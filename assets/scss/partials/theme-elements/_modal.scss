@@ -1,0 +1,17 @@
+.modal-content{
+    border-radius: 2px;
+    .modal-header{
+        border-bottom: 1px solid $theme-border;
+    }
+    .modal-footer{
+        border-top: 1px solid $theme-border;
+        .btn{
+            margin-bottom: 0;
+        }
+    }
+}
+@media screen and (max-width: 480px){
+    .modal-footer{
+        justify-content: center;
+    }
+}
