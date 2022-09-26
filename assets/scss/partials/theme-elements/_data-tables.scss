@@ -1,0 +1,242 @@
+/**  =====================
+      Data Tables css start
+==========================  **/
+.table {
+    td,
+    th {
+        border-top: 1px solid $theme-border;
+        white-space: nowrap;
+        padding: 1.05rem 0.75rem;
+    }
+
+    thead th {
+        border-bottom: 1px solid $theme-border;
+        font-size: 13px;
+        color: $theme-heading-color;
+        background: $theme-background;
+        text-transform: uppercase;
+    }
+
+    tbody + tbody {
+        border-top: 2px solid $theme-border;
+    }
+    &.table-dark{
+        thead th {
+            background-color: #11171a;
+        }
+    }
+    &.dataTable[class*="table-"]{
+      thead th{
+            background: $theme-background;
+        }
+    }
+}
+/* Border versions */
+
+.table-bordered {
+    border: 1px solid $theme-border;
+
+    td,
+    th {
+        border: 1px solid $theme-border;
+    }
+}
+/* Zebra-striping */
+
+.table-striped {
+    tbody tr:nth-of-type(2n+1) {
+        background-color: transparentize($primary-color,0.97);
+    }
+}
+/* Hover effect */
+
+.table-hover {
+    tbody tr {
+        &:hover {
+            background-color: transparentize($primary-color,0.97);
+        }
+    }
+}
+/* Table backgrounds */
+
+.table {
+    .thead-dark {
+        th {
+            color: #fff;
+            background-color: $dark-color;
+            border-color: darken($dark-color,10%);
+        }
+    }
+}
+
+.table-dark {
+    color: #fff;
+    background-color: $dark-color;
+
+    td,
+    th,
+    thead th {
+        border-color: darken($dark-color,10%);
+    }
+
+    &.table-striped {
+        tbody tr:nth-of-type(odd) {
+            background-color: darken($dark-color,2%);
+        }
+    }
+
+    &.table-hover {
+        tbody tr {
+            &:hover {
+                background-color: darken($dark-color,5%);
+            }
+        }
+    }
+    thead th {
+        // background-color: $dark-color;
+        color: #fff;
+    }
+}
+/* fixed header position */
+
+table.dataTable.fixedHeader-floating {
+    top: 60 !important;
+    @media screen and (max-width:992px) {
+        display: none !important;
+    }
+}
+
+@media screen and (max-width:992px) {
+    .fixedHeader-locked {
+        display: none !important;
+    }
+}
+
+/**  =====================
+      Foo-table css start
+==========================  **/
+
+.footable .pagination > {
+    .active > {
+        a,
+        span {
+            background-color: $primary-color;
+            border-color: $primary-color;
+
+            &:focus,
+            &:hover {
+                background-color: $primary-color;
+                border-color: $primary-color;
+            }
+        }
+    }
+
+    li > {
+        a,
+        span {
+            color: #222;
+        }
+    }
+}
+
+.footable-details.table,
+.footable.table {
+    margin-bottom: 0;
+}
+
+table {
+    &.footable > tfoot > tr.footable-paging > td > span.label {
+        margin-bottom: 0;
+    }
+
+    &.footable-paging-center > tfoot > tr.footable-paging > td {
+        padding-bottom: 0;
+    }
+}
+
+.table-columned > {
+    tbody > {
+        tr > {
+            td {
+                border: 0;
+                border-left: 1px solid $theme-border;
+            }
+
+            th {
+                border: 0;
+            }
+        }
+    }
+}
+/**====== Foo-table css end ======**/
+/**======= basic table css start =======**/
+.table.table-xl {
+    td,
+    th {
+        padding: 1.25rem 2rem;
+    }
+}
+
+.table.table-lg {
+    td,
+    th {
+        padding: 0.9rem 2rem;
+    }
+}
+
+.table.table-de {
+    td,
+    th {
+        padding: 0.75rem 2rem;
+    }
+}
+
+.table.table-sm {
+    td,
+    th {
+        padding: 0.6rem 2rem;
+    }
+}
+
+.table.table-xs {
+    td,
+    th {
+        padding: 0.4rem 2rem;
+    }
+}
+
+/**======= basic table css end ======**/
+
+#row-delete , #row-select{
+    .selected{
+        background-color:$primary-color;
+        color:#fff;
+    }
+}
+
+table{
+    &.dataTable{
+        td.focus {
+            outline: 1px solid nth($color-header-color,1);
+            outline-offset: -3px;
+            color: #fff;
+            background: linear-gradient(45deg, nth($color-header-color,1), nth($color-header-color-gt,1)) !important;
+        }
+        tbody{
+            >tr{
+                &.selected , >.selected{
+                        background: transparentize($primary-color,0.88);
+                    td ,th{
+                        &.select-checkbox{
+                            &:after{
+                                text-shadow: 1px 1px #e4f2fe, -1px -1px #e4f2fe, 1px -1px #e4f2fe, -1px 1px #e4f2fe;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+/**====== Data Tables css end ======**/

@@ -1,0 +1,100 @@
+/* Button variants
+ Easily pump out default styles, as well as :hover, :focus, :active,
+ and disabled options for all buttons */
+@mixin button-variant($background, $border, $hover-background: darken($background, 7.5%), $hover-border: darken($border, 10%), $active-background: darken($background, 10%), $active-border: darken($border, 12.5%)) {
+    color: color-yiq($background);
+    // background: linear-gradient(45deg, $background, $scol);
+    background-color: $border;
+    border-color: darken($border, 3%) ;
+
+    &:hover {
+        color: color-yiq($hover-background);
+        background-color: $hover-background;
+        border-color: $hover-border;
+    }
+
+    &.disabled,
+    &:disabled {
+        color: color-yiq($background);
+        background-color: $background;
+        border-color: $border;
+    }
+
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active,
+    .show > &.dropdown-toggle {
+        color: color-yiq($active-background);
+        background-color: $active-background;
+        border-color: $active-border;
+
+        &:focus {}
+    }
+}
+@mixin button-outline-variant($color, $color-hover: color-yiq($color), $active-background: $color, $active-border: $color) {
+    color: $color;
+    background-color: transparent;
+    background-image: none;
+    border-color: $color;
+
+    &:hover {
+        color: color-yiq($color);
+        background-color: $active-background;
+        border-color: $active-border;
+    }
+    &.disabled,
+    &:disabled {
+        color: $color;
+        background-color: transparent;
+    }
+
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active,
+    .show > &.dropdown-toggle {
+        color: color-yiq($active-background);
+        background-color: $active-background;
+        border-color: $active-border;
+    }
+}
+@mixin button-glow-variant($color, $color-hover: color-yiq($color), $active-background: $color, $active-border: $color) {
+    box-shadow: 0 0px 7px 0px transparentize($color,0.44), 0 0 10px 2px transparentize($color,0.8);
+    &:hover{
+        // box-shadow: 0 0px 3px 0px transparentize($color,0.44), 0 0 5px 1px transparentize($color,0.8);
+    }
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active:focus,
+    .show > &.dropdown-toggle,
+    &.active,
+    &:focus{
+        // box-shadow: none
+    }
+}
+@mixin button-gradient-variant($background, $border, $hover-background: darken($background, 7.5%), $hover-border: darken($border, 10%), $active-background: darken($background, 10%), $active-border: darken($border, 12.5%),$scol:$background) {
+    color: color-yiq($background);
+    background: linear-gradient(45deg, $background, $scol);
+    // background: linear-gradient(to top, $background, lighten($background, 10%), $background);
+    // background-size: 100% 200%;
+    // background-position: bottom;
+    border-color: darken($background, 3%);
+
+    &:hover {
+        color: color-yiq($hover-background);
+        background-color: $hover-background;
+        border-color: $hover-border;
+        // background-position: top;
+    }
+
+    &.disabled,
+    &:disabled {
+        color: color-yiq($background);
+        background-color: $background;
+        border-color: $border;
+    }
+
+    &:not(:disabled):not(.disabled).active,
+    &:not(:disabled):not(.disabled):active,
+    .show > &.dropdown-toggle {
+        color: color-yiq($active-background);
+        background-color: $active-background;
+        border-color: $active-border;
+    }
+}
