@@ -1,0 +1,25 @@
+{
+  "name": "ionicons-npm",
+  "version": "2.0.1",
+  "description": "The premium icon font for Ionic. Designed by @benjsperry.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DominicTobias/ionicons.git"
+  },
+  "keywords": [
+    "ionicons",
+    "svg",
+    "font",
+    "icons"
+  ],
+  "author": "Dominic Tobias <dominic.tobias@gmail.com> (https://github.com/DominicTobias)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DominicTobias/ionicons/issues"
+  },
+  "homepage": "https://github.com/DominicTobias/ionicons#readme"
+}
