@@ -115,7 +115,7 @@
     };
 </script>
 
-<div class="footer-fab">
+<!-- <div class="footer-fab">
     <div class="b-bg">
         <i class="fas fa-question"></i>
     </div>
@@ -125,7 +125,7 @@
             <li><a href="<?php echo base_url() ?>doc/index.html" data-text="Document" class="btn btn-icon btn-rounded btn-primary m-0"><i class="feather icon feather icon-book"></i></a></li>
         </ul>
     </div>
-</div>
+</div> -->
 
 <script src="<?php echo base_url() ?>assets/js/analytics.js"></script>
 
