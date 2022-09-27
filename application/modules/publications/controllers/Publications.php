@@ -1,15 +1,16 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Publications extends MX_Controller {
+class Publications extends MX_Controller
+{
 
-	
-	public  function __construct(){
-		parent:: __construct();
+
+	public  function __construct()
+	{
+		parent::__construct();
 
 		$this->module = "publications";
 		$this->title  = "Publications";
-		
 	}
 
 	public function index()
@@ -18,46 +19,40 @@ class Publications extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['page']   = "Publications List";
 		$data['publications'] = $this->publicationsmodel->get();
-	
-		render('list',$data);
+
+		render('list', $data);
 	}
 
-	public function save() {
+	public function save()
+	{
 
 		$is_error = false;
 
-		if ($this->form_validation->run('publications') == FALSE)
-		{
+		if ($this->form_validation->run('publications') == FALSE) {
 			flash_form();
 			$msg = validation_errors();
 			$is_error = true;
-		}
-		else
-		{
-			
+		} else {
+
 			$theme = [
-				'id' => @$this->input->post("id")
-				,'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id")
-				,'publication' => $this->input->post("publication")
-				,'description'  => $this->input->post("description")
-				,'file_type_id' => $this->input->post("file_type")
-				,'is_active' => $this->input->post("is_active")
+				'id' => @$this->input->post("id"), 'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id"), 'publication' => $this->input->post("publication"), 'description'  => $this->input->post("description"), 'file_type_id' => $this->input->post("file_type"), 'is_active' => $this->input->post("is_active")
 			];
 
-			$resp = $this->publicationsmodel->save($bank);
+			$resp = $this->publicationsmodel->save($theme);
 
 			$msg = "Operation Successful";
 		}
 		set_flash($msg, $is_error);
-		redirect( base_url("publications"));
+		redirect(base_url("publications"));
 	}
 
-	public function delete($id) {
-		
+	public function delete($id)
+	{
+
 		$resp = $this->publicationsmodel->delete($id);
 		$is_error = false;
-		
-		if($resp) {
+
+		if ($resp) {
 			$msg = "Success";
 		} else {
 			$msg = "False";
@@ -65,7 +60,4 @@ class Publications extends MX_Controller {
 
 		die($msg);
 	}
-
-
-
 }

@@ -20,10 +20,10 @@
                       <label>Publish</label>
                   </li>
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
-                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-book"></i></span><span class="pcoded-mtext">Publications</span></a>
+                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fas fa-book"></i></span><span class="pcoded-mtext">Publications</span></a>
                       <ul class="pcoded-submenu">
-                          <li class=""><a href="" class="">Create Publication</a></li>
-                          <li class=""><a href="" class="">Manage Publications</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>publications" class="">Create Publication</a></li>
+                          <li class=""><a href="" class="<?php echo base_url(); ?>publications/manage">Manage Publications</a></li>
 
                       </ul>
                   </li>
@@ -34,18 +34,18 @@
                       <ul class="pcoded-submenu">
                           <li><a href="">File Types</a></li>
                           <li><a href="sample-page.html">Authors</a></li>
-                          <li><a href="sample-page.html">Security Themes</a></li>
-                          <li><a href="sample-page.html">Security Sub-Themes</a></li>
-                          <li><a href="sample-page.html">Geographical Coverage</a></li>
-                          <li><a href="sample-page.html">Member States</a></li>
-                          <li><a href="sample-page.html">Regions</a></li>
+                          <li><a href="<?php echo base_url() ?>healththemes">Security Themes</a></li>
+                          <li><a href="<?php echo base_url() ?>authors">Security Sub-Themes</a></li>
+                          <li><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
+                          <li><a href="<?php echo base_url() ?>member_states">Member States</a></li>
+                          <li><a href=" <?php echo base_url() ?>regions">Regions</a></li>
 
 
                       </ul>
                   </li>
 
 
-                  <li class="nav-item pcoded-menu-caption">
+                  <li class=" nav-item pcoded-menu-caption">
                       <label>Settings</label>
                   </li>
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
