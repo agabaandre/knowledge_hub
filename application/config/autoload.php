@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('database', 'session');
+$autoload['libraries'] = array('database', 'session','form_validation');
 
 /*
 | -------------------------------------------------------------------
@@ -132,4 +132,10 @@ $autoload['language'] = array();
 |
 |	$autoload['model'] = array('first_model' => 'first');
 */
-$autoload['model'] = array();
+$autoload['model'] = array(
+ ['healththemes/healththemes_model'=>'healththemesmodel'],
+ ['authors/authors_model'=>'authorsmodel'],
+ ['geoareas/geoareas_model'=>'geoareasmodel'],
+ ['subthemes/subthemes_model'=>'subthemesmodel'],
+ ['publications/publications_model'=>'publicationsmodel'],
+);
