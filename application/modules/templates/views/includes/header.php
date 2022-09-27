@@ -1,37 +1,23 @@
-<!DOCTYPE html>
-<html lang="en">
-
 <head>
-    <title><?php echo $setting->title; ?></title>
+    <title>Flash Able - Most Complete Bootstrap Admin Template</title>
+    <!-- Meta -->
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="description" content="The RCCs serve as hubs for Africa CDC surveillance, preparedness and emergency response activities and coordinate regional public health initiatives by Member States in consultation with Africa CDC headquarters" />
-    <meta name="keywords" content="African Union Knowledge Hub" />
-    <meta name="author" content="Agaba Andrew" />
+    <meta name="description" content="Flash Able Bootstrap admin template made using Bootstrap 4 and it has huge amount of ready made feature, UI components, pages which completely fulfills any dashboard needs." />
+    <meta name="keywords" content="admin templates, bootstrap admin templates, bootstrap 4, dashboard, dashboard templets, sass admin templets, html admin templates, responsive, bootstrap admin templates free download,premium bootstrap admin templates, Flash Able, Flash Able bootstrap admin template">
+    <meta name="author" content="Codedthemes" />
+
     <!-- Favicon icon -->
     <link rel="icon" href="<?php echo base_url() ?>assets/images/favicon.ico" type="image/x-icon">
-    <!-- Google font-->
-    <link href="https://fonts.googleapis.com/css?family=Open+Sans:400,600,700" rel="stylesheet">
-    <!-- waves.css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/pages/waves/css/waves.min.css" type="text/css" media="all">
-    <!-- Required Fremwork -->
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>bower_components/bootstrap/css/bootstrap.min.css">
-    <!-- waves.css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/pages/waves/css/waves.min.css" type="text/css" media="all">
-    <!-- themify icon -->
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/icon/themify-icons/themify-icons.css">
-    <!-- font-awesome-n -->
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/css/font-awesome-n.min.css">
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/css/font-awesome.min.css">
-    <!-- scrollbar.css -->
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/css/jquery.mCustomScrollbar.css">
-    <!-- am chart export.css -->
-    <link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
-    <!-- radial chart.css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/pages/chart/radial/css/radial.css" type="text/css" media="all">
-    <!-- Style.css -->
-    <link rel="stylesheet" type="text/css" href="<?php echo base_url() ?>assets/css/style.css">
+    <!-- fontawesome icon -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/fonts/fontawesome/css/fontawesome-all.min.css">
+    <!-- animation css -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/animation/css/animate.min.css">
+    <!-- prism css -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/prism/css/prism.min.css">
+    <!-- vendor css -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
 </head>
 
-<body>
+<body class="layout-3">
