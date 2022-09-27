@@ -2,8 +2,8 @@
   <nav class="pcoded-navbar menupos-fixed menu-light">
       <div class="navbar-wrapper">
           <div class="navbar-brand header-logo">
-              <a href="<?php echo base_url() ?>" class="b-brand">
-                  <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
+              <a href="<?php echo base_url() ?>" class="b-brand" style="filter: brightness(0) invert(1);">
+                  <img src=" <?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
                   <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo-thumb images">
               </a>
               <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
