@@ -13,4 +13,15 @@
                     ]
                 ]
             ),
+        'author'=>array(
+                [
+                    'field'=>'name', 
+                    'label'=>'Author Name',
+                    'rules'=>'required|min_length[4]|max_length[100]',
+                    'errors' => [
+                        'required'     => 'You have not provided %s.',
+                        'is_unique'    => 'This %s already exists.'
+                    ]
+                ]
+            ),
     );

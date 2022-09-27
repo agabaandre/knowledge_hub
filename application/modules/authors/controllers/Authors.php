@@ -1,14 +1,14 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class HealthThemes extends MX_Controller {
+class Authors extends MX_Controller {
 
 	
 	public  function __construct(){
 		parent:: __construct();
 
-		$this->module = "healththemes";
-		$this->title  = "Health Security Themes";
+		$this->module = "authors";
+		$this->title  = "Authors";
 		
 	}
 
@@ -16,8 +16,8 @@ class HealthThemes extends MX_Controller {
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
-		$data['page']   = "Health Security Themes List";
-		$data['healththemes'] = $this->healththemesmodel->get();
+		$data['page']   = "Authors List";
+		$data['authors'] = $this->authorsmodel->get();
 	
 		render('list',$data);
 	}
@@ -26,7 +26,7 @@ class HealthThemes extends MX_Controller {
 
 		$is_error = false;
 
-		if ($this->form_validation->run('healththemes') == FALSE)
+		if ($this->form_validation->run('author') == FALSE)
 		{
 			flash_form();
 			$msg = validation_errors();
@@ -37,20 +37,20 @@ class HealthThemes extends MX_Controller {
 			
 			$theme = [
 				'id' => @$this->input->post("id")
-				,'description' => $this->input->post("description")
+				,'name' => $this->input->post("name")
 			];
 
-			$resp = $this->healththemesmodel->save($bank);
+			$resp = $this->authorsmodel->save($bank);
 
 			$msg = "Operation Successful";
 		}
 		set_flash($msg, $is_error);
-		redirect( base_url("healththemes"));
+		redirect( base_url("authors"));
 	}
 
 	public function delete($id) {
 		
-		$resp = $this->healththemesmodel->delete($id);
+		$resp = $this->authorsmodel->delete($id);
 		$is_error = false;
 		
 		if($resp) {
