@@ -3,7 +3,7 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Health Theme</h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Publication</h5>
         <button type="button" class="btn-close" data-dismiss="modal" aria-label="Close">&times;</button>
       </div>
           <form class="needs-validation" action="<?php echo base_url()?>/publications/save" method="POST" enctype='multipart/form-data'>
