@@ -14,22 +14,52 @@
                       <label>Navigation</label>
                   </li>
                   <li class="nav-item active">
-                      <a href="<?php echo base_url() ?>" class="nav-link"><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
+                      <a href="<?php echo base_url() ?>" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
                   </li>
                   <li class="nav-item pcoded-menu-caption">
-                      <label>Lists</label>
+                      <label>Publish</label>
                   </li>
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
-                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="feather icon-menu"></i></span><span class="pcoded-mtext"></span></a>
+                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-book"></i></span><span class="pcoded-mtext">Publications</span></a>
                       <ul class="pcoded-submenu">
-                          <li class=""><a href="" class=""></a></li>
+                          <li class=""><a href="" class="">Create Publication</a></li>
                           <li class=""><a href="" class="">Manage Publications</a></li>
+
                       </ul>
                   </li>
-                  <li data-username="Disabled Menu" class="nav-item disabled"><a href="#!" class="nav-link"><span class="pcoded-micon"><i class="feather icon-power"></i></span><span class="pcoded-mtext">Disabled menu</span></a></li>
-                  <li data-username="Sample Page" class="nav-item"><a href="sample-page.html" class="nav-link"><span class="pcoded-micon"><i class="feather icon-sidebar"></i></span><span class="pcoded-mtext">Sample page</span></a></li>
 
-              </ul>
+
+                  <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
+                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-list"></i></span><span class="pcoded-mtext">Form Lists</span></a>
+                      <ul class="pcoded-submenu">
+                          <li><a href="">File Types</a></li>
+                          <li><a href="sample-page.html">Authors</a></li>
+                          <li><a href="sample-page.html">Security Themes</a></li>
+                          <li><a href="sample-page.html">Security Sub-Themes</a></li>
+                          <li><a href="sample-page.html">Geographical Coverage</a></li>
+                          <li><a href="sample-page.html">Member States</a></li>
+                          <li><a href="sample-page.html">Regions</a></li>
+
+
+                      </ul>
+                  </li>
+
+
+                  <li class="nav-item pcoded-menu-caption">
+                      <label>Settings</label>
+                  </li>
+                  <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
+                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-users"></i></span><span class="pcoded-mtext">Settings</span></a>
+                      <ul class="pcoded-submenu">
+                          <li class=""><a href="" class="">Manage Users</a></li>
+                          <li class=""><a href="" class="">Groups and Permissions</a></li>
+                          <li class=""><a href="" class="">User Access Logs</a></li>
+                          <li class=""><a href="" class="">Constants and Variables</a></li>
+
+                      </ul>
+                  </li>
+
+
           </div>
       </div>
   </nav>
