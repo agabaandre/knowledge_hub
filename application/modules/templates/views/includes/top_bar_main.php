@@ -1,11 +1,7 @@
-<header class="navbar pcoded-header navbar-expand-lg navbar-light headerpos-fixed header-blue">
+<header class="navbar pcoded-header navbar-expand-lg navbar-light headerpos-fixed">
     <div class="m-header">
         <a class="mobile-menu" id="mobile-collapse1" href="#!"><span></span></a>
         <a href="index.html" class="b-brand">
-            <!-- <div class="b-bg">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <span class="b-title">Flash Able</span> -->
             <img src="http://localhost/knowledge_hub/assets/images/logo.svg" alt="" class="logo images">
             <img src="http://localhost/knowledge_hub/assets/images/logo-icon.svg" alt="" class="logo-thumb images">
         </a>

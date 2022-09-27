@@ -10,7 +10,7 @@ class Auth extends MX_Controller
   }
   public function index()
   {
-    $this->load->view("login");
+    $this->load->view("login/login");
   }
   public function recovery()
   {

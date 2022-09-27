@@ -1,14 +1,10 @@
   <!-- [ navigation menu ] start -->
-  <nav class="pcoded-navbar menupos-fixed menu-light brand-blue active-blue">
+  <nav class="pcoded-navbar menupos-fixed menu-light">
       <div class="navbar-wrapper">
           <div class="navbar-brand header-logo">
-              <a href="index.html" class="b-brand">
-                  <!-- <div class="b-bg">
-                        <i class="fas fa-bolt"></i>
-                    </div>
-                    <span class="b-title">Flash Able</span> -->
-                  <img src="<?php echo base_url() ?>assets/images/logo.svg" alt="" class="logo images">
-                  <img src="<?php echo base_url() ?>assets/images/logo-icon.svg" alt="" class="logo-thumb images">
+              <a href="<?php echo base_url() ?>" class="b-brand">
+                  <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
+                  <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo-thumb images">
               </a>
               <a class="mobile-menu" id="mobile-collapse" href="#!"><span></span></a>
           </div>
