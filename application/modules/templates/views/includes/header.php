@@ -20,4 +20,4 @@
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
 </head>
 
-<body class="layout-3">
+<body class="layout-14">
