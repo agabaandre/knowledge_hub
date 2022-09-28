@@ -19,4 +19,8 @@
     <!-- vendor css -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
 </head>
+<<<<<<< HEAD
+=======
+
 <body class="">
+>>>>>>> d0938d69759a9bd09229e05d944498a82a066efe

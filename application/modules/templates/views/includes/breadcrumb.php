@@ -1,17 +1,14 @@
  <!-- [ breadcrumb ] start -->
  <div class="page-header">
      <div class="page-block">
-         <div class="row align-items-center">
+         <div class="row align-items-right">
              <div class="col-md-12">
-                 <div class="page-header-title">
-                     <h5 class="m-b-10">Dashboard</h5>
-                 </div>
-                 <ul class="breadcrumb">
-                     <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
-                     <li class="breadcrumb-item"><a href="#!">
-                             <php echo $uptitle; ?>
-                         </a></li>
-                 </ul>
+                 <nav aria-label="breadcrumb">
+                     <ol class="breadcrumb">
+                         <li class="breadcrumb-item"><a href="<?php echo base_url() ?>">Home</a></li>
+                         <li class="breadcrumb-item active" aria-current="page"><?php echo $title ?></li>
+                     </ol>
+                 </nav>
              </div>
          </div>
      </div>
