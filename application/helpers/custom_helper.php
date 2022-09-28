@@ -22,22 +22,7 @@ if (!function_exists('render')) {
     }
 }
 
-//render-front-web with navigation
-if (!function_exists('render_client')) {
 
-    function render_client($view, $data = [], $plain = false)
-    {
-
-        $data['view'] = $view;
-
-        //renders without navigation
-        $template_method = 'templates/front_end_client';
-
-        $data['settings'] = settings();
-
-        echo Modules::run($template_method, $data);
-    }
-}
 
 //render-front-main website
 if (!function_exists('render_site')) {
@@ -48,7 +33,7 @@ if (!function_exists('render_site')) {
         $data['view'] = $view;
 
         //renders without navigation
-        $template_method = 'templates/front_end_site';
+        $template_method = 'templates/frontend';
 
         $data['settings'] = settings();
 

@@ -58,8 +58,8 @@ class Publications_model extends CI_Model {
 	public function get_author($publication){
 
 		$this->db->where('publication_id',$publication->id);
-		$this->db->join('author','author.id=author_publication.author');
-		$this->db->get($this->author_pubs_table)->row();
+		$this->db->join('author','author.id=author_publication.author_id');
+		return $this->db->get($this->author_pubs_table)->row();
 	}
 
 	public function get_filetype($type_id){

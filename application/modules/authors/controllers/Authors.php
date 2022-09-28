@@ -40,7 +40,7 @@ class Authors extends MX_Controller {
 				,'name' => $this->input->post("name")
 			];
 
-			$resp = $this->authorsmodel->save($bank);
+			$resp = $this->authorsmodel->save($theme);
 
 			$msg = "Operation Successful";
 		}
