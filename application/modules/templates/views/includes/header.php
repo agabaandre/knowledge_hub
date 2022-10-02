@@ -17,6 +17,10 @@
     <!-- prism css -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/prism/css/prism.min.css">
     <!-- vendor css -->
+    <!-- select2 css -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/select2/css/select2.min.css">
+    <!-- multi-select css -->
+    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/multi-select/css/multi-select.css">
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
     <script src="<?php echo base_url() ?>node_modules/jquery/dist/jquery.min.js"></script>
     <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts.js"></script>

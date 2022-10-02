@@ -26,7 +26,7 @@
             </div>
             <?php echo form_open_multipart(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 
-            <?php print_r($subthemes);
+            <?php //print_r($subthemes);
             ?>
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
@@ -50,7 +50,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Author</label>
-                                <select class="form-control" name="author_id" required>
+                                <select class="form-control js-example-basic-single" name="author_id" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($authors as $author) : ?>
                                         <option value="<?php echo $author->id; ?>">
@@ -64,7 +64,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
-                                <select class="form-control" name="sub_thematic_area_id" required select2>
+                                <select class="form-control js-example-basic-single" name="sub_thematic_area_id" required select2>
                                     <option disabled>Select</option>
                                     <?php foreach ($subthemes as $subtheme) : ?>
                                         <option value="<?php echo $subtheme->id; ?>">
@@ -103,7 +103,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Geographical Coverage</label>
-                                <select class="form-control" name="geographical_coverage_id" required>
+                                <select class="form-control js-example-basic-single select2" name="geographical_coverage_id" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($geoareas as $geoarea) : ?>
                                         <option value="<?php echo $geoarea->id; ?>">
