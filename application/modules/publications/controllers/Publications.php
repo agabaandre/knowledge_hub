@@ -29,6 +29,9 @@ class Publications extends MX_Controller
 		} else {
 			$data['title']  = 'Create Publication';
 		}
+		$data['authors'] = $this->authorsmodel->get();
+		$data['geoareas'] = $this->geoareasmodel->get();
+		$data['subtheme'] = $this->subthemesmodel->get();
 		$data['publications'] = $this->publicationsmodel->find($id);
 
 		render('form', $data);

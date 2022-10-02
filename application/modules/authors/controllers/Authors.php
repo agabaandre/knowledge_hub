@@ -1,15 +1,16 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class Authors extends MX_Controller {
+class Authors extends MX_Controller
+{
 
-	
-	public  function __construct(){
-		parent:: __construct();
+
+	public  function __construct()
+	{
+		parent::__construct();
 
 		$this->module = "authors";
 		$this->title  = "Authors";
-		
 	}
 
 	public function index()
@@ -18,26 +19,31 @@ class Authors extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['page']   = "Authors List";
 		$data['authors'] = $this->authorsmodel->get();
-	
-		render('list',$data);
+
+		render('list', $data);
 	}
 
-	public function save() {
+	public function get()
+	{
+
+		$data['authors'] = $this->authorsmodel->get();
+		return $data;
+	}
+
+
+	public function save()
+	{
 
 		$is_error = false;
 
-		if ($this->form_validation->run('author') == FALSE)
-		{
+		if ($this->form_validation->run('author') == FALSE) {
 			flash_form();
 			$msg = validation_errors();
 			$is_error = true;
-		}
-		else
-		{
-			
+		} else {
+
 			$theme = [
-				'id' => @$this->input->post("id")
-				,'name' => $this->input->post("name")
+				'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
 			];
 
 			$resp = $this->authorsmodel->save($theme);
@@ -45,15 +51,16 @@ class Authors extends MX_Controller {
 			$msg = "Operation Successful";
 		}
 		set_flash($msg, $is_error);
-		redirect( base_url("authors"));
+		redirect(base_url("authors"));
 	}
 
-	public function delete($id) {
-		
+	public function delete($id)
+	{
+
 		$resp = $this->authorsmodel->delete($id);
 		$is_error = false;
-		
-		if($resp) {
+
+		if ($resp) {
 			$msg = "Success";
 		} else {
 			$msg = "False";
@@ -61,7 +68,4 @@ class Authors extends MX_Controller {
 
 		die($msg);
 	}
-
-
-
 }

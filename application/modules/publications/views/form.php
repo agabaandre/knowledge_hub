@@ -7,28 +7,31 @@
         </div>
 
         <div class="card-body text-left">
-            <?php echo form_open(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
+            <div class="row justify-content-center">
+
+                <!-- toast -->
+                <div id="toast-3s" class="toast toast-3s fade hide" role="alert" aria-live="assertive" data-delay="3000" aria-atomic="true">
+                    <div class="toast-header">
+                        <strong class="mr-auto">Message</strong>
+                        <small class="text-muted"></small>
+                        <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="Close">
+                            <span>×</span>
+                        </button>
+                    </div>
+                    <div id="notification">
+
+                    </div>
+                </div>
+                <!-- end toast -->
+            </div>
+            <?php echo form_open_multipart(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 
             <?php //print_r($publications); 
             ?>
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
                 <div class="row">
-                    <!-- toast -->
-                    <div class="toast toast-3s fade hide" role="alert" aria-live="assertive" data-delay="3000" aria-atomic="true">
-                        <div class="toast-header">
-                            <img src="../assets/images/favicon.ico" alt="" class="img-fluid m-r-5" style="width:20px;">
-                            <strong class="mr-auto">Message</strong>
-                            <small class="text-muted"></small>
-                            <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="Close">
-                                <span>×</span>
-                            </button>
-                        </div>
-                        <div id="notification">
 
-                        </div>
-                    </div>
-                    <!-- end toast -->
                     <div class="col-md-6">
                         <div class="col-md-12">
                             <div class="mb-3">
@@ -142,6 +145,7 @@
                 </div>
             </div>
             <div class="modal-footer">
+
                 <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-primary" type="submit">Save Record</button>
             </div>
@@ -163,12 +167,16 @@
             method: "post",
             data: data,
             success: function(res) {
-                // if (res == "OK") {
-                //     $('.notification').html("<center><font color='green'>Publication Added</font></center>");
-                // } else {
-                //     $('.notification').html("<center>" + res + "</center>");
-                // }
-                $('.toast-3s').toast('show');
+                if (res == "OK") {
+
+                    $('.notification').html("<center><font color='green'>Publication Added</font></center>");
+                    $('.toast-3s').toast('show');
+                } else {
+
+                    $('.notification').html("<center>" + res + "</center>");
+                    $('.toast-3s').toast('show');
+                }
+
 
                 console.log(data);
             } //success

@@ -1,15 +1,16 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class HealthThemes extends MX_Controller {
+class HealthThemes extends MX_Controller
+{
 
-	
-	public  function __construct(){
-		parent:: __construct();
+
+	public  function __construct()
+	{
+		parent::__construct();
 
 		$this->module = "healththemes";
 		$this->title  = "Health Security Themes";
-		
 	}
 
 	public function index()
@@ -18,26 +19,30 @@ class HealthThemes extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['page']   = "Health Security Themes List";
 		$data['healththemes'] = $this->healththemesmodel->get();
-	
-		render('list',$data);
+
+		render('list', $data);
+	}
+	public function get()
+	{
+
+		$data['healththemes'] = $this->healththemesmodel->get();
+
+		$data;
 	}
 
-	public function save() {
+	public function save()
+	{
 
 		$is_error = false;
 
-		if ($this->form_validation->run('healththemes') == FALSE)
-		{
+		if ($this->form_validation->run('healththemes') == FALSE) {
 			flash_form();
 			$msg = validation_errors();
 			$is_error = true;
-		}
-		else
-		{
-			
+		} else {
+
 			$theme = [
-				'id' => @$this->input->post("id")
-				,'description' => $this->input->post("description")
+				'id' => @$this->input->post("id"), 'description' => $this->input->post("description")
 			];
 
 			$resp = $this->healththemesmodel->save($bank);
@@ -45,15 +50,16 @@ class HealthThemes extends MX_Controller {
 			$msg = "Operation Successful";
 		}
 		set_flash($msg, $is_error);
-		redirect( base_url("healththemes"));
+		redirect(base_url("healththemes"));
 	}
 
-	public function delete($id) {
-		
+	public function delete($id)
+	{
+
 		$resp = $this->healththemesmodel->delete($id);
 		$is_error = false;
-		
-		if($resp) {
+
+		if ($resp) {
 			$msg = "Success";
 		} else {
 			$msg = "False";
@@ -61,7 +67,4 @@ class HealthThemes extends MX_Controller {
 
 		die($msg);
 	}
-
-
-
 }
