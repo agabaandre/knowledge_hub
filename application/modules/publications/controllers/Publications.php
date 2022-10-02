@@ -16,11 +16,22 @@ class Publications extends MX_Controller
 	public function index()
 	{
 		$data['module'] = $this->module;
-		$data['title']  = $this->title;
-		$data['page']   = "Publications List";
+		$data['title']  = "Publications List";
 		$data['publications'] = $this->publicationsmodel->get();
 
 		render('list', $data);
+	}
+	public function create($id = FALSE)
+	{
+		$data['module'] = $this->module;
+		if ($id) {
+			$data['title']  = 'Create Publication';
+		} else {
+			$data['title']  = 'Create Publication';
+		}
+		$data['publications'] = $this->publicationsmodel->find($id);
+
+		render('form', $data);
 	}
 
 	public function save()
