@@ -26,7 +26,7 @@
             </div>
             <?php echo form_open_multipart(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 
-            <?php //print_r($publications); 
+            <?php print_r($subthemes);
             ?>
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
@@ -36,7 +36,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" class="form-control newform" id="title" name="description" required></textarea>
+                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="description" required></textarea>
                             </div>
                         </div>
 
@@ -52,33 +52,25 @@
                                 <label class="form-label" for="publication">Author</label>
                                 <select class="form-control" name="author_id" required>
                                     <option disabled>Select</option>
-                                    <option value="<?php echo $author->id; ?>">
-                                        <?php echo $author->name; ?>
-                                    </option>
+                                    <?php foreach ($authors as $author) : ?>
+                                        <option value="<?php echo $author->id; ?>">
+                                            <?php echo $author->name; ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Thematic Area</label>
-                                <select class="form-control" name="theme">
+                                <label class="form-label" for="publication">Sub Theme</label>
+                                <select class="form-control" name="sub_thematic_area_id" required select2>
                                     <option disabled>Select</option>
-                                    <option value="<?php echo $theme->id; ?>">
-                                        <?php echo $theme->name; ?>
-                                    </option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Sub Thematic Area</label>
-                                <select class="form-control" name="sub_thematic_area_id" required>
-                                    <option disabled>Select</option>
-                                    <option value="<?php echo $sub_theme->id; ?>">
-                                        <?php echo $sub_theme->name; ?>
-                                    </option>
+                                    <?php foreach ($subthemes as $subtheme) : ?>
+                                        <option value="<?php echo $subtheme->id; ?>">
+                                            <?php echo $subtheme->description; ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -99,9 +91,11 @@
                                 <label class="form-label" for="publication">File Type</label>
                                 <select class="form-control" name="file_type_id" required>
                                     <option disabled>Select</option>
-                                    <option value="<?php echo $filetype->id; ?>">
-                                        <?php echo $filetype->name; ?>
-                                    </option>
+                                    <?php foreach ($filetypes as $filetype) : ?>
+                                        <option value="<?php echo $filetype->id; ?>">
+                                            <?php echo $filetype->name; ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
@@ -111,9 +105,11 @@
                                 <label class="form-label" for="publication">Geographical Coverage</label>
                                 <select class="form-control" name="geographical_coverage_id" required>
                                     <option disabled>Select</option>
-                                    <option value="<?php echo $geoarea->id; ?>">
-                                        <?php echo $geoarea->name; ?>
-                                    </option>
+                                    <?php foreach ($geoareas as $geoarea) : ?>
+                                        <option value="<?php echo $geoarea->id; ?>">
+                                            <?php echo $geoarea->name; ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
