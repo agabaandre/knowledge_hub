@@ -12,7 +12,7 @@ require_once("includes/frontend/preloader.php");
 <div class="row p-4 pt-2 align-items-center header-bg"
  style=" background-image: url(<?php echo base_url(); ?>assets/images/map.png);">
     <div class="col-md-1 col-lg-1 col-sm-12 text-center">
-        <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="100px">
+        <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="250px">
     </div>
     <div class="col-md-11 col-lg-11 col-sm-12 text-center">
         <h3 class="text-white">Africa CDC RCC Health Security Knowledge Hub</h3>

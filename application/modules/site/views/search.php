@@ -5,7 +5,12 @@
      		<h4>Search Results</h4>
      	</div>
 
-     	<?php include 'partials/publications.php'; ?>
+     	<?php 
+
+	     	//include 'partials/themes.php';
+	     	include 'partials/publications.php';
+
+     	 ?>
        
 	</div>
 	
