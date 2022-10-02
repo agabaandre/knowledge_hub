@@ -138,4 +138,5 @@ $autoload['model'] = array(
     ['geoareas/geoareas_model' => 'geoareasmodel'],
     ['subthemes/subthemes_model' => 'subthemesmodel'],
     ['publications/publications_model' => 'publicationsmodel'],
+    ['filetypes/filetypes_model' => 'filetypesmodel'],
 );

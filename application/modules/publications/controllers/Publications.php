@@ -31,7 +31,8 @@ class Publications extends MX_Controller
 		}
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
-		$data['subtheme'] = $this->subthemesmodel->get();
+		$data['subthemes'] = $this->subthemesmodel->get();
+		$data['filetypes'] = $this->filetypesmodel->get();
 		$data['publications'] = $this->publicationsmodel->find($id);
 
 		render('form', $data);
