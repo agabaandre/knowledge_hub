@@ -14,7 +14,7 @@
                       <label>Navigation</label>
                   </li>
                   <li class="nav-item active">
-                      <a href="<?php echo base_url() ?>" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
+                      <a href="<?php echo base_url() ?>admin" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
                   </li>
                   <li class="nav-item pcoded-menu-caption">
                       <label>Publish</label>
@@ -22,8 +22,8 @@
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
                       <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fas fa-book"></i></span><span class="pcoded-mtext">Publications</span></a>
                       <ul class="pcoded-submenu">
-                          <li class=""><a href="<?php echo base_url(); ?>publications" class="">Create Publication</a></li>
-                          <li class=""><a href="" class="<?php echo base_url(); ?>publications/manage">Manage Publications</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>publications/create" class="">Create Publication</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>publications">Manage Publications</a></li>
 
                       </ul>
                   </li>

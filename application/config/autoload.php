@@ -58,7 +58,7 @@ $autoload['packages'] = array();
 |
 |	$autoload['libraries'] = array('user_agent' => 'ua');
 */
-$autoload['libraries'] = array('database', 'session','form_validation');
+$autoload['libraries'] = array('database', 'session', 'form_validation');
 
 /*
 | -------------------------------------------------------------------
@@ -89,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('url', 'absent', 'rosta', 'text', 'custom');
+$autoload['helper'] = array('url', 'absent', 'rosta', 'text', 'custom', 'csrf', 'form');
 
 /*
 | -------------------------------------------------------------------
@@ -133,9 +133,9 @@ $autoload['language'] = array();
 |	$autoload['model'] = array('first_model' => 'first');
 */
 $autoload['model'] = array(
- ['healththemes/healththemes_model'=>'healththemesmodel'],
- ['authors/authors_model'=>'authorsmodel'],
- ['geoareas/geoareas_model'=>'geoareasmodel'],
- ['subthemes/subthemes_model'=>'subthemesmodel'],
- ['publications/publications_model'=>'publicationsmodel'],
+    ['healththemes/healththemes_model' => 'healththemesmodel'],
+    ['authors/authors_model' => 'authorsmodel'],
+    ['geoareas/geoareas_model' => 'geoareasmodel'],
+    ['subthemes/subthemes_model' => 'subthemesmodel'],
+    ['publications/publications_model' => 'publicationsmodel'],
 );

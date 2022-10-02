@@ -1,15 +1,16 @@
 <?php
-defined('BASEPATH') OR exit('No direct script access allowed');
+defined('BASEPATH') or exit('No direct script access allowed');
 
-class GeoAreas extends MX_Controller {
+class GeoAreas extends MX_Controller
+{
 
-	
-	public  function __construct(){
-		parent:: __construct();
+
+	public  function __construct()
+	{
+		parent::__construct();
 
 		$this->module = "geoareas";
 		$this->title  = "Geographical Areas";
-		
 	}
 
 	public function index()
@@ -18,26 +19,30 @@ class GeoAreas extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['page']   = "Geographical Areas List";
 		$data['geoareas'] = $this->geoareasmodel->get();
-	
-		render('list',$data);
+
+		render('list', $data);
+	}
+	public function get()
+	{
+
+		$data['geoareas'] = $this->geoareasmodel->get();
+
+		return  $data;
 	}
 
-	public function save() {
+	public function save()
+	{
 
 		$is_error = false;
 
-		if ($this->form_validation->run('geoareas') == FALSE)
-		{
+		if ($this->form_validation->run('geoareas') == FALSE) {
 			flash_form();
 			$msg = validation_errors();
 			$is_error = true;
-		}
-		else
-		{
-			
+		} else {
+
 			$theme = [
-				'id' => @$this->input->post("id")
-				,'name' => $this->input->post("name")
+				'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
 			];
 
 			$resp = $this->geoareasmodel->save($bank);
@@ -45,15 +50,16 @@ class GeoAreas extends MX_Controller {
 			$msg = "Operation Successful";
 		}
 		set_flash($msg, $is_error);
-		redirect( base_url("geoareas"));
+		redirect(base_url("geoareas"));
 	}
 
-	public function delete($id) {
-		
+	public function delete($id)
+	{
+
 		$resp = $this->geoareasmodel->delete($id);
 		$is_error = false;
-		
-		if($resp) {
+
+		if ($resp) {
 			$msg = "Success";
 		} else {
 			$msg = "False";
@@ -61,7 +67,4 @@ class GeoAreas extends MX_Controller {
 
 		die($msg);
 	}
-
-
-
 }

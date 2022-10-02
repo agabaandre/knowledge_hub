@@ -18,5 +18,13 @@
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/prism/css/prism.min.css">
     <!-- vendor css -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
+    <script src="<?php echo base_url() ?>node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts-more.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/solid-gauge.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/exporting.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
+    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
 </head>
+
 <body class="">
