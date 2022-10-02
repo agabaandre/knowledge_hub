@@ -10,7 +10,7 @@ class Site_model extends CI_Model {
 	}
 
 
-	public function search_all($term,$type="all"){
+	public function search($term,$type="all"){
 
 		$search = ['search_key'=>$term];
 
@@ -18,10 +18,10 @@ class Site_model extends CI_Model {
 
 		  	$data['publications'] = $this->publicationsmodel->get($search);
 		  	$data['authors']      = $this->authorsmodel->get($search);
-		  	$data['themes']       = $this->healthemesmodel->get($search);
+		  	$data['themes']       = $this->healththemesmodel->get($search);
 		}
 		else if($type == "themes"){
- 		 	$data['themes']       = $this->healthemesmodel->get($search);
+ 		 	$data['themes']       = $this->healththemesmodel->get($search);
 		}
 		else if($type == "authors"){
  		 	$data['themes']       = $this->authorsmodel->get($search);

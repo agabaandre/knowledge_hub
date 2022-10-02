@@ -6,7 +6,7 @@
       	$row = (Object) $theme;
      ?>
 
-          <div class="card col-lg-3 col-xl-3 col-md-6 col-sm-6 col-xs-12 m-1 justify-content-center">
+          <div class="card col-lg-3 col-xl-3 col-md-6 col-sm-6 col-xs-12 m-1 justify-content-center active-card">
           	<a href="<?php echo base_url(); ?>">
               <div class="card-body category">
                   <div class="block">

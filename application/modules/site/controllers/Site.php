@@ -66,7 +66,9 @@ class Site extends MX_Controller {
 	public function search()
 	{
 		$data['module']    = $this->module;
-		$data['results'] = $this->sitemodel->search($this->input->post());
+		flash_form();
+		
+		$data['results'] = $this->sitemodel->search($this->input->post('term'));
 	
 		render_site('search',$data);
 	}

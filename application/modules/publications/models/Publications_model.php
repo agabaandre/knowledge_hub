@@ -67,7 +67,7 @@ class Publications_model extends CI_Model
 	{
 
 		$publication->author    = $this->get_author($publication);
-		$publication->geoareas = $this->geoareasmodel->find($publication->geographical_coverage_id);
+		//$publication->geoareas = $this->geoareasmodel->find($publication->geographical_coverage_id);
 
 		$publication->sub_theme = $this->subthemesmodel->find($publication->sub_thematic_area_id);
 		$publication->theme = $publication->sub_theme->theme;

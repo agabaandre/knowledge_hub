@@ -17,22 +17,24 @@ require_once("includes/frontend/preloader.php");
     <div class="col-md-11 col-lg-11 col-sm-12 text-center">
         <h3 class="text-white">Africa CDC RCC Health Security Knowledge Hub</h3>
         <h5  style="color:#C3A366; padding-bottom: 20px;">GLOBAL AND REGIONAL POLICIES, GUIDANCE, DATABASES AND RESOURCES</h5>
+
+           <!-- [ Main Content ] start -->
+        <?php echo form_open('site/search', 'class="row justify-content-center"'); ?>
+            <div class="col-sm-7">
+                <div class="form-group">
+                    <input type="text" class="form-control" name="term" placeholder="Search here" value="<?php echo old('term'); ?>">
+                </div>
+            </div>
+       <?php  echo form_close(); ?>
         
     </div>
 </div>
 
-<div class="container p-3" style="margin-top: -100px;">
+<div class="container p-3" style="margin-top: -50px;">
 
-    <!-- [ Main Content ] start -->
-    <div class="row justify-content-center">
-        <div class="col-sm-8">
-            <div class="form-group">
-                <input type="text" class="form-control" name="" placeholder="Search here">
-            </div>
-        </div>
-    </div>
-
-   <?php $this->load->view($module . "/" . $view); ?>
+ <?php
+    $this->load->view($module . "/" . $view); 
+  ?>
 
     <!-- [ Main Content ] end -->
                        
