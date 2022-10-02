@@ -7,20 +7,12 @@ require_once("includes/frontend/preloader.php");
 //require_once("includes/frontend/top_bar.php");
 
 ?>
-<style type="text/css">
-    
-    .header-bg{
-        background-color: rgba(145, 28, 57,0.8); 
-        min-height: 220px; 
-        background-image: url(<?php echo base_url(); ?>assets/images/map.png); 
-        background-position: right; 
-        background-repeat: no-repeat
-    }
-</style>
 
-<div class="row p-4 pt-2 align-items-center header-bg">
+
+<div class="row p-4 pt-2 align-items-center header-bg"
+ style=" background-image: url(<?php echo base_url(); ?>assets/images/map.png);">
     <div class="col-md-1 col-lg-1 col-sm-12 text-center">
-        <img src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="100px">
+        <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="100px">
     </div>
     <div class="col-md-11 col-lg-11 col-sm-12 text-center">
         <h3 class="text-white">Africa CDC RCC Health Security Knowledge Hub</h3>
@@ -29,9 +21,16 @@ require_once("includes/frontend/preloader.php");
     </div>
 </div>
 
-<div class="container p-3" style="margin-top: -50px;">
-     
+<div class="container p-3" style="margin-top: -100px;">
+
     <!-- [ Main Content ] start -->
+    <div class="row justify-content-center">
+        <div class="col-sm-8">
+            <div class="form-group">
+                <input type="text" class="form-control" name="" placeholder="Search here">
+            </div>
+        </div>
+    </div>
 
    <?php $this->load->view($module . "/" . $view); ?>
 

@@ -9,6 +9,8 @@ class Site extends MX_Controller {
 
 		$this->module = "site";
 		$this->title  = "Site";
+
+		$this->load->model('Site_model','sitemodel');
 		
 	}
 
@@ -18,10 +20,14 @@ class Site extends MX_Controller {
 		$data['title']  = $this->title;
 		
 		$data['categories'] = array(
-			["title"=>"Health Security Themes","icon"=>"icon-activity",'link'=>"healththemes"],
-			["title"=>"Authors","icon"=>"icon-users",'link'=>"authors"],
-			["title"=>"Geographical Coverage","icon"=>"icon-radio",'link'=>""],
-			["title"=>"All","icon"=>"icon-search",'link'=>"search"],
+			["title"=>"Health Security Themes",
+			"icon"=>"icon-activity",
+			'link'=>"healththemes",
+			"image"=>"theme.png"
+		],
+			["title"=>"Authors","icon"=>"icon-users",'link'=>"authors","image"=>"author.png"],
+			["title"=>"Geographical Coverage","icon"=>"icon-radio",'link'=>"","image"=>"location.png"],
+			//["title"=>"All","icon"=>"icon-search",'link'=>"search"],
 		);
 	
 		render_site('home',$data);
@@ -59,7 +65,8 @@ class Site extends MX_Controller {
 
 	public function search()
 	{
-		$data['module'] = $this->module;
+		$data['module']    = $this->module;
+		$data['results'] = $this->sitemodel->search($this->input->post());
 	
 		render_site('search',$data);
 	}

@@ -9,7 +9,7 @@
     <meta name="author" content="Agaba Andrew - 0256702787688" />
 
     <!-- Favicon icon -->
-    <link rel="icon" href="<?php echo base_url() ?>assets/images/favicon.ico" type="image/x-icon">
+    <link rel="icon" href="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" type="image/x-icon">
     <!-- fontawesome icon -->
     <link rel="stylesheet" href="<?php echo base_url() ?>assets/fonts/fontawesome/css/fontawesome-all.min.css">
     <!-- animation css -->

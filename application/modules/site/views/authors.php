@@ -3,12 +3,18 @@
 		<?php foreach ($authors as $author): ?>
 		     <div class="card col-lg-12">
 	          <div class="card-body text-left">
-				<h4 width="5%">
-				<i class="fa fa-user text-muted"></i> <?php echo $author->name; ?></h4>
-				<p><?php echo $author->address; ?></p>
-				<p><?php echo $author->telephone; ?></p>
-				<p><?php echo $author->email; ?></p>
+	          	<div class="row">
+	          	  <div class="col-md-1">
+	          	  	  <img src="<?php echo base_url();?>assets/images/icons/author.png" width="80px">
+	          	  </div>
+	          	 <div class="col-md-11">
+					<h4><?php echo $author->name; ?></h4>
+					<p><?php echo $author->address; ?></p>
+					<p><?php echo $author->telephone; ?></p>
+					<p><?php echo $author->email; ?></p>
+			    </div>
 			 	</div>
+			   </div>
 			</div>
 		<?php endforeach; ?>
 	

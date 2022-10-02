@@ -4,7 +4,7 @@
 		     	<div class="card-header">
 		     		<h4>Search</h4>
 		     	</div>
-	          <div class="card-body text-left">
+	           <div class="card-body text-left">
 				<div class="form-group">
 					<input type="text" class="form-control" name="" placeholder="Search here">
 				</div>
