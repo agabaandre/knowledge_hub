@@ -21,7 +21,7 @@ require_once("includes/frontend/preloader.php");
         <?php echo form_open('site/search', 'class="row justify-content-center"'); ?>
         <div class="col-sm-7">
             <div class="form-group">
-                <input type="text" class="form-control" name="term" placeholder="Search here" value="<?php echo old('term'); ?>">
+                <input type="text" class="form-control" name="term" placeholder="Search here" value="<?php echo old('term'); ?>" style="padding:10px; font-size:18px;">
             </div>
         </div>
         <?php echo form_close(); ?>
