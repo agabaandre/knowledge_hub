@@ -102,7 +102,7 @@ class Site extends MX_Controller {
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
 
-		$filter = ['region_id'=>$region_id];
+		$filter = ['geographical_coverage_id'=>$region_id];
 
 		$data['region']     = $this->geoareasmodel->find($region_id);
 		$data['results']['publications'] = $this->publicationsmodel->get($filter);
