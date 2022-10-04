@@ -37,8 +37,10 @@
                           <li><a href="<?php echo base_url() ?>healththemes">Security Themes</a></li>
                           <li><a href="<?php echo base_url() ?>subthemes">Security Sub-Themes</a></li>
                           <li><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
-                          <li><a href="<?php echo base_url() ?>member_states">Member States</a></li>
-                          <li><a href=" <?php echo base_url() ?>regions">Regions</a></li>
+                          <!-- <li><a href="<?php //echo base_url() 
+                                            ?>member_states">Member States</a></li>
+                          <li><a href=" <?php //echo base_url() 
+                                        ?>regions">Regions</a></li> -->
 
 
                       </ul>

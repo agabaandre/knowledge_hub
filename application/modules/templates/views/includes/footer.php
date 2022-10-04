@@ -127,6 +127,13 @@
     </div>
 </div> -->
 
+<!-- select2 Js -->
+<script src="<?php echo base_url() ?>assets/plugins/select2/js/select2.full.min.js"></script>
+
+<!-- multi-select Js -->
+<script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.quicksearch.js"></script>
+<script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.multi-select.js"></script>
+
 <script src="<?php echo base_url() ?>assets/js/analytics.js"></script>
 
 </body>

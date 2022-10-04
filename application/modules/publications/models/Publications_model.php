@@ -11,22 +11,21 @@ class Publications_model extends CI_Model
 		parent::__Construct();
 
 		$this->table = "publication";
-		$this->author_pubs_table = "author_publication";
 		$this->filetypes_table = "file_type";
 	}
 
 	public function get($filter = [])
 	{
 
-		if(!empty($filter)){
+		if (!empty($filter)) {
 
-			foreach($filter as $key => $value) {
-				
-				if($key == "search_key"):
-					$this->db->like('description',$value);
-					$this->db->or_like('publication',$value);
-				else:
-					$this->db->like($key,$value);
+			foreach ($filter as $key => $value) {
+
+				if ($key == "search_key") :
+					$this->db->like('description', $value);
+					$this->db->or_like('publication', $value);
+				else :
+					$this->db->like($key, $value);
 				endif;
 			}
 		}
@@ -78,9 +77,8 @@ class Publications_model extends CI_Model
 	public function get_author($publication)
 	{
 
-		$this->db->where('publication_id', $publication->id);
-		$this->db->join('author', 'author.id=author_publication.author_id');
-		return $this->db->get($this->author_pubs_table)->row();
+		$this->db->where('id', $publication->id);
+		return $this->db->get($this->table)->row();
 	}
 
 	public function get_filetype($type_id)
@@ -99,13 +97,22 @@ class Publications_model extends CI_Model
 			$this->db->where('id', $data['id']);
 			$this->db->update($this->table, $data);
 		} else {
-			$this->db->insert($this->table, $data);
+			$saved = $this->db->insert($this->table, $data);
 		}
 
 		$row_id = ($update) ? $data['id'] : $this->db->insert_id();
 
 		//return inserted row
-		return $this->find($row_id);
+		if ($saved) {
+			$mess = " Saved Sucessfully";
+		} else {
+			$mess = "Failed to Save";
+		}
+		if (empty($mess)) {
+			$mess = "Update Successful";
+		}
+
+		return $mess;
 	}
 
 	public function update($data)

@@ -18,7 +18,7 @@
                             <span>×</span>
                         </button>
                     </div>
-                    <div id="notification">
+                    <div class="notification">
 
                     </div>
                 </div>
@@ -26,7 +26,7 @@
             </div>
             <?php echo form_open_multipart(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 
-            <?php print_r($subthemes);
+            <?php //print_r($subthemes);
             ?>
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
@@ -36,7 +36,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="description" required></textarea>
+                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="title" required></textarea>
                             </div>
                         </div>
 
@@ -50,7 +50,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Author</label>
-                                <select class="form-control" name="author_id" required>
+                                <select class="form-control js-example-basic-single" name="author" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($authors as $author) : ?>
                                         <option value="<?php echo $author->id; ?>">
@@ -64,7 +64,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
-                                <select class="form-control" name="sub_thematic_area_id" required select2>
+                                <select class="form-control js-example-basic-single" name="sub_thematic_area_id" required select2>
                                     <option disabled>Select</option>
                                     <?php foreach ($subthemes as $subtheme) : ?>
                                         <option value="<?php echo $subtheme->id; ?>">
@@ -82,14 +82,14 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Description</label>
-                                <textarea placeholder="Title" class="form-control newform" id="description" name="description" required></textarea>
+                                <textarea placeholder="Descripion" class="form-control newform" id="description" name="description" required></textarea>
                             </div>
                         </div>
 
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Type</label>
-                                <select class="form-control" name="file_type_id" required>
+                                <select class="form-control" name="file_type" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($filetypes as $filetype) : ?>
                                         <option value="<?php echo $filetype->id; ?>">
@@ -103,7 +103,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Geographical Coverage</label>
-                                <select class="form-control" name="geographical_coverage_id" required>
+                                <select class="form-control js-example-basic-single select2" name="geographical_coverage" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($geoareas as $geoarea) : ?>
                                         <option value="<?php echo $geoarea->id; ?>">
@@ -126,7 +126,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Status</label>
-                                <select class="form-control" name="sub_thematic_area_id" required>
+                                <select class="form-control" name="is_active" required>
                                     <option value="Active">Active</option>
                                     <option value="Inactive">Inactive</option>
 
@@ -157,7 +157,7 @@
         e.preventDefault();
         var data = $(this).serialize();
         var url = '<?php echo base_url(); ?>publications/save'
-        console.log(data);
+        // console.log(data);
         $.ajax({
             url: url,
             method: "post",
@@ -174,7 +174,7 @@
                 }
 
 
-                console.log(data);
+                // console.log(res);
             } //success
         }); // ajax
     });
