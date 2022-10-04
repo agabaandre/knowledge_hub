@@ -12,7 +12,20 @@ class Subthemes_model extends CI_Model {
 
 	}
 
-	public function get(){
+	public function get($filter=[]){
+
+		if(!empty($filter)){
+
+			foreach($filter as $key => $value) {
+				
+				if($key == "search_key"):
+					$this->db->like('description',$value);
+					$this->db->or_like('publication',$value);
+				else:
+					$this->db->like($key,$value);
+				endif;
+			}
+		}
 
 		$subthemes = $this->db->get($this->table)->result();
 		foreach ($subthemes as $sub) {

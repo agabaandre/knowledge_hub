@@ -478,7 +478,7 @@ $config['csrf_protection'] = TRUE;
 $config['csrf_token_name'] = 'hp_name';
 $config['csrf_cookie_name'] = 'hp_cookie_name';
 $config['csrf_expire'] = 7200;
-$config['csrf_regenerate'] = TRUE;
+$config['csrf_regenerate'] = FALSE;
 $config['csrf_exclude_uris'] = array();
 
 /*

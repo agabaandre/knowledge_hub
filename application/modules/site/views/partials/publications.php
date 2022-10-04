@@ -8,7 +8,8 @@
           	  	  <img src="<?php echo base_url();?>assets/images/icons/author.png" width="80px">
           	  </div>
           	 <div class="col-md-11">
-				<p><?php echo truncate($row->description,410); ?></p>
+				<p><?php echo truncate($row->description,500); ?></p>
+				<strong><p class="text-primary"><?php echo $row->sub_theme->description; ?></p></strong>
 				<a href="<?php echo $row->publication; ?>" target="_blank"><small><?php echo $row->publication; ?></small></a>
 		    </div>
 		 	</div>

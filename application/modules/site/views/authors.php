@@ -2,6 +2,7 @@
 
 		<?php foreach ($authors as $author): ?>
 		     <div class="card col-lg-12">
+		     <a href="<?php echo base_url();?>site/author_pubs/<?php echo $author->id ?>">
 	          <div class="card-body text-left">
 	          	<div class="row">
 	          	  <div class="col-md-1">
@@ -15,6 +16,7 @@
 			    </div>
 			 	</div>
 			   </div>
+			  </a>
 			</div>
 		<?php endforeach; ?>
 	
