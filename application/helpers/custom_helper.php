@@ -31,9 +31,7 @@ if (!function_exists('render_site')) {
     {
 
         $data['view'] = $view;
-
-        //renders without navigation
-        $template_method = 'templates/frontend';
+        $template_method = ($plain) ? 'templates/plain' : 'templates/frontend';
 
         $data['settings'] = settings();
 

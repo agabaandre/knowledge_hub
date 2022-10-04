@@ -18,7 +18,7 @@ class Site extends MX_Controller {
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
-		render_site('landing',$data);
+		render_site('landing',$data,true);
 	}
 
 	public function index()
