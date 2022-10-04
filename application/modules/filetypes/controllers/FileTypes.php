@@ -9,15 +9,15 @@ class FileTypes extends MX_Controller
 	{
 		parent::__construct();
 
-		$this->module = "geoareas";
-		$this->title  = "Geographical Areas";
+		$this->module = "filetypes";
+		$this->title  = "File Types";
 	}
 
 	public function index()
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
-		$data['page']   = "Geographical Areas List";
+		$data['page']   = "File Types List";
 		$data['filetypes'] = $this->filetypesmodel->get();
 
 		render('list', $data);
@@ -35,20 +35,20 @@ class FileTypes extends MX_Controller
 
 		$is_error = false;
 
-		if ($this->form_validation->run('filetypes') == FALSE) {
-			flash_form();
-			$msg = validation_errors();
-			$is_error = true;
-		} else {
+		// if ($this->form_validation->run('filetypes') == FALSE) {
+		// 	flash_form();
+		// 	$msg = validation_errors();
+		// 	$is_error = true;
+		// } else {
 
-			$theme = [
-				'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
-			];
+		$theme = [
+			'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
+		];
 
-			$resp = $this->geoareasmodel->save($bank);
+		$resp = $this->filetypesmodel->save($theme);
 
-			$msg = "Operation Successful";
-		}
+		$msg = "Operation Successful";
+		// }
 		set_flash($msg, $is_error);
 		redirect(base_url("filetypes"));
 	}

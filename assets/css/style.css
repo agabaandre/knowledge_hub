@@ -4914,7 +4914,7 @@ pre[class*=language-]:before {
 }
 
 .pcoded-navbar.menu-light .header-logo {
-    background-color: #1b1c1d;
+    background-color: #348f41;
 }
 
 .pcoded-navbar.menu-light .header-logo .logo-dark {
@@ -16535,40 +16535,44 @@ div.code-toolbar>.toolbar span:hover {
 
 /**====== New stuff ======**/
 
-.header-bg{
-    background-color: rgba(52, 143, 65,1); 
-    min-height: 240px;  
-    background-position: right; 
+.header-bg {
+    background-color: rgba(52, 143, 65, 1);
+    min-height: 240px;
+    background-position: right;
     background-repeat: no-repeat;
-    background-size:contain;
-    -webkit-backdrop-filter: blur(38px); /* Use for Safari 9+, Edge 17+ (not a mistake) and iOS Safari 9.2+ */
-    backdrop-filter: blur(38px); /* Supported in Chrome 76 */
+    background-size: contain;
+    -webkit-backdrop-filter: blur(38px);
+    /* Use for Safari 9+, Edge 17+ (not a mistake) and iOS Safari 9.2+ */
+    backdrop-filter: blur(38px);
+    /* Supported in Chrome 76 */
 }
 
-.justify-content-center{
+.justify-content-center {
     display: flex;
     justify-content: center;
 }
 
-.category{
-        display:flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
- }
+.category {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
 
-.active-card:hover{
-    box-shadow:1px 2px 6px 2px rgba(52, 143, 65,1);
+.active-card:hover {
+    box-shadow: 1px 2px 6px 2px rgba(52, 143, 65, 1);
     transition: 0.3s;
 }
 
-.block{
+.block {
     display: block;
     padding-bottom: 8px
 }
-.text-cdc-green{
+
+.text-cdc-green {
     color: #119A48;
 }
-.text-cdc-gold{
-    color:#C3A366;
+
+.text-cdc-gold {
+    color: #C3A366;
 }

@@ -42,10 +42,10 @@ class HealthThemes extends MX_Controller
 		} else {
 
 			$theme = [
-				'id' => @$this->input->post("id"), 'description' => $this->input->post("description")
+				'id' => @$this->input->post("id"), 'description' => $this->input->post("description"), 'icon' => $this->input->post("icon")
 			];
 
-			$resp = $this->healththemesmodel->save($bank);
+			$resp = $this->healththemesmodel->save($theme);
 
 			$msg = "Operation Successful";
 		}
