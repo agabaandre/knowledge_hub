@@ -1,7 +1,7 @@
-<div class="row">
+<div class="row p-2">
 
 	<?php foreach ($results['publications'] as $row): ?>
-	     <div class="card col-lg-12">
+	     <div class="card col-lg-12 single-border">
           <div class="card-body text-left">
           	<div class="row">
           	  <div class="col-md-1">

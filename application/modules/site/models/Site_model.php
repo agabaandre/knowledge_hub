@@ -21,9 +21,11 @@ class Site_model extends CI_Model {
 		  	$data['themes']       = $this->healththemesmodel->get($search);
 		}
 		else if($type == "themes"){
+
  		 	$data['themes']       = $this->healththemesmodel->get($search);
 		}
 		else if($type == "authors"){
+			
  		 	$data['themes']       = $this->authorsmodel->get($search);
 		}
 

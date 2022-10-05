@@ -21,6 +21,7 @@ class Publications extends MX_Controller
 
 		render('list', $data);
 	}
+
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
@@ -55,8 +56,7 @@ class Publications extends MX_Controller
 	}
 
 	public function delete($id)
-	{
-
+	{   
 		$resp = $this->publicationsmodel->delete($id);
 		$is_error = false;
 

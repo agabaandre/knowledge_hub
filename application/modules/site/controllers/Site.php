@@ -18,6 +18,8 @@ class Site extends MX_Controller {
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
+		$data['slides'] = $this->slidesmodel->get();
+		
 		render_site('landing',$data,true);
 	}
 

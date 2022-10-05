@@ -6,7 +6,7 @@
 	          <div class="card-body text-left">
 	          	<div class="row">
 	          	  <div class="col-md-1">
-	          	  	  <img src="<?php echo base_url();?>assets/images/icons/author.png" width="80px">
+	          	  	  <img src="<?php echo base_url();?>assets/images/icons/author.png" width="40px">
 	          	  </div>
 	          	 <div class="col-md-11">
 					<h4><?php echo $author->name; ?></h4>

@@ -22,11 +22,11 @@ class HealthThemes extends MX_Controller
 
 		render('list', $data);
 	}
+	
 	public function get()
 	{
 
 		$data['healththemes'] = $this->healththemesmodel->get();
-
 		$data;
 	}
 

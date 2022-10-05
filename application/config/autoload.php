@@ -139,4 +139,5 @@ $autoload['model'] = array(
     ['subthemes/subthemes_model' => 'subthemesmodel'],
     ['publications/publications_model' => 'publicationsmodel'],
     ['filetypes/filetypes_model' => 'filetypesmodel'],
+    ['slides/slides_model'=>'slidesmodel']
 );

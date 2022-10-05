@@ -1,23 +1,46 @@
 
 <div class="row justify-content-center">
    
-  <div class="col-lg-6">
-    <div class="card col-lg-12">
-          <div class="card-body">
-      <p>
-      The RCCs serve as hubs for Africa CDC surveillance, preparedness and emergency response activities and coordinate regional public health initiatives by Member States in consultation with Africa CDC headquarters.
-    </p>
+  <div class="col-lg-7">
 
-      <p>
-      The RCCs serve as hubs for Africa CDC surveillance, preparedness and emergency response activities and coordinate regional public health initiatives by Member States in consultation with Africa CDC headquarters.
-      </p>
+      <div id="carouselExampleControls" class="carousel slide" data-ride="carousel">
+        <div class="carousel-inner">
 
-    </div>
-  </div>
+          <?php  
+            $i = 0;
+          foreach ($slides as $slide): ?>
+          <div class="carousel-item <?php echo ($i==0)?'active':'';?>">
+            <img class="d-block w-100" src="<?php echo base_url(); ?>assets/images/slider/<?php echo $slide->slide_image; ?>">
+
+            <?php if($slide->caption): ?>
+            <div class="carousel-caption d-none d-md-block">
+              <h5 class="text-white"><?php echo $slide->caption; ?></h5>
+            </div>
+            <?php endif; ?>
+
+          </div>
+
+        <?php
+          $i++; 
+         endforeach; ?>
+
+        </div>
+
+        <a class="carousel-control-prev" href="#carouselExampleControls" role="button" data-slide="prev">
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="sr-only">Previous</span>
+        </a>
+        <a class="carousel-control-next" href="#carouselExampleControls" role="button" data-slide="next">
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="sr-only">Next</span>
+        </a>
+
+      </div>
+    
 
 </div>
 
-  <div class="col-lg-6">
+  <div class="col-lg-5">
 
     <div class="card col-lg-12 bg-success">
       <a href="<?php echo base_url(); ?>">
