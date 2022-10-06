@@ -29,7 +29,7 @@ class Permissions extends MX_Controller
   {
     $data['view'] = "add_permissions";
     $data['title'] = "Add Permission";
-    $data['module'] = "auth";
+    $data['module'] = "permissions";
     echo Modules::run('templates/main', $data);
   }
   public function getPermissions()
@@ -56,7 +56,7 @@ class Permissions extends MX_Controller
   public function savePermissions()
   {
     $data = $this->input->post();
-    $post_d = $this->auth_mdl->savePermissions($data);
+    $post_d = $this->perms_mdl->savePermissions($data);
     if ($post_d) {
       $msg = "PermissionassignPermissions is Saved successfully";
       Modules::run('utility/setFlash', $msg);
@@ -75,7 +75,7 @@ class Permissions extends MX_Controller
         $row = array("group_id" => $groupId, "permission_id" => $perm);
         array_push($insert_data, $row);
       }
-      $post_d = $this->auth_mdl->assignPermissions($groupId, $insert_data);
+      $post_d = $this->perms_mdl->assignPermissions($groupId, $insert_data);
       if ($post_d) {
         $msg = "Assignments have been Saved successfully";
         Modules::run('utility/setFlash', $msg);

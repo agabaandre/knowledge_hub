@@ -1,7 +1,7 @@
 <?php
 
 $usergroups = Modules::run("permissions/getUserGroups");
-$rcc = Modules::run("geoareas/get_rcc");
+$rcc = Modules::run("geoareas/getrcc");
 
 
 ?>
@@ -11,7 +11,7 @@ $rcc = Modules::run("geoareas/get_rcc");
     <!-- general form elements disabled -->
     <div class="card card-default">
       <div class="card-header">
-        <h3 class="card-title">Add User</h3>
+        <h4 class="card-title">Add User</h4>
       </div>
       <!-- /.card-header -->
       <div class="card-body">
@@ -69,9 +69,9 @@ $rcc = Modules::run("geoareas/get_rcc");
             <div class="col-sm-4">
               <div class="form-group">
                 <label>RCC</label>
-                <select onChange="getCountries($(this).val());" name="access1" class="form-control select2 sregion" style="width:100%;">
+                <select onChange="getCountries($(this).val());" name="access1" class="form-control select2 sregion" style="width:100%;" multiple>
                   <option value="" disabled selected>RCC</option>
-                  <?php foreach ($districts as $district) :
+                  <?php foreach ($rcc as $district) :
                   ?>
                     <option value="<?php echo $district->region_name; ?>"><?php echo $district->region_name; ?></option>
                   <?php endforeach; ?>
@@ -83,7 +83,7 @@ $rcc = Modules::run("geoareas/get_rcc");
             <div class="col-sm-4">
               <div class="form-group">
                 <label>Country</label>
-                <select id="country" onChange="" name="access2" class="form-control select2 scountry" style="width:100%;">
+                <select id="scountry" name="access2" class="form-control select2 scountry" style="width:100%;" multiple>
 
                   <option value="" disabled selected>Country</option>
 
@@ -112,7 +112,7 @@ $rcc = Modules::run("geoareas/get_rcc");
     <!-- general form elements disabled -->
     <div class="card card-default">
       <div class="card-header">
-        <h3 class="card-title">User List</h3><br>
+        <h4 class="card-title">User List</h4><br>
         <form class="form-horizontal" action="<?php echo base_url() ?>auth/users" method="post" style="margin-top: 4px !important;">
 
           <div class="form-group col-md-5">
@@ -161,8 +161,8 @@ $rcc = Modules::run("geoareas/get_rcc");
                 <td><?php echo $user->name; ?></td>
                 <td><?php echo $user->username; ?></td>
                 <td><?php echo $user->group_name; ?></td>
-                <td><?php echo @access_level1($user->id); ?></td>
-                <td><?php echo @access_level2($user->id); ?></td>
+                <td><?php echo @access_level1(1); ?></td>
+                <td><?php echo @access_level2(1); ?></td>
                 <td><a data-toggle="modal" data-target="#user<?php echo $user->id; ?>" href="#">Edit</a>
 
                   <?php if ($user->status == 1) { ?>
@@ -426,4 +426,17 @@ $rcc = Modules::run("geoareas/get_rcc");
 
 
     }); //doc ready
+
+
+    function getCountries(val) {
+      $.ajax({
+        method: "GET",
+        url: "<?php echo base_url(); ?>geoareas/getCountries",
+        data: 'region_data=' + val,
+        success: function(data) {
+          //alert(data);
+          $(".scountry").html(data);
+        }
+      });
+    }
   </script>
