@@ -1,6 +1,6 @@
 <div class="row p-2">
 
-	<?php foreach ($results['publications'] as $row): ?>
+	<?php foreach ($publications as $row): ?>
 	     <div class="card col-lg-12 single-border">
           <div class="card-body text-left">
           	<div class="row">

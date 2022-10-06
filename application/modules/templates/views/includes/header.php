@@ -32,4 +32,4 @@
     <script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
 </head>
 
-<body class="">
+<body class="" style="overflow-x: hidden;">

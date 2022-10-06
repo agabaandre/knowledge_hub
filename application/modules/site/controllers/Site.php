@@ -81,7 +81,7 @@ class Site extends MX_Controller {
 		$filter = ['sub_thematic_area_id'=>$subtheme_id];
 
 		$data['subtheme']     = $this->subthemesmodel->find($subtheme_id);
-		$data['results']['publications'] = $this->publicationsmodel->get($filter );
+		$data['publications'] = $this->publicationsmodel->get($filter );
 
 		render_site('theme_publications',$data);
 	}
@@ -94,7 +94,7 @@ class Site extends MX_Controller {
 		$filter = ['author_id'=>$author_id];
 
 		$data['author']     = $this->authorsmodel->find($author_id);
-		$data['results']['publications'] = $this->publicationsmodel->get($filter );
+		$data['publications'] = $this->publicationsmodel->get($filter );
 
 		render_site('author_publications',$data);
 	}
@@ -107,7 +107,7 @@ class Site extends MX_Controller {
 		$filter = ['geographical_coverage_id'=>$region_id];
 
 		$data['region']     = $this->geoareasmodel->find($region_id);
-		$data['results']['publications'] = $this->publicationsmodel->get($filter);
+		$data['publications'] = $this->publicationsmodel->get($filter);
 
 		render_site('area_publications',$data);
 	}
@@ -139,7 +139,7 @@ class Site extends MX_Controller {
 		$data['module']    = $this->module;
 		flash_form();
 		
-		$data['results'] = $this->sitemodel->search($this->input->post('term'));
+		$data['publications'] = $this->sitemodel->search($this->input->post('term'));
 	
 		render_site('search',$data);
 	}
