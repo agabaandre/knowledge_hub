@@ -1,15 +1,9 @@
 <?php
 
-$usergroups = Modules::run("auth/getUserGroups");
+$usergroups = Modules::run("permissions/getUserGroups");
+$rcc = Modules::run("geoareas/get_rcc");
 
-$departments = Modules::run("departments/getAll_departments");
 
-$districts = Modules::run("auth/getDistricts");
-
-$facilities = Modules::run("auth/getFacilities");
-$variables = Modules::run("svariables/getSettings");
-
-//print_r($variables);
 ?>
 
 <div class="row">
@@ -24,8 +18,8 @@ $variables = Modules::run("svariables/getSettings");
         <form class="user_form" method="post" enctype="multipart/form-data">
           <div class="row">
             <div class="col-md-12">
-              <button type="submit" class="btn btn-info btn-outline">Save</button>
-              <button type="reset" class="btn  btnkey bg-gray-dark color-pale ">Reset All</button>
+              <button type="submit" class="btn btn-primary btn-sm">Save</button>
+              <button type="reset" class="btn  btn-secondary btn-sm">Reset All</button>
             </div>
             <div class="col-md-12" style="margin:0 auto;">
               <span class="status"></span>
@@ -44,7 +38,7 @@ $variables = Modules::run("svariables/getSettings");
                   <option value="" disabled selected>USER GROUP</option>
                   <?php foreach ($usergroups as $usergroup) :
                   ?>
-                    <option value="<?php echo $usergroup->group_id; ?>"><?php echo $usergroup->group_name; ?>
+                    <option value="<?php echo $usergroup->id; ?>"><?php echo $usergroup->group_name; ?>
 
                     </option>
                   <?php endforeach; ?>
@@ -63,7 +57,7 @@ $variables = Modules::run("svariables/getSettings");
               <!-- textarea -->
               <div class="form-group">
                 <label>Default Password</label>
-                <input type="text" required name="password" value="<?php echo $variables = Modules::run("svariables/getSettings")->default_password; ?> " class="form-control" readonly />
+                <input type="text" required name="password" value="<?php echo setting()->default_password; ?> " class="form-control" readonly />
               </div>
             </div>
             <div class="col-sm-4">
@@ -74,12 +68,12 @@ $variables = Modules::run("svariables/getSettings");
             </div>
             <div class="col-sm-4">
               <div class="form-group">
-                <label>District</label>
-                <select onChange="getFacs($(this).val());" name="district_id" class="form-control select2 sdistrict" style="width:100%;">
-                  <option value="" disabled selected>DISTRICT</option>
+                <label>RCC</label>
+                <select onChange="getCountries($(this).val());" name="access1" class="form-control select2 sregion" style="width:100%;">
+                  <option value="" disabled selected>RCC</option>
                   <?php foreach ($districts as $district) :
                   ?>
-                    <option value="<?php echo $district->district_id; ?>"><?php echo $district->district; ?></option>
+                    <option value="<?php echo $district->region_name; ?>"><?php echo $district->region_name; ?></option>
                   <?php endforeach; ?>
                 </select>
 
@@ -88,10 +82,10 @@ $variables = Modules::run("svariables/getSettings");
 
             <div class="col-sm-4">
               <div class="form-group">
-                <label>Facility</label>
-                <select id="facility" onChange="getDeps($(this).val());" name="facility_id" class="form-control select2 sfacility" style="width:100%;">
+                <label>Country</label>
+                <select id="country" onChange="" name="access2" class="form-control select2 scountry" style="width:100%;">
 
-                  <option value="" disabled selected>FACILITY</option>
+                  <option value="" disabled selected>Country</option>
 
 
                 </select>
@@ -100,14 +94,7 @@ $variables = Modules::run("svariables/getSettings");
               </div>
             </div>
             <div class="col-sm-4">
-              <div class="form-group">
-                <label>Department</label>
-                <select id="department" name="department_id" class="form-control select2 sdepartment" style="width:100%;">
-                  <option value="" disabled selected>DEPARTMENT</option>
 
-                </select>
-
-              </div>
             </div>
 
 
@@ -155,9 +142,8 @@ $variables = Modules::run("svariables/getSettings");
               <th>Name</th>
               <th>Username</th>
               <th>User Group</th>
-              <th>District</th>
-              <th>Facility</th>
-              <th>Department</th>
+              <th>RCC</th>
+              <th>Country</th>
               <th>Actions</th>
 
 
@@ -175,23 +161,22 @@ $variables = Modules::run("svariables/getSettings");
                 <td><?php echo $user->name; ?></td>
                 <td><?php echo $user->username; ?></td>
                 <td><?php echo $user->group_name; ?></td>
-                <td><?php echo $user->district; ?></td>
-                <td><?php echo $user->facility; ?></td>
-                <td><?php echo $user->department; ?></td>
-                <td><a data-toggle="modal" data-target="#user<?php echo $user->user_id; ?>" href="#">Edit</a>
+                <td><?php echo @access_level1($user->id); ?></td>
+                <td><?php echo @access_level2($user->id); ?></td>
+                <td><a data-toggle="modal" data-target="#user<?php echo $user->id; ?>" href="#">Edit</a>
 
                   <?php if ($user->status == 1) { ?>
 
-                    <a data-toggle="modal" data-target="#block<?php echo $user->user_id; ?>" href="#">Block</a>
+                    <a data-toggle="modal" data-target="#block<?php echo $user->id; ?>" href="#">Block</a>
                   <?php } else { ?>
 
-                    <a data-toggle="modal" data-target="#unblock<?php echo $user->user_id; ?>" href="#">Activate</a>
+                    <a data-toggle="modal" data-target="#unblock<?php echo $user->id; ?>" href="#">Activate</a>
 
                   <?php } ?>
 
 
 
-                  <a data-toggle="modal" data-target="#reset<?php echo $user->user_id; ?>" href="#">Reset</a>
+                  <a data-toggle="modal" data-target="#reset<?php echo $user->id; ?>" href="#">Reset</a>
 
                 </td>
 
@@ -199,13 +184,14 @@ $variables = Modules::run("svariables/getSettings");
 
 
               <!--small modal to show Image-->
-              <div class="modal" id="img<?php echo $user->user_id; ?>">
+              <div class="modal" id="img<?php echo $user->id; ?>">
                 <div class="modal-dialog">
                   <div class="modal-body">
 
                     <h1><a href="#" style="color: #FFF;" class="pull-right" data-dismiss="modal">&times;</a></h1>
 
-                    <img class="img img-thumbnail" src="<?php echo base_url() . "assets/images/sm/" . $user->photo; ?>" alt="No Image" />
+                    <img class="img img-thumbnail" src="<?php echo base_url() . "assets/images/users/" . @$user->photo;
+                                                        ?>" alt="No Image" />
 
                   </div>
                 </div>

@@ -2812,7 +2812,7 @@ pre[class*=language-]:before {
     border-radius: 0.25rem 0.25rem 0 0;
     padding: 15px;
     position: relative;
-    background: linear-gradient(45deg, #3949AB, #2962FF);
+    background: linear-gradient(45deg, #348f41, #348f41);
 }
 
 .pcoded-header .dropdown .profile-notification .pro-head img {
@@ -12676,28 +12676,28 @@ table.dataTable tbody>tr>.selected th.select-checkbox:after {
 .btn-primary {
     color: #fff;
     background-color: #348F41;
-    border-color: #3544a0;
+    border-color: #782C2D;
 }
 
 .btn-primary:hover {
     color: #fff;
-    background-color: #2f3d8e;
-    border-color: #2c3985;
+    background-color: #348F41;
+    border-color: #782C2D;
 }
 
 .btn-primary.disabled,
 .btn-primary:disabled {
     color: #fff;
     background-color: #348F41;
-    border-color: #348F41;
+    border-color: #782C2D;
 }
 
 .btn-primary:not(:disabled):not(.disabled).active,
 .btn-primary:not(:disabled):not(.disabled):active,
 .show>.btn-primary.dropdown-toggle {
     color: #fff;
-    background-color: #2c3985;
-    border-color: #29357b;
+    background-color: #348F41;
+    border-color: #782C2D;
 }
 
 .btn-secondary {
@@ -16576,4 +16576,3 @@ div.code-toolbar>.toolbar span:hover {
 .text-cdc-gold {
     color: #C3A366;
 }
-

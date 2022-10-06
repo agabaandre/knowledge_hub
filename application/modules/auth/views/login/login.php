@@ -12,7 +12,7 @@
   <meta name="author" content="Codedthemes" />
 
   <!-- Favicon icon -->
-  <link rel="icon" href="<?php echo base_url() ?>assets/images/favicon.ico" type="image/x-icon">
+  <link rel="icon" href="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" type="image/x-icon">
   <!-- fontawesome icon -->
   <link rel="stylesheet" href="<?php echo base_url() ?>assets/fonts/fontawesome/css/fontawesome-all.min.css">
   <!-- animation css -->
@@ -27,24 +27,24 @@
       <div class="row align-items-center">
         <div class="col-md-6">
           <div class="card-body">
-            <img src="<?php echo base_url() ?>assets/images/logo-dark.png" alt="" class="img-fluid mb-4">
-            <h4 class="mb-3 f-w-400">Login into your account</h4>
+            <img src="<?php echo base_url() ?>assets/images/cdc_square.png.png" alt="" class="img-fluid mb-4">
+            <h3 class="mb-3 f-w-400 justify-content-center">Sign In</h3>
+            <?php echo form_open_multipart(base_url('auth/login'), array('id' => 'filetypes', 'class' => 'filetypes')); ?>
+
+
             <div class="input-group mb-2">
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="feather icon-mail"></i></span>
               </div>
-              <input type="email" class="form-control" placeholder="Email address">
+              <input type="text" name="username" class="form-control" placeholder="Email address">
             </div>
             <div class="input-group mb-3">
               <div class="input-group-prepend">
                 <span class="input-group-text"><i class="feather icon-lock"></i></span>
               </div>
-              <input type="password" class="form-control" placeholder="Password">
+              <input type="password" name="password" class="form-control" placeholder="Password">
             </div>
-            <div class="saprator"><span>OR</span></div>
-            <button class="btn btn-facebook mb-2 mr-2"><i class="fab fa-facebook-f"></i>facebook</button>
-            <button class="btn btn-googleplus mb-2 mr-2"><i class="fab fa-google-plus-g"></i>Google</button>
-            <button class="btn btn-twitter mb-2 mr-2"><i class="fab fa-twitter"></i>Twitter</button>
+
             <div class="form-group text-left mt-2">
               <div class="checkbox checkbox-primary d-inline">
                 <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="">
@@ -52,8 +52,10 @@
               </div>
             </div>
             <button class="btn btn-primary mb-4">Login</button>
+
+            </form>
             <p class="mb-2 text-muted">Forgot password? <a href="auth-reset-password.html" class="f-w-400">Reset</a></p>
-            <p class="mb-0 text-muted">Don’t have an account? <a href="auth-signup.html" class="f-w-400">Signup</a></p>
+
           </div>
         </div>
         <div class="col-md-6 d-none d-md-block">

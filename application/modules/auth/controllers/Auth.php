@@ -10,95 +10,25 @@ class Auth extends MX_Controller
   }
   public function index()
   {
+
     $this->load->view("login/login");
   }
-  public function recovery()
-  {
-    $this->load->view("recover_password");
-  }
-  public function myprofile()
-  {
-    $data['module'] = "auth";
-    $data['view'] = "profile";
-    $data['title'] = "My Profile";
-    $user_role = $this->session->userdata('role');
-    if ($user_role == 'sadmin') {
-      echo Modules::run("templates/main", $data);
-    } else {
-      echo Modules::run("templates/main", $data);
-    }
-  }
+
   public function login()
   {
     $postdata = $this->input->post();
-    $person = $this->auth_mdl->loginChecker($postdata);
-    // print_r($person);
-    // exit;
-    if (!empty($person->user_id)) {
-      $user_group = $person->role;
-      $userdata = array(
-        "names" => $person->name,
-        "user_id" => $person->user_id,
-        "ihris_pid" => $person->ihris_pid,
-        "username" => $person->username,
-        "role" => $person->group_name,
-        "state" => $person->status,
-        "dateChanged" => $person->changed,
-        "changed" => $person->isChanged,
-        "isLoggedIn" => true,
-        "facility" => $person->facility_id,
-        "facility_name" => $person->facility,
-        "department" => $person->department,
-        "permissions" => $this->auth_mdl->getUserPerms($user_group),
-        "department_id" => $person->department_id,
-        "division" => $person->division,
-        "unit" => $person->unit,
-        "district_id" => $person->district_id,
-        "district" => $person->district,
-        "year" => date('Y'),
-        "month" => date('m'),
-        "date_from" => date("Y-m-d", strtotime("-1 month")),
-        "date_to" => date('Y-m-d')
-      );
-      //print_r($userdata);
-      $this->checkerUser($userdata);
+    $data = $this->auth_mdl->login($postdata);
+    $adata = (array)$data;
+    if (md5($postdata['password']) == $adata['password']) {
+      unset($adata['password']);
+      $_SESSION['user'] = (object)$adata;
+      redirect('dashboard');
     } else {
-      if ($person == "new") {
-        $msg = $this->session->set_flashdata('msg', "First time access detected, Contact the Admin for Activation");
-      } else {
-        $msg = $this->session->set_flashdata('msg', "Login Failed, Wrong credentials");
-      }
-      redirect("auth");
+      redirect('auth');
     }
   }
-  public function checkerUser($userdata)
-  {
-    // print_r("USer".$userdata);
-    if (!$userdata['isLoggedIn']) {
-      redirect("auth");
-    } else {
-      $this->session->set_userdata($userdata);
-      redirect("dashboard");
-    }
-  }
-  public function adminLegal()
-  {
-    if ($this->session->userdata['role'] !== "sadmin") {
-      redirect("auth");
-    }
-  }
-  public function isLegal()
-  {
-    date_default_timezone_set("Africa/Kampala");
-    if (empty($this->session->userdata['role'])) {
-      redirect("auth");
-    }
-  }
-  public function unlock($pass)
-  {
-    $res = $this->auth_mdl->unlock($pass);
-    echo $res;
-  }
+
+
   public function logout()
   {
     session_unset();
@@ -111,12 +41,7 @@ class Auth extends MX_Controller
     //print_r($userrow);
     return $userrow;
   }
-  // all users
-  //   public function getAll(){
-  //         $users=$this->auth_mdl->getAll($config['per_page'],$page,$searchkey=FALSE);
-  // //$users=$this->auth_mdl->get_user_list();
-  // return $users;
-  //  }
+
   public function users()
   {
     $searchkey = $this->input->post('search_key');
@@ -155,10 +80,9 @@ class Auth extends MX_Controller
     $data['links'] = $this->pagination->create_links();
     $data['users'] = $this->auth_mdl->getAll($config['per_page'], $page, $searchkey);
     $data['module'] = "auth";
-    $data['view'] = "add_users";
-    $data['title'] = "User management";
-    $data['uptitle'] = "User management";
-    echo Modules::run("templates/main", $data);
+    $data['title'] = "User Management";
+    $data['uptitle'] = "User Management";
+    render("users/add_users", $data);
   }
   public function addUser()
   {
@@ -193,10 +117,8 @@ class Auth extends MX_Controller
     else {
       $res = $this->auth_mdl->updateUser($postdata);
     } //no photo
-    //echo $res;
-    //print_r($postdata);
-  } //ftn end
-  //first time password change
+  }
+
   public function changePass()
   {
     $postdata = $this->input->post();
@@ -269,103 +191,6 @@ class Auth extends MX_Controller
     $this->image_lib->initialize($config);
     $this->image_lib->watermark();
   }
-  public function getUserGroups()
-  {
-    $groups = $this->auth_mdl->getUserGroups();
-    return $groups;
-  }
-  public function getDepartments()
-  {
-    $user_deprt = $this->auth_mdl->getDepartments();
-    return $user_deprt;
-    // print_r($user_deprt);
-  }
-  public function getDistricts()
-  {
-    $user_district = $this->auth_mdl->getDistricts();
-    return $user_district;
-    //print_r($user_district);
-  }
-  public function getFacilities()
-  {
-    $user_facility = $this->auth_mdl->getFacilities();
-    return $user_facility;
-    //print_r($user_facility);
-  }
-  public function addPermissions()
-  {
-    $data['view'] = "add_permissions";
-    $data['title'] = "Add Permission";
-    $data['module'] = "auth";
-    echo Modules::run('templates/main', $data);
-  }
-  public function getPermissions()
-  {
-    $perms = $this->auth_mdl->getPermissions();
-    return $perms;
-  }
-  public function groupPermissions($group = FALSE)
-  {
-    $fperms = array();
-    $perms = $this->auth_mdl->groupPermissions($group);
-    foreach ($perms as $perm) {
-      $perm['id'];
-      array_push($fperms, $perm['id']);
-    }
-    return $fperms;
-  }
-  public function getGroupPerms($groupId = FALSE)
-  {
-    $perms = $this->auth_mdl->getGroupPerms($groupId);
-    return $perms;
-    //print_r($perms);
-  }
-  public function savePermissions()
-  {
-    $data = $this->input->post();
-    $post_d = $this->auth_mdl->savePermissions($data);
-    if ($post_d) {
-      $msg = "PermissionassignPermissions is Saved successfully";
-      Modules::run('utility/setFlash', $msg);
-      redirect('admin/groups');
-    }
-  }
-  public function assignPermissions()
-  {
-    $this->session->set_flashdata('group', $this->input->post('group'));
-    if (!empty($this->input->post('assign'))) {
-      $data = $this->input->post();
-      $groupId = $data['group'];
-      $permissions = $data['permissions'];
-      $insert_data = array();
-      foreach ($permissions as $perm) {
-        $row = array("group_id" => $groupId, "permission_id" => $perm);
-        array_push($insert_data, $row);
-      }
-      $post_d = $this->auth_mdl->assignPermissions($groupId, $insert_data);
-      if ($post_d) {
-        $msg = "Assignments have been Saved successfully";
-        Modules::run('utility/setFlash', $msg);
-      }
-    }
-    redirect('admin/groups');
-  }
-  public function getEssential()
-  {
-    $this->db->where('state', 1);
-    $data = array("state" => 0);
-    $done = $this->db->update("users", $data);
-    if ($done) {
-      echo "<h1>Done Processing</h1>";
-    }
-  }
-  public function getInstall()
-  {
-    $this->db->where('state', 0);
-    $data = array("state" => 1);
-    $done = $this->db->update("users", $data);
-    if ($done) {
-      echo "<h1>Sudo Done Processing</h1>";
-    }
-  }
+  //permissions management
+
 }

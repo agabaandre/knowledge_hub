@@ -1,4 +1,4 @@
-<div class="modal fade" id="block<?php echo $user->user_id; ?>">
+<div class="modal fade" id="block<?php echo $user->id; ?>">
 <form class="block" action="<?php echo base_url(); ?>auth/blockUser" method="post">
 	<div class="modal-dialog">
 			<div class="modal-content">
@@ -8,7 +8,7 @@
 
 					<span class="status" style="margin:0 auto;"></span>
 
-						<input type="hidden" name="user_id" value="<?php echo $user->user_id; ?>">
+						<input type="hidden" name="id" value="<?php echo $user->id; ?>">
 						
 
 		

@@ -50,8 +50,8 @@
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
                       <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-users"></i></span><span class="pcoded-mtext">Settings</span></a>
                       <ul class="pcoded-submenu">
-                          <li class=""><a href="" class="">Manage Users</a></li>
-                          <li class=""><a href="" class="">Groups and Permissions</a></li>
+                          <li class=""><a href="<?php echo base_url() ?>auth/users" class="">Manage Users</a></li>
+                          <li class=""><a href="<?php echo base_url() ?>permissions" class="">Groups and Permissions</a></li>
                           <li class=""><a href="" class="">User Access Logs</a></li>
                           <li class=""><a href="" class="">Constants and Variables</a></li>
 

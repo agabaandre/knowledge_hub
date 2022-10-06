@@ -45,7 +45,7 @@ class GeoAreas extends MX_Controller
 				'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
 			];
 
-			$resp = $this->geoareasmodel->save($bank);
+			$resp = $this->geoareasmodel->save($theme);
 
 			$msg = "Operation Successful";
 		}
