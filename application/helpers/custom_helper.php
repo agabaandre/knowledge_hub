@@ -133,7 +133,7 @@ if (!function_exists('paginate')) {
         $config['cur_tag_close'] = '<span class="sr-only">(current)</span></a></li>';
         $config['num_tag_open'] = '<li class="page-item">';
         $config['num_tag_close'] = '</li>';
-        $config['use_page_numbers'] = false;
+        //$config['use_page_numbers'] = false;
 
         $ci->pagination->initialize($config);
 
