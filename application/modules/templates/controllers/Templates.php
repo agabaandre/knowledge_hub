@@ -10,8 +10,11 @@ class Templates extends MX_Controller
 	{
 
 		//  check_admin_access();
-
-		$this->load->view('main', $data);
+		if (isset($this->session->userdata('user')->name)) {
+			$this->load->view('main', $data);
+		} else {
+			redirect('auth/login');
+		}
 	}
 
 	public function plain($data)
@@ -27,5 +30,4 @@ class Templates extends MX_Controller
 		//check_logged_in();
 		$this->load->view('front_end', $data);
 	}
-
 }

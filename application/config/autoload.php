@@ -89,7 +89,7 @@ $autoload['drivers'] = array();
 |
 |	$autoload['helper'] = array('url', 'file');
 */
-$autoload['helper'] = array('url', 'absent', 'rosta', 'text', 'custom', 'csrf', 'form');
+$autoload['helper'] = array('url', 'absent', 'rosta', 'text', 'custom', 'csrf', 'form', 'useraccess');
 
 /*
 | -------------------------------------------------------------------
@@ -139,5 +139,5 @@ $autoload['model'] = array(
     ['subthemes/subthemes_model' => 'subthemesmodel'],
     ['publications/publications_model' => 'publicationsmodel'],
     ['filetypes/filetypes_model' => 'filetypesmodel'],
-    ['slides/slides_model'=>'slidesmodel']
+    ['slides/slides_model' => 'slidesmodel']
 );
