@@ -19,9 +19,29 @@ class Site_model extends CI_Model {
 		 $theme_pubs   = $this->get_theme_pubs($search);
 		 $author_pubs  = $this->get_author_pubs($search);
 
-		 $data = array_merge($publications,$theme_pubs,$author_pubs);
 
-		 return $data;
+		 $data = array_merge($publications,$theme_pubs,$author_pubs);
+		 
+		 return $this->lossless_array_merge($data);
+	}
+
+	private function lossless_array_merge($input_data) {
+	  
+	  $data = array();
+	  $added = [];
+
+	  foreach ($input_data as $a) {
+
+	      if(!in_array($a->id, $added)){
+
+	        array_push($data, $a);
+	        array_push($added, $a->id);
+
+	      }
+
+	  }
+
+	  return $data;
 	}
 
 
