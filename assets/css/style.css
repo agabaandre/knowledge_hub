@@ -91,6 +91,10 @@ h5 {
     font-weight: 600;
 }
 
+.bg-success {
+    background: linear-gradient(45deg, #a77777, var(--success)) !important;
+}
+
 h1 {
     font-size: 2.5rem;
 }
@@ -16577,5 +16581,3 @@ div.code-toolbar>.toolbar span:hover {
 .text-cdc-gold {
     color: #C3A366;
 }
-
-fon
