@@ -28,6 +28,16 @@
                       </ul>
                   </li>
 
+                  <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
+                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-chart-line"></i></span><span class="pcoded-mtext"></span>Performance Indicators</a>
+                      <ul class="pcoded-submenu">
+                          <li class=""><a href="<?php echo base_url(); ?>kpi/create" class="">Create KPIs</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>kpi/list">Manage KPIs</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>kpi/form" class="">KPI Data</a></li>
+                      </ul>
+
+                  </li>
+
 
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
                       <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-list"></i></span><span class="pcoded-mtext">Form Lists</span></a>

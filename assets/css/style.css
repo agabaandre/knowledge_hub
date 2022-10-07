@@ -12111,6 +12111,7 @@ select.form-control-lg:not([size]):not([multiple]) {
     border-top: 1px solid #e2e5e8;
     white-space: nowrap;
     padding: 1.05rem 0.75rem;
+    font-size: 14px;
 }
 
 .table thead th {
@@ -16576,3 +16577,5 @@ div.code-toolbar>.toolbar span:hover {
 .text-cdc-gold {
     color: #C3A366;
 }
+
+fon
