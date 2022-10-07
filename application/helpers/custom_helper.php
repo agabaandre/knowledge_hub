@@ -105,7 +105,7 @@ if (!function_exists('truncate')) {
 }
 
 if (!function_exists('paginate')) {
-    function paginate($route, $totals, $perPage = 20, $segment = 2)
+    function paginate($route, $totals, $perPage = 20, $segment = 3)
     {
         $ci = &get_instance();
         $config = array();
