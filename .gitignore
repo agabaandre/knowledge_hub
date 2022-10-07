@@ -16,3 +16,4 @@ application/logs/*
 !application/logs/.htaccess
 /vendor/
 database.php
+node_modules
