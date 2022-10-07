@@ -142,11 +142,12 @@ class Site extends MX_Controller {
 		$term    = $this->input->post('term');
 
 		$count   = $this->sitemodel->count($term);
-        $page    = ($this->uri->segment(3))?$this->uri->segment(3):0;
-        $perPage = 1;
+		$segment = 3;
+        $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
+        $perPage = 10;
 		
 		$data['publications'] = $this->sitemodel->search($term,$perPage,$page);
-		$data['links']     = paginate('site/search/',$count, $perPage,$page);
+		$data['links']     = paginate('site/search',$count, $perPage,$segment);
 	
 		render_site('search',$data);
 	}
