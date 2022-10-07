@@ -10,62 +10,54 @@ class Site_model extends CI_Model {
 	}
 
 
-	public function search($term,$type="all"){
+	public function search($term,$limit=null,$start=0){
+
+		$this->applyFilter($term);
+
+		if($limit){
+			$this->db->limit($limit,$start);
+		}
+
+		$results = $this->db->get('publication')->result();
+
+		foreach ($results as $pub) {
+			$pub = $this->publicationsmodel->attach_related($pub);
+		}
+		 
+		return $results;
+	}
+
+	public function count($term){	
+		$this->applyFilter($term);
+		return count($this->db->get('publication')->result());
+	}
+
+	public function applyFilter($term){
 
 		$search = ['search_key'=>$term];
 
+		$authors    = $this->get_authors($search);
+		$sub_themes = $this->get_subthemes($search);
 
-		 $publications = $this->publicationsmodel->get($search);
-		 $theme_pubs   = $this->get_theme_pubs($search);
-		 $author_pubs  = $this->get_author_pubs($search);
-
-
-		 $data = array_merge($publications,$theme_pubs,$author_pubs);
-		 
-		 return $this->lossless_array_merge($data);
-	}
-
-	private function lossless_array_merge($input_data) {
-	  
-	  $data = array();
-	  $added = [];
-
-	  foreach ($input_data as $a) {
-
-	      if(!in_array($a->id, $added)){
-
-	        array_push($data, $a);
-	        array_push($added, $a->id);
-
-	      }
-
-	  }
-
-	  return $data;
+		$this->db->like('publication',$term);
+		$this->db->or_where_in('author_id ',array_values($authors));
+		$this->db->or_where_in('sub_thematic_area_id',array_values($sub_themes));
 	}
 
 
-	public function get_author_pubs($search){
+	public function get_authors($search){
 
-		  	$authors      = $this->authorsmodel->get($search);
-		  	$author_ids   = [];
+	  	$authors      = $this->authorsmodel->get($search);
+	  	$author_ids   = [];
 
-			foreach ($authors as $row) {
-		  		array_push($author_ids, $row->id);
-		  	}
+		foreach ($authors as $row) {
+	  		array_push($author_ids, $row->id);
+	  	}
 
-		$this->db->where_in('author_id',$author_ids);
-		$pubs = $this->db->get('publication')->result();
-
-		foreach ($pubs as $pub) {
-			$pub->sub_theme = $this->subthemesmodel->find($pub->sub_thematic_area_id);
-		}
-
-		return $pubs;
-
+	  	return $author_ids;
 	}
 
-	public function get_theme_pubs($search){
+	public function get_subthemes($search){
 
 	  	$themes       = $this->healththemesmodel->get($search);
 	  	$subthemes_ids = [];
@@ -82,14 +74,7 @@ class Site_model extends CI_Model {
 
 		  endforeach;
 
-		$this->db->where_in('sub_thematic_area_id',$subthemes_ids);
-		$pubs = $this->db->get('publication')->result();
-
-		foreach ($pubs as $pub) {
-			$pub->sub_theme = $this->subthemesmodel->find($pub->sub_thematic_area_id);
-		}
-
-		return $pubs;
+		return $subthemes_ids;
 	}
 
 }

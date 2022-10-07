@@ -62,12 +62,10 @@ class Publications_model extends CI_Model
 		return $publication;
 	}
 
-	private function attach_related($publication)
+	public function attach_related($publication)
 	{
 
 		$publication->author    = $this->get_author($publication);
-		//$publication->geoareas = $this->geoareasmodel->find($publication->geographical_coverage_id);
-
 		$publication->sub_theme = $this->subthemesmodel->find($publication->sub_thematic_area_id);
 		$publication->theme = $publication->sub_theme->theme;
 		$publication->file_type = $this->get_filetype($publication->file_type_id);

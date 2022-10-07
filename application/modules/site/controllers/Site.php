@@ -138,8 +138,15 @@ class Site extends MX_Controller {
 	{
 		$data['module']    = $this->module;
 		flash_form();
+
+		$term    = $this->input->post('term');
+
+		$count   = $this->sitemodel->count($term);
+        $page    = ($this->uri->segment(3))?$this->uri->segment(3):0;
+        $perPage = 1;
 		
-		$data['publications'] = $this->sitemodel->search($this->input->post('term'));
+		$data['publications'] = $this->sitemodel->search($term,$perPage,$page);
+		$data['links']     = paginate('site/search/',$count, $perPage,$page);
 	
 		render_site('search',$data);
 	}

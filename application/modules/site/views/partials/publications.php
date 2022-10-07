@@ -16,5 +16,7 @@
 		   </div>
 		</div>
 	<?php endforeach; ?>
+
+	<?php echo $links; ?>
 	
 </div>
