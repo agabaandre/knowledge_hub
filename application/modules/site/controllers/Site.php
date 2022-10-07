@@ -144,7 +144,7 @@ class Site extends MX_Controller {
 		$count   = $this->sitemodel->count($term);
 		$segment = 3;
         $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
-        $perPage = 1;
+        $perPage = 10;
 		
 		$data['publications'] = $this->sitemodel->search($term,$perPage,$page);
 		$data['links']     = paginate('site/search',$count, $perPage,$segment);
