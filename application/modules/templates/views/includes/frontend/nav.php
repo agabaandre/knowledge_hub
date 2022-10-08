@@ -7,6 +7,16 @@
             <li class="nav-item active">
                 <a class="nav-link" href="<?php echo base_url() ?>site" style="color:#FFFFFF !important;">Home <span class=" sr-only"></span></a>
             </li>
+
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo base_url() ?>browse/healththemes" style="color:#FFFFFF !important;">Security Themes<span class=" sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo base_url() ?>browse/authors" style="color:#FFFFFF !important;">Authors<span class=" sr-only"></span></a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="<?php echo base_url() ?>browse/areas" style="color:#FFFFFF !important;">Geographical Regions<span class=" sr-only"></span></a>
+            </li>
         </ul>
     </div>
 </nav>
