@@ -152,5 +152,18 @@ class Site extends MX_Controller {
 		render_site('search',$data);
 	}
 
+    public function autocomplete(){
+
+    	$term = $_GET[ "term" ];
+    	$suggestions = [];
+
+    	$results = $this->sitemodel->search($term,500,0);
+
+    	foreach ($results as $result) {
+			$suggestions[] =  array( "label" => $result->title, "value" => $result->title);
+	    }
+
+		die(json_encode($suggestions));
+	}
 
 }

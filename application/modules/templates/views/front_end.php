@@ -3,7 +3,7 @@ date_default_timezone_set('Africa/Kampala');
 
 require_once("includes/header.php");
 require_once("includes/frontend/preloader.php");
-//require_once("includes/frontend/top_nav.php");
+require_once("includes/auto-complete.php");
 //require_once("includes/frontend/top_bar.php");
 
 ?>
@@ -18,10 +18,10 @@ require_once("includes/frontend/preloader.php");
         <h5 style="color:#C3A366; padding-bottom: 20px;">Global and Regional Policies, Guidance, Databases and Resources</h5>
 
         <!-- [ Main Content ] start -->
-        <?php echo form_open('site/search', 'class="row justify-content-center"'); ?>
+        <?php echo form_open('site/search', 'class="row justify-content-center search-form"'); ?>
         <div class="col-sm-7">
             <div class="form-group">
-                <input type="text" class="form-control" name="term" placeholder="Search here" value="<?php echo old('term'); ?>" style="padding:10px; font-size:18px; border-radius:7px;">
+                <input type="text" class="form-control autocomplete term" name="term" placeholder="Search here" value="<?php echo old('term'); ?>" style="padding:10px; font-size:18px; border-radius:7px;">
             </div>
         </div>
         <?php echo form_close(); ?>
@@ -39,6 +39,20 @@ require_once("includes/frontend/preloader.php");
 
 </div>
 <!-- [ Main Content ] end -->
+
+<script type="text/javascript">
+
+
+   $('.autocomplete').autocomplete({
+      source: "<?php echo base_url(); ?>site/autocomplete",
+        select: function( event, ui ) {
+            console.log(ui.item);
+            $('.term').val(ui.item.label);
+            $('.search-form').submit();
+        }
+    });
+
+</script>
 
 <!-- Required Js -->
 <script src="<?php echo base_url(); ?>assets/js/vendor-all.min.js"></script>
@@ -65,6 +79,8 @@ require_once("includes/frontend/preloader.php");
 </div>
 
 <script src="<?php echo base_url(); ?>assets/js/analytics.js"></script>
+
+
 </body>
 
 </html>
