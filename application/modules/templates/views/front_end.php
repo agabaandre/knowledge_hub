@@ -3,18 +3,21 @@ date_default_timezone_set('Africa/Kampala');
 
 require_once("includes/header.php");
 require_once("includes/frontend/preloader.php");
+
 require_once("includes/auto-complete.php");
 //require_once("includes/frontend/top_bar.php");
+require_once("includes/frontend/nav.php");
+
 
 ?>
 
 
-<div class="row p-4 pt-2 align-items-center header-bg" style=" background-image: url(<?php echo base_url(); ?>assets/images/map.png);">
+<div class="row p-4 pt-2 align-items-center header-bg " style=" background-image: url(<?php echo base_url(); ?>assets/images/map.png);">
     <div class="col-md-1 col-lg-1 col-sm-12 text-center">
-        <a href="<?php echo base_url() ?>"> <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="250px"></a>
+        <a class="nav-link" href="<?php echo base_url() ?>site" style="color:#FFFFFF !important;"> <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="250px"></a>
     </div>
-    <div class="col-md-11 col-lg-11 col-sm-12 text-center">
-        <h3 class="text-white">Africa CDC RCC Health Security Knowledge Hub</h3>
+    <div class="col-md-10 col-lg-10 col-sm-12 text-center">
+        <h3 class="text-white" style="font-size:25px;">Africa CDC RCC Health Security Knowledge Hub</h3>
         <h5 style="color:#C3A366; padding-bottom: 20px;">Global and Regional Policies, Guidance, Databases and Resources</h5>
 
         <!-- [ Main Content ] start -->
@@ -27,7 +30,11 @@ require_once("includes/auto-complete.php");
         <?php echo form_close(); ?>
 
     </div>
+    <div class="col-md-1 col-lg-1 col-sm-12 text-center">
+    </div>
+
 </div>
+
 
 <div class="container p-3" style="margin-top: -50px;">
 
