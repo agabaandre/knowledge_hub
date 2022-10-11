@@ -1,16 +1,16 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Site extends MX_Controller {
+class Records extends MX_Controller {
 
 	
 	public  function __construct(){
 		parent:: __construct();
 
-		$this->module = "site";
-		$this->title  = "Site";
+		$this->module = "records";
+		$this->title  = "Records";
 
-		$this->load->model('Site_model','sitemodel');
+		$this->load->model('Records_model','recordsmodel');
 		
 	}
 
@@ -87,7 +87,7 @@ class Site extends MX_Controller {
 
 		$data['subtheme']     = $this->subthemesmodel->find($subtheme_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
-		$data['links']     = paginate('site/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
+		$data['links']     = paginate('records/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
 
 		render_site('theme_publications',$data);
 	}
@@ -106,7 +106,7 @@ class Site extends MX_Controller {
 
 		$data['author']     = $this->authorsmodel->find($author_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
-		$data['links']     = paginate('site/author_pubs/'.$author_id,$count, $perPage,$segment);
+		$data['links']     = paginate('records/author_pubs/'.$author_id,$count, $perPage,$segment);
 
 		render_site('author_publications',$data);
 	}
@@ -125,7 +125,7 @@ class Site extends MX_Controller {
 
 		$data['region']     = $this->geoareasmodel->find($region_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
-		$data['links']     = paginate('site/areas_pubs/'.$region_id,$count, $perPage,$segment);
+		$data['links']     = paginate('records/areas_pubs/'.$region_id,$count, $perPage,$segment);
 	
 		render_site('area_publications',$data);
 	}
@@ -159,13 +159,13 @@ class Site extends MX_Controller {
 
 		$term    = $this->input->post('term');
 
-		$count   = $this->sitemodel->count($term);
+		$count   = $this->recordsmodel->count($term);
 		$segment = 3;
         $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
         $perPage = 10;
 		
-		$data['publications'] = $this->sitemodel->search($term,$perPage,$page);
-		$data['links']     = paginate('site/search',$count, $perPage,$segment);
+		$data['publications'] = $this->recordsmodel->search($term,$perPage,$page);
+		$data['links']     = paginate('records/search',$count, $perPage,$segment);
 	
 		render_site('search',$data);
 	}
@@ -175,7 +175,7 @@ class Site extends MX_Controller {
     	$term = $_GET[ "term" ];
     	$suggestions = [];
 
-    	$results = $this->sitemodel->search($term,10,0);
+    	$results = $this->recordsmodel->search($term,10,0);
 
     	foreach ($results as $result) {
 			$suggestions[] =  array( "label" => $result->title, "value" => $result->title);

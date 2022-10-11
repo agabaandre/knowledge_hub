@@ -5,7 +5,7 @@
     <div class="collapse navbar-collapse" id="navbarNavDropdown">
         <ul class="navbar-nav">
             <li class="nav-item active">
-                <a class="nav-link" href="<?php echo base_url() ?>site" style="color:#FFFFFF !important;">Home <span class=" sr-only"></span></a>
+                <a class="nav-link" href="<?php echo base_url() ?>records" style="color:#FFFFFF !important;">Home <span class=" sr-only"></span></a>
             </li>
 
             <li class="nav-item">

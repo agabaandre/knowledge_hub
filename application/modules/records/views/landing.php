@@ -54,7 +54,7 @@
     </div>
 
     <div class="card col-lg-12">
-      <a href="<?php echo base_url(); ?>site/index">
+      <a href="<?php echo base_url(); ?>records/index">
         <div class="card-body">
           <img src="<?php echo base_url(); ?>assets/images/icons/seo-report.png" width="50px">
           <h4 class="text-muted" style="font-size:17px;">

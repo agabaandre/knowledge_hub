@@ -14,14 +14,14 @@ require_once("includes/frontend/nav.php");
 
 <div class="row p-4 pt-2 align-items-center header-bg " style=" background-image: url(<?php echo base_url(); ?>assets/images/map.png);">
     <div class="col-md-1 col-lg-1 col-sm-12 text-center">
-        <a class="nav-link" href="<?php echo base_url() ?>site" style="color:#FFFFFF !important;"> <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="250px"></a>
+        <a class="nav-link" href="<?php echo base_url() ?>records" style="color:#FFFFFF !important;"> <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="250px"></a>
     </div>
     <div class="col-md-10 col-lg-10 col-sm-12 text-center">
         <h3 class="text-white" style="font-size:25px;">Africa CDC RCC Health Security Knowledge Hub</h3>
         <h5 style="color:#C3A366; padding-bottom: 20px;">Global and Regional Policies, Guidance, Databases and Resources</h5>
 
         <!-- [ Main Content ] start -->
-        <?php echo form_open('site/search', 'class="row justify-content-center search-form"'); ?>
+        <?php echo form_open('records/search', 'class="row justify-content-center search-form"'); ?>
         <div class="col-sm-7">
             <div class="form-group">
                 <input type="text" class="form-control autocomplete term" name="term" placeholder="Search here" value="<?php echo old('term'); ?>" style="padding:10px; font-size:18px; border-radius:7px;">
@@ -51,7 +51,7 @@ require_once("includes/frontend/nav.php");
 
 
    $('.autocomplete').autocomplete({
-        source: "<?php echo base_url(); ?>site/autocomplete",
+        source: "<?php echo base_url(); ?>records/autocomplete",
         minLength:3,
         select: function( event, ui ) {
             console.log(ui.item);
