@@ -40,7 +40,7 @@ class Site_model extends CI_Model {
 		$sub_themes = $this->get_subthemes($search);
 
 		$this->db->like('title',$term);
-		$this->db->or_like('description', $value);
+		$this->db->or_like('description', $term);
 
 		if(count($authors)>0)
 		$this->db->or_where_in('author_id ',array_values($authors));
