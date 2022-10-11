@@ -59,4 +59,4 @@ $route['browse/coverage']  = 'site/coverage';
 $route['browse/search']    = 'site/search';
 $route['browse/areas']     = 'site/areas';
 
-$route['admin']    = 'dashboard';
+$route['admin']    = 'auth';
