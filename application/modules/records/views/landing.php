@@ -58,7 +58,7 @@
         <div class="card-body">
           <img src="<?php echo base_url(); ?>assets/images/icons/seo-report.png" width="50px">
           <h4 class="text-muted" style="font-size:17px;">
-            Knowledge Hub Resources
+            Resources
           </h4>
         </div>
       </a>
