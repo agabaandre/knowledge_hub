@@ -67,7 +67,7 @@ class Site extends MX_Controller {
 
 		$filter = ['thematic_area_id'=>$theme_id];
 
-		$data['theme']        = $this->healththemesmodel->find($theme_id);
+		$data['theme']     = $this->healththemesmodel->find($theme_id);
 		$data['subthemes'] = $this->subthemesmodel->get($filter);
 
 		render_site('sub_themes',$data);
@@ -80,8 +80,14 @@ class Site extends MX_Controller {
 
 		$filter = ['sub_thematic_area_id'=>$subtheme_id];
 
+		$count   = $this->publicationsmodel->count($filter);
+		$segment = 4;
+        $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
+        $perPage = 10;
+
 		$data['subtheme']     = $this->subthemesmodel->find($subtheme_id);
-		$data['publications'] = $this->publicationsmodel->get($filter );
+		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
+		$data['links']     = paginate('site/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
 
 		render_site('theme_publications',$data);
 	}
@@ -93,8 +99,14 @@ class Site extends MX_Controller {
 
 		$filter = ['author_id'=>$author_id];
 
+		$count   = $this->publicationsmodel->count($filter);
+		$segment = 4;
+        $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
+        $perPage = 10;
+
 		$data['author']     = $this->authorsmodel->find($author_id);
-		$data['publications'] = $this->publicationsmodel->get($filter );
+		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
+		$data['links']     = paginate('site/author_pubs/'.$author_id,$count, $perPage,$segment);
 
 		render_site('author_publications',$data);
 	}
@@ -106,9 +118,15 @@ class Site extends MX_Controller {
 
 		$filter = ['geographical_coverage_id'=>$region_id];
 
-		$data['region']     = $this->geoareasmodel->find($region_id);
-		$data['publications'] = $this->publicationsmodel->get($filter);
+		$count   = $this->publicationsmodel->count($filter);
+		$segment = 4;
+        $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
+        $perPage = 10;
 
+		$data['region']     = $this->geoareasmodel->find($region_id);
+		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
+		$data['links']     = paginate('site/areas_pubs/'.$region_id,$count, $perPage,$segment);
+	
 		render_site('area_publications',$data);
 	}
 

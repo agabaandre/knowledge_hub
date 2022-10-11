@@ -14,21 +14,14 @@ class Publications_model extends CI_Model
 		$this->filetypes_table = "file_type";
 	}
 
-	public function get($filter = [])
+	public function get($filter = [],$limit=null,$start=0)
 	{
 
-		if (!empty($filter)) {
-
-			foreach ($filter as $key => $value) {
-
-				if ($key == "search_key") :
-					$this->db->like('description', $value);
-					$this->db->or_like('publication', $value);
-				else :
-					$this->db->like($key, $value);
-				endif;
-			}
+		if($limit){
+			$this->db->limit($limit,$start);
 		}
+
+		$this->applyFilter($filter);
 
 		$publications = $this->db->get($this->table)->result();
 
@@ -37,6 +30,28 @@ class Publications_model extends CI_Model
 		}
 
 		return $publications;
+	}
+
+	public function count($filter){	
+		$this->applyFilter($filter);
+		return count($this->db->get($this->table)->result());
+	}
+
+	public function applyFilter($filter){
+
+		if (!empty($filter)) {
+
+			foreach ($filter as $key => $value) {
+
+				if ($key == "search_key") :
+					$this->db->like('title', $value);
+					$this->db->or_like('description', $value);
+					$this->db->or_like('publication', $value);
+				else :
+					$this->db->like($key, $value);
+				endif;
+			}
+		}
 	}
 
 	public function get_by_subtheme($sub_theme_id)

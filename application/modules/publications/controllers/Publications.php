@@ -17,6 +17,7 @@ class Publications extends MX_Controller
 	{
 		$data['module'] = $this->module;
 		$data['title']  = "Publications List";
+		
 		$data['publications'] = $this->publicationsmodel->get();
 
 		render('list', $data);
