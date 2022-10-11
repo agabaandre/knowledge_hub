@@ -51,7 +51,8 @@ require_once("includes/frontend/nav.php");
 
 
    $('.autocomplete').autocomplete({
-      source: "<?php echo base_url(); ?>site/autocomplete",
+        source: "<?php echo base_url(); ?>site/autocomplete",
+        minLength:3,
         select: function( event, ui ) {
             console.log(ui.item);
             $('.term').val(ui.item.label);

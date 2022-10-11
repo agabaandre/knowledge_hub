@@ -20,8 +20,8 @@ class Site_model extends CI_Model {
 
 		$results = $this->db->get('publication')->result();
 
-		foreach ($results as $pub) {
-			$pub = $this->publicationsmodel->attach_related($pub);
+		foreach ($results as $key => $pub) {
+			$results[$key] = $this->publicationsmodel->attach_related($pub);
 		}
 		 
 		return $results;
@@ -39,8 +39,12 @@ class Site_model extends CI_Model {
 		$authors    = $this->get_authors($search);
 		$sub_themes = $this->get_subthemes($search);
 
-		$this->db->like('publication',$term);
+		$this->db->like('title',$term);
+
+		if(count($authors)>0)
 		$this->db->or_where_in('author_id ',array_values($authors));
+	
+	    if(count($sub_themes)>0)
 		$this->db->or_where_in('sub_thematic_area_id',array_values($sub_themes));
 	}
 

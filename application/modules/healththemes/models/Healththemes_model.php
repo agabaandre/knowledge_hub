@@ -12,7 +12,18 @@ class Healththemes_model extends CI_Model {
 
 	}
 
-	public function get(){
+	public function get($filter=[]){
+
+		if (!empty($filter)) {
+			foreach ($filter as $key => $value) {
+
+				if ($key == "search_key") :
+					$this->db->like('description', $value);
+				else :
+					$this->db->like($key, $value);
+				endif;
+			}
+		}
 
 		$healththemes = $this->db->get($this->table)->result();
 		return $healththemes;

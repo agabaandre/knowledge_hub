@@ -20,7 +20,6 @@ class Subthemes_model extends CI_Model {
 				
 				if($key == "search_key"):
 					$this->db->like('description',$value);
-					$this->db->or_like('publication',$value);
 				else:
 					$this->db->like($key,$value);
 				endif;

@@ -157,7 +157,7 @@ class Site extends MX_Controller {
     	$term = $_GET[ "term" ];
     	$suggestions = [];
 
-    	$results = $this->sitemodel->search($term,500,0);
+    	$results = $this->sitemodel->search($term,10,0);
 
     	foreach ($results as $result) {
 			$suggestions[] =  array( "label" => $result->title, "value" => $result->title);

@@ -11,7 +11,19 @@ class Authors_model extends CI_Model {
 
 	}
 
-	public function get(){
+	public function get($filter=[]){
+
+		if (!empty($filter)) {
+			foreach ($filter as $key => $value) {
+
+				if ($key == "search_key") :
+					$this->db->like('name', $value);
+				else :
+					$this->db->like($key, $value);
+				endif;
+			}
+		}
+
 
 		$authors = $this->db->get($this->table)->result();
 		return $authors;

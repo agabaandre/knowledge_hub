@@ -8,9 +8,11 @@
           	  	  <img src="<?php echo base_url();?>assets/images/icons/author.png" width="80px">
           	  </div>
           	 <div class="col-md-11">
-				<p><?php echo truncate($row->description,500); ?></p>
-				<strong><p class="text-primary"><?php echo $row->sub_theme->description; ?></p></strong>
-				<a href="<?php echo $row->publication; ?>" target="_blank"><small><?php echo $row->publication; ?></small></a>
+				<h5><?php echo truncate($row->title,500); ?></h5>
+				<p class="text-primary p-0"><?php echo $row->description; ?></p>
+				<p class="text-primary  p-0">Sub Theme: <?php echo $row->sub_theme->description; ?></p>
+				<a href="<?php echo $row->publication; ?>" target="_blank"><small>
+					<?php echo $row->publication; ?></small></a>
 		    </div>
 		 	</div>
 		   </div>
