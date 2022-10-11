@@ -44,9 +44,10 @@
     <div class="card col-lg-12">
       <a href="<?php echo base_url(); ?>">
         <div class="card-body">
-          <img src="<?php echo base_url(); ?>assets/images/icons/dashboards.png" width="60px">
-          <h4 class="text-black" style="font-size:17px;">
-            REGIONAL DASHBOARDS
+          <img src="<?php echo base_url(); ?>assets/images/icons/dashboards.png" width="50px">
+          <h4 class="text-muted" style="font-size:17px;">
+            Regional Collaborating Centres
+            Dashboards
           </h4>
         </div>
       </a>
@@ -55,9 +56,9 @@
     <div class="card col-lg-12">
       <a href="<?php echo base_url(); ?>site/index">
         <div class="card-body">
-          <img src="<?php echo base_url(); ?>assets/images/icons/seo-report.png" width="60px">
-          <h4 class="text-black" style="font-size:17px;">
-            GLOBAL AND REGIONAL POLICIES, GUIDANCE, DATABASES AND RESOURCES
+          <img src="<?php echo base_url(); ?>assets/images/icons/seo-report.png" width="50px">
+          <h4 class="text-muted" style="font-size:17px;">
+            Knowledge Hub Resources
           </h4>
         </div>
       </a>
