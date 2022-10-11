@@ -24,7 +24,7 @@ class Auth extends MX_Controller
       $_SESSION['user'] = (object)$adata;
       redirect('dashboard');
     } else {
-      redirect('auth');
+      redirect('auth/index');
     }
   }
 

@@ -4,17 +4,17 @@
       <div class="col-md-4">
         <div class="card statustic-card">
           <div class="card-header borderless pb-0">
-            <h5>Publication</h5>
+            <h5>Publications</h5>
           </div>
           <div class="card-body text-center">
-            <span class="d-block text-c-blue f-36">56</span>
+            <span class="d-block text-c-blue f-36"><?php echo $publications; ?></span>
             <p class="m-b-0">Total</p>
             <div class="progress">
               <div class="progress-bar bg-c-blue" style="width:56%"></div>
             </div>
           </div>
           <div class="card-footer bg-c-blue border-0">
-            <h6 class="text-white m-b-0">Inactive: 22</h6>
+            <h6 class="text-white m-b-0">Inactive: <?php echo $inactive_publications; ?></h6>
           </div>
         </div>
       </div>
@@ -24,14 +24,14 @@
             <h5>Authors</h5>
           </div>
           <div class="card-body text-center">
-            <span class="d-block text-c-green f-36">85</span>
+            <span class="d-block text-c-green f-36"><?php echo $authors; ?></span>
             <p class="m-b-0">Total</p>
             <div class="progress">
               <div class="progress-bar bg-c-green" style="width:85%"></div>
             </div>
           </div>
           <div class="card-footer bg-c-green border-0">
-            <h6 class="text-white m-b-0">Closed Today: 85</h6>
+            <h6 class="text-white m-b-0">New Authors: <?php echo $new_authors; ?></h6>
           </div>
         </div>
       </div>
@@ -41,14 +41,14 @@
             <h5>Peformance Indicators</h5>
           </div>
           <div class="card-body text-center">
-            <span class="d-block text-c-purple f-36">42</span>
+            <span class="d-block text-c-purple f-36"><?php echo $indicators; ?></span>
             <p class="m-b-0">Total</p>
             <div class="progress">
               <div style="width:42%; "></div>
             </div>
           </div>
           <div class="card-footer bg-c-red border-0">
-            <h6 class="text-white m-b-0">Unanswered: 42</h6>
+            <h6 class="text-white m-b-0">Approved Indicators: <?php echo $approved_indicators; ?></h6>
           </div>
         </div>
       </div>
