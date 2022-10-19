@@ -25,7 +25,7 @@ class Auth extends MX_Controller
       if ($postdata['route'] == 'rcc/dashboards') {
         redirect('rccs');
       } elseif ($postdata['route'] == 'admin/') {
-        redirect('dashboards');
+        redirect('dashboard');
       }
     } else {
       redirect('auth');
@@ -37,7 +37,13 @@ class Auth extends MX_Controller
   {
     session_unset();
     session_destroy();
-    redirect("auth");
+    redirect("admin");
+  }
+  public function logout_rcc()
+  {
+    session_unset();
+    session_destroy();
+    redirect("rcc/dashboards");
   }
   public function getUserByid($id)
   {
