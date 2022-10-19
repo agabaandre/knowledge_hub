@@ -43,7 +43,7 @@ require_once("includes/header.php");
 <!-- [ Pre-loader ] End -->
 
 <!-- [ navigation menu ] start -->
-<nav class="pcoded-navbar theme-horizontal navbar-blue">
+<nav class="pcoded-navbar theme-horizontal">
     <div class="navbar-wrapper container">
         <div class="navbar-brand header-logo">
             <a href="<?php echo base_url() ?>rccs" class="b-brand">
