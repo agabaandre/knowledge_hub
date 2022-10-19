@@ -9,8 +9,8 @@ class Rccs extends MX_Controller
 	{
 		parent::__construct();
 
-		$this->dashmodule = "dashboard";
-		$this->load->model("dashboard_mdl", 'dash_mdl');
+		$this->dashmodule = "rccs";
+		$this->load->model("Rccs_mdl", 'rccs_mdl');
 	}
 
 	public function index()
