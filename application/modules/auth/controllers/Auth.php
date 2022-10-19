@@ -22,7 +22,11 @@ class Auth extends MX_Controller
     if (md5($postdata['password']) == $adata['password']) {
       unset($adata['password']);
       $_SESSION['user'] = (object)$adata;
-      redirect('dashboard');
+      if ($postdata['route'] == 'rcc/dashboards') {
+        redirect('rccs');
+      } elseif ($postdata['route'] == 'admin/') {
+        redirect('dashboards');
+      }
     } else {
       redirect('auth');
     }

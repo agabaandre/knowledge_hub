@@ -43,6 +43,7 @@
                 <span class="input-group-text"><i class="feather icon-lock"></i></span>
               </div>
               <input type="password" name="password" class="form-control" placeholder="Password">
+              <input type="hidden" name="route" class="form-control" value="<?php echo $this->uri->segment(1) ?>/<?php echo $this->uri->segment(2) ?>" placeholder="Password">
             </div>
 
             <div class="form-group text-left mt-2">

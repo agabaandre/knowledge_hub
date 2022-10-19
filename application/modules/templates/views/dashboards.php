@@ -46,7 +46,7 @@ require_once("includes/header.php");
 <nav class="pcoded-navbar theme-horizontal navbar-blue">
     <div class="navbar-wrapper container">
         <div class="navbar-brand header-logo">
-            <a href="index.html" class="b-brand">
+            <a href="<?php echo base_url() ?>rccs" class="b-brand">
                 <!-- <div class="b-bg">
                         <i class="fas fa-bolt"></i>
                     </div>
@@ -396,13 +396,13 @@ require_once("includes/header.php");
     <div class="container">
         <div class="m-header">
             <a class="mobile-menu" id="mobile-collapse1" href="#!"><span></span></a>
-            <a href="index.html" class="b-brand">
+            <a href="<?php echo base_url() ?>rccs" class="b-brand">
                 <!-- <div class="b-bg">
                         <i class="fas fa-bolt"></i>
                     </div>
                     <span class="b-title">Flash Able</span> -->
-                <img src="<?php echo base_url(); ?>assets/images/logo-dark.svg" alt="" class="logo images">
-                <img src="<?php echo base_url(); ?>assets/images/logo-icon-dark.svg" alt="" class="logo-thumb images">
+                <img src=" <?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
+                <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo-thumb images">
             </a>
         </div>
         <a class="mobile-menu" id="mobile-header" href="#!">
