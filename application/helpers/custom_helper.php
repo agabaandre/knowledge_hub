@@ -21,6 +21,22 @@ if (!function_exists('render')) {
         echo Modules::run($template_method, $data);
     }
 }
+//render with navigation
+if (!function_exists('render_dashboard')) {
+
+    function render($view, $data = [], $plain = false)
+    {
+
+        $data['view'] = $view;
+
+        //plain renders without navigation
+        $template_method = ($plain) ? 'templates/dashboards' : 'templates/main';
+
+        $data['settings'] = settings();
+
+        echo Modules::run($template_method, $data);
+    }
+}
 
 
 
