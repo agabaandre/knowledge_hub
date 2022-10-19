@@ -24,7 +24,7 @@ if (!function_exists('render')) {
 //render with navigation
 if (!function_exists('render_dashboard')) {
 
-    function render($view, $data = [], $plain = false)
+    function render_dashboard($view, $data = [], $plain = false)
     {
 
         $data['view'] = $view;

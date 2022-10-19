@@ -19,7 +19,7 @@ class Dashboard extends MX_Controller
 		$data['title'] = "Main Dashboard";
 		$data['uptitle'] = "Main Dashboard";
 
-		render('home', $data);
+		render_dashboards('home', $data);
 	}
 	public function dashboardData()
 	{
