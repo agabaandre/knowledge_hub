@@ -9,13 +9,13 @@ class Rccs extends MX_Controller
 	{
 		parent::__construct();
 
-		$this->dashmodule = "rccs";
+		$this->module = "rccs";
 		$this->load->model("Rccs_mdl", 'rccs_mdl');
 	}
 
 	public function index()
 	{
-		$data['module'] = $this->dashmodule;
+		$data['module'] = $this->module;
 		$data['title'] = "RRC Dashboards";
 		$data['uptitle'] = "RCC Dashboards";
 
