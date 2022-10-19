@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Dashboard extends MX_Controller
+class Rccs extends MX_Controller
 {
 
 
@@ -16,10 +16,10 @@ class Dashboard extends MX_Controller
 	public function index()
 	{
 		$data['module'] = $this->dashmodule;
-		$data['title'] = "Main Dashboard";
-		$data['uptitle'] = "Main Dashboard";
+		$data['title'] = "RRC Dashboards";
+		$data['uptitle'] = "RCC Dashboards";
 
-		render_dashboards('home', $data);
+		render_dashboard('home', $data);
 	}
 	public function dashboardData()
 	{

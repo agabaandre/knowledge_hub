@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Dashboard_mdl extends CI_Model
+class Rccs_mdl extends CI_Model
 {
 
 
