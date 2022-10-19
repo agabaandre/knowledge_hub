@@ -24,7 +24,7 @@ class Rccs extends MX_Controller
 	public function dashboardData()
 	{
 
-		$data = $this->dash_mdl->getData();
+		$data = $this->rcss_mdl->getData();
 		echo json_encode($data);
 	}
 }
