@@ -30,7 +30,7 @@ if (!function_exists('render_dashboard')) {
         $data['view'] = $view;
 
         //plain renders without navigation
-        $template_method = ($plain) ? 'templates/dashboards' : 'templates/main';
+        $template_method = 'templates/dashboards';
 
         $data['settings'] = settings();
 
