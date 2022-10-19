@@ -15,12 +15,13 @@ class Rccs extends MX_Controller
 
 	public function index()
 	{
-		$data['module'] = $this->module;
-		$data['title'] = "RRC Dashboards";
+		$data['module']  = $this->module;
+		$data['title']   = "RRC Dashboards";
 		$data['uptitle'] = "RCC Dashboards";
 
 		render_dashboard('home', $data);
 	}
+	
 	public function dashboardData()
 	{
 
