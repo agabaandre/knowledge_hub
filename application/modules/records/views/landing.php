@@ -42,7 +42,7 @@
   <div class="col-lg-5">
 
     <div class="card col-lg-12">
-      <a href="<?php echo base_url(); ?>">
+      <a href="<?php echo base_url(); ?>rcc/dashboards">
         <div class="card-body">
           <img src="<?php echo base_url(); ?>assets/images/icons/dashboards.png" width="50px">
           <h4 class="text-muted" style="font-size:17px;">

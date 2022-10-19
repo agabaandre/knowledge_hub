@@ -60,3 +60,4 @@ $route['browse/search']    = 'records/search';
 $route['browse/areas']     = 'records/areas';
 
 $route['admin']    = 'auth';
+$route['rcc/dashboards']    = 'auth';
