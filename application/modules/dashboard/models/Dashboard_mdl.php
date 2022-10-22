@@ -21,6 +21,8 @@ class Dashboard_mdl extends CI_Model
         $data['thematic_areas'] = $this->thematic_areas();
         $data['subthemes'] = $this->subtheme_areas();
         $data['publication_areas'] = $this->publication_areas();
+        $data['rccs'] = $this->rccs();
+        $data['countries'] = $this->countries();
 
         return $data;
     }
@@ -79,6 +81,18 @@ class Dashboard_mdl extends CI_Model
     {
 
         $db = $this->db->get('geographical_coverage');
+        return  $db->num_rows();
+    }
+    public function countries()
+    {
+
+        $db = $this->db->get('country');
+        return  $db->num_rows();
+    }
+    public function rccs()
+    {
+
+        $db = $this->db->get('regions');
         return  $db->num_rows();
     }
 }

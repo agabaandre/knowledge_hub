@@ -14,7 +14,7 @@
             </div>
           </div>
           <div class="card-footer border-0">
-            <h6 class="text-black m-b-0">Inactive: <?php echo $tabs['publications'] - $tabs['active_pubs']; ?></h6>
+            <h6 class="text-muted m-b-0">Inactive: <?php echo $tabs['publications'] - $tabs['active_pubs']; ?></h6>
           </div>
         </div>
       </div>
@@ -32,7 +32,7 @@
           </div>
           <div class="card-footer border-0">
 
-            <h6 class="text-black m-b-0">Organisation Authors: <?php echo $tabs['org_authors']; ?></h6>
+            <h6 class="text-muted m-b-0">Organisation Authors: <?php echo $tabs['org_authors']; ?></h6>
           </div>
         </div>
       </div>
@@ -49,7 +49,7 @@
             </div>
           </div>
           <div class="card-footer  border-0">
-            <h6 class="text-black m-b-0">Subject Areas: <?php echo $tabs['subject_areas']; ?></h6>
+            <h6 class="text-muted m-b-0">Subject Areas: <?php echo $tabs['subject_areas']; ?></h6>
           </div>
         </div>
       </div>
@@ -125,11 +125,11 @@
                   <p class="m-b-0">Data Geographical Coverage</p>
                 </div>
                 <div class="col text-right">
-                  <p class="m-b-0 text-c-yellow"><i class="fas fa-long-arrow-alt-up m-r-10"></i>64%</p>
+
                 </div>
               </div>
               <div class="progress">
-                <div class="progress-bar progress-c-yellow" style="width:65%"></div>
+                <div class="progress-bar progress-c-yellow" style="width:100%"></div>
               </div>
             </div>
           </div>
@@ -137,22 +137,22 @@
             <div class="pp-cont">
               <div class="row align-items-center m-b-20">
                 <div class="col-auto">
-                  <i class="fas fa-dollar-sign f-24 text-mute"></i>
+                  <i class="fa -solid fa-flag fa-24 text-muted "></i>
                 </div>
                 <div class="col text-right">
-                  <h2 class="m-b-0 text-c-green">41M</h2>
+                  <h2 class="m-b-0 text-c-green"><?php echo $tabs['countries']; ?></h2>
                 </div>
               </div>
               <div class="row align-items-center m-b-15">
                 <div class="col-auto">
-                  <p class="m-b-0">Conversion Rate</p>
+                  <p class="m-b-0">Countries</p>
                 </div>
                 <div class="col text-right">
-                  <p class="m-b-0 text-c-green"><i class="fas fa-long-arrow-alt-up m-r-10"></i>54%</p>
+                  <p class="m-b-0 text-c-green"><?php echo $tabs['rccs']; ?> RCCS</p>
                 </div>
               </div>
               <div class="progress">
-                <div class="progress-bar progress-c-green" style="width:35%"></div>
+                <div class="progress-bar progress-c-green" style="width:100%"></div>
               </div>
             </div>
           </div>
