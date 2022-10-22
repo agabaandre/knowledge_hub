@@ -2,7 +2,7 @@
   <nav class="pcoded-navbar menupos-fixed menu-light">
       <div class="navbar-wrapper">
           <div class="navbar-brand header-logo">
-              <a href="<?php echo base_url() ?>" class="b-brand" style="filter: brightness(0) invert(1);">
+              <a href="<?php echo base_url() ?>dashboard" class="b-brand" style="filter: brightness(0) invert(1);">
                   <img src=" <?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
                   <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo-thumb images">
               </a>
@@ -14,7 +14,7 @@
                       <label>Navigation</label>
                   </li>
                   <li class="nav-item active">
-                      <a href="<?php echo base_url() ?>admin" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
+                      <a href="<?php echo base_url() ?>dashboard" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
                   </li>
                   <li class="nav-item pcoded-menu-caption">
                       <label>Publish</label>
