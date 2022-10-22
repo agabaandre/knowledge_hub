@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class Rccs_mdl extends CI_Model
+class Data_mdl extends CI_Model
 {
 
 
@@ -10,10 +10,10 @@ class Rccs_mdl extends CI_Model
 
         parent::__Construct();
     }
-
-    public function countries_data()
+    public function getData()
     {
 
-    }
+        //
 
+    }
 }
