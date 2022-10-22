@@ -17,18 +17,28 @@ class Auth extends MX_Controller
   public function login()
   {
     $postdata = $this->input->post();
+    $password = $this->input->post('password');
+    $hash = $this->argonhash->make($password);
     $data = $this->auth_mdl->login($postdata);
+    $route = $this->input->post('route');
     $adata = (array)$data;
-    if (md5($postdata['password']) == $adata['password']) {
-      unset($adata['password']);
+    $hash = $this->argonhash->make($password);
+
+    $auth = ($this->argonhash->check($password, $adata['password']));
+    unset($adata['password']);
+    //print_r($route);
+
+    if ($auth) {
       $_SESSION['user'] = (object)$adata;
-      if ($postdata['route'] == 'rcc/dashboards') {
+
+      if (($postdata['route'] == 'rcc/dashboards') ||  ($postdata['route'] == 'auth/')) {
         redirect('rccs');
       } elseif ($postdata['route'] == 'admin/') {
+
         redirect('dashboard');
+      } else {
+        redirect('auth');
       }
-    } else {
-      redirect('auth');
     }
   }
 

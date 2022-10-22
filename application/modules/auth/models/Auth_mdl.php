@@ -11,11 +11,9 @@ class Auth_mdl extends CI_Model
 	public function login($postdata)
 	{
 		$username = $postdata['username'];
-		$password = md5($postdata['password']);
 		if (!filter_var($username, FILTER_VALIDATE_EMAIL)) {
 			//login using username
 			$this->db->where("username", $username);
-			$this->db->where("password", $password);
 			$this->db->where("status", 1);
 			$this->db->join('user_groups', 'user_groups.id=user.role');
 			$qry = $this->db->get($this->table);
@@ -27,7 +25,6 @@ class Auth_mdl extends CI_Model
 		} else {
 			//login using email
 			$this->db->where("email", $username);
-			$this->db->where("password", $password);
 			$this->db->where("status", 1);
 			$this->db->join('user_groups', 'user_groups.id=user.role');
 			$qry = $this->db->get($this->table);
