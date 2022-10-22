@@ -34,13 +34,7 @@ require_once("includes/header.php");
 </style>
 
 
-<!-- [ Pre-loader ] start -->
-<div class="loader-bg">
-    <div class="loader-track">
-        <div class="loader-fill"></div>
-    </div>
-</div>
-<!-- [ Pre-loader ] End -->
+
 
 <nav class="navbar navbar-expand-lg navbar-dark bg-success">
   <span class="navbar-brand" style="background-color: transparent;">
@@ -57,6 +51,9 @@ require_once("includes/header.php");
     </div>
   </div>
 </nav>
+<!-- [ navigation menu ] end -->
+
+
 <!-- [ Main Content ] end -->
 <section style="padding: 20px 50px;">
 <div class="card">
