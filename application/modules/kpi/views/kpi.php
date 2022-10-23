@@ -27,7 +27,6 @@
                                         <th>KPI ID</th>
                                         <th>Indicator</th>
                                         <th>Subject Area</th>
-
                                         <th>Description</th>
                                         <th>Data Sources</th>
                                         <th>Computation</th>
@@ -42,8 +41,8 @@
                                             <td><?php echo $i ?></td>
                                             <td style="width:10%;"><input type="text" class="form-control" name="id[]" value="<?php echo $element->id; ?>" style="border:#000 none; width:70%;" readonly></td>
                                             <td><?php echo  $element->name; ?></td>
-                                            <input type="hidden" name="subject_area[]" value="<?php echo $element->subject_area; ?>">
-                                            <td style="width:20%;"><textarea name="short_name[]" rows=4 class="form-control" style="border:#000  none; width:90%;"><?php echo $element->short_name; ?></textarea></td>
+                                            <td><input type="text" name="subject_area[]" class="form-control" style="border:#000 none; width:70%;" value="<?php echo $element->subject_area; ?>">
+                                            </td>
                                             <td style="width:40%;"><textarea name="description[]" rows=4 class="form-control" style="border:#000  none; width:95%;"><?php echo $element->description; ?></textarea></td>
                                             <td style="width:15%;"><textarea name="data_sources[]" rows=4 class="form-control" style="border:#000  none; width:80%;"><?php echo $element->data_source; ?></textarea></td>
                                             <td style="width:25%;"><textarea name="computation[]" rows=5 class="form-control" style="border:#000  none; width:82%;"><?php echo $element->computation; ?></textarea></td>
