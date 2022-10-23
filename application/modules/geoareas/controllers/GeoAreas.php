@@ -79,7 +79,7 @@ class GeoAreas extends MX_Controller
 
 		if (!empty($_GET['region_data'])) {
 
-			$region = urldecode($_GET["region_data"]);
+			$dist = urldecode($_GET["region_data"]);
 
 			$distdata = array();
 			$distdata = explode("_", $dist);
