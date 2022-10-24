@@ -3,70 +3,70 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h4 class="modal-title" id="staticBackdropLabel">Add KPI</h4>
+                <h4 class="modal-title" id="staticBackdropLabel">KPI DATA</h4>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
-                <form action="<?php echo base_url(); ?>kpi/addkpi" enctype="multipart/form-data" method="post" accept-charset="utf-8">
+                <form action="<?php echo base_url(); ?>kpi/data" enctype="multipart/form-data" method="post" accept-charset="utf-8">
                     <div class="col-md-12 ml-auto">
                         <div class="form-group row">
                             <label for="shortname" class="col-sm-3 col-form-label">
-                                Short Name</label>
+                                Period</label>
                             <div class="col-sm-9">
-                                <input type="text" name="short_name" placeholder="KPI Short Name" class=" form-control">
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-form-label">
-                                Indicator description</label>
-                            <div class="col-sm-9">
-                                <textarea name="description" col="10" rows="5" class="form-control" id=""></textarea>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="frequency" class="col-sm-3 col-form-label">
-                                Frequency</label>
-                            <div class="col-sm-9">
-                                <select name="frequency" class="form-control codeigniterselect">
-                                    <option value="Annualy" selected="selected">Annualy</option>
-                                    <option value="Monthly" selected="selected">Monthly</option>
-                                    <option value="Quarterly" selected="selected">Quartery</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-form-label">
-                                Computation Method</label>
-                            <div class="col-sm-9">
-                                <textarea name="computation" col="6" rows="3" class="form-control" id=""></textarea>
-                            </div>
-                        </div>
-
-
-
-                        <div class="form-group row">
-                            <label for="description" class="col-sm-3 col-form-label">
-                                Data Sources</label>
-                            <div class="col-sm-9">
-                                <textarea name="data_sources" class="form-control" id=""></textarea>
+                                <input type="date" name="short_name" placeholder="Period" class=" ">
                             </div>
                         </div>
                         <div class="form-group row">
                             <label for="subject" class="col-sm-3 col-form-label">
-                                Subject Area</label>
+                                KPI</label>
                             <div class="col-sm-9">
                                 <select name="subject_area" class="form-control codeigniterselect">
-                                    <?php $elements = Modules::run('Kpi/get_kpi');
+                                    <?php $elements = Modules::run('Kpi/k');
                                     foreach ($elements as $element) : ?>
                                         <option value="<?php echo $element->id ?>" selected="selected"><?php echo $element->name ?></option>
                                     <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <label for="subject" class="col-sm-3 col-form-label">
+                                Country</label>
+                            <div class="col-sm-9">
+                                <select name="subject_area" class="form-control codeigniterselect">
+                                    <?php $elements = Modules::run('Kpi/subjectData');
+                                    foreach ($elements as $element) : ?>
+                                        <option value="<?php echo $element->id ?>" selected="selected"><?php echo $element->name ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="subject" class="col-sm-3 col-form-label">
+                                KPI</label>
+                            <div class="col-sm-9">
+                                <select name="subject_area" class="form-control codeigniterselect">
+                                    <?php $elements = Modules::run('Kpi/subjectData');
+                                    foreach ($elements as $element) : ?>
+                                        <option value="<?php echo $element->id ?>" selected="selected"><?php echo $element->name ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label for="description" class="col-sm-3 col-form-label">
+                                Value</label>
+                            <div class="col-sm-9">
+                                <input name="value" type="text" col="6" rows="3" class="form-control" id="">
+                            </div>
+                        </div>
+
+
+
+
+
 
                     </div>
                     <!---End sub2-->

@@ -39,6 +39,8 @@ class Auth extends MX_Controller
       } else {
         redirect('auth');
       }
+    } else {
+      redirect('auth');
     }
   }
 

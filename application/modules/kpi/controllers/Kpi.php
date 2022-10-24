@@ -27,4 +27,22 @@ class Kpi extends MX_Controller
 
 		render('kpi', $data);
 	}
+	public function data($id = FALSE)
+	{
+		$data['module']  = $this->module;
+		$data['title']   = "Add Data";
+		$data['uptitle'] = "Add Data";
+		$insert = $this->input->post();
+		$data['elements'] = $this->kpi_mdl->kpi_data();
+		$this->session->set_flashdata('message', 'Added');
+		$data['title']   = 'Add KPI Data';
+		$data['module']  = $this->module;
+
+		render('kpi_data', $data);
+	}
+	public function get_kpi($id = FALSE)
+	{
+		$data['elements'] = $this->kpi_mdl->create_kpi();
+		print_r($data);
+	}
 }

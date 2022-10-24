@@ -32,7 +32,7 @@
                       <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-chart-line"></i></span><span class="pcoded-mtext"></span>Performance Indicators</a>
                       <ul class="pcoded-submenu">
                           <li class=""><a href="<?php echo base_url(); ?>kpi" class="">Create and Manage KPIs</a></li>
-                          <li class=""><a href="<?php echo base_url(); ?>kpi/form" class="">KPI Data</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>kpi/data" class="">KPI Data</a></li>
                       </ul>
 
                   </li>
