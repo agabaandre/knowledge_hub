@@ -39,7 +39,7 @@
     <script src="<?php echo base_url() ?>node_modules/highcharts/modules/exporting.js"></script>
     <script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
     <script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
-<<<<<<< HEAD
+
     <style>
         .select2-close-mask {
             z-index: 2099;
@@ -49,28 +49,28 @@
             z-index: 3051;
         }
     </style>
-=======
 
     <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/blockui.min.js"></script>
-    
+
     <script type="text/javascript">
-        function showLoader(){
-            try{
-            $.blockUI({ message: '<h1><img src="<?php echo base_url(); ?>assets/images/loader.gif" /> Please wait...</h1>' });
-           }catch(err){
+        function showLoader() {
+            try {
+                $.blockUI({
+                    message: '<h1><img src="<?php echo base_url(); ?>assets/images/loader.gif" /> Please wait...</h1>'
+                });
+            } catch (err) {
                 console.log(err);
-           }
+            }
         }
 
-        function hideLoader(){
-            try{
-            $.unblockUI();
-            }catch(err){
+        function hideLoader() {
+            try {
+                $.unblockUI();
+            } catch (err) {
                 console.log(err);
-           }
+            }
         }
     </script>
->>>>>>> 889f410cf8027ef5803c6cbe57cfa855f8e8eabf
 </head>
 
 <body class="" style="overflow-x: hidden;">
