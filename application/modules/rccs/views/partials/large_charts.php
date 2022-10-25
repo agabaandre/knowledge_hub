@@ -19,8 +19,9 @@
             <h5>Line [ Basic ] Chart</h5>
         </div>
         <div class="card-body">
-            <div id="chart-highchart-line1" style="width: 100%; height: 350px;"></div>
+            <div id="countries_summary" style="width: 100%; height: 350px;"></div>
         </div>
     </div>
 </div>
 </div>
+

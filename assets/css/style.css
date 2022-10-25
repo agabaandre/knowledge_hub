@@ -16581,3 +16581,9 @@ div.code-toolbar>.toolbar span:hover {
 .text-cdc-gold {
     color: #C3A366;
 }
+
+.flexed{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

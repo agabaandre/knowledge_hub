@@ -45,9 +45,9 @@ require_once("includes/header.php");
   </button>
   <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
     <div class="navbar-nav">
-      <a class="nav-item nav-link active" href="#">HOME</a>
-      <a class="nav-item nav-link" href="#">Population</a>
-      <a class="nav-item nav-link" href="#">Population</a>
+      <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rcc">HOME</a>
+      <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">KPI Wise</a>
+      <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">Country Wise</a>
     </div>
   </div>
 </nav>
@@ -55,7 +55,7 @@ require_once("includes/header.php");
 
 
 <!-- [ Main Content ] end -->
-<section style="padding: 20px 50px;">
+<section style="padding: 20px 1%;">
 <div class="card">
   <div class="card-body">
 
@@ -74,8 +74,16 @@ require_once("includes/header.php");
 <!-- prism Js -->
 <script src="<?php echo base_url(); ?>assets/plugins/prism/js/prism.min.js"></script>
 <script src="<?php echo base_url(); ?>assets/js/horizontal-menu.js"></script>
+<script src="<?php echo base_url(); ?>assets/plugins/select2/select2.full.min.js"></script>
+
+<!-- highchart chart -->
+<script src="<?php echo base_url(); ?>assets/plugins/chart-highchart/js/highcharts.js"></script>
+
 <script type="text/javascript">
     (function() {
+
+        $('.select2').select2();
+
         if ($('#layout-sidenav').hasClass('sidenav-horizontal') || window.layoutHelpers.isSmallScreen()) {
             return;
         }
@@ -125,6 +133,7 @@ require_once("includes/header.php");
         </ul>
     </div>
 </div>
+
 
 <script src="<?php echo base_url(); ?>assets/js/analytics.js"></script>
 
