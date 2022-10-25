@@ -2,6 +2,26 @@
 <script src="<?php echo base_url() ?>assets/js/vendor-all.min.js"></script>
 <script src="<?php echo base_url() ?>assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 <script src="<?php echo base_url() ?>assets/js/pcoded.min.js"></script>
+<script src="<?php echo base_url() ?>assets/plugins/material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+
+<!-- material datetimepicker Js -->
+<script src="http://momentjs.com/downloads/moment-with-locales.min.js"></script>
+<script src="<?php echo base_url() ?>assets/plugins/material-datetimepicker/js/bootstrap-material-datetimepicker.js"></script>
+<!-- minicolors Js -->
+<script src="<?php echo base_url() ?>assets/plugins/mini-color/js/jquery.minicolors.min.js"></script>
+
+<!-- select2 Js -->
+<script src="<?php echo base_url() ?>assets/plugins/select2/js/select2.full.min.js"></script>
+
+<!-- multi-select Js -->
+<script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.quicksearch.js"></script>
+<script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.multi-select.js"></script>
+
+<!-- form-select-custom Js -->
+<script src="<?php echo base_url() ?>assets/js/pages/form-select-custom.js"></script>
+
+<!-- form-picker-custom Js -->
+<script src="<?php echo base_url() ?>assets/js/pages/form-picker-custom.js"></script>
 
 <!-- prism Js -->
 <script src="<?php echo base_url() ?>assets/plugins/prism/js/prism.min.js"></script>
@@ -113,6 +133,7 @@
         });
         return this;
     };
+    $('.select2').select2();
 </script>
 
 <!-- <div class="footer-fab">

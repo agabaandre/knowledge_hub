@@ -67,4 +67,9 @@ class Geoareas_model extends CI_Model
 		$this->db->where('id', $id);
 		$this->db->delete($this->table);
 	}
+	public function get_countries()
+	{
+		$this->db->order_by('name', 'ASC');
+		return $this->db->get('country')->result();
+	}
 }

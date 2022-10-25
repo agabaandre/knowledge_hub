@@ -10,7 +10,7 @@
                         <!-- Button trigger modal -->
                         <div class="d-flex content-justify-right">
                             <button type="button" class="btn btn-success " data-toggle="modal" data-target="#staticBackdrop" style="margin-bottom:3px; width:150px;"><i class="fa fa-plus">
-                                </i>Add KPI
+                                </i>Add KPI DATA
                             </button>
 
 
@@ -38,7 +38,7 @@
                                             <td><?php echo $i ?></td>
                                             <td><?php echo  $element->period; ?></td>
                                             <td><?php echo $element->country->name; ?></td>
-                                            <td><?php echo $element->indicator->name; ?></td>
+                                            <td><?php echo $element->kpi->name; ?></td>
                                             <td><?php echo $element->value; ?></td>
                                         </tr>
                                     <?php
