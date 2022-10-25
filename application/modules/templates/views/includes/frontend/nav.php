@@ -1,4 +1,7 @@
-<nav class="navbar navbar-expand-lg navbar-light sticky-top" style="background:#348f41; border-bottom: 1px solid #FFF; ">
+<nav class="navbar navbar-expand-lg navbar-light sticky-top" style="background:#348f41; border-bottom: 1px solid #FFF;   -webkit-transition:height 200ms ease-in;
+    -moz-transition:height 200ms ease-in;
+    -o-transition:height 200ms ease-in;
+    transition:height 200ms ease-in; ">
     <button class="navbar-toggler bg-light" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>

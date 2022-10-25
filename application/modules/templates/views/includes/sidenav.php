@@ -2,7 +2,7 @@
   <nav class="pcoded-navbar menupos-fixed menu-light">
       <div class="navbar-wrapper">
           <div class="navbar-brand header-logo">
-              <a href="<?php echo base_url() ?>" class="b-brand" style="filter: brightness(0) invert(1);">
+              <a href="<?php echo base_url() ?>dashboard" class="b-brand" style="filter: brightness(0) invert(1);">
                   <img src=" <?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo images">
                   <img src="<?php echo base_url() ?>assets/images/cdc_square.png" alt="" class="logo-thumb images">
               </a>
@@ -14,7 +14,7 @@
                       <label>Navigation</label>
                   </li>
                   <li class="nav-item active">
-                      <a href="<?php echo base_url() ?>admin" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
+                      <a href="<?php echo base_url() ?>dashboard" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
                   </li>
                   <li class="nav-item pcoded-menu-caption">
                       <label>Publish</label>
@@ -31,9 +31,8 @@
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
                       <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-chart-line"></i></span><span class="pcoded-mtext"></span>Performance Indicators</a>
                       <ul class="pcoded-submenu">
-                          <li class=""><a href="<?php echo base_url(); ?>kpi/create" class="">Create KPIs</a></li>
-                          <li class=""><a href="<?php echo base_url(); ?>kpi/list">Manage KPIs</a></li>
-                          <li class=""><a href="<?php echo base_url(); ?>kpi/form" class="">KPI Data</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>kpi" class="">Create and Manage KPIs</a></li>
+                          <li class=""><a href="<?php echo base_url(); ?>kpi/data" class="">KPI Data</a></li>
                       </ul>
 
                   </li>

@@ -17,6 +17,7 @@ class Dashboard extends MX_Controller
 	{
 		$data['module'] = $this->dashmodule;
 		$data['title'] = "Main Dashboard";
+		$data['tabs'] = $this->dash_mdl->getData();
 		$data['uptitle'] = "Main Dashboard";
 
 		render('home', $data);
@@ -24,7 +25,7 @@ class Dashboard extends MX_Controller
 	public function dashboardData()
 	{
 
-		$data = $this->dash_mdl->getData();
-		echo json_encode($data);
+
+		//echo json_encode($data);
 	}
 }
