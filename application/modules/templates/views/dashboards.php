@@ -46,8 +46,10 @@ require_once("includes/header.php");
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
             <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rccs">HOME</a>
-            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">KPI Wise</a>
-            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">Country Wise</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">By KPI</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">By Member State</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>/admin">Administration</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>auth/logout_rcc">Sign Out</a>
         </div>
     </div>
 </nav>
