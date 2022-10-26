@@ -13,7 +13,7 @@
                   <li class="nav-item pcoded-menu-caption">
                       <label>Navigation</label>
                   </li>
-                  <li class="nav-item active">
+                  <li class="nav-item">
                       <a href="<?php echo base_url() ?>dashboard" class="nav-link"><span class="pcoded-micon"><i class="fas fa-home"></i></span><span class="pcoded-mtext">Dashboard</span></a>
                   </li>
                   <li class="nav-item pcoded-menu-caption">
@@ -27,9 +27,8 @@
 
                       </ul>
                   </li>
-
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
-                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-chart-line"></i></span><span class="pcoded-mtext"></span>Performance Indicators</a>
+                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-chart-line"></i></span><span class="pcoded-mtext">Performance Indicators</span></a>
                       <ul class="pcoded-submenu">
                           <li class=""><a href="<?php echo base_url(); ?>kpi/create" class="">Create and Manage KPIs</a></li>
                           <li class=""><a href="<?php echo base_url(); ?>kpi/data" class="">KPI Data</a></li>
@@ -39,7 +38,7 @@
 
 
                   <li data-username="Menu levels Menu level 2.1 Menu level 2.2" class="nav-item pcoded-hasmenu">
-                      <a href="#!" class="nav-link"><span class="pcoded-micon"><i class="fas fa-list"></i></span><span class="pcoded-mtext">Form Lists</span></a>
+                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fas fa-list"></i></span><span class="pcoded-mtext">Form Lists</span></a>
                       <ul class="pcoded-submenu">
                           <li><a href="<?php echo base_url() ?>filetypes">File Types</a></li>
                           <li><a href=" <?php echo base_url() ?>authors">Authors</a></li>
@@ -65,6 +64,10 @@
                           <li class=""><a href="" class="">Constants and Variables</a></li>
 
                       </ul>
+                  </li>
+                  <li class="nav-item">
+                      <a href="#" class="nav-link"><span class="pcoded-micon"><i class="fa-solid fa-lock"></i></span><span class="pcoded-mtext">Change Password</span></a>
+
                   </li>
 
 
