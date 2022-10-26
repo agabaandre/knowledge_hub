@@ -85,7 +85,7 @@
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
-                text: 'Country-Wise Analysis'
+                text: 'Member State Analysis'
             },
             subtitle: {
                 text: 'Source: Africa CDC'

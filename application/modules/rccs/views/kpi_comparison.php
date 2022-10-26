@@ -94,7 +94,7 @@
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
-                text: 'KPI-Wise Analysis'
+                text: 'KPI Analysis'
             },
             subtitle: {
                 text: 'Source: Africa CDC'
