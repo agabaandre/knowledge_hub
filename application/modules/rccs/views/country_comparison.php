@@ -17,16 +17,7 @@
                             <?php endforeach; ?>
                         </select>
                     </div>
-                     <!-- <div class="form-group col-md-6">
-                        <br>
-                        <label>KPI </label>
-                        <select class="form-control select2" name="kpi_id" onchange="fetchData()">
-                            <option value="">All</option>
-                            <?php foreach ($kpis as $kpi): ?>
-                                <option value="<?php echo $kpi->id; ?>"><?php echo $kpi->name; ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div> -->
+                    
                     <div class="form-group col-md-3">
                         <br>
                         <label>Switch Graph</label>

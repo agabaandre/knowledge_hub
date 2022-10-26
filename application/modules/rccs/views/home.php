@@ -1,6 +1,24 @@
 <div class="row">
 
 <div class="col-md-12">
+
+ <form class="filter_form" method="get" action="<?php echo base_url("rccs/index"); ?>">
+    <div class="row">
+         <div class="form-group col-md-12">
+            <br>
+             <label>Country</label>
+            <select class="form-control select2" name="country_id" onchange="$('.filter_form').submit();">
+                <option value="">All</option>
+                <?php foreach ($countries as $country): ?>
+                    <option 
+                    <?php echo (isset($filter['country_id']) && $filter['country_id']==$country->id)?"selected":""; ?> 
+                    value="<?php echo $country->id; ?>"><?php echo $country->name; ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+       
+    </div>
+</form>
     
 <?php require_once 'partials/top_summary_widgets.php'; ?>
 
@@ -9,8 +27,11 @@
 </div>
 
 </div>
+<div class="data" style="display: none;" >
 
-<script src="<?php echo base_url(); ?>assets/js/pages/chart-highchart-custom.js"></script>
+    <?php echo $graph_data; ?>
+
+</div>
 
 <!-- am chart js -->
 <script src="<?php echo base_url(); ?>assets/plugins/chart-am4/js/core.js"></script>
@@ -19,66 +40,49 @@
 <script src="<?php echo base_url(); ?>assets/plugins/chart-am4/js/worldLow.js"></script>
 <script src="<?php echo base_url(); ?>assets/plugins/chart-am4/js/continentsLow.js"></script>
 
-<!-- dashboard-custom js -->
-<script src="<?php echo base_url(); ?>assets/js/pages/dashboard-sale.js"></script>
-
-
 
 <script type="text/javascript">
 
-    var data = "<?php echo json_encode($countries_summary); ?>";
-    console.log(data);
 
     $(document).ready(function() {
-     // [ line-basic-chart ] Start
-        Highcharts.chart('countries_summary', {
+
+       var seriesData = JSON.parse($('.data').html());
+
+       console.log(seriesData);
+
+       Highcharts.chart('large_chart', {
             chart: {
-                type: 'spline',
+                type: 'column'
             },
-            colors: ['#0288d1', '#3949AB', '#463699'],
+            colors: Array(seriesData.length).fill().map(()=>`#${Math.floor(Math.random()*16444215).toString(16)}`),
             title: {
-                text: 'Country-Wise Analysis'
+                text: 'Country General KPI values'
             },
             subtitle: {
-                text: ' ' 
+                text: 'Source: Africa CDC'
+            },
+            xAxis: {
+                categories: [
+                    'Currenct Year'
+                ],
+                crosshair: true
             },
             yAxis: {
+                min: 0,
                 title: {
                     text: 'KPI Value'
                 }
             },
-            plotOptions: {
-                series: {
-                    label: {
-                        connectorAllowed: false
-                    },
-                    pointStart: 2010
-                }
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f} </b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
             },
-            series: [{
-                name: 'Installation',
-                data: [5, 25, 15, 35, 25, 35, 45, 75]
-            }, {
-                name: 'Manufacturing',
-                data: [25, 35, 45, 75, 5, 25, 15, 35, ]
-            }, {
-                name: 'Sales & Distribution',
-                data: [45, 75, 25, 5, 15, 55, 5, 25]
-            }],
-            responsive: {
-                rules: [{
-                    condition: {
-                        maxWidth: 500
-                    },
-                    chartOptions: {
-                        legend: {
-                            layout: 'horizontal',
-                            align: 'center',
-                            verticalAlign: 'bottom'
-                        }
-                    }
-                }]
-            }
+            series: seriesData
         });
+
     });
 </script>

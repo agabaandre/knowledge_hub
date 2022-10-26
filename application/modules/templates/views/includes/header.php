@@ -44,7 +44,7 @@
 
         function hideLoader(){
             try{
-            $.unblockUI();
+             $.unblockUI();
             }catch(err){
                 console.log(err);
            }
