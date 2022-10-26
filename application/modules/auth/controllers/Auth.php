@@ -29,6 +29,8 @@ class Auth extends MX_Controller
     //print_r($route);
 
     if ($auth) {
+      $adata['region'] = $this->auth_mdl->access_level1($adata['user_id']);
+      $adata['country'] = $this->auth_mdl->access_level2($adata['user_id']);
       $_SESSION['user'] = (object)$adata;
 
       if (($postdata['route'] == 'rcc/dashboards') ||  ($postdata['route'] == 'auth/')) {

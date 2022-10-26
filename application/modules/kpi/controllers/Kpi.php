@@ -13,7 +13,7 @@ class Kpi extends MX_Controller
 		$this->load->model("Kpi_mdl", 'kpi_mdl');
 	}
 
-	public function index($id = FALSE)
+	public function create($id = FALSE)
 	{
 		$data['module']  = $this->module;
 		$data['title']   = "Manage Indicators";
@@ -33,7 +33,7 @@ class Kpi extends MX_Controller
 		$data['title']   = "Add Data";
 		$data['uptitle'] = "Add Data";
 		$insert = $this->input->post();
-		$data['elements'] = $this->kpi_mdl->kpi_data();
+		$data['elements'] = $this->kpi_mdl->kpi_data($insert);
 		$this->session->set_flashdata('message', 'Added');
 		$data['title']   = 'Add KPI Data';
 		$data['module']  = $this->module;
@@ -42,7 +42,15 @@ class Kpi extends MX_Controller
 	}
 	public function get_kpi($id = FALSE)
 	{
-		$data['elements'] = $this->kpi_mdl->create_kpi();
-		print_r($data);
+		$data = $this->kpi_mdl->create_kpi($id);
+		return $data;
+	}
+	public function get_subjects()
+	{
+		return $this->kpi_mdl->get_subjects();
+	}
+	public function get_countries()
+	{
+		return $this->geoareasmodel->get_countries();
 	}
 }

@@ -1,7 +1,7 @@
 <?php
 
 $usergroups = Modules::run("permissions/getUserGroups");
-$rcc = Modules::run("geoareas/getrcc");
+$rccs = Modules::run("geoareas/getrcc");
 
 
 ?>
@@ -15,90 +15,90 @@ $rcc = Modules::run("geoareas/getrcc");
       </div>
       <!-- /.card-header -->
       <div class="card-body">
-        <form class="user_form" method="post" enctype="multipart/form-data">
-          <div class="row">
-            <div class="col-md-12">
-              <button type="submit" class="btn btn-primary btn-sm">Save</button>
-              <button type="reset" class="btn  btn-secondary btn-sm">Reset All</button>
-            </div>
-            <div class="col-md-12" style="margin:0 auto;">
-              <span class="status"></span>
-            </div>
-            <div class="col-sm-4">
-              <!-- text input -->
-              <div class="form-group">
-                <label>Name</label>
-                <input type="text" name="name" autocomplete="off" class="form-control" placeholder="Full Name" required />
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <div class="form-group">
-                <label>User Group</label>
-                <select name="role" style="width:100%;" class="role form-control select2" required>
-                  <option value="" disabled selected>USER GROUP</option>
-                  <?php foreach ($usergroups as $usergroup) :
-                  ?>
-                    <option value="<?php echo $usergroup->id; ?>"><?php echo $usergroup->group_name; ?>
-
-                    </option>
-                  <?php endforeach; ?>
-                </select>
-              </div>
-            </div>
-
-            <div class="col-sm-4">
-              <!-- textarea -->
-              <div class="form-group">
-                <label>Username</label>
-                <input type="text" required name="username" autocomplete="off" class="form-control" placeholder="Username" required />
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <!-- textarea -->
-              <div class="form-group">
-                <label>Default Password</label>
-                <input type="text" required name="password" value="<?php echo setting()->default_password; ?> " class="form-control" readonly />
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <div class="form-group">
-                <label>Email</label>
-                <input type="email" required name="email" class="form-control" placeholder="Email" required />
-              </div>
-            </div>
-            <div class="col-sm-4">
-              <div class="form-group">
-                <label>RCC</label>
-                <select onChange="getCountries($(this).val());" name="access1" class="form-control select2 sregion" style="width:100%;" multiple>
-                  <option value="" disabled selected>RCC</option>
-                  <?php foreach ($rcc as $district) :
-                  ?>
-                    <option value="<?php echo $district->region_name; ?>"><?php echo $district->region_name; ?></option>
-                  <?php endforeach; ?>
-                </select>
-
-              </div>
-            </div>
-
-            <div class="col-sm-4">
-              <div class="form-group">
-                <label>Country</label>
-                <select id="scountry" name="access2" class="form-control select2 scountry" style="width:100%;" multiple>
-
-                  <option value="" disabled selected>Country</option>
 
 
-                </select>
+        <?php echo form_open_multipart(base_url('geoareas/save'), array('id' => 'userform', 'class' => 'user_form')); ?>
 
-
-              </div>
+        <div class="row">
+          <div class="col-md-12">
+            <button type="submit" class="btn btn-primary btn-sm">Save</button>
+            <button type="reset" class="btn  btn-secondary btn-sm">Reset All</button>
+          </div>
+          <div class="col-md-12" style="margin:0 auto;">
+            <span class="status"></span>
+          </div>
+          <div class="col-sm-4">
+            <!-- text input -->
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" name="name" autocomplete="off" class="form-control" placeholder="Full Name" required />
             </div>
-            <div class="col-sm-4">
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label>User Group</label>
+              <select name="role" style="width:100%;" class="role form-control select2" required>
+                <option value="" disabled selected>USER GROUP</option>
+                <?php foreach ($usergroups as $usergroup) :
+                ?>
+                  <option value="<?php echo $usergroup->id; ?>"><?php echo $usergroup->group_name; ?>
+
+                  </option>
+                <?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-sm-4">
+            <!-- textarea -->
+            <div class="form-group">
+              <label>Username</label>
+              <input type="text" required name="username" autocomplete="off" class="form-control" placeholder="Username" required />
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <!-- textarea -->
+            <div class="form-group">
+              <label>Default Password</label>
+              <input type="text" required name="password" value="<?php echo setting()->default_password; ?> " class="form-control" readonly />
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" required name="email" class="form-control" placeholder="Email" required />
+            </div>
+          </div>
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label>RCC</label>
+              <select onChange="getCountries($(this).val());" name="access1[]" class="form-control select2 sregion" style="width:100%;" multiple>
+                <?php foreach ($rccs as $rcc) :
+                ?>
+                  <option value="<?php echo $rcc->id; ?>"><?php echo $rcc->region_name; ?></option>
+                <?php endforeach; ?>
+              </select>
 
             </div>
+          </div>
 
+          <div class="col-sm-4">
+            <div class="form-group">
+              <label>Country</label>
+              <select name="access2[]" class="form-control select2 scountry" style="width:100%;" multiple>
+
+
+              </select>
+
+
+            </div>
+          </div>
+          <div class="col-sm-4">
 
           </div>
+
+
+        </div>
       </div>
       </form>
 
@@ -158,25 +158,25 @@ $rcc = Modules::run("geoareas/getrcc");
 
               <tr>
                 <td><?php echo $no; ?>. </td>
-                <td><?php echo $user->name; ?></td>
+                <td><?php echo $user->user_id; ?></td>
                 <td><?php echo $user->username; ?></td>
                 <td><?php echo $user->group_name; ?></td>
-                <td><?php echo @access_level1(1); ?></td>
-                <td><?php echo @access_level2(1); ?></td>
-                <td><a data-toggle="modal" data-target="#user<?php echo $user->id; ?>" href="#">Edit</a>
+                <td><?php echo @access_level1($user->user_id); ?></td>
+                <td><?php echo @access_level2($user->user_id); ?></td>
+                <td><a data-toggle="modal" data-target="#user<?php echo $user->user_id; ?>" href="#">Edit</a>
 
                   <?php if ($user->status == 1) { ?>
 
-                    <a data-toggle="modal" data-target="#block<?php echo $user->id; ?>" href="#">Block</a>
+                    <a data-toggle="modal" data-target="#block<?php echo $user->user_id; ?>" href="#">Block</a>
                   <?php } else { ?>
 
-                    <a data-toggle="modal" data-target="#unblock<?php echo $user->id; ?>" href="#">Activate</a>
+                    <a data-toggle="modal" data-target="#unblock<?php echo $user->user_id; ?>" href="#">Activate</a>
 
                   <?php } ?>
 
 
 
-                  <a data-toggle="modal" data-target="#reset<?php echo $user->id; ?>" href="#">Reset</a>
+                  <a data-toggle="modal" data-target="#reset<?php echo $user->user_id; ?>" href="#">Reset</a>
 
                 </td>
 
@@ -433,9 +433,9 @@ $rcc = Modules::run("geoareas/getrcc");
         method: "GET",
         url: "<?php echo base_url(); ?>geoareas/getCountries",
         data: 'region_data=' + val,
-        success: function(data) {
-          //alert(data);
-          $(".scountry").html(data);
+        success: function(res) {
+          console.log(res);
+          $(".scountry").html(res);
         }
       });
     }

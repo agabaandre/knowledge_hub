@@ -79,35 +79,24 @@ class GeoAreas extends MX_Controller
 
 		if (!empty($_GET['region_data'])) {
 
-			$dist = urldecode($_GET["region_data"]);
+			$region = urldecode($_GET["region_data"]);
+			$this->db->where('region_id', $region);
+			$countries = $this->db->get('country')->result();
 
-			$distdata = array();
-			$distdata = explode("_", $dist);
+			$opt = "<option value=''>Select Region</option>";
 
-			$dist_id = $distdata[0];
-			$district = $distdata[1];
-			$userdata = $this->session->get_userdata();
-			$permissions = $userdata['permissions'];
-			//view all facilities
-			if (in_array('38', $permissions)) {
-				$sql = "SELECT DISTINCT facility_id,facility FROM ihrisdata WHERE district_id LIKE '$dist_id' ORDER BY facility ASC";
-			} else {
-				$facility = $_SESSION['facility'];
-				$sql = "SELECT DISTINCT facility_id,facility FROM ihrisdata WHERE facility_id LIKE '$facility'";
-			}
+			if (!empty($countries)) {
 
-			$facilities = $this->db->query($sql)->result();
-
-			$opt = "<option value=''>Select Facility</option>";
-
-			if (!empty($facilities)) {
-
-				foreach ($facilities as $facility) {
-					$opt .= "<option value='" . $facility->facility_id . "__" . $facility->facility . "'>" . ucwords($facility->facility) . "</option>";
+				foreach ($countries as $country) {
+					$opt .= "<option value='" . $country->id . "'>" . ucwords($country->name) . "</option>";
 				}
 			}
 
 			echo $opt;
 		}
+	}
+	public function countries()
+	{
+		return $this->geoareasmodel->get_countries();
 	}
 }

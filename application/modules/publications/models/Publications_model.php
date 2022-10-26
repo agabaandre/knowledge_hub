@@ -14,11 +14,11 @@ class Publications_model extends CI_Model
 		$this->filetypes_table = "file_type";
 	}
 
-	public function get($filter = [],$limit=null,$start=0)
+	public function get($filter = [], $limit = null, $start = 0)
 	{
 
-		if($limit){
-			$this->db->limit($limit,$start);
+		if ($limit) {
+			$this->db->limit($limit, $start);
 		}
 
 		$this->applyFilter($filter);
@@ -32,12 +32,14 @@ class Publications_model extends CI_Model
 		return $publications;
 	}
 
-	public function count($filter){	
+	public function count($filter)
+	{
 		$this->applyFilter($filter);
 		return count($this->db->get($this->table)->result());
 	}
 
-	public function applyFilter($filter){
+	public function applyFilter($filter)
+	{
 
 		if (!empty($filter)) {
 
@@ -91,7 +93,7 @@ class Publications_model extends CI_Model
 	{
 
 		$this->db->where('id', $publication->id);
-		return $this->db->get($this->table)->row();
+		return $this->db->get('author')->row();
 	}
 
 	public function get_filetype($type_id)

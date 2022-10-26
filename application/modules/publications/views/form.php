@@ -89,7 +89,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Type</label>
-                                <select class="form-control" name="file_type" required>
+                                <select class="form-control select2" name="file_type" required>
                                     <option disabled>Select</option>
                                     <?php foreach ($filetypes as $filetype) : ?>
                                         <option value="<?php echo $filetype->id; ?>">
@@ -113,7 +113,7 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12">
+                        <div class="col-md-12" style="display:none;">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
@@ -126,7 +126,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Status</label>
-                                <select class="form-control" name="is_active" required>
+                                <select class="form-control select2" name="is_active" required>
                                     <option value="Active">Active</option>
                                     <option value="Inactive">Inactive</option>
 
