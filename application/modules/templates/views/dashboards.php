@@ -45,7 +45,7 @@ require_once("includes/header.php");
     </button>
     <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
         <div class="navbar-nav">
-            <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rcc">HOME</a>
+            <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rccs">HOME</a>
             <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">KPI Wise</a>
             <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">Country Wise</a>
         </div>
@@ -76,6 +76,28 @@ require_once("includes/header.php");
 <script src="<?php echo base_url(); ?>assets/js/horizontal-menu.js"></script>
 <script src="<?php echo base_url(); ?>assets/plugins/select2/select2.full.min.js"></script>
 
+
+<script type="text/javascript" src="<?php echo base_url(); ?>assets/js/blockui.min.js"></script>
+
+<script type="text/javascript">
+    function showLoader() {
+        try {
+            $.blockUI({
+                message: '<h1><img src="<?php echo base_url(); ?>assets/images/loader.gif" /> Please wait...</h1>'
+            });
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    function hideLoader() {
+        try {
+            $.unblockUI();
+        } catch (err) {
+            console.log(err);
+        }
+    }
+</script>
 <!-- highchart chart -->
 <script src="<?php echo base_url(); ?>assets/plugins/chart-highchart/js/highcharts.js"></script>
 

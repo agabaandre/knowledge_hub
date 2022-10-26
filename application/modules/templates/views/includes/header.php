@@ -49,27 +49,6 @@
         }
     </style>
 
-    <script type="text/javascript" src="<?php echo base_url(); ?>assets/js/blockui.min.js"></script>
-
-    <script type="text/javascript">
-        function showLoader() {
-            try {
-                $.blockUI({
-                    message: '<h1><img src="<?php echo base_url(); ?>assets/images/loader.gif" /> Please wait...</h1>'
-                });
-            } catch (err) {
-                console.log(err);
-            }
-        }
-
-        function hideLoader() {
-            try {
-                $.unblockUI();
-            } catch (err) {
-                console.log(err);
-            }
-        }
-    </script>
 </head>
 
 <body class="" style="overflow-x: hidden;">
