@@ -28,7 +28,7 @@
         </ul>
         <ul class="navbar-nav ml-auto">
 
-            <li><a href="#!" class="displayChatbox"><i class="icon feather icon-mail"></i></a></li>
+            <li><a href="#!" class="{{displayChatbox}}"><i class="icon feather icon-mail"></i></a></li>
             <li>
                 <div class="dropdown drp-user">
                     <a href="#" class="" data-toggle="dropdown">
@@ -43,10 +43,10 @@
                             </a>
                         </div>
                         <ul class="pro-body">
-                            <li><a href="#!" class="dropdown-item"><i class="feather icon-settings"></i> Settings</a></li>
-                            <li><a href="#!" class="dropdown-item"><i class="feather icon-user"></i> Profile</a></li>
-                            <li><a href="message.html" class="dropdown-item"><i class="feather icon-mail"></i> My Messages</a></li>
-                            <li><a href="auth-signin.html" class="dropdown-item"><i class="feather icon-lock"></i> Lock Screen</a></li>
+                            <li><a href="#" class="dropdown-item"><i class="feather icon-settings"></i> Settings</a></li>
+                            <li><a href="#" class="dropdown-item"><i class="feather icon-user"></i> Profile</a></li>
+                            <li><a href="#" class="dropdown-item"><i class="feather icon-mail"></i>Notifications</a></li>
+
                         </ul>
                     </div>
                 </div>

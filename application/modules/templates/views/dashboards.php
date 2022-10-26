@@ -36,35 +36,35 @@ require_once("includes/header.php");
 
 
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-success">
-  <span class="navbar-brand" style="background-color: transparent;">
-      <img width="130px" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png">
-  </span>
-  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
-  </button>
-  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
-    <div class="navbar-nav">
-      <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rcc">HOME</a>
-      <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">KPI Wise</a>
-      <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">Country Wise</a>
+<nav class="navbar navbar-expand-lg navbar-dark " style="background:#348f41;">
+    <span class=" navbar-brand" style="background-color: transparent;">
+        <img style="filter: brightness(0) invert(1);" src="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" width="150px">
+    </span>
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+        <div class="navbar-nav">
+            <a class="nav-item nav-link active" href="<?php echo base_url(); ?>rcc">HOME</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/kpi_comparison">KPI Wise</a>
+            <a class="nav-item nav-link" href="<?php echo base_url(); ?>rccs/country_comparison">Country Wise</a>
+        </div>
     </div>
-  </div>
 </nav>
 <!-- [ navigation menu ] end -->
 
 
 <!-- [ Main Content ] end -->
 <section style="padding: 20px 1%;">
-<div class="card">
-  <div class="card-body">
+    <div class="card">
+        <div class="card-body">
 
-    <?php
-      $this->load->view($module . "/" . $view);
-    ?>
+            <?php
+            $this->load->view($module . "/" . $view);
+            ?>
 
-  </div>
-</div>
+        </div>
+    </div>
 </section>
 
 <!-- Required Js -->

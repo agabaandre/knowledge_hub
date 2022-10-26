@@ -80,19 +80,15 @@ class GeoAreas extends MX_Controller
 		if (!empty($_GET['region_data'])) {
 
 			$region = urldecode($_GET["region_data"]);
-
-
-			$sql = "SELECT DISTINCT name FROM country WHERE region_id LIKE '$region'";
-
-
-			$countries = $this->db->query($sql)->result();
+			$this->db->where('region_id', $region);
+			$countries = $this->db->get('country')->result();
 
 			$opt = "<option value=''>Select Region</option>";
 
 			if (!empty($countries)) {
 
 				foreach ($countries as $country) {
-					$opt .= "<option value='" . $country->country_id . "'>" . ucwords($country->name) . "</option>";
+					$opt .= "<option value='" . $country->id . "'>" . ucwords($country->name) . "</option>";
 				}
 			}
 

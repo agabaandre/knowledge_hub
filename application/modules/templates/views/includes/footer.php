@@ -16,6 +16,9 @@
 <!-- multi-select Js -->
 <script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.quicksearch.js"></script>
 <script src="<?php echo base_url() ?>assets/plugins/multi-select/js/jquery.multi-select.js"></script>
+<!-- sweet alert Js -->
+<script src="<?php echo base_url() ?>assets/plugins/sweetalert/js/sweetalert.min.js"></script>
+<script src="<?php echo base_url() ?>assets/js/pages/ac-alert.js"></script>
 
 <!-- form-select-custom Js -->
 <script src="<?php echo base_url() ?>assets/js/pages/form-select-custom.js"></script>
@@ -25,6 +28,9 @@
 
 <!-- prism Js -->
 <script src="<?php echo base_url() ?>assets/plugins/prism/js/prism.min.js"></script>
+
+
+
 
 <script>
     // Active Color
