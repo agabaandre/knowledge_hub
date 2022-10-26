@@ -23,7 +23,7 @@
 				</thead>
 				<?php
 
-				$i = 0;
+				$i = 1;
 				foreach ($publications as $row) :
 					//print_r($row);
 				?>

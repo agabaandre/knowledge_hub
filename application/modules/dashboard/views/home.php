@@ -1,4 +1,6 @@
 <div class="row">
+  <?php //print_r($this->session->userdata()); 
+  ?>
   <div class="col-xl-12">
     <div class="row">
       <div class="col-md-4">
