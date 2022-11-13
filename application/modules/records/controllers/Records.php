@@ -20,7 +20,7 @@ class Records extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['slides'] = $this->slidesmodel->get();
 		
-		render_site('landing',$data,true);
+		render_site('index',$data,true);
 	}
 
 	public function index()
@@ -39,7 +39,7 @@ class Records extends MX_Controller {
 			//["title"=>"All","icon"=>"icon-search",'link'=>"search"],
 		);
 	
-		render_site('home',$data);
+		render_site('index',$data);
 	}
 
 	public function themes()

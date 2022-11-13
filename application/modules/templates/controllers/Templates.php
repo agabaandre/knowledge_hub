@@ -28,7 +28,7 @@ class Templates extends MX_Controller
 	public function frontend($data)
 	{
 		//check_logged_in();
-		$this->load->view('front_end', $data);
+		$this->load->view('site', $data);
 	}
 
 	public function dashboards($data)
