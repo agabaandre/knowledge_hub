@@ -11,11 +11,11 @@
 								<h1 class="banner_title ft-bold mb-1">Explore Africa's Health Data</h1>
 								
 							</div>
-							<?php echo form_open('records/search', 'class="search-form bg-white rounded p-1"'); ?>
-								<div class="row no-gutters">
+							<?php echo form_open('records/search', 'class="bg-white rounded p-1 search-form"'); ?>
+							<div class="row no-gutters">
 									<div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text" class="form-control lg left-ico" placeholder="Enter keyword to search" />
+											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="<?php echo old("term"); ?>" placeholder="Enter keyword to search" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
@@ -38,7 +38,7 @@
 										</div>
 									</div>
 								</div>
-							<?php form_close(); ?>
+								<?php echo form_close(); ?>
 
                             
 

@@ -19,4 +19,14 @@
 	<?php endforeach; ?>
 
 	<?php echo $links; ?>
+
+	<?php if(count($publications)== 0): ?>
+
+		<div class="row justify-content-center py-5">
+			<i class="fa fa-info-circle fa-2x text-muted"></i>
+			
+			<h4 class="text-muted">No matching records found</h4>
+		</div>
+
+	<?php endif; ?>
 	

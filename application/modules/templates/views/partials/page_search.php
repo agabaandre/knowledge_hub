@@ -15,13 +15,13 @@
 								<div class="row no-gutters">
 									<div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text" class="form-control sm left-ico autocomplete term" name="term" placeholder="Job Title, Keyword or Company" />
+											<input type="text"  value="<?php echo old("term"); ?>" class="form-control sm left-ico autocomplete term" name="term" placeholder="Job Title, Keyword or Company" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width custom-height sm rounded bg-dark text-white fs-md" type="button">Go</button>
+											<button class="btn full-width custom-height sm rounded bg-dark text-white fs-md" type="submit">Search</button>
 										</div>
 									</div>
 								</div>

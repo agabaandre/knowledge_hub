@@ -208,7 +208,7 @@ class Records extends MX_Controller {
     	$results = $this->recordsmodel->search($term,10,0);
 
     	foreach ($results as $result) {
-			$suggestions[] =  array( "label" => truncate($result->title,100), "value" => substr($result->title,0,100));
+			$suggestions[] =  array( "label" => substr($result->title,0,100), "value" => substr($result->title,0,100));
 	    }
 
 		die(json_encode($suggestions));

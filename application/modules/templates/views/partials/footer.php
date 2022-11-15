@@ -9,10 +9,10 @@
 									<img src="<?php echo base_url() ?>assets/images/icon_Africa_cdc.png" class="img-footer small mb-2" alt="" />
 									
 									<div class="address mt-2">
-										3298 Grant Street Longview, New Texox<br>United Kingdom 75601	
+									Addis Ababa <br>Ethiopia	
 									</div>
 									<div class="address mt-3">
-										1-202-555-0106<br>support@workplex.com
+									+251 11 551 7700<br>africacdc@africa-union.org
 									</div>
 									<div class="address mt-2">
 										<ul class="list-inline">
@@ -25,29 +25,29 @@
 							
 							<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
 								<div class="footer_widget">
-									<h4 class="widget_title">For Employers</h4>
+									<h4 class="widget_title">For Authors</h4>
 									<ul class="footer-menu">
-										<li><a href="#">Explore Candidates</a></li>
-										<li><a href="#">Job Pricing</a></li>
+										<li><a href="#">Publish a resource</a></li>
+										<li><a href="#">Login</a></li>
 									</ul>
 								</div>
 							</div>
 									
 							<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
 								<div class="footer_widget">
-									<h4 class="widget_title">For Candidates</h4>
+									<h4 class="widget_title">For Everyone</h4>
 									<ul class="footer-menu">
-										<li><a href="#">Explore All Jobs</a></li>
-										<li><a href="#">Browse Categories</a></li>
+										<li><a href="#">Frequently accessed resources</a></li>
+										<li><a href="#">RCC Resources</a></li>
 									</ul>
 								</div>
 							</div>
 					
 							<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
 								<div class="footer_widget">
-									<h4 class="widget_title">About Company</h4>
+									<h4 class="widget_title">About This Portal</h4>
 									<ul class="footer-menu">
-										<li><a href="#">Who We'r?</a></li>
+										<li><a href="#">How it works</a></li>
 										<li><a href="#">Our Mission</a></li>
 									</ul>
 								</div>
@@ -55,10 +55,10 @@
 							
 							<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
 								<div class="footer_widget">
-									<h4 class="widget_title">Helpful Topics</h4>
+									<h4 class="widget_title">Helpful Links</h4>
 									<ul class="footer-menu">
 										<li><a href="#">Site Map</a></li>
-										<li><a href="#">Security</a></li>
+										<li><a href="#">Privacy Policy</a></li>
 									</ul>
 								</div>
 							</div>

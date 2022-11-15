@@ -1,4 +1,4 @@
-<div class="gray pt-3">
+<div class="gray py-4">
 <div class="container">
 	<div class="row">
 
