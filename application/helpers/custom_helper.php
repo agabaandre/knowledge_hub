@@ -43,13 +43,14 @@ if (!function_exists('render_dashboard')) {
 //render-front-main website
 if (!function_exists('render_site')) {
 
-    function render_site($view, $data = [], $plain = false)
+    function render_site($view, $data = [],$is_home=false, $plain = false)
     {
 
         $data['view'] = $view;
         $template_method = ($plain) ? 'templates/plain' : 'templates/frontend';
 
         $data['settings'] = settings();
+        $data['is_home']  = $is_home;
 
         echo Modules::run($template_method, $data);
     }

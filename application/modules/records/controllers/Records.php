@@ -11,6 +11,7 @@ class Records extends MX_Controller {
 		$this->title  = "Records";
 
 		$this->load->model('Records_model','recordsmodel');
+		$this->load->model('quotes/Quotes_model','quotesmodel');
 		
 	}
 
@@ -20,7 +21,7 @@ class Records extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['slides'] = $this->slidesmodel->get();
 		
-		render_site('index',$data,true);
+		render_site('landing',$data,true);
 	}
 
 	public function index()
@@ -28,18 +29,47 @@ class Records extends MX_Controller {
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
 		
-		$data['categories'] = array(
-			["title"=>"Health Security Themes",
-			"icon"=>"icon-activity",
-			'link'=>"healththemes",
-			"image"=>"theme.png"
-			],
-			["title"=>"Authors","icon"=>"icon-users",'link'=>"authors","image"=>"author.png"],
-			["title"=>"Geographical Coverage","icon"=>"icon-radio",'link'=>"areas","image"=>"location.png"],
-			//["title"=>"All","icon"=>"icon-search",'link'=>"search"],
-		);
+		$data['categories'] = $this->get_categories();
+
+		$data['recent']  = $this->publicationsmodel->get([],8,0);
+		$data['authors'] = $this->authorsmodel->get([],12,0);
+		$data['quotes']  = $this->quotesmodel->get();
 	
-		render_site('index',$data);
+		render_site('index',$data,true);
+	}
+
+	public function get_categories(){
+
+		return array(
+			[
+				"title"=>"Health Security Themes",
+				"icon"=>"fa fa-heart",
+				'link'=>"healththemes",
+				"image"=>"theme.png",
+				"stats"=>"345 Resources"
+			],
+			[
+				"title"=>"Resource Contibuting Authors",
+				"icon"=>"fa fa-business-time",
+				'link'=>"authors",
+				"image"=>"author.png",
+				"stats"=>"300 Resources"
+			],
+			[
+				"title"=>"Geographical Coverage",
+				"icon"=>"fa fa-map-pin",
+				'link'=>"areas",
+				"image"=>"location.png",
+				"stats"=>"345 Resources"
+			],
+			[
+				"title"=>"Public Discussion Forums",
+				"icon"=>"fa fa-comments",
+				'link'=>"areas",
+				"image"=>"location.png",
+				"stats"=>"100 Resources"
+			]
+		);
 	}
 
 	public function themes()
@@ -178,7 +208,7 @@ class Records extends MX_Controller {
     	$results = $this->recordsmodel->search($term,10,0);
 
     	foreach ($results as $result) {
-			$suggestions[] =  array( "label" => $result->title, "value" => $result->title);
+			$suggestions[] =  array( "label" => truncate($result->title,100), "value" => substr($result->title,0,100));
 	    }
 
 		die(json_encode($suggestions));

@@ -18,9 +18,6 @@
 										<ul class="list-inline">
 											<li class="list-inline-item"><a href="#" class="theme-cl"><i class="lni lni-facebook-filled"></i></a></li>
 											<li class="list-inline-item"><a href="#" class="theme-cl"><i class="lni lni-twitter-filled"></i></a></li>
-											<li class="list-inline-item"><a href="#" class="theme-cl"><i class="lni lni-youtube"></i></a></li>
-											<li class="list-inline-item"><a href="#" class="theme-cl"><i class="lni lni-instagram-filled"></i></a></li>
-											<li class="list-inline-item"><a href="#" class="theme-cl"><i class="lni lni-linkedin-original"></i></a></li>
 										</ul>
 									</div>
 								</div>
@@ -156,7 +153,23 @@
 		<script src="<?php echo base_url(); ?>resources/js/custom.js"></script>
 		<!-- ============================================================== -->
 		<!-- This page plugins -->
-		<!-- ============================================================== -->			
+		<!-- ============================================================== -->	
+		
+       <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+		
+		<script type="text/javascript">
+
+		$('.autocomplete').autocomplete({
+			source: "<?php echo base_url(); ?>records/autocomplete",
+			minLength:3,
+			select: function( event, ui ) {
+				console.log(ui.item);
+				$('.term').val(ui.item.label);
+				$('.search-form').submit();
+			}
+		});
+
+		</script>
 
 	</body>
 </html>

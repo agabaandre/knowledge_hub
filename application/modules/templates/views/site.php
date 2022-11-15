@@ -9,6 +9,10 @@
 
 require_once 'partials/header.php';
 
+
+if(!$is_home)
+require_once 'partials/page_search.php';
+
 $this->load->view($module . "/" . $view);
 
 require_once 'partials/footer.php';

@@ -40,6 +40,56 @@
 /*------------------------------------------------------------
 	Page Loader
 -------------------------------------------------------------*/
+:root{
+    color-eastern:#9F2241;
+    color-central:#348f41;
+    color-nothern:#b4a269;
+    color-western:#a3a3a3;
+    color-southern:#4a4a4a;
+}
+
+.bg-eastern{
+    background-color: var(--color-eastern)!important;
+}
+
+.bg-western{
+    background-color: var(--color-western)!important;
+}
+
+.bg-central{
+    background-color: var(--color-central)!important;
+}
+
+.bg-nothern{
+    background-color: var(--color-nothern)!important;
+}
+
+.bg-southern{
+    background-color: var(--color-southern)!important;
+}
+
+
+
+.text-eastern{
+    color: var(--color-eastern)!important;
+}
+
+.text-western{
+    color: var(--color-western)!important;
+}
+
+.text-central{
+    color: var(--color-central)!important;
+}
+
+.text-nothern{
+    color: var(--color-nothern)!important;
+}
+
+.text-southern{
+    color: var(--color-southern)!important;
+}
+
 .no-js #loader {
     display: none;
 }

@@ -8,10 +8,11 @@ class Authors_model extends CI_Model {
 
 		parent::__Construct();
 		$this->table="author";
+		$this->publications_table = "publication";
 
 	}
 
-	public function get($filter=[]){
+	public function get($filter=[],$limit=null,$start=null){
 
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
@@ -24,8 +25,14 @@ class Authors_model extends CI_Model {
 			}
 		}
 
-
+		if($limit)
+		$this->db->limit($limit,$start);
+		
 		$authors = $this->db->get($this->table)->result();
+		foreach($authors as $author):
+			$author->publications = $this->get_author_pubs($author->id);
+		endforeach;
+
 		return $authors;
 	}
 
@@ -33,10 +40,16 @@ class Authors_model extends CI_Model {
 		$author = $this->db->where('id',$id)->get($this->table)->row();
 		
 		 if($author)
-		 	$author->publications = [];
+		 	$author->publications = $this->get_author_pubs($author->id);
 
 		 return $author;
 	}
+
+	public function get_author_pubs($id){
+		$author_pubs = $this->db->where('author_id',$id)->get($this->publications_table)->result();
+		 return $author_pubs;
+	}
+
 
    //Save and returned inserted/updated row
    public function save($data,$update=false){
