@@ -113,7 +113,7 @@
             item = $('<li>');
             input = '<input  type="checkbox" name="answer" value=' + i + ' />';
 
-            input += questions[index].choices[i];
+            input += " "+questions[index].choices[i];
             item.append(input);
             radioList.append(item);
         }
