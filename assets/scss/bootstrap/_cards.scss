@@ -1,0 +1,58 @@
+/* ###### Card  ###### */
+
+.card {
+  border-radius: 0;
+
+  &.text-white .card-title, &.tx-white .card-title {
+    color: $white;
+  }
+}
+
+.card-header, .card-footer {
+  position: relative;
+  border-color: #e2e8f5;
+  padding-left: 1.25rem;
+  padding-right: 1.25rem;
+  padding-top: 1.25rem;
+  padding-bottom: 1.25rem;
+}
+
+.card-header {
+  border-bottom: 0;
+
+  &:first-child {
+    border-radius: 0;
+  }
+}
+
+.card-header-tab {
+  border-bottom: 0;
+  padding: 0;
+}
+
+.card-title {
+  font-weight: 700;
+  color: #1c273c;
+  font-size: 14px;
+  text-transform: uppercase;
+}
+
+.carousel-control-prev-icon, .carousel-control-next-icon {
+  background-image: none;
+  display: block;
+  width: auto;
+  height: auto;
+}
+
+.carousel-control-prev-icon svg, .carousel-control-next-icon svg {
+  width: 48px;
+  height: 48px;
+}
+
+.carousel-indicators li {
+  width: 10px;
+  height: 10px;
+  border-radius: 100%;
+}
+
+/* ###### Card  ###### */

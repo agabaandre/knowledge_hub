@@ -1,0 +1,58 @@
+/* ###### Colors  ###### */
+
+.slide-menu a.active {
+  background: transparent;
+  color: $primary!important;
+}
+
+.slide.submenu.is-expanded .side-menu__item {
+  color: $primary!important;
+}
+.slide-item.active, .slide-item:hover, .slide-item:focus {
+    color: $primary;
+    background: transparent;
+}
+.first-sidemenu {
+  background: $primary;
+}
+.slide-item {
+  &.active:before {
+    content: '';
+    width: 2px;
+    height: 30px;
+    background: $primary;
+    position: absolute;
+    left: 13px;
+    border-radius: 18%;
+  }
+}
+.slide.submenu.active:before {
+    content: '';
+    width: 2px;
+    height: 30px;
+    background:$primary;
+    position: absolute;
+    left: 0;
+    border-radius: 18%;
+    top: 5px;
+}
+.irs-min, .irs-max {
+	color: $primary;
+}
+.tree li i{
+    margin-right: 10px;
+    font-weight: bold;
+    color: $primary;
+    font-size: 16px;
+    line-height: 1;
+	cursor: pointer;
+}
+.step-app > ul > li .number .cart-icons{
+	height: 26px;
+	width: 26px;
+	text-align: center;
+	line-height: 2;
+	fill: $primary;
+	margin-right: 0;
+}
+/* ###### Colors  ###### */
