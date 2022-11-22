@@ -16,22 +16,22 @@ class Forums_model extends CI_Model
 		$this->users_table 			= "user";
 	}
 
-	public function count($filters=[])
+	public function count($filters = [])
 	{
 		$this->applyFilters($filters);
 		return $this->db->count_all($this->table);
 	}
 
-	public function get($filters=[],$limit=null,$start=null)
+	public function get($filters = [], $limit = null, $start = null)
 	{
-		if($limit)
-		$this->db->limit($limit,$start);
+		if ($limit)
+			$this->db->limit($limit, $start);
 
 		$this->applyFilters($filters);
 
 		$rows = $this->db->get($this->table)->result();
 
-		foreach($rows as $row):
+		foreach ($rows as $row) :
 			$row->tags = $this->get_tags($row->id);
 			$row->user     = $this->find_user($row->created_by);
 		endforeach;
@@ -39,24 +39,24 @@ class Forums_model extends CI_Model
 		return $rows;
 	}
 
-	public function applyFilters($filters=[]){
+	public function applyFilters($filters = [])
+	{
 
-		foreach($filters as $key=>$value){
+		foreach ($filters as $key => $value) {
 
-			if($key=="not_id"):
-			 $this->db->where("id !=$value");
-			else:
-				$this->db->where($key,$value);
+			if ($key == "not_id") :
+				$this->db->where("id !=$value");
+			else :
+				$this->db->where($key, $value);
 			endif;
 		}
-
 	}
 
 	public function find($id)
 	{
 		$row = $this->db->where('id', $id)->get($this->table)->row();
-		
-		if($row):
+
+		if ($row) :
 			$row->tags     = $this->get_tags($row->id);
 			$row->comments = $this->get_comments($row->id);
 			$row->user     = $this->find_user($row->created_by);
@@ -67,7 +67,7 @@ class Forums_model extends CI_Model
 
 	public function find_user($id)
 	{
-		return $this->db->where('id', $id)->get($this->users_table)->row();
+		return $this->db->where('user_id', $id)->get($this->users_table)->row();
 	}
 
 	public function get_tags($forum_id)
@@ -79,9 +79,9 @@ class Forums_model extends CI_Model
 	public function comment_replies($comment_id)
 	{
 		$replies = $this->db->where('parent_id', $comment_id)->get($this->forum_comments_table)->result();
-		$replies = ($replies)?$replies:[];
+		$replies = ($replies) ? $replies : [];
 
-		foreach($replies as $reply){
+		foreach ($replies as $reply) {
 			$reply->user = $this->find_user($reply->created_by);
 		}
 
@@ -90,15 +90,15 @@ class Forums_model extends CI_Model
 
 	public function get_comments($forum_id)
 	{
-		
+
 		$this->db->where('parent_id is NULL');
 		$comments = $this->db->where('forum_id', $forum_id)->get($this->forum_comments_table)->result();
 
-		foreach($comments as $comment){
+		foreach ($comments as $comment) {
 			$comment->replies = $this->comment_replies($comment->id);
 			$comment->user     = $this->find_user($comment->created_by);
 		}
-		
+
 		return $comments;
 	}
 
