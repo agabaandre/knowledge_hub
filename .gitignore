@@ -11,3 +11,4 @@ application/logs/*
 /vendor/
 database.php
 node_modules
+/Afcdc theme/

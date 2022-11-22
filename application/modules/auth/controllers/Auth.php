@@ -34,7 +34,8 @@ class Auth extends MX_Controller
       $_SESSION['user'] = (object)$adata;
 
       if (($postdata['route'] == 'rcc/dashboards') ||  ($postdata['route'] == 'auth/')) {
-        redirect('rccs');
+        //redirect('rccs');
+          redirect('dashboard');
       } elseif ($postdata['route'] == 'admin/') {
 
         redirect('dashboard');

@@ -1,44 +1,58 @@
-<head>
-    <title><?php echo setting()->title; ?></title>
-    <!-- Meta -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="description" content="<?php echo setting()->site_description; ?>" />
-    <meta name="keywords" content="<?php echo setting()->seo_keywords; ?>">
-    <meta name="author" content="Africa CDC" />
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name='viewport' content='width=device-width, initial-scale=1.0, user-scalable=0'>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="description" content="<?php echo setting()->site_description; ?>" />
+        <meta name="keywords" content="<?php echo setting()->seo_keywords; ?>">
+        <meta name="author" content="Africa CDC" />
+		<!-- Title -->
+		<title><?php echo $title; ?></title>
 
-    <!-- Favicon icon -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css" integrity="sha512-xh6O/CkQoPOWDdYTDqeRdPCVd1SpvCA9XXcUnZS2FmJNp1coAFzvtCN9BmamE+4aHK8yyUHUSCcJHgXloTyT2A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <link rel="icon" href="<?php echo base_url(); ?>assets/images/icon_Africa_cdc.png" type="image/x-icon">
-    <!-- fontawesome icon -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/fonts/fontawesome/css/fontawesome-all.min.css">
-    <!-- animation css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/animation/css/animate.min.css">
-    <!-- prism css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/prism/css/prism.min.css">
-    <!-- vendor css -->
-    <!-- select2 css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/select2/css/select2.min.css">
-    <!-- multi-select css -->
+		<!-- Favicon -->
+		<link rel="icon" href="<?php echo _base_url() ?>assets/img/brand/favicon.png" type="image/x-icon"/>
 
-    <!-- material datetimepicker css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/material-datetimepicker/css/bootstrap-material-datetimepicker.css">
-    <!-- Bootstrap datetimepicker css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/bootstrap-datetimepicker/css/bootstrap-datepicker3.min.css">
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/fonts/material/css/materialdesignicons.min.css">
-    <!-- minicolors css -->
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/mini-color/css/jquery.minicolors.css">
+		<!-- Icons css -->
+		<link href="<?php echo _base_url() ?>assets/css/icons.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/plugins/multi-select/css/multi-select.css">
-    <link rel="stylesheet" href="<?php echo base_url() ?>assets/css/style.css">
-    <script src="<?php echo base_url() ?>node_modules/jquery/dist/jquery.min.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts-more.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/solid-gauge.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/exporting.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
-    <script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
+		<!-- Bootstrap css -->
+		<link rel="stylesheet" href="<?php echo _base_url() ?>assets/plugins/bootstrap/css/bootstrap.min.css">
+
+		<!-- Right-sidemenu css -->
+		<link href="<?php echo _base_url() ?>assets/plugins/sidebar/sidebar.css" rel="stylesheet">
+
+		<!-- Style css -->
+		<link rel="stylesheet" type="text/css" media="all" href="<?php echo _base_url() ?>assets/css/style.css">
+
+		<!-- Colors css -->
+		<link id="theme" rel="stylesheet" type="text/css" media="all" href="<?php echo _base_url() ?>assets/css/colors/color.css">
+
+		<!-- Horizontal css -->
+		<link href="<?php echo _base_url() ?>assets/css/horizontalmenu/horizontal-menu.css" rel="stylesheet">
+
+		<!-- Skinmodes css -->
+		<link href="<?php echo _base_url() ?>assets/css/skin-modes.css" rel="stylesheet">
+
+		<!-- Darktheme css -->
+		<link href="<?php echo _base_url() ?>assets/css/style-dark.css" rel="stylesheet">
+
+		<!-- Map css-->
+		<link href="<?php echo _base_url() ?>assets/plugins/jqvmap/jqvmap.min.css" rel="stylesheet">
+
+		<!-- Switcher css-->
+		<link href="<?php echo _base_url() ?>assets/switcher/css/switcher.css" rel="stylesheet">
+		<link href="<?php echo _base_url() ?>assets/switcher/demo.css" rel="stylesheet">
+
+		<!-- Animations css -->
+		<link href="<?php echo _base_url() ?>assets/css/animate.css" rel="stylesheet">
+        <script src="<?php echo base_url() ?>node_modules/jquery/dist/jquery.min.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/highcharts-more.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/modules/solid-gauge.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/modules/exporting.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
+        <script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
 
     <style>
         .select2-close-mask {
@@ -51,4 +65,4 @@
 
 </head>
 
-<body class="" style="overflow-x: hidden;">
+<body class="main-body">

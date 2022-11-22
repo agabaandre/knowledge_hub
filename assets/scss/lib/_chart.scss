@@ -1,0 +1,84 @@
+/* ###### Chart  ###### */
+
+/* ###### 4.5 Morris ###### */
+
+.morris-hover.morris-default-style {
+  border-radius: 0;
+}
+
+/* ###### 5.2 Charts  ###### */
+
+.main-donut-chart {
+  position: relative;
+  border-radius: 50%;
+  overflow: hidden;
+
+  .slice {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .chart-center {
+    position: absolute;
+    border-radius: 50%;
+
+    span {
+      display: block;
+      text-align: center;
+    }
+  }
+}
+
+.morris-wrapper-demo {
+  height: 200px;
+  position: relative;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+@media (min-width: 576px) {
+  .morris-wrapper-demo {
+    height: 300px;
+  }
+}
+
+.morris-donut-wrapper-demo {
+  height: 200px;
+}
+
+@media (min-width: 576px) {
+  .morris-donut-wrapper-demo {
+    height: 250px;
+  }
+}
+
+.chartjs-wrapper-demo {
+  height: 250px;
+}
+
+@media (max-width: 330px) {
+  .chartjs-wrapper-demo {
+    width: 290px;
+  }
+}
+
+@media (min-width: 992px) {
+  .chartjs-wrapper-demo {
+    height: 300px;
+  }
+}
+
+.chartist-wrapper-demo {
+  height: 200px;
+}
+
+@media (min-width: 768px) {
+  .chartist-wrapper-demo {
+    height: 300px;
+  }
+}
+
+/* ###### Chart  ###### */

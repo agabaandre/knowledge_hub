@@ -1,36 +1,37 @@
-<?php
-date_default_timezone_set('Africa/Kampala');
+<?php require_once('includes/header.php');
+      require_once('includes/loader.php'); 
+  ?>
+		<!-- Page -->
+		<div class="page">
+			<?php require("includes/top_bar_main.php");
+                  require("includes/top_bar_mobile.php");
+                  require("includes/nav.php");
+            ?>
+			<!-- Main-content -->
+			<div class="main-content horizontal-content">
 
-require_once("includes/header.php");
-require_once("includes/preloader.php");
-require_once("includes/sidenav.php");
-require_once("includes/top_bar_main.php");
-require_once("includes/top_bar_chat_user.php");
-require_once("includes/top_bar_chat_messages.php");
+				<!-- Container-fluid -->
+				<div class="container">
 
+					<!-- Main-content-body -->
+					<div class="">
 
-?>
-<!-- [ Main Content ] start -->
-<div class="pcoded-main-container">
-    <div class="pcoded-wrapper">
-        <div class="pcoded-content">
-            <div class="pcoded-inner-content">
-                <div class="main-body">
-                    <div class="page-wrapper">
-                        <!-- [ Main Content ] start -->
+						<!-- header-title -->
+						<div class="header-title">
+							<div class="mb-0 mb-lg-0 mb-xl-0">
+								<h4 class="mb-2">Dashboard</h4>
+								<div class="main-content-breadcrumb"> <span>Dashboard</span> <span><?php echo $title ?></span> </div>
+							</div>
+						</div>
+		
+                        <?php   $this->load->view($module . "/" . $view); ?> ?>
+					</div>
+					<!-- Main-content-body closed -->
+				</div>
+				<!-- Container-fluid closed -->
+			</div>
+			<!-- Main-content closed -->
+		</div>
+		<!-- Page closed -->
+        
 
-                        <?php
-                        require_once('includes/breadcrumb.php');
-
-                        $this->load->view($module . "/" . $view); ?>
-                        <!-- [ Main Content ] end -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- [ Main Content ] end -->
-<?php
-require_once("includes/footer.php");
-?>

@@ -1,0 +1,168 @@
+.step-app > .step-steps {
+	margin: 0;
+	display: inline-table;
+	overflow: hidden;
+	width: 100%;
+	table-layout: fixed;
+	padding: 0;
+	list-style: none;
+	height: 110px;
+	border-radius:6px 6px 0 0;
+	overflow: hidden;
+	text-align: center;
+	border: 1px solid #e2e8f5;
+}
+.step-app > .step-steps > li {
+      list-style: none;
+      flex: 1;
+      width: 307px;
+      width: auto;
+      display: table-cell;
+      position: relative;
+      margin-bottom: 0;
+      padding-bottom: 0;
+}
+.step-steps{
+	overflow: hidden;
+}
+
+.step-app > ul > .step2.active:before {
+    background: #1d53f7 !important;
+    width: 37%;
+    z-index: 2;
+}
+.step-app > ul > .step3.active:before {
+    background: #1d53f7 !important;
+    width: 59%;
+    z-index: 2;
+}
+.step-app > ul > .step4.active:before {
+    background: #1d53f7 !important;
+    width: 93%;
+    z-index: 2;
+}
+.step-app > .step-steps > li:last-child> a{
+	margin-right: 0;
+}
+.step-app > ul > li .number {
+    border-color: #1d53f7;
+    background-color: #f1f4ff !important;
+    color: #FFFFFF !important;
+    width: 50px;
+    height: 50px;
+    line-height: 2.5rem;
+    border: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+    border-radius: 50%;
+    padding: 13px 12px;
+    text-align: center;
+    margin-left: 1rem;
+}
+.step-app > ul > li.active .number {
+    border-color: #1d53f7;
+    background-color: rgba(0,0,0,0.1) !important;
+    color: #FFFFFF !important;
+}
+.step-app > ul > li.done .number {
+    border-color: #16b52f;
+    background-color:#0f9f25 !important;
+    color: #FFFFFF !important;
+}
+.step-app > ul > li.active.error .number {
+   border-color: #e7505a;
+    background-color:#d2303a !important;
+    color: #FFFFFF !important;
+}
+.step-app > .step-steps > li > a {
+  display: block;
+  padding: 10px;
+  color: #333;
+  text-decoration: none;
+  border-right: 1px solid #fff;
+  text-align: center;
+  justify-content: center;
+  margin: 0 auto;
+  text-align: center;
+  border: 0;
+  margin-right: 1.5rem;
+  border-radius: 6px;
+  background-color: #fff;
+  -webkit-box-shadow: 0 0.75rem 1.5rem rgba(18,38,63,.03);
+  box-shadow: 7px 8px 9px -2px #c4cbe3;
+  position: relative;
+  padding: 24px 15px;
+  font-size: 16px;
+}
+.step-content .table thead th, .step-content .table thead td {
+    padding: 17px 15px;
+}
+
+.step-app > .step-steps > li.active a {
+  color: #fff;
+}
+.step-app > ul > li.done  .number .cart-icons{
+	fill:#fff;
+	
+}
+.step-app >  ul > li.step2.active.error a{
+	background-color: #e7505a !important;
+    box-shadow: 0px 4px 9px 0px rgba(231, 80, 90, 0.5);
+    border-color: #ff5353;
+}
+.step-app > .step-content {
+  padding: 0;
+  border-top: 0;
+}
+.step-app > .step-content > .step-tab-panel {
+  display: none;
+}
+.step-app  .trash{
+	height:20px;
+	width:20px;
+    fill: #dc3545 !important;
+}
+
+.step-app > .step-content > .step-tab-panel.active {
+  display: block;
+}
+.step-app > .step-footer {
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+.step-app .select2-container--default .select2-selection--single {
+    height: 35px;
+}
+.step-app  .select2-container--default .select2-selection--single .select2-selection__arrow b {
+    margin-top: -4px;
+}
+.step-app > .step-footer > .step-btn {
+  padding: 4px 16px;
+  color: #333;
+  text-decoration: none;
+  background: #e5e5e5;
+  border-radius: 3px;
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.step-app > ul > li.active .number .cart-icons{
+	fill: #fff;
+	 height: 24px;
+    width: 24px;
+}
+
+.step-app > ul > li.active .info {
+    color: #fff;
+}
+.step-steps .step1.done  a , .step-steps  .step2.done a  , .step-steps .step3.done  a {
+    background-color: #51bb25;
+	box-shadow: 0px 4px 9px 0px rgba(48, 206, 72, 0.3);
+    color: #fff;
+    border: 1px solid #51bb25;
+}
+.step-steps .step1.done  a:hover , .step-steps  .step2.done a:hover  , .step-steps .step3.done  a:hover {
+    background-color: #22c03c;
+	color: #fff;
+}
