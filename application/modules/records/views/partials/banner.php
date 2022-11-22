@@ -70,16 +70,16 @@
 							
 						</div>
 						<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12 col-12">
-							<!-- <div class="bnr_thumb position-relative">
+							<div class="bnr_thumb position-relative">
 								<img src="<?php echo base_url(); ?>resources/img/bn-3.png" class="img-fluid bnr_img" alt="" />
 								<div class="list_crs_img">
 									<img src="<?php echo base_url(); ?>resources/img/favs/health-check.png" class="img-fluid elsio cirl animate-fl-y" alt="">
 									<img src="<?php echo base_url(); ?>resources/img/favs/demographics.png" class="img-fluid elsio arrow animate-fl-x" alt="">
 									<img src="<?php echo base_url(); ?>resources/img/favs/africa.png" class="img-fluid elsio moon animate-fl-x" alt="">
 								</div>
-							</div> -->
+							</div>
 
-						<div id='container'>
+						<div id='container' style="z-index:3000; position:absolute; top:70px">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>

@@ -31,6 +31,7 @@
 							
 								<li><a href="<?php echo base_url(); ?>">Home</a></li>
 								<li><a href="<?php echo base_url('records/search'); ?>">Search</a></li>
+								<li><a href="<?php echo base_url('forums/index'); ?>">Forums</a></li>
 								
 							</ul>
 							

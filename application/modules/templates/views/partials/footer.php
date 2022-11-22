@@ -152,7 +152,7 @@
 		<script src="<?php echo base_url(); ?>resources/js/jQuery.style.switcher.js"></script>
 		<script src="<?php echo base_url(); ?>resources/js/custom.js"></script>
 
-		<script src="<?php echo base_url(); ?>assets/js/quiz.js"></script>
+		<script src="<?php echo base_url(); ?>resources/js/quiz.js"></script>
 		<!-- ============================================================== -->
 		<!-- This page plugins -->
 		<!-- ============================================================== -->	
