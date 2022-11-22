@@ -79,7 +79,7 @@
 								</div>
 							</div>
 
-						<div id='container' style="z-index:3000; position:absolute; top:70px">
+						<div id='container' style="z-index:100; position:absolute; top:70px">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>

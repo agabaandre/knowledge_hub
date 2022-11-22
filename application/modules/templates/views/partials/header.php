@@ -3,12 +3,12 @@
             <!-- Top header  -->
             <!-- ============================================================== -->
             <!-- Start Navigation -->
-			<div class="header header-transparent dark-text">
+			<div class="header">
 				<div class="container">
 					<nav id="navigation" class="navigation navigation-landscape">
 						<div class="nav-header">
 							<a class="nav-brand" href="<?php echo base_url() ?>">
-								<img src="<?php echo base_url() ?>assets/images/icon_Africa_cdc.png" class="logo"  alt="" />
+								<img src="<?php echo base_url() ?>assets/images/logo.png" class="logo"  alt="" />
 							</a>
 							<div class="nav-toggle"></div>
 							<div class="mobile_nav">

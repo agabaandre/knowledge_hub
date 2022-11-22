@@ -28,11 +28,11 @@
 												<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($row->title,40); ?></h4>
 												<div class="d-block mb-2 position-relative">
 													<span class="text-muted medium"><i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></span>
-													<span class="muted medium ml-2 theme-cl"><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
+													<span class="muted medium ml-2 theme-cl"><br><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
 												</div>
 											</div>
 										</div>
-										<div class="text-center mlb-last"><a href="job-detail.html" class="btn gray ft-medium apply-btn fs-sm rounded">View Details<i class="lni lni-arrow-right-circle ml-1"></i></a></div>
+										<div class="text-center mlb-last"><a href="<?php echo $row->publication; ?>" target="_blank" class="btn gray ft-medium apply-btn fs-sm rounded">View</a></div>
 									</div>
 								</div>
 							</div>
