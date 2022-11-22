@@ -44,19 +44,18 @@
 }
 
 input[type="radio"] {
-    /* Add if not using autoprefixer */
-    -webkit-appearance: none;
-    appearance: none;
+   
     /* For iOS < 15 to remove gradient background */
-    background-color: rgb(17, 107, 163);
+    background-color: rgb(17, 107, 163)!important;
+    border: 1px solid rgb(17, 107, 163)!important;
     /* Not removed via appearance */
-    margin: 0;
+    /*margin: 0!important;*/
   }
   
 #container {
     width:100%;
     margin:auto;
-    padding: 0 25px 40px 10px;
+    padding: 0 15px 30px 10px;
     background-color: rgb(250, 247, 247);
     border-radius:5px;
     color: grey;

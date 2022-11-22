@@ -36,7 +36,8 @@
 								
 								<div class="article_posts_thumb">
 									<span class="img"><img class="img-fluid" src="https://via.placeholder.com/500x500" alt=""></span>
-									<h3 class="pa-name">Rosalina William</h3>
+								    <small class="text-muted">Posted By</small>
+									<h3 class="pa-name"><?php echo $forum->user->name; ?></h3>
 									
 								</div>
 								
