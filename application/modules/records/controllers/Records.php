@@ -44,28 +44,28 @@ class Records extends MX_Controller {
 			[
 				"title"=>"Health Security Themes",
 				"icon"=>"fa fa-heart",
-				'link'=>"healththemes",
+				'link'=>"browse/healththemes",
 				"image"=>"theme.png",
 				"stats"=>"345 Resources"
 			],
 			[
 				"title"=>"Resource Contibuting Authors",
 				"icon"=>"fa fa-business-time",
-				'link'=>"authors",
+				'link'=>"browse/authors",
 				"image"=>"author.png",
 				"stats"=>"300 Resources"
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
-				'link'=>"areas",
+				'link'=>"browse/areas",
 				"image"=>"location.png",
 				"stats"=>"345 Resources"
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
-				'link'=>"areas",
+				'link'=>"forums",
 				"image"=>"location.png",
 				"stats"=>"100 Resources"
 			]

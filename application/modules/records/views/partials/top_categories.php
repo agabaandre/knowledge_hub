@@ -9,7 +9,7 @@
 								<?php foreach($categories as $category): ?>
 										
 								<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-								<a href="<?php echo base_url(); ?>browse/<?php echo $category['link']; ?>">
+								<a href="<?php echo base_url(); ?><?php echo $category['link']; ?>">
 										<div class="dro_140">
 											<div class="dro_141 de"><i class="<?php echo $category['icon']; ?>"></i></div>
 											<div class="dro_142">
