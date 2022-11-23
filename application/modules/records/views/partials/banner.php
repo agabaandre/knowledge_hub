@@ -79,7 +79,7 @@
 								</div>
 							</div>
 
-						<div id='container' style="z-index:100; position:absolute; top:70px">
+						<!-- <div id='container' style="z-index:100; position:absolute; top:70px">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>
@@ -89,7 +89,7 @@
 							<div class='button' id='prev'><a href='#'>Prev</a></div>
 							<div class='button' id='start'> <a href='#'>Start Over</a></div>
 						</div>
-		
+		 -->
 						</div>
 					</div>
 				</div>
