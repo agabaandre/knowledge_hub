@@ -74,18 +74,6 @@
 <script src="<?php echo base_url() ?>assets/plugins/bootstrap/js/bootstrap.min.js"></script>
 
 
-<div class="footer-fab">
-  <div class="b-bg">
-    <i class="fas fa-question"></i>
-  </div>
-  <div class="fab-hover">
-    <ul class="list-unstyled">
-      <li><a href="<?php echo base_url() ?>doc/index-bc-package.html" data-text="UI Kit" class="btn btn-icon btn-rounded btn-info m-0"><i class="feather icon-layers"></i></a></li>
-      <li><a href="<?php echo base_url() ?>doc/index.html" data-text="Document" class="btn btn-icon btn-rounded btn-primary m-0"><i class="feather icon feather icon-book"></i></a></li>
-    </ul>
-  </div>
-</div>
-
 
 </body>
 
