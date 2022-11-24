@@ -44,28 +44,28 @@ class Records extends MX_Controller {
 			[
 				"title"=>"Health Security Themes",
 				"icon"=>"fa fa-heart",
-				'link'=>"healththemes",
+				'link'=>"browse/healththemes",
 				"image"=>"theme.png",
 				"stats"=>"345 Resources"
 			],
 			[
 				"title"=>"Resource Contibuting Authors",
 				"icon"=>"fa fa-business-time",
-				'link'=>"authors",
+				'link'=>"browse/authors",
 				"image"=>"author.png",
 				"stats"=>"300 Resources"
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
-				'link'=>"areas",
+				'link'=>"browse/areas",
 				"image"=>"location.png",
 				"stats"=>"345 Resources"
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
-				'link'=>"areas",
+				'link'=>"forums",
 				"image"=>"location.png",
 				"stats"=>"100 Resources"
 			]
@@ -120,6 +120,15 @@ class Records extends MX_Controller {
 		$data['links']     = paginate('records/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
 
 		render_site('theme_publications',$data);
+	}
+
+	public function show($id){
+		
+		$data['publication'] = $this->publicationsmodel->find($id);
+		$data['module']       = $this->module;
+		$data['title']        = $this->title;
+
+		render_site('publication_detail',$data,true);
 	}
 
 	public function author_pubs($author_id){

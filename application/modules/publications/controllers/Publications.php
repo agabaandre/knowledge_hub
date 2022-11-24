@@ -69,4 +69,11 @@ class Publications extends MX_Controller
 
 		die($msg);
 	}
+
+	public function comment()
+	{
+		$this->publicationsmodel->save_comment($this->input->post());
+		 set_flash("Comment submitted successfully");
+		 redirect('records/show/'.$this->input->post('publication_id'));
+	}
 }
