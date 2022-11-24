@@ -122,6 +122,15 @@ class Records extends MX_Controller {
 		render_site('theme_publications',$data);
 	}
 
+	public function show($id){
+		
+		$data['publication'] = $this->publicationsmodel->find($id);
+		$data['module']       = $this->module;
+		$data['title']        = $this->title;
+
+		render_site('publication_detail',$data,true);
+	}
+
 	public function author_pubs($author_id){
 
 		$data['module'] = $this->module;

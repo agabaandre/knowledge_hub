@@ -10,9 +10,9 @@
 				<h5><?php echo truncate($row->title,500); ?></h5>
 				<p class="text-nothern p-0"><?php echo $row->description; ?></p>
 				<p class="text-success  p-0">Sub Theme: <?php echo $row->sub_theme->description; ?></p>
-				<a href="<?php echo $row->publication; ?>" target="_blank"><small>
-					<?php echo $row->publication; ?></small></a>
-		    </div>
+				<a href="<?php echo $row->publication; ?>" target="_blank"><small><?php echo $row->publication; ?></small></a>
+				<p class="text-muted  p-0">Last updated: <?php echo time_ago($row->sub_theme->updated_at); ?></p>
+			</div>
 		 	</div>
 		   </div>
 		</div>

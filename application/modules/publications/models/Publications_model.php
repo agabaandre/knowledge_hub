@@ -12,6 +12,7 @@ class Publications_model extends CI_Model
 
 		$this->table = "publication";
 		$this->filetypes_table = "file_type";
+		$this->comments_table = "publication_comments";
 	}
 
 	public function get($filter = [], $limit = null, $start = 0)
@@ -74,19 +75,33 @@ class Publications_model extends CI_Model
 
 		$publication = $this->db->where('id', $id)->get($this->table)->row();
 
-		if ($publication)
+		if ($publication):
 			$publication = $this->attach_related($publication);
+			//increment visits
+			$this->save(['visits'=>(intval($publication->visits)+1),'id'=>$id]);
+		endif;
 		return $publication;
 	}
 
 	public function attach_related($publication)
 	{
 
-		$publication->author    = $this->get_author($publication);
-		$publication->sub_theme = $this->subthemesmodel->find($publication->sub_thematic_area_id);
-		$publication->theme = $publication->sub_theme->theme;
-		$publication->file_type = $this->get_filetype($publication->file_type_id);
+		$publication->author      = $this->get_author($publication);
+		$publication->sub_theme   = $this->subthemesmodel->find($publication->sub_thematic_area_id);
+		$publication->theme       = $publication->sub_theme->theme;
+		$publication->file_type   = $this->get_filetype($publication->file_type_id);
+		$publication->attachments = $this->get_attachments($publication->id);
+		$publication->has_attachments = (count($publication->attachments)>0 )?true:false;
+		$publication->comments     = $this->get_comments($publication->id);
+		$publication->has_comments = (count($publication->comments)>0 )?true:false;
+
 		return $publication;
+	}
+
+	public function get_attachments($publication_id)
+	{
+		$this->db->where('publication_id', $publication_id);
+		return $this->db->get('publication_attachments')->result();
 	}
 
 	public function get_author($publication)
@@ -110,7 +125,7 @@ class Publications_model extends CI_Model
 		//if id is supplied, find record to update
 		if ($update ||  (int) $data['id'] > 0) {
 			$this->db->where('id', $data['id']);
-			$this->db->update($this->table, $data);
+			$saved = $this->db->update($this->table, $data);
 		} else {
 			$saved = $this->db->insert($this->table, $data);
 		}
@@ -147,4 +162,16 @@ class Publications_model extends CI_Model
 		$this->db->where('id', $id);
 		$this->db->delete($this->table);
 	}
+
+	public function save_comment($data)
+	{
+		return $this->db->insert($this->comments_table, $data);
+	}
+
+	public function get_comments($publication_id)
+	{
+		$this->db->where('publication_id', $publication_id);
+		return $this->db->get($this->comments_table)->result();
+	}
+
 }

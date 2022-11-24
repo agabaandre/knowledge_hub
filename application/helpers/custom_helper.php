@@ -342,3 +342,16 @@ if (!function_exists('render_csv_data')) {
         exit;
     }
 }
+
+
+if (!function_exists('share_buttons')) {
+	function share_buttons($link,$subject="Check this  Africa CDC  resource"){
+
+		$data['link']   = $link;
+        $data['subject'] = $subject;
+
+		$ci =& get_instance();
+
+		$ci->load->view('templates/share_buttons',$data);
+	}
+}
