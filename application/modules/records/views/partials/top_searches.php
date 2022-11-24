@@ -18,7 +18,7 @@
 					
 					<?php foreach($recent as $row): ?>
 						<!-- Single -->
-						<a href="<?php echo $row->publication; ?>" target="_blank">
+						<a href="<?php echo base_url("records/show/").$row->id; ?>">
 							<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
 								<div class="jbr-wrap text-left border rounded">
 									<div class="cats-box mlb-res rounded bg-white d-flex align-items-center justify-content-between px-3 py-3">
@@ -32,7 +32,7 @@
 												</div>
 											</div>
 										</div>
-										<div class="text-center mlb-last"><a href="<?php echo $row->publication; ?>" target="_blank" class="btn gray ft-medium apply-btn fs-sm rounded">View</a></div>
+										<div class="text-center mlb-last"><a href="<?php echo base_url("records/show/").$row->id; ?>"  class="btn gray ft-medium apply-btn fs-sm rounded">Browse</a></div>
 									</div>
 								</div>
 							</div>
