@@ -27,8 +27,11 @@
 											<div class="cats-box-caption px-2">
 												<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($row->title,40); ?></h4>
 												<div class="d-block mb-2 position-relative">
-													<span class="text-muted medium"><i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></span>
+													<span class="text-muted medium">
+														Author: <i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></span>
 													<span class="muted medium ml-2 theme-cl"><br><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
+													<span class="text-muted medium d-block">
+														Last updated: <i class="fa fa-bank mr-1"></i><?php echo time_ago($row->created_at); ?>
 												</div>
 											</div>
 										</div>
