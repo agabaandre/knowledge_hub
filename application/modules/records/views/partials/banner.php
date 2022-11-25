@@ -19,19 +19,6 @@
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
-									<!-- <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
-										<div class="form-group mb-0 position-relative">
-											<select class="custom-select lg b-0">
-											  <option value="1">Choose Categories</option>
-											  <option value="2">Information Technology</option>
-											  <option value="3">Cloud Computing</option>
-											  <option value="4">Engineering Services</option>
-											  <option value="5">Healthcare/Pharma</option>
-											  <option value="6">Telecom/ Internet</option>
-											  <option value="7">Finance/Insurance</option>
-											</select>
-										</div>
-									</div> -->
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Search</button>
@@ -73,13 +60,18 @@
 							<div class="bnr_thumb position-relative">
 								<img src="<?php echo base_url(); ?>resources/img/bn-3.png" class="img-fluid bnr_img" alt="" />
 								<div class="list_crs_img">
-									<img src="<?php echo base_url(); ?>resources/img/favs/health-check.png" class="img-fluid elsio cirl animate-fl-y" alt="">
-									<img src="<?php echo base_url(); ?>resources/img/favs/demographics.png" class="img-fluid elsio arrow animate-fl-x" alt="">
-									<img src="<?php echo base_url(); ?>resources/img/favs/africa.png" class="img-fluid elsio moon animate-fl-x" alt="">
+									<img src="<?php echo base_url(); ?>resources/img/favs/health-check.png" class="img-fluid elsio cirl animate-fl-y" alt="" style="min-width: 170px; cursor: pointer;"
+									onclick="$('.quiz').show();">
+
+									<img src="<?php echo base_url(); ?>resources/img/favs/africa.png" class="img-fluid elsio moon animate-fl-x" alt="" style="min-width: 170px;">
+
+									<img src="<?php echo base_url(); ?>resources/img/favs/demographics.png" class="img-fluid elsio arrow animate-fl-y" alt="" style="min-width: 170px;">
 								</div>
+
+								
 							</div>
 
-						<!-- <div id='container' style="z-index:100; position:absolute; top:70px">
+						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>
@@ -89,8 +81,8 @@
 							<div class='button' id='prev'><a href='#'>Prev</a></div>
 							<div class='button' id='start'> <a href='#'>Start Over</a></div>
 						</div>
-		 -->
 						</div>
+
 					</div>
 				</div>
 				

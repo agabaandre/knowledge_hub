@@ -223,4 +223,12 @@ class Records extends MX_Controller {
 		die(json_encode($suggestions));
 	}
 
+	public function quiz(){
+
+		$questions = $this->recordsmodel->get_questions();
+
+		die(json_encode($questions));
+
+	}
+
 }
