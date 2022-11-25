@@ -82,4 +82,43 @@ class Records_model extends CI_Model {
 		return $subthemes_ids;
 	}
 
+	public function get_questions(){
+
+		$result = [];
+
+		$questions = $this->db->get("questions")->result();
+
+		foreach ($questions as $question) {
+
+			$answers    = $this->get_answers($question->id);
+			
+			$answer_str = array_column($answers, 'answer_text');
+
+			$result[] = array(
+				"question"=> $question->question_text,
+				"choices" => $answer_str,
+				"correctAnswer"=>intval($this->get_correct_answer($answers))
+			);
+
+	    }
+
+	    return $result;
+
+	}
+
+	public function get_correct_answer($answers){
+
+			foreach ($answers as $key => $value) {
+				
+				if($value['is_correct']==1)
+					return $key;
+			}
+	}
+
+	public function get_answers($id){
+
+		$this->db->where('question_id',$id);
+		return $this->db->get("answers")->result_array();
+	}
+
 }

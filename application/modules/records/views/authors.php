@@ -13,7 +13,8 @@
 								<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($author->name,40); ?></h4>
 								<div class="d-block mb-2 position-relative">
 									<span class="text-muted medium"><i class="fa fa-bank mr-1"></i><?php echo $author->address; ?></span>
-									<span class="muted medium ml-2 theme-cl"><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $author->telephone; ?> <?php echo $author->email; ?></span>
+									<span class="muted medium ml-2 theme-cl">
+									<?php echo count($author->publications); ?> Resource<?php echo (count($author->publications)!==1)?'s':''; ?> <br> <?php echo $author->email; ?></span>
 								</div>
 							</div>
 						</div>
