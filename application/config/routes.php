@@ -61,3 +61,4 @@ $route['browse/areas']     = 'records/areas';
 
 $route['admin']    = 'auth';
 $route['rcc/dashboards']    = 'auth';
+$route['logout']   = 'auth/frontend_logout';

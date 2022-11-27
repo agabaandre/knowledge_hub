@@ -1,0 +1,177 @@
+<?php
+defined('BASEPATH') or exit('No direct script access allowed');
+
+class Publications_model extends CI_Model
+{
+
+
+	public function __Construct()
+	{
+
+		parent::__Construct();
+
+		$this->table = "publication";
+		$this->filetypes_table = "file_type";
+		$this->comments_table = "publication_comments";
+	}
+
+	public function get($filter = [], $limit = null, $start = 0)
+	{
+
+		if ($limit) {
+			$this->db->limit($limit, $start);
+		}
+
+		$this->applyFilter($filter);
+
+		$publications = $this->db->get($this->table)->result();
+
+		foreach ($publications as $pub) {
+			$pub = $this->attach_related($pub);
+		}
+
+		return $publications;
+	}
+
+	public function count($filter)
+	{
+		$this->applyFilter($filter);
+		return count($this->db->get($this->table)->result());
+	}
+
+	public function applyFilter($filter)
+	{
+
+		if (!empty($filter)) {
+
+			foreach ($filter as $key => $value) {
+
+				if ($key == "search_key") :
+					$this->db->like('title', $value);
+					$this->db->or_like('description', $value);
+					$this->db->or_like('publication', $value);
+				else :
+					$this->db->like($key, $value);
+				endif;
+			}
+		}
+	}
+
+	public function get_by_subtheme($sub_theme_id)
+	{
+
+		$this->db->where('sub_thematic_area_id', $sub_theme_id);
+		$publications = $this->db->get($this->table)->result();
+
+		foreach ($publications as $pub) {
+			$pub = $this->attach_related($pub);
+		}
+
+		return $publications;
+	}
+
+	public function find($id)
+	{
+
+		$publication = $this->db->where('id', $id)->get($this->table)->row();
+
+		if ($publication):
+			$publication = $this->attach_related($publication);
+			//increment visits
+			$this->save(['visits'=>(intval($publication->visits)+1),'id'=>$id]);
+		endif;
+		return $publication;
+	}
+
+	public function attach_related($publication)
+	{
+
+		$publication->author      = $this->get_author($publication);
+		$publication->sub_theme   = $this->subthemesmodel->find($publication->sub_thematic_area_id);
+		$publication->theme       = $publication->sub_theme->theme;
+		$publication->file_type   = $this->get_filetype($publication->file_type_id);
+		$publication->attachments = $this->get_attachments($publication->id);
+		$publication->has_attachments = (count($publication->attachments)>0 )?true:false;
+		$publication->comments     = $this->get_comments($publication->id);
+		$publication->has_comments = (count($publication->comments)>0 )?true:false;
+
+		return $publication;
+	}
+
+	public function get_attachments($publication_id)
+	{
+		$this->db->where('publication_id', $publication_id);
+		return $this->db->get('publication_attachments')->result();
+	}
+
+	public function get_author($publication)
+	{
+
+		$this->db->where('id', $publication->id);
+		return $this->db->get('author')->row();
+	}
+
+	public function get_filetype($type_id)
+	{
+
+		$this->db->where('id', $type_id);
+		return $this->db->get($this->filetypes_table)->row();
+	}
+
+	//Save and returned inserted/updated row
+	public function save($data, $update = false)
+	{
+
+		//if id is supplied, find record to update
+		if ($update ||  (int) $data['id'] > 0) {
+			$this->db->where('id', $data['id']);
+			$saved = $this->db->update($this->table, $data);
+		} else {
+			$saved = $this->db->insert($this->table, $data);
+		}
+
+		$row_id = ($update) ? $data['id'] : $this->db->insert_id();
+
+		//return inserted row
+		if ($saved) {
+			$mess = " Saved Sucessfully";
+		} else {
+			$mess = "Failed to Save";
+		}
+		if (empty($mess)) {
+			$mess = "Update Successful";
+		}
+
+		return $mess;
+	}
+
+	public function update($data)
+	{
+
+		$this->db->insert($this->table, $data);
+		$row_id =  $this->db->insert_id();
+
+		//return inserted row
+		return $this->find($row_id);
+	}
+
+	public function delete($id)
+	{
+
+		//return inserted row
+		$this->db->where('id', $id);
+		$this->db->delete($this->table);
+	}
+
+	public function save_comment($data)
+	{
+		return $this->db->insert($this->comments_table, $data);
+	}
+
+	public function get_comments($publication_id)
+	{
+		$this->db->where('publication_id', $publication_id);
+		return $this->db->get($this->comments_table)->result();
+	}
+
+}
