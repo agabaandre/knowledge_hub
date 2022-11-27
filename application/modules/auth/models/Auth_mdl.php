@@ -244,4 +244,9 @@ class Auth_mdl extends CI_Model
 		$query = $this->db->get('user_access_level2');
 		return $query->result_array();
 	}
+
+	public function find_user($id){
+		$this->db->where('user_id',$id);
+		return $this->db->get($this->table,$id)->row();
+	}
 }
