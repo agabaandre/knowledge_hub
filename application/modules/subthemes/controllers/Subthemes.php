@@ -44,7 +44,7 @@ class Subthemes extends MX_Controller
 				'id' => @$this->input->post("id"), 'description' => $this->input->post("description")
 			];
 
-			$resp = $this->subthemesmodel->save($bank);
+			$resp = $this->subthemesmodel->save($theme);
 
 			$msg = "Operation Successful";
 		}
