@@ -7,7 +7,7 @@
 			<nav id="navigation" class="navigation navigation-landscape">
 				<div class="nav-header">
 					<a class="nav-brand" href="<?php echo base_url() ?>">
-						<img src="<?php echo base_url() ?>assets/images/logo.png" class="logo" alt="" />
+						<img src="<?php echo base_url() ?>assets/images/logo.png" class="logo" alt="" style="width:280px;" />
 					</a>
 					<div class="nav-toggle"></div>
 					<div class="mobile_nav">
