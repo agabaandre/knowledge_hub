@@ -12,7 +12,7 @@ class Permissions extends MX_Controller
   public function index()
   {
     $data['module'] = $this->module;
-    $data['title'] = $data['uptitle'] = "User Groups and Permissions";
+    $data['title'] = $data['uptitle'] = "User Permissions";
     render('groups', $data);
   }
 
