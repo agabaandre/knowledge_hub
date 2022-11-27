@@ -67,7 +67,7 @@ class Forums_model extends CI_Model
 
 	public function find_user($id)
 	{
-		return $this->db->where('id', $id)->get($this->users_table)->row();
+		return $this->db->where('user_id', $id)->get($this->users_table)->row();
 	}
 
 	public function get_tags($forum_id)
