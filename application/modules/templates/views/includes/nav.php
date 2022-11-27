@@ -31,16 +31,13 @@
 					</ul>
 				</li>
 
-				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="bx bx-user-circle menu-icon"></i> Custom <i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="bx bx-cog"></i>Settings <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="signin.html" class="slide-item">Sign In</a></li>
-						<li aria-haspopup="true"><a href="signup.html" class="slide-item">Sign Up</a></li>
-						<li aria-haspopup="true"><a href="forgot.html" class="slide-item">Forgot Password</a></li>
-						<li aria-haspopup="true"><a href="reset.html" class="slide-item">Reset Password</a></li>
-						<li aria-haspopup="true"><a href="lockscreen.html" class="slide-item">Lock screen</a></li>
-						<li aria-haspopup="true"><a href="underconstruction.html" class="slide-item">UnderConstruction</a></li>
-						<li aria-haspopup="true"><a href="404.html" class="slide-item">404 Error</a></li>
-						<li aria-haspopup="true"><a href="500.html" class="slide-item">500 Error</a></li>
+
+						<li class=""><a href="<?php echo base_url() ?>auth/users" class="">Manage Users</a></li>
+						<li class=""><a href="<?php echo base_url() ?>permissions" class="">Groups and Permissions</a></li>
+						<li class=""><a href="" class="">User Access Logs</a></li>
+						<li class=""><a href="" class="">Constants and Variables</a></li>
 					</ul>
 				</li>
 			</ul>
