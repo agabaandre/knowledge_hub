@@ -10,7 +10,7 @@
 								<div class="col-xl-12 col-lg-12 col-md-12 col-12">
 									<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
 										<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
-											<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Forums Available</h6>
+											<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Discussions Available</h6>
 										</div>
 										
 									</div>
