@@ -26,7 +26,7 @@ class Forums extends MX_Controller
 		$data['rows_count']= $count;
 
 		$data['module'] = $this->module;
-		render_site("forums",$data);
+		render_site("forums",$data,true);
 	}
 
 	public function detail($forum_id){

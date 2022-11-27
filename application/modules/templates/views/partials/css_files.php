@@ -21,4 +21,6 @@
         <!-- Preloader - style you can find in spinners.css -->
         <!-- ============================================================== -->
     <div class="preloader"></div>
+
+    <span class="base_url" style="display:none;"><?php echo  base_url(); ?></span>
 		

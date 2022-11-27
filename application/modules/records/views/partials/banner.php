@@ -71,7 +71,7 @@
 								
 							</div>
 
-						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px">
+						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px; opacity:0.9;">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>
