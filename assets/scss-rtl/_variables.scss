@@ -4,12 +4,12 @@ $color:#e5ebf3;
 
 /*Color variables*/
 
-$primary:#0068ff;
+$primary:#348f41;
 $secondary:#7987a1;
 $pink:#f10075;
 $teal:#00cccc;
 $purple:#673ab7;
-$success:#51bb25 ;
+$success:#51bb25;
 $warning:#f0ad4e;
 $danger:#e7505a;
 $info:#17a2b8;
@@ -20,6 +20,7 @@ $white:#ffffff;
 $black:#000000;
 
 /*gray variables*/
+
 $gray-100:#f4f6fd;
 $gray-200:#eaeefb;
 $gray-300:#e1e8fd;
@@ -31,6 +32,7 @@ $gray-800:#4a5779;
 $gray-900:#2d3856;
 
 /*white variables*/
+
 $white-1:rgba(255, 255, 255, 0.1);
 $white-2:rgba(255, 255, 255, 0.2);
 $white-3:rgba(255, 255, 255, 0.3);
@@ -45,6 +47,7 @@ $white-08:rgba(255, 255, 255, 0.08);
 $white-75:rgba(255, 255, 255, 0.075);
 
 /*black variables*/
+
 $black-1:rgba(0, 0, 0, 0.1);
 $black-2:rgba(0, 0, 0, 0.2);
 $black-3:rgba(0, 0, 0, 0.3);
@@ -57,16 +60,10 @@ $black-9:rgba(0, 0, 0, 0.9);
 $black-05:rgba(0, 0, 0, 0.05);
 
 /*shadow variables*/
-$shadow: 12px 7px 13px -3px #b4bfd8;
 
+$shadow: 12px 7px 13px -3px #b4bfd8;
 
 /* dark theme */
 
 $card-color:#252b3c;
-
 $darktheme-primary:#4f94fb;
-
-
-
-	
-

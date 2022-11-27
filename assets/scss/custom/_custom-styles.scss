@@ -180,7 +180,7 @@
         &:hover,
         &:focus {
             background-color: transparent;
-            color: $primary;
+            color: #348f41;
         }
         +.dropdown-item {
             border-top: 1px dotted #e2eaf9;
@@ -912,7 +912,7 @@
     .dropdown-item {
         padding: 0.5rem 1rem;
         &:hover {
-            color: $primary;
+            color: #348f41;
             background: transparent;
         }
     }
@@ -1265,8 +1265,8 @@
     padding: 0.8rem 1rem;
     border-top-left-radius: 6px;
     border-top-right-radius: 6px;
-    border: 1px solid;
-    background: $primary;
+    border: 1px solid #348f41;
+    background: #348f41;
 }
 
 .chat-scroll,
@@ -1316,12 +1316,12 @@
     border-radius: 2px;
     color: #031b4e;
     &:hover {
-        color: $primary;
+        color: #348f41;
     }
 }
 
 .main-message-list .name:hover {
-    color: $primary;
+    color: #348f41;
 }
 
 .notification-subtext {
@@ -1347,7 +1347,7 @@
 
 .page-header-icon i {
     margin: 0 auto;
-    color: $primary;
+    color: #348f41;
     text-shadow: -2px 2px 2px rgba(34, 5, 191, 0.2);
 }
 
@@ -1401,7 +1401,7 @@
             width: 12px;
             height: 12px;
             left: 0;
-            border: 3px solid $primary;
+            border: 3px solid #348f41;
             margin-right: 15px;
             z-index: 2;
             background: $white;
@@ -1449,7 +1449,7 @@
     display: block;
     height: 10%;
     width: 1px;
-    background: $primary;
+    background: #348f41;
     left: -27px;
     z-index: 99;
     height: 34px;
@@ -1690,7 +1690,7 @@
     }
     .task-line {
         &.primary:before {
-            background: $primary;
+            background: #348f41;
         }
         &.pink:before {
             background: $pink;
@@ -1736,7 +1736,7 @@
         &.active,
         &:hover,
         &:focus {
-            color: $primary;
+            color: #348f41;
         }
         color: $secondary;
     }
@@ -1799,7 +1799,7 @@
 .activity .added-project {
     font-weight: 700;
     font-size: 12px;
-    color: $primary;
+    color: #348f41;
 }
 
 .sparkline .tooltip {
@@ -1957,10 +1957,10 @@
         }
     }
     .primary {
-        fill: $primary;
+        fill: #348f41;
     }
     &:hover .primary {
-        fill: $primary;
+        fill: #348f41;
         opacity: 1;
     }
     .teal,
@@ -2171,7 +2171,7 @@
 .card-minimal-two {
     .nav-pills .nav-link.active {
         border-radius: 2px;
-        background-color: $primary;
+        background-color: #348f41;
     }
     .nav-link {
         display: block;
@@ -2288,7 +2288,7 @@
     }
     &.primary {
         background-color: rgba(217, 232, 254, 0.6) !important;
-        color: $primary !important;
+        color: #348f41 !important;
         border: 1px dashed #7da7e4;
     }
     &.pink {
@@ -2356,13 +2356,13 @@
         height: inherit;
     }
     .page-item.active .page-link {
-        background-color: $primary;
+        background-color: #348f41;
     }
 }
 
 .dataTables_wrapper .dataTables_paginate {
     .paginate_button.focus {
-        background: $primary;
+        background: #348f41;
     }
     .page-item.disabled .page-link {
         background-color: #ebeef7;
@@ -2399,7 +2399,7 @@ table.dataTable tfoot {
 }
 
 .border-left-primary {
-    border-left-color: $primary !important;
+    border-left-color: #348f41 !important;
 }
 
 .border-left-success {
@@ -2729,7 +2729,7 @@ dd {
 }
 
 .preview-thumbnail.nav-tabs li a.active img {
-    border: 2px solid $primary !important;
+    border: 2px solid #348f41 !important;
 }
 
 .preview-pic img {
@@ -3045,7 +3045,7 @@ pre {
     color: $white;
     font-weight: 600;
     font-size: 16px;
-    background-color: $primary;
+    background-color: #348f41;
     float: left;
     border-radius: 50%;
 }
@@ -3138,7 +3138,7 @@ pre {
     padding: 10px 18px 10px 20px;
     background: #e9edf5;
     &.active {
-        color: $primary;
+        color: #348f41;
         font-weight: 600;
         &::before {
             top: auto;
@@ -3265,7 +3265,7 @@ pre {
     &:focus {
         text-decoration: none;
         background: transparent;
-        color: $primary;
+        color: #348f41;
         border-radius: 0;
         position: relative;
     }
@@ -3273,7 +3273,7 @@ pre {
         content: '';
         height: 41px;
         width: 2px;
-        background: $primary;
+        background: #348f41;
         left: 0;
         position: absolute;
     }
@@ -3287,7 +3287,7 @@ pre {
 
 .slide-menu a.active {
     background: transparent;
-    color: $primary;
+    color: #348f41;
 }
 
 @media (min-width: 1218px) {
@@ -3642,7 +3642,7 @@ pre {
     background-position: center center;
     &:before {
         content: '';
-        background: $primary;
+        background: #348f41;
         opacity: 0.93;
         left: 0;
         top: 0;
@@ -3938,7 +3938,7 @@ pre {
 .resp-vtabs li.active .social {
     color: #031b4e;
     p:hover {
-        color: $primary;
+        color: #348f41;
     }
 }
 
@@ -3991,7 +3991,7 @@ pre {
     -moz-transition: background-color 0.1s linear;
     -webkit-transition: background-color 0.1s linear;
     -o-transition: background-color 0.1s linear;
-    background: $primary;
+    background: #348f41;
     color: $white;
     border-radius: 6px;
     border: 1px solid #dedcfb;
@@ -4001,7 +4001,7 @@ pre {
         line-height: 2.4;
     }
     &:hover {
-        background: $primary;
+        background: #348f41;
         border-width: 3px;
         color: $white;
         border: 1px solid $white;
@@ -4029,7 +4029,7 @@ pre {
     height: 100%;
     display: block;
     border-radius: 5px;
-    background: $primary;
+    background: #348f41;
     opacity: 0.93;
 }
 
@@ -4042,7 +4042,7 @@ pre {
     &:before {
         content: '';
         position: absolute;
-        background: $primary;
+        background: #348f41;
         opacity: 0.93;
         width: 100%;
         height: 100%;
@@ -4184,7 +4184,7 @@ pre {
         }
         .nav-link.active::before {
             bottom: 0;
-            background: $primary;
+            background: #348f41;
         }
     }
 }
@@ -4207,7 +4207,7 @@ pre {
     margin: 0 5px 0px 0;
     border-radius: 3px 3px 0 0;
     &.active {
-        background: $primary;
+        background: #348f41;
         color: $white;
         &::before {
             display: none;
@@ -4231,7 +4231,7 @@ pre {
         margin-top: 20px;
     }
     .nav.panel-tabs li a.active {
-        background: $primary;
+        background: #348f41;
         color: $white;
     }
 }
@@ -4255,7 +4255,7 @@ pre {
         color: #14112d;
         width: 100%;
         &.active {
-            background: $primary;
+            background: #348f41;
             color: $white;
         }
     }
@@ -4339,8 +4339,8 @@ pre {
         }
     }
     >ul li.active {
-        border-color: $primary;
-        background: $primary;
+        border-color: #348f41;
+        background: #348f41;
         color: $white;
     }
     * {
@@ -4600,9 +4600,9 @@ pre {
         }
     }
     .content_wrapper .accordian_header.active {
-        color: $primary;
+        color: #348f41;
         &:after {
-            background: $primary;
+            background: #348f41;
         }
     }
 }
@@ -4694,14 +4694,14 @@ pre {
             display: flex;
             color: #2c2c2c;
             &.active {
-                color: $primary;
+                color: #348f41;
             }
         }
     }
 }
 
 .items-blog-tab-menu li a:hover {
-    color: $primary;
+    color: #348f41;
 }
 
 hr {
@@ -4745,11 +4745,11 @@ hr {
         position: relative;
         font-size: 14px;
         font-weight: 500;
-        border-left: 2px solid $primary;
+        border-left: 2px solid #348f41;
         height: 45px;
         &.collapsed {
             color: #031b4e;
-            border-left: 3px solid $primary;
+            border-left: 3px solid #348f41;
             height: 45px;
         }
     }
@@ -5037,7 +5037,7 @@ input.error {
                 text-align: center;
                 border-right: 1px solid #d3dfea;
                 &.active {
-                    background: $primary;
+                    background: #348f41;
                     color: $white;
                     border-radius: 2px;
                     text-align: center;
@@ -5099,7 +5099,7 @@ input.error {
         height: 100%;
         top: 0;
         left: 0;
-        background: $primary;
+        background: #348f41;
         opacity: 0.95;
     }
 }
@@ -5129,7 +5129,7 @@ input.error {
 }
 
 .fill-primary {
-    fill: $primary;
+    fill: #348f41;
 }
 
 .fill-danger {
@@ -5471,12 +5471,12 @@ input.error {
     background: #f1f5ff;
     width: 100%;
     font-size: 30px;
-    color: $primary;
+    color: #348f41;
     line-height: 0;
 }
 
 .main-content-body-show .main-header-mail-arrow:hover {
-    color: $primary;
+    color: #348f41;
 }
 
 .main-header-mail-arrow {
@@ -5550,7 +5550,7 @@ input.error {
 }
 
 .main-footer a {
-    color: $primary;
+    color: #348f41;
     font-weight: 500;
 }
 
@@ -5665,7 +5665,7 @@ input.error {
 }
 
 .main-star-item {
-    color: $primary;
+    color: #348f41;
     font-size: 14px;
     position: relative;
     +.main-star-item {
@@ -5883,7 +5883,7 @@ input.error {
     background-size: cover;
     &:before {
         content: '';
-        background-color: $primary;
+        background-color: #348f41;
         position: absolute;
         width: 100%;
         height: 100%;
@@ -5908,7 +5908,7 @@ input.error {
     text-align: center;
     border: 1px solid #dce1f9;
     margin-right: 1rem;
-    color: $primary;
+    color: #348f41;
 }
 
 .invoiceicon-lg {
@@ -5921,7 +5921,7 @@ input.error {
     text-align: center;
     border: 1px solid #dce1f9;
     margin-right: 1rem;
-    color: $primary;
+    color: #348f41;
 }
 
 .bg-background2 {
@@ -5937,7 +5937,7 @@ input.error {
         width: 100%;
     }
     &:before {
-        background: linear-gradient(-225deg, $primary 45%, $primary 100%) !important;
+        background: linear-gradient(-225deg, #348f41 45%, #348f41 100%) !important;
         opacity: 0.87;
         content: '';
         position: absolute;
@@ -5983,7 +5983,7 @@ input.error {
     position: relative;
     top: 2px;
     border: 1px solid #e5ebfb;
-    color: $primary;
+    color: #348f41;
     background: var(--primary-transparentcolor);
     border-radius: 100%;
 }
@@ -6004,7 +6004,7 @@ input.error {
 }
 
 .chart-icon .text-primary {
-    color: $primary !important;
+    color: #348f41 !important;
 }
 
 .highlight {
@@ -6245,42 +6245,42 @@ input.error {
 }
 
 .SumoSelect>.optWrapper.multiple>.MultiControls>p.btnOk:focus {
-    background: $primary;
+    background: #348f41;
     color: #fff;
 }
 
 .datepicker-panel>ul>li {
     &.highlighted {
-        background-color: $primary !important;
+        background-color: #348f41 !important;
         color: #fff !important;
         border-radius: 4px;
         &:hover {
-            background-color: $primary !important;
+            background-color: #348f41 !important;
             color: #fff !important;
         }
     }
     &.picked {
         background-color: rgba(89, 101, 249, 0.1);
-        color: $primary;
+        color: #348f41;
         border-radius: 3px;
         &:hover {
             background-color: rgba(89, 101, 249, 0.1);
-            color: $primary;
+            color: #348f41;
             border-radius: 3px;
         }
     }
 }
 
 .step-app>.step-steps>li.active a {
-    background: $primary;
+    background: #348f41;
     box-shadow: 7px 8px 9px -2px rgba(0, 104, 255, 0.2);
-    border-color: $primary;
+    border-color: #348f41;
 }
 
 .lg-actions {
     .lg-next,
     .lg-prev {
-        background-color: $primary;
+        background-color: #348f41;
         border-radius: 4px;
         color: #fff;
         cursor: pointer;
@@ -6291,7 +6291,7 @@ input.error {
         position: absolute;
         top: 50%;
         z-index: 1080;
-        border: 1px solid $primary;
+        border: 1px solid #348f41;
         outline: none;
     }
 }
@@ -6299,19 +6299,19 @@ input.error {
 .lg-outer .lg-thumb-item {
     &.active,
     &:hover {
-        border-color: $primary;
+        border-color: #348f41;
     }
 }
 
 .SumoSelect {
     >.optWrapper.multiple {
         &.okCancelInMulti>.MultiControls>p:focus {
-            border-color: $primary;
+            border-color: #348f41;
             outline: none;
-            background-color: $primary;
+            background-color: #348f41;
         }
         >.options li.opt.selected span i {
-            background-color: $primary;
+            background-color: #348f41;
             box-shadow: none;
             border-color: transparent;
             background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAYAAAD+Bd/7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAABMSURBVAiZfc0xDkAAFIPhd2Kr1WRjcAExuIgzGUTIZ/AkImjSofnbNBAfHvzAHjOKNzhiQ42IDFXCDivaaxAJd0xYshT3QqBxqnxeHvhunpu23xnmAAAAAElFTkSuQmCC');
@@ -6322,7 +6322,7 @@ input.error {
     .select-all {
         &.selected>span i,
         &.partial>span i {
-            background-color: $primary;
+            background-color: #348f41;
             box-shadow: none;
             border-color: transparent;
             background-image: url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAgAAAAGCAYAAAD+Bd/7AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAALEgAACxIB0t1+/AAAABx0RVh0U29mdHdhcmUAQWRvYmUgRmlyZXdvcmtzIENTNXG14zYAAABMSURBVAiZfc0xDkAAFIPhd2Kr1WRjcAExuIgzGUTIZ/AkImjSofnbNBAfHvzAHjOKNzhiQ42IDFXCDivaaxAJd0xYshT3QqBxqnxeHvhunpu23xnmAAAAAElFTkSuQmCC');
@@ -6335,7 +6335,7 @@ input.error {
 .step-app .whishlist {
     height: 20px;
     width: 20px;
-    fill: $primary !important;
+    fill: #348f41 !important;
 }
 
 .app.sidebar-mini #audiencee-metric {
@@ -6350,44 +6350,44 @@ input.error {
 }
 
 .horizontal-color .horizontal-main.hor-menu {
-    background: $primary;
+    background: #348f41;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li>a.active {
-    color: $primary;
+    color: #348f41;
     background: transparent;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li:hover .sub-icon {
-    color: $primary;
+    color: #348f41;
     background: transparent;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li>a.active {
-    color: $primary;
+    color: #348f41;
     background: transparent;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li>ul.sub-menu>li>a.active {
-    color: $primary;
+    color: #348f41;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li>ul.sub-menu>li>a:hover {
-    color: $primary;
+    color: #348f41;
 }
 
 .horizontalMenu>.horizontalMenu-list>li>ul.sub-menu>li>ul.sub-menu>li>a:hover {
-    color: $primary;
+    color: #348f41;
 }
 
 .hor-menu .horizontalMenu>.horizontalMenu-list>li>.horizontal-megamenu .link-list li:hover a {
-    color: $primary;
+    color: #348f41;
 }
 
 .hor-menu .slide-item.active,
 .hor-menu .slide-item:hover,
 .hor-menu .slide-item:focus {
-    color: $primary!important;
+    color: #348f41!important;
     background: transparent;
 }
 
@@ -6396,19 +6396,19 @@ input.error {
 {
     background: transparent !important;
     border: 0 !important;
-    color: $primary !important;
+    color: #348f41!important;
     box-shadow: none !important;
 }
 
 .scrumb-card .btn-primary {
     background: transparent !important;
     border: 0 !important;
-    color: $primary!important;
+    color: #348f41!important;
     box-shadow: none !important;
 }
 
 .sweet-alert button {
-    background-color: $primary!important;
+    background-color: #348f41!important;
 }
 
 .modal-open .select2-container--default .select2-selection--single {
