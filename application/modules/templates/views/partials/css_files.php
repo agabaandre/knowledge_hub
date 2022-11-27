@@ -22,5 +22,5 @@
         <!-- ============================================================== -->
     <div class="preloader"></div>
 
-    <span class="base_url hidden"><?php echo  base_url(); ?></span>
+    <span class="base_url" style="display:none;"><?php echo  base_url(); ?></span>
 		
