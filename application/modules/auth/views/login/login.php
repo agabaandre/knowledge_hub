@@ -59,10 +59,13 @@
 
           </div>
         </div>
-        <div class="col-md-6 d-none d-md-block">
+        <!-- <div class="col-md-6 d-none d-md-block align-items-center" style="background:url('<?php echo base_url() ?>/assets/images/map.png'); width:200px;">
+          <div class="" style="min-height:450px">
+            <h2>AFRICA REGIONAL COORDINATIONG CENTRES</h2>
+          </div> -->
 
-          <img src="<?php echo base_url() ?>assets/images/image_login.png" alt="" class="img-fluid">
-        </div>
+        <!-- <img src="" alt="" class=" img-fluid"> -->
+        <!-- </div> -->
       </div>
     </div>
   </div>
