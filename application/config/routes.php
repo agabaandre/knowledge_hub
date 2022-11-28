@@ -64,3 +64,4 @@ $route['rcc/dashboards']    = 'auth';
 $route['logout']   = 'auth/frontend_logout';
 
 $route['account/publications']   = 'account/index';
+$route['account/publish']        = 'account/create';
