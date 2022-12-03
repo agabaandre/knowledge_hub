@@ -170,8 +170,16 @@ class Publications_model extends CI_Model
 
 	public function get_comments($publication_id)
 	{
+		$this->load->model('auth/auth_mdl');
+
 		$this->db->where('publication_id', $publication_id);
-		return $this->db->get($this->comments_table)->result();
+		$comments = $this->db->get($this->comments_table)->result();
+
+		foreach($comments as $comment):
+		 $comment->user = $this->auth_mdl->find_user($comment->user_id);
+		endforeach;
+
+		 return $comments;
 	}
 
 }

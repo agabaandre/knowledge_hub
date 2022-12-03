@@ -82,6 +82,49 @@
 									</div>
 								</div>
 							</div>
+
+							<!-- Blog Comment -->
+							<div class="article_detail_wrapss single_article_wrap format-standard">
+								
+								<div class="comment-area">
+									<div class="all-comments">
+										<h3 class="comments-title"><?php echo count($publication->comments); ?> Comments</h3>
+										<div class="comment-list">
+											<ul>
+												
+											<?php foreach($publication->comments as $comment): ?>
+												<li class="article_comments_wrap">
+
+													<article>
+														<div class="article_comments_thumb">
+															<img src="https://via.placeholder.com/500x500" alt="">
+														</div>
+														<div class="comment-details">
+															<div class="comment-meta">
+																<div class="comment-left-meta">
+																	<h4 class="author-name"><?php echo  ($comment->user)?$comment->user->name:'Anonymous'; ?></h4>
+																	<div class="comment-date"><?php echo time_ago($comment->created_at); ?></div>
+																</div>
+																<div class="comment-reply">
+																	<a href="#" class="reply text-success"><span class="icona"><i class="ti-back-left"></i></span> Reply</a>
+																</div>
+															</div>
+															<div class="comment-text">
+																<p><?php echo $comment->comment; ?></p>
+															</div>
+															
+														</div>
+													</article>
+													
+												</li>
+												<?php endforeach; ?>
+											</ul>
+										</div>
+									</div>
+								</div>
+								
+							</div>
+							
 							
 						</div>
 						
@@ -93,6 +136,7 @@
                                 <?php echo form_open('publications/comment', 'class="_apply_form_form"'); ?>
 							
                                     <input type="hidden" name="publication_id" value="<?php echo $publication->id; ?>" />
+									<input type="hidden" name="user_id" value="<?php echo @user_session()->user_id; ?>" />
 									<div class="form-group">
 										<label class="text-success mb-1 ft-medium medium">Your comment</label>
 										<textarea name="comment" class="form-control" placeholder="Your comment"></textarea>

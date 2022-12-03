@@ -19,7 +19,7 @@
 
 						<div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6">
 							<div class="cats-wrap text-center">
-								<a href="#" class="cats-box d-block rounded bg-white px-2 py-4">
+								<a href="<?php echo base_url('records/author_pubs/'.$author->id); ?>" class="cats-box d-block rounded bg-white px-2 py-4">
 									<div class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-3 theme-bg-light circle">
 										<i class="<?php echo $author->icon; ?> fs-lg theme-cl"></i></div>
 									<div class="cats-box-caption">

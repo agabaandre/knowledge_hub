@@ -15,28 +15,30 @@ class Account extends MX_Controller
 
 	public function index()
 	{
-		$data['module'] = 'publications';
-		$data['title']  = "Account";
-		$data['publications'] = $this->publicationsmodel->get();
+		$data['module'] = $this->module;
+		$data['title']  = "Our Publications";
+		$data['publications'] = $this->publicationsmodel->get(['author_id'=>user_session()->user_id]);
 
-		render('list', $data);
+		render_site('list', $data,true);
 	}
 
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
+
 		if ($id) {
 			$data['title']  = 'Create Publication';
 		} else {
 			$data['title']  = 'Create Publication';
 		}
+
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();
 		$data['filetypes'] = $this->filetypesmodel->get();
 		$data['publications'] = $this->publicationsmodel->find($id);
 
-		render('form', $data);
+		render_site('form', $data);
 	}
 
 	public function save()
@@ -57,8 +59,6 @@ class Account extends MX_Controller
 		];
 
 		$resp = $this->publicationsmodel->save($theme);
-
-		// set_flash($msg, $is_error);
 		echo $resp;
 	}
 
@@ -76,10 +76,5 @@ class Account extends MX_Controller
 		die($msg);
 	}
 
-	public function comment()
-	{
-		$this->publicationsmodel->save_comment($this->input->post());
-		 set_flash("Comment submitted successfully");
-		 redirect('records/show/'.$this->input->post('publication_id'));
-	}
+	
 }
