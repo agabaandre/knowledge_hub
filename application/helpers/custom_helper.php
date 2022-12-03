@@ -374,3 +374,17 @@ if (!function_exists('is_guest')) {
         return (@user_session()->user)?false:true;
     }
 }
+
+if (!function_exists('is_valid_image')) {
+
+    function is_valid_image($name, $path = './uploads/publications/')
+    {
+        $image = $path . $name;
+        if (file_exists($image)) {
+            return TRUE;
+        } else {
+            return FALSE;
+
+        }
+    }
+}
