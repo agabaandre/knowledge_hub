@@ -7,7 +7,7 @@
 				</li>
 				<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard/rcc" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
 				</li>
-				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Publish Reource<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Publish Resource<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/create" class="slide-item"> Create New</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/create" class="slide-item">Publications</a></li>
@@ -23,7 +23,7 @@
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">Resource and Asset Types</a></li>
-						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>authors">Authors</a></li>
+						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>authors">Data Sources</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>healththemes">Security Themes</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>subthemes">Security Sub-Themes</a></li>
 						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
