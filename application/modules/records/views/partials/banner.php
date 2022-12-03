@@ -7,7 +7,6 @@
 						<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 							<div class="banner_caption text-left mb-4">
 
-								<div class="d-block mb-2"><span class="px-3 py-1 medium theme-bg-light theme-cl rounded">Africa CDC</span></div>
 								<h1 class="banner_title ft-bold mb-1">Explore Africa's Health Data</h1>
 								
 							</div>

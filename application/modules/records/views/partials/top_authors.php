@@ -7,7 +7,7 @@
 					<div class="row justify-content-center">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<div class="sec_title position-relative text-center mb-5">
-								<h2 class="ft-bold">Browse Top Authors</h2>
+								<h2 class="ft-bold">Top Information Sources </h2>
 							</div>
 						</div>
 					</div>
@@ -39,7 +39,7 @@
 					<div class="row justify-content-center">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<div class="position-relative text-center">
-								<a href="<?php echo base_url('records/authors'); ?>" class="btn btn-md bg-dark rounded text-light hover-theme">Browse All Authors<i class="lni lni-arrow-right-circle ml-2"></i></a>
+								<a href="<?php echo base_url('records/authors'); ?>" class="btn btn-md bg-dark rounded text-light hover-theme">Browse All Sources<i class="lni lni-arrow-right-circle ml-2"></i></a>
 							</div>
 						</div>
 					</div>

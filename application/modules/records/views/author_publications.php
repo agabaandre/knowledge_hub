@@ -4,7 +4,7 @@
 
      <div class="col-lg-12">
      	<div class="row">
-		 <h4>Author: <?php echo $author->name; ?></h4>
+		 <h4>Source: <?php echo $author->name; ?></h4>
      	</div>
 
      	<?php 

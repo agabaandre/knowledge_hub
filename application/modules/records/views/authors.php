@@ -18,7 +18,7 @@
 								</div>
 							</div>
 						</div>
-						<div class="text-center mlb-last"><a href="<?php echo base_url();?>records/author_pubs/<?php echo $author->id ?>" class="btn gray ft-medium apply-btn fs-sm rounded">View Details<i class="lni lni-arrow-right-circle ml-1"></i></a></div>
+						<div class="text-center mlb-last"><a href="<?php echo base_url();?>records/author_pubs/<?php echo $author->id ?>" class="btn gray ft-medium apply-btn fs-sm rounded">View Publications<i class="lni lni-arrow-right-circle ml-1"></i></a></div>
 					</div>
 				</div>
 			</div>
