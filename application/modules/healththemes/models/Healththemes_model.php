@@ -12,6 +12,11 @@ class Healththemes_model extends CI_Model {
 
 	}
 
+	public function count(){
+
+		return $this->db->count_all($this->table);
+	}
+
 	public function get($filter=[]){
 
 		if (!empty($filter)) {

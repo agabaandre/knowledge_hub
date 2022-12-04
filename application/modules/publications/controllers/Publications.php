@@ -26,11 +26,13 @@ class Publications extends MX_Controller
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
+		
 		if ($id) {
 			$data['title']  = 'Create Publication';
 		} else {
 			$data['title']  = 'Create Publication';
 		}
+
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();

@@ -19,6 +19,13 @@ class Geoareas_model extends CI_Model
 		$geoareas = $this->db->get($this->table)->result();
 		return $geoareas;
 	}
+	public function count()
+	{
+
+		$geoareas = $this->db->count_all($this->table);
+		return $geoareas;
+	}
+
 	public function getrcc()
 	{
 

@@ -5,7 +5,7 @@ class Publications_model extends CI_Model
 {
 
 
-	public function __Construct()
+	public function __construct()
 	{
 
 		parent::__Construct();

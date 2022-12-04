@@ -46,28 +46,28 @@ class Records extends MX_Controller {
 				"icon"=>"fa fa-heart",
 				'link'=>"browse/healththemes",
 				"image"=>"theme.png",
-				"stats"=>"345 Resources"
+				"stats"=> $this->healththemesmodel->count()
 			],
 			[
 				"title"=>"Resource Contibuting Authors",
 				"icon"=>"fa fa-business-time",
 				'link'=>"browse/authors",
 				"image"=>"author.png",
-				"stats"=>"300 Resources"
+				"stats"=> $this->authorsmodel->count() 
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
 				'link'=>"browse/areas",
 				"image"=>"location.png",
-				"stats"=>"345 Resources"
+				"stats"=>$this->geoareasmodel->count()
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
 				'link'=>"forums",
 				"image"=>"location.png",
-				"stats"=>"100 Resources"
+				"stats"=>$this->forumsmodel->count()
 			]
 		);
 	}
@@ -185,7 +185,6 @@ class Records extends MX_Controller {
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
-		
 		$data['authors'] = $this->authorsmodel->get();
 	
 		render_site('authors',$data);

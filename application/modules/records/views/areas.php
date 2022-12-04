@@ -10,10 +10,10 @@
             
             <a href="<?php echo base_url(); ?>records/areas_pubs/<?php echo $row->id; ?>">
               <div class="card-body category">
-                  <div class="block">
-                    <i class="fas fa-map-pin fa-2x text-cdc-gold"></i>
+                  <div class="d-block text-center">
+                    <i class="fas fa-map-pin fa-2x text-success"></i>
                   </div>
-                  <div class="block">
+                  <div class="d-block">
                      <h6 class="text-center"><?php echo $row->name; ?></h6>
                   </div>
               </div>

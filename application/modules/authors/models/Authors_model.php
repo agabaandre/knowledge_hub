@@ -12,6 +12,11 @@ class Authors_model extends CI_Model {
 
 	}
 
+	public function count(){
+
+		return $this->db->count_all($this->table);
+	}
+
 	public function get($filter=[],$limit=null,$start=null){
 
 		if (!empty($filter)) {
