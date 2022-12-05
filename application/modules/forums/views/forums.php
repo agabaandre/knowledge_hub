@@ -31,8 +31,8 @@
 														<p>
 														<?php echo truncate($forum->forum_description,400); ?>
 													</a>
-
-													<a style="color:blue;" href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">View Details</a>
+													<br>
+													<a class="text-success" href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">View Details</a>
 													</p>
 											</div>
 											<div class="jb-list-01-info d-block mb-3">

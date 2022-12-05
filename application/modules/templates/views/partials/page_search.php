@@ -1,5 +1,5 @@
 	<!-- ======================= Searchbar Banner ======================== -->
-	<div class="py-3 theme-bg" style="margin-top: 80px;">
+	<div class="py-3 theme-bg" style="margin-top: 20px;">
 				<div class="container">
 					<div class="row justify-content-between align-items-center">
 
