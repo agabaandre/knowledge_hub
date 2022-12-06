@@ -5,7 +5,7 @@
 			<ul class="horizontalMenu-list">
 				<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
 				</li>
-				<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard/rcc" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="<?php echo base_url() ?>rccdashboards" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
 				</li>
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Publish Resource<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
