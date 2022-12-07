@@ -67,12 +67,13 @@ class Forums extends MX_Controller
 		$segment = 3;
 		$page    = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
 		$perPage = 12;
-
+		$data['title'] = "Forums";
+		$data['uptitle'] = "Forums";
 		$data['forums']    = $this->forumsmodel->get([], $perPage, $page);
 		$data['links']     = paginate('forums/admin/', $count, $perPage, $segment);
 		$data['rows_count'] = $count;
 
 		$data['module'] = $this->module;
-		render("forum_admin", $data, true);
+		render("forum_admin", $data);
 	}
 }
