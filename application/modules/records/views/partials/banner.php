@@ -30,9 +30,15 @@
 
                             <div class="d-block mb-2 mt-3">
                                 <span class="text-muted">Tags:</span>
-                                    <span class="px-3 py-1 medium bg-dark text-white rounded">HIV AIDs</span>
-                                <span class="px-3 py-1 medium bg-info text-white rounded">Population</span>
-                                <span class="px-3 py-1 medium bg-blue text-white rounded">Others</span>
+
+                                <?php 
+
+                                $colors = ['dark','blue','green'];
+
+                                foreach ($tags as $tag): ?>
+                                    <span class="px-3 py-1 medium bg-<?php echo $colors[mt_rand(0,2)]; ?> text-white rounded"><?php echo $tag->tag_text; ?></span>
+                                 <?php endforeach; ?>
+
                             </div>
 
                             <div class="quotes-slider px-3 col-lg-8">
