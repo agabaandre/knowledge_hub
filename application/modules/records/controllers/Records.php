@@ -34,6 +34,7 @@ class Records extends MX_Controller {
 		$data['recent']  = $this->publicationsmodel->get([],8,0);
 		$data['authors'] = $this->authorsmodel->get([],12,0);
 		$data['quotes']  = $this->quotesmodel->get();
+		$data['tags']	 = $this->publicationsmodel->get_tags();
 	
 		render_site('index',$data,true);
 	}

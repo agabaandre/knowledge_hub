@@ -94,6 +94,7 @@ class Publications_model extends CI_Model
 		$publication->has_attachments = (count($publication->attachments)>0 )?true:false;
 		$publication->comments     = $this->get_comments($publication->id);
 		$publication->has_comments = (count($publication->comments)>0 )?true:false;
+		$publication->tags         = $this->get_tags($publication->id);
 
 		return $publication;
 	}
@@ -180,6 +181,20 @@ class Publications_model extends CI_Model
 		endforeach;
 
 		 return $comments;
+	}
+
+	public function get_tags($publication_id=null)
+	{
+		
+		if($publication_id):
+			$this->db->where('publication_id', $publication_id);
+			$this->db->join('publication_tags', 'tags.id=publication_tags.publication_id');
+			$results =$this->db->get('tags')->result();
+	    else:
+	    	$results =$this->db->get('tags')->result();
+	    endif;
+
+	    return $results;
 	}
 
 }
