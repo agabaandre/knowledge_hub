@@ -16,6 +16,9 @@
 
 				<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
 				</li>
+				<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				</li>
+
 
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Performance<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
@@ -33,6 +36,8 @@
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>subthemes">Security Sub-Themes</a></li>
 						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quotes</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quiz</a></li>
 					</ul>
 				</li>
 
