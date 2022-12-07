@@ -197,4 +197,10 @@ class Publications_model extends CI_Model
 	    return $results;
 	}
 
+	public function get_types(){
+
+		return $this->db->get('file_type')->result();
+
+	}
+
 }

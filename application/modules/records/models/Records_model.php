@@ -10,9 +10,9 @@ class Records_model extends CI_Model {
 	}
 
 
-	public function search($term,$limit=null,$start=0){
+	public function search($term,$type,$limit=null,$start=0){
 
-		$this->applyFilter($term);
+		$this->applyFilter($term,$type);
 
 		if($limit){
 			$this->db->limit($limit,$start);
@@ -27,17 +27,20 @@ class Records_model extends CI_Model {
 		return $results;
 	}
 
-	public function count($term){	
-		$this->applyFilter($term);
+	public function count($term,$type){	
+		$this->applyFilter($term,$type);
 		return count($this->db->get('publication')->result());
 	}
 
-	public function applyFilter($term){
+	public function applyFilter($term,$type){
 
 		$search = ['search_key'=>$term];
 
 		$authors    = $this->get_authors($search);
 		$sub_themes = $this->get_subthemes($search);
+
+		if($type)
+		$this->db->where('file_type_id',$type);
 
 		$this->db->like('title',$term);
 		$this->db->or_like('description', $term);

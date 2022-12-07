@@ -12,12 +12,25 @@
 							</div>
 							<?php echo form_open('records/search', 'class="bg-white rounded p-1 search-form"'); ?>
 							<div class="row no-gutters">
-									<div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12">
+									<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="<?php echo old("term"); ?>" placeholder="Enter keyword to search" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
+									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+										<div class="form-group mb-0 position-relative">
+											<select class="custom-select lg b-0" name="type">
+											  <option value="" disabled selected>Choose Type</option>
+											  <?php foreach ($types as $type): ?>
+											  <option value="<?php echo $type->id; ?>" 
+											  	<?php echo (old("type")==$type->id)?"seleced":"";?>
+											  	><?php echo $type->name; ?></option>
+											<?php endforeach; ?>
+											</select>
+										</div>
+									</div>
+
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Search</button>
