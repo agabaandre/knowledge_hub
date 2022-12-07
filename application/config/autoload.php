@@ -142,4 +142,6 @@ $autoload['model'] = array(
     ['slides/slides_model' => 'slidesmodel'],
     ['Kpi/kpi_mdl' => 'kpi_mdl'],
     ['forums/forums_model' => 'forumsmodel'],
+    ['tags/tags_model' => 'tagsmodel']
+
 );

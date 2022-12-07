@@ -102,6 +102,20 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
+                                <label class="form-label" for="publication">Search Tags</label>
+                                <select class="form-control select2" name="tags" required multiple>
+                                    <option disabled>Select</option>
+                                    <?php foreach ($tags as $tag) : ?>
+                                        <option value="<?php echo $tag->tag_id; ?>">
+                                            <?php echo $tag->tag_text; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
                                 <label class="form-label" for="publication">Geographical Coverage</label>
                                 <select class="form-control js-example-basic-single select2" name="geographical_coverage" required>
                                     <option disabled>Select</option>
