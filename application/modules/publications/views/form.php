@@ -43,7 +43,7 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Publication URL Link</label>
+                                <label class="form-label" for="publication">Publication URL Link / Doc</label>
                                 <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="publication" required>
                             </div>
                         </div>
@@ -113,13 +113,12 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12" style="display:none;">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="validatedCustomFile">
-                                    <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
-                                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
+                                    <input type="file" class="form-control" name="cover" id="">
+
                                 </div>
                             </div>
                         </div>

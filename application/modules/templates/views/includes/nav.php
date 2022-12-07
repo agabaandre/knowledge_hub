@@ -10,7 +10,7 @@
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Publish Resource<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/create" class="slide-item"> Create New</a></li>
-						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/create" class="slide-item">Publications</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications" class="slide-item">Publications</a></li>
 					</ul>
 				</li>
 
