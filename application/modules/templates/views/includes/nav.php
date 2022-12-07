@@ -14,12 +14,17 @@
 					</ul>
 				</li>
 
+				<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				</li>
+
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Performance<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url(); ?>kpi/create" class="slide-item">Add Indicator</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url(); ?>kpi/data" class="slide-item">Inidicator Data</a></li>
 					</ul>
 				</li>
+
+
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">Resource and Asset Types</a></li>
