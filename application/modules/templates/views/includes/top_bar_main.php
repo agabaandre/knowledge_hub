@@ -1,15 +1,15 @@
 <!-- Main-content -->
-<div class="main-header main-header-fixed">
-	<div class="container">
+<div class="main-header main-header-fixed" style="background:grey; color:#FFF !important;">
+	<div class=" container">
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
-			<a class="header-brand" href="index.html">
-				<img src="<?php echo base_url() ?>assets/img/brand/logo.png" class="desktop-logo" id="change-image">
+			<a class="header-brand" href="<?php echo base_url() ?>">
+				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=250>
 			</a>
 		</div>
 		<div class="main-header-center">
 			<div class="responsive-logo">
-				<a href="index.html"><img src="<?php echo base_url() ?>assets/img/brand/logo.png" class="mobile-logo" alt="logo"></a>
+				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=250px>
 			</div>
 		</div>
 		<div class="main-header-right">

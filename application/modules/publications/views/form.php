@@ -43,7 +43,7 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Publication URL Link</label>
+                                <label class="form-label" for="publication">Publication URL Link / Doc</label>
                                 <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="publication" required>
                             </div>
                         </div>
@@ -102,6 +102,20 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
+                                <label class="form-label" for="publication">Search Tags</label>
+                                <select class="form-control select2" name="tags" required multiple>
+                                    <option disabled>Select</option>
+                                    <?php foreach ($tags as $tag) : ?>
+                                        <option value="<?php echo $tag->tag_id; ?>">
+                                            <?php echo $tag->tag_text; ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
                                 <label class="form-label" for="publication">Geographical Coverage</label>
                                 <select class="form-control js-example-basic-single select2" name="geographical_coverage" required>
                                     <option disabled>Select</option>
@@ -113,13 +127,12 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12" style="display:none;">
+                        <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="validatedCustomFile">
-                                    <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
-                                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
+                                    <input type="file" class="form-control" name="cover" id="">
+
                                 </div>
                             </div>
                         </div>

@@ -7,18 +7,30 @@
 						<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 							<div class="banner_caption text-left mb-4">
 
-								<div class="d-block mb-2"><span class="px-3 py-1 medium theme-bg-light theme-cl rounded">Africa CDC</span></div>
 								<h1 class="banner_title ft-bold mb-1">Explore Africa's Health Data</h1>
 								
 							</div>
 							<?php echo form_open('records/search', 'class="bg-white rounded p-1 search-form"'); ?>
 							<div class="row no-gutters">
-									<div class="col-xl-10 col-lg-10 col-md-10 col-sm-12 col-12">
+									<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="<?php echo old("term"); ?>" placeholder="Enter keyword to search" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
+									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
+										<div class="form-group mb-0 position-relative">
+											<select class="custom-select lg b-0" name="type">
+											  <option value="" disabled selected>Choose Type</option>
+											  <?php foreach ($types as $type): ?>
+											  <option value="<?php echo $type->id; ?>" 
+											  	<?php echo (old("type")==$type->id)?"seleced":"";?>
+											  	><?php echo $type->name; ?></option>
+											<?php endforeach; ?>
+											</select>
+										</div>
+									</div>
+
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Search</button>
@@ -31,9 +43,15 @@
 
                             <div class="d-block mb-2 mt-3">
                                 <span class="text-muted">Tags:</span>
-                                    <span class="px-3 py-1 medium bg-dark text-white rounded">HIV AIDs</span>
-                                <span class="px-3 py-1 medium bg-info text-white rounded">Population</span>
-                                <span class="px-3 py-1 medium bg-blue text-white rounded">Others</span>
+
+                                <?php 
+
+                                $colors = ['dark','blue','green'];
+
+                                foreach ($tags as $tag): ?>
+                                    <span class="px-3 py-1 medium bg-<?php echo $colors[mt_rand(0,2)]; ?> text-white rounded"><?php echo $tag->tag_text; ?></span>
+                                 <?php endforeach; ?>
+
                             </div>
 
                             <div class="quotes-slider px-3 col-lg-8">
@@ -71,7 +89,7 @@
 								
 							</div>
 
-						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px">
+						<div id='container' class="quiz" style="z-index:100; display: none; position:absolute; top:70px; opacity:0.9;">
 							<div id='title'>
 								<h1 class="quizH1">Attempt this Quiz</h1>
 							</div>

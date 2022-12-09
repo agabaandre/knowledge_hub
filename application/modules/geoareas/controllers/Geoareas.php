@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class GeoAreas extends MX_Controller
+class Geoareas extends MX_Controller
 {
 
 

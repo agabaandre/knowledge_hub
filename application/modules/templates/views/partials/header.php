@@ -7,7 +7,7 @@
 			<nav id="navigation" class="navigation navigation-landscape">
 				<div class="nav-header">
 					<a class="nav-brand" href="<?php echo base_url() ?>">
-						<img src="<?php echo base_url() ?>assets/images/logo.png" class="logo" alt="" />
+						<img src="<?php echo base_url() ?>assets/images/logo.png" class="logo" alt="" style="width:280px;" />
 					</a>
 					<div class="nav-toggle"></div>
 					<div class="mobile_nav">
@@ -35,16 +35,31 @@
 					</ul>
 
 					<ul class="nav-menu nav-menu-social align-to-right">
+						<?php if(is_guest()): ?>
 						<li>
-							<a href="#" data-toggle="modal" data-target="#login" class="ft-medium">
+							<a href="#" data-toggle="modal" data-target="#login" class="ft-medium text-bold">
 								<i class="lni lni-user mr-2"></i>Sign In
 							</a>
 						</li>
+						<?php else: ?>
+
+						<li>
+							<a href="<?php echo base_url('account/publications'); ?>"  class="ft-medium text-success">
+								Our Publications
+							</a>
+						</li>
+
 						<li class="add-listing theme-bg bg-central">
 							<a href="#">
 								<i class="lni lni-circle-plus mr-1"></i>Publish a resource
 							</a>
 						</li>
+						<li>
+							<a href="<?php echo base_url('logout'); ?>"  class="ft-medium">
+								Logout
+							</a>
+						</li>
+						<?php endif; ?>
 					</ul>
 				</div>
 			</nav>
@@ -55,3 +70,4 @@
 	<!-- ============================================================== -->
 	<!-- Top header  -->
 	<!-- ============================================================== -->
+

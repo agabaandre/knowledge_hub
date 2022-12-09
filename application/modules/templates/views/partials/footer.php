@@ -94,15 +94,17 @@
 								<h2 class="m-0 ft-regular">Login</h2>
 							</div>
 							
-							<form>				
+							<?php echo form_open(base_url('auth/login')); ?>
+							
+								<input type="hidden" name="route" value="front" />
 								<div class="form-group">
 									<label>User Name</label>
-									<input type="text" class="form-control" placeholder="Username*">
+									<input type="text" name="username" class="form-control" placeholder="Username*">
 								</div>
 								
 								<div class="form-group">
 									<label>Password</label>
-									<input type="password" class="form-control" placeholder="Password*">
+									<input type="password" name="password" class="form-control" placeholder="Password*">
 								</div>
 								
 								<div class="form-group">
@@ -121,10 +123,7 @@
 									<button type="submit" class="btn btn-md full-width theme-bg text-light fs-md ft-medium">Login</button>
 								</div>
 								
-								<div class="form-group text-center mb-0">
-									<p class="extra">Not a member?<a href="#et-register-wrap" class="text-dark"> Register</a></p>
-								</div>
-							</form>
+							<?php echo form_close(); ?>
 						</div>
 					</div>
 				</div>

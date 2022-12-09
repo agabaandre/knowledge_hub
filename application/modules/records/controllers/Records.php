@@ -34,6 +34,8 @@ class Records extends MX_Controller {
 		$data['recent']  = $this->publicationsmodel->get([],8,0);
 		$data['authors'] = $this->authorsmodel->get([],12,0);
 		$data['quotes']  = $this->quotesmodel->get();
+		$data['tags']	 = $this->publicationsmodel->get_tags();
+		$data['types']   = $this->publicationsmodel->get_types();
 	
 		render_site('index',$data,true);
 	}
@@ -46,28 +48,28 @@ class Records extends MX_Controller {
 				"icon"=>"fa fa-heart",
 				'link'=>"browse/healththemes",
 				"image"=>"theme.png",
-				"stats"=>"345 Resources"
+				"stats"=> $this->healththemesmodel->count()
 			],
 			[
 				"title"=>"Resource Contibuting Authors",
 				"icon"=>"fa fa-business-time",
 				'link'=>"browse/authors",
 				"image"=>"author.png",
-				"stats"=>"300 Resources"
+				"stats"=> $this->authorsmodel->count() 
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
 				'link'=>"browse/areas",
 				"image"=>"location.png",
-				"stats"=>"345 Resources"
+				"stats"=>$this->geoareasmodel->count()
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
 				'link'=>"forums",
 				"image"=>"location.png",
-				"stats"=>"100 Resources"
+				"stats"=>$this->forumsmodel->count()
 			]
 		);
 	}
@@ -118,6 +120,8 @@ class Records extends MX_Controller {
 		$data['subtheme']     = $this->subthemesmodel->find($subtheme_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
 		$data['links']     = paginate('records/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
+		$data['types']   = $this->publicationsmodel->get_types();
+	
 
 		render_site('theme_publications',$data);
 	}
@@ -146,6 +150,8 @@ class Records extends MX_Controller {
 		$data['author']     = $this->authorsmodel->find($author_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
 		$data['links']     = paginate('records/author_pubs/'.$author_id,$count, $perPage,$segment);
+		$data['types']   = $this->publicationsmodel->get_types();
+	
 
 		render_site('author_publications',$data);
 	}
@@ -165,6 +171,8 @@ class Records extends MX_Controller {
 		$data['region']     = $this->geoareasmodel->find($region_id);
 		$data['publications'] = $this->publicationsmodel->get($filter,$perPage,$page);
 		$data['links']     = paginate('records/areas_pubs/'.$region_id,$count, $perPage,$segment);
+		$data['types']   = $this->publicationsmodel->get_types();
+	
 	
 		render_site('area_publications',$data);
 	}
@@ -185,7 +193,6 @@ class Records extends MX_Controller {
 	{
 		$data['module'] = $this->module;
 		$data['title']  = $this->title;
-		
 		$data['authors'] = $this->authorsmodel->get();
 	
 		render_site('authors',$data);
@@ -197,14 +204,16 @@ class Records extends MX_Controller {
 		flash_form();
 
 		$term    = $this->input->post('term');
+		$type    = $this->input->post('type');
 
-		$count   = $this->recordsmodel->count($term);
+		$count   = $this->recordsmodel->count($term,$type);
 		$segment = 3;
         $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
         $perPage = 10;
 		
-		$data['publications'] = $this->recordsmodel->search($term,$perPage,$page);
+		$data['publications'] = $this->recordsmodel->search($term,$type,$perPage,$page);
 		$data['links']     = paginate('records/search',$count, $perPage,$segment);
+		$data['types']   = $this->publicationsmodel->get_types();
 	
 		render_site('search',$data);
 	}

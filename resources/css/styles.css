@@ -305,7 +305,7 @@ h3,
 h4,
 h5,
 h6 {
-    color: #000000;
+    color: #8b263a;
     font-weight: 400;
 }
 
@@ -4038,7 +4038,7 @@ select.form-control:focus {
 }
 
 .btn.custom-height.sm {
-    height: 40px;
+    height: 60px;
     padding: 5px 8px;
 }
 

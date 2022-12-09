@@ -17,7 +17,7 @@ class Publications extends MX_Controller
 	{
 		$data['module'] = $this->module;
 		$data['title']  = "Publications List";
-		
+
 		$data['publications'] = $this->publicationsmodel->get();
 
 		render('list', $data);
@@ -26,15 +26,18 @@ class Publications extends MX_Controller
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
+
 		if ($id) {
 			$data['title']  = 'Create Publication';
 		} else {
 			$data['title']  = 'Create Publication';
 		}
+
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();
 		$data['filetypes'] = $this->filetypesmodel->get();
+		$data['tags'] = $this->tagsmodel->get();
 		$data['publications'] = $this->publicationsmodel->find($id);
 
 		render('form', $data);
@@ -57,7 +60,7 @@ class Publications extends MX_Controller
 	}
 
 	public function delete($id)
-	{   
+	{
 		$resp = $this->publicationsmodel->delete($id);
 		$is_error = false;
 
@@ -73,7 +76,7 @@ class Publications extends MX_Controller
 	public function comment()
 	{
 		$this->publicationsmodel->save_comment($this->input->post());
-		 set_flash("Comment submitted successfully");
-		 redirect('records/show/'.$this->input->post('publication_id'));
+		set_flash("Comment submitted successfully");
+		redirect('records/show/' . $this->input->post('publication_id'));
 	}
 }

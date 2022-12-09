@@ -7,8 +7,10 @@
             correctAnswer: 4
         },
         */
+    
+    const quiz_url = `${$('.base_url').html()}records/quiz`
 
-    fetch('http://localhost/knowledge_hub/records/quiz')
+    fetch(quiz_url)
      .then((response) => response.json())
      .then((data) => {
                 

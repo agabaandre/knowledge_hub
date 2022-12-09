@@ -10,7 +10,7 @@
 								<div class="col-xl-12 col-lg-12 col-md-12 col-12">
 									<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
 										<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
-											<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Forums Available</h6>
+											<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Discussions Available</h6>
 										</div>
 										
 									</div>
@@ -31,8 +31,8 @@
 														<p>
 														<?php echo truncate($forum->forum_description,400); ?>
 													</a>
-
-													<a style="color:blue;" href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">View Details</a>
+													<br>
+													<a class="text-success" href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">View Details</a>
 													</p>
 											</div>
 											<div class="jb-list-01-info d-block mb-3">

@@ -5,7 +5,7 @@ class Publications_model extends CI_Model
 {
 
 
-	public function __Construct()
+	public function __construct()
 	{
 
 		parent::__Construct();
@@ -94,6 +94,7 @@ class Publications_model extends CI_Model
 		$publication->has_attachments = (count($publication->attachments)>0 )?true:false;
 		$publication->comments     = $this->get_comments($publication->id);
 		$publication->has_comments = (count($publication->comments)>0 )?true:false;
+		$publication->tags         = $this->get_tags($publication->id);
 
 		return $publication;
 	}
@@ -170,8 +171,36 @@ class Publications_model extends CI_Model
 
 	public function get_comments($publication_id)
 	{
+		$this->load->model('auth/auth_mdl');
+
 		$this->db->where('publication_id', $publication_id);
-		return $this->db->get($this->comments_table)->result();
+		$comments = $this->db->get($this->comments_table)->result();
+
+		foreach($comments as $comment):
+		 $comment->user = $this->auth_mdl->find_user($comment->user_id);
+		endforeach;
+
+		 return $comments;
+	}
+
+	public function get_tags($publication_id=null)
+	{
+		
+		if($publication_id):
+			$this->db->where('publication_id', $publication_id);
+			$this->db->join('publication_tags', 'tags.id=publication_tags.publication_id');
+			$results =$this->db->get('tags')->result();
+	    else:
+	    	$results =$this->db->get('tags')->result();
+	    endif;
+
+	    return $results;
+	}
+
+	public function get_types(){
+
+		return $this->db->get('file_type')->result();
+
 	}
 
 }

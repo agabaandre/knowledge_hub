@@ -59,10 +59,6 @@
 
           </div>
         </div>
-        <div class="col-md-6 d-none d-md-block">
-
-          <img src="<?php echo base_url() ?>assets/images/image_login.png" alt="" class="img-fluid">
-        </div>
       </div>
     </div>
   </div>

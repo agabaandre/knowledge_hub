@@ -14,7 +14,7 @@
 											<div class="dro_141 de"><i class="<?php echo $category['icon']; ?>"></i></div>
 											<div class="dro_142">
 												<h6><?php echo $category['title']; ?></h6>
-												<p><?php echo  $category['stats']; ?></p>
+												<p><?php echo  $category['stats']; ?> Records</p>
 											</div>
 										</div>
 								</a>

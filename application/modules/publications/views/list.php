@@ -14,10 +14,6 @@
 						<th>#</th>
 						<th>Title</th>
 						<th>Description</th>
-
-
-
-
 						<th>Edit/Delete</th>
 					</tr>
 				</thead>

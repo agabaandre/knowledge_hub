@@ -29,9 +29,17 @@ class Auth extends MX_Controller
     //print_r($route);
 
     if ($auth) {
-      $adata['region'] = $this->auth_mdl->access_level1($adata['user_id']);
+      $adata['region']  = $this->auth_mdl->access_level1($adata['user_id']);
       $adata['country'] = $this->auth_mdl->access_level2($adata['user_id']);
       $_SESSION['user'] = (object)$adata;
+
+      if($postdata['route'] == 'front'){
+
+        $this->session->set_userdata($adata);
+
+        redirect(base_url());
+
+       }
 
       if (($postdata['route'] == 'rcc/dashboards') ||  ($postdata['route'] == 'auth/')) {
         //redirect('rccs');
@@ -217,5 +225,12 @@ class Auth extends MX_Controller
     $this->image_lib->watermark();
   }
   //permissions management
+
+  public function frontend_logout()
+  {
+    session_unset();
+    session_destroy(); 
+    redirect( base_url());
+  }
 
 }

@@ -355,3 +355,36 @@ if (!function_exists('share_buttons')) {
 		$ci->load->view('templates/share_buttons',$data);
 	}
 }
+
+
+if (!function_exists('user_session')) {
+    function user_session($return_array=false){
+        $ci =& get_instance();
+        if($return_array):
+            return ($ci->session->userdata('region'))? $ci->session->userdata(): ['is_logged_in'=>false,'is_admin'=>false];
+        else:
+            return ($ci->session->userdata('region'))? (Object) $ci->session->userdata(): (Object) ['is_logged_in'=>false,'is_admin'=>false];
+        endif;
+
+    }
+}
+
+if (!function_exists('is_guest')) {
+    function is_guest(){
+        return (@user_session()->user)?false:true;
+    }
+}
+
+if (!function_exists('is_valid_image')) {
+
+    function is_valid_image($name, $path = './uploads/publications/')
+    {
+        $image = $path . $name;
+        if (file_exists($image)) {
+            return TRUE;
+        } else {
+            return FALSE;
+
+        }
+    }
+}

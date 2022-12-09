@@ -11,9 +11,9 @@
 							<div class="article_detail_wrapss single_article_wrap format-standard">
 								<div class="article_body_wrap">
                                     
-                                    <?php if($forum->forum_image){ ?>
+                                    <?php if(is_valid_image($forum->forum_image,"./uploads/forums/")){ ?>
 									<div class="article_featured_image">
-										<img class="img-fluid" src="https://via.placeholder.com/1200x800" alt="">
+										<img class="img-fluid" src="<?php echo base_url();?>uploads/forums/<?php echo $forum->forum_image; ?>" alt="">
 									</div>
                                     <?php }; ?>
 									
@@ -35,7 +35,13 @@
 							<div class="article_detail_wrapss single_article_wrap format-standard">
 								
 								<div class="article_posts_thumb">
-									<span class="img"><img class="img-fluid" src="https://via.placeholder.com/500x500" alt=""></span>
+									<span class="img">
+										<?php if(is_valid_image($forum->user->photo,"./uploads/authors/")): ?>
+						          	  	  <img src="<?php echo base_url();?>uploads/authors/<?php echo $forum->user->photo; ?>" >
+						          	  	<?php else: ?>
+						          	  		<img src="<?php echo base_url();?>uploads/authors/author.png">
+						          	  	<?php endif; ?>
+									</span>
 								    <small class="text-muted">Posted By</small>
 									<h3 class="pa-name"><?php echo $forum->user->name; ?></h3>
 									
@@ -56,9 +62,9 @@
 												<li class="article_comments_wrap">
 
 													<article>
-														<div class="article_comments_thumb">
+														<!-- <div class="article_comments_thumb">
 															<img src="https://via.placeholder.com/500x500" alt="">
-														</div>
+														</div> -->
 														<div class="comment-details">
 															<div class="comment-meta">
 																<div class="comment-left-meta">
@@ -143,7 +149,9 @@
 								<?php foreach($forums as $forum): ?>
 									<li>
 										<span class="left">
-											<img src="https://via.placeholder.com/1200x800" alt="" class="">
+											<?php if(is_valid_image($forum->forum_image,"./uploads/forums/")){ ?>
+												<img class="img-fluid" src="<?php echo base_url();?>uploads/forums/<?php echo $forum->forum_image; ?>" alt="">
+		                                    <?php }; ?>
 										</span>
 										<span class="right">
 											<a class="feed-title" href="#"><?php echo $forum->forum_title; ?></a> 

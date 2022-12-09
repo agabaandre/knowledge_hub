@@ -61,3 +61,7 @@ $route['browse/areas']     = 'records/areas';
 
 $route['admin']    = 'auth';
 $route['rcc/dashboards']    = 'auth';
+$route['logout']   = 'auth/frontend_logout';
+
+$route['account/publications']   = 'account/index';
+$route['account/publish']        = 'account/create';
