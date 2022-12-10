@@ -25,6 +25,9 @@
             </div>
             <!-- end toast -->
             </div>
+
+            <div class="container">
+
         
             <?php echo form_open_multipart(base_url('forums/save'), array('id' => 'forum', 'class' => 'forum')); ?>
 
@@ -62,40 +65,13 @@
             </div>
             <div class="modal-footer">
 
-                <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-primary" type="submit">Submit</button>
+                <button class="btn btn-success" type="submit">Submit</button>
             </div>
 
             <?php echo form_close(); ?>
+            
+            </div>
 
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
-
-<script>
-    $('#forume').submit(function(e) {
-        e.preventDefault();
-        var data = $(this).serialize();
-        var url = '<?php echo base_url(); ?>forums/save'
-        // console.log(data);
-        $.ajax({
-            url: url,
-            method: "post",
-            data: data,
-            success: function(res) {
-                if (res == "OK") {
-
-                    $('.notification').html("<center><font color='green'>Forum Discusiion Submitted</font></center>");
-                    $('.toast-3s').toast('show');
-                } else {
-
-                    $('.notification').html("<center>" + res + "</center>");
-                    $('.toast-3s').toast('show');
-                }
-
-
-                // console.log(res);
-            } //success
-        }); // ajax
-    });
-</script>
