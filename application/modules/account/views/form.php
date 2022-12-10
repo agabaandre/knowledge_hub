@@ -143,7 +143,7 @@
             <div class="modal-footer">
 
                 <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-primary" type="submit">Save Record</button>
+                <button class="btn btn-primary" type="submit">Submit</button>
             </div>
 
             <?php echo form_close(); ?>

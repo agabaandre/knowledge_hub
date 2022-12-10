@@ -41,6 +41,13 @@
 								<i class="lni lni-user mr-2"></i>Sign In
 							</a>
 						</li>
+
+						<li>
+							<a href="<?php echo base_url('account/register'); ?>"  class="ft-medium text-bold">
+								Register
+							</a>
+						</li>
+
 						<?php else: ?>
 
 						<li>
@@ -50,7 +57,7 @@
 						</li>
 
 						<li class="add-listing theme-bg bg-central">
-							<a href="#">
+							<a href="<?php echo base_url('account/publish'); ?>">
 								<i class="lni lni-circle-plus mr-1"></i>Publish a resource
 							</a>
 						</li>

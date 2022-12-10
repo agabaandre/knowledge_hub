@@ -185,7 +185,7 @@ class Records extends MX_Controller {
 		
 		$data['authors'] = $this->authorsmodel->get();
 	
-		render_site('authors',$data);
+		render_site('authors',$data,true);
 	}
 
 
@@ -195,7 +195,7 @@ class Records extends MX_Controller {
 		$data['title']  = $this->title;
 		$data['authors'] = $this->authorsmodel->get();
 	
-		render_site('authors',$data);
+		render_site('authors',$data,true);
 	}
 
 	public function search()

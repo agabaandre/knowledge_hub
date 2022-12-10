@@ -25,20 +25,14 @@ class Account extends MX_Controller
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
-
-		if ($id) {
-			$data['title']  = 'Create Publication';
-		} else {
-			$data['title']  = 'Create Publication';
-		}
-
+		$data['title']  = 'Create Publication';
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();
 		$data['filetypes'] = $this->filetypesmodel->get();
 		$data['publications'] = $this->publicationsmodel->find($id);
 
-		render_site('form', $data);
+		render_site('form', $data,true);
 	}
 
 	public function save()
@@ -59,7 +53,7 @@ class Account extends MX_Controller
 		];
 
 		$resp = $this->publicationsmodel->save($theme);
-		echo $resp;
+		redirect('account');
 	}
 
 	public function delete($id)

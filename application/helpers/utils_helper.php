@@ -84,9 +84,6 @@ if (!function_exists('base64_to_image')) {
 
 		$output_file = $storage_path . "/" . $file_name;
 
-		// split the string on commas
-		// $data[ 0 ] == "data:image/png;base64"
-		// $data[ 1 ] == <actual base64 string>
 		$data = explode(',', $base64_string);
 
 		file_put_contents($output_file, base64_decode(trim($data[1])));
