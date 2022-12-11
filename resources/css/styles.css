@@ -98,7 +98,7 @@
     display: none;
 }
 
-.js #loader {
+. .js #loader {
     display: block;
     position: absolute;
     left: 100px;
@@ -6499,6 +6499,15 @@ footer.skin-dark-footer ul.footer-bottom-social li a:focus {
     text-decoration: none;
     background: #333c56;
     color: #ffffff;
+}
+
+body {
+    top: 0px !important;
+    position: static !important;
+}
+
+.goog-te-banner-frame {
+    display: none !important
 }
 
 #back2Top:hover {
