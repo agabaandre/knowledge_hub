@@ -49,7 +49,7 @@
                                 $colors = ['dark','blue','green'];
 
                                 foreach ($tags as $tag): ?>
-                                    <span class="px-3 py-1 medium bg-<?php echo $colors[mt_rand(0,2)]; ?> text-white rounded"><?php echo $tag->tag_text; ?></span>
+                                    <a href="<?php echo base_url("records/search"); ?>?tag=<?php echo $tag->tag_text; ?>" class="px-3 py-1 medium bg-<?php echo $colors[mt_rand(0,2)]; ?> text-white rounded"><?php echo $tag->tag_text; ?></a>
                                  <?php endforeach; ?>
 
                             </div>

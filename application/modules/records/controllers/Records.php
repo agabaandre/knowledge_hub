@@ -30,7 +30,7 @@ class Records extends MX_Controller {
 		$data['title']  = $this->title;
 		
 		$data['categories'] = $this->get_categories();
-
+		$data['featured']  = $this->publicationsmodel->get(['is_featured'=>1],10,0);
 		$data['recent']  = $this->publicationsmodel->get([],8,0);
 		$data['authors'] = $this->authorsmodel->get([],12,0);
 		$data['quotes']  = $this->quotesmodel->get();
@@ -203,7 +203,7 @@ class Records extends MX_Controller {
 		$data['module']    = $this->module;
 		flash_form();
 
-		$term    = $this->input->post('term');
+		$term    = (isset($_GET['tag']))?($_GET['tag']):$this->input->post('term');
 		$type    = $this->input->post('type');
 
 		$count   = $this->recordsmodel->count($term,$type);

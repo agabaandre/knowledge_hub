@@ -34,20 +34,20 @@
             <?php //print_r($subthemes);
             ?>
             <div class="modal-body">
-                <input type="hidden" name="id" id="id" class="newform">
+                <input type="hidden" name="id" id="id" class="">
                 <div class="row">
 
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Discussion Title</label>
-                                <input type="text" placeholder="Title" rows="1" class="form-control newform" id="title" name="title" required/>
+                                <input type="text" placeholder="Title" rows="1" class="form-control " id="title" name="title" required/>
                             </div>
                         </div>
 
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description"> Description</label>
-                                <textarea placeholder="Descripion" class="form-control newform" id="description" name="description" required></textarea>
+                                <textarea placeholder="Descripion" class="form-control " id="description" name="description" required></textarea>
                             </div>
                         </div>
 
