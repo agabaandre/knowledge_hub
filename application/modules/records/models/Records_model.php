@@ -52,7 +52,9 @@ class Records_model extends CI_Model
 			$this->db->like('title', $term);
 			$this->db->or_like('description', $term);
 			//if tag, include pubs with the tag
-			$this->db->or_where_in('id', $this->publication_tags($term));
+			$tag_pubs = $this->publication_tags($term);
+			if(count($tag_pubs)>0)
+			$this->db->or_where_in('id', $tag_pubs);
 
 			if (count($authors) > 0)
 				$this->db->or_where_in('author_id ', array_values($authors));

@@ -4,7 +4,7 @@
 					<div class="row justify-content-center">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<div class="sec_title position-relative text-center mb-5">
-								<h6 class="text-muted mb-0">Feature Publications</h6>
+								<h2 class="ft-bold">Recommended Publications</span></h2>
 							</div>
 						</div>
 					</div>
@@ -22,7 +22,7 @@
 									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
 										<div class="rw-header d-flex align-items-center justify-content-start">
 											<div class="rv-110-caption pl-3">
-												<h4 class="ft-medium fs-md mb-0 lh-1"><?php echo truncate($row->title, 40); ?></h4>
+												<h4 class="ft-medium fs-md mb-0 lh-1"><?php echo truncate($row->title, 30); ?></h4>
 												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></p>
 											</div>
 										</div>
