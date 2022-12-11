@@ -24,18 +24,15 @@
 				<div class="nav-menus-wrapper" style="transition-property: none;">
 
 					<!-- Use CSS to replace link text with flag icons -->
-					<div class="translation-links">
-						<a href="#" class="eng" data-lang="eng"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/en.png" alt="EN" width=30></a>
-						<a href="#" class="fr" data-lang="fr"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/fr.png" alt="FR" width=30></a>
-						<a href="#" class="pt-PT" data-lang="pt-PT"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/pl.png" alt="PT" width=30></a>
-						<a href="#" class="ar" data-lang="ar"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/uae.png" alt="AR" width=30></a>
-					</div>
+
 					<ul class="nav-menu">
 
 						<li><a href="<?php echo base_url(); ?>">Home</a></li>
 						<li><a href="<?php echo base_url('records/search'); ?>">Search</a></li>
 						<li><a href="<?php echo base_url('forums/index'); ?>">Forums</a></li>
 						<li><a href="<?php echo base_url('faqs/index'); ?>">FAQs</a></li>
+
+
 
 					</ul>
 
@@ -72,6 +69,14 @@
 								</a>
 							</li>
 						<?php endif; ?>
+						<div id="google_translate_element" style="display: none;"></div>
+						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);">
+							<option data-content='<span class="flag-icon flag-icon-us"></span> English' value="English">English</option>
+							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
+							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese (Portugal, Brazil)' value="Portuguese (Portugal, Brazil)">Portuguese (Portugal, Brazil)</option>
+
+						</select>
+						<div>
 					</ul>
 				</div>
 			</nav>

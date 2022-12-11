@@ -141,7 +141,10 @@
 	<!-- ============================================================== -->
 	<!-- All Jquery -->
 	<!-- ============================================================== -->
+	X
 	<script src="<?php echo base_url(); ?>resources/js/jquery.min.js"></script>
+	<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
+
 	<script src="<?php echo base_url(); ?>resources/js/popper.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/bootstrap.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/slick.js"></script>
@@ -171,45 +174,33 @@
 
 		//Quizz
 	</script>
-	<!-- Code provided by Google -->
-	<div id="google_translate_element"></div>
+
 	<script type="text/javascript">
 		function googleTranslateElementInit() {
 			new google.translate.TranslateElement({
 				pageLanguage: 'en',
+				layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
 				autoDisplay: false
-			}, 'google_translate_element'); //remove the layout
+			}, 'google_translate_element');
 		}
-	</script>
 
-	<script src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
-	<script type="text/javascript">
-		function triggerHtmlEvent(element, eventName) {
-			var event;
-			if (document.createEvent) {
-				event = document.createEvent('HTMLEvents');
-				event.initEvent(eventName, true, true);
-				element.dispatchEvent(event);
-			} else {
-				event = document.createEventObject();
-				event.eventType = eventName;
-				element.fireEvent('on' + event.eventType, event);
+		function translateLanguage(lang) {
+			googleTranslateElementInit();
+			var $frame = $('.goog-te-menu-frame:first');
+			if (!$frame.length) {
+				alert("Error: Could not find Google translate frame.");
+				return false;
 			}
+			$frame.contents().find('.goog-te-menu2-item span.text:contains(' + lang + ')').get(0).click();
+			return false;
 		}
-		//  <!--Flag click handler-- >
-		$('.translation-links a').click(function(e) {
-			e.preventDefault();
-			var lang = $(this).data('lang');
-			$('#google_translate_element select option').each(function() {
-				if ($(this).text().indexOf(lang) > -1) {
-					$(this).parent().val($(this).val());
-					var container = document.getElementById('google_translate_element');
-					var select = container.getElementsByTagName('select')[0];
-					triggerHtmlEvent(select, 'change');
-				}
-			});
+
+		$(function() {
+			$('.selectpicker').selectpicker();
 		});
 	</script>
+
+
 
 	</body>
 

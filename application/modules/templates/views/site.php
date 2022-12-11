@@ -17,5 +17,7 @@ $this->load->view($module . "/" . $view);
 
 require_once 'partials/footer.php';
 
+
+
 ?>
 	
