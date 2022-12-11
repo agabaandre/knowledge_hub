@@ -171,7 +171,7 @@ class Auth extends MX_Controller
     $res = $this->auth_mdl->blockUser($postdata);
     echo $res;
   }
-  public function unblockUser()
+  public function unblockUser()                                                                                                                                                                                                                                                              
   {
     $postdata = $this->input->post();
     $res = $this->auth_mdl->unblockUser($postdata);
