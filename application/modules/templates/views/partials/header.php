@@ -25,10 +25,10 @@
 
 					<!-- Use CSS to replace link text with flag icons -->
 					<div class="translation-links">
-						<a href="#" class="eng" data-lang="eng"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/en.png" alt="EN"></a>
-						<a href="#" class="fr" data-lang="fr"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/fr.png" alt="FR"></a>
-						<a href="#" class="pt-PT" data-lang="pt-PT"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/pl.png" alt="PT"></a>
-						<a href="#" class="ar" data-lang="ar"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/uae.png" alt="AR"></a>
+						<a href="#" class="eng" data-lang="eng"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/en.png" alt="EN" width=30></a>
+						<a href="#" class="fr" data-lang="fr"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/fr.png" alt="FR" width=30></a>
+						<a href="#" class="pt-PT" data-lang="pt-PT"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/pl.png" alt="PT" width=30></a>
+						<a href="#" class="ar" data-lang="ar"><img class="img-fluid" src="<?php echo base_url() ?>assets/images/flags/uae.png" alt="AR" width=30></a>
 					</div>
 					<ul class="nav-menu">
 
