@@ -203,7 +203,7 @@ class Records extends MX_Controller {
 		$data['module']    = $this->module;
 		flash_form();
 
-		$term    = $this->input->post('term');
+		$term    = (isset($_GET['tag']))?($_GET['tag']):$this->input->post('term');
 		$type    = $this->input->post('type');
 
 		$count   = $this->recordsmodel->count($term,$type);
