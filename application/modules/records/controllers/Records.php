@@ -30,7 +30,7 @@ class Records extends MX_Controller {
 		$data['title']  = $this->title;
 		
 		$data['categories'] = $this->get_categories();
-
+		$data['featured']  = $this->publicationsmodel->get(['is_featured'=>1],10,0);
 		$data['recent']  = $this->publicationsmodel->get([],8,0);
 		$data['authors'] = $this->authorsmodel->get([],12,0);
 		$data['quotes']  = $this->quotesmodel->get();
