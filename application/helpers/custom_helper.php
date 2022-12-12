@@ -304,6 +304,16 @@ if (!function_exists('flash_form')) {
     }
 }
 
+if (!function_exists('clear_form')) {
+    function clear_form($key = 'form_data')
+    {
+        $ci = &get_instance();
+
+        $ci->session->set_flashdata($key, null);
+    }
+}
+
+
 
 function check_logged_in()
 {

@@ -30,6 +30,12 @@
 											<span class="muted medium ml-2 theme-cl"><br><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
 											<span class="text-muted medium d-block">
 												Last updated: <i class="fa fa-bank mr-1"></i><?php echo time_ago($row->updated_at); ?></span>
+												<span class="text-muted medium d-block">
+													<i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views
+												</span>
+												<span class="text-muted medium">
+													<i class="fa fa-comments mr-1"></i> <?php echo count($row->comments); ?> Comments
+												</span>
 										</div>
 									</div>
 								</div>
