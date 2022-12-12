@@ -31,15 +31,23 @@
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
                 <div class="row">
-
-                    <div class="col-md-6">
-                        <div class="col-md-12">
+                <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="title" required></textarea>
+                                <input placeholder="Title"  class="form-control newform" id="title" name="title" required/>
                             </div>
                         </div>
 
+                <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="summernote">Publication Description</label>
+                                <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required></textarea>
+                            </div>
+                        </div>
+
+
+                    <div class="col-md-6">
+                     
 
                         <div class="col-md-12">
                             <div class="mb-3">
@@ -78,14 +86,9 @@
                         <!-- <div  class="col-md-4"> -->
                         <!-- </div> -->
                     </div>
+                 
                     <div class="col-md-6">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="description">Publication Description</label>
-                                <textarea placeholder="Descripion" class="form-control newform" id="description" name="description" required></textarea>
-                            </div>
-                        </div>
-
+                       
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Type</label>

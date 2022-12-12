@@ -46,7 +46,7 @@
 						<div class="jbd-01 pr-3">
 							<div class="jbd-details mb-4">
 								<h5 class="ft-medium fs-md">Description</h5>
-								<p><?php echo $publication->description; ?></p>
+								<p><?php echo nl2br($publication->description); ?></p>
 							</div>
 
 							<div class="jbd-details mb-4">
@@ -112,7 +112,7 @@
 															</div>
 														</div>
 														<div class="comment-text">
-															<p><?php echo $comment->comment; ?></p>
+															<p><?php echo nl2br($comment->comment); ?></p>
 														</div>
 
 													</div>

@@ -20,23 +20,21 @@
 							<a href="<?php echo base_url("records/show/") . $row->id; ?>">
 								<div class="single_review px-2">
 									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
-										<div class="rw-header d-flex align-items-center justify-content-start">
-											<div class="rv-110-caption pl-3">
+										<div class="rw-header d-flex justify-content-start">
+											<div class="rv-110-caption pl-0">
 												<h4 class="ft-medium fs-md mb-0 lh-1"><?php echo truncate($row->title, 30); ?></h4>
 												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></p>
 											</div>
 										</div>
-										<div class="">
-											<span class="muted medium ml-2 theme-cl"><br><i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
-											<span class="text-muted medium d-block">
-												Last updated: <i class="fa fa-bank mr-1"></i><?php echo time_ago($row->updated_at); ?></span>
-												<span class="text-muted medium d-block">
-													<i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views
-												</span>
-												<span class="text-muted medium">
-													<i class="fa fa-comments mr-1"></i> <?php echo count($row->comments); ?> Comments
-												</span>
-										</div>
+										    <span class="d-block theme-cl">
+												<i class="lni lni-briefcase mr-1"></i>Theme: <?php echo $row->theme->description; ?>
+											</span>
+											<span class="muted medium d-block theme-cl"><i class="lni lni-archive mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
+											<span class="text-muted medium d-block "><i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?> </span>
+											<span class="text-muted d-block mt-1">
+												<span class=" mr-1"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
+												<span class=" mr-1 ml-1"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
+								           </span>
 									</div>
 								</div>
 							</a>

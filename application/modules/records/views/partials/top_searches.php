@@ -24,18 +24,22 @@
 												<div class="cats-box-caption px-2">
 													<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($row->title, 40); ?></h4>
 													<div class="d-block mb-2 position-relative">
-													  <p class="text-nothern p-0"><?php echo truncate($row->description,60); ?></p>
+													  <p class="text-nothern p-0"><?php echo nl2br(truncate($row->description,60)); ?></p>
 														<span class="text-muted medium">
 															Source: <i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></span>
+														
 														<span class="muted medium ml-2 theme-cl"><br>
-														<i class="lni lni-briefcase mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
-														<span class="text-muted medium d-block">
-														<i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?></span>
-														<span class="text-muted medium d-block">
-															<i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views
-														</span>
-														<span class="text-muted medium">
-														<i class="fa fa-comments mr-1"></i> <?php echo count($row->comments); ?> Comments
+														<i class="lni lni-briefcase mr-1"></i>Theme: <?php echo $row->theme->description; ?></span>
+															<span class="muted medium ml-2 theme-cl"><br>
+														<i class="lni lni-archive mr-1"></i>Sub Theme: <?php echo $row->sub_theme->description; ?></span>
+														
+														<span class="muted medium ml-2 text-muted mt-1 "><br>
+														<i class="lni lni-empty-file mr-1"></i>Type: <?php echo $row->file_type->name; ?></span>
+														
+														<span class="text-muted medium d-block mt-1">
+														    <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?> </span>
+															<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
+														    <span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
 														</span>
 														
 													</div>
