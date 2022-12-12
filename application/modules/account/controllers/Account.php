@@ -131,11 +131,9 @@ class Account extends MX_Controller
 	{
 	  $postdata = $this->input->post();
 	  $password = $this->input->post('password');
-	  $hash = $this->argonhash->make($password);
 	  $data = $this->auth_mdl->login($postdata);
-	  $adata = (array)$data;
-	  $hash = $this->argonhash->make($password);
-  
+	  $adata = (array) $data;
+	 
 	  $auth = ($this->argonhash->check($password, $adata['password']));
 	  unset($adata['password']);
 	
