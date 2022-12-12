@@ -161,6 +161,12 @@
 
 	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
+	    <!-- include summernote css/js -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+
+
 	<script type="text/javascript">
 		$('.autocomplete').autocomplete({
 			source: "<?php echo base_url(); ?>records/autocomplete",
@@ -170,6 +176,14 @@
 				$('.term').val(ui.item.label);
 				$('.search-form').submit();
 			}
+		});
+
+		$(document).ready(function() {
+			$('#summernote').summernote({
+				placeholder: 'Discussion body here',
+				tabsize: 2,
+				height: 200
+			});
 		});
 
 		//Quizz

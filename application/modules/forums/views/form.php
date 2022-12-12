@@ -47,7 +47,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description"> Description</label>
-                                <textarea placeholder="Descripion" class="form-control " id="description" name="description" required></textarea>
+                                <textarea placeholder="Descripion" class="form-control " id="summernote" rows="8" name="description" required></textarea>
                             </div>
                         </div>
 
