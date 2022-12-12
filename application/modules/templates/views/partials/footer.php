@@ -23,45 +23,31 @@
 						</div>
 					</div>
 
-					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
 						<div class="footer_widget">
-							<h4 class="widget_title">For Authors</h4>
+							<h4 class="widget_title">Navigate</h4>
 							<ul class="footer-menu">
-								<li><a href="#">Publish a resource</a></li>
-								<li><a href="#">Login</a></li>
+							    <li><a href="<?php echo base_url(); ?>">Home</a></li>
+								<?php if(is_guest()): ?>
+								<li><a href="#login" data-bs-toggle="modal">Login</a></li>
+								
+								<?php else: ?>
+								<li><a href="<?php echo base_url("account/publish"); ?>">Publish a resource</a></li>
+								<?php endif; ?>
+								<li><a href="<?php echo base_url("forums"); ?>">Discussion Forums</a></li>
 							</ul>
 						</div>
 					</div>
-
-					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-						<div class="footer_widget">
-							<h4 class="widget_title">For Everyone</h4>
-							<ul class="footer-menu">
-								<li><a href="#">Frequently accessed resources</a></li>
-								<li><a href="#">RCC Resources</a></li>
-							</ul>
-						</div>
-					</div>
-
-					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
+					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
 						<div class="footer_widget">
 							<h4 class="widget_title">About This Portal</h4>
 							<ul class="footer-menu">
-								<li><a href="#">How it works</a></li>
-								<li><a href="#">Our Mission</a></li>
+								<li><a href="<?php echo base_url("faqs"); ?>">Frequently asked questions</a></li>
+								<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
 							</ul>
 						</div>
 					</div>
 
-					<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12">
-						<div class="footer_widget">
-							<h4 class="widget_title">Helpful Links</h4>
-							<ul class="footer-menu">
-								<li><a href="#">Site Map</a></li>
-								<li><a href="#">Privacy Policy</a></li>
-							</ul>
-						</div>
-					</div>
 
 				</div>
 			</div>
@@ -94,7 +80,7 @@
 						<h2 class="m-0 ft-regular">Login</h2>
 					</div>
 
-					<?php echo form_open(base_url('auth/login')); ?>
+					<?php echo form_open(base_url('account/login')); ?>
 
 					<input type="hidden" name="route" value="front" />
 					<div class="form-group">
