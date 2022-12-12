@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="author" content="Themezhub" />
+    <meta name="author" content="Africa CDC" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Africa CDC Health Knowledge Hub</title>

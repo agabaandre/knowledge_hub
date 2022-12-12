@@ -19,6 +19,7 @@
 							</li>
 
 						</ul>
+
 					</div>
 				</div>
 				<div class="nav-menus-wrapper" style="transition-property: none;">
@@ -69,15 +70,19 @@
 								</a>
 							</li>
 						<?php endif; ?>
+
+
+					</ul>
+
+					<ul class=" nav-menu nav-menu-social align-to-right" style="position:relative; margin-top:25px;">
 						<div id="google_translate_element" style="display: none;"></div>
 						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);">
-							<option data-content='<span class="flag-icon flag-icon-us"></span> English' value="English">English</option>
+							<option data-content='English' value="English"><span class="flag-icon flag-icon-us"></span>English</option>
 							<option data-content='<span class="flag-icon flag-icon-ar"></span> Arabic' value="Arabic">Arabic</option>
 							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
 							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Portuguese">Portuguese</option>
 
 						</select>
-						<div>
 					</ul>
 				</div>
 			</nav>
