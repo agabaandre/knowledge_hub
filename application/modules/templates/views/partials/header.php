@@ -74,7 +74,7 @@
 							<option data-content='<span class="flag-icon flag-icon-us"></span> English' value="English">English</option>
 							<option data-content='<span class="flag-icon flag-icon-ar"></span> Arabic' value="Arabic">Arabic</option>
 							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
-							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Portuguese">Portuguese (Portugal)</option>
+							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Portuguese">Portuguese</option>
 
 						</select>
 						<div>
