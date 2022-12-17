@@ -25,6 +25,7 @@ class Rccdashboards extends MX_Controller
 
 
 		$data['countries'] = $this->data_mdl->get_countries();
+		$data['regions'] = $this->geoareasmodel->getrcc();
 		$data['filter']    = $filter;
 		$data['year']      = $current_year;
 		$data['year_data'] = $this->get_year_data($filter, $current_year);

@@ -15,7 +15,7 @@
 								<div class="row no-gutters">
 									<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text"  value="<?php echo old("term"); ?>" class="form-control sm left-ico autocomplete term" name="term" placeholder="Job Title, Keyword or Company" />
+											<input type="text"  value="<?php echo old("term"); ?>" class="form-control sm left-ico autocomplete term custom-height-lg" name="term" placeholder="Job Title, Keyword or Company" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
@@ -25,7 +25,7 @@
 											  <option value="" disabled selected>Choose Type</option>
 											  <?php foreach ($types as $type): ?>
 											  <option value="<?php echo $type->id; ?>" 
-											  	<?php echo (old("type")==$type->id)?"seleced":"";?>
+											  	<?php echo (old("type")==$type->id)?"selected":"";?>
 											  	><?php echo $type->name; ?></option>
 											<?php endforeach; ?>
 											</select>
@@ -33,7 +33,7 @@
 									</div>
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width custom-height sm rounded bg-dark text-white fs-md" type="submit">Search</button>
+											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Search</button>
 										</div>
 									</div>
 								</div>

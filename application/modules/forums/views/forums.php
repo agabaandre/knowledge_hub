@@ -12,6 +12,13 @@
 										<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
 											<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Discussions Available</h6>
 										</div>
+
+										<?php if(!is_guest()): ?>
+											<a href="<?php echo base_url('forums/create'); ?>"  class="btn btn-outline-success btn-sm text-bold mr-4">
+												<i class="fa fa-edit mr-2"></i>Start New Discussion
+											</a>
+										<?php endif; ?>
+
 										
 									</div>
 								</div>
