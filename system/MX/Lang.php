@@ -1,8 +1,5 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
-/** load the CI class for Modular Extensions **/
-require dirname(__FILE__).'/Base.php';
-
 /**
  * Modular Extensions - HMVC
  *
@@ -10,12 +7,12 @@ require dirname(__FILE__).'/Base.php';
  * @link	http://codeigniter.com
  *
  * Description:
- * This library replaces the CodeIgniter Controller class
+ * This library extends the CodeIgniter CI_Language class
  * and adds features allowing use of modules and the HMVC design pattern.
  *
- * Install this file as application/third_party/MX/Controller.php
+ * Install this file as application/third_party/MX/Lang.php
  *
- * @copyright	Copyright (c) 2015 Wiredesignz
+ * @copyright	Copyright (c) 2011 Wiredesignz
  * @version 	5.5
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -36,32 +33,41 @@ require dirname(__FILE__).'/Base.php';
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  **/
-class MX_Controller 
+class MX_Lang extends CI_Lang
 {
-	public $autoload = array();
-	
-	public function __construct() 
+	public function load($langfile, $lang = '', $return = FALSE, $add_suffix = TRUE, $alt_path = '', $_module = '')	
 	{
-		if(CI::$APP->config->item('controller_suffix')){
-			$search = CI::$APP->config->item('controller_suffix');
+		if (is_array($langfile)) 
+		{
+			foreach($langfile as $_lang) $this->load($_lang);
+			return $this->language;
 		}
-		else{
-			$search = "";
-		}
-		$class = str_replace($search, '', get_class($this));
-		log_message('debug', $class." MX_Controller Initialized");
-		Modules::$registry[strtolower($class)] = $this;	
-		
-		/* copy a loader instance and initialize */
-		$this->load = clone load_class('Loader');
-		$this->load->initialize($this);	
-		
-		/* autoload module items */
-		$this->load->_autoloader($this->autoload);
-	}
+			
+		$deft_lang = CI::$APP->config->item('language');
+		$idiom = ($lang == '') ? $deft_lang : $lang;
 	
-	public function __get($class) 
-	{
-		return CI::$APP->$class;
+		if (in_array($langfile.'_lang'.EXT, $this->is_loaded, TRUE))
+			return $this->language;
+
+		$_module OR $_module = CI::$APP->router->fetch_module();
+		list($path, $_langfile) = Modules::find($langfile.'_lang', $_module, 'language/'.$idiom.'/');
+
+		if ($path === FALSE) 
+		{
+			if ($lang = parent::load($langfile, $lang, $return, $add_suffix, $alt_path)) return $lang;
+		
+		} 
+		else 
+		{
+			if($lang = Modules::load_file($_langfile, $path, 'lang'))
+			{
+				if ($return) return $lang;
+				$this->language = array_merge($this->language, $lang);
+				$this->is_loaded[] = $langfile.'_lang'.EXT;
+				unset($lang);
+			}
+		}
+		
+		return $this->language;
 	}
 }

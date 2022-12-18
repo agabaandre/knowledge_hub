@@ -22,7 +22,7 @@ class Auth extends MX_Controller
     $data = $this->auth_mdl->login($postdata);
     $route = $this->input->post('route');
     $adata = (array)$data;
-    $hash = $this->argonhash->make($password);
+    //$hash = $this->argonhash->make($password);
 
     $auth = ($this->argonhash->check($password, $adata['password']));
     unset($adata['password']);

@@ -1,7 +1,8 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
-/** load the CI class for Modular Extensions **/
-require dirname(__FILE__).'/Base.php';
+/* load MX core classes */
+require_once dirname(__FILE__).'/Lang.php';
+require_once dirname(__FILE__).'/Config.php';
 
 /**
  * Modular Extensions - HMVC
@@ -10,10 +11,10 @@ require dirname(__FILE__).'/Base.php';
  * @link	http://codeigniter.com
  *
  * Description:
- * This library replaces the CodeIgniter Controller class
- * and adds features allowing use of modules and the HMVC design pattern.
+ * This library extends the CodeIgniter CI_Controller class and creates an application 
+ * object allowing use of the HMVC design pattern.
  *
- * Install this file as application/third_party/MX/Controller.php
+ * Install this file as application/third_party/MX/Base.php
  *
  * @copyright	Copyright (c) 2015 Wiredesignz
  * @version 	5.5
@@ -36,32 +37,24 @@ require dirname(__FILE__).'/Base.php';
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  **/
-class MX_Controller 
+class CI extends CI_Controller
 {
-	public $autoload = array();
+	public static $APP;
 	
-	public function __construct() 
-	{
-		if(CI::$APP->config->item('controller_suffix')){
-			$search = CI::$APP->config->item('controller_suffix');
-		}
-		else{
-			$search = "";
-		}
-		$class = str_replace($search, '', get_class($this));
-		log_message('debug', $class." MX_Controller Initialized");
-		Modules::$registry[strtolower($class)] = $this;	
+	public function __construct() {
 		
-		/* copy a loader instance and initialize */
-		$this->load = clone load_class('Loader');
-		$this->load->initialize($this);	
+		/* assign the application instance */
+		self::$APP = $this;
 		
-		/* autoload module items */
-		$this->load->_autoloader($this->autoload);
-	}
-	
-	public function __get($class) 
-	{
-		return CI::$APP->$class;
+		global $LANG, $CFG;
+		
+		/* re-assign language and config for modules */
+		if ( ! $LANG instanceof MX_Lang) $LANG = new MX_Lang;
+		if ( ! $CFG instanceof MX_Config) $CFG = new MX_Config;
+		
+		parent::__construct();
 	}
 }
+
+/* create the application object */
+new CI;
