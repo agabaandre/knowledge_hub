@@ -27,7 +27,7 @@ class Account extends MX_Controller
 		$data['module'] = $this->module;
 
 		if ($id) {
-			$data['title']  = 'Create Publication';
+			$data['title']  = 'Edit Publication';
 		} else {
 			$data['title']  = 'Create Publication';
 		}
@@ -44,22 +44,24 @@ class Account extends MX_Controller
 	public function save()
 	{
 
-		$is_error = false;
+		// $is_error = false;
 
-		$theme = [
-			'id'           => @$this->input->post("id"), 
-			'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id"), 
-			'publication'  => $this->input->post("publication"),
-			'author_id'    => $this->input->post("author"),
-			'geographical_coverage_id' => $this->input->post("geographical_coverage"), 
-			'title' 	   => $this->input->post("title"), 
-			'description'  => $this->input->post("description"), 
-			'file_type_id' => $this->input->post("file_type"),
-			'is_active'    => $this->input->post("is_active")
-		];
+		// $theme = [
+		// 	'id'           => @$this->input->post("id"), 
+		// 	'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id"), 
+		// 	'publication'  => $this->input->post("publication"),
+		// 	'author_id'    => $this->input->post("author"),
+		// 	'geographical_coverage_id' => $this->input->post("geographical_coverage"), 
+		// 	'title' 	   => $this->input->post("title"), 
+		// 	'description'  => $this->input->post("description"), 
+		// 	'file_type_id' => $this->input->post("file_type"),
+		// 	'is_active'    => $this->input->post("is_active")
+		// ];
 
-		$resp = $this->publicationsmodel->save($theme);
-		echo $resp;
+		// $resp = $this->publicationsmodel->save($theme);
+		// echo $resp;
+
+		dd($this->input->post());
 	}
 
 	public function delete($id)

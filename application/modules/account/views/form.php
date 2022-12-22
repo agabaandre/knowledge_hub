@@ -40,7 +40,6 @@
                             </div>
                         </div>
 
-
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Publication URL Link</label>
@@ -64,7 +63,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
-                                <select class="form-control js-example-basic-single" name="sub_thematic_area_id" required select2>
+                                <select class="form-control js-example-basic-single select2" name="sub_thematic_area_id" required select2>
                                     <option disabled>Select</option>
                                     <?php foreach ($subthemes as $subtheme) : ?>
                                         <option value="<?php echo $subtheme->id; ?>">
@@ -82,7 +81,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Description</label>
-                                <textarea placeholder="Descripion" class="form-control newform" id="description" name="description" required></textarea>
+                                <textarea placeholder="Descripion" id="" name="description"></textarea>
                             </div>
                         </div>
 
@@ -154,28 +153,35 @@
 
 <script>
     $('#publications').submit(function(e) {
+        // e.preventDefault();
+        // var data = $(this).serialize();
+        // var url = '<?php echo base_url(); ?>publications/save'
+        // // console.log(data);
+        // $.ajax({
+        //     url: url,
+        //     method: "post",
+        //     data: data,
+        //     success: function(res) {
+        //         if (res == "OK") {
+
+        //             $('.notification').html("<center><font color='green'>Publication Added</font></center>");
+        //             $('.toast-3s').toast('show');
+        //         } else {
+
+        //             $('.notification').html("<center>" + res + "</center>");
+        //             $('.toast-3s').toast('show');
+        //         }
+
+
+        //         // console.log(res);
+        //     } //success
+        // }); // ajax
+
         e.preventDefault();
-        var data = $(this).serialize();
-        var url = '<?php echo base_url(); ?>publications/save'
-        // console.log(data);
-        $.ajax({
-            url: url,
-            method: "post",
-            data: data,
-            success: function(res) {
-                if (res == "OK") {
 
-                    $('.notification').html("<center><font color='green'>Publication Added</font></center>");
-                    $('.toast-3s').toast('show');
-                } else {
+        // Get the form data
+        var form_data = new FormData(this);
 
-                    $('.notification').html("<center>" + res + "</center>");
-                    $('.toast-3s').toast('show');
-                }
-
-
-                // console.log(res);
-            } //success
-        }); // ajax
+        console.log(form_data);
     });
 </script>

@@ -24,6 +24,8 @@ class Auth extends MX_Controller
     $adata = (array)$data;
     $hash = $this->argonhash->make($password);
 
+    // dd($hash);
+
     $auth = ($this->argonhash->check($password, $adata['password']));
     unset($adata['password']);
     //print_r($route);

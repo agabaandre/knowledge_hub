@@ -428,6 +428,37 @@
 <!-- Custom js -->
 <script src="<?php echo base_url() ?>assets/js/custom.js"></script>
 
+<!-- Add Select2 Nodemodules -->
+<link href="<?php echo base_url() ?>node_modules/select2/dist/css/select2.min.css" rel="stylesheet" />
+<script src="<?php echo base_url() ?>node_modules/select2/dist/js/select2.min.js"></script>
+
+<!-- Add TinyMCE Nodemodules -->
+<script src="<?php echo base_url() ?>node_modules/tinymce/tinymce.min.js"></script>
+
+<!-- Add Sweetalert2 Nodemodule -->
+<script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+
+<!-- Add Jquery Datatables cdn -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
+<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+
+<script>
+	$(document).ready(function() {
+		$('.select2').select2();
+	});
+</script>
+
+
+<script>
+	tinymce.init({
+		selector: "#description",
+		plugins: [
+			"insertdatetime"
+		],
+		width: "auto",
+		height: 400,
+	});
+</script>
 
 
 </body>
