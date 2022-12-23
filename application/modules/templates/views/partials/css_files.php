@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="<?php echo base_url(); ?>resources/css/sharing.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
+
+
     <style>
         .goog-te-banner-frame.skiptranslate {
             display: none !important;
