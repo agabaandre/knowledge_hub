@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+#[AllowDynamicProperties]
 class FileTypes_model extends CI_Model
 {
 
