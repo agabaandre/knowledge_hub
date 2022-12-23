@@ -33,10 +33,10 @@
 									<?php echo truncate($forum->forum_description, 400); ?>
 								</td>
 
-								<td><?php echo $forum->forum_status; ?></td>
+								<td><?php echo $forum->status; ?></td>
 								<td>
 									<!-- Approve Button -->
-									<?php if ($forum->forum_status == 'pending') : ?>
+									<?php if ($forum->status == 'pending') : ?>
 
 										<!-- Approve modal action -->
 										<button type="button" class="btn btn-success btn-sm btn-block" data-toggle="modal" data-target="#approveForumModal" data-forumid="<?php echo $forum->id; ?>" data-forumtitle="<?php echo $forum->forum_title; ?>" data-forumdescription="<?php echo $forum->forum_description; ?>">
