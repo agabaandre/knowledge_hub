@@ -14,7 +14,7 @@
 	<div class="card-body">
 		<div class="row">
 			<div class="col-md-12">
-				<table class="table table-striped table-bordered table-hover">
+				<table class="table table-striped table-bordered table-hover" id="forum-approval-table">
 					<thead>
 						<tr>
 							<th>Forum</th>
@@ -59,7 +59,7 @@
 
 	<!-- Approve forum modal -->
 	<div class="modal fade" id="approveForumModal" tabindex="-1" role="dialog" aria-labelledby="approveForumModalLabel" aria-hidden="true">
-		<div class="modal-dialog" role="document">
+		<div class="modal-dialog modal-lg" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
 					<h5 class="modal-title" id="approveForumModalLabel">Approve Forum</h5>
