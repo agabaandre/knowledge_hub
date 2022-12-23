@@ -1,66 +1,88 @@
-<div class="gray pt-2">
-	<div class="container">
+<div class="card col-md-12">
+
+	<!-- Card Header with tools -->
+	<div class="card-header">
+		<div class="card-title">
+			<h4>Forum Admin</h4>
+		</div>
+		<!-- <div class="card-tools text-right">
+			<a href="<?php echo base_url('forums/admin/add_forum'); ?>" class="btn btn-primary btn-sm">Add Forum</a>
+		</div> -->
+	</div>
+
+	<!-- Card Body -->
+	<div class="card-body">
 		<div class="row">
-
-
-			<!-- Item Wrap Start -->
-			<div class="col-lg-12 col-md-12 col-sm-12 ">
-
-				<div class="row">
-					<div class="col-xl-12 col-lg-12 col-md-12 col-12">
-						<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
-							<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
-								<h6 class="mb-0 ft-medium fs-sm"><?php echo $rows_count; ?> Discussions Available</h6>
-							</div>
-
-						</div>
-					</div>
-				</div>
-
-				<!-- All jobs -->
-				<div class="row">
-					<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-
-						<!-- Single job -->
+			<div class="col-md-12">
+				<table class="table table-striped table-bordered table-hover">
+					<thead>
+						<tr>
+							<th>Forum</th>
+							<th>Forum Status</th>
+							<th>Forum Actions</th>
+						</tr>
+					</thead>
+					<tbody>
 						<?php foreach ($forums as $forum) : ?>
-							<div class="job_grid d-block border rounded px-3 pt-3 pb-2">
-								<div class="jb-list01">
-									<div class="jb-list-01-title">
-										<a href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">
-											<h5 class="ft-medium mb-1"><?php echo $forum->forum_title; ?></h5>
-											<p>
-												<?php echo truncate($forum->forum_description, 400); ?>
-										</a>
-										<br>
-										<a class="text-success" href="<?php echo base_url("forums/detail/"); ?><?php echo $forum->id; ?>">View Details</a>
-										</p>
-									</div>
-									<div class="jb-list-01-info d-block mb-3">
-										<span class="text-muted mr-2"><i class="lni lni-alarm-clock mr-1"></i>
-											<?php echo time_ago($forum->created_at); ?>
-										</span>
-									</div>
-									<div class="jb-list-01-title">
-										<?php foreach ($forum->tags as $tag) : ?>
-											<span class="mr-2 mb-2 d-inline-flex px-2 py-1 rounded theme-cl theme-bg-light"><?php echo $tag->tag; ?></span>
-										<?php endforeach; ?>
-									</div>
-								</div>
-							</div>
+							<tr>
+								<td style="max-width:500px; min-width:500px;">
+									<!-- Clickable title -->
+									<a href="<?php echo base_url('forums/detail/' . $forum->id); ?>">
+										<h4><?php echo $forum->forum_title; ?></h4>
+									</a>
+									<?php echo truncate($forum->forum_description, 400); ?>
+								</td>
+
+								<td><?php echo $forum->forum_status; ?></td>
+								<td>
+									<!-- Approve Button -->
+									<?php if ($forum->forum_status == 'pending') : ?>
+
+										<!-- Approve modal action -->
+										<button type="button" class="btn btn-success btn-sm btn-block" data-toggle="modal" data-target="#approveForumModal" data-forumid="<?php echo $forum->id; ?>" data-forumtitle="<?php echo $forum->forum_title; ?>" data-forumdescription="<?php echo $forum->forum_description; ?>">
+											Approve
+										</button>
+
+
+										<!-- <a href="<?php echo base_url('forums/admin/approve_forum/' . $forum->id); ?>" class="btn btn-success btn-sm btn-block">Approve</a> -->
+									<?php endif; ?>
+									<a href="<?php echo base_url('forums/admin/edit_forum/' . $forum->id); ?>" class="btn btn-primary btn-sm btn-block">Edit</a>
+									<a href="<?php echo base_url('forums/admin/delete_forum/' . $forum->id); ?>" class="btn btn-danger btn-sm btn-block">Delete</a>
+								</td>
+							</tr>
 						<?php endforeach; ?>
-
-
-					</div>
-				</div>
-
-				<div class="row">
-					<div class="col-lg-12 col-md-12 col-sm-12">
-						<?php echo $links; ?>
-					</div>
-				</div>
-
+					</tbody>
+				</table>
 			</div>
+		</div>
+	</div>
 
+	<!-- Approve forum modal -->
+	<div class="modal fade" id="approveForumModal" tabindex="-1" role="dialog" aria-labelledby="approveForumModalLabel" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h5 class="modal-title" id="approveForumModalLabel">Approve Forum</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+
+					<!-- <h6>Are you sure you want to approve this forum?</h6> -->
+					<p><span id="forumTitle"></span></p>
+					<!-- Forum description -->
+					<p><span id="forumDescription"></span></p>
+				</div>
+				<div class="modal-footer">
+					<!-- <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button> -->
+					<!-- Reject Button -->
+					<a href="" id="rejectForumLink" class="btn btn-danger">Reject</a>
+
+					<a href="" id="approveForumLink" class="btn btn-success">Approve</a>
+
+				</div>
+			</div>
 		</div>
 	</div>
 </div>
