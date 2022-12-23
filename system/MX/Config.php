@@ -1,8 +1,5 @@
 <?php (defined('BASEPATH')) OR exit('No direct script access allowed');
 
-/** load the CI class for Modular Extensions **/
-require dirname(__FILE__).'/Base.php';
-
 /**
  * Modular Extensions - HMVC
  *
@@ -10,10 +7,10 @@ require dirname(__FILE__).'/Base.php';
  * @link	http://codeigniter.com
  *
  * Description:
- * This library replaces the CodeIgniter Controller class
+ * This library extends the CodeIgniter CI_Config class
  * and adds features allowing use of modules and the HMVC design pattern.
  *
- * Install this file as application/third_party/MX/Controller.php
+ * Install this file as application/third_party/MX/Config.php
  *
  * @copyright	Copyright (c) 2015 Wiredesignz
  * @version 	5.5
@@ -36,32 +33,46 @@ require dirname(__FILE__).'/Base.php';
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  **/
-class MX_Controller 
-{
-	public $autoload = array();
-	
-	public function __construct() 
+class MX_Config extends CI_Config 
+{	
+	public function load($file = '', $use_sections = FALSE, $fail_gracefully = FALSE, $_module = '') 
 	{
-		if(CI::$APP->config->item('controller_suffix')){
-			$search = CI::$APP->config->item('controller_suffix');
-		}
-		else{
-			$search = "";
-		}
-		$class = str_replace($search, '', get_class($this));
-		log_message('debug', $class." MX_Controller Initialized");
-		Modules::$registry[strtolower($class)] = $this;	
+		if (in_array($file, $this->is_loaded, TRUE)) return $this->item($file);
+
+		$_module OR $_module = CI::$APP->router->fetch_module();
+		list($path, $file) = Modules::find($file, $_module, 'config/');
 		
-		/* copy a loader instance and initialize */
-		$this->load = clone load_class('Loader');
-		$this->load->initialize($this);	
+		if ($path === FALSE)
+		{
+			parent::load($file, $use_sections, $fail_gracefully);					
+			return $this->item($file);
+		}  
 		
-		/* autoload module items */
-		$this->load->_autoloader($this->autoload);
-	}
-	
-	public function __get($class) 
-	{
-		return CI::$APP->$class;
+		if ($config = Modules::load_file($file, $path, 'config'))
+		{
+			/* reference to the config array */
+			$current_config =& $this->config;
+
+			if ($use_sections === TRUE)	
+			{
+				if (isset($current_config[$file])) 
+				{
+					$current_config[$file] = array_merge($current_config[$file], $config);
+				} 
+				else 
+				{
+					$current_config[$file] = $config;
+				}
+				
+			} 
+			else 
+			{
+				$current_config = array_merge($current_config, $config);
+			}
+
+			$this->is_loaded[] = $file;
+			unset($config);
+			return $this->item($file);
+		}
 	}
 }

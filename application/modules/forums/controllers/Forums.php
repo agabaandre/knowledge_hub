@@ -30,6 +30,13 @@ class Forums extends MX_Controller
 		render_site("forums", $data, true);
 	}
 
+	public function create()
+	{
+		$data['module'] = $this->module;
+		$data['title']  = "Create Discussion";
+		render_site("form", $data, true);
+	}
+
 	public function detail($forum_id)
 	{
 
@@ -49,7 +56,8 @@ class Forums extends MX_Controller
 		$quote = [
 			'id' => @$this->input->post("id"),
 			'forum_title' => $this->input->post("title"),
-			'forum_descriptionn' => $this->input->post("description"),
+			'forum_description' => $this->input->post("description"),
+			'created_by'=>user_session()->user_id
 		];
 
 		$resp = $this->forumsmodel->save($quote);

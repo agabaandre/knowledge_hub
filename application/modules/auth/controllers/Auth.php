@@ -22,7 +22,7 @@ class Auth extends MX_Controller
     $data = $this->auth_mdl->login($postdata);
     $route = $this->input->post('route');
     $adata = (array)$data;
-    $hash = $this->argonhash->make($password);
+    //$hash = $this->argonhash->make($password);
 
     // dd($hash);
 
@@ -173,7 +173,7 @@ class Auth extends MX_Controller
     $res = $this->auth_mdl->blockUser($postdata);
     echo $res;
   }
-  public function unblockUser()
+  public function unblockUser()                                                                                                                                                                                                                                                              
   {
     $postdata = $this->input->post();
     $res = $this->auth_mdl->unblockUser($postdata);
