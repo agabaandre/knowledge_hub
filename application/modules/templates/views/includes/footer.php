@@ -438,9 +438,11 @@
 <!-- Add Sweetalert2 Nodemodule -->
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
-<!-- Add Jquery Datatables cdn -->
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/jquery.dataTables.css">
-<script type="text/javascript" charset="utf8" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css" />
+
+<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.js"></script>
+
+
 
 <script>
 	$(document).ready(function() {
@@ -451,12 +453,64 @@
 
 <script>
 	tinymce.init({
-		selector: "#description",
+		selector: "textarea#description",
 		plugins: [
 			"insertdatetime"
 		],
 		width: "auto",
 		height: 400,
+	});
+</script>
+
+<!-- Update Tag Script -->
+<script>
+	$('#edit-tag-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+		var button = $(event.relatedTarget);
+		var tagId = button.data('id');
+		var tagText = button.data('tag');
+		var modal = $(this);
+		modal.find('.modal-body #tag_id').val(tagId);
+		modal.find('.modal-body #tag_name').val(tagText);
+	});
+</script>
+
+<!-- Update Author Script -->
+<script>
+	$('#edit-author-modal').on('show.bs.modal', function(event) {
+		console.log('Update Author Modal Opened');
+		var button = $(event.relatedTarget);
+		var authorId = button.data('id');
+		var authorName = button.data('name');
+		var authorEmail = button.data('email');
+		var authorPhone = button.data('phone');
+		var authorAddress = button.data('address');
+		var modal = $(this);
+		modal.find('.modal-body #id').val(authorId);
+		modal.find('.modal-body #name').val(authorName);
+		modal.find('.modal-body #email').val(authorEmail);
+		modal.find('.modal-body #telephone').val(authorPhone);
+		modal.find('.modal-body #address').val(authorAddress);
+		// Is organization
+		var isOrganization = button.data('isorganization');
+		// isOrganization Select
+		var isOrganizationSelect = modal.find('.modal-body #is_organization');
+		if (isOrganization == 1) {
+			isOrganizationSelect.val('1');
+		} else {
+			isOrganizationSelect.val('0');
+		}
+	});
+</script>
+
+<!-- Datatables -->
+<script>
+	$(document).ready(function() {
+		$('table#authors-table').DataTable({
+			buttons: [
+				'copy', 'csv', 'excel', 'pdf', 'print'
+			]
+		});
 	});
 </script>
 

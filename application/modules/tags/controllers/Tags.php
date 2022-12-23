@@ -34,12 +34,14 @@ class Tags extends MX_Controller
 	{
 
 		$is_error = false;
+		// dd($this->input->post());
 
-		$theme = [
-			'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
+		$data = [
+			'id' => @$this->input->post("id"),
+			'tag_text' => $this->input->post("tag_name")
 		];
 
-		$resp = $this->tagsmodel->save($theme);
+		$resp = $this->tagsmodel->save($data);
 
 		$msg = "Operation Successful";
 		// }

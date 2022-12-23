@@ -4,7 +4,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <p>
@@ -23,7 +25,7 @@
     var toDeleteRow = '';
 
     function deleteRow() {
-        let url = '<?php echo base_url(); ?>geoareas/delete/' + toDeleteRow;
+        let url = '<?php echo base_url(); ?>tags/delete/' + toDeleteRow;
 
         fetch(url)
             .then(res => res.text())
