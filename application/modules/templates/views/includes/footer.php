@@ -506,13 +506,26 @@
 <!-- Datatables -->
 <script>
 	$(document).ready(function() {
-		$('table#authors-table').DataTable({
+		var authorsTable = $('table#authors-table').DataTable({
 			buttons: [
 				'copy', 'csv', 'excel', 'pdf', 'print'
-			]
+			],
+			exportOptions: {
+				columns: [0, 1, 2, 3, 4],
+
+			}
 		});
+
+
+		var exportButton = $('#exportAuthors');
+
+		exportButton.on('click', function() {
+			authorsTable.button(1).trigger();
+		});
+
 	});
 </script>
+
 
 
 </body>

@@ -1,11 +1,16 @@
 <div class="row">
 	<div class="card col-lg-12">
 
+		<?php include 'includes/create-modal.php'; ?>
+		<?php include 'includes/delete-modal.php'; ?>
+		<?php include 'includes/update-modal.php'; ?>
 
 		<!-- Card Header -->
 		<div class="card-header text-left">
 			<h3 class="card-title float-left"><?php echo $title; ?></h3>
-			<a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-use-add"></i> Add Author</a>
+			<!-- Export Data onClick-->
+			<button type="button" id="exportAuthors" class="btn btn-success btn-sm float-right">Export Data</button>
+			<a href="#create-modal" data-toggle="modal" class="btn btn-outline-success btn-sm mx-3 float-right"><i class="fa fa-use-add"></i> Add Author</a>
 		</div>
 
 		<!-- Card Body -->
@@ -44,9 +49,3 @@
 
 	</div>
 </div>
-
-
-
-<?php include 'includes/create-modal.php'; ?>
-<?php include 'includes/delete-modal.php'; ?>
-<?php include 'includes/update-modal.php'; ?>

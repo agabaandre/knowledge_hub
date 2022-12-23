@@ -192,6 +192,7 @@
 			});
 		});
 
+	
 		// On Edit Modal Shown Event
 		$('#editModal').on('show.bs.modal', function(event) {
 			console.log('Edit Modal Event Triggered');
