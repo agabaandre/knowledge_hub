@@ -503,6 +503,22 @@
 	});
 </script>
 
+<!-- Script -->
+<script>
+	// Approve forum modal
+	$('#approveForumModal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget) // Button that triggered the modal
+		var forumId = button.data('forumid') // Extract info from data-* attributes
+		var forumTitle = button.data('forumtitle')
+		var forumDescription = button.data('forumdescription')
+		var modal = $(this)
+		modal.find('#forumTitle').html(`<h4>${forumTitle}</h4>`)
+		modal.find('#approveForumLink').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + forumId)
+		modal.find('#forumDescription').html(forumDescription)
+	});
+</script>
+
+
 <!-- Datatables -->
 <script>
 	$(document).ready(function() {
