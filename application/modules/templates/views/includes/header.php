@@ -64,6 +64,16 @@
 		.select2-dropdown {
 			z-index: 3051;
 		}
+
+		/* File Input Styling */
+		input[type="file"]::-webkit-file-upload-button {
+			visibility: hidden;
+		}
+
+		input[type="file"]::before {
+			content: 'Click to Upload';
+			display: inline-block;
+		}
 	</style>
 
 </head>
