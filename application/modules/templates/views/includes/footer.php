@@ -542,6 +542,17 @@
 	});
 </script>
 
+<!-- Datatables -->
+<script>
+	$(document).ready(function() {
+		var forumsTable = $('table#forum-approval-table').DataTable({
+			buttons: [
+				'copy', 'csv', 'excel', 'pdf', 'print'
+			],
+		});
+
+	});
+</script>
 
 
 </body>
