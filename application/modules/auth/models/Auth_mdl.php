@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
+#[AllowDynamicProperties]
 class Auth_mdl extends CI_Model
 {
 	public function __construct()
@@ -245,8 +246,9 @@ class Auth_mdl extends CI_Model
 		return $query->result_array();
 	}
 
-	public function find_user($id){
-		$this->db->where('user_id',$id);
-		return $this->db->get($this->table,$id)->row();
+	public function find_user($id)
+	{
+		$this->db->where('user_id', $id);
+		return $this->db->get($this->table, $id)->row();
 	}
 }

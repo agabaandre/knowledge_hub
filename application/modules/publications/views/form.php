@@ -40,17 +40,20 @@
                             </div>
                         </div>
 
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <label class="form-label" for="description">Publication Description</label>
+                                <textarea id="description" placeholder="Descripion" class="form-control newform" name="description"></textarea>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="col-md-6">
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Publication URL Link / Doc</label>
-                                <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="publication" required>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
                                 <label class="form-label" for="publication">Author</label>
-                                <select class="form-control js-example-basic-single" name="author" required>
+                                <select class="form-control js-example-basic-single" name="author" required id="authors">
                                     <option disabled>Select</option>
                                     <?php foreach ($authors as $author) : ?>
                                         <option value="<?php echo $author->id; ?>">
@@ -75,16 +78,29 @@
                             </div>
                         </div>
 
-                        <!-- <div  class="col-md-4"> -->
-                        <!-- </div> -->
-                    </div>
-                    <div class="col-md-6">
                         <div class="col-md-12">
+                            <!-- Section Label -->
+                            <label class="form-label mb-3" for="publication">Publication Document Type</label>
                             <div class="mb-3">
-                                <label class="form-label" for="description">Publication Description</label>
-                                <textarea placeholder="Descripion" class="form-control newform" id="description" name="description" required></textarea>
+                                <label class="form-check-inline">
+                                    <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
+                                </label>
+                                <label class="form-check-inline">
+                                    <input type="radio" name="upload_type" value="link" class="form-check-input">External Link
+                                </label>
+
+                                <div id="file-input">
+                                    <!-- <label class="form-label" for="publication">Publication Doc</label> -->
+                                    <input placeholder="Attach publication document" type="file" name="file" class="form-control">
+                                </div>
+
+                                <div id="link-input" style="display:none;">
+                                    <!-- <label class="form-label" for="publication">Publication URL Link</label> -->
+                                    <input placeholder="Add publication link" type="text" name="link" class="form-control">
+                                </div>
                             </div>
                         </div>
+
 
                         <div class="col-md-12">
                             <div class="mb-3">
@@ -106,7 +122,8 @@
                                 <select class="form-control select2" name="tags" required multiple>
                                     <option disabled>Select</option>
                                     <?php foreach ($tags as $tag) : ?>
-                                        <option value="<?php echo $tag->tag_id; ?>">
+
+                                        <option value="<?php echo $tag->id; ?>">
                                             <?php echo $tag->tag_text; ?>
                                         </option>
                                     <?php endforeach; ?>
@@ -166,29 +183,52 @@
 </div>
 
 <script>
+    $('input[name="upload_type"]').on('change', function() {
+        if ($(this).val() == 'upload') {
+            $('#file-input').show();
+            $('#link-input').hide();
+        } else {
+            $('#file-input').hide();
+            $('#link-input').show();
+        }
+    });
+
     $('#publications').submit(function(e) {
         e.preventDefault();
-        var data = $(this).serialize();
-        var url = '<?php echo base_url(); ?>publications/save'
-        // console.log(data);
+
+        var form = $(this);
+
+        // Get the form data.]
+        var formData = new FormData(form.get(0));
+
         $.ajax({
-            url: url,
-            method: "post",
-            data: data,
-            success: function(res) {
-                if (res == "OK") {
+            url: form.attr('action'),
+            type: form.attr('method'),
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.status == 'success') {
+                    Swal.fire({
+                        title: 'Success!',
+                        text: response.message,
+                        icon: 'success'
+                    });
 
-                    $('.notification').html("<center><font color='green'>Publication Added</font></center>");
-                    $('.toast-3s').toast('show');
+                    $('#publications').trigger("reset");
+
                 } else {
-
-                    $('.notification').html("<center>" + res + "</center>");
-                    $('.toast-3s').toast('show');
+                    Swal.fire({
+                        title: 'Error!',
+                        text: response.message,
+                        icon: 'error'
+                    });
                 }
+            }
+        });
 
 
-                // console.log(res);
-            } //success
-        }); // ajax
+
     });
 </script>

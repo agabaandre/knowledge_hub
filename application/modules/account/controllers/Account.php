@@ -27,7 +27,13 @@ class Account extends MX_Controller
 	public function create($id = FALSE)
 	{
 		$data['module'] = $this->module;
-		$data['title']  = 'Create Publication';
+
+		if ($id) {
+			$data['title']  = 'Create Publication';
+		} else {
+			$data['title']  = 'Create Publication';
+		}
+
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();

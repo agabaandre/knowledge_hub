@@ -55,6 +55,7 @@
 	<script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
 	<script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
 
+
 	<style>
 		.select2-close-mask {
 			z-index: 2099;
@@ -62,6 +63,16 @@
 
 		.select2-dropdown {
 			z-index: 3051;
+		}
+
+		/* File Input Styling */
+		input[type="file"]::-webkit-file-upload-button {
+			visibility: hidden;
+		}
+
+		input[type="file"]::before {
+			content: 'Click to Upload';
+			display: inline-block;
 		}
 	</style>
 

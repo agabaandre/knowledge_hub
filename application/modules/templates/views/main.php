@@ -13,7 +13,7 @@ require_once('includes/preloader.php');
 	<div class="main-content horizontal-content">
 
 		<!-- Container-fluid -->
-		<div class="container">
+		<div class="container-fluid">
 
 			<!-- Main-content-body -->
 			<div class="">

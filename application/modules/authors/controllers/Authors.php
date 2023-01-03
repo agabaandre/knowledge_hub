@@ -34,24 +34,40 @@ class Authors extends MX_Controller
 	public function save()
 	{
 
-		$is_error = false;
+		// Get author data from form
+		$author = [
+			'id' => @$this->input->post("id"),
+			'name' => $this->input->post("name"),
+			'address' => $this->input->post("address"),
+			'telephone' => $this->input->post("telephone"),
+		];
 
-		if ($this->form_validation->run('author') == FALSE) {
-			flash_form();
-			$msg = validation_errors();
-			$is_error = true;
+		// dd($author);
+
+		// Validate the input data
+		$this->form_validation->set_rules('name', 'Author Name', 'required');
+		
+		if ($this->form_validation->run() == FALSE) {
+			// Validation failed
+			// Return to the form with error messages
+			$this->session->set_flashdata('error', validation_errors());
+			redirect(base_url("authors"));
 		} else {
-
-			$theme = [
-				'id' => @$this->input->post("id"), 'name' => $this->input->post("name")
-			];
-
-			$resp = $this->authorsmodel->save($theme);
-
-			$msg = "Operation Successful";
+			// Validation passed
+			// Save the data to the database
+			$resp = $this->authorsmodel->save($author);
+			if ($resp) {
+				// Data saved successfully
+				// Return to the form with success message
+				$this->session->set_flashdata('success', 'Author saved successfully');
+				redirect(base_url("authors"));
+			} else {
+				// Data not saved
+				// Return to the form with error message
+				$this->session->set_flashdata('error', 'Author not saved');
+				redirect(base_url("authors"));
+			}
 		}
-		set_flash($msg, $is_error);
-		redirect(base_url("authors"));
 	}
 
 	public function delete($id)

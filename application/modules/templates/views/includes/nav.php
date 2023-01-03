@@ -33,6 +33,8 @@
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>healththemes">Security Themes</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>subthemes">Security Sub-Themes</a></li>
 						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
+						<!-- File Types -->
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">File Types</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quotes</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quiz</a></li>

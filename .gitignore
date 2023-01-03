@@ -12,3 +12,6 @@ application/logs/*
 database.php
 node_modules
 /Afcdc theme/
+
+# Exclud Uploads From Git
+/uploads/

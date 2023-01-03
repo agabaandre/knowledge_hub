@@ -1,6 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
+#[AllowDynamicProperties]
 class Account_model extends CI_Model
 {
 
@@ -13,9 +14,9 @@ class Account_model extends CI_Model
 		$this->users_table = "user";
 	}
 
-	public function insert_user($data){
+	public function insert_user($data)
+	{
 
-		return $this->db->insert($this->users_table,$data);
+		return $this->db->insert($this->users_table, $data);
 	}
-
 }

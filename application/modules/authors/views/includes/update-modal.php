@@ -1,9 +1,9 @@
 <!--  Extra Large modal example -->
-<div class="modal" id="create-modal">
+<div class="modal fade" id="edit-author-modal">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Author</h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Update Author Info</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -62,7 +62,7 @@
       </div>
       <div class="modal-footer">
         <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-        <button class="btn btn-primary" type="submit">Save Record</button>
+        <button class="btn btn-primary" type="submit">Update Record</button>
       </div>
 
       </form>
