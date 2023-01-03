@@ -70,11 +70,9 @@
 								</a>
 							</li>
 						<?php endif; ?>
-<<<<<<< HEAD
 						<div id="google_translate_element " style="display: none;"></div>
 						<select class="selectpicker btn bg-grey rounded text-green" data-width="fit" onchange="translateLanguage(this.value);" >
 							<option data-content='<span class="flag-icon flag-icon-us"></span> English' value="English">English</option>
-=======
 
 
 					</ul>
@@ -83,7 +81,6 @@
 						<div id="google_translate_element" style="display: none;"></div>
 						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);">
 							<option data-content='English' value="English"><span class="flag-icon flag-icon-us"></span>English</option>
->>>>>>> 645d1f934ca44bc87b3afc8429be6b23434a7bdb
 							<option data-content='<span class="flag-icon flag-icon-ar"></span> Arabic' value="Arabic">Arabic</option>
 							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
 							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Portuguese">Portuguese</option>
