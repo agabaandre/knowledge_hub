@@ -70,13 +70,8 @@
 								</a>
 							</li>
 						<?php endif; ?>
-						<div id="google_translate_element " style="display: none;"></div>
-						<select class="selectpicker btn bg-grey rounded text-green" data-width="fit" onchange="translateLanguage(this.value);" >
-							<option data-content='<span class="flag-icon flag-icon-us"></span> English' value="English">English</option>
-
 
 					</ul>
-
 					<div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
 						<div id="google_translate_element" style="display: none;"></div>
 						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);">
