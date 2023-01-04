@@ -2,6 +2,10 @@
 
     <div class="col-md-12">
 
+    <div class="card">
+        <div class="card-body">
+
+    
         <form class="filter_form" method="get" action="<?php echo base_url("rccdashboards/index"); ?>">
             <div class="row">
                 <div class="form-group col-md-4">
@@ -30,12 +34,6 @@
                     </select>
                 </div>
 
-            </div>
-
-    </div>
-    <div class="col-md-12">
-        <div class="row">
-
             <div class="form-group col-md-4">
                 <br>
                 <label>Data Indicator</label>
@@ -61,10 +59,15 @@
                     <option value="bar">Bar Graph</option>
                 </select>
             </div>
-        </div>
-    </div>
-</div>
+            </div>
 </form>
+
+</div>
+</div>
+            
+</div>
+</div>
+
 
 <?php require_once 'partials/top_summary_widgets.php'; ?>
 
@@ -94,16 +97,17 @@
 
         $.ajax({
             data: $('.filter_form').serialize(),
-            url: "<?php echo base_url(); ?>rccs/kpi_comparison_data",
+            url: "<?php echo base_url(); ?>rccdashboards/kpi_comparison_data",
             success: function(response) {
+                console.log(response);
                 seriesData = JSON.parse(response);
 
                 renderChart();
-                hideLoader();
+                //hideLoader();
             },
             error: function(error) {
                 console.log(error);
-                hideLoader();
+                //hideLoader();
                 alert("Server error stopped the operation");
             }
         });

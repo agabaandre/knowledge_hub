@@ -7,7 +7,7 @@
                 <br>
                 <form class="filter_form">
                     <div class="row">
-                        <div class="form-group col-md-9">
+                        <div class="form-group col-md-8">
                             <br>
                             <label>Country</label>
                             <select class="form-control select2" name="country_id" onchange="fetchData()">
@@ -18,7 +18,7 @@
                             </select>
                         </div>
 
-                        <div class="form-group col-md-3">
+                        <div class="form-group col-md-4">
                             <br>
                             <label>Switch Graph</label>
                             <select class="form-control select2" onchange="switchChartType($(this).val())">
@@ -55,20 +55,22 @@
 
     function fetchData() {
 
-        showLoader();
+        //showLoader();
 
         $.ajax({
             data: $('.filter_form').serialize(),
-            url: "<?php echo base_url(); ?>rccs/country_comparison_data",
+            url: "<?php echo base_url(); ?>rccdashboards/country_comparison_data",
             success: function(response) {
                 seriesData = JSON.parse(response);
 
+                //console.log(response);
+
                 renderChart();
-                hideLoader();
+                //hideLoader();
             },
             error: function(error) {
                 console.log(error);
-                hideLoader();
+                //hideLoader();
                 alert("Server error stopped the operation");
             }
         });
