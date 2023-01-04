@@ -74,7 +74,7 @@
 					</ul>
 					<div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
 						<div id="google_translate_element" style="display: none;"></div>
-						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);" style="border:#FFF;">
+						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);" style="border:#FFF;"com>
 							<option data-content='English' value="English"><span class="flag-icon flag-icon-us"></span>English</option>
 							<option data-content='<span class="flag-icon flag-icon-ar"></span> Arabic' value="Arabic">Arabic</option>
 							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
