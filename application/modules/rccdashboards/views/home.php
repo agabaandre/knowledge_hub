@@ -1,5 +1,15 @@
 <div class="row">
 
+<?php 
+
+//print_r(json_encode(user_session())); 
+
+//rerender regios user has access to
+//render regions' countries
+//filter data accordingly
+
+?>
+
     <div class="col-md-12">
 
     <div class="card">
@@ -103,11 +113,11 @@
                 seriesData = JSON.parse(response);
 
                 renderChart();
-                //hideLoader();
+                hideLoader();
             },
             error: function(error) {
                 console.log(error);
-                //hideLoader();
+                hideLoader();
                 alert("Server error stopped the operation");
             }
         });
@@ -163,6 +173,7 @@
 
     $(document).ready(function() {
 
+        showLoader();
         fetchData();
 
     });

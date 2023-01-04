@@ -21,7 +21,7 @@ class Rccdashboards extends MX_Controller
 		$data['uptitle'] = "RCC Dashboards";
 
 		$filter = $this->input->get();
-		$current_year   = date('Y');
+		$current_year   = "2022"; //date('Y');
 
 
 		$data['countries'] = $this->data_mdl->get_countries();
