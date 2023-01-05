@@ -32,7 +32,8 @@
                     <br>
                     <label>Member State</label>
                     <select class="form-control select2 countries" name="country_id" onchange="$('.filter_form').submit();">
-
+                        <option value="">None</option>
+                        <option value="1">Uganda</option>
                     </select>
                 </div>
 
@@ -79,18 +80,42 @@
 </div>
 
 
-<?php require_once 'partials/top_summary_widgets.php'; ?>
+<?php 
+
+   foreach($years_data as $widget_data):
+    
+    $year_data = $widget_data['data'];
+
+    if(count($year_data)>0):
+
+ ?>
+
+<h3><?php echo $widget_data['subject_area']; ?></h3>
+
+<?php 
+
+    require 'partials/top_summary_widgets.php';
+
+?>
 
 <div class="row">
     <div class="card-body">
-        <div id="countries_summary" style="width: 100%; height: 350px;"></div>
+        <div id="countries_summary<?php echo  $widget_data['subject_area_id']; ?>" style="width: 100%; height: 350px;"></div>
     </div>
 </div>
+
+<?php 
+
+endif;
+endforeach; ?>
+
+
 <script type="text/javascript">
     var chartType = 'spline';
     var seriesData = null;
     var reRender = false;
     var chart = null;
+
 
     function switchChartType(type) {
         //var ui_chart = $('#countries_summary').highcharts();
@@ -102,22 +127,22 @@
     }
 
 
-    function fetchData() {
+    function fetchData(subjectAreaId) {
 
 
         $.ajax({
             data: $('.filter_form').serialize(),
-            url: "<?php echo base_url(); ?>rccdashboards/kpi_comparison_data",
+            url: `<?php echo base_url(); ?>rccdashboards/kpi_comparison_data/${subjectAreaId}`,
             success: function(response) {
                 console.log(response);
                 seriesData = JSON.parse(response);
 
-                renderChart();
-                hideLoader();
+                renderChart(subjectAreaId);
+                //hideLoader();
             },
             error: function(error) {
                 console.log(error);
-                hideLoader();
+                //hideLoader();
                 alert("Server error stopped the operation");
             }
         });
@@ -125,23 +150,23 @@
     }
 
 
-    function renderChart() {
+    function renderChart(subjectAreaId) {
 
         // [ line-basic-chart ] Start
-        chart = Highcharts.chart('countries_summary', {
+        chart = Highcharts.chart(`countries_summary${subjectAreaId}`, {
             chart: {
                 type: chartType,
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
-                text: 'KPI Analysis'
+                text: 'Indicator Analysis'
             },
             subtitle: {
                 text: 'Source: Africa CDC'
             },
             yAxis: {
                 title: {
-                    text: 'KPI Value'
+                    text: 'Indicator Value'
                 }
             },
             xAxis: {
@@ -173,8 +198,18 @@
 
     $(document).ready(function() {
 
-        showLoader();
-        fetchData();
+        //showLoader();
+
+        var widget_data = JSON.parse('<?php echo json_encode($years_data); ?>');
+
+        console.log(widget_data);
+
+        widget_data.forEach((subjectArea)=>{
+
+          if(subjectArea.data.length>0)
+          fetchData(subjectArea.subject_area_id);
+
+        });
 
     });
 </script>
