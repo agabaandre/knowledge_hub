@@ -31,7 +31,7 @@ class Data_mdl extends CI_Model
 						 $this->db->where_in('kpi_id', $kpi_ids);
 				endif;
 
-				if ($key=='kpi_id')
+				if ($key=='kpi_id' || $key=='country_id')
 					$this->db->where($key, $value);
 			}
 		}
@@ -96,6 +96,8 @@ class Data_mdl extends CI_Model
 
 	public function get_kpis($filter = [], $only_ids=false)
 	{
+
+		$this->db->reset_query();
 
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
@@ -216,8 +218,8 @@ class Data_mdl extends CI_Model
 
 				if (!empty($value)) {
 
-					if ($key == "kpi_id") {
-						$this->db->where('kpi_id', $value);
+					if ($key == "kpi_id" || $key == "country_id") {
+						$this->db->where($key, $value);
 					} 
 				}
 			}

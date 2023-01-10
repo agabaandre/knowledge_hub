@@ -104,13 +104,12 @@ class Rccdashboards extends MX_Controller
 		$filter = $this->input->get();
 		$filter['subject_area'] = $subject_area_id;
 
-		if(isset($filter['country_id'])):
-
+	
+		if(intval($filter['country_id'])>0):
 			$data = $this->data_mdl->countries_data($filter);
 	    else:
 	    	$data = $this->data_mdl->kpi_data($filter);
 	    endif;
-
 
 		die(json_encode($data));
 	}
