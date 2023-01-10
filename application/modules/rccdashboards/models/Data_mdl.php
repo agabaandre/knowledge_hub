@@ -82,8 +82,10 @@ class Data_mdl extends CI_Model
 
 	public function get_countries()
 	{
-		$this->db->where('national', 'National');
-		return $this->db->get($this->countries_tb)->result();
+		$query      = $this->db->query("SELECT * from country WHERE national='National' AND id in(SELECT country_id from kpi_data)");
+		$countries = $query->result();
+
+		return $countries;
 	}
 
 	public function get_periods_years()
@@ -183,6 +185,7 @@ class Data_mdl extends CI_Model
 				if (isset($data[$count])) {
 
 					array_push($data[$count]["data"], $kpi_avg);
+					
 				} else {
 
 					$data[$count]["name"]   = $kpi->name;
@@ -225,7 +228,7 @@ class Data_mdl extends CI_Model
 			}
 		}
 
-		$this->db->group_by('kpi_id');
+		$this->db->group_by('country_id,kpi_id');
 		$this->db->select("kpi_name,AVG(kpi_value) as kpi_value,kpi_id");
 		$qry = $this->db->get('kpi_data');
 		return ($get_row) ? $qry->row() : $qry->result();
