@@ -24,6 +24,17 @@ class Publications_model extends CI_Model
 
 		$this->applyFilter($filter);
 
+		if(isset($filter['is_featured'])){
+		$recommendation   = get_cookie('recommendation');
+
+		if(!empty($recommendation)){
+
+		  $recommended = unserialize(get_cookie('recommendation'));
+
+		  $this->db->or_where_in('sub_thematic_area_id', $recommended);
+		}
+	  }
+
 		$publications = $this->db->get($this->table)->result();
 
 		foreach ($publications as $pub) {

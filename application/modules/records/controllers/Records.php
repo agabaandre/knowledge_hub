@@ -112,6 +112,8 @@ class Records extends MX_Controller {
 
 		$filter = ['sub_thematic_area_id'=>$subtheme_id];
 
+		$this->cache_recommendation($subtheme_id);
+
 		$count   = $this->publicationsmodel->count($filter);
 		$segment = 4;
         $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
@@ -122,15 +124,18 @@ class Records extends MX_Controller {
 		$data['links']     = paginate('records/author_pubs/'.$subtheme_id,$count, $perPage,$segment);
 		$data['types']   = $this->publicationsmodel->get_types();
 	
-
 		render_site('theme_publications',$data);
 	}
 
 	public function show($id){
 		
 		$data['publication'] = $this->publicationsmodel->find($id);
-		$data['module']       = $this->module;
-		$data['title']        = $this->title;
+		$data['module']      = $this->module;
+		$data['title']       = $this->title;
+
+		$thematic_area_id = $data['publication']->sub_thematic_area_id;
+
+		$this->cache_recommendation($thematic_area_id);
 
 		render_site('publication_detail',$data,true);
 	}
@@ -238,6 +243,23 @@ class Records extends MX_Controller {
 
 		die(json_encode($questions));
 
+	}
+
+	private function cache_recommendation($thematic_area_id){
+
+		$recommendation   = get_cookie('recommendation');
+
+		if(!empty($recommendation)){
+			$cookie_data = unserialize($recommendation, ["allowed_classes" => false]);
+			
+			if(!in_array($thematic_area_id,$cookie_data))
+			  array_push($cookie_data,$thematic_area_id);
+
+		}else{
+			$cookie_data[]=$thematic_area_id;
+		}
+
+		set_cookie('recommendation',serialize($cookie_data));
 	}
 
 }
