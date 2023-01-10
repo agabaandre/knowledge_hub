@@ -31,10 +31,17 @@ class Data_mdl extends CI_Model
 						 $this->db->where_in('kpi_id', $kpi_ids);
 				endif;
 
-				if ($key=='kpi_id' || $key=='country_id')
+				if ($key=='kpi_id')
 					$this->db->where($key, $value);
+					
 			}
+
+			
+		if(isset($filter['country_id']))
+		$this->db->where('country_id', $filter['country_id']);
+
 		}
+
 
 		if ($columns) {
 			$this->db->select($columns);
@@ -44,6 +51,8 @@ class Data_mdl extends CI_Model
 			$this->db->group_by($group_by);
 
 		$records = $this->db->get($this->data_view)->result();
+
+		//dd($this->db->last_query());
 
 		return $records;
 	}
@@ -88,6 +97,20 @@ class Data_mdl extends CI_Model
 		return $countries;
 	}
 
+	public function get_data_kpis()
+	{
+		$query      = $this->db->query("SELECT id from kpi WHERE  id in(SELECT kpi_id from kpi_data)");
+		$kpis = $query->result();
+
+		$result =[];
+
+		foreach($kpis as $kpi){
+			array_push($result,$kpi->id);
+		}
+
+		return $result;
+	}
+
 	public function get_periods_years()
 	{
 		$this->db->select('period_year');
@@ -114,6 +137,8 @@ class Data_mdl extends CI_Model
 				}
 			}
 		}
+
+		$this->db->where_in('id',$this->get_data_kpis());
 
 		$results = $this->db->get($this->kpi_tb)->result();
 
@@ -149,7 +174,8 @@ class Data_mdl extends CI_Model
 				$data_value = array_column($results, 'kpi_value');
 
 				$data[$count]["name"]  = $kpi->name;
-				$data[$count]["data"][]  = (count($data_value) > 0) ? (float) $data_value[0] : 0;
+				$col_value = (count($data_value) > 0) ? array_sum($data_value) / count($data_value):0;
+				$data[$count]["data"][]  = (float) $col_value;
 				$countries[] = $country->name;
 			}
 
@@ -185,7 +211,7 @@ class Data_mdl extends CI_Model
 				if (isset($data[$count])) {
 
 					array_push($data[$count]["data"], $kpi_avg);
-					
+
 				} else {
 
 					$data[$count]["name"]   = $kpi->name;
