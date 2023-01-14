@@ -3,7 +3,7 @@
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
 			<h3 class="card-title float-left"><?php echo $title; ?></h3>
-			<a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add New Question</a>
+			<a href="#create-quize-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add New Question</a>
 		</div>
 
 		<?php include 'includes/create-modal.php'; ?>
@@ -24,7 +24,7 @@
 							<td><?php echo $question['id']; ?></td>
 							<td><?php echo $question['question_text']; ?></td>
 							<td>
-								<ul>
+								<ul style="list-style: none;">
 									<?php
 									$answers = explode(',', $question['answers']);
 									foreach ($answers as $answer) :

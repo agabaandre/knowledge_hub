@@ -10,10 +10,34 @@
       </div>
       <div class="modal-body">
         <?php echo form_open('questions/save'); ?>
-        
+
         <div class="form-group">
           <label for="quote">Question</label>
           <textarea class="form-control" name="quote" id="quote" rows="3" placeholder="Enter Question"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="answer1">Answer 1</label>
+          <input type="text" class="form-control" name="answer1" id="answer1" placeholder="Enter Answer 1">
+        </div>
+
+        <div class="form-group">
+          <label for="answer2">Answer 2</label>
+          <input type="text" class="form-control" name="answer2" id="answer2" placeholder="Enter Answer 2">
+        </div>
+
+        <div class="form-group">
+          <label for="answer3">Answer 3</label>
+          <input type="text" class="form-control" name="answer3" id="answer3" placeholder="Enter Answer 2">
+        </div>
+
+        <div class="form-group">
+          <label for="correct_answer">Correct Answer</label>
+          <select class="form-control" name="correct_answer" id="correct_answer">
+            <option value="1">Answer 1</option>
+            <option value="2">Answer 2</option>
+            <option value="3">Answer 3</option>
+          </select>
         </div>
 
         <!-- Button ALigned to right -->
