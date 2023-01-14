@@ -44,6 +44,10 @@
 									<?php endforeach; ?>
 								</ul>
 							</td>
+							<td>
+								<a href="#edit-quize-modal" data-toggle="modal" class="btn btn-sm btn-primary edit-quize" data-id="<?php echo $question['id']; ?>" data-question="<?php echo $question['question_text']; ?>" data-answers="<?php echo $question['answers']; ?>"><i class="fa fa-edit"></i> Edit</a>
+								<a href="#delete-quize-modal" data-toggle="modal" class="btn btn-sm btn-danger delete-quize" data-id="<?php echo $question['id']; ?>"><i class="fa fa-trash"></i> Delete</a>
+							</td>
 						</tr>
 					<?php endforeach; ?>
 				</tbody>

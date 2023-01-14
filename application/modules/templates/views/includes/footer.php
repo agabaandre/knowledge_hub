@@ -454,15 +454,14 @@
 <script>
 	$('#create-quize-modal').on('show.bs.modal', function(event) {
 		console.log('Modal Opened');
-		var button = $(event.relatedTarget);
-		var id = button.data('id');
-		var title = button.data('title');
-		var modal = $(this);
-		modal.find('.modal-body #quize_id').val(id);
-		modal.find('.modal-body #quize_title').val(title);
+		// var button = $(event.relatedTarget);
+		// var id = button.data('id');
+		// var title = button.data('title');
+		// var modal = $(this);
+		// modal.find('.modal-body #quize_id').val(id);
+		// modal.find('.modal-body #quize_title').val(title);
 	});
-
-	</script>
+</script>
 
 <!-- Update Quize Script -->
 <script>
@@ -470,14 +469,30 @@
 		console.log('Modal Opened');
 		var button = $(event.relatedTarget);
 		var id = button.data('id');
-		var title = button.data('question');
+		var question = button.data('question');
+		var answers = button.data('answers');
 		var modal = $(this);
-		modal.find('.modal-body #quize_id').val(id);
-		modal.find('.modal-body #quize_title').val(title);
-		modal.find('.modal-body #quize_description').val(description);
-	});
+		modal.find('.modal-body #id').val(id);
+		modal.find('.modal-body #question').val(question);
 
-	</script>
+		var answersArray = answers.split(',');
+		for (var i = 0; i < answersArray.length; i++) {
+			var answer = answersArray[i].split(':');
+			var id = answer[0];
+			var text = answer[1];
+			var is_correct = answer[2];
+
+			// Append the answer to the respective form input
+			// $("#answer" + (i + 1)).val(text);
+			modal.find('.modal-body #answer' + (i + 1)).val(text);
+			if (is_correct == 1) {
+				// $("#correct_answer").val(i + 1);
+				// Set the select otpion to the correct answer
+				modal.find('.modal-body #correct_answer').val(i + 1);
+			}
+		}
+	});
+</script>
 
 
 <!-- Update Tag Script -->

@@ -9,11 +9,11 @@
         </button>
       </div>
       <div class="modal-body">
-        <?php echo form_open('questions/save'); ?>
+        <?php echo form_open('quize/save'); ?>
 
         <div class="form-group">
-          <label for="quote">Question</label>
-          <textarea class="form-control" name="quote" id="quote" rows="3" placeholder="Enter Question"></textarea>
+          <label for="question">Question</label>
+          <textarea class="form-control" name="question" id="question" rows="3" placeholder="Enter Question"></textarea>
         </div>
 
         <div class="form-group">

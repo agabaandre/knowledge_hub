@@ -32,21 +32,44 @@ class Quize extends MX_Controller
 
 	public function save()
 	{
-
-		$is_error = false;
-		
-		$data = [
-			'id' => @$this->input->post("id"),
-			'question_text' => $this->input->post("question_text"),
-			'is_active' => $this->input->post("is_active") ? 1 : 0,
-		];
-
-		$resp = $this->quizemodel->save($data);
-
-		$msg = "Operation Successful";
-		// }
-		set_flash($msg, $is_error);
-		redirect(base_url("quize"));
+		$data = $this->input->post();
+		if (isset($data['id']) && !empty($data['id'])) {
+			// Update existing question
+			$question_data = array(
+				'id' => $data['id'],
+				'question_text' => $data['question'],
+				'enabled' => 1
+			);
+			$this->quizemodel->updateQuestion($question_data);
+			$this->quizemodel->deleteAnswers($data['id']);
+			// loop through the answers and insert them
+			for ($i = 1; $i <= 3; $i++) {
+				$answer_data = array(
+					'question_id' => $data['id'],
+					'answer_text' => $data['answer' . $i],
+					'is_correct' => ($data['correct_answer'] == $i) ? 1 : 0
+				);
+				$this->quizemodel->saveAnswer($answer_data);
+			}
+		} else {
+			// Save new question
+			$question_data = array(
+				'question_text' => $data['question'],
+				'enabled' => 1
+			);
+			$question_id = $this->quizemodel->saveQuestion($question_data);
+			// loop through the answers and insert them
+			for ($i = 1; $i <= 3; $i++) {
+				$answer_data = array(
+					'question_id' => $question_id,
+					'answer_text' => $data['answer' . $i],
+					'is_correct' => ($data['correct_answer'] == $i) ? 1 : 0
+				);
+				$this->quizemodel->saveAnswer($answer_data);
+			}
+		}
+		// Redirect to the list page
+		redirect('quize');
 	}
 
 	public function delete($id)
