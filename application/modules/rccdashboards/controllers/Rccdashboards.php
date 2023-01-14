@@ -21,19 +21,27 @@ class Rccdashboards extends MX_Controller
 		$data['uptitle'] = "RCC Dashboards";
 
 		$filter = $this->input->get();
-		$current_year   = date('Y');
+		$current_year   = "2022"; //date('Y');
 
 
 		$data['countries'] = $this->data_mdl->get_countries();
-		$data['regions'] = $this->geoareasmodel->getrcc();
+		$data['regions']   = $this->geoareasmodel->getrcc();
 		$data['filter']    = $filter;
 		$data['year']      = $current_year;
-		$data['year_data'] = $this->get_year_data($filter, $current_year);
 
-		$graph_filter = $filter;
-		$graph_filter['period_year'] = $current_year;
 
-		$data['graph_data'] = json_encode($this->data_mdl->country_year_kpis($graph_filter));
+		foreach ($this->data_mdl->get_subject_area() as $key=>$subject_area):
+
+			$filter['subject_area']  = $subject_area->id;
+			$data['years_data'][$key]['subject_area'] = $subject_area->name;
+			$data['years_data'][$key]['subject_area_id'] = $subject_area->id;
+			$data['years_data'][$key]['data'] = $this->get_year_data($filter, $current_year);
+
+
+			$graph_filter = $filter;
+			$graph_filter['period_year'] = $current_year;
+
+	    endforeach;
 
 		render('home', $data);
 	}
@@ -44,8 +52,7 @@ class Rccdashboards extends MX_Controller
 		$previous_year = $current_year - 1;
 
 		$filter['period_year'] = $current_year;
-		$filter['kpi_ids']     = [1, 2, 12, 3, 10, 11];
-
+		
 		$results = $this->data_mdl->get_country_kpis($filter);
 
 		foreach ($results as $row) {
@@ -92,10 +99,18 @@ class Rccdashboards extends MX_Controller
 		die(json_encode($data));
 	}
 
-	public function kpi_comparison_data()
+	public function kpi_comparison_data($subject_area_id)
 	{
+		$filter = $this->input->get();
+		$filter['subject_area'] = $subject_area_id;
 
-		$data = $this->data_mdl->kpi_data($this->input->get());
+	
+		if(intval($filter['country_id'])>0):
+			$data = $this->data_mdl->countries_data($filter);
+	    else:
+	    	$data = $this->data_mdl->kpi_data($filter);
+	    endif;
+
 		die(json_encode($data));
 	}
 

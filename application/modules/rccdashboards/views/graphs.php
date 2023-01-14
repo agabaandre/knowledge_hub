@@ -1,42 +1,10 @@
+<?php require_once 'partials/top_summary_widgets.php'; ?>
+
 <div class="row">
-
-    <div class="col-md-12">
-        <div class="card">
-            <div class="card-header">
-                <h5>Member state Comparative Analysis</h5>
-                <br>
-                <form class="filter_form">
-                    <div class="row">
-                        <div class="form-group col-md-8">
-                            <br>
-                            <label>Country</label>
-                            <select class="form-control select2" name="country_id" onchange="fetchData()">
-                                <option value="">All</option>
-                                <?php foreach ($countries as $country) : ?>
-                                    <option value="<?php echo $country->id; ?>"><?php echo $country->name; ?></option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-
-                        <div class="form-group col-md-4">
-                            <br>
-                            <label>Switch Graph</label>
-                            <select class="form-control select2" onchange="switchChartType($(this).val())">
-                                <option value="spline">Line Chart</option>
-                                <option value="bar">Bar Graph</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="card-body">
-                <div id="countries_summary" style="width: 100%; height: 350px;"></div>
-            </div>
-        </div>
+    <div class="card-body">
+        <div id="countries_summary" style="width: 100%; height: 350px;"></div>
     </div>
-
 </div>
-
 <script type="text/javascript">
     var chartType = 'spline';
     var seriesData = null;
@@ -55,22 +23,20 @@
 
     function fetchData() {
 
-        //showLoader();
 
         $.ajax({
             data: $('.filter_form').serialize(),
-            url: "<?php echo base_url(); ?>rccdashboards/country_comparison_data",
+            url: "<?php echo base_url(); ?>rccdashboards/kpi_comparison_data",
             success: function(response) {
+                console.log(response);
                 seriesData = JSON.parse(response);
 
-                //console.log(response);
-
                 renderChart();
-                //hideLoader();
+                hideLoader();
             },
             error: function(error) {
                 console.log(error);
-                //hideLoader();
+                hideLoader();
                 alert("Server error stopped the operation");
             }
         });
@@ -87,7 +53,7 @@
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
-                text: 'Member State Analysis'
+                text: 'KPI Analysis'
             },
             subtitle: {
                 text: 'Source: Africa CDC'
@@ -126,6 +92,7 @@
 
     $(document).ready(function() {
 
+        showLoader();
         fetchData();
 
     });

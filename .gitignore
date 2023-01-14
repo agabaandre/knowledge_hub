@@ -13,5 +13,5 @@ database.php
 node_modules
 /Afcdc theme/
 
-# Exclud Uploads From Git
+# Exclud Uploads From pushing to Git
 /uploads/

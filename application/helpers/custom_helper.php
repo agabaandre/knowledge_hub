@@ -243,7 +243,7 @@ if (!function_exists('user_session')) {
     function user_session()
     {
         $ci = &get_instance();
-        return ($ci->session->userdata('id')) ? (object) $ci->session->userdata() : (object) ['is_logged_in' => false, 'is_admin' => false];
+        return ($ci->session->userdata()) ? (object) $ci->session->userdata() : (object) ['is_logged_in' => false, 'is_admin' => false];
     }
 }
 

@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+#[AllowDynamicProperties]
 class Publications_model extends CI_Model
 {
 
@@ -23,6 +23,17 @@ class Publications_model extends CI_Model
 		}
 
 		$this->applyFilter($filter);
+
+		if(isset($filter['is_featured'])){
+		$recommendation   = get_cookie('recommendation');
+
+		if(!empty($recommendation)){
+
+		  $recommended = unserialize(get_cookie('recommendation'));
+
+		  $this->db->or_where_in('sub_thematic_area_id', $recommended);
+		}
+	  }
 
 		$publications = $this->db->get($this->table)->result();
 
@@ -75,10 +86,10 @@ class Publications_model extends CI_Model
 
 		$publication = $this->db->where('id', $id)->get($this->table)->row();
 
-		if ($publication):
+		if ($publication) :
 			$publication = $this->attach_related($publication);
 			//increment visits
-			$this->save(['visits'=>(intval($publication->visits)+1),'id'=>$id]);
+			$this->save(['visits' => (intval($publication->visits) + 1), 'id' => $id]);
 		endif;
 		return $publication;
 	}
@@ -91,9 +102,9 @@ class Publications_model extends CI_Model
 		$publication->theme       = $publication->sub_theme->theme;
 		$publication->file_type   = $this->get_filetype($publication->file_type_id);
 		$publication->attachments = $this->get_attachments($publication->id);
-		$publication->has_attachments = (count($publication->attachments)>0 )?true:false;
+		$publication->has_attachments = (count($publication->attachments) > 0) ? true : false;
 		$publication->comments     = $this->get_comments($publication->id);
-		$publication->has_comments = (count($publication->comments)>0 )?true:false;
+		$publication->has_comments = (count($publication->comments) > 0) ? true : false;
 		$publication->tags         = $this->get_tags($publication->id);
 
 		return $publication;
@@ -183,31 +194,30 @@ class Publications_model extends CI_Model
 		$this->db->where('publication_id', $publication_id);
 		$comments = $this->db->get($this->comments_table)->result();
 
-		foreach($comments as $comment):
-		 $comment->user = $this->auth_mdl->find_user($comment->user_id);
+		foreach ($comments as $comment) :
+			$comment->user = $this->auth_mdl->find_user($comment->user_id);
 		endforeach;
 
-		 return $comments;
+		return $comments;
 	}
 
-	public function get_tags($publication_id=null)
+	public function get_tags($publication_id = null)
 	{
-		
-		if($publication_id):
+
+		if ($publication_id) :
 			$this->db->where('publication_id', $publication_id);
 			$this->db->join('publication_tags', 'tags.id=publication_tags.publication_id');
-			$results =$this->db->get('tags')->result();
-	    else:
-	    	$results =$this->db->get('tags')->result();
-	    endif;
+			$results = $this->db->get('tags')->result();
+		else :
+			$results = $this->db->get('tags')->result();
+		endif;
 
-	    return $results;
+		return $results;
 	}
 
-	public function get_types(){
+	public function get_types()
+	{
 
 		return $this->db->get('file_type')->result();
-
 	}
-
 }

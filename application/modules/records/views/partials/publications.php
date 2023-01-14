@@ -1,6 +1,7 @@
 
 	<?php foreach ($publications as $row): ?>
 		 <a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
+
 	     <div class="card col-lg-12 single-border mb-1">
           <div class="card-body text-left">
           	<div class="row">
@@ -27,8 +28,10 @@
 				
 				<span class="text-muted medium d-block mt-1">
 					<span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?> </span>
+					<a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
 					<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
 					<span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
+					</a>
 				</span>
 
 			</div>

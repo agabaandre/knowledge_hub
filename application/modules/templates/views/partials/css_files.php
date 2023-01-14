@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zxx">
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
 
 <head>
     <meta charset="utf-8" />
-    <meta name="author" content="Themezhub" />
+    <meta name="author" content="Africa CDC" />
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <title>Africa CDC Health Knowledge Hub</title>
@@ -16,6 +16,8 @@
     <link rel="stylesheet" href="<?php echo base_url(); ?>resources/css/sharing.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
+
+
     <style>
         .goog-te-banner-frame.skiptranslate {
             display: none !important;

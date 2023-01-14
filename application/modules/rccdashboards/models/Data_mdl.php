@@ -1,6 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
-
+#[AllowDynamicProperties]
 class Data_mdl extends CI_Model
 {
 
@@ -21,10 +21,27 @@ class Data_mdl extends CI_Model
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
 
-				if (!empty($value))
+				if($key=='subject_area'):
+						$kpi_ids = $this->get_kpis(['subject_area'=>$filter['subject_area']],true);
+
+						if(count($kpi_ids) == 0)
+							return [];
+						
+						if(count($kpi_ids) > 0)
+						 $this->db->where_in('kpi_id', $kpi_ids);
+				endif;
+
+				if ($key=='kpi_id')
 					$this->db->where($key, $value);
+					
 			}
+
+			
+		if(isset($filter['country_id']))
+		$this->db->where('country_id', $filter['country_id']);
+
 		}
+
 
 		if ($columns) {
 			$this->db->select($columns);
@@ -35,14 +52,34 @@ class Data_mdl extends CI_Model
 
 		$records = $this->db->get($this->data_view)->result();
 
+		//dd($this->db->last_query());
+
 		return $records;
 	}
 
-	public function get_subject_area($id)
-	{
+	public function subject_sub_themes($id){
 
-		$this->db->where('id', $id);
-		return $this->db->get($this->subject_area_tb)->row();
+		$this->db->where('thematic_area_id',$id);
+		$result = $this->db->get($this->subject_area_tb)->result();
+
+		$subtheme_ids = [];
+
+		foreach ($result as $row) {
+
+			array_push($subtheme_ids, $row_id);
+		}
+
+		return $subtheme_ids;
+	}
+
+	public function get_subject_area($id=null)
+	{
+		if($id):
+			$this->db->where('id', $id);
+			return $this->db->get($this->subject_area_tb)->row();
+		else:
+			return $this->db->get($this->subject_area_tb)->result();
+	    endif;
 	}
 
 	public function get_country($id)
@@ -54,32 +91,69 @@ class Data_mdl extends CI_Model
 
 	public function get_countries()
 	{
-		$this->db->where('national', 'National');
-		return $this->db->get($this->countries_tb)->result();
+		$query      = $this->db->query("SELECT * from country WHERE national='National' AND id in(SELECT country_id from kpi_data)");
+		$countries = $query->result();
+
+		return $countries;
+	}
+
+	public function get_data_kpis()
+	{
+		$query      = $this->db->query("SELECT id from kpi WHERE  id in(SELECT kpi_id from kpi_data)");
+		$kpis = $query->result();
+
+		$result =[];
+
+		foreach($kpis as $kpi){
+			array_push($result,$kpi->id);
+		}
+
+		return $result;
 	}
 
 	public function get_periods_years()
 	{
 		$this->db->select('period_year');
 		$this->db->group_by('period_year');
+
 		return array_column($this->db->get($this->data_view)->result_array(), 'period_year');
 	}
 
-	public function get_kpis($filter = [])
+	public function get_kpis($filter = [], $only_ids=false)
 	{
+
+		$this->db->reset_query();
 
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
 
 				if (!empty($value)) {
-					if ($key == "kpi_id") :
+					if ($key == "kpi_id"){
 						$this->db->where('id', $value);
-					endif;
+					}
+				   else if ($key == "subject_area"){
+						$this->db->where("subject_area", $value);
+				   }
 				}
 			}
 		}
 
-		return $this->db->get($this->kpi_tb)->result();
+		$this->db->where_in('id',$this->get_data_kpis());
+
+		$results = $this->db->get($this->kpi_tb)->result();
+
+		if($only_ids){ //return an raary of ids
+
+			$ids = [];
+
+			foreach ($results as $row) {
+				array_push($ids, $row->id);
+			}
+
+			return $ids;
+		}
+
+		return $results;
 	}
 
 	public function kpi_data($filter = [])
@@ -94,13 +168,14 @@ class Data_mdl extends CI_Model
 			foreach ($this->get_countries() as $country) {
 
 				$filter['kpi_id']     = $kpi->id;
-				$filter['country_id']     = $country->id;
+				$filter['country_id'] = $country->id;
 
 				$results    = $this->get($filter, "country_id");
 				$data_value = array_column($results, 'kpi_value');
 
 				$data[$count]["name"]  = $kpi->name;
-				$data[$count]["data"][]  = (count($data_value) > 0) ? (float) $data_value[0] : 0;
+				$col_value = (count($data_value) > 0) ? array_sum($data_value) / count($data_value):0;
+				$data[$count]["data"][]  = (float) $col_value;
 				$countries[] = $country->name;
 			}
 
@@ -122,7 +197,7 @@ class Data_mdl extends CI_Model
 		foreach ($this->get_periods_years() as $period) :
 			$count   = 0;
 
-			foreach ($this->get_kpis() as $kpi) {
+			foreach ($this->get_kpis($filter) as $kpi) {
 
 				$filter['kpi_id']      = $kpi->id;
 				$filter['period_year'] = $period;
@@ -136,6 +211,7 @@ class Data_mdl extends CI_Model
 				if (isset($data[$count])) {
 
 					array_push($data[$count]["data"], $kpi_avg);
+
 				} else {
 
 					$data[$count]["name"]   = $kpi->name;
@@ -156,6 +232,14 @@ class Data_mdl extends CI_Model
 	public function get_country_kpis($filter = [], $get_row = false)
 	{
 
+		$kpi_ids = $this->get_kpis(['subject_area'=>$filter['subject_area']],true);
+
+		if(count($kpi_ids) == 0)
+			return [];
+
+		
+		if(count($kpi_ids) > 0)
+		 $this->db->where_in('kpi_id', $kpi_ids);
 
 		if (!empty($filter)) {
 
@@ -163,18 +247,14 @@ class Data_mdl extends CI_Model
 
 				if (!empty($value)) {
 
-					if ($key == "kpi_id") {
-						$this->db->where('kpi_id', $value);
-					} else if ($key == "kpi_ids") {
-						$this->db->where_in('kpi_id', $value);
-					} else {
+					if ($key == "kpi_id" || $key == "country_id") {
 						$this->db->where($key, $value);
-					}
+					} 
 				}
 			}
 		}
 
-		$this->db->group_by('kpi_id');
+		$this->db->group_by('country_id,kpi_id');
 		$this->db->select("kpi_name,AVG(kpi_value) as kpi_value,kpi_id");
 		$qry = $this->db->get('kpi_data');
 		return ($get_row) ? $qry->row() : $qry->result();
@@ -190,19 +270,6 @@ class Data_mdl extends CI_Model
 
 
 		foreach ($this->get_kpis($filter) as $kpi) :
-
-			if (!empty($filter)) {
-
-				foreach ($filter as $key => $value) {
-
-					if (!empty($value)) {
-
-						if ($key !== "kpi_id" && $key !== "kpi_ids") {
-							$this->db->where($key, $value);
-						}
-					}
-				}
-			}
 
 			$this->db->where('kpi_id', $kpi->id);
 			$this->db->select("kpi_name,AVG(kpi_value) as kpi_value,kpi_id");

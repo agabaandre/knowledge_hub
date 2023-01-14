@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
+#[AllowDynamicProperties]
 class Permissions_mdl extends CI_Model
 {
 	public function __construct()

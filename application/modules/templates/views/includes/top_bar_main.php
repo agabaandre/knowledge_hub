@@ -1,5 +1,5 @@
 <!-- Main-content -->
-<div class="main-header main-header-fixed" style="background:grey; color:#FFF !important;">
+<div class="main-header main-header-fixed" style="background:rgba(52, 143, 65, 1); color:#FFF !important;">
 	<div class=" container">
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
