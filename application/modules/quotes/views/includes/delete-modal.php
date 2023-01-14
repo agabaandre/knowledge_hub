@@ -4,7 +4,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
             <div class="modal-body">
                 <p>
@@ -13,29 +15,29 @@
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
-                <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">Yes Delete</button>
+                <button class="btn btn-outline-danger btn-sm edit" onclick="deleteRow()">Yes Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-    <script>
-        var toDeleteRow = '';
-        function deleteRow () {
-            let url = '<?php echo base_url();?>geoareas/delete/' + toDeleteRow;
+<script>
+    var toDeleteRow = '';
 
-                fetch(url)
-                .then(res => res.text())
-                .then(res => {
-                    console.log(res)
-                    $('#delete-modal').modal('hide');
-                     window.location.reload();
-                })
-        }
+    function deleteRow() {
+        let url = '<?php echo base_url(); ?>quotes/delete/' + toDeleteRow;
 
-        function openDeleteModal (row = 0) {
-            toDeleteRow = row;
-            $('#delete-modal').modal('show');
-        }
-    </script>
+        fetch(url)
+            .then(res => res.text())
+            .then(res => {
+                console.log(res)
+                $('#delete-modal').modal('hide');
+                window.location.reload();
+            })
+    }
+
+    function openDeleteModal(row = 0) {
+        toDeleteRow = row;
+        $('#delete-modal').modal('show');
+    }
+</script>

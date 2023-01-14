@@ -464,6 +464,19 @@
 	});
 </script>
 
+<!-- Update Tag Script -->
+<script>
+	$('#edit-quote-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var quote = button.data('quote');
+		var modal = $(this);
+		modal.find('.modal-body #id').val(id);
+		modal.find('.modal-body #quote').val(quote);
+	});
+</script>
+
 <!-- Update Author Script -->
 <script>
 	$('#edit-author-modal').on('show.bs.modal', function(event) {

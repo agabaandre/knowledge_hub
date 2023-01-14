@@ -29,15 +29,15 @@
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">Resource and Asset Types</a></li>
-						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>authors">Data Sources</a></li>
+						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>authors">Data Sources/Authors</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>healththemes">Security Themes</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>subthemes">Security Sub-Themes</a></li>
 						<li aria-haspopup="true"><a href=" <?php echo base_url() ?>geoareas">Geographical Coverage</a></li>
 						<!-- File Types -->
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">File Types</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li>
-						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quotes</a></li>
-						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Quiz</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quotes">Quotes</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quizes">Quiz</a></li>
 					</ul>
 				</li>
 

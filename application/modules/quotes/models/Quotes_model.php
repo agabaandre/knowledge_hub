@@ -16,14 +16,14 @@ class Quotes_model extends CI_Model
 	public function get()
 	{
 
-		$rows = $this->db->get($this->table)->result();
-		return $rows;
+		$quotes = $this->db->get($this->table)->result();
+		return $quotes;
 	}
 
 	public function find($id)
 	{
-		$row = $this->db->where('id', $id)->get($this->table)->row();
-		return $row;
+		$tag = $this->db->where('id', $id)->get($this->table)->row();
+		return $tag;
 	}
 
 	//Save and returned inserted/updated row
