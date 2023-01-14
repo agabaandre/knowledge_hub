@@ -12,6 +12,7 @@ class Forums extends MX_Controller
 		$this->module = "forums";
 		$this->title  = "Forums";
 		$this->load->model('forums_model', 'forumsmodel');
+		$this->load->library('pagination');
 	}
 
 	public function index()
@@ -84,4 +85,6 @@ class Forums extends MX_Controller
 		$data['module'] = $this->module;
 		render("forum_admin", $data);
 	}
+
+	
 }

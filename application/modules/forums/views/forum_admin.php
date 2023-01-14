@@ -12,8 +12,17 @@
 
 	<!-- Card Body -->
 	<div class="card-body">
+
+		<style>
+			td {
+				word-wrap: break-word;
+				overflow: hidden;
+				max-width: calc(100vw - 500px);
+			}
+		</style>
 		<div class="row">
 			<div class="col-md-12">
+				<div class="table-responsive">
 				<table class="table table-striped table-bordered table-hover" id="forum-approval-table">
 					<thead>
 						<tr>
@@ -25,7 +34,7 @@
 					<tbody>
 						<?php foreach ($forums as $forum) : ?>
 							<tr>
-								<td style="max-width:500px; min-width:500px;">
+								<td>
 									<!-- Clickable title -->
 									<a href="<?php echo base_url('forums/detail/' . $forum->id); ?>">
 										<h4><?php echo $forum->forum_title; ?></h4>
@@ -53,6 +62,7 @@
 						<?php endforeach; ?>
 					</tbody>
 				</table>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -438,10 +438,10 @@
 <!-- Add Sweetalert2 Nodemodule -->
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css" />
+<!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css" /> -->
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.js"></script>
-
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap.min.css" integrity="sha512-BMbq2It2D3J17/C7aRklzOODG1IQ3+MHw3ifzBHMBwGO/0yUqYmsStgBjI0z5EYlaDEFnvYV7gNYdD3vFLRKsA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
 <script>
@@ -450,17 +450,6 @@
 	});
 </script>
 
-
-<script>
-	// tinymce.init({
-	// 	selector: "textarea#description",
-	// 	plugins: [
-	// 		"insertdatetime"
-	// 	],
-	// 	width: "auto",
-	// 	height: 400,
-	// });
-</script>
 
 <!-- Update Tag Script -->
 <script>
@@ -523,6 +512,7 @@
 <script>
 	$(document).ready(function() {
 		var authorsTable = $('table#authors-table').DataTable({
+			"autoWidth": true,
 			buttons: [
 				'copy', 'csv', 'excel', 'pdf', 'print'
 			],
@@ -543,21 +533,12 @@
 </script>
 
 <!-- Datatables -->
-<script>
-	$(document).ready(function() {
-		var forumsTable = $('table#forum-approval-table').DataTable({
-			buttons: [
-				'copy', 'csv', 'excel', 'pdf', 'print'
-			],
-		});
 
-	});
-</script>
 
 <script>
 	$(document).ready(function() {
 		var table = $('#publicationTable').DataTable({
-
+			"autoWidth": true,
 			"dom": 'bootstrap',
 			"buttons": [
 				'copy', 'csv', 'excel', 'pdf',
@@ -612,11 +593,9 @@
 		// modal.find('#desc').val(desc);
 
 		descQuill.setContents(
-			[
-				{
-					"insert": desc
-				}
-			]
+			[{
+				"insert": desc
+			}]
 		)
 
 		$('#edit-publication-form').on('submit', function(e) {
@@ -627,7 +606,7 @@
 			// Add Quill Description to form
 			var description = descQuill.root.innerHTML;
 
-			
+
 
 			// Append to form
 			form.append(`<input type="hidden" name="description" value="${desc}">`);
@@ -639,10 +618,10 @@
 				success: function(response) {
 
 					var result = JSON.parse(response);
-					
-					if(result.status == 'success') {
+
+					if (result.status == 'success') {
 						$('#editModal').modal('hide');
-						
+
 						Swal.fire({
 							icon: 'success',
 							title: 'Success',

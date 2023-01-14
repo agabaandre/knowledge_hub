@@ -94,6 +94,11 @@
 					<?php endforeach; ?>
 				</tbody>
 			</table>
+
+			<!-- Pagination -->
+			<ul>
+				<?php echo $this->pagination->create_links(); ?>
+			</ul>
 		</div>
 
 	</div>

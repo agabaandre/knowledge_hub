@@ -68,6 +68,7 @@
     <script>
         $(document).ready(function() {
             $('#kpi').DataTable({
+                "autoWidth": true,
                 dom: 'Bfrtip',
                 buttons: [
                     'copyHtml5',

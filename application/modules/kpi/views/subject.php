@@ -61,6 +61,7 @@
  <script>
      $(document).ready(function() {
          $('#subject').DataTable({
+            "autoWidth": true,
              dom: 'Bfrtip',
              buttons: [
                  'copyHtml5',
