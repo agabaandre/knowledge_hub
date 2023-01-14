@@ -9,30 +9,24 @@ require_once('includes/preloader.php');
 	require("includes/top_bar_mobile.php");
 	require("includes/nav.php");
 	?>
-	<!-- Main-content -->
-	<div class="main-content horizontal-content">
 
-		<!-- Container-fluid -->
-		<div class="container">
-
-			<!-- Main-content-body -->
-			<div class="">
-
-				<!-- header-title -->
-				<div class="header-title">
-					<div class="mb-0 mb-lg-0 mb-xl-0">
-						<h4 class="mb-2">Dashboard</h4>
-						<div class="main-content-breadcrumb"> <span>Dashboard</span> <span><?php echo $title ?></span> </div>
-					</div>
-				</div>
-
-				<?php $this->load->view($module . "/" . $view); ?>
+	<div class="col-md-12" style="margin-left: 20px;">
+		<!-- header-title -->
+		<div class="header-title">
+			<div class="mb-0 mb-lg-0 mb-xl-0">
+				<h4 class="mb-2">Dashboard</h4>
+				<div class="main-content-breadcrumb"> <span>Dashboard</span> <span><?php echo $title ?></span> </div>
 			</div>
-			<!-- Main-content-body closed -->
 		</div>
-		<!-- Container-fluid closed -->
 	</div>
-	<!-- Main-content closed -->
+
+	<!-- Main Content -->
+	<div class="main-content" style="margin-right: 20px; margin-left: 20px; margin-top: 20px;">
+		<div class="container-fluid">
+			<?php $this->load->view($module . "/" . $view); ?>
+		</div>
+	</div>
+	
 </div>
 <!-- Page closed -->
 <?php require("includes/footer.php"); ?>
