@@ -45,6 +45,9 @@
 	<link href="<?php echo base_url() ?>assets/switcher/css/switcher.css" rel="stylesheet">
 	<link href="<?php echo base_url() ?>assets/switcher/demo.css" rel="stylesheet">
 
+	<!-- Quill -->
+	<link href="https://cdn.quilljs.com/1.2.6/quill.snow.css" rel="stylesheet">
+
 	<!-- Animations css -->
 	<link href="<?php echo base_url() ?>assets/css/animate.css" rel="stylesheet">
 	<script src="<?php echo base_url() ?>node_modules/jquery/dist/jquery.min.js"></script>

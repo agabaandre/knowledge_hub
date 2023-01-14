@@ -432,8 +432,8 @@
 <link href="<?php echo base_url() ?>node_modules/select2/dist/css/select2.min.css" rel="stylesheet" />
 <script src="<?php echo base_url() ?>node_modules/select2/dist/js/select2.min.js"></script>
 
-<!-- Add TinyMCE Nodemodules -->
-<script src="<?php echo base_url() ?>node_modules/tinymce/tinymce.min.js"></script>
+<!-- Add Quil -->
+<script src="https://cdn.quilljs.com/1.2.6/quill.min.js"></script>
 
 <!-- Add Sweetalert2 Nodemodule -->
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
@@ -452,14 +452,14 @@
 
 
 <script>
-	tinymce.init({
-		selector: "textarea#description",
-		plugins: [
-			"insertdatetime"
-		],
-		width: "auto",
-		height: 400,
-	});
+	// tinymce.init({
+	// 	selector: "textarea#description",
+	// 	plugins: [
+	// 		"insertdatetime"
+	// 	],
+	// 	width: "auto",
+	// 	height: 400,
+	// });
 </script>
 
 <!-- Update Tag Script -->
@@ -553,6 +553,155 @@
 
 	});
 </script>
+
+<script>
+	$(document).ready(function() {
+		var table = $('#publicationTable').DataTable({
+
+			"dom": 'bootstrap',
+			"buttons": [
+				'copy', 'csv', 'excel', 'pdf',
+			]
+		});
+
+
+		var filterButton = $('#filterButton');
+
+		var exportButton = $('#exportButton');
+
+		filterButton.on('click', function() {
+			var filterTitle = $('#filterTitle').val();
+			var filterSource = $('#filterSource').val();
+
+			// Apply both filters
+			table.columns(1).search(filterTitle).draw();
+			table.columns(2).search(filterSource).draw();
+		});
+
+		exportButton.on('click', function() {
+
+			// If filter has value, apply filter to table and export
+			if ($('#filterTitle').val()) {
+				var filter = $('#filterTitle').val();
+				table.search(filter).draw();
+				table.button(1).trigger();
+			} else {
+				table.button(1).trigger();
+			}
+		});
+	});
+
+	var descQuill = new Quill('div#description', {
+		theme: 'snow'
+	});
+
+
+	// On Edit Modal Shown Event
+	$('#editModal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var desc = button.data('description');
+
+
+		var modal = $(this);
+
+		modal.find('.modal-title').text('Update Publication');
+		modal.find('#id').val(id);
+		modal.find('#title').val(title);
+		// modal.find('#desc').val(desc);
+
+		descQuill.setContents(
+			[
+				{
+					"insert": desc
+				}
+			]
+		)
+
+		$('#edit-publication-form').on('submit', function(e) {
+			e.preventDefault();
+			var form = $(this);
+			var url = form.attr('action');
+
+			// Add Quill Description to form
+			var description = descQuill.root.innerHTML;
+
+			
+
+			// Append to form
+			form.append(`<input type="hidden" name="description" value="${desc}">`);
+
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: form.serialize(),
+				success: function(response) {
+
+					var result = JSON.parse(response);
+					
+					if(result.status == 'success') {
+						$('#editModal').modal('hide');
+						
+						Swal.fire({
+							icon: 'success',
+							title: 'Success',
+							text: 'Publication updated successfully!',
+						}).then((result) => {
+							if (result.value) {
+								location.reload();
+							}
+						});
+					} else {
+						$('#editModal').modal('hide');
+						Swal.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Publication update failed!',
+						});
+					}
+				}
+			});
+		});
+	});
+
+	// Sweet Alert Delete Confirmation
+	$('#deleteModal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var modal = $(this);
+
+		modal.find('.modal-title').text('Delete Publication: ' + title);
+		modal.find('#delete_id').val(id);
+
+		$('#deleteForm').on('submit', function(e) {
+			e.preventDefault();
+			var form = $(this);
+			var url = form.attr('action');
+
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: form.serialize(),
+				success: function(response) {
+					console.log(response);
+					Swal.fire({
+						title: 'Success!',
+						text: 'Publication Deleted Successfully!',
+						type: 'success',
+						confirmButtonText: 'Ok'
+					}).then((result) => {
+						if (result.value) {
+							window.location.href = '<?php echo base_url('publications'); ?>';
+						}
+					});
+				}
+			});
+		});
+	});
+</script>
+
 
 
 </body>

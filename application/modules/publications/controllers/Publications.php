@@ -43,6 +43,7 @@ class Publications extends MX_Controller
 		render('form', $data);
 	}
 
+
 	public function save()
 	{
 		$is_error = false;
@@ -165,6 +166,27 @@ class Publications extends MX_Controller
 		}
 	}
 
+	public function edit()
+	{
+		$id = $this->input->post('id');
+		$title = $this->input->post('title');
+		$description = $this->input->post('description');
+
+		$data = [
+			'id' => $id,
+			'title' => $title,
+			'description' => $description
+		];
+
+		$resp = $this->publicationsmodel->update($data);
+
+		$response = [];
+		$response['status'] = 'success';
+		$response['message'] = 'Publication Updated Successfully';
+
+		echo json_encode($response);
+	}
+
 	public function delete($id)
 	{
 		$resp = $this->publicationsmodel->delete($id);
@@ -185,4 +207,6 @@ class Publications extends MX_Controller
 		set_flash("Comment submitted successfully");
 		redirect('records/show/' . $this->input->post('publication_id'));
 	}
+
+	
 }
