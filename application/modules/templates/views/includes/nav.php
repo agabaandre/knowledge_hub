@@ -37,7 +37,7 @@
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">File Types</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quotes">Quotes</a></li>
-						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quizes">Quiz</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quize">Quize</a></li>
 					</ul>
 				</li>
 

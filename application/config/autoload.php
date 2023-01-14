@@ -146,5 +146,7 @@ $autoload['model'] = array(
     ['faqs/faqs_model'=>'faqsmodel'],
     // Quotes Model
     ['quotes/quotes_model'=>'quotesmodel'],
+    // Quize Model
+    ['quize/quize_model'=>'quizemodel'],
 
 );

@@ -450,6 +450,21 @@
 	});
 </script>
 
+<!-- Update Quize Script -->
+<script>
+	$('#edit-quize-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('question');
+		var modal = $(this);
+		modal.find('.modal-body #quize_id').val(id);
+		modal.find('.modal-body #quize_title').val(title);
+		modal.find('.modal-body #quize_description').val(description);
+	});
+
+	</script>
+
 
 <!-- Update Tag Script -->
 <script>
