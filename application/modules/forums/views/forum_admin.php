@@ -55,8 +55,11 @@
 
 										<!-- <a href="<?php echo base_url('forums/admin/approve_forum/' . $forum->id); ?>" class="btn btn-success btn-sm btn-block">Approve</a> -->
 									<?php endif; ?>
-									<a href="<?php echo base_url('forums/admin/edit_forum/' . $forum->id); ?>" class="btn btn-primary btn-sm btn-block">Edit</a>
-									<a href="<?php echo base_url('forums/admin/delete_forum/' . $forum->id); ?>" class="btn btn-danger btn-sm btn-block">Delete</a>
+									<!-- <a href="<?php echo base_url('forums/admin/edit_forum/' . $forum->id); ?>" class="btn btn-primary btn-sm btn-block">Edit</a>
+									<a href="<?php echo base_url('forums/admin/delete_forum/' . $forum->id); ?>" class="btn btn-danger btn-sm btn-block">Delete</a> -->
+
+									<!-- Delete Button -->
+									<a class="btn btn-sm btn-danger btn-block" href="javascript:void(0);" onclick="openDeleteModal(<?php echo $forum->id; ?>)" class="text-danger">Delete</a>
 								</td>
 							</tr>
 						<?php endforeach; ?>
@@ -96,3 +99,6 @@
 		</div>
 	</div>
 </div>
+
+<!-- Delete forum modal -->
+<?php include 'includes/delete-modal.php'; ?>

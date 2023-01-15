@@ -86,5 +86,11 @@ class Forums extends MX_Controller
 		render("forum_admin", $data);
 	}
 
+	public function delete($id)
+	{
+		$this->forumsmodel->delete($id);
+		echo "success";
+	}
+
 	
 }
