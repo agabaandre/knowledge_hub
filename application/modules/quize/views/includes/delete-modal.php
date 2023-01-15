@@ -31,13 +31,13 @@
             .then(res => res.text())
             .then(res => {
                 console.log(res)
-                $('#delete-modal').modal('hide');
+                $('#delete-quize-modal').modal('hide');
                 window.location.reload();
             })
     }
 
     function openDeleteModal(row = 0) {
         toDeleteRow = row;
-        $('#delete-modal').modal('show');
+        $('#delete-quize-modal').modal('show');
     }
 </script>

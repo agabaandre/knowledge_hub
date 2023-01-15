@@ -57,5 +57,12 @@ class Quize_model extends CI_Model
 		return $result;
 	}
 
+	public function deleteQuestion($id)
+	{
+		$this->db->where('id', $id);
+		$this->db->delete('questions');
+		return $this->db->affected_rows();
+	}
+
 	
 }

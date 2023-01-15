@@ -74,16 +74,11 @@ class Quize extends MX_Controller
 
 	public function delete($id)
 	{
+		// Delete question and answers
+		$this->quizemodel->deleteAnswers($id);
+		$this->quizemodel->deleteQuestion($id);
 
-		$resp = $this->quizemodel->delete($id);
-		$is_error = false;
-
-		if ($resp) {
-			$msg = "Success";
-		} else {
-			$msg = "False";
-		}
-
-		die($msg);
+		return true;
+		
 	}
 }
