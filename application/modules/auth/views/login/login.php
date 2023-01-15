@@ -22,10 +22,10 @@
 </head>
 <!-- [ auth-signin ] start -->
 <div class="auth-wrapper">
-  <div class="auth-content container">
-    <div class="card">
-      <div class="row align-items-center">
-        <div class="col-md-6">
+  <div class="auth-content container mt-100">
+    <div class="row align-items-center">
+      <div class="col-md-6 offset-md-3 align-self-center">
+        <div class="card">
           <div class="card-body">
             <img src="<?php echo base_url() ?>assets/images/cdc_square.png.png" alt="" class="img-fluid mb-4">
             <h3 class="mb-3 f-w-400 justify-content-center">Sign In</h3>

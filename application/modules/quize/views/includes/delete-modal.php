@@ -1,5 +1,5 @@
 <!-- First modal dialog -->
-<div class="modal" id="delete-modal">
+<div class="modal" id="delete-quize-modal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
@@ -15,29 +15,29 @@
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
-                <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">Yes Delete</button>
+                <button class="btn btn-outline-danger btn-sm edit" onclick="deleteRow()">Yes Delete</button>
             </div>
         </div>
     </div>
 </div>
 
-    <script>
-        var toDeleteRow = '';
-        function deleteRow () {
-            let url = '<?php echo base_url();?>forums/delete/' + toDeleteRow;
+<script>
+    var toDeleteRow = '';
 
-                fetch(url)
-                .then(res => res.text())
-                .then(res => {
-                    console.log(res)
-                    $('#delete-modal').modal('hide');
-                     window.location.reload();
-                })
-        }
+    function deleteRow() {
+        let url = '<?php echo base_url(); ?>quize/delete/' + toDeleteRow;
 
-        function openDeleteModal (row = 0) {
-            toDeleteRow = row;
-            $('#delete-modal').modal('show');
-        }
-    </script>
+        fetch(url)
+            .then(res => res.text())
+            .then(res => {
+                console.log(res)
+                $('#delete-quize-modal').modal('hide');
+                window.location.reload();
+            })
+    }
+
+    function openDeleteModal(row = 0) {
+        toDeleteRow = row;
+        $('#delete-quize-modal').modal('show');
+    }
+</script>

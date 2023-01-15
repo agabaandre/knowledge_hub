@@ -143,6 +143,10 @@ $autoload['model'] = array(
     ['Kpi/kpi_mdl' => 'kpi_mdl'],
     ['forums/forums_model' => 'forumsmodel'],
     ['tags/tags_model' => 'tagsmodel'],
-    ['faqs/faqs_model'=>'faqsmodel']
+    ['faqs/faqs_model'=>'faqsmodel'],
+    // Quotes Model
+    ['quotes/quotes_model'=>'quotesmodel'],
+    // Quize Model
+    ['quize/quize_model'=>'quizemodel'],
 
 );

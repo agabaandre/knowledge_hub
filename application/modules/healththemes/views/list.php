@@ -21,7 +21,7 @@
 				<td width="5%"><i class="fa <?php echo $theme->icon; ?> fa-2x text-muted"></i></td>
 				<td><?php echo $theme->description; ?></td>
 				<td><a href="#edit<?php echo $theme->id; ?>"><i class="fa fa-edit"></i> Edit</td>
-				<td><a href="javascript:void(0);" onclick="openDeleteModal(<?php echo $theme->id; ?>)" class="text-danger"><i class="fa fa-trash"></i> Delete</td>
+				<td><a href="javascript:void(0);" onclick="openDeleteModal(<?php echo $theme->id; ?>)" class="text-danger"><i class="fa fa-trash"></i> Delete</a></td>
 			 </tr>
 		<?php endforeach; ?>
 		</table>

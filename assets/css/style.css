@@ -1923,6 +1923,7 @@ pre code {
     }
     .main-content.horizontal-content {
         margin-top: 0 !important;
+        margin: 50px !important;
     }
     .main-content .container {
         max-width: none !important;

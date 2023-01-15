@@ -12,6 +12,7 @@ class Forums extends MX_Controller
 		$this->module = "forums";
 		$this->title  = "Forums";
 		$this->load->model('forums_model', 'forumsmodel');
+		$this->load->library('pagination');
 	}
 
 	public function index()
@@ -57,9 +58,9 @@ class Forums extends MX_Controller
 			'id' => @$this->input->post("id"),
 			'forum_title' => $this->input->post("title"),
 			'forum_description' => $this->input->post("description"),
-			'created_by'=>user_session()->user_id
+			'created_by'=> $this->session->userdata('user')->id,
 		];
-
+		
 		$resp = $this->forumsmodel->save($quote);
 
 		$msg = "Operation Successful";
@@ -84,4 +85,12 @@ class Forums extends MX_Controller
 		$data['module'] = $this->module;
 		render("forum_admin", $data);
 	}
+
+	public function delete($id)
+	{
+		$this->forumsmodel->delete($id);
+		echo "success";
+	}
+
+	
 }

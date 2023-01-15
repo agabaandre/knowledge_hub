@@ -4,7 +4,9 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="myExtraLargeModalLabel">Create Sub-Health Theme</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
       <?php echo form_open_multipart(base_url('healththemes/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 

@@ -43,6 +43,7 @@ class Publications extends MX_Controller
 		render('form', $data);
 	}
 
+
 	public function save()
 	{
 		$is_error = false;
@@ -107,7 +108,8 @@ class Publications extends MX_Controller
 			} else {
 				// If the upload is successful, get the file name
 				$publication = $this->upload->data('file_name');
-				$publication = $publication['name'];
+				// dd($publication);
+				// $publication = $publication['name'];
 			}
 		} else {
 			$publication = $this->input->post("link");
@@ -137,11 +139,6 @@ class Publications extends MX_Controller
 				'cover' => $cover ?? 'cover.png',
 			];
 
-			// // If ID is empty, remove it from the array
-			// if (empty($theme['id'])) {
-			// 	unset($theme['id']);
-			// }
-
 			$result = $this->publicationsmodel->save($theme);
 
 
@@ -165,6 +162,27 @@ class Publications extends MX_Controller
 		}
 	}
 
+	public function edit()
+	{
+		$id = $this->input->post('id');
+		$title = $this->input->post('title');
+		$description = $this->input->post('description');
+
+		$data = [
+			'id' => $id,
+			'title' => $title,
+			'description' => $description
+		];
+
+		$resp = $this->publicationsmodel->update($data);
+
+		$response = [];
+		$response['status'] = 'success';
+		$response['message'] = 'Publication Updated Successfully';
+
+		echo json_encode($response);
+	}
+
 	public function delete($id)
 	{
 		$resp = $this->publicationsmodel->delete($id);
@@ -185,4 +203,6 @@ class Publications extends MX_Controller
 		set_flash("Comment submitted successfully");
 		redirect('records/show/' . $this->input->post('publication_id'));
 	}
+
+	
 }

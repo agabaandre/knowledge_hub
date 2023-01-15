@@ -432,35 +432,69 @@
 <link href="<?php echo base_url() ?>node_modules/select2/dist/css/select2.min.css" rel="stylesheet" />
 <script src="<?php echo base_url() ?>node_modules/select2/dist/js/select2.min.js"></script>
 
-<!-- Add TinyMCE Nodemodules -->
-<script src="<?php echo base_url() ?>node_modules/tinymce/tinymce.min.js"></script>
-
 <!-- Add Sweetalert2 Nodemodule -->
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
-<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css" />
+<!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css" /> -->
 
-<script type="text/javascript" src="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js" integrity="sha512-BkpSL20WETFylMrcirBahHfSnY++H2O1W+UnEEO4yNIl+jI2+zowyoGJpbtk6bx97fBXf++WJHSSK2MV4ghPcg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap.min.css" integrity="sha512-BMbq2It2D3J17/C7aRklzOODG1IQ3+MHw3ifzBHMBwGO/0yUqYmsStgBjI0z5EYlaDEFnvYV7gNYdD3vFLRKsA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
+
+
+<!-- include summernote css/js -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 
 
 <script>
 	$(document).ready(function() {
 		$('.select2').select2();
 	});
-</script>
 
-
-<script>
-	tinymce.init({
-		selector: "textarea#description",
-		plugins: [
-			"insertdatetime"
-		],
-		width: "auto",
-		height: 400,
+	$('#publication_description').summernote({
+		minHeight: 300,
 	});
 </script>
+
+<!-- Create Quize  -->
+<script>
+	$('#create-quize-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+	});
+</script>
+
+<!-- Update Quize Script -->
+<script>
+	$('#edit-quize-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var question = button.data('question');
+		var answers = button.data('answers');
+		var modal = $(this);
+		modal.find('.modal-body #id').val(id);
+		modal.find('.modal-body #question').val(question);
+
+		var answersArray = answers.split(',');
+		for (var i = 0; i < answersArray.length; i++) {
+			var answer = answersArray[i].split(':');
+			var id = answer[0];
+			var text = answer[1];
+			var is_correct = answer[2];
+
+			// Append the answer to the respective form input
+			// $("#answer" + (i + 1)).val(text);
+			modal.find('.modal-body #answer' + (i + 1)).val(text);
+			if (is_correct == 1) {
+				// $("#correct_answer").val(i + 1);
+				// Set the select otpion to the correct answer
+				modal.find('.modal-body #correct_answer').val(i + 1);
+			}
+		}
+	});
+</script>
+
 
 <!-- Update Tag Script -->
 <script>
@@ -472,6 +506,24 @@
 		var modal = $(this);
 		modal.find('.modal-body #tag_id').val(tagId);
 		modal.find('.modal-body #tag_name').val(tagText);
+	});
+</script>
+
+<!-- Update Tag Script -->
+<script>
+	$('#edit-quote-modal').on('show.bs.modal', function(event) {
+		console.log('Modal Opened');
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var quote = button.data('quote');
+
+		console.log(quote);
+
+		var modal = $(this);
+		modal.find('.modal-body #id').val(id);
+		// modal.find('.modal-body #quote_description').val(quote);
+
+		$('#quote_description').summernote('code', quote);
 	});
 </script>
 
@@ -506,15 +558,15 @@
 <!-- Script -->
 <script>
 	// Approve forum modal
-	$('#approveForumModal').on('show.bs.modal', function(event) {
+	$('#approve-forum-modal').on('show.bs.modal', function(event) {
 		var button = $(event.relatedTarget) // Button that triggered the modal
-		var forumId = button.data('forumid') // Extract info from data-* attributes
-		var forumTitle = button.data('forumtitle')
-		var forumDescription = button.data('forumdescription')
+		var id = button.data('id') // Extract info from data-* attributes
+		var title = button.data('title')
+		var description = button.data('description')
 		var modal = $(this)
-		modal.find('#forumTitle').html(`<h4>${forumTitle}</h4>`)
-		modal.find('#approveForumLink').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + forumId)
-		modal.find('#forumDescription').html(forumDescription)
+		modal.find('#title').html(`<h4>${title}</h4>`)
+		modal.find('#link').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + id)
+		modal.find('#description').html(description)
 	});
 </script>
 
@@ -523,6 +575,7 @@
 <script>
 	$(document).ready(function() {
 		var authorsTable = $('table#authors-table').DataTable({
+			"autoWidth": true,
 			buttons: [
 				'copy', 'csv', 'excel', 'pdf', 'print'
 			],
@@ -543,16 +596,171 @@
 </script>
 
 <!-- Datatables -->
+
+
 <script>
 	$(document).ready(function() {
-		var forumsTable = $('table#forum-approval-table').DataTable({
-			buttons: [
-				'copy', 'csv', 'excel', 'pdf', 'print'
-			],
+		var table = $('#publicationTable').DataTable({
+			"autoWidth": true,
+			"dom": 'bootstrap',
+			"buttons": [
+				'copy', 'csv', 'excel', 'pdf',
+			]
 		});
 
+
+		var filterButton = $('#filterButton');
+
+		var exportButton = $('#exportButton');
+
+		filterButton.on('click', function() {
+			var filterTitle = $('#filterTitle').val();
+			var filterDesc = $('#filterDesc').val();
+			var filterSource = $('#filterSource').val();
+
+			// Apply both filters
+			table.columns(1).search(filterTitle).draw();
+			table.columns(2).search(filterDesc).draw();
+			table.columns(3).search(filterSource).draw();
+		});
+
+		exportButton.on('click', function() {
+
+			// If filter has value, apply filter to table and export
+			if ($('#filterTitle').val()) {
+				var filter = $('#filterTitle').val();
+				table.search(filter).draw();
+				table.button(1).trigger();
+			} else {
+				table.button(1).trigger();
+			}
+		});
+	});
+
+	// On Edit Forum Modal Shown
+	$('#edit-forum-modal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var desc = button.data('description');
+		var modal = $(this);
+		modal.find('.modal-title').text('Update Forum');
+		modal.find('#id').val(id);
+		modal.find('#title').val(title);
+		modal.find('#description').summernote('code', desc);
+	});
+
+	$('#quote_description').summernote({
+		height: 300,
+	});
+
+	// On Edit Modal Shown Event
+	$('#edit-publication-modal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var desc = button.data('description');
+
+
+		var modal = $(this);
+
+		modal.find('.modal-title').text('Update Publication');
+		modal.find('#id').val(id);
+		modal.find('#title').val(title);
+		// modal.find('#publication_description').summernote({
+		// 	height: 300,
+		// 	toolbar: [
+		// 		['style', ['style']],
+		// 		['font', ['bold', 'underline', 'clear']],
+		// 		['fontname', ['fontname']],
+		// 		['color', ['color']],
+		// 		['para', ['ul', 'ol', 'paragraph']],
+		// 		['table', ['table']],
+		// 		['insert', ['link', 'picture', 'video']],
+		// 		['view', ['fullscreen', 'codeview', 'help']],
+		// 	],
+		// });
+		
+		// Set summernote content for description
+		$('#publication_description').summernote('code', desc);
+
+		
+
+		$('#edit-publication-form').on('submit', function(e) {
+			e.preventDefault();
+			var form = $(this);
+			var url = form.attr('action');
+
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: form.serialize(),
+				success: function(response) {
+
+					var result = JSON.parse(response);
+
+					if (result.status == 'success') {
+						$('#editModal').modal('hide');
+
+						Swal.fire({
+							icon: 'success',
+							title: 'Success',
+							text: 'Publication updated successfully!',
+						}).then((result) => {
+							if (result.value) {
+								location.reload();
+							}
+						});
+					} else {
+						$('#editModal').modal('hide');
+						Swal.fire({
+							icon: 'error',
+							title: 'Oops...',
+							text: 'Publication update failed!',
+						});
+					}
+				}
+			});
+		});
+	});
+
+	// Sweet Alert Delete Confirmation
+	$('#deleteModal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var modal = $(this);
+
+		modal.find('.modal-title').text('Delete Publication: ' + title);
+		modal.find('#delete_id').val(id);
+
+		$('#deleteForm').on('submit', function(e) {
+			e.preventDefault();
+			var form = $(this);
+			var url = form.attr('action');
+
+			$.ajax({
+				type: 'POST',
+				url: url,
+				data: form.serialize(),
+				success: function(response) {
+					console.log(response);
+					Swal.fire({
+						title: 'Success!',
+						text: 'Publication Deleted Successfully!',
+						type: 'success',
+						confirmButtonText: 'Ok'
+					}).then((result) => {
+						if (result.value) {
+							window.location.href = '<?php echo base_url('publications'); ?>';
+						}
+					});
+				}
+			});
+		});
 	});
 </script>
+
 
 
 </body>

@@ -1,9 +1,9 @@
 <!--  Extra Large modal example -->
-<div class="modal" id="create-modal">
+<div class="modal" id="edit-filetype-modal">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create File Type </h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Update File Type </h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -19,6 +19,7 @@
               <input type="text" placeholder="Enetr File Type" class="form-control newform" id="name" name="name" required>
             </div>
           </div>
+
 
           <!-- <div  class="col-md-4"> -->
           <!-- </div> -->

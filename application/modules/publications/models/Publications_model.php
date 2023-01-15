@@ -160,11 +160,18 @@ class Publications_model extends CI_Model
 	public function update($data)
 	{
 
-		$this->db->insert($this->table, $data);
-		$row_id =  $this->db->insert_id();
+		// $this->db->insert($this->table, $data);
+		// $row_id =  $this->db->insert_id();
+
+		// //return inserted row
+		// return $this->find($row_id);
+
+		// Update record with id
+		$this->db->where('id', $data['id']);
+		$this->db->update($this->table, $data);
 
 		//return inserted row
-		return $this->find($row_id);
+		return true;
 	}
 
 	public function delete($id)
