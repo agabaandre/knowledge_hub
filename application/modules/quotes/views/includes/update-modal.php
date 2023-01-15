@@ -14,7 +14,7 @@
         <?php echo form_open('quotes/save'); ?>
         <div class="form-group">
           <label for="quote">Quote</label>
-          <input type="text" class="form-control" name="quote" id="quote" placeholder="Enter tag name">
+          <textarea type="text" class="form-control" name="quote" id="quote_description" placeholder="Enter quote"></textarea>
           <input type="hidden" name="id" id="id">
         </div>
         <!-- Button ALigned to right -->

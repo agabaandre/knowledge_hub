@@ -13,7 +13,7 @@
         
         <div class="form-group">
           <label for="quote">Quote</label>
-          <textarea class="form-control" name="quote" id="quote" rows="3" placeholder="Enter Quote"></textarea>
+          <textarea class="form-control" name="quote" id="quote" rows="3" placeholder="Enter Quote" id="quote_description"></textarea>
         </div>
 
         <!-- Button ALigned to right -->

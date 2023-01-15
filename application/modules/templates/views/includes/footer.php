@@ -432,9 +432,6 @@
 <link href="<?php echo base_url() ?>node_modules/select2/dist/css/select2.min.css" rel="stylesheet" />
 <script src="<?php echo base_url() ?>node_modules/select2/dist/js/select2.min.js"></script>
 
-<!-- Add Quil -->
-<script src="https://cdn.quilljs.com/1.2.6/quill.min.js"></script>
-
 <!-- Add Sweetalert2 Nodemodule -->
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
 
@@ -519,9 +516,14 @@
 		var button = $(event.relatedTarget);
 		var id = button.data('id');
 		var quote = button.data('quote');
+
+		console.log(quote);
+
 		var modal = $(this);
 		modal.find('.modal-body #id').val(id);
-		modal.find('.modal-body #quote').val(quote);
+		// modal.find('.modal-body #quote_description').val(quote);
+
+		$('#quote_description').summernote('code', quote);
 	});
 </script>
 
@@ -556,15 +558,15 @@
 <!-- Script -->
 <script>
 	// Approve forum modal
-	$('#approveForumModal').on('show.bs.modal', function(event) {
+	$('#approve-forum-modal').on('show.bs.modal', function(event) {
 		var button = $(event.relatedTarget) // Button that triggered the modal
-		var forumId = button.data('forumid') // Extract info from data-* attributes
-		var forumTitle = button.data('forumtitle')
-		var forumDescription = button.data('forumdescription')
+		var id = button.data('id') // Extract info from data-* attributes
+		var title = button.data('title')
+		var description = button.data('description')
 		var modal = $(this)
-		modal.find('#forumTitle').html(`<h4>${forumTitle}</h4>`)
-		modal.find('#approveForumLink').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + forumId)
-		modal.find('#forumDescription').html(forumDescription)
+		modal.find('#title').html(`<h4>${title}</h4>`)
+		modal.find('#link').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + id)
+		modal.find('#description').html(description)
 	});
 </script>
 
@@ -635,7 +637,22 @@
 		});
 	});
 
+	// On Edit Forum Modal Shown
+	$('#edit-forum-modal').on('show.bs.modal', function(event) {
+		var button = $(event.relatedTarget);
+		var id = button.data('id');
+		var title = button.data('title');
+		var desc = button.data('description');
+		var modal = $(this);
+		modal.find('.modal-title').text('Update Forum');
+		modal.find('#id').val(id);
+		modal.find('#title').val(title);
+		modal.find('#description').summernote('code', desc);
+	});
 
+	$('#quote_description').summernote({
+		height: 300,
+	});
 
 	// On Edit Modal Shown Event
 	$('#edit-publication-modal').on('show.bs.modal', function(event) {
