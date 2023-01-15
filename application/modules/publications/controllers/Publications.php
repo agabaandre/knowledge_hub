@@ -108,7 +108,8 @@ class Publications extends MX_Controller
 			} else {
 				// If the upload is successful, get the file name
 				$publication = $this->upload->data('file_name');
-				$publication = $publication['name'];
+				// dd($publication);
+				// $publication = $publication['name'];
 			}
 		} else {
 			$publication = $this->input->post("link");
@@ -137,11 +138,6 @@ class Publications extends MX_Controller
 				'is_active' => $this->input->post("is_active"),
 				'cover' => $cover ?? 'cover.png',
 			];
-
-			// // If ID is empty, remove it from the array
-			// if (empty($theme['id'])) {
-			// 	unset($theme['id']);
-			// }
 
 			$result = $this->publicationsmodel->save($theme);
 

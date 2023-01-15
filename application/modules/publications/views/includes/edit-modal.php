@@ -1,5 +1,5 @@
 <!-- Edit Modal -->
-<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
+<div class="modal fade" id="edit-publication-modal" tabindex="-1" role="dialog" aria-labelledby="editModalLabel" aria-hidden="true">
 		<div class="modal-dialog" role="document">
 			<div class="modal-content">
 				<div class="modal-header">
@@ -21,7 +21,7 @@
 
 						<div class="form-group">
 							<label for="description">Description</label>
-							<div id="description" style="min-height: 300px;"></div>
+							<textarea id="publication_description" name="description" style="min-height: 300px;"></textarea>
 						</div>
 
 

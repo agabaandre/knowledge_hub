@@ -7,19 +7,27 @@
 		<div class="card-header">
 			<div class="container-fluid">
 				<div class="row">
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<div class="form-group">
 							<label for="title">Title</label>
-							<input type="text" name="title" id="filterTitle" class="form-control">
+							<input type="text" name="title" id="filterTitle" class="form-control"
+								placeholder="Filter by Title"
+							>
 						</div>
 					</div>
-					<div class="col-md-4">
+					<div class="col-md-3">
 						<div class="form-group">
 							<label for="source">Source / Author</label>
-							<input type="text" name="source" id="filterSource" class="form-control" value="">
+							<input type="text" name="source" id="filterSource" class="form-control" value="" placeholder="Filter by Source/Author">
 						</div>
 					</div>
-					<div class="col-md-4">
+					<div class="col-md-3">
+						<div class="form-group">
+							<label for="source">Description</label>
+							<input type="text" name="description" id="filterDesc" class="form-control" value="" placeholder="Filter by Description">
+						</div>
+					</div>
+					<div class="col-md-3">
 						<div class="form-group">
 							<label for="file_type">File Type</label>
 							<select name="file_type" id="file_type" class="form-control">
@@ -81,14 +89,12 @@
 								<a href="<?php echo base_url('publications/delete/' . $publication->id); ?>" class="btn btn-danger btn-sm">Delete</a> -->
 
 								<!-- Edit Modal Action -->
-								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#editModal" data-id="<?php echo $publication->id; ?>" data-title="<?php echo $publication->title; ?>" data-description="<?php echo $publication->description; ?>" data-publication="<?php echo $publication->publication; ?>" data-file_type="<?php echo $publication->file_type_id; ?>">
+								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#edit-publication-modal" data-id="<?php echo $publication->id; ?>" data-title="<?php echo $publication->title; ?>" data-description="<?php echo $publication->description; ?>" data-publication="<?php echo $publication->publication; ?>" data-file_type="<?php echo $publication->file_type_id; ?>">
 									Edit
 								</button>
 
 								<!-- Delete Modal Action -->
-								<button type="button" class="btn btn-danger btn-sm" data-toggle="modal" data-target="#deleteModal" data-id="<?php echo $publication->id; ?>" data-title="<?php echo $publication->title; ?>" data-description="<?php echo $publication->description; ?>" data-publication="<?php echo $publication->publication; ?>" data-file_type="<?php echo $publication->file_type_id; ?>">
-									Delete
-								</button>
+								<a class="btn btn-sm btn-danger" href="javascript:void(0);" onclick="openDeleteModal(<?php echo $publication->id; ?>)" class="text-danger"> Delete</a>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -102,3 +108,5 @@
 
 	<!-- Include edit-modal.php -->
 	<?php include('includes/edit-modal.php'); ?>
+	<!-- Include delete-modal.php -->
+	<?php include('includes/delete-modal.php'); ?>

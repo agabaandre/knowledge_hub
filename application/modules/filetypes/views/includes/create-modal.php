@@ -15,8 +15,8 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Area</label>
-              <input type="text" placeholder="Enetr File Type" class="form-control newform" id="name" name="name" required>
+              <label class="form-label" for="name">File Type</label>
+              <input type="text" placeholder="Enter File Type" class="form-control newform" id="name" name="name" required>
             </div>
           </div>
 

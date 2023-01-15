@@ -43,7 +43,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Description</label>
-                                <textarea id="description" placeholder="Descripion" class="form-control newform" name="description"></textarea>
+                                <textarea id="publication_description" placeholder="Descripion" class="form-control newform" name="description" style="min-height: 400px;"></textarea>
                             </div>
                         </div>
 
@@ -201,9 +201,11 @@
         // Get the form data.]
         var formData = new FormData(form.get(0));
 
+        var url = form.attr('action');
+
         $.ajax({
-            url: form.attr('action'),
-            type: form.attr('method'),
+            url: url,
+            type: 'post',
             data: formData,
             cache: false,
             contentType: false,
@@ -212,8 +214,12 @@
                 if (response.status == 'success') {
                     Swal.fire({
                         title: 'Success!',
-                        text: response.message,
+                        html: response.message,
                         icon: 'success'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
                     });
 
                     $('#publications').trigger("reset");
@@ -221,7 +227,7 @@
                 } else {
                     Swal.fire({
                         title: 'Error!',
-                        text: response.message,
+                        html: response.message,
                         icon: 'error'
                     });
                 }

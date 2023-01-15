@@ -444,9 +444,19 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap.min.css" integrity="sha512-BMbq2It2D3J17/C7aRklzOODG1IQ3+MHw3ifzBHMBwGO/0yUqYmsStgBjI0z5EYlaDEFnvYV7gNYdD3vFLRKsA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
 
+
+<!-- include summernote css/js -->
+<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+
+
 <script>
 	$(document).ready(function() {
 		$('.select2').select2();
+	});
+
+	$('#publication_description').summernote({
+		minHeight: 300,
 	});
 </script>
 
@@ -454,12 +464,6 @@
 <script>
 	$('#create-quize-modal').on('show.bs.modal', function(event) {
 		console.log('Modal Opened');
-		// var button = $(event.relatedTarget);
-		// var id = button.data('id');
-		// var title = button.data('title');
-		// var modal = $(this);
-		// modal.find('.modal-body #quize_id').val(id);
-		// modal.find('.modal-body #quize_title').val(title);
 	});
 </script>
 
@@ -609,11 +613,13 @@
 
 		filterButton.on('click', function() {
 			var filterTitle = $('#filterTitle').val();
+			var filterDesc = $('#filterDesc').val();
 			var filterSource = $('#filterSource').val();
 
 			// Apply both filters
 			table.columns(1).search(filterTitle).draw();
-			table.columns(2).search(filterSource).draw();
+			table.columns(2).search(filterDesc).draw();
+			table.columns(3).search(filterSource).draw();
 		});
 
 		exportButton.on('click', function() {
@@ -629,13 +635,10 @@
 		});
 	});
 
-	var descQuill = new Quill('div#description', {
-		theme: 'snow'
-	});
 
 
 	// On Edit Modal Shown Event
-	$('#editModal').on('show.bs.modal', function(event) {
+	$('#edit-publication-modal').on('show.bs.modal', function(event) {
 		var button = $(event.relatedTarget);
 		var id = button.data('id');
 		var title = button.data('title');
@@ -647,26 +650,29 @@
 		modal.find('.modal-title').text('Update Publication');
 		modal.find('#id').val(id);
 		modal.find('#title').val(title);
-		// modal.find('#desc').val(desc);
+		// modal.find('#publication_description').summernote({
+		// 	height: 300,
+		// 	toolbar: [
+		// 		['style', ['style']],
+		// 		['font', ['bold', 'underline', 'clear']],
+		// 		['fontname', ['fontname']],
+		// 		['color', ['color']],
+		// 		['para', ['ul', 'ol', 'paragraph']],
+		// 		['table', ['table']],
+		// 		['insert', ['link', 'picture', 'video']],
+		// 		['view', ['fullscreen', 'codeview', 'help']],
+		// 	],
+		// });
+		
+		// Set summernote content for description
+		$('#publication_description').summernote('code', desc);
 
-		descQuill.setContents(
-			[{
-				"insert": desc
-			}]
-		)
+		
 
 		$('#edit-publication-form').on('submit', function(e) {
 			e.preventDefault();
 			var form = $(this);
 			var url = form.attr('action');
-
-			// Add Quill Description to form
-			var description = descQuill.root.innerHTML;
-
-
-
-			// Append to form
-			form.append(`<input type="hidden" name="description" value="${desc}">`);
 
 			$.ajax({
 				type: 'POST',
