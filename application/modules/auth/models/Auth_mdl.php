@@ -246,6 +246,19 @@ class Auth_mdl extends CI_Model
 		return $query->result_array();
 	}
 
+	public function user_permissions($role)
+	{
+		 $this->db->select('permission_id');
+		 $this->db->where("group_id", $role);
+		$query = $this->db->get('group_permissions')->result();
+
+		$perms = array();
+		foreach ($query as $perm) {
+			array_push($perms, $perm->permission_id);
+		}
+		return $perms;
+	}
+
 	public function find_user($id)
 	{
 		$this->db->where('user_id', $id);

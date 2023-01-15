@@ -398,3 +398,11 @@ if (!function_exists('is_valid_image')) {
         }
     }
 }
+if (!function_exists('permissions')) {
+
+    function can_access()
+    {
+        $ci = & get_instance();
+        return $ci->session->userdata('user')->permissions;
+    }
+}
