@@ -4,24 +4,15 @@
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
 			<a class="header-brand" href="<?php echo base_url() ?>">
-				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=250>
+				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=200>
 			</a>
 		</div>
 		<div class="main-header-center">
 			<div class="responsive-logo">
-				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=250px>
+				<img src="<?php echo base_url() ?>assets/images/logo.png" id="change-image" style="filter: brightness(0) invert(1);" width=200px>
 			</div>
 		</div>
 		<div class="main-header-right">
-			<div id="input-search" class="input-search header-search nav-item my-auto">
-				<form class="d-flex">
-					<input class="search-input form-control" placeholder="Search for anything..." type="search">
-					<span class="search-icon"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-							<circle cx="11" cy="11" r="8"></circle>
-							<line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-						</svg></span>
-				</form>
-			</div><!-- search closed -->
 			<div class="dropdown main-header-message right-toggle">
 				<div class="nav-item full-screen fullscreen-button">
 					<a class="new nav-link full-screen-link menu-icons fullscreen" href="#"><svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -180,10 +171,10 @@
 				</a>
 			</div><!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
-				<a class="profile-user" href=""><img alt="" src="<?php echo base_url() ?>assets/img/faces/6.jpg"></a>
+				<a  class=""><i class="bx bx-user-circle"></i></a>
 				<div class="dropdown-menu animated fadeInUp">
 					<div class="main-header-profile header-img">
-						<h6>Mack Adamia</h6><span>Premium Member</span>
+						<h6><?php echo $this->session->userdata('user')->name; ?></h6><span><?php echo ucwords($this->session->userdata('user')->group_name); ?></span>
 					</div>
 					<a class="dropdown-item" href="profile.html"><i class="bx bx-user-circle"></i> My Profile</a>
 					<a class="dropdown-item" href="editprofile.html"><i class="bx bxs-edit"></i> Edit Profile</a>
