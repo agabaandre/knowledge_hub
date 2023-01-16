@@ -40,6 +40,8 @@
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quotes">Quotes</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>quize">Quize</a></li>
+						<!-- Privacy Policy -->
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>privacypolicy">Privacy Policy</a></li>
 					</ul>
 				</li>
 

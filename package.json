@@ -6,6 +6,7 @@
     "ionicons-npm": "^2.0.1",
     "jquery": "^3.6.1",
     "jquery-autocomplete": "^1.2.8",
+    "marked": "^4.2.12",
     "select2": "^4.1.0-rc.0",
     "sweetalert2": "^11.6.16",
     "tinymce": "^6.3.1"

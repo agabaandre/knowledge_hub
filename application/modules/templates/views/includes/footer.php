@@ -455,6 +455,38 @@
 	$('#publication_description').summernote({
 		minHeight: 300,
 	});
+
+	// privacy_policy
+	$('#privacy_policy').summernote({
+		minHeight: 400,
+		minWidth: 800,
+	});
+
+	$('#form-privacy-policy').on('submit', function(e) {
+		e.preventDefault();
+		var data = $(this).serialize();
+		
+		$.ajax({
+			url: '<?php echo base_url() ?>/privacypolicy/save',
+			type: 'POST',
+			data: data,
+			success: function(response) {
+				if (response == 'success') {
+					Swal.fire({
+						icon: 'success',
+						title: 'Success',
+						text: 'Privacy Policy Updated Successfully',
+					});
+				} else {
+					Swal.fire({
+						icon: 'error',
+						title: 'Oops...',
+						text: 'Something went wrong!',
+					});
+				}
+			}
+		});
+	});
 </script>
 
 <!-- Create Quize  -->
