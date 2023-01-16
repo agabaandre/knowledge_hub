@@ -12,10 +12,7 @@ class PrivacyPolicy extends MX_Controller {
         $data['module'] = $this->module;
         $data['title'] = $this->title;
         $data['page'] = "Privacy Policy";
-        // Get Privacy Policy from markdown file
         $data['privacy_policy'] = file_get_contents(APPPATH . 'modules/privacypolicy/privacy_policy.md');
-
-
         render('privacy_policy', $data);
     }
 
