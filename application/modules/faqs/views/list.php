@@ -10,7 +10,7 @@
 							</div>
 							<div class="jbd-01-caption pl-3">
 								<div class="tbd-title">
-									<h4 class="mb-0 ft-medium fs-md">
+									<h4 class="mb-0 ft-medium fs-lg">
 										FREQUENTLY ASKED QUESTIONS
 									</h4>
 								</div>

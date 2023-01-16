@@ -35,6 +35,7 @@
 								<li><a href="<?php echo base_url("account/publish"); ?>">Publish a resource</a></li>
 								<?php endif; ?>
 								<li><a href="<?php echo base_url("forums"); ?>">Discussion Forums</a></li>
+								
 							</ul>
 						</div>
 					</div>
@@ -44,6 +45,7 @@
 							<ul class="footer-menu">
 								<li><a href="<?php echo base_url("faqs"); ?>">Frequently asked questions</a></li>
 								<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
+								<li><a href="<?php echo base_url('privacypolicy/read'); ?>">Privacy Policy</a></li>
 							</ul>
 						</div>
 					</div>
