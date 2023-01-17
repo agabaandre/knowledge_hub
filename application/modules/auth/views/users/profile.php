@@ -25,11 +25,11 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">New Password</label>
-                    <input type="password" class="form-control" value="password">
+                    <input type="new_password" class="form-control" value="password">
                 </div>
                 <div class="form-group">
                     <label class="form-label">Confirm Password</label>
-                    <input type="password" class="form-control" value="password">
+                    <input type="new_password" class="form-control" value="password">
                 </div>
             </div>
             <div class="card-footer text-right"><a href="#" class="btn btn-primary">Update</a> <a href="#"
@@ -49,14 +49,10 @@
                                 <label class="form-label">Language</label>
                             </div>
                             <div class="col-md-9">
-                                <select class="form-control select2">
-                                    <option>Us English</option>
-                                    <option>Arabic</option>
-                                    <option>Korean</option>
-                                </select>
+                              <?php echo translate(); ?>
+					         </div>
                             </div>
                         </div>
-                    </div>
                     <div class="mb-4 main-content-label">Name</div>
                     <div class="form-group ">
                         <div class="row">
@@ -95,134 +91,12 @@
                                 <label class="form-label">Role</label>
                             </div>
                             <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="Designation" value="Web Designer">
+                                <p><?php echo $this->session->userdata('user')->group_name; ?></p>
+                                
                             </div>
                         </div>
                     </div>
-                    <div class="mb-4 main-content-label">Contact Info</div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Email<i>(required)</i></label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="Email" value="info@Admix.in">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Website</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="Website" value="@spruko.w">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Phone</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="phone number" value="+245 354 654">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Address</label>
-                            </div>
-                            <div class="col-md-9">
-                                <textarea class="form-control" name="example-textarea-input" rows="2"
-                                    placeholder="Address">San Francisco, CA</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 main-content-label">Social Info</div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Twitter</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="twitter"
-                                    value="twitter.com/spruko.me">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Facebook</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="facebook"
-                                    value="https://www.facebook.com/Admix">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Google+</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="google" value="spruko.com">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Linked in</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="linkedin"
-                                    value="linkedin.com/in/spruko">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Github</label>
-                            </div>
-                            <div class="col-md-9">
-                                <input type="text" class="form-control" placeholder="github" value="github.com/sprukos">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 main-content-label">About Yourself</div>
-                    <div class="form-group ">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Biographical Info</label>
-                            </div>
-                            <div class="col-md-9">
-                                <textarea class="form-control" name="example-textarea-input" rows="4"
-                                    placeholder="">pleasure rationally encounter but because pursue consequences that are extremely painful.occur in which toil and pain can procure him some great pleasure..</textarea>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="mb-4 main-content-label">Email Preferences</div>
-                    <div class="form-group mb-0">
-                        <div class="row">
-                            <div class="col-md-3">
-                                <label class="form-label">Verified User</label>
-                            </div>
-                            <div class="col-md-9">
-                                <div class="custom-controls-stacked">
-                                    <label class="ckbox mg-b-10"><input checked="" type="checkbox"><span> Accept to
-                                            receive post or page notification emails</span></label>
-                                    <label class="ckbox"><input checked="" type="checkbox"><span> Accept to receive
-                                            email sent to multiple recipients</span></label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                   
                 </form>
             </div>
             <div class="card-footer">

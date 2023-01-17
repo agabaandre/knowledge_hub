@@ -67,8 +67,8 @@
 
 						<li class=""><a href="<?php echo base_url() ?>auth/users" class="">Manage Users</a></li>
 						<li class=""><a href="<?php echo base_url() ?>permissions" class="">Groups and Permissions</a></li>
-						<li class=""><a href="" class="">User Access Logs</a></li>
-						<li class=""><a href="" class="">Constants and Variables</a></li>
+						<li class=""><a href="<?php echo base_url() ?>logs" class="">User Logs</a></li>
+						<li class=""><a href="<?php echo base_url() ?>constants" class="">Constants</a></li>
 					</ul>
 				</li>
 			</ul>

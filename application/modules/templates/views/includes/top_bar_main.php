@@ -39,7 +39,7 @@
 							
 							<!-- If comment_count > 0 -->
 							<?php if($pending_forum_comments_count > 0): ?>
-								<h6 class="menu-header-title mb-0">You have <?php echo $pending_forum_comments_count; ?> forum comment requiring approval</h6>
+								<h6 class="menu-header-title mb-0">You have <?php echo $pending_forum_comments_count; ?> forum comments requiring approval</h6>
 							<?php else: ?>
 								<h6 class="menu-header-title mb-0">You have no pending forum comments</h6>
 							<?php endif; ?>

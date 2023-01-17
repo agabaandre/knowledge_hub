@@ -369,6 +369,8 @@
 <!-- JQuery min js -->
 <script src="<?php echo base_url() ?>assets/plugins/jquery/jquery.min.js"></script>
 
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
+
 <!-- Popper js -->
 <script src="<?php echo base_url() ?>assets/plugins/popper/popper.min.js"></script>
 

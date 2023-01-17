@@ -129,7 +129,7 @@
 	<!-- ============================================================== -->
 	<!-- All Jquery -->
 	<!-- ============================================================== -->
-	X
+	
 	<script src="<?php echo base_url(); ?>resources/js/jquery.min.js"></script>
 	<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 

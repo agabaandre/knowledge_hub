@@ -452,3 +452,13 @@ if (!function_exists('get_permission_id')) {
         return false;
     }
 }
+if (!function_exists('translate')) {
+
+    function translate()
+    {
+        include('langauge.php');
+        
+    }
+}
+
+ 	                       

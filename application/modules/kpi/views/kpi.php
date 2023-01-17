@@ -9,10 +9,10 @@
                     <div class="card">
                         <!-- Button trigger modal -->
                         <div class="d-flex content-justify-right">
-                            <button type="button" class="btn btn-success " data-toggle="modal" data-target="#staticBackdrop" style="margin-bottom:3px; width:150px;"><i class="fa fa-plus">
+                            <button type="button" class="btn btn-sm btn-success " data-toggle="modal" data-target="#staticBackdrop" style="margin-right:5px; width:100px;"><i class="fa fa-plus">
                                 </i>Add KPI
                             </button>
-                            <button type="submit" class="btn btn-success" style="margin-bottom:3px; width:150px;"><i class="fa fa-circle">
+                            <button type="submit" class="btn btn-sm btn-success" style="margin-bottom:3px; width:100px;"><i class="fa fa-circle">
                                 </i>Update KPI
                             </button>
 

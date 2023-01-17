@@ -82,7 +82,7 @@ $valid_data++;
 
  ?>
 
-<h3><?php echo $widget_data['subject_area']; ?></h3>
+<h3 class="theme-primary"><?php echo $widget_data['subject_area']; ?></h3>
 
 <?php 
 

@@ -32,6 +32,8 @@
 						<li><a href="<?php echo base_url('records/search'); ?>">Search</a></li>
 						<li><a href="<?php echo base_url('forums/index'); ?>">Forums</a></li>
 						<li><a href="<?php echo base_url('faqs'); ?>">FAQs</a></li>
+						<li><a href="<?php echo base_url('privacypolicy/read'); ?>">Privacy</a></li>
+						<!-- <li><a href="<?php //echo base_url('privacypolicy/read'); ?>">About</a></li> -->
 
 					</ul>
 
@@ -80,15 +82,7 @@
 
 					</ul>
 					<div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
-						<div id="google_translate_element" style="display: none;"></div>
-						<select class="selectpicker" data-width="fit" onchange="translateLanguage(this.value);" style="border:#FFF;"com>
-							<option data-content='English' value="English"><span class="flag-icon flag-icon-us"></span>English</option>
-							<option data-content='<span class="flag-icon flag-icon-ar"></span> Arabic' value="Arabic">Arabic</option>
-							<option data-content='<span class="flag-icon flag-icon-fr"></span> French' value="French">French</option>
-							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Portuguese">Portuguese</option>
-							<option data-content='<span class="flag-icon flag-icon-pt"></span> Portuguese' value="Spanish">Spanish</option>
-
-						</select>
+					 <?php echo translate(); ?>
 					</div>
 				</div>
 			</nav>

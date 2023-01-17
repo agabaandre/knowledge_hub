@@ -44,6 +44,8 @@
 	<!-- Switcher css-->
 	<link href="<?php echo base_url() ?>assets/switcher/css/switcher.css" rel="stylesheet">
 	<link href="<?php echo base_url() ?>assets/switcher/demo.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
 
 	<!-- Animations css -->
 	<link href="<?php echo base_url() ?>assets/css/animate.css" rel="stylesheet">

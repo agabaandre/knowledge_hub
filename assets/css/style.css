@@ -537,8 +537,29 @@ h2,
 h3,
 .h3 {
     font-size: 1.53125rem;
+
+}
+.theme-primary{
+    background: #28b661;
+    color: #fff;
+    border-radius:3px;
+}
+.theme-secondary{
+    background: #8b263a;
+    color:#FFF;
+    border-radius: 3px;
+    
+}
+.text-primary {
+    color: #008a00;
+   
 }
 
+.text-secondary {
+    color: #8b263a;
+   
+
+}
 h4,
 .h4 {
     font-size: 1.3125rem;
@@ -68752,10 +68773,10 @@ div.dataTables_wrapper div.dataTables_filter input {
 
 .menu-header-content {
     padding: 0.8rem 1rem;
-    border-top-left-radius: 6px;
-    border-top-right-radius: 6px;
-    border: 1px solid #0068ff;
-    background: #0068ff;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    border: 1px solid #7f7f7f;
+    background: #212529;
 }
 
 .chat-scroll,
