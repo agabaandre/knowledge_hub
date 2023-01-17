@@ -33,8 +33,6 @@
 						<li><a href="<?php echo base_url('forums/index'); ?>">Forums</a></li>
 						<li><a href="<?php echo base_url('faqs'); ?>">FAQs</a></li>
 
-
-
 					</ul>
 
 					<ul class="nav-menu nav-menu-social align-to-right">
@@ -53,17 +51,26 @@
 
 						<?php else : ?>
 
-							<li>
-								<a href="<?php echo base_url('account/publications'); ?>" class="ft-medium text-success">
-									Our Publications
-								</a>
-							</li>
+							<li><a href="#">Publications</a>
+									<ul class="nav-dropdown nav-submenu">
+										<li>
+										<a href="<?php echo base_url('account/publications'); ?>">
+										   <i class="fa fa-list mr-1"></i> Our Publications
+										</a>
+										</li>
+										<li>
+										<a href="<?php echo base_url('records/favourites'); ?>">
+										   <i class="fa fa-star mr-1"></i> My Favourites
+										</a>
+										</li>
+										<li>
+										<a href="<?php echo base_url('account/publish'); ?>">
+											<i class="lni lni-circle-plus mr-1"></i>Publish a resource
+										</a>
+										</li>
+									</ul>
+								</li>
 
-							<li class="add-listing theme-bg bg-central">
-								<a href="<?php echo base_url('account/publish'); ?>">
-									<i class="lni lni-circle-plus mr-1"></i>Publish a resource
-								</a>
-							</li>
 							<li>
 								<a href="<?php echo base_url('logout'); ?>" class="ft-medium">
 									Logout

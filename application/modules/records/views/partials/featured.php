@@ -34,6 +34,7 @@
 											<span class="text-muted d-block mt-1">
 												<span class=" mr-1"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
 												<span class=" mr-1 ml-1"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
+												
 								           </span>
 									</div>
 								</div>

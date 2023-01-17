@@ -199,9 +199,27 @@ class Publications extends MX_Controller
 
 	public function comment()
 	{
-		$this->publicationsmodel->save_comment($this->input->post());
-		set_flash("Comment submitted successfully");
+		if(captcha_valid()):
+			$this->publicationsmodel->save_comment($this->input->post());
+			set_flash("Comment submitted successfully");
+		else:
+			flash_form();
+			set_flash("Invalid confirmation text",true);
+		endif;
 		redirect('records/show/' . $this->input->post('publication_id'));
+	}
+
+	public function add_to_favourites($id)
+	{
+		$this->publicationsmodel->save_favourite($id);
+		set_flash("Added to favourites successfully");
+		redirect('records/favourites');
+	}
+
+	public function remove_favourite($id){
+		$this->publicationsmodel->delete_favourite($id);
+		set_flash("Removed from favourites successfully");
+		redirect('records/favourites');
 	}
 
 	

@@ -32,6 +32,9 @@
 					<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
 					<span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
 					</a>
+
+					<?php include 'favourites_btn.php'; ?>
+					
 				</span>
 
 			</div>

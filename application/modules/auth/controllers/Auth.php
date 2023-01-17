@@ -35,6 +35,7 @@ class Auth extends MX_Controller
       $adata['region']  = $this->auth_mdl->access_level1($adata['user_id']);
       $adata['country'] = $this->auth_mdl->access_level2($adata['user_id']);
       $adata['permissions'] = $this->auth_mdl->user_permissions($adata['role']);
+      $adata['is_admin'] = true;
       $_SESSION['user'] = (object)$adata;
 
       if($postdata['route'] == 'front'){

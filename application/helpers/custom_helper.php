@@ -402,6 +402,9 @@ if (!function_exists('permissions')) {
 
     function can_access()
     {
+        if(!user_session()->is_admin)
+        return [];
+        
         $ci = & get_instance();
         return $ci->session->userdata('user')->permissions;
     }

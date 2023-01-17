@@ -59,16 +59,35 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Author</label>
                                 <select class="form-control js-example-basic-single" name="author" required>
-                                    <option disabled>Select</option>
-                                    <?php foreach ($authors as $author) : ?>
+                                   
+                                    <?php 
+                                    if(user_session()->is_admin):
+                                        ?>
+                                         <option disabled>Select</option>
+                                        <?php
+                                        foreach ($authors as $author) :
+                                        ?>
                                         <option value="<?php echo $author->id; ?>">
                                             <?php echo $author->name; ?>
                                         </option>
-                                    <?php endforeach; ?>
+                                        
+                                    <?php 
+                                     endforeach;
+                                     else: 
+                                        if(user_session()->author){
+                                     ?>
+                                    <option value="<?php echo user_session()->author->id; ?>">
+                                        <?php echo user_session()->author->name; ?>
+                                    </option>
+
+                                    <?php }else{ ?>
+
+                                        <option value="">No Author assigned to User</option>
+                                
+                                    <?php } endif; ?>
                                 </select>
                             </div>
                         </div>
-
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
@@ -126,6 +145,9 @@
                                 </div>
                             </div>
                         </div>
+                        
+                        <?php 
+                         if(user_session()->is_admin): ?>
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Status</label>
@@ -134,6 +156,18 @@
                                     <option value="Inactive">Inactive</option>
 
                                 </select>
+                            </div>
+                        </div>
+                        <?php else: ?>
+
+                            <input type="hidden"  name="is_active" value="In-Active">
+
+                        <?php endif; ?>
+
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <?php echo get_capture_image(); ?>
+                                <input type="text" name="captcha" placeholder="Enter the give text" class="form-control" required>
                             </div>
                         </div>
 
