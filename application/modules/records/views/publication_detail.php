@@ -72,6 +72,7 @@
 										<label class="text-muted">Sub-Theme</label>
 										<span class="text-dark"><?php echo $publication->sub_theme->description; ?></span>
 									</div>
+									<?php if(!is_guest()): ?>
 									<div class="details ft-medium">
 										<div class="btn btn-outline-dark mt-2">
 									   <?php 
@@ -80,6 +81,7 @@
 									   ?>
 										</div>
 									</div>
+									<?php endif; ?>
 								</div>
 							</div>
 

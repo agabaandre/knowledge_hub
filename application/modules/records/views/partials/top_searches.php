@@ -40,9 +40,11 @@
 														    <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?> </span>
 															<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
 														    <span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
+															<?php if(!is_guest()): ?>
 															<div class="btn btn-outline-dark btn-sm mt-2">
 														      <?php include 'favourites_btn.php'; ?>
 															</div>
+															<?php endif; ?>
 														</span>    
 													</div>
 												</div>
