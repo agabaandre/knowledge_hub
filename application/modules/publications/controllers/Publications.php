@@ -222,5 +222,15 @@ class Publications extends MX_Controller
 		redirect('records/favourites');
 	}
 
+	// Moderate publications
+	public function moderate()
+	{
+		$data['module'] = $this->module;
+		$data['title']  = "Moderate Publications";
+		// Get all forums with comments that are not approved
+		$data['publications'] = $this->publicationsmodel->get_publications_with_pending_comments();
+		render("publications_moderate", $data);
+	}
+
 	
 }

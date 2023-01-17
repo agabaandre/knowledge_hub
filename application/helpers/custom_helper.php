@@ -398,14 +398,12 @@ if (!function_exists('is_valid_image')) {
         }
     }
 }
-if (!function_exists('permissions')) {
+if (!function_exists('can_access')) {
 
-    function can_access()
+    function can_access($permission)
     {
-        if(!user_session()->is_admin)
-        return [];
-        
         $ci = & get_instance();
-        return $ci->session->userdata('user')->permissions;
+        $permissions = $ci->session->userdata('user')->permissions;
+        return in_array($permission, $permissions);
     }
 }

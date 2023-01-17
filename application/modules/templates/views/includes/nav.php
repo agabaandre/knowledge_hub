@@ -3,7 +3,7 @@
 		<!--Nav-->
 		<nav class="horizontalMenu clearfix">
 			<ul class="horizontalMenu-list">
-				<?php if (in_array('38', can_access())) { ?>
+				<?php if (can_access(38)) { ?>
 					<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					</li>
 				<?php } ?>

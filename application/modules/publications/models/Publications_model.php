@@ -273,4 +273,45 @@ class Publications_model extends CI_Model
 		return $this->db->delete('favourites');
 	}
 
+	public function get_publications_with_pending_comments()
+	{
+		$this->db->select('publication.*');
+		$this->db->from('publication');
+		$this->db->join('publication_comments', 'publication.id = publication_comments.publication_id', 'inner');
+		$this->db->where('publication_comments.status', 'pending');
+		$this->db->group_by('publication.id');
+		$query = $this->db->get();
+		$results = $query->result();
+
+		foreach ($results as $publication) {
+			$this->db->select('publication_comments.*, user.name as user_name, user.user_id, user.email as user_email');
+			$this->db->from('publication_comments');
+			$this->db->join('user', 'publication_comments.user_id = user.user_id', 'left');
+			$this->db->where('publication_comments.publication_id', $publication->id);
+			$this->db->where('publication_comments.status', 'pending');
+			$comments_query = $this->db->get();
+			$comments_result = $comments_query->result();
+			foreach ($comments_result as $comment) {
+				$comment->created_by = array("name" => $comment->user_name, "id" => $comment->user_id, "email" => $comment->user_email);
+				unset($comment->user_name);
+				unset($comment->user_id);
+				unset($comment->user_email);
+			}
+			$publication->comments = $comments_result;
+		}
+		return $results;
+	}
+
+	public function approve_comment($comment_id)
+	{
+		$this->db->where('id', $comment_id);
+		$this->db->update('publication_comments', array('status' => 'approved'));
+	}
+
+	public function reject_comment($comment_id)
+	{
+		$this->db->where('id', $comment_id);
+		$this->db->update('publication_comments', array('status' => 'rejected'));
+	}
+
 }
