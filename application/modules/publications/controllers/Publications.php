@@ -232,5 +232,37 @@ class Publications extends MX_Controller
 		render("publications_moderate", $data);
 	}
 
+	// Approve comment
+	public function approve_comment($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->publicationsmodel->approve_comment($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Comment approved successfully'
+		];
+
+		echo json_encode($response);
+	}
+
+	// Reject comment
+	public function reject_comment($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->publicationsmodel->reject_comment($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Comment rejected successfully'
+		];
+
+		echo json_encode($response);
+	}
+
 	
 }

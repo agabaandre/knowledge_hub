@@ -27,9 +27,10 @@
                                 </div>
                             <?php else : ?>
                                 <?php foreach ($publications as $publication) : ?>
-                                    <h3><?php echo $publication->title; ?></h3>
+                                    <h4><?php echo $publication->title; ?></h4>
                                     <p><?php echo substr($publication->description, 0, 150); ?>...</p>
-                                    <table class="table table-striped">
+                                    <hr />
+                                    <table class="table table-striped condensed">
                                         <thead>
                                             <tr>
                                                 <th>Comment</th>
