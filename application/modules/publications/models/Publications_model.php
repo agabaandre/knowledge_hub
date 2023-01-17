@@ -235,10 +235,11 @@ class Publications_model extends CI_Model
 	public function user_favourites(){
 		
 		
-		if(is_guest())
+		try {
+			if(is_guest())
 		return [];
 
-		$favs = $this->db->where('user_id',user_session()->id)->get('favourites')->result();
+		$favs = $this->db->where('user_id',user_session()->user->id)->get('favourites')->result();
 		$favourites = [];
 
 		foreach($favs as $fav){
@@ -246,6 +247,10 @@ class Publications_model extends CI_Model
 		}
 
 		return $favourites;
+		} catch (\Throwable $th) {
+			//throw $th;
+			return [];
+		}
 	}
 
 	public function get_favourites($start=null,$limit=null)
