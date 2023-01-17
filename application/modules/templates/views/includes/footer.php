@@ -587,21 +587,6 @@
 	});
 </script>
 
-<!-- Script -->
-<script>
-	// Approve forum modal
-	$('#approve-forum-modal').on('show.bs.modal', function(event) {
-		var button = $(event.relatedTarget) // Button that triggered the modal
-		var id = button.data('id') // Extract info from data-* attributes
-		var title = button.data('title')
-		var description = button.data('description')
-		var modal = $(this)
-		modal.find('#title').html(`<h4>${title}</h4>`)
-		modal.find('#link').attr('href', '<?php echo base_url('forums/admin/approve_forum/'); ?>' + id)
-		modal.find('#description').html(description)
-	});
-</script>
-
 
 <!-- Datatables -->
 <script>

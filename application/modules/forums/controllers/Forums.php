@@ -58,9 +58,9 @@ class Forums extends MX_Controller
 			'id' => @$this->input->post("id"),
 			'forum_title' => $this->input->post("title"),
 			'forum_description' => $this->input->post("description"),
-			'created_by'=> $this->session->userdata('user')->id,
+			'created_by' => $this->session->userdata('user')->id,
 		];
-		
+
 		$resp = $this->forumsmodel->save($quote);
 
 		$msg = "Operation Successful";
@@ -86,11 +86,78 @@ class Forums extends MX_Controller
 		render("forum_admin", $data);
 	}
 
+	public function moderate()
+	{
+		$data['module'] = $this->module;
+		$data['title']  = "Moderate Discussion";
+		// Get all forums with comments that are not approved
+		$data['forums'] = $this->forumsmodel->get_forums_with_pending_comments();
+		render("forum_moderate", $data);
+	}
+
 	public function delete($id)
 	{
 		$this->forumsmodel->delete($id);
 		echo "success";
 	}
 
-	
+	public function approve_forum($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->forumsmodel->approve_forum($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Forum approved successfully'
+		];
+
+		echo json_encode($response);
+	}
+
+	public function reject_forum($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->forumsmodel->reject_forum($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Forum rejected successfully'
+		];
+
+		echo json_encode($response);
+	}
+
+	public function approve_comment($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->forumsmodel->approve_comment($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Comment approved successfully'
+		];
+
+		echo json_encode($response);
+	}
+
+	public function reject_comment($id)
+	{
+		// Accept json data
+		header('Content-Type: application/json');
+		header('Accept: application/json');
+
+		$this->forumsmodel->reject_comment($id);
+		$response = [
+			'status' => 'success',
+			'message' => 'Comment rejected successfully'
+		];
+
+		echo json_encode($response);
+	}
 }

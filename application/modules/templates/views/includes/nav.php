@@ -4,20 +4,28 @@
 		<nav class="horizontalMenu clearfix">
 			<ul class="horizontalMenu-list">
 				<?php if (in_array('38', can_access())) { ?>
-				<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
-				</li>
-				<?php }?>
+					<li aria-haspopup="true"><a href="<?php echo base_url() ?>dashboard" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
+					</li>
+				<?php } ?>
 				<li aria-haspopup="true"><a href="<?php echo base_url() ?>rccdashboards" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
 				</li>
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Publish Resource<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/create" class="slide-item"> Create New</a></li>
 						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications" class="slide-item">Publications</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>publications/moderate" class="slide-item">Moderate Publications</a></li>
 					</ul>
 				</li>
 
-				<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
+					<ul class="sub-menu">
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="slide-item">Forums</a></li>
+						<li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/moderate" class="slide-item">Moderate Forums</a></li>
+					</ul>
 				</li>
+
+				<!-- <li aria-haspopup="true"><a href="<?php echo base_url() ?>forums/admin" class="sub-icon"><i class="bx bx-home-circle menu-icon"></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				</li> -->
 
 
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class="fas fa-files"></i>Performance<i class="fe fe-chevron-down horizontal-icon"></i></a>
