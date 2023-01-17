@@ -60,19 +60,22 @@ class Auth extends MX_Controller
     }
   }
 
+  public function profile()
+  {
+    $data['module'] = "auth";
+    $data['view'] = "profile";
+    $data['title'] = "My Profile";
 
+    render("users/profile", $data);
+
+  }
   public function logout()
   {
     session_unset();
     session_destroy();
-    redirect("admin");
+    redirect("auth");
   }
-  public function logout_rcc()
-  {
-    session_unset();
-    session_destroy();
-    redirect("rcc/dashboards");
-  }
+
   public function getUserByid($id)
   {
     $userrow = $this->auth_mdl->getUser($id);
