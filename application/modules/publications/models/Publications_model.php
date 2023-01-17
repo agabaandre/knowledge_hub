@@ -234,6 +234,10 @@ class Publications_model extends CI_Model
 
 	public function user_favourites(){
 		
+		
+		if(is_guest())
+		return [];
+
 		$favs = $this->db->where('user_id',user_session()->id)->get('favourites')->result();
 		$favourites = [];
 
