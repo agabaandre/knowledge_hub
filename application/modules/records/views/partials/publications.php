@@ -32,6 +32,22 @@
 					<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
 					<span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
 					</a>
+					<?php 
+					if(!is_guest()){
+					 if(!$row->is_favourite):
+					 ?>
+						<a href="<?php echo base_url(); ?>publications/add_to_favourites/<?php echo $row->id; ?>">
+					      <span class=" mr-2"><i class="fa fa-star mr-1"></i> Add to Favourites </span>
+						</a>
+					<?php else: ?>
+						<a href="<?php echo base_url(); ?>publications/remove_favourite/<?php echo $row->id; ?>">
+					      <span class=" mr-2"><i class="fa fa-star mr-1 text-warning"></i> Remove Favourite </span>
+						</a>
+					<?php 
+				    endif;
+				  }
+				
+				?>
 				</span>
 
 			</div>

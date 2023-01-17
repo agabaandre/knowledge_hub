@@ -262,4 +262,20 @@ class Records extends MX_Controller {
 		set_cookie('recommendation',serialize($cookie_data));
 	}
 
+	public function favourites()
+	{
+		$data['module']    = $this->module;
+		flash_form();
+	
+		$count   = $this->publicationsmodel->count_favourites();
+		$segment = 3;
+        $page    = ($this->uri->segment($segment))?$this->uri->segment($segment):0;
+        $perPage = 10;
+		
+		$data['publications'] = $this->publicationsmodel->get_favourites($perPage,$page);
+		$data['links']     = paginate('records/favourites',$count, $perPage,$segment);
+		
+		render_site('favourites',$data,true);
+	}
+
 }

@@ -167,6 +167,12 @@
 		});
 
 		$(document).ready(function() {
+
+			setTimeout(function(){
+
+				$('.alert').fadeOut('slow')
+			},3000);
+
 			$('#summernote').summernote({
 				placeholder: 'Discussion body here',
 				tabsize: 2,

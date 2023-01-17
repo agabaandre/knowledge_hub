@@ -35,6 +35,10 @@ class Publications_model extends CI_Model
 		}
 	  }
 
+	  if(isset($filter['favourites'])){ //get favourites
+		$this->db->where_in('id', $filter['favourites']);
+	  }
+
 		$publications = $this->db->get($this->table)->result();
 
 		foreach ($publications as $pub) {
@@ -62,7 +66,9 @@ class Publications_model extends CI_Model
 					$this->db->or_like('description', $value);
 					$this->db->or_like('publication', $value);
 				else :
-					$this->db->like($key, $value);
+
+					if ($key !== "favourites")
+					 $this->db->like($key, $value);
 				endif;
 			}
 		}
@@ -106,6 +112,7 @@ class Publications_model extends CI_Model
 		$publication->comments     = $this->get_comments($publication->id);
 		$publication->has_comments = (count($publication->comments) > 0) ? true : false;
 		$publication->tags         = $this->get_tags($publication->id);
+		$publication->is_favourite = in_array($publication->id,$this->user_favourites());
 
 		return $publication;
 	}
@@ -220,4 +227,48 @@ class Publications_model extends CI_Model
 
 		return $this->db->get('file_type')->result();
 	}
+
+	public function count_favourites(){
+		return (!is_guest())?count($this->db->where('user_id',user_session()->id)->get('favourites')->result()):0;
+	}
+
+	public function user_favourites(){
+		
+		$favs = $this->db->where('user_id',user_session()->id)->get('favourites')->result();
+		$favourites = [];
+
+		foreach($favs as $fav){
+			array_push($favourites,$fav->publication_id);
+		}
+
+		return $favourites;
+	}
+
+	public function get_favourites($start=null,$limit=null)
+	{
+		
+		if(is_guest())
+		return [];
+
+		$filter['favourites'] = $this->user_favourites();
+
+		return (count($filter['favourites'] )>0)?$this->get($filter,$start,$limit):[];
+	}
+
+	public function save_favourite($id){
+
+
+		$row = ['publication_id'=>$id, 'user_id'=>user_session()->id];
+
+		return $this->db->insert('favourites',$row);
+	}
+
+	public function delete_favourite($id){
+
+		$this->db->where('publication_id',$id);
+		$this->db->where('user_id',user_session()->id);
+
+		return $this->db->delete('favourites');
+	}
+
 }
