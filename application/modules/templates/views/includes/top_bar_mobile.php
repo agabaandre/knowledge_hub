@@ -118,7 +118,7 @@
 							</svg><span class=" pulse"></span></a>
 						<div class="dropdown-menu animated fadeInUp">
 							<div class="menu-header-content text-left d-flex">
-								<p class="main-notification-text mb-0">You have 1 unread notification<a class="badge badge-pill badge-success ml-2 float-right" href="#">Mark All Read</a></p>
+								<p class="main-notification-text mb-0">You have <?php echo $pending_forum_comments; ?> requiring approval<a class="badge badge-pill badge-success ml-2 float-right" href="#">Mark All Read</a></p>
 							</div>
 							<div class="main-notification-list Notification-scroll1">
 								<a class="d-flex pl-3 pr-3  border-bottom" href="#">
@@ -176,7 +176,11 @@
 						<a class="profile-user" href=""><img alt="" src="<?php echo base_url() ?>assets/img/faces/6.jpg"></a>
 						<div class="dropdown-menu animated fadeInUp">
 							<div class="main-header-profile header-img">
-								<h6>Mack Adamia</h6><span>Premium Member</span>
+								<h6>
+									<?php echo $this->session->userdata('name'); ?>
+								</h6><span>
+									<?php echo $this->session->userdata('role'); ?>
+								</span>
 							</div>
 							<a class="dropdown-item" href="profile.html"><i class="bx bx-user-circle"></i> My Profile</a>
 							<a class="dropdown-item" href="editprofile.html"><i class="bx bxs-edit"></i> Edit Profile</a>

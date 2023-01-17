@@ -472,7 +472,8 @@ CREATE TABLE `forum_comments` (
   `comment` varchar(500) NOT NULL,
   `created_by` int(11) NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `parent_id` int(11) DEFAULT NULL
+  `parent_id` int(11) DEFAULT NULL,
+  `status` ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
@@ -701,17 +702,37 @@ CREATE TABLE `permissions` (
 -- Dumping data for table `permissions`
 --
 
-INSERT INTO `permissions` (`id`, `name`, `definition`) VALUES
-(13, 'Manage RCCS', 'Manage RCCS'),
-(14, 'Add Authors', 'Add Authors'),
-(15, 'Manage Standard Form Lists', 'Manage Standard Form Lists'),
-(17, 'Add Users', 'Add Users'),
-(32, 'Manage Front Page Slider', 'Manage Front Page Slider'),
-(35, 'View User Audit Log', 'View User Audit Log'),
-(36, 'Add KPIs', 'Add KPIs'),
-(37, 'Manage KPIs', 'Manage KPIs'),
-(38, 'View Knowledge Hub Dashboard', 'View Knowledge Hub Dashboard'),
-(39, 'View RRCs KPIs Dashboard', 'View RRCs KPIs Dashboard');
+INSERT INTO `permissions` (`definition`, `id`, `name`) VALUES
+('Manage RCCS', 13, 'manage_rccs'),
+('Add Authors', 14, 'add_authors'),
+('Manage Standard Form Lists', 15, 'manage_standard_form_lists'),
+('Add Users', 17, 'add_users'),
+('Manage Front Page Slider', 32, 'manage_front_page_slider'),
+('View User Audit Log', 35, 'view_user_audit_log'),
+('Add KPIs', 36, 'add_kpis'),
+('Manage KPIs', 37, 'manage_kpis'),
+('View Knowledge Hub Dashboard', 38, 'view_knowledge_hub_dashboard'),
+('View RRCs KPIs Dashboard', 39, 'view_rccs_kpis_dashboard'),
+('Moderate Publication', 40, 'moderate_publication'),
+('Moderate Forum', 41, 'moderate_forum'),
+('Modify Privacy Policy', 42, 'modify_privacy_policy'),
+('Update Quize', 43, 'update_quize'),
+('Update Quotes', 44, 'update_quotes'),
+('Update Tags', 45, 'update_tags'),
+('Update FileTypes', 46, 'update_filetypes'),
+('Update Geographical Coverage', 47, 'update_geo_coverage'),
+('Update SubThemes', 48, 'update_subthemes'),
+('Update Themes', 49, 'update_themes'),
+('Update Sources', 50, 'update_sources'),
+('View Publications', 51, 'view_publications'),
+('Update Publications', 52, 'update_publications'),
+('View Dashboard', 53, 'view_dashboard'),
+('View RCC Dashboard', 54, 'view_rcc_dashboard'),
+('Create Publication', 55, 'create_publication'),
+('View Forums', 56, 'view_forums'),
+('View Performance', 57, 'view_performance'),
+('Create Performance Indicator', 58, 'create_performance_indicator');
+
 
 -- --------------------------------------------------------
 
@@ -1010,7 +1031,9 @@ CREATE TABLE `publication_comments` (
   `user_id` int(11) NOT NULL DEFAULT 0,
   `publication_id` int(11) NOT NULL,
   `comment` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `status` ENUM('pending', 'approved', 'rejected') NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --

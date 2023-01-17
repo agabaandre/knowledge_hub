@@ -407,3 +407,48 @@ if (!function_exists('can_access')) {
         return in_array($permission, $permissions);
     }
 }
+
+// Can Access With Array
+if (!function_exists('can_access_multi')) {
+
+    function can_access_multi($permissions)
+    {
+        // Get ID's of all permission names
+        $permission_ids = array_map(function ($permission) {
+            return get_permission_id($permission);
+        }, $permissions);
+
+        // dd($permission_ids);
+
+        $ci = & get_instance();
+
+        // Get ID's of all user permissions
+        $user_permissions = $ci->session->userdata('user')->permissions;
+
+        // dd($user_permissions);
+
+        // Check if any of the permission id's match
+        foreach ($permission_ids as $permission_id) {
+            if (in_array($permission_id, $user_permissions)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+}
+
+if (!function_exists('get_permission_id')) {
+
+    function get_permission_id($permission)
+    {
+        $ci = & get_instance();
+        $ci->db->select('id');
+        $ci->db->where('name', $permission);
+        $query = $ci->db->get('permissions');
+        if ($query->num_rows() > 0) {
+            return $query->row()->id;
+        }
+        return false;
+    }
+}
