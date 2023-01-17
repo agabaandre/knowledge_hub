@@ -261,9 +261,7 @@ class Publications_model extends CI_Model
 
 	public function save_favourite($id){
 
-
 		$row = ['publication_id'=>$id, 'user_id'=>user_session()->id];
-
 		return $this->db->insert('favourites',$row);
 	}
 

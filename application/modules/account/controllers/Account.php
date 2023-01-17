@@ -145,8 +145,10 @@ class Account extends MX_Controller
 	
 	  if ($auth) {
 		
-		$adata['author'] = $this->authorsmodel->find($adata['author_id']);
-		$adata['country'] = $this->auth_mdl->access_level2($adata['user_id']);
+		$adata['author']   = $this->authorsmodel->find($adata['author_id']);
+		$adata['country']  = $this->auth_mdl->access_level2($adata['user_id']);
+		$adata['is_admin'] = false;
+		
 		$_SESSION['user'] = (object)$adata;
 
 		$this->session->set_userdata($adata);
