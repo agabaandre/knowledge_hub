@@ -151,8 +151,15 @@
 						<input type="hidden" name="user_id" value="<?php echo @user_session()->user_id; ?>" />
 						<div class="form-group">
 							<label class="text-success mb-1 ft-medium medium">Your comment</label>
-							<textarea name="comment" class="form-control" placeholder="Your comment"></textarea>
+							<textarea name="comment" class="form-control" placeholder="Your comment" required><?php echo old('comment');?></textarea>
 						</div>
+
+						<div class="col-md-12">
+                            <div class="mb-3">
+                                <?php echo get_capture_image(); ?>
+                                <input type="text" name="captcha" placeholder="Enter the give text" class="form-control mt-2" required>
+                            </div>
+                        </div>
 
 						<div class="form-group">
 							<button type="submit" class="btn btn-md rounded theme-bg text-light ft-medium fs-sm full-width">Submit Comment</button>

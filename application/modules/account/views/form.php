@@ -164,6 +164,13 @@
 
                         <?php endif; ?>
 
+                        <div class="col-md-12">
+                            <div class="mb-3">
+                                <?php echo get_capture_image(); ?>
+                                <input type="text" name="captcha" placeholder="Enter the give text" class="form-control" required>
+                            </div>
+                        </div>
+
                         <!-- <div  class="col-md-4"> -->
                         <!-- </div> -->
                     </div>
