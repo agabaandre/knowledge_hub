@@ -72,6 +72,14 @@
 										<label class="text-muted">Sub-Theme</label>
 										<span class="text-dark"><?php echo $publication->sub_theme->description; ?></span>
 									</div>
+									<div class="details ft-medium">
+										<div class="btn btn-outline-dark mt-2">
+									   <?php 
+									   	  $row = $publication;
+									     include 'partials/favourites_btn.php'; 
+									   ?>
+										</div>
+									</div>
 								</div>
 							</div>
 
