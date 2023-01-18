@@ -12,7 +12,7 @@
 	<title><?php echo $title; ?></title>
 
 	<!-- Favicon -->
-	<link rel="icon" href="<?php echo base_url() ?>assets/img/brand/favicon.png" type="image/x-icon" />
+	<link rel="icon" href="<?php echo base_url() ?>assets/images/fav.png" type="image/x-icon" />
 
 	<!-- Icons css -->
 	<link href="<?php echo base_url() ?>assets/css/icons.css" rel="stylesheet">
