@@ -12,8 +12,10 @@ $rccs = Modules::run("geoareas/getrcc");
     <div class="card card-default">
       <div class="card-header">
         <h4 class="card-title">Add User</h4>
+         <hr>
       </div>
       <!-- /.card-header -->
+     
       <div class="card-body">
 
 
@@ -112,7 +114,10 @@ $rccs = Modules::run("geoareas/getrcc");
     <!-- general form elements disabled -->
     <div class="card card-default">
       <div class="card-header">
-        <h4 class="card-title">User List</h4><br>
+        <h4 class="card-title">User List</h4>
+         <hr>
+        <br>
+
         <form class="form-horizontal" action="<?php echo base_url() ?>auth/users" method="post" style="margin-top: 4px !important;">
 
           <div class="form-group col-md-5">

@@ -6,6 +6,7 @@
                 <div class="card-header">
                     <div class="card-title">
                         <h4>Publications Moderation</h4>
+                         <hr>
                     </div>
                     <div class="card-tools text-right">
 

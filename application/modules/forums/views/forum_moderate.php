@@ -5,6 +5,7 @@
                 <div class="card-header">
                     <div class="card-title">
                         <h4>Forum Moderation</h4>
+                        <hr>
                     </div>
                     <div class="card-tools text-right">
 
@@ -32,8 +33,8 @@
                                         <thead>
                                             <tr>
                                                 <th>Comment</th>
-                                                <th>Created By</th>
-                                                <th>Created At</th>
+                                                <th>Source</th>
+                                                <th>Date</th>
                                                 <th>Actions</th>
                                             </tr>
                                         </thead>

@@ -7,6 +7,7 @@
                     'method' => 'post']); ?>
                 <div class="card-header">
                     <h3 class="card-title">Privacy Policy</h3>
+                     <hr>
                 </div>
                 <div class="card-body">
                     <div class="form-group">

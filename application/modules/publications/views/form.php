@@ -4,6 +4,7 @@
     <div class="card col-lg-12">
         <div class="card-header text-left">
             <h4 class="card-title float-left"><?php echo $title; ?></h4>
+             <hr>
         </div>
 
         <div class="card-body text-left">
