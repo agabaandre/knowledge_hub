@@ -134,7 +134,7 @@
 						<h6><?php echo $this->session->userdata('user')->name; ?></h6><span><?php echo ucwords($this->session->userdata('user')->group_name); ?></span>
 					</div>
 					<a class="dropdown-item" href="auth/profile"><i class="bx bx-user-circle"></i> My Profile</a>
-					<a class="dropdown-item" href="auth/change_password"><i class="bx bx-cog"></i> Change Password</a>
+					<a class="dropdown-item" href="auth/profile"><i class="bx bx-cog"></i> Change Password</a>
 					<a class="dropdown-item" href="auth/logout"><i class="bx bx-log-out-circle"></i> Log Out</a>
 				</div>
 			</div><!-- Main-profile-menu closed -->
