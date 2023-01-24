@@ -56,7 +56,7 @@
 						<?php if (can_access_multi(['view_file_types'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>filetypes">File Types</a></li><?php } ?>
 						<?php if (can_access_multi(['view_tags'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>tags">Search Tags</a></li><?php } ?>
 						<?php if (can_access_multi(['view_quotes'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>quotes">Quotes</a></li><?php } ?>
-						<?php if (can_access_multi(['view_quize'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>quize">Quize</a></li><?php } ?>
+						<?php if (can_access_multi(['view_quize'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>quize">Quiz</a></li><?php } ?>
 						<!-- Privacy Policy -->
 						<?php if (can_access_multi(['view_privacy_policy'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>privacypolicy">Privacy Policy</a></li><?php } ?>
 					</ul>
