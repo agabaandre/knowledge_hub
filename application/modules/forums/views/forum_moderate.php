@@ -4,7 +4,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
-                        <h4>Forum Moderation</h4>
+                        <h5>Forum Moderation</h5>
                         <hr>
                     </div>
                     <div class="card-tools text-right">
@@ -29,6 +29,7 @@
                                 <?php foreach ($forums as $forum) : ?>
                                     <h3><?php echo $forum->forum_title; ?></h3>
                                     <p><?php echo substr($forum->forum_description, 0, 150); ?>...</p>
+                                    <hr>
                                     <table class="table table-striped">
                                         <thead>
                                             <tr>
@@ -45,8 +46,8 @@
                                                     <td><?php echo $comment->created_by['name']; ?></td>
                                                     <td><?php echo $comment->created_at; ?></td>
                                                     <td>
-                                                        <a href="<?php echo base_url('forums/approve_comment/' . $comment->id); ?>" class="btn btn-success btn-sm" id="approve_comment">Approve</a>
-                                                        <a href="<?php echo base_url('forums/reject_comment/' . $comment->id); ?>" class="btn btn-danger btn-sm" id="reject_comment">Reject</a>
+                                                        <a href="<?php echo base_url('forums/approve_comment/' . $comment->id); ?>" class="btn btn-success btn-sm" id="approve_comment" style="width:100px;">Approve</a>
+                                                        <a href="<?php echo base_url('forums/reject_comment/' . $comment->id); ?>" class="btn btn-danger btn-sm" id="reject_comment" style="width:100px;">Reject</a>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>
