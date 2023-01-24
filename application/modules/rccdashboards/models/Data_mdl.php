@@ -70,7 +70,7 @@ class Data_mdl extends CI_Model
 	{
 		if($id):
 			$this->db->where('id', $id);
-			return $this->db->get($this->subject_area_tb)->row();
+			return $this->db->get($this->subject_area_tb)->result();
 		else:
 			return $this->db->get($this->subject_area_tb)->result();
 	    endif;
@@ -286,6 +286,10 @@ class Data_mdl extends CI_Model
 		return $data;
 	}
 
+	public function get_subjectareas(){
+
+		return $this->db->get("subject_areas")->result();
+	}
 	// Call stored Prodcedure
 	public  function callProcedure($name, $paramsArray = [])
 	{
