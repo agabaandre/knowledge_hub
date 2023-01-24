@@ -8,7 +8,14 @@
       <h5 class="card-title"> Constants</h5>
     </div>
   </div>
-
+  <?php if ($this->session->flashdata('message')):?>
+<div class="alert alert-success alert-dismissible fade show" role="alert">
+  <strong><?php echo $this->session->flashdata('message');?></strong>
+  <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
+</div>
+<?php endif; ?>
   <hr style="border:1px solid rgb(140, 141, 137);" />
   <div class="col-md-12">
     <?php echo form_open_multipart(base_url('constants/saveconstants'), array('id' => 'constants')); ?>

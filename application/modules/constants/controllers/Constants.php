@@ -30,6 +30,7 @@ class Constants extends MX_Controller
 	public function saveconstants(){
 		    $postdata = $this->input->post();
 			$data['message'] = $this->constants_mdl->update_variables($postdata);
+		    $this->session->set_flashdata('message','Constants Updated');
 			redirect("constants");
 	
 	}
