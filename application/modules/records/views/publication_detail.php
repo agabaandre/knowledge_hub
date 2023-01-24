@@ -23,11 +23,18 @@
 							</div>
 						</div>
 						<div class="jbd-01-right text-right">
+						<?php if ($publication->has_attachments) : ?>
 							<div class="jbl_button mb-2"><a href="<?php echo $publication->publication; ?>" target="_blank" class="btn btn-md rounded theme-bg-light theme-cl fs-sm ft-medium">Browse Resource</a></div>
 
-							<?php if ($publication->has_attachments) : ?>
-								<div class="jbl_button"><a href="<?php echo $publication->publication; ?>" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> Attachment</a></div>
-							<?php endif; ?>
+						<?php 
+						    elseif ($publication->has_attachments) :
+								foreach($publication->attachments as $pub_file):
+								?>
+									<div class="jbl_button"><a href="<?php echo base_url('uploads/publications/'.$pub_file->file); ?>" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment</a></div>
+								<?php 
+								endforeach;
+						    endif;
+							 ?>
 						</div>
 					</div>
 				</div>
