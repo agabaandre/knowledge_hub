@@ -53,11 +53,11 @@
 
             <div class="form-group col-md-3">
                 <br>
-                <label>Sub Theme</label>
-                <select class="form-control select2" name="subject_area" onchange="fetchData()">
+                <label>Subject Area</label>
+                <select class="form-control select2" name="subject_area" onchange="$('.filter_form').submit();">
                 <option value="" selected>All</option>
-                    <?php foreach($subthemes as $theme): ?>
-                        <option value="<?php echo $theme->id; ?>" <?php echo (isset($filter['subject_area']) && $filter['subject_area'] == $theme->id) ? "selected" : ""; ?>><?php echo $theme->description; ?></option>
+                    <?php foreach($subjectareas as $subject): ?>
+                        <option value="<?php echo $subject->id; ?>" <?php echo (isset($filter['subject_area']) && $filter['subject_area'] == $subject->id) ? "selected" : ""; ?>><?php echo $subject->name; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>

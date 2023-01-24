@@ -23,15 +23,14 @@ class Rccdashboards extends MX_Controller
 		$filter = $this->input->get();
 		$current_year   = "2022"; //date('Y');
 
-		
 		$data['countries'] = $this->data_mdl->get_countries($filter);
 		$data['regions']   = $this->geoareasmodel->getrcc();
-		$data['subthemes'] = $this->subthemesmodel->get();
+		$data['subjectareas'] = $this->data_mdl->get_subjectareas();
 		$data['filter']    = $filter;
 		$data['year']      = $current_year;
 
-		
-		foreach ($this->data_mdl->get_subject_area() as $key=>$subject_area):
+
+		foreach ($this->data_mdl->get_subject_area($filter['subject_area']) as $key=>$subject_area):
 
 			$filter['subject_area']  = $subject_area->id;
 			$data['years_data'][$key]['subject_area'] = $subject_area->name;
