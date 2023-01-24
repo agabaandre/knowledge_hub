@@ -29,8 +29,8 @@ class Rccdashboards extends MX_Controller
 		$data['filter']    = $filter;
 		$data['year']      = $current_year;
 
-		$subject_area_id = (isset($filter['subject_area']))?$filter['subject_area']:null;
-		
+		$subject_area_id = (isset($filter['subject_area']))?$filter['subject_area']:null;//subject area option
+
 		foreach ($this->data_mdl->get_subject_area($subject_area_id) as $key=>$subject_area):
 
 			$filter['subject_area']  = $subject_area->id;
