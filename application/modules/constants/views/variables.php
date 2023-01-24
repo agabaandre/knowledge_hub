@@ -11,8 +11,7 @@
 
   <hr style="border:1px solid rgb(140, 141, 137);" />
   <div class="col-md-12">
-    <form method="post" action="<?php echo base_url(); ?>saveconstants" autocomplte="off">
-
+    <?php echo form_open_multipart(base_url('constants/saveconstants'), array('id' => 'constants')); ?>
       <?php foreach ($setting as $key => $value) { ?>
         <div id="">
           <label><?php echo strtoupper(str_replace("_", " ", $key)); ?></label>
