@@ -57,7 +57,7 @@
 	<script src="<?php echo base_url() ?>node_modules/highcharts/modules/export-data.js"></script>
 	<script src="<?php echo base_url() ?>node_modules/highcharts/modules/accessibility.js"></script>
 	<script src="<?php echo base_url() ?>node_modules/blockui/jquery.blockui.min.js"></script>
-
+	
 	<script>
 
 		function showLoader(message="Please wait..."){
@@ -87,6 +87,7 @@
 			content: 'Click to Upload';
 			display: inline-block;
 		}
+
 	</style>
 
 </head>

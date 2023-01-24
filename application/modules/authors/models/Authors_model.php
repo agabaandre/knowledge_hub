@@ -21,13 +21,15 @@ class Authors_model extends CI_Model
 
 	public function get($filter = [], $limit = null, $start = null)
 	{
+		$this->db->reset_query();
 
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
 
 				if ($key == "search_key") :
 					$this->db->like('name', $value);
-				else :
+				else:
+					if($key !== "file_type_id")
 					$this->db->like($key, $value)->order_by('id', 'DESC');
 				endif;
 			}

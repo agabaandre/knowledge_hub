@@ -217,8 +217,8 @@ class Records extends MX_Controller {
         $perPage = 10;
 		
 		$data['publications'] = $this->recordsmodel->search($term,$type,$perPage,$page);
-		$data['links']     = paginate('records/search',$count, $perPage,$segment);
-		$data['types']   = $this->publicationsmodel->get_types();
+		$data['links']        = paginate('records/search',$count, $perPage,$segment);
+		$data['types']        = $this->publicationsmodel->get_types();
 	
 		render_site('search',$data);
 	}

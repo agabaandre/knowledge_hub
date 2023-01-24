@@ -46,28 +46,35 @@ class Records_model extends CI_Model
 
 			$search = ['search_key' => $term];
 
-			$authors    = $this->get_authors($search);
-			$sub_themes = $this->get_subthemes($search);
-
 			$this->db->like('title', $term);
-			$this->db->or_like('description', $term);
 			//if tag, include pubs with the tag
-			$tag_pubs = $this->publication_tags($term);
-			if(count($tag_pubs)>0)
-			$this->db->or_where_in('id', $tag_pubs);
 
-			if (count($authors) > 0)
-				$this->db->or_where_in('author_id ', array_values($authors));
+			if(!$type){
 
-			if (count($sub_themes) > 0)
-				$this->db->or_where_in('sub_thematic_area_id', array_values($sub_themes));
+				
+			    $this->db->or_like('description', $term);
+
+				$authors    = $this->get_authors($search);
+				$sub_themes = $this->get_subthemes($search);
+				$tag_pubs   = $this->publication_tags($term);
+
+				if(count($tag_pubs)>0)
+				$this->db->or_where_in('id', $tag_pubs);
+
+				if (count($authors) > 0)
+					$this->db->or_where_in('author_id ', array_values($authors));
+
+				if (count($sub_themes) > 0)
+					$this->db->or_where_in('sub_thematic_area_id', array_values($sub_themes));
+			}
+
 		endif;
 	}
 
 
 	public function get_authors($search)
 	{
-
+	
 		$authors      = $this->authorsmodel->get($search);
 		$author_ids   = [];
 

@@ -22,7 +22,7 @@
 									<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<select class="custom-select lg b-0" name="type">
-											  <option value="" disabled selected>Choose Type</option>
+											  <option value="" selected>All</option>
 											  <?php foreach ($types as $type): ?>
 											  <option value="<?php echo $type->id; ?>" 
 											  	<?php echo (old("type")==$type->id)?"selected":"";?>

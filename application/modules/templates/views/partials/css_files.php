@@ -17,9 +17,12 @@
 
     <link rel="stylesheet" href="<?php echo base_url(); ?>resources/css/quiz.css">
     <link rel="stylesheet" href="<?php echo base_url(); ?>resources/css/sharing.css">
+    <link rel="stylesheet" href="<?php echo base_url(); ?>resources/css/cookie-alert.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
 
+	<script src="<?php echo base_url(); ?>resources/js/jquery.min.js"></script>
 
     <style>
         .goog-te-banner-frame.skiptranslate {
@@ -36,6 +39,10 @@
 
         .trans-section {
             margin: 100px;
+        }
+
+        .favbtn a:hover {
+            color:white!important;
         }
     </style>
 

@@ -52,8 +52,6 @@ class Data_mdl extends CI_Model
 
 		$records = $this->db->get($this->data_view)->result();
 
-		//dd($this->db->last_query());
-
 		return $records;
 	}
 

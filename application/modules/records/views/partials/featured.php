@@ -23,7 +23,7 @@
 										<div class="rw-header d-flex justify-content-start">
 											<div class="rv-110-caption pl-0">
 												<h4 class="ft-medium fs-md mb-0 lh-1"><?php echo truncate($row->title, 30); ?></h4>
-												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i><?php echo $row->author->name; ?></p>
+												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i><?php echo @$row->author->name; ?></p>
 											</div>
 										</div>
 										    <span class="d-block theme-cl">

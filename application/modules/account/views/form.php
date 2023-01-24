@@ -45,14 +45,12 @@
                             </div>
                         </div>
 
-
                     <div class="col-md-6">
                      
-
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Publication URL Link</label>
-                                <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="publication" required>
+                                <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="link" required>
                             </div>
                         </div>
                         <div class="col-md-12">
@@ -62,23 +60,26 @@
                                    
                                     <?php 
                                     if(user_session()->is_admin):
+                                        //if admin
                                         ?>
                                          <option disabled>Select</option>
                                         <?php
                                         foreach ($authors as $author) :
                                         ?>
+
                                         <option value="<?php echo $author->id; ?>">
                                             <?php echo $author->name; ?>
                                         </option>
                                         
                                     <?php 
-                                     endforeach;
-                                     else: 
+                                        endforeach;
+
+                                     else://not admin
                                         if(user_session()->author){
                                      ?>
-                                    <option value="<?php echo user_session()->author->id; ?>">
-                                        <?php echo user_session()->author->name; ?>
-                                    </option>
+                                            <option value="<?php echo user_session()->author->id; ?>">
+                                                <?php echo user_session()->author->name; ?>
+                                            </option>
 
                                     <?php }else{ ?>
 
@@ -135,16 +136,29 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="col-md-12" style="display:none;">
+
+                        <div class="col-md-12" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="validatedCustomFile">
+                                    <input type="file" class="custom-file-input" name="cover" id="validatedCustomFile">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
                                     <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
                                 </div>
                             </div>
                         </div>
+
+                        <div class="col-md-12" >
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Publication Attachment</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" name="file" id="validatedCustomFile">
+                                    <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+                                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
+                                </div>
+                            </div>
+                        </div>
+                        
                         
                         <?php 
                          if(user_session()->is_admin): ?>
@@ -190,36 +204,46 @@
 </div>
 
 <script>
-    $('#publications').submit(function(e) {
-        // e.preventDefault();
-        // var data = $(this).serialize();
-        // var url = '<?php echo base_url(); ?>publications/save'
-        // // console.log(data);
-        // $.ajax({
-        //     url: url,
-        //     method: "post",
-        //     data: data,
-        //     success: function(res) {
-        //         if (res == "OK") {
-
-        //             $('.notification').html("<center><font color='green'>Publication Added</font></center>");
-        //             $('.toast-3s').toast('show');
-        //         } else {
-
-        //             $('.notification').html("<center>" + res + "</center>");
-        //             $('.toast-3s').toast('show');
-        //         }
-
-
-        //         // console.log(res);
-        //     } //success
-        // }); // ajax
-
+      $('#publications').submit(function(e) {
         e.preventDefault();
 
-        // Get the form data
-        var form_data = new FormData(this);
+        var form = $(this);
 
-        console.log(form_data);
+        // Get the form data.]
+        var formData = new FormData(form.get(0));
+        var url = form.attr('action');
+
+        $.ajax({
+            url: url,
+            type: 'post',
+            data: formData,
+            cache: false,
+            contentType: false,
+            processData: false,
+            success: function(response) {
+                if (response.status == 'success') {
+                    Swal.fire({
+                        title: 'Success!',
+                        html: response.message,
+                        icon: 'success'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            location.reload();
+                        }
+                    });
+
+                    $('#publications').trigger("reset");
+
+                } else {
+                    Swal.fire({
+                        title: 'Error!',
+                        html: response.message,
+                        icon: 'error'
+                    });
+                }
+            }
+        });
+
+
     });
 </script>

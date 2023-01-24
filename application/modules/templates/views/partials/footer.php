@@ -122,6 +122,20 @@
 
 
 	</div>
+
+	<?php if(!get_cookie('is_returning')): ?>
+	<div class="cookie-consent">
+
+          <span>This site uses cookies to enhance user experience. see<a href="<?php echo base_url('privacypolicy/read'); ?>" class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
+          <div class="mt-2 d-flex align-items-center justify-content-center g-2">
+            <button class="allow-button mr-1" allow="1">Allow cookies</button>
+            <button class="allow-button" allow="0">cancel</button>
+          </div>
+          
+    </div>
+
+	<?php endif; ?>
+
 	<!-- ============================================================== -->
 	<!-- End Wrapper -->
 	<!-- ============================================================== -->
@@ -130,7 +144,6 @@
 	<!-- All Jquery -->
 	<!-- ============================================================== -->
 	
-	<script src="<?php echo base_url(); ?>resources/js/jquery.min.js"></script>
 	<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 
 	<script src="<?php echo base_url(); ?>resources/js/popper.min.js"></script>
@@ -141,21 +154,37 @@
 	<script src="<?php echo base_url(); ?>resources/js/snackbar.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/jQuery.style.switcher.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/custom.js"></script>
-
 	<script src="<?php echo base_url(); ?>resources/js/quiz.js"></script>
 	<!-- ============================================================== -->
 	<!-- This page plugins -->
 	<!-- ============================================================== -->
 
-	<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
 
 	    <!-- include summernote css/js -->
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
-
-
+<script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.js"></script>
 
 	<script type="text/javascript">
+
+		$('.allow-button').click(function(){
+
+			var allow = $(this).attr('allow');
+
+			if(parseInt(allow) === 1){
+				//cookie for 90days
+				var date = new Date();
+				date.setTime(date.getTime() + (90*24*60*60*1000));
+				expires = "; expires=" + date.toUTCString();
+				document.cookie = "is_returning" + "=" + "yes"  + expires + "; path=/";
+			}
+
+			$('.cookie-consent').hide();
+		});
+
+
 		$('.autocomplete').autocomplete({
 			source: "<?php echo base_url(); ?>records/autocomplete",
 			minLength: 3,
@@ -167,6 +196,11 @@
 		});
 
 		$(document).ready(function() {
+
+			//cookies
+			window.addEventListener("cookieAlertAccept", function() {
+				//alert("cookies accepted");
+			});
 
 			setTimeout(function(){
 

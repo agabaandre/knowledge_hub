@@ -60,8 +60,6 @@ class Publications extends MX_Controller
 		// Get the publication document
 		$publication = $files['file'];
 
-
-
 		// If the cover is not empty, upload it
 		if (!empty($cover['name'])) {
 			// Chnage the file name to cover with the extension and timestamp
