@@ -21,9 +21,10 @@ class Records_model extends CI_Model
 			$this->db->limit($limit, $start);
 		}
 		
+		if($term)
 		$this->db->or_like('description',$term);
 
-		$results = $this->db->get('publication')->result();
+		$results = $this->db->order_by('id','desc')->get('publication')->result();
 
 		foreach ($results as $key => $pub) {
 			$results[$key] = $this->publicationsmodel->attach_related($pub);
