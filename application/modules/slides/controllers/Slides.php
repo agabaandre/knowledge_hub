@@ -43,7 +43,7 @@ class Slides extends MX_Controller
     $config['upload_path']   = './assets/images/slider/';
     $config['allowed_types'] = 'gif|jpg|png|pdf|jpeg';
     $config['max_size']      = 3070;
-    $config['file_name']    = "slide" . user_session()->id.time();
+    $config['file_name']    = "slide" . user_session()->user->user_id.time();
     $this->load->library('upload',$config);
 
     if ($this->upload->do_upload('image')) {

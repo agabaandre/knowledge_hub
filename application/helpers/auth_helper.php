@@ -17,7 +17,7 @@ if (!function_exists('user_can')) {
     function user_can($slag)
     {
         $ci = &get_instance();
-        $permissions = $ci->usersmodel->userperms(user_session()->id);
+        $permissions = $ci->usersmodel->userperms(user_session()->user->user_id);
         foreach ($permissions  as $key => $permission) {
             if ($permission->slag == $slag)
                 if ($permission->has_permission)
@@ -34,7 +34,7 @@ if (!function_exists('user_perms')) {
     function user_perms()
     {
         $ci = &get_instance();
-        $perms =  $ci->usersmodel->userperms(user_session()->id);
+        $perms =  $ci->usersmodel->userperms(user_session()->user->user_id);
         foreach ($perms as $key => $perm) {
             $perms[$perm->slag] = $perm;
         }

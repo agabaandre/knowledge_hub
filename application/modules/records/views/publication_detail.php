@@ -148,7 +148,7 @@
 						<?php echo form_open('publications/comment', 'class="_apply_form_form"'); ?>
 
 						<input type="hidden" name="publication_id" value="<?php echo $publication->id; ?>" />
-						<input type="hidden" name="user_id" value="<?php echo @user_session()->user_id; ?>" />
+						<input type="hidden" name="user_id" value="<?php echo @user_session()->user->user_id; ?>" />
 						<div class="form-group">
 							<label class="text-success mb-1 ft-medium medium">Your comment</label>
 							<textarea name="comment" class="form-control" placeholder="Your comment" required><?php echo old('comment');?></textarea>

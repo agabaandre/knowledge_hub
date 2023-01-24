@@ -269,14 +269,14 @@ class Publications_model extends CI_Model
 		if(!user_session()) //no session data
 		return [];
 
-		$row = ['publication_id'=>$id, 'user_id'=>user_session()->id];
+		$row = ['publication_id'=>$id, 'user_id'=>user_session()->user->user_id];
 		return $this->db->insert('favourites',$row);
 	}
 
 	public function delete_favourite($id){
 
 		$this->db->where('publication_id',$id);
-		$this->db->where('user_id',user_session()->id);
+		$this->db->where('user_id',user_session()->user->user_id);
 
 		return $this->db->delete('favourites');
 	}
