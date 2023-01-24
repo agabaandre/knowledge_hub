@@ -29,9 +29,11 @@ class Subthemes_model extends CI_Model
 		}
 
 		$subthemes = $this->db->get($this->table)->result();
+
 		foreach ($subthemes as $sub) {
 			$sub = $this->attach_related($sub);
 		}
+		
 		return $subthemes;
 	}
 

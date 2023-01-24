@@ -38,10 +38,8 @@ class Data_mdl extends CI_Model
 
 			
 		if(isset($filter['country_id']))
-		$this->db->where('country_id', $filter['country_id']);
-
+			$this->db->where('country_id', $filter['country_id']);
 		}
-
 
 		if ($columns) {
 			$this->db->select($columns);
@@ -59,12 +57,10 @@ class Data_mdl extends CI_Model
 
 		$this->db->where('thematic_area_id',$id);
 		$result = $this->db->get($this->subject_area_tb)->result();
-
 		$subtheme_ids = [];
 
 		foreach ($result as $row) {
-
-			array_push($subtheme_ids, $row_id);
+			array_push($subtheme_ids, $row->id);
 		}
 
 		return $subtheme_ids;
@@ -87,9 +83,15 @@ class Data_mdl extends CI_Model
 		return $this->db->get($this->countries_tb)->row();
 	}
 
-	public function get_countries()
+	public function get_countries($filter=null)
 	{
-		$query      = $this->db->query("SELECT * from country WHERE national='National' AND id in(SELECT country_id from kpi_data)");
+		$additional = "";
+
+		if(isset($filter['region_id']) && $filter['region_id']>0){
+			$additional = " AND region_id ='".$filter['region_id']."'";
+		};
+
+		$query      = $this->db->query("SELECT * from country WHERE national='National' AND id in(SELECT country_id from kpi_data) $additional");
 		$countries = $query->result();
 
 		return $countries;

@@ -28,7 +28,7 @@
                         <?php endforeach; ?>
                     </select>
                 </div>
-                <div class="form-group col-md-3">
+                <div class="form-group col-md-2">
                     <br>
                     <label>Member State</label>
                     <select class="form-control select2 countries" name="country_id" onchange="$('.filter_form').submit();">
@@ -40,17 +40,29 @@
                     </select>
                 </div>
 
-            <div class="form-group col-md-3">
+            <div class="form-group col-md-2">
                 <br>
                 <label>Period</label>
                 <select class="form-control select2" name="period_year" onchange="fetchData()">
                     <option value="">All</option>
-                    <?php foreach ($years as $year) : ?>
-                        <option value="<?php echo $year; ?>"><?php echo $year; ?></option>
+                    <?php foreach ($years as $year): ?>
+                        <option value="<?php echo $year; ?>" <?php echo (isset($filter['period_year']) && $filter['period_year'] == $year) ? "selected" : ""; ?>><?php echo $year; ?></option>
                     <?php endforeach; ?>
                 </select>
             </div>
+
             <div class="form-group col-md-3">
+                <br>
+                <label>Sub Theme</label>
+                <select class="form-control select2" name="subject_area" onchange="fetchData()">
+                <option value="" selected>All</option>
+                    <?php foreach($subthemes as $theme): ?>
+                        <option value="<?php echo $theme->id; ?>" <?php echo (isset($filter['subject_area']) && $filter['subject_area'] == $theme->id) ? "selected" : ""; ?>><?php echo $theme->description; ?></option>
+                    <?php endforeach; ?>
+                </select>
+            </div>
+            
+            <div class="form-group col-md-2">
                 <br>
                 <label>Visualisation Type</label>
                 <select class="form-control select2" onchange="switchChartType($(this).val())">
@@ -58,6 +70,8 @@
                     <option value="bar">Bar Graph</option>
                 </select>
             </div>
+
+            
             </div>
 </form>
 
@@ -82,7 +96,7 @@ $valid_data++;
 
  ?>
 
-<h3 class="theme-primary"><?php echo $widget_data['subject_area']; ?></h3>
+<h3 class="theme-primary p-2"><?php echo $widget_data['subject_area']; ?></h3>
 
 <?php 
 
