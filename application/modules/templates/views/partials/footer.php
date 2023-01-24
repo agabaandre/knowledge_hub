@@ -149,9 +149,6 @@
 	<script src="<?php echo base_url(); ?>resources/js/popper.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/bootstrap.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/slick.js"></script>
-	<script src="<?php echo base_url(); ?>resources/js/slider-bg.js"></script>
-	<script src="<?php echo base_url(); ?>resources/js/smoothproducts.js"></script>
-	<script src="<?php echo base_url(); ?>resources/js/snackbar.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/jQuery.style.switcher.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/custom.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/quiz.js"></script>
@@ -165,7 +162,6 @@
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
-<script src="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.js"></script>
 
 	<script type="text/javascript">
 
@@ -187,9 +183,10 @@
 
 		$('.autocomplete').autocomplete({
 			source: "<?php echo base_url(); ?>records/autocomplete",
-			minLength: 3,
+			minLength: 5,
 			select: function(event, ui) {
 				console.log(ui.item);
+
 				$('.term').val(ui.item.label);
 				$('.search-form').submit();
 			}
@@ -197,11 +194,7 @@
 
 		$(document).ready(function() {
 
-			//cookies
-			window.addEventListener("cookieAlertAccept", function() {
-				//alert("cookies accepted");
-			});
-
+			
 			setTimeout(function(){
 
 				$('.alert').fadeOut('slow')
@@ -238,7 +231,7 @@
 		}
 
 		$(function() {
-			$('.selectpicker').selectpicker();
+			//$('.selectpicker').selectpicker();
 		});
 	</script>
 

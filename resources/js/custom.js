@@ -170,25 +170,10 @@ $(function() {
 		$("#navigation").navigation()
 	});
 	
-	// Product Preview
-	$('.sp-wrap').smoothproducts();
 	
 	// Tooltip
 	$('[data-toggle="tooltip"]').tooltip(); 
-	
-	// Snackbar for wishlist Product
-	$('.snackbar-wishlist').click(function() { 
-		Snackbar.show({
-			text: 'Your Job was added to wishlist successfully!',
-			pos: 'top-right',
-			showAction: false,
-			actionText: "Dismiss",
-			duration: 3000,
-			textColor: '#fff',
-			backgroundColor: '#151515'
-		}); 
-	});
-	
+
 	// Bottom To Top Scroll Script
 	$(window).on('scroll', function() {
 		var height = $(window).scrollTop();

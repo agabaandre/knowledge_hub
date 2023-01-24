@@ -143,7 +143,6 @@
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="cover" id="validatedCustomFile">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
-                                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
                                 </div>
                             </div>
                         </div>
@@ -154,7 +153,6 @@
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="file" id="validatedCustomFile">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
-                                    <!-- <div class="invalid-feedback">Example invalid custom file feedback</div> -->
                                 </div>
                             </div>
                         </div>

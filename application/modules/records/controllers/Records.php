@@ -228,7 +228,7 @@ class Records extends MX_Controller {
     	$term = $_GET[ "term" ];
     	$suggestions = [];
 
-    	$results = $this->recordsmodel->search($term,10,0);
+    	$results = $this->recordsmodel->search($term,null,5,0);
 
     	foreach ($results as $result) {
 			$suggestions[] =  array( "label" => substr($result->title,0,100), "value" => substr($result->title,0,100));

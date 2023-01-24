@@ -9,7 +9,7 @@
 	<meta name="keywords" content="<?php echo setting()->seo_keywords; ?>">
 	<meta name="author" content="Africa CDC" />
 	<!-- Title -->
-	<title><?php echo $title; ?></title>
+	<title><?php echo $title ?? 'Africa CDC'; ?></title>
 
     <!-- Custom CSS -->
     <!-- Favicon -->

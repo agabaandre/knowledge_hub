@@ -20,6 +20,8 @@ class Records_model extends CI_Model
 		if ($limit) {
 			$this->db->limit($limit, $start);
 		}
+		
+		$this->db->or_like('description',$term);
 
 		$results = $this->db->get('publication')->result();
 
@@ -46,7 +48,7 @@ class Records_model extends CI_Model
 
 			$search = ['search_key' => $term];
 
-			$this->db->like('title', $term);
+			$this->db->like('title', $term,'both');
 			//if tag, include pubs with the tag
 
 			if(!$type){
