@@ -164,14 +164,14 @@ class Publications_model extends CI_Model
 		return $mess;
 	}
 
+	public function save_attachment($attchment, $publication_id){
+		$data = array('publication_id'=>$publication_id,'file'=>$attchment);
+		return $this->db->insert('publication_attachments',$data);
+	}
+
 	public function update($data)
 	{
 
-		// $this->db->insert($this->table, $data);
-		// $row_id =  $this->db->insert_id();
-
-		// //return inserted row
-		// return $this->find($row_id);
 
 		// Update record with id
 		$this->db->where('id', $data['id']);

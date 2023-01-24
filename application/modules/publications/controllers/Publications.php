@@ -58,7 +58,7 @@ class Publications extends MX_Controller
 		$cover = $files['cover'];
 
 		// Get the publication document
-		$publication = $files['file'];
+		$publication_file = $files['file'];
 
 		// If the cover is not empty, upload it
 		if (!empty($cover['name'])) {
@@ -85,15 +85,31 @@ class Publications extends MX_Controller
 			$cover = 'cover.png';
 		}
 
+		$theme = [
+			'id' => @$this->input->post("id"),
+			'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id"),
+			'publication' => $this->input->post("link") ?? 'N/A',
+			'author_id' => $this->input->post("author"),
+			'geographical_coverage_id' => $this->input->post("geographical_coverage"),
+			'title' => $this->input->post("title"),
+			'description'  => $this->input->post("description", TRUE),
+			'file_type_id' => $this->input->post("file_type"),
+			'is_active' => $this->input->post("is_active"),
+			'cover' => $cover ?? 'cover.png',
+		];
+
+		$publication = $this->publicationsmodel->save($theme);
+
+
 		// If the publication is not empty, upload it
-		if (!empty($publication['name'])) {
+		if (!empty($publication->id) && isset($publication_file['name'])) {
 			// Chnage the file name to pub zx  with the extension and timestamp
-			$publication['name'] = 'publication' . time() . '.' . pathinfo($publication['name'], PATHINFO_EXTENSION);
+			$file_name = 'publication' . time() . '.' . pathinfo($publication_file['name'], PATHINFO_EXTENSION);
 
 			// Set the upload configuration
 			$config['upload_path']   = './uploads/publications/';
 			$config['allowed_types'] = 'pdf|doc|docx|xls|xlsx|ppt|pptx';
-			$config['file_name']     = $publication['name'];
+			$config['file_name']     = $file_name;
 
 			// Upload the file
 			$this->upload->initialize($config);
@@ -105,13 +121,11 @@ class Publications extends MX_Controller
 				$is_error = true;
 			} else {
 				// If the upload is successful, get the file name
-				$publication = $this->upload->data('file_name');
-				// dd($publication);
-				// $publication = $publication['name'];
+				$attachment = $this->upload->data('file_name');
+				$this->publicationsmodel->save_attachment($attachment,$publication->id);
 			}
-		} else {
-			$publication = $this->input->post("link");
-		}
+
+		} 
 
 		$response = [];
 
@@ -124,23 +138,9 @@ class Publications extends MX_Controller
 
 			// Get the formdata
 
-			$theme = [
-				'id' => @$this->input->post("id"),
-				'sub_thematic_area_id' => @$this->input->post("sub_thematic_area_id"),
-				'publication' => $publication,
-				'author_id' => $this->input->post("author"),
-				'geographical_coverage_id' => $this->input->post("geographical_coverage"),
-				'title' => $this->input->post("title"),
-				'description'  => $this->input->post("description", TRUE),
-				'file_type_id' => $this->input->post("file_type"),
-				'is_active' => $this->input->post("is_active"),
-				'cover' => $cover ?? 'cover.png',
-			];
+			
 
-			$result = $this->publicationsmodel->save($theme);
-
-
-			if ($result) {
+			if ($publication) {
 				$response['status'] = 'success';
 				$response['message'] = 'Publication Saved Successfully';
 
