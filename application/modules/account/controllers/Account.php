@@ -19,7 +19,7 @@ class Account extends MX_Controller
 	{
 		$data['module'] = $this->module;
 		$data['title']  = "Our Publications";
-		$data['publications'] = $this->publicationsmodel->get(['author_id'=>user_session()->user_id]);
+		$data['publications'] = $this->publicationsmodel->get(['author_id'=>user_session()->user->user_id]);
 
 		render_site('list', $data,true);
 	}

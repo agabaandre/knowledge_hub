@@ -229,7 +229,7 @@ class Publications_model extends CI_Model
 	}
 
 	public function count_favourites(){
-		return (!is_guest())?count($this->db->where('user_id',user_session()->id)->get('favourites')->result()):0;
+		return (!is_guest())?count($this->db->where('user_id',user_session()->user->user_id)->get('favourites')->result()):0;
 	}
 
 	public function user_favourites(){
@@ -239,7 +239,7 @@ class Publications_model extends CI_Model
 			if(is_guest())
 		return [];
 
-		$favs = $this->db->where('user_id',user_session()->user->id)->get('favourites')->result();
+		$favs = $this->db->where('user_id',user_session('user')->user->user_id)->get('favourites')->result();
 		$favourites = [];
 
 		foreach($favs as $fav){
