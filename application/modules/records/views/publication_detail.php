@@ -28,10 +28,12 @@
 
 						<?php 
 						    elseif ($publication->has_attachments) :
+								$count = 1;
 								foreach($publication->attachments as $pub_file):
 								?>
-									<div class="jbl_button"><a href="<?php echo base_url('uploads/publications/'.$pub_file->file); ?>" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment</a></div>
-								<?php 
+									<div class="jbl_button"><a href="<?php echo base_url('uploads/publications/'.$pub_file->file); ?>" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment <?php echo $count; ?></a></div>
+								<?php
+								$count++;
 								endforeach;
 						    endif;
 							 ?>
