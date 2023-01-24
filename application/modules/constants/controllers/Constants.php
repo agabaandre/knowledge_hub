@@ -22,13 +22,16 @@ class Constants extends MX_Controller
 		$data['module'] = 'constants';
 		$data['view'] = "variables";
 		$data['setting'] = $this->getSettings();
-		$postdata = $this->input->post();
-		if ($this->input->post('site_name')) {
-			$data['message'] = $this->constants_mdl->update_variables($postdata);
-			redirect("constants/");
-		} else {
+	
+		
 			echo Modules::run('templates/main', $data);
-		}
+	
+	}
+	public function saveconstants(){
+		    $postdata = $this->input->post();
+			$data['message'] = $this->constants_mdl->update_variables($postdata);
+			redirect("constants");
+	
 	}
 	public function getSettings()
 	{
