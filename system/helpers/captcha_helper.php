@@ -241,9 +241,14 @@ if ( ! function_exists('create_captcha'))
 		//  Assign colors
 		// ----------------------------------
 
-		is_array($colors) OR $colors = $defaults['colors'];
+		is_array($colors) OR $colors = array(
+			'background'	=> array(255,255,255),
+			'border'	=> array(153,102,102),
+			'text'		=> array(204,153,153),
+			'grid'		=> array(255,182,182)
+		);
 
-		foreach (array_keys($defaults['colors']) as $key)
+		foreach (array_keys($colors) as $key)
 		{
 			// Check for a possible missing value
 			is_array($colors[$key]) OR $colors[$key] = $defaults['colors'][$key];
