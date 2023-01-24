@@ -149,6 +149,9 @@
 	<script src="<?php echo base_url(); ?>resources/js/popper.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/bootstrap.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/slick.js"></script>
+	<script src="<?php echo base_url(); ?>resources/js/slider-bg.js"></script>
+	<script src="<?php echo base_url(); ?>resources/js/smoothproducts.js"></script>
+	<script src="<?php echo base_url(); ?>resources/js/snackbar.min.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/jQuery.style.switcher.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/custom.js"></script>
 	<script src="<?php echo base_url(); ?>resources/js/quiz.js"></script>
@@ -186,7 +189,6 @@
 			minLength: 5,
 			select: function(event, ui) {
 				console.log(ui.item);
-
 				$('.term').val(ui.item.label);
 				$('.search-form').submit();
 			}
@@ -194,7 +196,6 @@
 
 		$(document).ready(function() {
 
-			
 			setTimeout(function(){
 
 				$('.alert').fadeOut('slow')
