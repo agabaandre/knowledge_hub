@@ -23,7 +23,7 @@
 							</div>
 						</div>
 						<div class="jbd-01-right text-right">
-						<?php if ($publication->has_attachments) : ?>
+						<?php if (!$publication->has_attachments) : ?>
 							<div class="jbl_button mb-2"><a href="<?php echo $publication->publication; ?>" target="_blank" class="btn btn-md rounded theme-bg-light theme-cl fs-sm ft-medium">Browse Resource</a></div>
 
 						<?php 
