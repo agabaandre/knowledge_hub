@@ -197,13 +197,13 @@ class Publications extends MX_Controller
 
 	public function comment()
 	{
-		if(captcha_valid()):
+		//if(captcha_valid()):
 			$this->publicationsmodel->save_comment($this->input->post());
 			set_flash("Comment submitted successfully");
-		else:
-			flash_form();
-			set_flash("Invalid confirmation text",true);
-		endif;
+		// else:
+		// 	flash_form();
+		// 	set_flash("Invalid confirmation text",true);
+		// endif;
 		redirect('records/show/' . $this->input->post('publication_id'));
 	}
 
