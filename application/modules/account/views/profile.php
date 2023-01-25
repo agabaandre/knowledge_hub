@@ -37,7 +37,7 @@
                 </div>
             </div>
             <div class="card-footer text-right"><a href="#" class="btn btn-success">Update</a> <a href="#"
-                    class="btn btn-danger">Cancle</a></div>
+                    class="btn btn-danger">Cancel</a></div>
         </div>
     </div>
 
