@@ -5,7 +5,7 @@ class Privacypolicy extends MX_Controller {
 
     public function __construct() {
         parent::__construct();
-        $this->module = "privacypolicy";
+        $this->module = "privacy_policy";
         $this->title = "Privacy Policy";
 
         $this->load->model('privacypolicymodel');

@@ -32,7 +32,7 @@
 						<li><a href="<?php echo base_url('records/search'); ?>">Search</a></li>
 						<li><a href="<?php echo base_url('forums/index'); ?>">Forums</a></li>
 						<li><a href="<?php echo base_url('faqs'); ?>">FAQs</a></li>
-						<li><a href="<?php echo base_url('privacypolicy/read'); ?>">Privacy</a></li>
+						<li><a href="<?php echo base_url('privacy_policy/read'); ?>">Privacy</a></li>
 						<!-- <li><a href="<?php //echo base_url('privacypolicy/read'); ?>">About</a></li> -->
 
 					</ul>
