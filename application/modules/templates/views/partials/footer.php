@@ -45,7 +45,7 @@
 							<ul class="footer-menu">
 								<li><a href="<?php echo base_url("faqs"); ?>">Frequently asked questions</a></li>
 								<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
-								<li><a href="<?php echo base_url('privacypolicy/read'); ?>">Privacy Policy</a></li>
+								<li><a href="<?php echo base_url('privacy_policy/read'); ?>">Privacy Policy</a></li>
 							</ul>
 						</div>
 					</div>
@@ -126,7 +126,7 @@
 	<?php if(!get_cookie('is_returning')): ?>
 	<div class="cookie-consent">
 
-          <span>This site uses cookies to enhance user experience. see<a href="<?php echo base_url('privacypolicy/read'); ?>" class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
+          <span>This site uses cookies to enhance user experience. see<a href="<?php echo base_url('privacy_policy/read'); ?>" class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
           <div class="mt-2 d-flex align-items-center justify-content-center g-2">
             <button class="allow-button mr-1" allow="1">Allow cookies</button>
             <button class="allow-button" allow="0">cancel</button>
