@@ -36,7 +36,7 @@
                     <input type="new_password" class="form-control" value="password">
                 </div>
             </div>
-            <div class="card-footer text-right"><a href="#" class="btn btn-primary">Update</a> <a href="#"
+            <div class="card-footer text-right"><a href="#" class="btn btn-success">Update</a> <a href="#"
                     class="btn btn-danger">Cancle</a></div>
         </div>
     </div>
@@ -109,7 +109,7 @@
                 </form>
             </div>
             <div class="card-footer">
-                <button type="submit" class="btn btn-primary waves-effect waves-light">Update Profile</button>
+                <button type="submit" class="btn btn-success waves-effect waves-light">Update Profile</button>
             </div>
         </div>
     </div>

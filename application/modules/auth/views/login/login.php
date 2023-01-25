@@ -52,7 +52,7 @@
                 <label for="checkbox-fill-a1" class="cr"> Save credentials</label>
               </div>
             </div>
-            <button class="btn btn-primary mb-4">Login</button>
+            <button class="btn btn-success mb-4">Login</button>
 
             </form>
             <p class="mb-2 text-muted">Forgot password? <a href="auth-reset-password.html" class="f-w-400">Reset</a></p>
