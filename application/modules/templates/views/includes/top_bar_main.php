@@ -118,7 +118,7 @@
 				</div>
 			</div><!-- Main-header-message closed -->
 			
-			<div class="dropdown main-header-message right-toggle">
+			<!-- <div class="dropdown main-header-message right-toggle">
 				<a class="nav-link menu-icons" data-toggle="sidebar-right" data-target=".sidebar-right">
 					<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
 						<line x1="3" y1="12" x2="21" y2="12"></line>
@@ -126,7 +126,8 @@
 						<line x1="3" y1="18" x2="21" y2="18"></line>
 					</svg>
 				</a>
-			</div><!-- Main-header-message closed -->
+			</div> -->
+			<!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
 				<a  class=""><img class="rounded-circle" src="<?php echo base_url(); ?>assets/images/user.jpg" style="width:35px;"></a>
 				<div class="dropdown-menu animated fadeInUp">
