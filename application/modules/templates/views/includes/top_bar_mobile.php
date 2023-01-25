@@ -116,7 +116,7 @@
 						</a>
 					</div><!-- Right-toggle closed -->
 					<div class="dropdown main-profile-menu nav nav-item nav-link">
-						<a class="profile-user" href=""><img alt="" src="<?php echo base_url() ?>assets/img/faces/6.jpg"></a>
+                       <a  class=""><img class="rounded-circle" src="<?php echo base_url(); ?>assets/images/user.jpg" style="width:35px;"></a>
 						<div class="dropdown-menu animated fadeInUp">
 							<div class="main-header-profile header-img">
 								<h6>
