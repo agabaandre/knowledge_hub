@@ -55,6 +55,11 @@
 
 							<li><a href="#">Publications</a>
 									<ul class="nav-dropdown nav-submenu">
+											<li>
+										<a href="<?php echo base_url('account/profile'); ?>">
+										   <i class="fa fa-list mr-1"></i> My Profile
+										</a>
+										</li>
 										<li>
 										<a href="<?php echo base_url('account/publications'); ?>">
 										   <i class="fa fa-list mr-1"></i> Our Publications

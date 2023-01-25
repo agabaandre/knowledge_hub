@@ -43,6 +43,16 @@ class Account extends MX_Controller
 		render_site('form', $data,true);
 	}
 
+	public function profile()
+	{
+		$data['module'] = "auth";
+		$data['view'] = "profile";
+		$data['title'] = "My Profile";
+
+		render_site("users/profile", $data);
+
+	}
+
 	public function save()
 	{
 
