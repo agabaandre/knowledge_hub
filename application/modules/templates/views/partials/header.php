@@ -57,7 +57,7 @@
 									<ul class="nav-dropdown nav-submenu">
 											<li>
 										<a href="<?php echo base_url('account/profile'); ?>">
-										   <i class="fa fa-list mr-1"></i> My Profile
+										   <i class="fa fa-user mr-1"></i> My Profile
 										</a>
 										</li>
 										<li>
