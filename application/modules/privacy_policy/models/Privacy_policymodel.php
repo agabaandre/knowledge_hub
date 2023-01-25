@@ -1,5 +1,5 @@
 <?php
-class PrivacyPolicyModel extends CI_Model{
+class Privacy_policymodel extends CI_Model{
 
 
     public  function get()
