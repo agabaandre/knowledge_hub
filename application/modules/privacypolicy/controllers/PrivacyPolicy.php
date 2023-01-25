@@ -1,7 +1,7 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 
-class PrivacyPolicy extends MX_Controller {
+class Privacypolicy extends MX_Controller {
 
     public function __construct() {
         parent::__construct();
