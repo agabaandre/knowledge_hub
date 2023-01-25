@@ -8,21 +8,21 @@ class Privacy_policy extends MX_Controller {
         $this->module = "privacy_policy";
         $this->title = "Privacy Policy";
 
-        $this->load->model('privacypolicymodel');
+        $this->load->model('privacy_policymodel');
     }
 
     public function index() {
         $data['module'] = $this->module;
         $data['title'] = $this->title;
         $data['page'] = "Privacy Policy";
-        $data['privacy_policy'] = $this->privacypolicymodel->get();
+        $data['privacy_policy'] = $this->privacy_policymodel->get();
         render('privacy_policy', $data);
     }
 
     public function read() {
         $data['module'] = $this->module;
         $data['title'] = "PRIVACY POLICY";
-        $data['policy'] = $this->privacypolicymodel->get();
+        $data['policy'] = $this->privacy_policymodel->get();
         render_site('policy', $data,true);
     }
 
