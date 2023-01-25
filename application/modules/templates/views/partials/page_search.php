@@ -15,7 +15,7 @@
 								<div class="row no-gutters">
 									<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text"  value="<?php echo old("term"); ?>" class="form-control left-ico autocomplete term custom-height-lg" name="term" placeholder="What are you looking for?"  style="font-size:22px;"/>
+											<input type="text"  value="<?php echo old("term"); ?>" class="form-control left-ico autocomplete term custom-height-lg" name="term" placeholder="What are you looking for?"  style="font-size:18px;"/>
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
