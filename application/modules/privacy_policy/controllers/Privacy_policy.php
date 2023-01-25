@@ -29,7 +29,7 @@ class Privacy_policy extends MX_Controller {
     public function save() {
         $is_error = false;
         $privacy_policy = $this->input->post("privacy_policy");
-        $resp = file_put_contents(APPPATH . 'modules/privacypolicy/privacy_policy.md', $privacy_policy);
+        $resp = file_put_contents(APPPATH . 'modules/privacy_policy/privacy_policy.md', $privacy_policy);
         if ($resp) {
             $msg = "success";
         } else {
