@@ -65,7 +65,7 @@
                             </div>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" name="username" placeholder=""
-                                    value="<?php echo $this->session->userdata()->username; ?>">
+                                    value="<?php echo $this->session->userdata()->username; ?>" readonly>
                             </div>
                         </div>
                     </div>
