@@ -7,7 +7,7 @@
 						<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 							<div class="banner_caption text-left mb-4">
 
-								<h2 class="banner_title ft-bold mb-1">"It’s a Good Day to Have a Good Day!"</h2>
+								<h3 class="banner_title ft-bold mb-1">"It’s a Good Day to Have a Good Day!"</h3>
 								
 							</div>
 							<?php echo form_open('records/search', 'class="bg-white rounded p-1 search-form"'); ?>
