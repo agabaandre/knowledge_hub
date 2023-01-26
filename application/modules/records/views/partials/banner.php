@@ -12,17 +12,17 @@
 							</div>
 							<?php echo form_open('records/search', 'class="bg-white rounded p-1 search-form"'); ?>
 							<div class="row no-gutters">
-									<div class="col-xl-6 col-lg-6 col-md-6 col-sm-12 col-12">
+									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="<?php echo old("term"); ?>" placeholder="Scour the knowledge base" />
+											<input type="text" class="form-control lg left-ico autocomplete term" name="term" value="<?php echo old("term"); ?>" placeholder="Type Keywords to unfold it all" />
 											<i class="bnc-ico lni lni-search-alt"></i>
 										</div>
 									</div>
 								
 
-									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
+									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Unfold it All</button>
+											<button class="btn full-width custom-height-lg theme-bg text-white fs-md" type="submit">Click to Unfold</button>
 										</div>
 									</div>
 								</div>
