@@ -237,6 +237,25 @@
 	</script>
 
 
+	<!-- <script>
+		$(document).ready(function(){
+    $('#subscription-form').on('submit', function(e){
+        e.preventDefault();
+        var email = $('#subscribe-email').val();
+		var csrf_token = $('input[name="csrf_token"]').val();
+        $.ajax({
+            type: "POST",
+            url: "subscription/index",
+            data: {email: email},
+            success: function(response) {
+                alert(response);
+            }
+        });
+    });
+});
+	</script> -->
+
+
 
 	</body>
 

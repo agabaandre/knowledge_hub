@@ -8,6 +8,7 @@
 	<meta name="description" content="<?php echo setting()->site_description; ?>" />
 	<meta name="robots" content="noindex">
 	<meta name="author" content="Africa CDC" />
+
 	<!-- Title -->
 	<title><?php echo $title; ?></title>
 
