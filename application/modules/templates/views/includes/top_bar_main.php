@@ -132,7 +132,7 @@
 				<a  class=""><img class="rounded-circle" src="<?php echo base_url(); ?>assets/images/user.jpg" style="width:35px;"></a>
 				<div class="dropdown-menu animated fadeInUp">
 					<div class="main-header-profile header-img">
-						<h6><?php echo $this->session->userdata('user')->name; ?></h6><span><?php echo ucwords($this->session->userdata('user')->group_name); ?></span>
+						<h6><?php echo $this->session->userdata('user')['name'] ?? 'Administrator'; ?></h6><span><?php echo ucwords($this->session->userdata('user')['group_name'] ?? ''); ?></span>
 					</div>
 					<a class="dropdown-item" href="auth/profile"><i class="bx bx-user-circle"></i> My Profile</a>
 					<a class="dropdown-item" href="auth/profile"><i class="bx bx-cog"></i> Change Password</a>

@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: nginx/Dockerfile
+    ports: 
+      - "8080:80"
+    networks:
+      - internal
+    volumes:
+      - ./:/var/www/html
+  php:
+    build:
+      context: .
+      dockerfile: php/Dockerfile
+    networks:
+      - internal
+    volumes:
+      - ./:/var/www/html
+  mysql:
+    build:
+      context: .
+      dockerfile: mysql/Dockerfile
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: knowledgehub
+      MYSQL_USER: knowledgehub
+      MYSQL_PASSWORD: 7foldQibei
+    ports:
+      - "3306:3306"
+    networks:
+      - internal
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+      - ./mysql/base.sql:/docker-entrypoint-initdb.d/base.sql
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    environment:
+      PMA_ARBITRARY: 1
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: password
+    ports:
+      - "8081:80"
+    networks:
+      - internal
+networks:
+  internal:
+    driver: bridge

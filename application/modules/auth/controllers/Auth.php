@@ -16,49 +16,40 @@ class Auth extends MX_Controller
 
   public function login()
   {
+    $this->session->unset_userdata('error_message');
+
     $postdata = $this->input->post();
-    $password = $this->input->post('password');
-    $hash = $this->argonhash->make($password);
-    $data = $this->auth_mdl->login($postdata);
-    $route = $this->input->post('route');
-    $adata = (array)$data;
-    //$hash = $this->argonhash->make($password);
 
-    // dd($hash);
-
-    $auth = ($this->argonhash->check($password, $adata['password']));
-    unset($adata['password']);
-    //print_r($route);
-    //dd($adata);
-
-    if ($auth) {
-      $adata['region']      = $this->auth_mdl->access_level1($adata['user_id']);
-      $adata['country']     = $this->auth_mdl->access_level2($adata['user_id']);
-      $adata['permissions'] = $this->auth_mdl->user_permissions($adata['role']);
-      $adata['is_admin']    = true;
-
-      $_SESSION['user'] = (object)$adata;
-
-      if($postdata['route'] == 'front'){
-
-        $this->session->set_userdata($adata);
-
-        redirect(base_url());
-
-       }
-
-      if (($postdata['route'] == 'rcc/dashboards') ||  ($postdata['route'] == 'auth/')) {
-        //redirect('rccs');
-          redirect('dashboard');
-      } elseif ($postdata['route'] == 'admin/') {
-
-        redirect('dashboard');
-      } else {
-        redirect('auth');
-      }
-    } else {
+    if (!isset($postdata['username']) || !isset($postdata['password'])) {
+      $this->session->set_flashdata('error_message', 'Invalid username/email or password');
       redirect('auth');
     }
+
+    $username = $postdata['username'];
+    $password = $postdata['password'];
+
+    $hash = $this->argonhash->make($password);
+
+    $data = (array) $this->auth_mdl->login([
+      'username' => $username,
+      'password' => $password
+    ]);
+
+    if (empty($data) || !$this->argonhash->check($password, $data['password'])) {
+      $this->session->set_flashdata('error_message', 'Invalid email/username or password');
+      redirect('auth');
+    }
+
+    unset($data['password']);
+
+    $data['region']      = $this->auth_mdl->access_level1($data['user_id']);
+    $data['country']     = $this->auth_mdl->access_level2($data['user_id']);
+    $data['permissions'] = $this->auth_mdl->user_permissions($data['role']);
+    $data['is_admin']    = true;
+
+    $this->session->set_userdata('user', $data);
+
+    redirect('dashboard');
   }
 
   public function profile()

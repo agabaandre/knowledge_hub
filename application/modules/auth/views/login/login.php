@@ -33,6 +33,11 @@
             <h3 class="mb-3 f-w-400 justify-content-center">Sign In</h3>
             <?php echo form_open_multipart(base_url('auth/login'), array('id' => 'filetypes', 'class' => 'filetypes')); ?>
 
+            <?php if ($this->session->flashdata('error_message')): ?>
+                <div class="alert alert-danger">
+                    <?php echo $this->session->flashdata('error_message'); ?>
+                </div>
+            <?php endif; ?>
 
             <div class="input-group mb-2">
               <div class="input-group-prepend">

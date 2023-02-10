@@ -15,3 +15,6 @@ node_modules
 
 # Exclud Uploads From pushing to Git
 /uploads/
+
+# Exclude MySQL data
+mysql/data 

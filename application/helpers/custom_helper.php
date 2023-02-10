@@ -413,23 +413,12 @@ if (!function_exists('can_access_multi')) {
 
     function can_access_multi($permissions)
     {
-        // Get ID's of all permission names
-        $permission_ids = array_map(function ($permission) {
-            return get_permission_id($permission);
-        }, $permissions);
-
-        // dd($permission_ids);
-
         $ci = & get_instance();
+        $user_permission_ids = $ci->session->userdata('user')['permissions'];
 
-        // Get ID's of all user permissions
-        $user_permissions = $ci->session->userdata('user')->permissions;
-
-        // dd($user_permissions);
-
-        // Check if any of the permission id's match
-        foreach ($permission_ids as $permission_id) {
-            if (in_array($permission_id, $user_permissions)) {
+        foreach ($permissions as $permission_name) {
+            $permission_id = get_permission_id($permission_name);
+            if (in_array($permission_id, $user_permission_ids)) {
                 return true;
             }
         }

@@ -8,13 +8,10 @@ class Templates extends MX_Controller
 
 	public function main($data)
 	{
-
-
-		//  check_admin_access();
-		if (isset($this->session->userdata('user')->name)) {
+		if($this->session->has_userdata('user')) {
 			$this->load->view('main', $data);
 		} else {
-			redirect('auth/login');
+			redirect('auth');
 		}
 	}
 
