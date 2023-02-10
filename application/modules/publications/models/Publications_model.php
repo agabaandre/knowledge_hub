@@ -229,7 +229,7 @@ class Publications_model extends CI_Model
 	}
 
 	public function count_favourites(){
-		return (!is_guest())?count($this->db->where('user_id',user_session()->user->user_id)->get('favourites')->result()):0;
+		return (!is_guest())?count($this->db->where('user_id',$user->user_id)->get('favourites')->result()):0;
 	}
 
 	public function user_favourites(){
@@ -239,7 +239,9 @@ class Publications_model extends CI_Model
 			if(is_guest())
 		return [];
 
-		$favs = $this->db->where('user_id',user_session('user')->user->user_id)->get('favourites')->result();
+		$user = (object) $this->session->userdata('user');
+
+		$favs = $this->db->where('user_id',$user->user_id)->get('favourites')->result();
 		$favourites = [];
 
 		foreach($favs as $fav){
@@ -265,18 +267,21 @@ class Publications_model extends CI_Model
 	}
 
 	public function save_favourite($id){
+
+		$user = (object) $this->session->userdata('user');
 		
-		if(!user_session()) //no session data
+		if(!$user) //no session data
 		return [];
 
-		$row = ['publication_id'=>$id, 'user_id'=>user_session()->user->user_id];
+		$row = ['publication_id'=>$id, 'user_id'=>$user->user_id];
 		return $this->db->insert('favourites',$row);
 	}
 
 	public function delete_favourite($id){
 
+		$user = (object) $this->session->userdata('user');
 		$this->db->where('publication_id',$id);
-		$this->db->where('user_id',user_session()->user->user_id);
+		$this->db->where('user_id',$user->user_id);
 
 		return $this->db->delete('favourites');
 	}
