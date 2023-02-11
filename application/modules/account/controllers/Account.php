@@ -146,29 +146,29 @@ class Account extends MX_Controller
 	public function login()
 	{
 	  $postdata = $this->input->post();
-	  $password = $this->input->post('password');
-	  $data = $this->auth_mdl->login($postdata);
-	  $adata = (array) $data;
-	 
-	  $auth = ($this->argonhash->check($password, $adata['password']));
-	  unset($adata['password']);
-	
-	  if ($auth) {
-		
-		$adata['author']   = $this->authorsmodel->find($adata['author_id']);
-		$adata['country']  = $this->auth_mdl->access_level2($adata['user_id']);
-		$adata['is_admin'] = false;
-		
-		$_SESSION['user'] = (object)$adata;
+	  $username = $postdata['username'];
+	  $password = $postdata['password'];
 
-		$this->session->set_userdata($adata);
-		set_flash("Welcome back!");
-		redirect(base_url());
-  	
-	  } else {
-		set_flash("Login failed, wrong username or password",true);
-		redirect(base_url());
+	  $data = (array) $this->auth_mdl->login([
+		'username' => $username,
+		'password' => $password
+	  ]);
+
+	  if(empty($data)) {
+		  $this->session->set_flashdata('error_message', 'Invalid email/username and password combination');
+		  redirect('account/login');
 	  }
+
+	  unset($data['password']);
+
+	  $data['author']   = $this->authorsmodel->find($data['author_id']);
+		$data['country']  = $this->auth_mdl->access_level2($data['user_id']);
+		$data['is_admin'] = false;
+
+    $this->session->set_userdata('user', $data);
+
+    $this->session->set_flashdata('success_message', 'Welcome back');
+    redirect(base_url());
 	}
   
   
