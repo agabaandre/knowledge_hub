@@ -47,6 +47,14 @@
         .favbtn a:hover {
             color:white!important;
         }
+
+        .app-comment{
+            padding: 10px; 
+            background-color:rgba(222, 224, 222,0.5); 
+            border-radius:8px; 
+            margin-top:10px;
+        }
+
     </style>
 
 

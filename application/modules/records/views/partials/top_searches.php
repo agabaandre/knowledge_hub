@@ -68,7 +68,7 @@
 												$com_count++;
 												if($com_count<6):
 												?>
-												<li style="padding: 10px; background-color:rgba(222, 224, 222,0.5); border-radius:8px; margin-top:10px;">
+												<li class="app-comment">
 												 <h6><small><?php echo $comm->user->name; ?></small></h6>
 												 <p><?php echo $comm->comment; ?></p>
 												 <small class="text-success"><?php echo time_ago($comm->created_at); ?></small>
