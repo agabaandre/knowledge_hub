@@ -10,7 +10,7 @@
 	<meta name="author" content="Africa CDC" />
 
 	<!-- Title -->
-	<title><?php echo $title; ?></title>
+	<title><?php echo @$title ?? 'Africa CDC Knowledge Hub'; ?></title>
 
 	<!-- Favicon -->
 	<link rel="icon" href="<?php echo base_url() ?>assets/images/fav.png" type="image/x-icon" />
