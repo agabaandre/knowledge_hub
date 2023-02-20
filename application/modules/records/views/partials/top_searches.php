@@ -58,7 +58,7 @@
 											<div class="text-center mlb-last"><a href="<?php echo base_url("records/show/") . $row->id; ?>" class="btn gray ft-medium apply-btn fs-sm rounded">Browse</a></div>
 										</div>
 
-										
+										<?php if(count($row->comments)>0): ?>
 										<div class="collapse px-3 py-3" id="comments<?php echo $i; ?>">
 											<h5>Comments</h5>
 											<ul class="list-group">
@@ -71,11 +71,13 @@
 												<li style="padding: 10px; background-color:rgba(222, 224, 222,0.5); border-radius:8px; margin-top:10px;">
 												 <h6><small><?php echo $comm->user->name; ?></small></h6>
 												 <p><?php echo $comm->comment; ?></p>
-												 <?php echo time_ago($comm->created_at); ?></small>
+												 <small class="text-success"><?php echo time_ago($comm->created_at); ?></small>
 												</li>
 												<?php endif; endforeach; ?>
+												<a class="py-3" href="<?php echo base_url("records/show/") . $row->id; ?>">View All</a>
 											</ul>
 										</div>
+										<?php endif; ?>
 
 
 									</div>
