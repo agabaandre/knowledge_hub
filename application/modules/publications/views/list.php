@@ -90,7 +90,8 @@
 								<a href="<?php echo base_url('publications/delete/' . $publication->id); ?>" class="btn btn-danger btn-sm">Delete</a> -->
 
 								<!-- Edit Modal Action -->
-								<button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#edit-publication-modal" data-id="<?php echo $publication->id; ?>" data-title="<?php echo $publication->title; ?>" data-description="<?php echo $publication->description; ?>" data-publication="<?php echo $publication->publication; ?>" data-file_type="<?php echo $publication->file_type_id; ?>">
+								<a href="<?php echo base_url('publications/edit/' . $publication->id); ?>" type="button" class="btn btn-primary btn-sm" 
+								>
 									Edit
 								</button>
 
