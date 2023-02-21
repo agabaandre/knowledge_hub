@@ -31,6 +31,13 @@
 						<li><a href="<?php echo base_url(); ?>">Home</a></li>
 						<li><a href="<?php echo base_url('records/search'); ?>">Search</a></li>
 						<li><a href="<?php echo base_url('forums/index'); ?>">Collaborate</a></li>
+						<li class=""><a href="javascript:void(0);">PH Assets<span class="submenu-indicator"></span></a>
+							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
+								<li><a href="<?php echo base_url('experts'); ?>">Experts</a></li>
+								<li><a href="<?php echo base_url('healthassets'); ?>">Other Assets</a></li>
+							</ul>
+						</li>
+
 						<li><a href="<?php echo base_url('faqs'); ?>">FAQs</a></li>
 						<li><a href="<?php echo base_url('privacy_policy/read'); ?>">Privacy</a></li>
 						<!-- <li><a href="<?php //echo base_url('privacypolicy/read'); ?>">About</a></li> -->

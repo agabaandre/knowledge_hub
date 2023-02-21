@@ -117,10 +117,10 @@
 											<li class="article_comments_wrap">
 
 												<article>
-													<div class="article_comments_thumb">
+													<!-- <div class="article_comments_thumb">
 														<img src="https://via.placeholder.com/500x500" alt="">
-													</div>
-													<div class="comment-details">
+													</div> -->
+													<div class="comment-details app-comment" >
 														<div class="comment-meta">
 															<div class="comment-left-meta">
 																<h4 class="author-name"><?php echo ($comment->user) ? $comment->user->name : 'Anonymous'; ?></h4>
@@ -135,6 +135,8 @@
 														</div>
 
 													</div>
+
+													
 												</article>
 
 											</li>

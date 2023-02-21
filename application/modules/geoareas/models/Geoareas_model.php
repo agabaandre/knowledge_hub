@@ -11,6 +11,8 @@ class Geoareas_model extends CI_Model
 		parent::__Construct();
 
 		$this->table = "geographical_coverage";
+		$this->countries_table = "country";
+		$this->regions_table = "regions";
 	}
 
 	public function get()
@@ -37,6 +39,19 @@ class Geoareas_model extends CI_Model
 	{
 		$geoarea = $this->db->where('id', $id)->get($this->table)->row();
 		return $geoarea;
+	}
+
+	public function find_region($id)
+	{
+		$region = $this->db->where('id', $id)->get($this->regions_table)->row();
+		return $region;
+	}
+
+	public function find_country($id)
+	{
+		$country = $this->db->where('id', $id)->get($this->countries_table)->row();
+		$country->region = $this->find_region($country->region_id);
+		return $country;
 	}
 
 	//Save and returned inserted/updated row

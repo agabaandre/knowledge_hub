@@ -9,7 +9,7 @@
 	<meta name="keywords" content="<?php echo setting()->seo_keywords; ?>">
 	<meta name="author" content="Africa CDC" />
 	<!-- Title -->
-	<title><?php echo 'Africa CDC Knowledge Hub - '.$title ?? 'Africa CDC Knowledge Hub'; ?></title>
+	<title><?php echo 'Africa CDC Knowledge Hub - '.@$title ?? 'Africa CDC Knowledge Hub'; ?></title>
 
     <!-- Custom CSS -->
     <!-- Favicon -->
@@ -47,6 +47,15 @@
         .favbtn a:hover {
             color:white!important;
         }
+
+        .app-comment{
+            padding: 10px; 
+            background-color:rgba(222, 224, 222,0.5); 
+            border-radius:8px; 
+            margin-top:10px;
+        }
+        
+
     </style>
 
 
