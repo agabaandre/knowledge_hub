@@ -149,5 +149,7 @@ $autoload['model'] = array(
     // Quize Model
     ['quize/quize_model'=>'quizemodel'],
     // Subscribe Model
-    ['subscription/subscription_model' => 'msubscription']
+    ['subscription/subscription_model' => 'msubscription'],
+    // Mailing List Model
+    ['mailing_list/mailing_list_mdl' => 'mMailingList']
 );

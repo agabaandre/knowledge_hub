@@ -32,23 +32,11 @@ class Healththemes extends MX_Controller
 
 	public function save()
 	{
-
 		$is_error = false;
-
-		if ($this->form_validation->run('healththemes') == FALSE) {
-			flash_form();
-			$msg = validation_errors();
-			$is_error = true;
-		} else {
-
-			$theme = [
-				'id' => @$this->input->post("id"), 'description' => $this->input->post("description"), 'icon' => $this->input->post("icon")
-			];
-
-			$resp = $this->healththemesmodel->save($theme);
-
-			$msg = "Operation Successful";
-		}
+		$data = $this->input->post();
+		$theme = (array) $data;
+		$resp = $this->healththemesmodel->save($theme);
+		$msg = "Operation Successful";
 		set_flash($msg, $is_error);
 		redirect(base_url("healththemes"));
 	}

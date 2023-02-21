@@ -7,4 +7,5 @@ ADD php/php.ini /usr/local/etc/php/
 # Install the PDO MySQL extension for PHP
 RUN docker-php-ext-install pdo_mysql
 
+# Install the MySQLi extension for PHP
 RUN docker-php-ext-install mysqli && docker-php-ext-enable mysqli

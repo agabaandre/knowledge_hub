@@ -24,6 +24,13 @@
 							<textarea id="publication_description" name="description" style="min-height: 300px;"></textarea>
 						</div>
 
+						<div class="mb-3">
+							<label for="publication" class="form-label">Author</label>
+							<select class="form-control" name="author" required id="authors">
+								<option disabled>Select</option>
+							</select>
+						</div>
+
 
                         <!-- Submit Button -->
                         <div class="form-group">

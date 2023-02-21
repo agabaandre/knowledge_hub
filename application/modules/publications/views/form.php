@@ -27,8 +27,6 @@
             </div>
             <?php echo form_open_multipart(base_url('publications/save'), array('id' => 'publications', 'class' => 'publications')); ?>
 
-            <?php //print_r($subthemes);
-            ?>
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
                 <div class="row">

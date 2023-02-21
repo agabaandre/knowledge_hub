@@ -69,7 +69,10 @@
 						<li class=""><a href="<?php echo base_url() ?>permissions" class="">Groups and Permissions</a></li>
 						<li class=""><a href="<?php echo base_url() ?>auth/logs" class="">User Logs</a></li>
 						<li class=""><a href="<?php echo base_url() ?>constants" class="">Constants</a></li>
+						
+						<?php if(can_access_multi(['view_mailing_list'])) { ?>
 						<li class=""><a href="<?php echo base_url(); ?>mailing_list" class="">Mailing List</a></li>
+						<?php } ?>
 					</ul>
 				</li>
 			</ul>
