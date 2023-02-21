@@ -27,7 +27,7 @@
 											<div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:75%;">
 												<div class="text-center"><img src="<?php echo base_url(); ?>assets/images/icons/author.png" class="img-fluid" width="55" alt=""></div>
 												<div class="cats-box-caption">
-													<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($row->title, 40); ?></h4>
+													<h4 class="fs-md mb-0 ft-medium"><?php echo truncate($row->title, 50); ?></h4>
 													<div class="d-block mb-2 position-relative" >
 													  <p class="text-nothern p-0"><?php echo nl2br(truncate($row->description,60)); ?></p>
 														<span class="text-muted medium">
@@ -66,14 +66,16 @@
 												$com_count=0;
 												foreach($row->comments as $comm): 
 												$com_count++;
-												if($com_count<6):
+												//if($com_count<6):
 												?>
 												<li class="app-comment">
 												 <h6><small><?php echo $comm->user->name; ?></small></h6>
 												 <p><?php echo $comm->comment; ?></p>
 												 <small class="text-success"><?php echo time_ago($comm->created_at); ?></small>
 												</li>
-												<?php endif; endforeach; ?>
+												<?php 
+												//endif;
+											    endforeach; ?>
 												<a class="py-3" href="<?php echo base_url("records/show/") . $row->id; ?>">View All</a>
 											</ul>
 										</div>
