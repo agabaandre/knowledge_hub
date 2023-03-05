@@ -1,7 +1,6 @@
 
 	<?php foreach ($publications as $row): ?>
 		 <a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
-
 	     <div class="card col-lg-12 single-border mb-1">
           <div class="card-body text-left">
           	<div class="row">

@@ -43,13 +43,24 @@ class HealthAssets_model extends CI_Model
 
 		foreach ($filters as $key => $value) {
 
-			if ($key == "not_id") :
+			if ($key == "not_id"):
 				$this->db->where("id !=$value");
 			else :
 				$this->db->where($key, $value);
 			endif;
 		}
 	}
+
+	public function assets_by_type($slug="",$filters=[],$limit = null, $start = null)
+	{
+		$type = $this->db->where('slug', $slug)->get($this->types_table)->row();
+
+		if($type)
+		 $filters['asset_type_id'] = $type->id;
+
+		return $this->get($filters, $limit, $start);
+	}
+
 
 	public function find($id)
 	{
@@ -113,6 +124,27 @@ class HealthAssets_model extends CI_Model
 		$this->db->where('id', $id);
 		$this->db->delete($this->table);
 	}
+
+	
+	//Save and returned inserted/updated row
+	public function save_type($data, $update = false)
+	{
+
+		//if id is supplied, find record to update
+		if ($update ||  (int) $data['id'] > 0) {
+			$this->db->where('id', $data['id']);
+			$this->db->update($this->table, $data);
+		} else {
+			$this->db->insert($this->table, $data);
+		}
+
+		$row_id = ($update) ? $data['id'] : $this->db->insert_id();
+
+		//return inserted row
+		return $this->find($row_id);
+	}
+
+	
 
 	
 }

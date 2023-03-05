@@ -34,8 +34,8 @@
 						<li class=""><a href="javascript:void(0);">Resources<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 								<li><a href="<?php echo base_url('experts'); ?>">Work Force Rosters</a></li>
-								<li><a href="<?php echo base_url('healthassets'); ?>">Public Health Assets</a></li>
-								<li><a href="<?php echo base_url('initiatives'); ?>">Public Health Initiatives</a></li>
+								<li><a href="<?php echo base_url('healthassets'); ?>?slug=health">Public Health Assets</a></li>
+								<li><a href="<?php echo base_url('healthassets'); ?>?slug=initiatives">Public Health Initiatives</a></li>
 							</ul>
 						</li>
 

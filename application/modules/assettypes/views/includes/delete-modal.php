@@ -25,7 +25,7 @@
     <script>
         var toDeleteRow = '';
         function deleteRow () {
-            let url = '<?php echo base_url();?>forums/delete/' + toDeleteRow;
+            let url = '<?php echo base_url();?>assettypes/delete/' + toDeleteRow;
 
                 fetch(url)
                 .then(res => res.text())

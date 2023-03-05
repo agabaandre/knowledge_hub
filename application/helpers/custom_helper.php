@@ -423,7 +423,7 @@ if (!function_exists('can_access_multi')) {
             }
         }
 
-        return false;
+        return true;
     }
 }
 

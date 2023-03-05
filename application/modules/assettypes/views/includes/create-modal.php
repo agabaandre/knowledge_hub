@@ -3,20 +3,20 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create File Type </h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Asset Type </h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      <?php echo form_open_multipart(base_url('filetypes/save'), array('id' => 'filetypes', 'class' => 'filetypes')); ?>
+      <?php echo form_open_multipart(base_url('assettypes/save'), array('id' => 'assettypes', 'class' => 'assettypes')); ?>
 
       <div class="modal-body">
         <input type="hidden" name="id" id="id" class="newform">
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">File Type</label>
-              <input type="text" placeholder="Enetr File Type" class="form-control newform" id="name" name="name" required>
+              <label class="form-label" for="name">Asset Type</label>
+              <input type="text" placeholder="Enter Asset Type" class="form-control newform" id="name" name="name" required>
             </div>
           </div>
 

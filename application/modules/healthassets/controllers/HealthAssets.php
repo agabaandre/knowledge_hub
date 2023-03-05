@@ -4,7 +4,6 @@ defined('BASEPATH') or exit('No direct script access allowed');
 class HealthAssets extends MX_Controller
 {
 
-
 	public  function __construct()
 	{
 		parent::__construct();
@@ -16,14 +15,14 @@ class HealthAssets extends MX_Controller
 
 	public function index()
 	{
-
 		$count   = $this->assetsmodel->count([]);
 		$segment = 3;
 		$page    = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
 		$perPage = 12;
+		$slug = $this->input->get('slug');
 
-		$data['assets']    = $this->assetsmodel->get([], $perPage, $page);
-		$data['links']     = paginate('assets/index/', $count, $perPage, $segment);
+		$data['assets']     = $this->assetsmodel->assets_by_type($slug,[], $perPage, $page);
+		$data['links']      = paginate('assets/index/', $count, $perPage, $segment);
 		$data['rows_count'] = $count;
 
 		$data['module'] = $this->module;
@@ -39,18 +38,14 @@ class HealthAssets extends MX_Controller
 
 	public function detail($asset_id)
 	{
-
 		$data['asset']    = $this->assetsmodel->find($asset_id);
 		$data['assets']   = $this->assetsmodel->get(['not_id' => $asset_id], 10, 0);
 		$data['module']   = $this->module;
-
 		render_site("asset_details", $data, true);
 	}
 
-
 	public function save()
 	{
-
 		$is_error = false;
 
 		$quote = [
