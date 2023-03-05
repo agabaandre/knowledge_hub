@@ -35,14 +35,19 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="title" required></textarea>
+                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" name="title" required
+                               >
+                                <?php echo $publication->title; ?>
+                            </textarea>
                             </div>
                         </div>
 
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Description</label>
-                                <textarea id="publication_description" placeholder="Descripion" class="form-control newform" name="description" style="min-height: 400px;"></textarea>
+                                <textarea id="publication_description" placeholder="Descripion" class="form-control newform" name="description" style="min-height: 400px;">
+                                <?php echo $publication->description; ?>
+                            </textarea>
                             </div>
                         </div>
 

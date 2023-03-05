@@ -27,12 +27,8 @@ class Publications extends MX_Controller
 	{
 		$data['module'] = $this->module;
 
-		if ($id) {
-			$data['title']  = 'Create Publication';
-		} else {
-			$data['title']  = 'Create Publication';
-		}
-
+		$data['title']  = 'Create Publication';
+	
 		$data['authors'] = $this->authorsmodel->get();
 		$data['geoareas'] = $this->geoareasmodel->get();
 		$data['subthemes'] = $this->subthemesmodel->get();
@@ -42,6 +38,23 @@ class Publications extends MX_Controller
 
 		render('form', $data);
 	}
+
+	public function edit($id) {
+		$data['module'] = $this->module;
+
+		$data['title']  = 'Update Publication';
+	
+		$data['authors'] = $this->authorsmodel->get();
+		$data['geoareas'] = $this->geoareasmodel->get();
+		$data['subthemes'] = $this->subthemesmodel->get();
+		$data['filetypes'] = $this->filetypesmodel->get();
+		$data['tags'] = $this->tagsmodel->get();
+		$data['publication'] = $this->publicationsmodel->find($id);
+
+		render('form-edit', $data);
+	}
+
+
 
 
 	public function save()
@@ -158,27 +171,6 @@ class Publications extends MX_Controller
 
 			echo json_encode($response);
 		}
-	}
-
-	public function edit()
-	{
-		$id = $this->input->post('id');
-		$title = $this->input->post('title');
-		$description = $this->input->post('description');
-
-		$data = [
-			'id' => $id,
-			'title' => $title,
-			'description' => $description
-		];
-
-		$resp = $this->publicationsmodel->update($data);
-
-		$response = [];
-		$response['status'] = 'success';
-		$response['message'] = 'Publication Updated Successfully';
-
-		echo json_encode($response);
 	}
 
 	public function delete($id)
