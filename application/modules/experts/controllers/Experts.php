@@ -30,6 +30,26 @@ class Experts extends MX_Controller
 		render_site("experts", $data, true);
 	}
 
+	public function admin()
+	{
+		$count   = $this->expertsmodel->count([]);
+		$segment = 3;
+		$page    = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
+		$perPage = 12;
+		$slug = $this->input->get('slug');
+
+		$filter = $this->input->post();
+
+		$data['experts']     = $this->expertsmodel->get($filter, $perPage, $page);
+		$data['countries']  = $this->geoareasmodel->get_countries();
+		$data['links']      = paginate('experts/admin/', $count, $perPage, $segment);
+		$data['rows_count'] = $count;
+		$data['title'] = "Health Experts List";
+
+		$data['module'] = $this->module;
+		render("expert_admin", $data);
+	}
+
 	public function create()
 	{
 		$data['module'] = $this->module;
@@ -53,19 +73,27 @@ class Experts extends MX_Controller
 
 		$is_error = false;
 
-		$quote = [
+		$sess = (object) user_session()->user;
+
+		$record = [
 			'id' => @$this->input->post("id"),
-			'expert_title' => $this->input->post("title"),
-			'expert_description' => $this->input->post("description"),
-			'created_by' => $this->session->userdata('user')->id,
+			'first_name' => $this->input->post("first_name"),
+			'last_name' => $this->input->post("last_name"),
+			'job_title' => $this->input->post("job_title"),
+			'phone_number' => $this->input->post("phone_number"),
+			'email' => $this->input->post("email"),
+			'occupation' => $this->input->post("occupation"),
+			'expert_type' => $this->input->post("expert_type"),
+			'country_id' => $this->input->post("country_id"),
+			'created_by' => $sess->id,
 		];
 
-		$resp = $this->expertsmodel->save($quote);
+		$resp = $this->expertsmodel->save($record);
 
 		$msg = "Operation Successful";
 
 		set_flash($msg, $is_error);
-		redirect(base_url("experts"));
+		redirect(base_url("experts/admin"));
 	}
 
 
