@@ -29,12 +29,27 @@ class HealthAssets extends MX_Controller
 		render_site("assets", $data, true);
 	}
 
-	public function create()
+	public function admin()
 	{
+		$count   = $this->assetsmodel->count([]);
+		$segment = 3;
+		$page    = ($this->uri->segment($segment)) ? $this->uri->segment($segment) : 0;
+		$perPage = 12;
+		$slug = $this->input->get('slug');
+
+		$filter = $this->input->post();
+
+		$data['assets']     = $this->assetsmodel->get($filter, $perPage, $page);
+		$data['types'] 		= $this->assetsmodel->get_types();
+		$data['countries']  = $this->geoareasmodel->get_countries();
+		$data['links']      = paginate('healthassets/admin/', $count, $perPage, $segment);
+		$data['rows_count'] = $count;
+		$data['title'] = "Health Assets";
+
 		$data['module'] = $this->module;
-		$data['title']  = "Create Discussion";
-		render_site("form", $data, true);
+		render("assets_admin", $data);
 	}
+
 
 	public function detail($asset_id)
 	{
@@ -48,11 +63,16 @@ class HealthAssets extends MX_Controller
 	{
 		$is_error = false;
 
+		$sess = (object) user_session()->user;
+
 		$quote = [
 			'id' => @$this->input->post("id"),
-			'asset_title' => $this->input->post("title"),
-			'asset_description' => $this->input->post("description"),
-			'created_by' => $this->session->userdata('user')->id,
+			'asset_name'    => $this->input->post("asset_name"),
+			'asset_desc'    => $this->input->post("asset_desc"),
+			'asset_type_id' => $this->input->post("asset_type_id"),
+			'url'           => $this->input->post("asset_url"),
+			'country_id'    => $this->input->post("country_id"),
+			'created_by'    => $sess->user_id,
 		];
 
 		$resp = $this->assetsmodel->save($quote);
@@ -60,7 +80,7 @@ class HealthAssets extends MX_Controller
 		$msg = "Operation Successful";
 
 		set_flash($msg, $is_error);
-		redirect(base_url("assets"));
+		redirect(base_url("healthassets/admin"));
 	}
 
 

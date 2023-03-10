@@ -8,27 +8,8 @@
 
         <div class="card-body text-left">
 
-        <div class="row justify-content-center">
-
-            <!-- toast -->
-            <div id="toast-3s" class="toast toast-3s fade hide" role="alert" aria-live="assertive" data-delay="3000" aria-atomic="true">
-                <div class="toast-header">
-                    <strong class="mr-auto">Message</strong>
-                    <small class="text-muted"></small>
-                    <button type="button" class="m-l-5 mb-1 mt-1 close" data-dismiss="toast" aria-label="Close">
-                        <span>×</span>
-                    </button>
-                </div>
-                <div class="notification">
-
-                </div>
-            </div>
-            <!-- end toast -->
-            </div>
-
             <div class="container">
 
-        
             <?php echo form_open_multipart(base_url('forums/save'), array('id' => 'forum', 'class' => 'forum')); ?>
 
             <?php //print_r($subthemes);

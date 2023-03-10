@@ -78,6 +78,13 @@ class HealthAssets_model extends CI_Model
 		return $row;
 	}
 
+
+	public function get_types()
+	{
+		return $this->db->get($this->types_table)->result();
+	}
+
+
 	public function find_type($id)
 	{
 		return $this->db->where('id', $id)->get($this->types_table)->row();

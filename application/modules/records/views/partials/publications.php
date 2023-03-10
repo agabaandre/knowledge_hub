@@ -1,19 +1,32 @@
 
-	<?php foreach ($publications as $row): ?>
-		 <a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
+	<?php 
+	   $i=0;
+	   foreach ($publications as $row):
+		$i++;
+	 ?>
 	     <div class="card col-lg-12 single-border mb-1">
           <div class="card-body text-left">
           	<div class="row">
           	  <div class="col-md-2">
-          	  	<?php if(is_valid_image($row->cover)): ?>
-          	  	  <img src="<?php echo base_url();?>uploads/publications/<?php echo $row->cover; ?>" width="80px">
-          	  	<?php else: ?>
-          	  		<img src="<?php echo base_url();?>uploads/publications/cover.png" width="80px">
-          	  	<?php endif; ?>
+				
+				<a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
+						<?php if(is_valid_image($row->cover)): ?>
+						<img src="<?php echo base_url();?>uploads/publications/<?php echo $row->cover; ?>" width="80px">
+						<?php else: ?>
+							<img src="<?php echo base_url();?>uploads/publications/cover.png" width="80px">
+						<?php endif; ?>
+				</a>
           	  </div>
           	 <div class="col-md-10">
-				<h5><?php echo truncate($row->title,500); ?></h5>
-				<p class="text-nothern p-0"><?php echo nl2br(truncate($row->description,100)); ?></p>
+				<h5>
+					<a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
+					<?php echo truncate($row->title,500); ?></a>
+			    </h5>
+				<p class="text-nothern p-0">
+				<a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
+					<?php echo nl2br(truncate($row->description,100)); ?>
+				</a>
+				</p>
 				<a href="<?php echo $row->publication; ?>" target="_blank"><small><?php echo $row->publication; ?></small></a>
 		
 
@@ -29,18 +42,18 @@
 					<span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: <?php echo time_ago($row->updated_at); ?> </span>
 					<a href="<?php echo base_url(); ?>records/show/<?php echo $row->id; ?>">
 					<span class=" mr-2"><i class="fa fa-eye mr-1"></i><?php echo $row->visits; ?> Views </span>
-					<span class=" mr-1 ml-2"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
+					<span class=" mr-1 ml-2 comments<?php echo $i; ?>" 
+					data-bs-toggle="popover"
+					data-bs-placement="bottom"><i class="fa fa-comments"></i> <?php echo count($row->comments); ?> Comments</span>
 					</a>
-
+					<?php include 'comments.php'; ?>
 					<?php include 'favourites_btn.php'; ?>
-					
 				</span>
 
 			</div>
 		 	</div>
 		   </div>
 		</div>
-	</a>
 	<?php endforeach; ?>
 
 	<?php echo $links; ?>

@@ -59,7 +59,7 @@
 						<?php if (can_access_multi(['view_quize'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>quize">Quiz</a></li><?php } ?>
 						<!-- Privacy Policy -->
 						<?php if (can_access_multi(['view_asset_types'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>assettypes">Health Asset Types</a></li><?php } ?>
-						<?php if (can_access_multi(['view_assets'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>healthassets">Health Assets</a></li><?php } ?>
+						<?php if (can_access_multi(['view_assets'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>healthassets/admin">Health Assets</a></li><?php } ?>
 						<?php if (can_access_multi(['view_privacy_policy'])) { ?><li aria-haspopup="true"><a href="<?php echo base_url() ?>privacy_policy">Privacy Policy</a></li><?php } ?>
 					</ul>
 				</li>

@@ -232,30 +232,20 @@
 		}
 
 		$(function() {
-			//$('.selectpicker').selectpicker();
+			
+			// Pick the div data as required
+			var head = "" + $('.pop-head').html();
+			var data = "" + $('.pop-body').html();
+
+			$('[data-bs-toggle="popover"]').popover({
+				html: true,
+				title: head,
+				content: data,
+				placement:'bottom',
+				trigger:'click'
+			});
 		});
 	</script>
-
-
-	<!-- <script>
-		$(document).ready(function(){
-    $('#subscription-form').on('submit', function(e){
-        e.preventDefault();
-        var email = $('#subscribe-email').val();
-		var csrf_token = $('input[name="csrf_token"]').val();
-        $.ajax({
-            type: "POST",
-            url: "subscription/index",
-            data: {email: email},
-            success: function(response) {
-                alert(response);
-            }
-        });
-    });
-});
-	</script> -->
-
-
 
 	</body>
 
