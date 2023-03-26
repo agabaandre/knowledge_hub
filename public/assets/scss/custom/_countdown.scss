@@ -1,0 +1,105 @@
+/* ###### Countdown  ###### */
+
+#count-down {
+  position: relative;
+  text-align: center;
+  display: inline-block;
+
+  .clock-presenter {
+    height: 80px;
+    padding: 0px;
+    text-align: center;
+
+    .digit {
+      margin-top: 5px;
+      font-size: 1.5rem;
+      color: $white;
+      line-height: 60px;
+      height: 60px;
+      display: inline-block;
+      overflow: hidden;
+      text-align: center;
+      position: relative;
+      cursor: default;
+      font-weight: 600;
+      border-radius: 3px;
+    }
+
+    width: 70px;
+    height: 70px;
+    float: left;
+    margin: 0 20px 0 0;
+    background: url(../img/photos/pattern.png);
+    border-radius: 3px;
+    background-size: cover;
+    position: relative;
+
+    &:before {
+      content: '';
+      position: absolute;
+      background: rgba(40, 92, 247, 0.85);
+      left: 0;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      display: block;
+      border-radius: 3px;
+    }
+
+    .note {
+      position: relative;
+      margin-bottom: 0px;
+      cursor: default;
+      font-size: 16px;
+      opacity: 0.7;
+    }
+  }
+}
+
+@media (max-width: 568px) {
+  #count-down .clock-presenter {
+    margin-bottom: 45px;
+  }
+  code {
+	font-size: 11px !important;
+  }
+  
+  .example {
+	padding: 0 !important;
+	border: 0 !important;
+	font-size: .876rem;
+  }
+
+  .main-content-breadcrumb {
+    margin: auto 0 11px 0 !important;
+  }
+
+  .shopping-illustrate {
+    height: 100px;
+    margin-bottom: 1rem !important;
+  }
+}
+#timer-countinbetween, #timer-countup, #timer-countercallback{
+	background: #f3f6ff;
+    padding: 11px 28px;
+    border-radius: 5px;
+    font-size: 18px;
+    margin-top: 2rem;
+    border: 1px solid #ecf0fd;
+}
+.offer-card .heading .heading-title{
+    font-size: 18px;
+    line-height: 26px;
+    font-weight: 500;
+    letter-spacing: .04em;
+    margin: 0 0 0.5rem 0;
+	color:$white;
+    transition: color .2s linear;
+}
+.offer-card .subtitle{
+	font-size: 16px;
+    margin-bottom: 0;
+    color: $white-7;
+}
+
+/* ###### Countdown  ###### */

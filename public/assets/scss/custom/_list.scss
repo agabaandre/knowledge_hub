@@ -1,0 +1,44 @@
+/* ###### List ###### */
+
+.main-list-item {
+  .main-list-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+  }
+
+  + .main-list-item {
+    border-top: 1px solid #e4ebf7;
+  }
+
+  &:last-child {
+    padding-bottom: 0;
+  }
+
+  h6 {
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+
+  > div {
+    &:first-child h6 {
+      color: #1c273c;
+    }
+
+    span {
+      color: $secondary;
+      font-size: 12px;
+    }
+
+    &:last-child {
+      text-align: right;
+
+      h6 {
+        line-height: 1;
+      }
+    }
+  }
+}
+
+/* ###### List ###### */

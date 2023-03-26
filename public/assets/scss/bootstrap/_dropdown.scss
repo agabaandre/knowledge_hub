@@ -1,0 +1,49 @@
+/* ########## Dropdown ########## */
+
+/* ###### 3.5 Dropdown ###### */
+
+.dropdown-menu {
+  padding: 0;
+  border-width: 1px;
+  border-radius: 0;
+  box-shadow: 0px 10px 10px 20px rgba(179, 186, 212, 0), 0px 10px 15px -5px #4a546f;
+  border-radius: 5px;
+}
+
+.dropdown-item {
+  padding: 8px 15px;
+  font-size: 13px;
+}
+
+.dropdown-header {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+
+.dropdown-toggle-1::after {
+  top: 10px;
+  right: 9px;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  content: '\f3d0';
+  font-family: 'Ionicons';
+  position: absolute;
+  display: inline-block;
+  color: #7a8eb1;
+}
+
+.dropdown-toggle-2::after {
+  top: 13px;
+  right: 0px;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: 0;
+  content: '\f3d0';
+  font-family: 'Ionicons';
+  position: absolute;
+  display: inline-block;
+  color: #7a8eb1;
+}
+
+/* ########## Dropdown ########## */

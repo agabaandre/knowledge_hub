@@ -1,0 +1,268 @@
+/* ###### Tabs ###### */
+
+
+
+.tabs-style-1 .main-nav-line .nav-link {
+  &.active {
+    color: #242f48;
+    border: 1px solid;
+    border-color: #e0e6ed #e0e6ed $white;
+  }
+
+  padding: 10px 18px 10px 18px;
+  background: transparent;
+}
+
+.table-invoice.table thead {
+  th, td {
+    padding: 9px 15px;
+  }
+}
+
+.tabs-style-1 {
+  .panel-tabs.main-nav-line .nav-link.active::before {
+    background: transparent !important;
+  }
+
+  .main-nav-line .nav-link {
+    padding: 10px 18px 10px 18px;
+    background: transparent;
+  }
+}
+
+.tabs-style-6 .nav.panel-tabs {
+    background: #ebf0ff;
+    border-radius: 50px;
+    border: none;
+    padding: 10px 20px 10px 9px;
+}
+.tabs-style-6 .nav.panel-tabs li a {
+    font-size: 14px;
+    font-weight: 500;
+    background: #dbe3fb;
+    border: none;
+    padding: 14px 19px;
+    border-radius: 50px;
+	margin: 4px;
+	display: -webkit-inline-box;
+    transition: all 0.5s ease 0s;
+}
+
+.tabs-style-6 .nav.panel-tabs li a.active ,.tabs-style-6 .nav.panel-tabs li a.active:hover,.tabs-style-6 .nav.panel-tabs li a.active:focus{
+    background: $primary;
+    color: $white;
+}
+.tabs-style-9 .nav.panel-tabs {
+    background: #ebf0ff;
+    border-radius: 4px;
+    border: none;
+    padding: 19px 20px 20px 9px;
+}
+.tabs-style-9 .nav.panel-tabs li a {
+    font-size: 14px;
+    font-weight: 500;
+    background: #dbe3fb;
+    border: none;
+    padding: 14px 19px;
+    border-radius: 4px;
+	margin: 4px;
+	display: -webkit-inline-box;
+    transition: all 0.5s ease 0s;
+}
+
+.tabs-style-9 .nav.panel-tabs li a.active ,.tabs-style-9 .nav.panel-tabs li a.active:hover,.tabs-style-9 .nav.panel-tabs li a.active:focus{
+    background: $primary;
+    color: $white;
+}
+
+.tabs-style-7 .nav.panel-tabs li a {
+    font-size: 14px;
+    color: #031b4e;
+    background: #fff;
+    margin: 0;
+    padding: 20px 25px;
+    border-radius: 0;
+    border: none;
+    border-right: 1px solid #dfe6f9;
+    text-transform: uppercase;
+    position: relative;
+}
+.tabs-style-7 .tabs-menu-body {
+    font-size: 14px;
+    color: #031b4e;
+    line-height: 25px;
+    padding: 20px;
+    border: 1px solid #dfe6f9;
+    border-top: none;
+}
+.tabs-style-7 .nav.panel-tabs li a.active:before {
+    content: "";
+    width: 58%;
+    height: 4px;
+    background: #fff;
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+}
+.tabs-style-7 .nav.panel-tabs li a.active:after {
+    content: "";
+    border-top: 10px solid $primary;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    position: absolute;
+    bottom: -10px;
+    left: 43%;
+}
+.tabs-style-7 .nav.panel-tabs li a.active, .tabs-style-7 .nav.panel-tabs li a.active:hover {
+    color: #fff;
+    border: none;
+    background: $primary;
+    border-right: 1px solid #dfe6f9;
+}
+.tabs-style-7 .nav.panel-tabs {
+   border:1px solid #dfe6f9;
+   padding: 17px 0 18px 0px;
+}
+
+.tabs-style-8 .tabs-menu-body {
+    font-size: 14px;
+    color: #031b4e;
+    line-height: 25px;
+    padding: 20px;
+    border: 1px solid #dfe6f9;
+    border-top: none;
+}
+.tabs-style-8 .nav.panel-tabs li a {
+    font-size: 14px;
+    color: #031b4e;
+    border-radius: 0;
+    padding: 18px 15px;
+    margin-right: 0;
+    border: none;
+    border-right: 1px solid #f0f0f0;
+    text-transform: uppercase;
+    position: relative;
+    transition: all 0.3s ease 0s;
+    font-weight: 500;
+}
+.tabs-style-8 .nav.panel-tabs li a.active:before {
+    content: "";
+    width: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    border-top: 3px solid $primary;
+    transition: all 0.5s ease 0s;
+}
+
+.tabs-style-8 .nav.panel-tabs li a.active:after,.tabs-style-8 .nav.panel-tabs  li a.active:after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 45%;
+    border: 7px solid transparent;
+    border-top: 7px solid $primary;
+    transition: all 0.5s ease 0s;
+}
+.tabs-style-8 .nav.panel-tabs {
+    border: 1px solid #dfe6f9;
+    padding: 15px 0 16px 0px;
+}
+@media (max-width: 576px) {
+	.tabs-style-8 .nav.panel-tabs {
+		width: 100%;
+		display: block;
+	}
+	.tabs-style-8 .nav.panel-tabs li a{
+		width: 100%;
+		display: block;
+		text-align: center;
+		border-bottom: 1px solid #dfe6f9;
+		border-left: 1px solid #dfe6f9;
+	}
+	.tabs-style-8 .nav.panel-tabs {
+		border: 0 !important;
+		padding: 0 !important;
+	}
+	.tabs-style-8 .nav.panel-tabs li:first-child a{
+		border-top: 1px solid #dfe6f9;
+	}
+	.tabs-style-7 .nav.panel-tabs {
+		width: 100%;
+		display: block;
+	}
+	.tabs-style-7 .nav.panel-tabs li a{
+		width: 100%;
+		display: block;
+		text-align: center;
+		border-bottom: 1px solid #dfe6f9;
+		border-left: 1px solid #dfe6f9;
+	}
+	.tabs-style-7 .nav.panel-tabs {
+		border: 0 !important;
+		padding: 0 !important;
+	}
+	.tabs-style-7 .nav.panel-tabs li:first-child a{
+		border-top: 1px solid #dfe6f9;
+	}
+	.tabs-style-7 .nav.panel-tabs li a.active:before {
+		background:#21bed2;
+	}
+	.tabs-style-8 .nav.panel-tabs li a.active:after, .tabs-style-8 .nav.panel-tabs li a.active:after {
+		left: 49% !important;
+	}
+}
+
+@media (max-width: 998px) and (min-width: 844px) {
+	.tabs-style-7 .nav.panel-tabs li a {
+		font-size: 12px;
+		color: #031b4e;
+		background: #fff;
+		margin: 0;
+		padding: 20px 12px;
+		border-radius: 0;
+		border: none;
+		border-right: 1px solid #dfe6f9;
+		text-transform: uppercase;
+		position: relative;
+	}
+	.tabs-style-8 .nav.panel-tabs li a {
+		font-size: 12px;
+		color: #031b4e;
+		background: #fff;
+		margin: 0;
+		padding: 20px 12px;
+		border-radius: 0;
+		border: none;
+		border-right: 1px solid #dfe6f9;
+		text-transform: uppercase;
+		position: relative;
+	}
+}
+@media (max-width: 845px){
+	.tabs-style-7 .nav.panel-tabs li a {
+		width: 100%;
+		display: block;
+		text-align: center;
+		border-bottom: 1px solid #dfe6f9;
+		border-left: 1px solid #dfe6f9;
+	}
+	.tabs-style-7 .nav.panel-tabs {
+		width: 100%;
+		display: block;
+	}
+	.tabs-style-8 .nav.panel-tabs li a {
+		width: 100%;
+		display: block;
+		text-align: center;
+		border-bottom: 1px solid #dfe6f9;
+		border-left: 1px solid #dfe6f9;
+	}
+	.tabs-style-8 .nav.panel-tabs {
+		width: 100%;
+		display: block;
+	}
+}
+/* ###### Tags  ###### */

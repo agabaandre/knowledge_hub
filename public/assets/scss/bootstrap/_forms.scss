@@ -1,0 +1,49 @@
+/* ###### Form-elements ###### */
+
+.form-control {
+  border-radius: 3px;
+
+  &:focus {
+    border-color: #97a3b9;
+    box-shadow: none;
+  }
+}
+
+.custom-file, .custom-file-input {
+  height: 38px;
+}
+
+.custom-file-label {
+  height: 38px;
+  line-height: 1.8;
+  border-radius: 0;
+
+  &::after {
+    line-height: 1.8;
+    border-radius: 0;
+    height: auto;
+  }
+}
+
+.form-label {
+  display: block;
+  margin-bottom: 5px;
+  color: #3b475d;
+}
+.file-browser .btn-default {
+    background: #f1f4fb;
+    border-top-right-radius: 3px !important;
+    border-bottom-right-radius: 3px !important;
+    padding: .56rem 15px;
+    color: #68769a;
+    border-radius: 0;
+    border: 1px solid #e2e8f5;
+}
+.form-sizes code {
+    background: #f2f5ff;
+    border: 1px solid #e7ecfd;
+    border-radius: 3px;
+    padding: 3px;
+    font-size: 11px;
+}
+/* ###### Form-elements ###### */

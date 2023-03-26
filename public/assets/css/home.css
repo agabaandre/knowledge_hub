@@ -1,0 +1,27 @@
+
+.spotlight {
+  position: relative;
+  min-height: 30vh;
+  padding: 10% 2%;
+  padding-bottom: 30%!important;
+  background-color:#03343b ;
+}
+
+.spotlight:after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 5%;
+  width: 100%;
+  background-color: #f4f5f7;
+  border-top-left-radius: 50% 20%;
+  border-top-right-radius: 50% 20%;
+  user-select: none;
+}
+
+.spotlight .row{
+
+  min-width: 100%;
+  display: flex;
+}
