@@ -34,6 +34,12 @@ class PublicationsRepository{
         return  $results;
     }
     
+    public function favourites(Request $request){
+        $pub = new Publication();
+
+        return $pub;
+    }
+
 
     public function save(Request $request){
         $pub = new Publication();

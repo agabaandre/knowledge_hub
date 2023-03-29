@@ -30,7 +30,6 @@
 
 						<li><a href="{{ url('/')}}">Home</a></li>
 						<li><a href="{{ url('records/search')}}">Search</a></li>
-						<li><a href="{{ url('forums/index')}}">Collaborate</a></li>
 						<li class=""><a href="javascript:void(0);">Resources<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 								<li><a href="{{ url('experts')}}">Work Force Rosters</a></li>
@@ -47,38 +46,38 @@
 					<ul class="nav-menu nav-menu-social align-to-right">
 						@guest
 							<li>
-								<a href="#" data-toggle="modal" data-target="#login" class="ft-medium text-bold">
+								<a href="{{ route('login')}}"  class="ft-medium text-bold">
 									<i class="lni lni-user mr-2"></i>Sign In
 								</a>
 							</li>
 
 							<li>
-								<a href="{{ url('account/register')}}" class="ft-medium text-bold">
+								<a href="{{ route('register')}}" class="ft-medium text-bold">
 									Register
 								</a>
 							</li>
 
 						@else
 
-							<li><a href="#">Publications</a>
+							<li><a href="#">My Account</a>
 									<ul class="nav-dropdown nav-submenu">
 											<li>
-										<a href="{{ url('account/profile')}}">
+										<a href="{{ route('account.profile')}}">
 										   <i class="fa fa-user mr-1"></i> My Profile
 										</a>
 										</li>
 										<li>
-										<a href="{{ url('account/publications')}}">
+										<a href="{{ route('account.publications')}}">
 										   <i class="fa fa-list mr-1"></i> Our Publications
 										</a>
 										</li>
 										<li>
-										<a href="{{ url('records/favourites')}}">
+										<a href="{{ route('account.favourites')}}">
 										   <i class="fa fa-star mr-1"></i> My Favourites
 										</a>
 										</li>
 										<li>
-										<a href="{{ url('account/publish')}}">
+										<a href="{{ route('account.publish')}}">
 											<i class="lni lni-circle-plus mr-1"></i>Publish a resource
 										</a>
 										</li>

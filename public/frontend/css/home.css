@@ -36,13 +36,20 @@
 
 .spot-row h3{
   color: #fff;
-  font-size: 24pt;
+  font-size: 19pt;
   line-break: auto;
+  padding-top: 30px;
 }
 
 .spot-item:hover{
   box-shadow: 1px 1px 6px 1px#28b661;
 }
 
+@media only screen and (max-width:800px) {
 
+  .spotlight .spot-row .col-lg-4,.spotlight .spot-row .col-lg-5,.spotlight .spot-row .col-lg-7, .spotlight .spot-row .col-lg-8{
+     display: block!important;
+     min-width: 100%!important;
+   }
+}
 

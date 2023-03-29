@@ -51,7 +51,7 @@ class HomeController extends Controller
 				"stats"=> 0
 			],
 			[
-				"title"=>"Resource Contibuting Authors",
+				"title"=>"Resource Contibuting Sources",
 				"icon"=>"fa fa-business-time",
 				'link'=>"browse/authors",
 				"image"=>"author.png",

@@ -14,7 +14,7 @@ class AssetsRepository{
         if($request->slug){
 
           $results->where('asset_desc','like','%'.$request->slug.'%');
-          $results->where('asset_name','like','%'.$request->slug.'%');
+          $results->orWhere('asset_name','like','%'.$request->slug.'%');
 
         }
 

@@ -16,12 +16,13 @@
 					>
 
 							@php 
-							$i=0; 
+								$i=0; 
 							@endphp
+
 						   @foreach ($recent as $row)
 
 							@php 
-							$i++;
+								$i++;
 							@endphp
 							
 							<!-- Single -->
@@ -30,8 +31,15 @@
 								  data-aos="zoom-in">
 									<div class="jbr-wrap text-left border rounded">
 										<div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
-											<div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:75%;">
-												<div class="text-center"><a href="{{ url('records/show')}}?id={{$row->id}}"><img src="{{ asset('assets/images/icons/author.png')}}" class="img-fluid" width="55" alt=""></a></div>
+											   <div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:100%;">
+													@php
+														if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
+															$image_link = storage_link('uploads/publications/'.$row->cover);
+														else:
+																$image_link = storage_link('uploads/publications/cover.jpg');
+														endif;
+													@endphp
+
 												<div class="cats-box-caption">
 													<h4 class="fs-md mb-0 ft-medium"><a href="{{ url('records/show') }}?id={{$row->id}}">{{truncate($row->title, 50)}}</a></h4>
 													<div class="d-block mb-2 position-relative" >
@@ -52,18 +60,23 @@
 															<span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{$row->visits}} Views </span>
 														    <span><span class="mr-1 ml-2 text-muted d-inline "
 															         data-bs-toggle="popover"
-																	data-bs-placement="bottom" aria-expanded="false" aria-controls="comments{{$i}}"><i class="fa fa-comments"></i> {{count($row->comments)}} Comments</span></span>
+																	 data-bs-placement="bottom" aria-expanded="false" aria-controls="comments{{$i}}"><i class="fa fa-comments"></i> {{count($row->comments)}} Comments</span></span>
 															@auth()
 															<div class="btn btn-outline-dark btn-sm mt-2 favbtn">
-														      @include('home.partial.favourites_btn')
+															@include ('common.favourites_btn')
 															</div>
 															@endauth
 														</span>   
 
 													</div>
 												</div>
+												<div class="text-center px-2 d-none d-lg-block"  style="min-width:20%; min-height:20vh;">
+												  <a href="{{ url('records/show') }}?id={{$row->id}}">
+													<img src="{{ $image_link }}" class="rounded" width="100px"/>
+												  </a>
+											    </div>
+												
 											</div>
-											<div class="text-center mlb-last"><a href="{{ url('records/show') }}id={{$row->id}}" class="btn gray ft-medium apply-btn fs-sm rounded">Browse</a></div>
 										</div>
 
 										@include('home.partials.comments')

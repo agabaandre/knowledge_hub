@@ -43,6 +43,7 @@
             margin: 100px;
         }
 
+
         .favbtn a:hover {
             color:white!important;
         }

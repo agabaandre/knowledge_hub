@@ -13,7 +13,6 @@ class AssetsController extends Controller
         $this->assetsRepo       = $assetsRepo;
     }
 
-
     public function index(Request $request){
 
         $data['assets'] = $this->assetsRepo->get($request);

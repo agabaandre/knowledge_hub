@@ -112,7 +112,7 @@
     width: 100%;
     height: 100%;
     z-index: 9999999;
-    background: url(../img/loader.gif) center no-repeat #ffffff;
+    background: url(../../assets/images/loader.gif) center no-repeat rgba(255, 255, 255, 0.9);
 }
 
 

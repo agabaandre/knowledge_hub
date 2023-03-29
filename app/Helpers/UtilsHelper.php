@@ -83,11 +83,12 @@ if (!function_exists('text_date')) {
 }
 
 if (!function_exists('share_buttons')) {
-	function share_buttons($link,$subject="Check this  Africa CDC  resource"){
+	function share_buttons($link,$subject="Checkout this  Africa CDC  resource"){
 
-		$data['link']   = $link;
+		$data['link']    = $link;
         $data['subject'] = $subject;
-		view('common.share_buttons',$data);
+
+		return view('common.share_buttons',$data);
 	}
 }
 

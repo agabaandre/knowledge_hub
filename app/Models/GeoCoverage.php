@@ -8,4 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class GeoCoverage extends Model
 {
     use HasFactory;
+
+    protected $table = "geographical_coverage";
 }

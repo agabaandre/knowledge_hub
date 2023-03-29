@@ -79,23 +79,24 @@
 						<h2 class="m-0 ft-regular">Login</h2>
 					</div>
 
-					<form action="{{ url('account/login') }}">
+					<form action="{{ route('login') }}" method="post">
+						@csrf
 
 					<input type="hidden" name="route" value="front" />
 					<div class="form-group">
 						<label>User Name</label>
-						<input type="text" name="username" class="form-control" placeholder="Username*">
+						<input type="email" name="email" class="form-control" placeholder="Username*" autocomplete="off">
 					</div>
 
 					<div class="form-group">
 						<label>Password</label>
-						<input type="password" name="password" class="form-control" placeholder="Password*">
+						<input type="password" name="password" class="form-control" placeholder="Password*" autocomplete="off">
 					</div>
 
 					<div class="form-group">
 						<div class="d-flex align-items-center justify-content-between">
 							<div class="flex-1">
-								<input id="dd" class="checkbox-custom" name="dd" type="checkbox">
+								<input id="dd" class="checkbox-custom" name="remember" type="checkbox">
 								<label for="dd" class="checkbox-custom-label">Remember Me</label>
 							</div>
 							<div class="eltio_k2">
@@ -141,16 +142,12 @@
 	<script src="{{ asset('frontend/js/snackbar.min.js')}}"></script>
 	<script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
 	<script src="{{ asset('frontend/js/custom.js')}}"></script>
-	<script src="{{ asset('frontend/js/quiz.js')}}"></script>
 	<script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
 	<!-- ============================================================== -->
 	<!-- This page plugins -->
 	<!-- ============================================================== -->
 
-<script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
-	    <!-- include summernote css/js -->
-<link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
+<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
 <script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
 <
 	<script type="text/javascript">
@@ -185,18 +182,11 @@
 
 		$(document).ready(function() {
 
-			//$('.select2').select2();
-
 			setTimeout(function(){
 
 				$('.alert').fadeOut('slow')
 			},3000);
 
-			$('#summernote').summernote({
-				placeholder: 'Discussion body here',
-				tabsize: 2,
-				height: 200
-			});
 		});
 
 		//Quizz

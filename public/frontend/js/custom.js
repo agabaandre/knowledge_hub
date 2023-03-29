@@ -198,6 +198,7 @@ $(function() {
 
 	//splot-slider
 
+	
 	// reviews-slide
 	$('.reviews-slide').slick({
 	  slidesToShow:1,
@@ -258,10 +259,10 @@ $(function() {
 
 	$('.quotes-slider').slick({
 		slidesToShow:1,
-		arrows: true,
+		arrows: false,
 		dots: false,
 		infinite: true,
-		speed: 3000,
+		speed: 5000,
 		cssEase: 'linear',
 		autoplaySpeed: 3000,
 		autoplay:true,
@@ -315,38 +316,38 @@ $(function() {
 	  ]
 	});
 
-	
-	
-	// item Slide
-	$('.slide_items').slick({
-	  slidesToShow:4,
-	  arrows: true,
-	  dots: false,
-	  infinite: true,
-	  speed: 500,
-	  cssEase: 'linear',
-	  autoplaySpeed: 2000,
-	  autoplay:true,
-	  responsive: [
-		{
-		  breakpoint: 1024,
-		  settings: {
-			arrows: true,
-			dots: false,
-			slidesToShow:3
-		  }
-		},
-		{
-		  breakpoint: 600,
-		  settings: {
-			arrows: true,
-			dots: false,
-			slidesToShow:1
-		  }
-		}
-	  ]
-	});
 
+		$('.slide_items').slick({
+			slidesToShow:4,
+			arrows: true,
+			dots: false,
+			infinite: true,
+			speed: 1500,
+			cssEase: 'linear',
+			autoplaySpeed: 2000,
+			autoplay:true,
+			responsive: [
+			  {
+				breakpoint: 1024,
+				settings: {
+				  arrows: true,
+				  dots: false,
+				  slidesToShow:3
+				}
+			  },
+			  {
+				breakpoint: 600,
+				settings: {
+				  arrows: true,
+				  dots: false,
+				  slidesToShow:1
+				}
+			  }
+			]
+		  });
+
+	// item Slide
+	
 	// item Slide
 	$('.questions-slide').slick({
 		slidesToShow:1,

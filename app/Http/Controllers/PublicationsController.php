@@ -51,4 +51,14 @@ class PublicationsController extends Controller
         $searches     = $this->publicationsRepo->get($request,true);
         return response()->json($searches);
     }
+
+    public function add_favourite(){
+        //logic here
+        return back();
+    }
+
+    public function remove_favourite(){
+        //logic here
+        return back();
+    }
 }
