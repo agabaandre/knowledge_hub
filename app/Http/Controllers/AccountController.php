@@ -25,14 +25,14 @@ class AccountController extends Controller
 
     public function favourites(Request $request){
 
-        $data['favourites'] = $this->publicationsRepo->get($request);
+        $data['favourites'] = $this->publicationsRepo->favourites($request);
         return view('account.favourites',$data);
     }
 
 
     public function publications(Request $request){
 
-        $data['publications'] = $this->publicationsRepo->get($request);
+        $data['publications'] = $this->publicationsRepo->my_publications($request);
         return view('account.mypublications',$data);
     }
 
@@ -45,8 +45,26 @@ class AccountController extends Controller
 
     public function submit_publication(Request $request){
 
-        $data['publications'] = $this->publicationsRepo->get($request);
-        return view('account.publications',$data);
+        $request->validate([
+            'title'=>'required',
+            'file_type'=>'required',
+            'sub_theme'=>'required',
+            'description'=>'required'
+        ]);
+
+        $saved = $this->publicationsRepo->save($request);
+
+        $message = ($saved)?'Resource submitted successfully':'Request failed try again';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message'] = $data['alert']= $message;
+        $data['status']  = 200;
+
+        if($request->ajax())
+           return response($data);
+
+        return redirect()->route('account.publications')->with($data);
+
     }
 
 }

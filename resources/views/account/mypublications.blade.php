@@ -2,10 +2,13 @@
 
 @section('styles')
 
+
+ @include('common.table')
+
 @endsection
 
 @section('content')
-<div class="row">
+<div class="row px-3">
 
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
@@ -29,20 +32,16 @@
                   @endphp
 				@foreach ($publications as $row) 
 					<tr>
-						<td width="5%">{{$i++}} <i class="fa {{$row->file_type->icon}} fa-2x text-muted"></i></td>
+						<td width="5%">{{$i++}} <i class="fa {{$row->file_type->icon}} text-muted"></i></td>
 						<td>
-							{{ truncate($row->title, 50) }} 
-							<p><a href="{{ $row->publication}}" target="_blank">View Publication</a>
-							<p>
+							<a href="{{ $row->publication}}" target="_blank">{{ truncate($row->title, 50) }} </a>
 						</td>
-
+						<td>{{ truncate($row->description, 100)}}</td>
 						<td>
-							{{ truncate($row->description, 20)}}
-						</td>
-
-
-						<td><a href="#edit{{ $row->id}}"><i class="fa fa-edit"></i> Edit
-								<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger"><i class="fa fa-trash"></i> Delete</td>
+							<a href="#edit{{ $row->id}}"><i class="fa fa-edit"></i> Edit
+							<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger  ml-3">
+							<i class="fa fa-trash"></i> Delete
+						 </td>
 					</tr>
 				@endforeach
 			</table>

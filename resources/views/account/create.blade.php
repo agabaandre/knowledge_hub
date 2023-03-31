@@ -30,17 +30,49 @@
                 </div>
                 <!-- end toast -->
             </div>
-           <form action="{{ route('account.publication') }}" id='publications' class='publications'>
+           <form method="POST" action="{{ route('account.publication') }}" id='publications' class='publications'>
             @csrf
             <div class="modal-body">
                 <input type="hidden" name="id" id="id" class="newform">
                 <div class="row">
+                    
+
                 <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
                                 <input placeholder="Title"  class="form-control newform"  id="title" name="title" required/>
                             </div>
+                 </div>
+
+                    
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">File Type</label>
+                        @include('partials.publications.filetype_dropdown',['field'=>'file_type'])
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Sub Theme</label>
+                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme'])
+                            </div>
+                 </div>
+                 
+                 <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Publication URL Link</label>
+                                <input type="text" placeholder="URL Link" class="form-control url" id="publication" name="link" required>
+                            </div>
                         </div>
+                       
+                        
+                 <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Geographical Coverage</label>
+                                @include('partials.publications.area_dropdown')
+                            </div>
+                </div>
 
                 <div class="col-md-12">
                             <div class="mb-3">
@@ -49,87 +81,40 @@
                             </div>
                         </div>
 
-                    <div class="col-md-6">
-                     
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Publication URL Link</label>
-                                <input type="text" placeholder="URL Link" class="form-control newform" id="publication" name="link" required>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Author</label>
-                                <select class="form-control js-example-basic-single" name="author" required>
-                                   <option value="">No Author assigned to User</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Sub Theme</label>
-                                @include('partials.publications.subtheme_dropdown')
-                            </div>
-                        </div>
-
-                        <!-- <div  class="col-md-4"> -->
-                        <!-- </div> -->
-                    </div>
-                 
-                    <div class="col-md-6">
-                       
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">File Type</label>
-                                @include('partials.publications.filetype_dropdown')
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage</label>
-                                @include('partials.publications.area_dropdown')
-                            </div>
-                        </div>
-
-                        <div class="col-md-12" >
+                   
+                        <div class="col-md-6" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" name="cover" id="validatedCustomFile">
+                                    <input type="file" class="custom-file-input" name="cover" id="cover">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+                                    <div class="cover_preview py-2"></div>
                                 </div>
                             </div>
                         </div>
 
-                        <div class="col-md-12" >
+                        <div class="col-md-6 attachment" >
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Publication Attachment</label>
+                                <label class="form-label" for="publication">Publication Attachments</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" name="file" id="validatedCustomFile">
-                                    <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
+                                    <input type="file" class="custom-file-input" name="files" id="attachments">
+                                    <label class="custom-file-label" for="validatedCustomFile">Choose file.s..</label>
+                                    <div class="preview py-2"></div>
                                 </div>
                             </div>
                         </div>
-                        @can('moderate publications')
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Status</label>
-                                <select class="form-control select2" name="is_active" required>
-                                    <option value="Active">Active</option>
-                                    <option value="Inactive">Inactive</option>
 
-                                </select>
+                        <div class="col-md-6 justify-content-center video" style="display: none;">
+                             <label class="form-label" for="publication">Video</label>
+                            <div class="mb-3">
+                                <iframe width="450" height="260"class="vid" src="">
+                                </iframe>
                             </div>
                         </div>
-                        @else
-
-                            <input type="hidden"  name="is_active" value="In-Active">
-
-                        @endif
-                    </div>
+                    
 
                 </div>
+
             </div>
             <div class="modal-footer">
 
@@ -148,9 +133,45 @@
 @section('scripts')
 
 @include('partials.general.summernote')
+@include('common.attachment_js')
+@include('common.sweet-alert')
 
 <script>
-      $('#publications').submit(function(e) {
+
+    var isVideo=false;
+
+    $('.url').on('blur',function(e) {
+
+        const url = e.target.value;
+        if(isVideo)
+         $('.vid').attr('src',url);
+    });
+
+    $('#file_type').on('change',function(e) {
+
+        const alltypes = JSON.parse('<?php echo json_encode($file_types); ?>');
+        console.log(alltypes);
+
+        const selectedType = alltypes.find(item=>item.id === parseInt(e.target.value));
+
+        if(selectedType.name.toLowerCase().indexOf('video')>-1){
+            $('.attachment').hide();
+            $('.video').show();
+            isVideo = true;
+            $('.vid').attr('src',$('.url').val());
+
+        }else{
+
+            $('.attachment').show();
+            $('.video').hide();
+            isVideo = true;
+            //
+        }
+         
+    });
+
+
+      $('#publications00').submit(function(e) {
         e.preventDefault();
 
         var form = $(this);
@@ -167,26 +188,18 @@
             contentType: false,
             processData: false,
             success: function(response) {
-                if (response.status == 'success') {
-                    Swal.fire({
-                        title: 'Success!',
-                        html: response.message,
-                        icon: 'success'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            location.reload();
-                        }
-                    });
-
-                    $('#publications').trigger("reset");
-
+                
+                if(response.status == 200) {
+                    
+                $('#publications').trigger("reset");
+                   swal('Successful', response.data.message,'success');
+            
                 } else {
-                    Swal.fire({
-                        title: 'Error!',
-                        html: response.message,
-                        icon: 'error'
-                    });
+                    swal('Error!', response.data.message,'error');
                 }
+            },
+            error:function(error){
+                swal('Error!', error?.message,'error');
             }
         });
 

@@ -30,7 +30,7 @@ class ViewComposerServiceProvider extends ServiceProvider
     public function boot()
     {
         
-        View::composer(['home/partials/*','partials/publications/*'],FileTypesViewComposer::class);
+        View::composer(['home/partials/*','partials/publications/*','account/*'],FileTypesViewComposer::class);
         View::composer(['partials/quiz/*'],QuestionsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],FactsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],SubThemesViewComposer::class);

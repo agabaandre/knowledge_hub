@@ -71,9 +71,15 @@
 													</div>
 												</div>
 												<div class="text-center px-2 d-none d-lg-block"  style="min-width:20%; min-height:20vh;">
-												  <a href="{{ url('records/show') }}?id={{$row->id}}">
+												  @if($row->is_video)
+
+												  <iframe width="150" height="80" src="{{ $row->publication }}"></iframe>
+
+												  @else
+												 <a href="{{ url('records/show') }}?id={{$row->id}}">
 													<img src="{{ $image_link }}" class="rounded" width="100px"/>
 												  </a>
+												  @endif
 											    </div>
 												
 											</div>

@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+
+	@php
+		if( is_valid_image(storage_link('uploads/publications/'.$publication->cover))):
+			$image_link = storage_link('uploads/publications/'.$publication->cover);
+		else:
+				$image_link = storage_link('uploads/publications/cover.jpg');
+		endif;
+	@endphp
+
     <!-- ======================= Publication Info ======================== -->
 	<div class="bg-light rounded py-5" style="background-image: url({{ asset('frontend/img/dots.png')}}); background-repeat:repeat-x; background-size:contain;">
 		<div class="container">
@@ -18,6 +27,7 @@
 									</h4>
 								</div>
 								<div class="jbl_location mb-3">
+
 									<span>{{ $publication->theme->description }}</span>
 								</div>
 								<div class="jbl_info01">
@@ -25,6 +35,8 @@
 								</div>
 							</div>
 						</div>
+						
+					
 						<div class="jbd-01-right text-right">
 						@if(!$publication->has_attachments)
 							<div class="jbl_button mb-2"><a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded theme-bg-light theme-cl fs-sm ft-medium">Browse Resource</a></div>
@@ -56,10 +68,18 @@
 		<div class="container">
 			<div class="row">
 
+			   
+
 				<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12">
 					<div class="rounded mb-4">
 						<div class="jbd-01 pr-3">
-							<div class="jbd-details mb-4">
+								<div class="jbd-details mb-4">
+								@if($publication->is_video)
+								<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
+								@else
+								<img src="{{ $image_link }}" class="rounded" width="500px"/>
+								@endif
+								<br>
 								<h5 class="ft-medium fs-md">Description</h5>
 								<p>{{ nl2br($publication->description) }}</p>
 							</div>

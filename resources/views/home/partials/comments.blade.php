@@ -22,7 +22,7 @@ Comments
             @endphp
            
             <li class="app-comment">
-                <h6><small>{{$comm->user->name}}</small></h6>
+                <h6><small>{{@$comm->user->name}}</small></h6>
                 <p>{{$comm->comment}}</p>
                 <small class="text-success">{{time_ago($comm->created_at)}}</small>
             </li>
