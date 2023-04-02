@@ -71,6 +71,7 @@ Route::group(["prefix"=>"account"],function(){
     Route::get("/publications",[AccountController::class,'publications'])->name('account.publications');
     Route::get("publications/delete",[AccountController::class,'remove_favourite'])->name('account.pub_delete');
     Route::post("/publication",[AccountController::class,'submit_publication'])->name('account.publication');
+    Route::get("/newversion",[AccountController::class,'create_version'])->name('account.newversion');
 
 });
 

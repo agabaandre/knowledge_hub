@@ -42,23 +42,37 @@ class AccountController extends Controller
         return view('account.create');
     }
 
+    public function create_version(Request $request){
+
+        $data['publication'] = $this->publicationsRepo->find($request->id);
+        
+        return view('account.create_version',$data);
+    }
+
 
     public function submit_publication(Request $request){
 
-        $request->validate([
-            'title'=>'required',
+        $val_rules =[
+            'cover'=>'required',
             'file_type'=>'required',
             'sub_theme'=>'required',
             'description'=>'required'
-        ]);
+        ];
+
+        if($request->original_id):
+            unset($val_rules['sub_theme']);
+            unset($val_rules['title']);
+        endif;
+
+        $request->validate($val_rules);
 
         $saved = $this->publicationsRepo->save($request);
 
         $message = ($saved)?'Resource submitted successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';
-        $data['message'] = $data['alert']= $message;
-        $data['status']  = 200;
+        $data['message']     = $data['alert']= $message;
+        $data['status']      = 200;
 
         if($request->ajax())
            return response($data);

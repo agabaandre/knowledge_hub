@@ -23,23 +23,23 @@
 							<div class="jbd-01-caption pl-3">
 								<div class="tbd-title">
 									<h4 class="mb-0 ft-medium fs-md">
-										{{ $publication->title }}
+										{!! $publication->title !!}
 									</h4>
 								</div>
 								<div class="jbl_location mb-3">
 
-									<span>{{ $publication->theme->description }}</span>
+									<span>{!! $publication->theme->description !!}</span>
 								</div>
 								<div class="jbl_info01">
-									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->sub_theme->description }}</span>
+									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ (!$publication->is_version)?$publication->sub_theme->description:'Version '.$publication->version_no }}</span>
 								</div>
 							</div>
 						</div>
 						
 					
 						<div class="jbd-01-right text-right">
-						@if(!$publication->has_attachments)
-							<div class="jbl_button mb-2"><a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded theme-bg-light theme-cl fs-sm ft-medium">Browse Resource</a></div>
+						@if(!$publication->has_attachments && $publication->is_video)
+							<div class="jbl_button mb-2"><a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium">Browse Resource</a></div>
 
 						@elseif ($publication->has_attachments)
                                
@@ -47,14 +47,20 @@
 								 $count = 1;
                                 @endphp
 
-								@foreach($publication->attachments as $pub_file)
+								   @foreach($publication->attachments as $pub_file)
 									<div class="jbl_button"><a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a></div>
-								
                                    @php
 								     $count++;
                                    @endphp
 								@endforeach;
 						    @endif
+
+							@auth
+							<div class="jbl_button mb-2">
+								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}" target="_blank" class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
+								Submit a Version</a>
+							</div>
+							@endauth
 						</div>
 					</div>
 				</div>
@@ -81,7 +87,7 @@
 								@endif
 								<br>
 								<h5 class="ft-medium fs-md">Description</h5>
-								<p>{{ nl2br($publication->description) }}</p>
+								<p>{!! $publication->description !!}</p>
 							</div>
 
 							<div class="jbd-details mb-4">
@@ -101,11 +107,11 @@
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Theme</label>
-										<span class="text-dark">{{ $publication->theme->description }}</span>
+										<span class="text-dark">{!! $publication->theme->description !!}</span>
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Sub-Theme</label>
-										<span class="text-dark">{{ nl2br($publication->sub_theme->description) }}</span>
+										<span class="text-dark">{!! nl2br($publication->sub_theme->description) !!}</span>
 									</div>
 									@auth()
 									<div class="details ft-medium">
@@ -177,6 +183,19 @@
 				<!-- Sidebar -->
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
+					
+					
+					   @if(count($publication->versioning)>0)
+							<h4 class="ft-medium fs-md mb-3">Resource Versions</h4>
+							<ul class="list-group mb-3">
+								@foreach($publication->versioning as $version)
+									<li><h5 class="text-muted"><a href="{{ url('records/show') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
+								@endforeach
+							</ul>
+						@elseif($publication->parent_id)
+							<h5 class=" mb-3"><a class="text-success" href="{{ url('records/show') }}?id={{$publication->parent_id}}">View Original Version</a></h5>
+						@endif
+			
 						<h4 class="ft-medium fs-md mb-3">Got something to say about this resource?</h4>
 
 						<form action="{{ url('publications/comment') }}" class="_apply_form_form" >

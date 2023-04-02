@@ -73,13 +73,29 @@ class PublicationsRepository{
     public function save(Request $request){
 
         $pub = new Publication();
+
+        if($request->original_id):
+
+            $parent = $this->find($request->original_id);
+            $pub->sub_thematic_area_id     = $parent->sub_thematic_area_id;
+            $pub->geographical_coverage_id = $parent->geographical_coverage_id;
+            $pub->is_version = 1;
+            $pub->title                    = $parent->title;
+            $versions_now = count($parent->versioning);
+            $pub->version_no               = ($versions_now ==0)?$versions_now +2: $versions_now+1;
+
+        else:
+           
+        $pub->sub_thematic_area_id      = $request->sub_theme;
+        $pub->geographical_coverage_id  = $request->geo_area_id;
+        $pub->title                     = $request->title;
+
+        endif;
+
         $pub->author_id            = current_user()->author_id;
-        $pub->sub_thematic_area_id = $request->sub_theme;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
-        $pub->title                = $request->title;
         $pub->file_type_id         = $request->file_type;
-        $pub->geographical_coverage_id = $request->geo_area_id;
         $pub->visits                   = 0;
 
         $file_type = $this->find_type($request->file_type);
@@ -103,6 +119,7 @@ class PublicationsRepository{
             $this->save_attachments($files,$pub->id);
         endif;
 
+       
         return $pub;
     }
 
@@ -129,6 +146,25 @@ class PublicationsRepository{
 
     public function get_subtheme($id){
         return SubThemeticArea::find($id);
+    }
+
+    public function add_favourite($pub_id){
+
+         $fav = new Favourite();
+         $fav->user_id = current_user()->id;
+         $fav->publication_id = $pub_id;
+         $fav->save();
+    }
+
+    public function remove_favourite($pub_id){
+
+        $fav = Favourite::where('publication_id',$pub_id)
+        ->where('user_id',current_user()->id)
+        ->first();
+
+        if($fav)
+        $fav->destroy();
+
     }
 
     private function save_attachments($files,$publication_id=null){

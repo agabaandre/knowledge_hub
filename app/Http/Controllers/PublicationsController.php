@@ -22,6 +22,7 @@ class PublicationsController extends Controller
     public function show(Request $request){
 
         $data['publication'] = $this->publicationsRepo->find($request->id);
+      
         return view('publications.show',$data);
     }
 
@@ -52,13 +53,14 @@ class PublicationsController extends Controller
         return response()->json($searches);
     }
 
-    public function add_favourite(){
+    public function add_favourite(Request $request){
         //logic here
+        $this->publicationsRepo->add_favourite($request->id);
         return back();
     }
 
     public function remove_favourite(){
-        //logic here
+        $this->publicationsRepo->remove_favourite($request->id);
         return back();
     }
 }

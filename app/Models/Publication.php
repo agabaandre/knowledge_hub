@@ -10,7 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value'];
+    protected $appends = ['theme','label','value','versioning','is_favourite'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -45,5 +45,18 @@ class Publication extends Model
 
     public function comments(){
         return $this->hasMany(PublicationComment::class);
+    }
+
+    public function versioning(){
+        return $this->hasMany(Publication::class,'parent_id','id');
+    }
+
+    public function parent(){
+        return $this->belongsTo(Publication::class,'id','parent_id');
+    }
+
+    public function getIsFavouriteAttribute(){
+        $fav = Favourite::where('user_id',current_user()->id)->where('publication_id',$this->id)->first();
+        return ($fav)?true:false;
     }
 }

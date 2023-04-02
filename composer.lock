@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "432cf1c6c316f0671daa49ec06aff37d",
+    "content-hash": "9fd01d9f27adb611e416a12f24b2fc9f",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1669,6 +1669,58 @@
                 }
             ],
             "time": "2022-04-17T13:12:02+00:00"
+        },
+        {
+            "name": "meaningcloud/meaningcloud-php",
+            "version": "3.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/MeaningCloud/meaningcloud-php.git",
+                "reference": "ba531c06425abf01e8962e99d2b6c6ee52c4f34a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/MeaningCloud/meaningcloud-php/zipball/ba531c06425abf01e8962e99d2b6c6ee52c4f34a",
+                "reference": "ba531c06425abf01e8962e99d2b6c6ee52c4f34a",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "php": "^7.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6.4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MeaningCloud\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "MeaningCloud Support Team",
+                    "email": "support@meaningcloud.com"
+                }
+            ],
+            "description": "MeaningCloud's official PHP SDK",
+            "homepage": "https://www.meaningcloud.com",
+            "keywords": [
+                "MeaningCloud",
+                "nlp",
+                "php",
+                "text analytics"
+            ],
+            "support": {
+                "email": "support@meaningcloud.com",
+                "issues": "https://github.com/MeaningCloud/meaningcloud-php/issues",
+                "source": "https://github.com/MeaningCloud/meaningcloud-php/tree/3.0"
+            },
+            "time": "2020-09-14T10:53:35+00:00"
         },
         {
             "name": "monolog/monolog",
