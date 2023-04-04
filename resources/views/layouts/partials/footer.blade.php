@@ -213,18 +213,7 @@
 		}
 
 		$(function() {
-			
-			// Pick the div data as required
-			var head = "" + $('.pop-head').html();
-			var data = "" + $('.pop-body').html();
-
-			$('[data-bs-toggle="popover"]').popover({
-				html: true,
-				title: head,
-				content: data,
-				placement:'bottom',
-				trigger:'click'
-			});
+			//$('[data-bs-toggle="popover"]').popover({html: true,placement:'bottom'});  
 		});
 	</script>
 

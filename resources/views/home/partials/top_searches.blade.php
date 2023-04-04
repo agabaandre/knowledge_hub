@@ -58,9 +58,10 @@
 														<span class="text-muted medium d-block mt-1">
 														    <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: {{time_ago($row->updated_at)}} </span>
 															<span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{$row->visits}} Views </span>
-														    <span><span class="mr-1 ml-2 text-muted d-inline "
+														    <span><span class="mr-1 ml-2 text-muted d-inline pop{{$row->id}}"
 															         data-bs-toggle="popover"
-																	 data-bs-placement="bottom" aria-expanded="false" aria-controls="comments{{$i}}"><i class="fa fa-comments"></i> {{count($row->comments)}} Comments</span></span>
+																	 data-bs-trigger="hover"
+																	 data-bs-placement="bottom" aria-expanded="false" aria-controls="comments{{$i}}" onclick="showComments('{{$row->id}}')"><i class="fa fa-comments"></i> {{count($row->comments)}} Comments</span></span>
 															@auth()
 															<div class="btn btn-outline-dark btn-sm mt-2 favbtn">
 															@include ('common.favourites_btn')

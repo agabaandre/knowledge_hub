@@ -1,12 +1,12 @@
 <!-- Data for popover header -->
-<div class="pop-head d-none">
+<div class="pop-head d-none heading{{$row->id}}">
 <h6 class="text text-success">
 Comments
 </h6>
 </div>
 			
 <!-- Data for popover content -->
-<div class="pop-body d-none" style="max-height:50%;" onmouseout="$().tooltip('hide')" onblur="">
+<div class="pop-body d-none pbody{{$row->id}}" style="max-height:50%;" onmouseout="$('{{$row->id}}').popover().hide();" onblur="">
     <div class="text"> 
     @if(count($row->comments)>0)
     <div class="row px-3" id="comments{{ $i}}">

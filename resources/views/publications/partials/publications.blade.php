@@ -27,19 +27,19 @@
           	 <div class="col-md-10">
 				<h5>
 					<a href="{{ url('records/show')}}?id={{$row->id}}">
-					{{ truncate($row->title,500)}}</a>
+					{!! truncate($row->title,500) !!}</a>
 			    </h5>
 				<p class="text-nothern p-0">
 				<a href="{{ url('records/show')}}?id={{$row->id}}">
-					{{ nl2br(truncate($row->description,100))}}
+					{!! nl2br(truncate($row->description,180)) !!}
 				</a>
 				</p>
 				<a href="{{$row->publication}}" class="text-blue" target="_blank"><small>{{truncate($row->publication,100)}}</small></a>
 		
 				<span class="muted medium ml-2 theme-cl"><br>
-				<i class="lni lni-briefcase mr-1"></i>Theme: {{$row->theme->description}}</span>
+				<i class="lni lni-briefcase mr-1"></i>Theme: {!!$row->theme->description!!}</span>
 					<span class="muted medium ml-2 theme-cl"><br>
-				<i class="lni lni-archive mr-1"></i>Sub Theme: {{$row->sub_theme->description}}</span>
+				<i class="lni lni-archive mr-1"></i>Sub Theme: {!!$row->sub_theme->description!!}</span>
 				
 				<span class="muted medium ml-2 text-muted mt-1 "><br>
 				<i class="lni lni-empty-file mr-1"></i>Type: {{$row->file_type->name}}</span>

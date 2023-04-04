@@ -17,3 +17,43 @@
     @include('home.partials.subscription')
 
 @endsection
+
+@section('scripts')
+
+
+
+
+<script>
+var showing = false;
+
+function showComments(elem){
+
+    // Pick the div data as required
+			var head = "" + $('.heading'+elem).html();
+			var data = "" + $('.pbody'+elem).html();
+
+          
+			$('.pop'+elem).popover({
+				html: true,
+				title: head,
+				content: data,
+				placement:'bottom',
+                manual:'hover'
+			});
+
+          //  $('.pop'+elem).popover();
+
+
+        
+    //    if(!showing){
+    //        $('.pop'+elem).show();
+    //     }
+    //     else{
+    //         $('.pop'+elem).hide();
+    //     }
+
+}
+
+</script>
+
+@endsection
