@@ -94,3 +94,5 @@
 </head>
 
 <body class="main-body">
+	<div id="google_translate_element"></div>
+	

@@ -1,5 +1,5 @@
  <div id="google_translate_element" style="display: none;"></div>
-    <select class="selectpicker" onchange="translateLanguage(this.value);" style="border:#FFF;">
+<select class="language-select" style="border:#FFF;">
         <option value="English">English</option>
         <option value="Arabic">Arabic</option>
         

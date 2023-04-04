@@ -165,6 +165,7 @@
 <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote.min.js"></script>
 <script src="<?php echo base_url() ?>node_modules/sweetalert2/dist/sweetalert2.all.min.js"></script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
 	<script type="text/javascript">
 
@@ -211,7 +212,7 @@
 		//Quizz
 	</script>
 
-	<script type="text/javascript">
+<script type="text/javascript">
 		function googleTranslateElementInit() {
 			new google.translate.TranslateElement({
 				pageLanguage: 'en',
@@ -221,14 +222,30 @@
 		}
 
 		function translateLanguage(lang) {
-			googleTranslateElementInit();
+		function googleTranslateElementInit() {
+  new google.translate.TranslateElement({pageLanguage: 'en', layout: google.translate.TranslateElement.InlineLayout.SIMPLE}, 'google_translate_element');
+}
+
+function translateLanguage(lang) {
 			var $frame = $('.goog-te-menu-frame:first');
-			if (!$frame.length) {
+			if (!$frame.size()) {
 				alert("Error: Could not find Google translate frame.");
 				return false;
 			}
 			$frame.contents().find('.goog-te-menu2-item span.text:contains(' + lang + ')').get(0).click();
-			return false;
+			}
+
+			$(function() {
+			// initialize the Google Translate API
+			googleTranslateElementInit();
+
+			// add an event listener to the language selector
+			$('.language-select').on('change', function() {
+				var selectedLang = $(this).val();
+				translateLanguage(selectedLang);
+			});
+			});
+
 		}
 
 		$(function() {
