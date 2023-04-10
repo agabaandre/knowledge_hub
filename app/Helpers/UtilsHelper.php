@@ -108,10 +108,26 @@ if (!function_exists('is_valid_image')) {
 if(!function_exists('storage_link')){
 
     function storage_link($file_path){
-       return url('/').Storage::disk('local')->url($file_path);
+
+       return "public/".Storage::disk('local')->url($file_path);
+
      }
    
    }
+
+   if(!function_exists('form_edit')){
+
+    function form_edit($field,$data=null,$data_field=null){
+
+        $field = str_replace('[','',$field);
+        $field = str_replace(']','',$field);
+        
+        return ($data)?$data->{$data_field}:old($field);
+     }
+   
+   }
+
+   
 
 
 

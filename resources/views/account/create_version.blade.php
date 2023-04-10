@@ -26,7 +26,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="description">Version Number</label>
                                 <input placeholder="Version Number"  class="form-control" 
-                                value="{{ (old('version'))?old('version'):number_format(count($publication->versions)+1,1)}}"  id="version" name="version" readonly/>
+                                value="{{ (old('version'))?old('version'):number_format(count($publication->versioning->toArray())+1,1)}}"  id="version" name="version" readonly/>
                             </div>
                  </div>
 

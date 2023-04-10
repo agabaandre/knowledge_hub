@@ -29,7 +29,7 @@
 							<ul class="footer-menu">
 							    <li><a href="{{ url('/') }}">Home</a></li>
 								@guest
-								<li><a href="#login" data-bs-toggle="modal">Login</a></li>
+								<li><a href="{{ url('login') }}" >Login</a></li>
 								@else
 								<li><a href="{{ url('account/publish') }}">Publish a resource</a></li>
 								@endguest
@@ -44,7 +44,7 @@
 							<ul class="footer-menu">
 								<li><a href="{{ url('faqs') }}">Frequently asked questions</a></li>
 								<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
-								<li><a href="{{ url('privacy_policy/read') }}">Privacy Policy</a></li>
+								<li><a href="{{ url('privacy') }}">Privacy Policy</a></li>
 							</ul>
 						</div>
 					</div>

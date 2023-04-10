@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Admin\Controllers;
+namespace App\Http\Controllers\Admin;
 
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
@@ -24,7 +24,7 @@ class AdminController extends Controller
 
         $request['rows']      = 10;
 		$data['publications'] = $this->publicationsRepo->get($request);
-
+      
         return view('admin.home.index',$data);
     }
 

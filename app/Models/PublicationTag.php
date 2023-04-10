@@ -9,7 +9,7 @@ class PublicationTag extends Model
 {
     use HasFactory;
 
-    protected $appends = ['tag_text'];
+    public $timestamps = false;
 
     public function tag(){
         return $this->belongsTo(Tag::class,"tag_id","id");

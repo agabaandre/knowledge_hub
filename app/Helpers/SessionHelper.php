@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Spatie\Permission\Models\Role;
 
 if(!function_exists('get_cookie')){
 	function get_cookie($cookie_name){
@@ -21,6 +23,27 @@ if(!function_exists('current_user')){
 	function current_user(){
 		return Auth::user();
 	}
+}
+
+if(!function_exists('settings')){
+	 function settings()
+	 {
+		return null;
+	 }
+}
+
+
+function get_role($userId){
+    $user_role = DB::table("model_has_roles")->where('model_id',$userId)->first();
+    $role = ($user_role)?Role::find($user_role->role_id):null;
+
+	return $role;
+}
+
+
+function is_admin(){
+	$role = get_role(current_user()->id);
+	return (strpos(strtolower($role->name),'admin') >-1)?true:false;
 }
 
 

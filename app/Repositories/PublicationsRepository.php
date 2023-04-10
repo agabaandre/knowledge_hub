@@ -28,12 +28,27 @@ class PublicationsRepository{
         if($request->author)
          $pubs->where('author_id',$request->author);
 
+         if($request->file_type)
+         $pubs->where('file_type_id',$request->file_type);
+
          if($request->subtheme)
          $pubs->where('sub_thematic_area_id',$request->subtheme);
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
         return  $results;
+    }
+
+    public function with_pending_comments($request){
+        
+        $rows_count = ($request->rows)?$request->rows:20;
+
+        $pubs = Publication::orderBy('id','desc');
+        $pubs = $pubs->whereHas('comments', function($q){
+            $q->where('status', 'pending');
+        });
+        
+        $results = $pubs->paginate($rows_count);
     }
 
     public function my_publications(Request $request){
@@ -92,11 +107,14 @@ class PublicationsRepository{
 
         endif;
 
-        $pub->author_id            = current_user()->author_id;
+        $pub->author_id            = ($request->author)?$request->author:current_user()->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
         $pub->file_type_id         = $request->file_type;
         $pub->visits                   = 0;
+
+        if($request->is_active)
+        $pub->is_active = $request->is_active;
 
         $file_type = $this->find_type($request->file_type);
 
@@ -113,13 +131,19 @@ class PublicationsRepository{
 
         $saved = ($request->id)?$pub->update():$pub->save();
 
+        $id = ($request->id)?$request->id:$pub->id;
+
         //save attachments
         if($request->hasFile('files')):
             $files = $request->file('files');
-            $this->save_attachments($files,$pub->id);
+            $this->save_attachments($files,$id);
         endif;
 
-       
+        //save tags
+        if($request->tags):
+            $this->save_tags($request->tags,$id);
+        endif;
+
         return $pub;
     }
 
@@ -128,9 +152,27 @@ class PublicationsRepository{
         return Publication::find($id);
     }
 
+    public function delete($id){
+        return Publication::find($id)->delete();
+    }
+
+
     public function get_tags(){
         return Tag::all();
     }
+
+    public function save_tags($tags,$publication_id){
+
+        for($i=0;$i<count($tags);$i++){
+
+             $pub_tag = new PublicationTag();
+             $pub_tag->tag_id = $tags[$i];
+             $pub_tag->publication_id = $publication_id;
+             $pub_tag->save();
+        }
+
+    }
+
 
     public function get_types(){
         return PublicationType::all();
@@ -163,7 +205,7 @@ class PublicationsRepository{
         ->first();
 
         if($fav)
-        $fav->destroy();
+        $fav->delete();
 
     }
 
@@ -175,9 +217,9 @@ class PublicationsRepository{
         foreach ($upfiles as $file) {
 
             $description = $file->getClientOriginalName();
-            $file_name = md5_file($file->getRealPath());
-            $extension = $file->guessExtension();
-            $file_path = $file_name.'.'.$extension;
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
            
             $file->move(storage_path().'/uploads/publications/',$file_path);
 

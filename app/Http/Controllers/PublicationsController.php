@@ -59,7 +59,7 @@ class PublicationsController extends Controller
         return back();
     }
 
-    public function remove_favourite(){
+    public function remove_favourite(Request $request){
         $this->publicationsRepo->remove_favourite($request->id);
         return back();
     }

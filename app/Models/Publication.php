@@ -10,7 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value','versioning','is_favourite'];
+    protected $appends = ['theme','label','value','is_favourite'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -18,6 +18,10 @@ class Publication extends Model
 
     public function attachments(){
         return $this->hasMany(PublicationAttachment::class);
+    }
+
+    public function tags(){
+        return $this->hasMany(PublicationTag::class);
     }
 
     public function author(){

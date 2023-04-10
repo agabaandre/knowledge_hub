@@ -20,8 +20,8 @@
    }
 
 
-  table tbody tr:nth-child(even) {
+  /* table tbody tr:nth-child(even) {
      background-color: #c5d5d6;
-  }
+  } */
 
 </style>

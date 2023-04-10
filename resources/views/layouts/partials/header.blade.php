@@ -32,14 +32,18 @@
 						<li><a href="{{ url('records/search')}}">Search</a></li>
 						<li class=""><a href="javascript:void(0);">Resources<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
-								<li><a href="{{ url('experts')}}">Work Force Rosters</a></li>
+							   
+							    @can('view_experts')
+								 <li><a href="{{ url('experts')}}">Work Force Rosters</a></li>
+								@endcan
+
 								<li><a href="{{ url('healthassets')}}?slug=health">Public Health Assets</a></li>
 								<li><a href="{{ url('healthassets')}}?slug=initiatives">Public Health Initiatives</a></li>
 							</ul>
 						</li>
-
+						<li><a href="{{ url('forums')}}">Forums</a></li>
 						<li><a href="{{ url('faqs')}}">FAQs</a></li>
-						<li><a href="{{ url('privacy_policy/read')}}">Privacy</a></li>
+						<li><a href="{{ url('privacy')}}">Privacy</a></li>
 
 					</ul>
 
@@ -61,7 +65,14 @@
 
 							<li><a href="#">My Account</a>
 									<ul class="nav-dropdown nav-submenu">
-											<li>
+										@if(is_admin())
+										<li>
+										<a href="{{ route('admin.index')}}">
+										   <i class="fa fa-link mr-1"></i>Admin Panel
+										</a>
+										</li>
+										@endif
+										<li>
 										<a href="{{ route('account.profile')}}">
 										   <i class="fa fa-user mr-1"></i> My Profile
 										</a>
