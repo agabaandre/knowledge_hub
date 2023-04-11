@@ -55,6 +55,7 @@ Route::group(["prefix"=>"authors"],function(){
 
 Route::group(["prefix"=>"healthassets"],function(){
     Route::get("/",[AssetsController::class,'index']);
+    Route::get("/detail",[AssetsController::class,'details']);
 });
 
 Route::group(["prefix"=>"faqs"],function(){

@@ -14,5 +14,9 @@ class HealthAsset extends Model
     public function type(){
         return $this->belongsTo(AssetType::class,"asset_type_id","id");
     }
+
+    public function country(){
+        return $this->belongsTo(Country::class,"country_id","id");
+    }
     
 }

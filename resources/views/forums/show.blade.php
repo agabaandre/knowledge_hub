@@ -20,7 +20,7 @@
                                 
                                 @if(is_valid_image(storage_link('uploads/forums/'.$forum->forum_image)))
                                 <div class="article_featured_image">
-                                    <img class="img-fluid" src="{{ asset(storage_link('uploads/forums/'.$forum->forum_image)) }}" alt="">
+                                    <img class="img-fluid" src="{{ storage_link('uploads/forums/'.$forum->forum_image) }}" alt="">
                                 </div>
                                 @endif
 
@@ -43,9 +43,9 @@
                             <div class="article_posts_thumb">
                                 <span class="img">
                                        @if(is_valid_image(storage_link('uploads/users/'.$forum->user->photo)))
-                                          <img src="{{ asset(storage_link('uploads/users/'.$forum->user->photo))}}" >
+                                          <img src="{{ storage_link('uploads/users/'.$forum->user->photo)}}" >
                                         @else
-                                            <img src="{{ asset(storage_link('uploads/users/'.$forum->user->photo))}}">
+                                            <img src="{{ storage_link('uploads/users/'.$forum->user->photo)}}">
                                         @endif
                                 </span>
                                 <small class="text-muted">Posted By</small>
@@ -151,7 +151,7 @@
                                 <li>
                                     <span class="left">
                                         @if(is_valid_image(storage_link("uploads/forums/".$forum->forum_image)))
-                                            <img class="img-fluid" src="{{ asset(storage_link('uploads/forums/'.$forum->forum_image)) }}" alt="">
+                                            <img class="img-fluid" src="{{ storage_link('uploads/forums/'.$forum->forum_image) }}" alt="">
                                         @endif
                                     </span>
                                     <span class="right">

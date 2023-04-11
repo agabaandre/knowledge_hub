@@ -34,6 +34,7 @@
             if(parseInt(selectedType.is_downloadable) === 1){
 
                 $('.attachment').show();
+                $('.video').hide();
 
             }else{
 

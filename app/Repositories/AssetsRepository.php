@@ -12,10 +12,8 @@ class AssetsRepository{
         $results    = HealthAsset::orderBy('id','desc');
         
         if($request->slug){
-
           $results->where('asset_desc','like','%'.$request->slug.'%');
           $results->orWhere('asset_name','like','%'.$request->slug.'%');
-
         }
 
         return $results->paginate($rows_count);

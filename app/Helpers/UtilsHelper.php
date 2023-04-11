@@ -109,8 +109,8 @@ if(!function_exists('storage_link')){
 
     function storage_link($file_path){
 
-       return "public/".Storage::disk('local')->url($file_path);
-
+       return url('/').Storage::disk('local')->url($file_path);
+       
      }
    
    }
