@@ -1,0 +1,613 @@
+ADMIX-UPDATE  (27th-October-2020)
+
+1) Calendar isssue is fixed
+2) Added IE supported Css
+3) Fixed some UI issues
+4) Color skins are updated
+5) RTL Versions Includes (New)
+
+
+///////////////////////////
+
+1) Calendar isssue is fixed
+
+///////////////////////////
+
+In calendar page event modals are not displaying to fix this issue please follow the below steps
+
+
+Step:1   Replace Previous "app-calendar.js" with update "app-calendar.js"  
+	 open js files and replace  update app-calendar.js ---------> rootpath(Admix/assets/js/app-calendar.js) 
+	 
+	 
+Step:2   Open calendar.html page
+
+
+	Step:1   Add "select2 form-control" class beside the "select2-modal main-event-time" for id="modalSetSchedule" this modal , 
+		 for Start Date and end date please check the "image1.jpg"
+	
+	Step:2   Add js and CSS links in calendar.html page 
+	
+		add select2.js link after the  select2.full.min.js link as shown below
+	
+		 <!-- Select2.full.min js -->
+		<script src="../assets/plugins/select2/js/select2.full.min.js"></script>
+		<script src="../assets/js/select2.js"></script>       /////////  add this js link
+		
+		
+	Step:3   Add select2.css link near the css links
+		 
+		 <!--- Select2 css--> 
+		<link href="../assets/plugins/select2/css/select2.min.css" rel="stylesheet">  /////////  add this css link
+		
+ 
+Step:3   Replace Previous "select2.min.css"  file with updated "select2.min.css" file  ---------> rootpath(Admix/assets/plugins/select2/css/select2.min.css) 
+
+
+========================================================
+
+If you are using scss files please follow the below  steps:
+
+========================================================
+
+Step:    Open "_custom-styles.scss" file add below scss at last of the page ------>   rootpath(Admix/assets/scss/custom/_custom-styles.scss)
+
+
+	.modal-open .select2-container--default .select2-selection--single {
+	     border: 0 !important; 
+	}
+	.modal-open .select2-container--default .select2-selection--single .select2-selection__rendered {
+	    color: #444;
+	    line-height: 28px;
+	    padding: 0.375rem 0.75rem;
+	    font-size: 0.875rem;
+	    font-weight: 400;
+	    color: #596882;
+	    background-color: #ffffff;
+	    background-clip: padding-box;
+	    border: 1px solid #e2e8f5;
+	    height: 39px;
+	    outline: none;
+	}
+	.dark-theme.modal-open .select2-container--default .select2-selection--single .select2-selection__rendered {
+	    background-color: #2a3146;
+	    border: 1px solid rgba(226, 232, 245, 0.1);
+	}
+	
+
+Step:2  Run below commands in command prompt
+	
+	gulp watch
+	
+	gulp beautify
+	
+	
+	gulp watch command is for the updated scss will automatically generate in css file
+	
+	gulp beautify is for  it beautifies the css code
+	
+If you don't know gulp check the documentation folder and gulp online tutorials
+	
+
+=======================================================================
+
+If you are Not using Gulp you can directly update CSS in style.css file
+
+=======================================================================
+
+Step:1   Open style.css  root path (Admix/assets/css/style.css) add below code at last of the page
+
+
+        .modal-open .select2-container--default .select2-selection--single {
+	    border: 0 !important; 
+	}
+	.modal-open .select2-container--default .select2-selection--single .select2-selection__rendered {
+	    color: #444;
+	    line-height: 28px;
+	    padding: 0.375rem 0.75rem;
+	    font-size: 0.875rem;
+	    font-weight: 400;
+	    color: #596882;
+	    background-color: #ffffff;
+	    background-clip: padding-box;
+	    border: 1px solid #e2e8f5;
+	    height: 39px;
+	    outline: none;
+	}
+	.dark-theme.modal-open .select2-container--default .select2-selection--single .select2-selection__rendered {
+	    background-color: #2a3146;
+	    border: 1px solid rgba(226, 232, 245, 0.1);
+	}
+	 
+
+
+======================================================================
+=================================================================
+  
+  
+  
+///////////////////////////
+
+2) Added IE supported CSS
+
+///////////////////////////
+
+
+In IE11 UI issues are fixed to fix this issue add the below code 
+
+
+	
+========================================================
+
+If you are using scss files please follow the below  steps:
+
+========================================================	
+
+
+Step:1    Open "_custom-styles.scss" file add below scss at last of the page ------>   rootpath(Admix/assets/scss/custom/_custom-styles.scss)
+
+ 
+Step:2    ADD BELOW CODE 
+
+	/*IE*/
+
+	*::-ms-backdrop, .horizontalMenucontainer {
+	  display: inherit !important;
+	  flex-direction: inherit !important;
+	  justify-content: inherit !important;
+	}
+
+	*::-ms-backdrop, .main-body, .main-dashboard {
+	  display: inherit !important;
+	}
+
+	*::-ms-backdrop, .media .wd-50 {
+	  width: inherit !important;
+	}
+
+	*::-ms-backdrop, .main-notification-list .media-body {
+	  display: table-footer-group;
+	}
+
+	*::-ms-backdrop, .main-notification-list .media {
+	  padding: 10px 10px;
+	}
+
+	*::-ms-backdrop, .breadcrumb-4 ol {
+	  display: flex;
+	}
+
+	*::-ms-backdrop, #list16 .list-group-item .avatar-md {
+	  width: 16% !important;
+	}
+
+	*::-ms-backdrop, .users-list-group .btn {
+	  padding: 3px 10px;
+	  height: inherit;
+	  width: inherit;
+	}
+
+	*::-ms-backdrop, #media-object .media, #media-object2 .media, #media-object3 .media, #media-object4 .media {
+	  display: flex !important;
+	}
+
+	*::-ms-backdrop, .left-wrapper .btn-icon, *::-ms-backdrop, .suggestions .btn-icon {
+	  padding: 7px 8px;
+	  height: inherit;
+	  width: inherit;
+	}
+
+	*::-ms-backdrop, .profile-page .profile-header .header-links {
+	  display: list-item;
+	}
+
+	*::-ms-backdrop, .page-h {
+	  height: 100%;
+	}
+
+	*::-ms-backdrop, .bg-image .row {
+	  width: 100%;
+	  height: 100%;
+	}
+
+	*::-ms-backdrop, .app.sidebar-mini.sidenav-toggled .sidebar-scroll .main-sidebar-header {
+	  width: 70px;
+	}
+
+	*::-ms-backdrop, #ChatCalls .media-body, *::-ms-backdrop, #ChatContacts .media-body {
+	  display: table-footer-group;
+	  width: 100%;
+	  padding: 3px 10px;
+	}
+
+	*::-ms-backdrop, #media-object5 .media.media-list {
+	  display: inline !important;
+	}
+
+	*::-ms-backdrop, .prf-details .row {
+	  width: 100%;
+	  height: 100%;
+	}
+
+	*::-ms-backdrop, .crypto .media-body {
+	  display: table-footer-group;
+	}
+	*::-ms-backdrop, #media-object5 .media-list.media.d-sm-flex, *::-ms-backdrop, #media-object5 .media.d-sm-flex{
+		display: inherit !important;
+	}
+	*::-ms-backdrop, .main-notification-list.Notification-scroll  .media-body{
+		flex:inherit;
+	}
+	*::-ms-backdrop, .app-sidebar .btn-icon{
+		padding:16px 13px;
+	}
+	*::-ms-backdrop, .breadcrumb-3 .breadcrumb{
+		display:-ms-inline-flexbox;
+		text-align:center;
+		margin:0 auto;
+		justify-content:center;
+	}
+	*::-ms-backdrop, .breadcrumb-4 .breadcrumb{
+		display:-ms-inline-flexbox;
+		text-align:right;
+	}
+	*::-ms-backdrop, .breadcrumb-4 {
+		float:right;
+		line-height:0;
+	}
+	*::-ms-backdrop, #right .example{
+		padding:2rem;
+	}
+	*::-ms-backdrop, .content-body.main-content{
+		min-height:calc(100vh - 70px) !important
+	}
+	*::-ms-backdrop, .horizontal-content.content-body.main-content{
+		min-height:calc(100vh - 70px) !important
+	}
+	*::-ms-backdrop, .ckbox input[type='checkbox']{
+		margin-right:10px;
+	}
+	*::-ms-backdrop, .custom-control.custom-checkbox{
+		padding-top:0.9rem
+	}
+	*::-ms-backdrop, .ql-snow :not(.ql-color-picker):not(.ql-icon-picker).ql-picker svg{
+		margin-top: -14px;
+	}
+	@media (min-width:767px) {
+		*::-ms-backdrop, .card-sigin{
+			margin-top: 12rem;
+		}
+		 *::-ms-backdrop, .main-card-signin{
+			margin-top: 14rem;
+		}
+		*::-ms-backdrop, .bg-image .mb-4.d-flex{
+			margin-top: 15rem;
+		}
+	}
+	*::-ms-backdrop, .main-error-wrapper{
+		margin-top: 12rem;
+	} 
+	
+Step:3  Run below commands in command prompt
+		
+		gulp watch
+		
+		gulp beautify
+		
+		
+		gulp watch command is for the updated scss will automatically generate in a css file
+		
+		gulp beautify is for  it beautifies the CSS code
+		
+
+=======================================================================
+
+If you are Not using Gulp you can directly update CSS in style.css file
+
+=======================================================================
+
+Step:1  Open style.css  root path (Admix/assets/css/style.css) add below code at last of the page
+        and also add this css in colors folder color1.css ,color2.css ,color3.css ,color4.css ,color5.css last of the page
+
+	/*IE*/
+
+	*::-ms-backdrop,
+	.horizontalMenucontainer {
+		display: inherit !important;
+		flex-direction: inherit !important;
+		justify-content: inherit !important;
+	}
+	*::-ms-backdrop,
+	.main-body,
+	.main-dashboard {
+		display: inherit !important;
+	}
+	*::-ms-backdrop,
+	.media .wd-50 {
+		width: inherit !important;
+	}
+	*::-ms-backdrop,
+	.main-notification-list .media-body {
+		display: table-footer-group;
+	}
+	*::-ms-backdrop,
+	.main-notification-list .media {
+		padding: 10px 10px;
+	}
+	*::-ms-backdrop,
+	.breadcrumb-4 ol {
+		display: flex;
+	}
+	*::-ms-backdrop,
+	#list16 .list-group-item .avatar-md {
+		width: 16% !important;
+	}
+	*::-ms-backdrop,
+	.users-list-group .btn {
+		padding: 3px 10px;
+		height: inherit;
+		width: inherit;
+	}
+	*::-ms-backdrop,
+	#media-object .media,
+	#media-object2 .media,
+	#media-object3 .media,
+	#media-object4 .media {
+		display: flex !important;
+	}
+	*::-ms-backdrop,
+	.left-wrapper .btn-icon,
+	*::-ms-backdrop,
+	.suggestions .btn-icon {
+		padding: 7px 8px;
+		height: inherit;
+		width: inherit;
+	}
+	*::-ms-backdrop,
+	.profile-page .profile-header .header-links {
+		display: list-item;
+	}
+	*::-ms-backdrop,
+	.page-h {
+		height: 100%;
+	}
+	*::-ms-backdrop,
+	.bg-image .row {
+		width: 100%;
+		height: 100%;
+	}
+	*::-ms-backdrop,
+	.app.sidebar-mini.sidenav-toggled .sidebar-scroll .main-sidebar-header {
+		width: 70px;
+	}
+	*::-ms-backdrop,
+	#ChatCalls .media-body,
+	*::-ms-backdrop,
+	#ChatContacts .media-body {
+		display: table-footer-group;
+		width: 100%;
+		padding: 3px 10px;
+	}
+	*::-ms-backdrop,
+	#media-object5 .media.media-list {
+		display: inline !important;
+	}
+	*::-ms-backdrop,
+	.prf-details .row {
+		width: 100%;
+		height: 100%;
+	}
+	*::-ms-backdrop,
+	.crypto .media-body {
+		display: table-footer-group;
+	}
+	*::-ms-backdrop,
+	#media-object5 .media-list.media.d-sm-flex,
+	*::-ms-backdrop,
+	#media-object5 .media.d-sm-flex {
+		display: inherit !important;
+	}
+	*::-ms-backdrop,
+	.main-notification-list.Notification-scroll .media-body {
+		flex: inherit;
+	}
+	*::-ms-backdrop,
+	.app-sidebar .btn-icon {
+		padding: 16px 13px;
+	}
+	*::-ms-backdrop,
+	.breadcrumb-3 .breadcrumb {
+		display: -ms-inline-flexbox;
+		text-align: center;
+		margin: 0 auto;
+		justify-content: center;
+	}
+	*::-ms-backdrop,
+	.breadcrumb-4 .breadcrumb {
+		display: -ms-inline-flexbox;
+		text-align: right;
+	}
+	*::-ms-backdrop,
+	.breadcrumb-4 {
+		float: right;
+		line-height: 0;
+	}
+	*::-ms-backdrop,
+	#right .example {
+		padding: 2rem;
+	}
+	*::-ms-backdrop,
+	.content-body.main-content {
+		min-height: calc(100vh - 70px) !important;
+	}
+	*::-ms-backdrop,
+	.horizontal-content.content-body.main-content {
+		min-height: calc(100vh - 70px) !important;
+	}
+	*::-ms-backdrop,
+	.ckbox input[type='checkbox'] {
+		margin-right: 10px;
+	}
+	*::-ms-backdrop,
+	.custom-control.custom-checkbox {
+		padding-top: 0.9rem;
+	}
+	*::-ms-backdrop,
+	.ql-snow:not(.ql-color-picker):not(.ql-icon-picker).ql-picker svg {
+		margin-top: -14px;
+	}
+	@media (min-width: 767px) {
+		*::-ms-backdrop,
+		.card-sigin {
+			margin-top: 12rem;
+		}
+		*::-ms-backdrop,
+		.main-card-signin {
+			margin-top: 14rem;
+		}
+		*::-ms-backdrop,
+		.bg-image .mb-4.d-flex {
+			margin-top: 15rem;
+		}
+	}
+	*::-ms-backdrop,
+	.main-error-wrapper {
+		margin-top: 12rem;
+	}
+	
+/////////////////////////////////////////////
+
+2.1) Update chart-widget.js & chart.chartjs
+
+/////////////////////////////////////////////	
+
+Some charts are not displaying in IE11 in the chart-widgets.html page so please update  chart-widget.js  file
+ 
+
+Step:1   Please Update previous chart-widget.js  file with updated chart-widget.js   root--->(assets/js/chart-widget.js)
+
+
+Chart x & y axis is not displaying in IE11 in the chart-chartjs.html page so please update  chart.chartjs  file
+ 
+
+Step:2   Please Update previous chart.chartjs.js  file with updated chart-widget.js   root--->(assets/js/chart.chartjs.js)
+	
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+2.2) In index.html page there is an issue for Product Status & Top Selling Product cards
+
+//////////////////////////////////////////////////////////////////////////////////////////
+
+Step:1  open index.html page remove the "row-deck" beside the "row-sm" as shown below
+
+
+##### PREVIOUS #####
+
+<div class="row row-sm row-deck">
+
+
+##### UPDATED #####
+
+<div class="row row-sm">
+	
+======================================================================
+=================================================================	
+
+///////////////////////////
+
+3) Fixed some UI issues
+
+///////////////////////////	
+
+There is an issue in when you choose the colour in sidemenu to fix this follow below steps
+
+
+========================================================
+
+If you are using scss files please follow the below  steps:
+
+========================================================
+
+
+Step:1   open sidemenu.scss    rootpath (Admix/assets/scss/single-sidemenu/singlemenu.scss)
+
+
+Step:2   Add Below scss in singlemenu.scss at last of the page
+
+        
+        @media (min-width: 768px){
+		.app.main-body.sidebar-mini .main-content {
+			margin-left: 250px;
+		}
+		.main-body.app.sidebar-mini.sidenav-toggled .main-content {
+			margin-left: 80px;
+		}
+		.app.main-body.sidebar-mini  .main-footer{
+			margin-left: 250px;
+		}
+		.app.main-body.sidebar-mini.sidenav-toggled  .main-footer{
+			margin-left: 80px;
+		}
+         }
+
+
+Step:3  Run below commands in command prompt
+		
+		gulp singlemenu
+		
+		gulp beautify
+		
+		
+		gulp singlemenu command is for the updated scss will automatically generate in singlemenu.css file
+		
+		gulp beautify is for  it beautifies the CSS code
+
+=======================================================================
+
+If you are not using Gulp you can directly update CSS in singlemenu.css file
+
+=======================================================================
+
+Step:1  open  singlemenu.css  rootpath (Admix/assets/scss/single-sidemenu/singlemenu.css)
+
+	
+Step:2   Add Below
+
+	@media (min-width: 768px){
+		.app.main-body.sidebar-mini .main-content {
+			margin-left: 250px;
+		}
+		.main-body.app.sidebar-mini.sidenav-toggled .main-content {
+			margin-left: 80px;
+		}
+		.app.main-body.sidebar-mini  .main-footer{
+			margin-left: 250px;
+		}
+		.app.main-body.sidebar-mini.sidenav-toggled  .main-footer{
+			margin-left: 80px;
+		}
+    }
+   
+  
+======================================================================
+======================================================================
+         
+///////////////////////////
+
+4) Color skins are updated
+
+///////////////////////////
+
+Please update color.css & color5.css   ------->  roothapth(Admix/assets/css/colors/)
+
+
+Previous: <!-- Style css -->
+	  <link href="../assets/css/style.css" rel="stylesheet">
+
+Updated & add :
+	 <!--- Style css -->
+	<link rel="stylesheet" type="text/css" media="all" href="../../assets/css-rtl/style.css">
+
+	<!-- Colors css -->
+	<link id="theme" rel="stylesheet" type="text/css" media="all" href="../../assets/css-rtl/colors/color.css">

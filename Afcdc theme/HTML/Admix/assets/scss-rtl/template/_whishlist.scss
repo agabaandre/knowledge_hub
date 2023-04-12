@@ -1,0 +1,137 @@
+/* ###### Handle-counter  ###### */
+
+.handle-counter {
+  overflow: hidden;
+  display: flex;
+
+  .counter-minus, .counter-plus {
+    float: left;
+    text-align: center;
+  }
+
+  input {
+    float: left;
+    text-align: center;
+    height: 39px;
+    border-radius: 0;
+    width: 104px;
+    border: 1px solid #e0e6f0;
+  }
+  .btn {
+    padding: 9px 14px !important;
+  }
+}
+.counter-minus.btn{
+	padding: 9px 15px !important;
+}
+.counter-minus {
+  border-radius: 0px 3px 3px 0px;
+}
+
+.counter-plus {
+  border-radius: 3px 0px 0px 3px;
+}
+
+.handle-counter .btn:disabled {
+    background-color: #8c98ac;
+    cursor: not-allowed;
+    color: #fff;
+
+  &:hover {
+    background-color: #7a869c;
+    cursor: not-allowed;
+  }
+}
+
+.step-content .form-label {
+    display: block;
+    margin-bottom: 11px;
+    color: #384358;
+    font-weight: 500;
+}
+
+/* ###### Wishlist-table  ###### */
+
+.wishlist-table {
+  .table-bordered td {
+    border: 0;
+    padding: 16px 16px;
+    vertical-align: middle;
+  }
+
+  .card-aside-img {
+    img {
+      width: 70px;
+      height: 70px;
+      border-radius: 6px;
+    }
+
+    text-align: center;
+    width: 110px;
+  }
+
+  .card-item-desc {
+    margin-left: 1rem;
+  }
+
+  .prd-name, .price {
+    color: #031b4e;
+    font-weight: 500;
+    font-size: 15px;
+  }
+
+  .btn {
+    padding: 6px 13px;
+    font-size: 13px;
+  }
+
+  .out-of-stock {
+    &:before {
+		position: absolute;
+		content: '';
+		background: rgba(239, 242, 246, 0.8) !important;
+		top: 16px;
+		left: 31px;
+		width: 70px;
+		height: 92px;
+		min-width: 43px;
+		height: 70px;
+		bottom: 0;
+		background-size: cover;
+		display: block;
+    }
+
+    &:after {
+		position: absolute;
+		content: 'OUT OF STOCK';
+		top: 47px;
+		left: 36px;
+		color: #f00;
+		bottom: 0;
+		background-size: cover;
+		display: block;
+		font-size: 8.97px;
+		text-align: center;
+		font-weight: 600;
+    }
+  }
+
+  .btn-icon {
+    width: 33px;
+    height: 33px;
+  }
+
+  .table-bordered {
+    thead th {
+      border-top-width: 1px;
+      padding-top: 16px;
+      padding-bottom: 16px;
+    }
+
+    th, td {
+      border: 0;
+      border-top: 1px solid #e4ebf7;
+      border-bottom: 1px solid #e4ebf7;
+    }
+  }
+}

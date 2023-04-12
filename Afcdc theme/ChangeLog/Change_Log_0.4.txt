@@ -1,0 +1,46 @@
+
+Update :  01-December-2020  
+--------------------------------------------------------------------------------------------------------
+
+Updates :  
+
+1) cookies.html page is added
+
+2) Updated IE-11 UI issues.
+
+3) Extra Versions Includes
+
+--------------------------------------------------------------------------------------------------------
+ 
+1) cookies.html page is added.
+
+	Step1:: Copy the cookies.html file from updated Admix-V-0.4. and add the cookies.html page in your HTML pages.
+	
+	Step2:: Open plugins folder (root--->assets/plugins). and copy the cookies folder from updated Admix-V-0.4. and add the cookies folder in your plugins folder
+
+
+2) Open cards.html, empty.html,  sweeet-alerts.html pages in horizontal and horizontal-dark folders. Update the main content classes with the previous main content Body classes.
+
+
+   Previous:
+   ----------
+   
+   <!-- Main-content -->
+   <div class="main-content content-body horizontal-content">
+   
+  Example:  is shown in the images image1 (before)
+	
+   Updated:
+   --------
+   
+   <!-- Main-content -->
+   <div class="main-content horizontal-content"> /// Removed the class content-body
+   
+  Example: is shown in the  image2 (after) 
+  
+
+3) update custom-styles in both LTR & RTL and run gulp command (assets\scss\custom\custom-styles)
+
+
+
+

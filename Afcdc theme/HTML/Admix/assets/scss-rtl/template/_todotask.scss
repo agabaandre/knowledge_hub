@@ -1,0 +1,126 @@
+/* ###### Task  ###### */
+
+.task-label {
+  padding: 10px  12px 16px 22px !important;
+  text-transform: uppercase;
+  color: $black !important;
+  font-weight: 500 !important;
+}
+
+.date-and-time {
+  margin-bottom: 2px;
+  margin-top: 2px;
+  font-size: 11px;
+  font-weight: 400;
+  color: #697b98;
+}
+
+.task-actions li {
+  padding: 0;
+
+  a i {
+    padding: 0 0 0 9px;
+    color: #031b4e;
+    font-size: 19px;
+  }
+}
+
+.horizontalMenucontainer .task-actions li a i {
+  padding: 0 0 0 9px;
+  color: #031b4e;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.task-task-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 3px 0 0 #f4f7ff;
+  -webkit-transition: all 0.2s;
+  transition: all 0.2s;
+}
+
+.main-mail-item.unread:hover {
+    background-color:rgba(189, 205, 228, 0.1);
+}
+
+@media (min-width: 992px) {
+  .task-task-item {
+    width: auto;
+    padding: 10px 25px;
+  }
+}
+
+@media (max-width: 1199px) {
+  .task-task-item .main-mail-body {
+    max-width: 100%;
+    width: 100%;
+  }
+}
+
+.task-task-item {
+  padding: 15px 20px;
+  border-bottom: 1px solid #e4ebf7;
+  background-color: rgba(189, 205, 228, 0.1);
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.task-container, .tab-list-items {
+  position: relative;
+}
+
+.todo-inbox .task-menu {
+  background: $white;
+  margin: 7px 13px 7px 13px;
+  width: 25px;
+  border-radius: 0;
+  color: #515365;
+  align-self: center;
+  border-bottom: 1px solid #e0e6ed;
+}
+
+.tasks-list-box, .task-menu-show, .tab-list-items {
+  height: 600px;
+  position: relative;
+}
+
+@media (max-width: 991px) {
+  .tab-list-items {
+    &.task-menu-show, &.mail-menu-show {
+      position: absolute;
+      z-index: 12;
+      width: 265px;
+      height: 100%;
+      left: 0;
+      background: $white;
+      display: block;
+      padding-left: 0;
+      box-shadow: $shadow;
+    }
+
+    display: none;
+  }
+}
+
+.task-btn {
+  padding: 0 1.5rem 0 1.5rem;
+}
+
+.task-overlay {
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  z-index: 4 !important;
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+
+  &.task-overlay-show {
+    display: block;
+    opacity: .8;
+  }
+}
+
+/* ###### Task ###### */

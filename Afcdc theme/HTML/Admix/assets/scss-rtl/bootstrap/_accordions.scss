@@ -1,0 +1,256 @@
+/* ###### Accordion ###### */
+
+.accordion {
+  > .card {
+    overflow: hidden;
+
+    &:not(:first-of-type) {
+      .card-header:first-child {
+        border-radius: 0;
+      }
+
+      &:not(:last-of-type) {
+        border-bottom: 0;
+        border-radius: 0;
+      }
+    }
+
+    &:first-of-type {
+      border-bottom: 0;
+      border-bottom-right-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    &:last-of-type {
+      border-top-left-radius: 0;
+      border-top-right-radius: 0;
+    }
+
+    .card-header {
+      margin-bottom: -1px;
+    }
+  }
+
+  .card {
+    border-width: 0;
+
+    + .card {
+      margin-top: 1px;
+    }
+  }
+
+  .card-header {
+    padding: 0;
+    background-color: transparent;
+    font-weight: 500;
+
+    a {
+      display: block;
+      padding: 14px 20px;
+      color: #1c273c;
+      position: relative;
+      font-weight: 500;
+      font-size: 14px;
+      background-color: #eff3ff;
+
+      &:hover, &:focus {
+        color: #1c273c;
+      }
+
+      &.collapsed {
+        color: #42516b;
+        background-color: #eff3ff;
+        border-bottom-color: transparent;
+
+        &:hover, &:focus {
+          color: #1c273c;
+          background-color: #e5eafb;
+        }
+      }
+    }
+  }
+
+  .card-body {
+    padding: 0 20px 20px;
+    background-color: #eff3ff;
+    transition: none;
+  }
+}
+
+.accordion-indigo {
+  .card {
+    border-color: $primary;
+  }
+
+  .card-header a {
+    color: $primary;
+
+    &:hover, &:focus {
+      color: $primary;
+    }
+
+    &.collapsed {
+      background-color: $primary;
+      color: $white-8;
+      font-weight: 500;
+      letter-spacing: -.1px;
+
+      &:hover, &:focus {
+        background-color: $primary;
+        color: $white;
+      }
+    }
+  }
+}
+
+.accordion-blue {
+  .card {
+    border-color: $primary;
+  }
+
+  .card-header a {
+    color: $primary;
+
+    &:hover, &:focus {
+      color: $primary;
+    }
+
+    &.collapsed {
+      background-color: $primary;
+      color: $white-8;
+      font-weight: 500;
+      letter-spacing: -.1px;
+
+      &:hover, &:focus {
+        background-color: #1a53ff;
+        color: $white;
+      }
+    }
+  }
+}
+
+.accordion-dark {
+  .card {
+    border-color: #1c273c;
+  }
+
+  .card-header a {
+    color: #1c273c;
+
+    &:hover, &:focus {
+      color: #1c273c;
+    }
+
+    &.collapsed {
+      background-color: #1c273c;
+      color: $white-8;
+      font-weight: 500;
+      letter-spacing: -.1px;
+
+      &:hover, &:focus {
+        background-color: #141c2b;
+        color: $white;
+      }
+    }
+  }
+}
+
+.accordion-gray {
+  .card {
+    border-color: $secondary;
+  }
+
+  .card-header a {
+    color: $secondary;
+
+    &:hover, &:focus {
+      color: $secondary;
+    }
+
+    &.collapsed {
+      background-color: $secondary;
+      color: $white-8;
+      font-weight: 500;
+      letter-spacing: -.1px;
+
+      &:hover, &:focus {
+        background-color: #6a7a96;
+        color: $white;
+      }
+    }
+  }
+}
+
+.main-accordion {
+  .accordion-item {
+    background-color: #f6f9fd;
+    border: 1px solid #dee2ef;
+    position: relative;
+    transition: all 0.2s ease-in-out;
+
+    &:hover, &:focus {
+      cursor: pointer;
+      background-color: #f1f2f6;
+      border-color: #bcc4de;
+      z-index: 4;
+    }
+
+    &.active {
+      background-color: $white;
+      z-index: 5;
+      border-color: #bcc4de;
+
+      .accordion-title {
+        color: $primary;
+      }
+
+      .accordion-body {
+        display: block;
+      }
+    }
+
+    + .accordion-item {
+      margin-top: -1px;
+    }
+  }
+
+  .accordion-header {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+  }
+
+  .accordion-title {
+    font-weight: 700;
+    color: #031b4e;
+    margin: 0;
+    transition: all 0.2s ease-in-out;
+  }
+
+  .accordion-body {
+    display: none;
+    padding: 0 20px 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-accordion .accordion-item {
+    transition: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .main-accordion .accordion-title {
+    transition: none;
+  }
+}
+.accordion.accordion-color .card-header a.collapsed {
+    color: $white;
+    background-color: $primary;
+    border-bottom-color: transparent;
+}
+.accordion.accordion-color .card-header a.collapsed:hover, .accordion.accordion-color .card-header a.collapsed:focus {
+       color: $white;
+    background-color: $primary;
+}
+/* ###### Accordion ###### */

@@ -1,0 +1,172 @@
+ADMIX-UPDATE  (10-08-2020)
+
+1)Moved some scss code from "_toggle.scss" to "sidemenu.scss"
+
+2)Updated Telephone input
+
+
+//////////////////////////////////////////////////////////////
+
+1) Moved some scss code from "_toggle.scss" to "sidemenu.scss"
+
+/////////////////////////////////////////////////////////////
+
+
+############## Changed in scss ##############
+
+
+Step1 : Remove this scss from "_toggle.scss" from linenumber 79 to 108   -----> rootpath ----> (Admix\assets\scss\custom\_toggle.scss)
+
+@media (min-width: 768px) {
+  .main-body.dashboard-3.app.sidebar-mini {
+    &.sidenav-toggled .main-content {
+      margin-left: 60px;
+    }
+    &.sidenav-toggled1 .main-content {
+      margin-left: 0px;
+    }
+  }
+  .app.sidebar-mini {
+    .main-content {
+      margin-left: 320px;
+    }
+    &.sidenav-toggled .main-content {
+      margin-left: 70px;
+    }
+    &.sidenav-toggled1 .main-content {
+      margin-left: 0;
+    }
+    &.sidenav-toggled.sidenav-toggled1 .main-content {
+      margin-left: 70px;
+    }
+  }
+}
+
+Step2 : Add Below scss in last of the page in "sidemenu.scss"   -----> rootpath ----> (Admix\assets\css\sidemenu\sidemenu.scss)
+
+
+@media (min-width: 768px) {
+  .main-body.dashboard-3.app.sidebar-mini {
+    &.sidenav-toggled .main-content {
+      margin-left: 60px;
+    }
+    &.sidenav-toggled1 .main-content {
+      margin-left: 0px;
+    }
+  }
+  .app.sidebar-mini {
+    .main-content {
+      margin-left: 320px;
+    }
+    &.sidenav-toggled .main-content {
+      margin-left: 70px;
+    }
+    &.sidenav-toggled1 .main-content {
+      margin-left: 0;
+    }
+    &.sidenav-toggled.sidenav-toggled1 .main-content {
+      margin-left: 70px;
+    }
+  }
+}
+
+
+Step:3  After than run "gulp watch" command
+
+
+
+############## Changed in css ##############
+
+Step:1  Open style.css  Remove this css from "style.css" from linenumber 74683 to 74707   -----> rootpath ----> (assets/css/style.css)
+
+	@media (min-width: 768px) {
+	    .main-body.dashboard-3.app.sidebar-mini.sidenav-toggled .main-content {
+	        margin-left: 60px;
+	    }
+	
+	    .main-body.dashboard-3.app.sidebar-mini.sidenav-toggled1 .main-content {
+	        margin-left: 0px;
+	    }
+	
+	    .app.sidebar-mini .main-content {
+	        margin-left: 320px;
+	    }
+	
+	    .app.sidebar-mini.sidenav-toggled .main-content {
+	        margin-left: 70px;
+	    }
+	
+	    .app.sidebar-mini.sidenav-toggled1 .main-content {
+	        margin-left: 0;
+	    }
+	
+	    .app.sidebar-mini.sidenav-toggled.sidenav-toggled1 .main-content {
+	        margin-left: 70px;
+	    }
+      }
+
+Step:2  Add Below scss in last of the page in "sidemenu.css"   -----> rootpath ----> (assets\css\sidemenu\sidemenu.css)
+
+	@media (min-width: 768px) {
+	    .main-body.dashboard-3.app.sidebar-mini.sidenav-toggled .main-content {
+		margin-left: 60px;
+	    }
+
+	    .main-body.dashboard-3.app.sidebar-mini.sidenav-toggled1 .main-content {
+		margin-left: 0px;
+	    }
+
+	    .app.sidebar-mini .main-content {
+		margin-left: 320px;
+	    }
+
+	    .app.sidebar-mini.sidenav-toggled .main-content {
+		margin-left: 70px;
+	    }
+
+	    .app.sidebar-mini.sidenav-toggled1 .main-content {
+		margin-left: 0;
+	    }
+
+	    .app.sidebar-mini.sidenav-toggled.sidenav-toggled1 .main-content {
+		margin-left: 70px;
+	    }
+      }
+      
+      
+
+//////////////////////////////////
+
+2)Updated Telephone input
+
+//////////////////////////////////
+
+
+Step:1  Update the "telephoneinput.css"      rootpath ----> (assets\plugins\telephoneinput\telephoneinput.css)
+
+        Replace previous "telephoneinput.css"  with updated "telephoneinput.css"
+
+
+Step:2  Open form-advanced.html page in all folders and update html code
+
+
+####### PREVIOUS HTML #######
+
+<div class="input-group">
+     <form>
+	  <input type="tel" id="mobile-number" placeholder="e.g. +1 702 123 4567">
+     </form>
+</div>
+
+								
+
+####### UPDATED HTML #######
+
+<div class="input-group telephone-input">
+    <input type="tel" id="mobile-number" placeholder="e.g. +1 702 123 4567">
+    <span class="input-group-btn">
+	<button class="btn ripple btn-primary" type="button">Submit</button>
+    </span>
+</div>
+         
+ 

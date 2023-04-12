@@ -1,0 +1,132 @@
+/* ###### Table  ###### */
+
+.table {
+  color: $dark;
+
+  thead {
+    th, td {
+      font-weight: 700;
+      font-size: 12px;
+	  color: #1c273c;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+      border-bottom-width: 1px;
+      border-top-width: 0;
+      padding: 15px 15px;
+    }
+  }
+
+  tbody tr {
+    background-color: $white-5 ;
+
+    th {
+      font-weight: 500;
+    }
+  }
+
+  th, td {
+    padding: 9px 15px;
+    line-height: 1.462;
+  }
+}
+
+.table-striped tbody tr:nth-of-type(2n+1) {
+  background-color: rgb(244, 246, 255);
+}
+
+.table-bordered thead {
+  th, td {
+    border-top-width: 1px;
+    padding-top: 7px;
+    padding-bottom: 7px;
+    background-color: $white-5 ;
+  }
+}
+
+.card-table-one {
+  .table {
+    margin-bottom: 0;
+
+    thead tr > {
+      th, td {
+        vertical-align: middle;
+        white-space: nowrap;
+        padding-right: 2px;
+      }
+    }
+
+    tbody tr > {
+      th, td {
+        vertical-align: middle;
+        white-space: nowrap;
+        padding-right: 2px;
+      }
+    }
+
+    thead tr > {
+      th {
+        &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+          text-align: right;
+        }
+      }
+
+      td {
+        &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+          text-align: right;
+        }
+      }
+    }
+
+    tbody tr > {
+      th {
+        &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+          text-align: right;
+        }
+      }
+
+      td {
+        &:nth-child(3), &:nth-child(4), &:nth-child(5) {
+          text-align: right;
+        }
+      }
+    }
+
+    thead tr > {
+      th strong, td strong {
+        color: #1c273c;
+      }
+    }
+
+    tbody tr > {
+      th strong, td strong {
+        color: #1c273c;
+      }
+    }
+  }
+
+  .flag-icon {
+    font-size: 20px;
+    line-height: 1;
+    border-radius: 100%;
+  }
+}
+
+@media (min-width: 768px) {
+  .card-table-one .table {
+    thead tr > {
+      th, td {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+
+    tbody tr > {
+      th, td {
+        padding-left: 0;
+        padding-right: 0;
+      }
+    }
+  }
+}
+
+/* ###### Table  ###### */
