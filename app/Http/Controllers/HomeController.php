@@ -46,7 +46,7 @@ class HomeController extends Controller
 			[
 				"title"=>"Health Security Themes",
 				"icon"=>"fa fa-heart",
-				'link'=>"browse/healththemes",
+				'link'=>"browse/themes",
 				"image"=>"theme.png",
 				"stats"=> 0
 			],

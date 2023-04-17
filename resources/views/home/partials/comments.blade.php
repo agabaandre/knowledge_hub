@@ -27,7 +27,7 @@ Comments
                 <small class="text-success">{{time_ago($comm->created_at)}}</small>
             </li>
             @endforeach
-            <a class="py-3" href="{{url('records/show')}}?id={{$row->id}}">View All</a>
+            <a class="py-3" href="{{url('records/resource')}}?id={{$row->id}}">View All</a>
         </ul>
     </div>
      @endif

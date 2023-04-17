@@ -9,7 +9,7 @@
 								@foreach($categories as $category)
 										
 								<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-								<a href="{{url('/')}}{{$category['link']}}">
+								<a href="{{url($category['link'])}}">
 										<div class="dro_140">
 											<div class="dro_141 de"><i class="{{$category['icon']}}"></i></div>
 											<div class="dro_142">

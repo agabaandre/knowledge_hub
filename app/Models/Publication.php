@@ -63,4 +63,8 @@ class Publication extends Model
         $fav = Favourite::where('user_id',current_user()->id)->where('publication_id',$this->id)->first();
         return ($fav)?true:false;
     }
+
+    public function summaries(){
+        return $this->hasMany(PublicationSummary::class,"resource_id");
+    }
 }

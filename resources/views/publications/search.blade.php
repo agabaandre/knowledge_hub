@@ -25,6 +25,7 @@
 
 	<div class="col-lg-4">
     @include('publications.partials.facts')
+	<br/>
     </div>
 </div>
 </div>

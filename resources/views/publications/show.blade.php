@@ -38,29 +38,37 @@
 						
 					
 						<div class="jbd-01-right text-right">
-						@if(!$publication->has_attachments && $publication->is_video)
-							<div class="jbl_button mb-2"><a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium">Browse Resource</a></div>
-
-						@elseif ($publication->has_attachments)
-                               
-                                @php
-								 $count = 1;
-                                @endphp
-
-								   @foreach($publication->attachments as $pub_file)
-									<div class="jbl_button"><a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a></div>
-                                   @php
-								     $count++;
-                                   @endphp
-								@endforeach;
-						    @endif
-
-							@auth
+						
+							
 							<div class="jbl_button mb-2">
-								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}" target="_blank" class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
-								Submit a Version</a>
+
+							
+								@if(!$publication->has_attachments && $publication->is_video)
+								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium"><i class="fa fa-link"></i> Browse Resource</a>
+
+								@elseif ($publication->has_attachments)
+									
+										@php
+										$count = 1;
+										@endphp
+
+										@foreach($publication->attachments as $pub_file)
+											<a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a>
+										@php
+											$count++;
+										@endphp
+										@endforeach;
+									@endif
+									
+								@auth
+
+								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}"  class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
+								<i class="fa fa-info-circle"></i> Submit a Version</a>
+								<a href="{{ route('account.summarize')}}?id={{ $publication->id }}" class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
+								<i class="fa fa-file"></i> Submit a Summary / Abstract</a>
+
+							  @endauth
 							</div>
-							@endauth
 						</div>
 					</div>
 				</div>
@@ -131,7 +139,7 @@
 						<div class="jbd-02 pt-4 pr-3">
 							<h5 class="text-bold text-success">Share this</h5>
 							<div class="row justify-content-center">
-								{{ share_buttons( url("records/show")."?id=".$publication->id) }}
+								{{ share_buttons( url('records/resource')."?id=".$publication->id) }}
 							</div>
 						</div>
 					</div>
@@ -189,11 +197,22 @@
 							<h4 class="ft-medium fs-md mb-3">Resource Versions</h4>
 							<ul class="list-group mb-3">
 								@foreach($publication->versioning as $version)
-									<li><h5 class="text-muted"><a href="{{ url('records/show') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
+									<li><h5 class="text-muted"><a href="{{ url('records/resource') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
 								@endforeach
 							</ul>
 						@elseif($publication->parent_id)
-							<h5 class=" mb-3"><a class="text-success" href="{{ url('records/show') }}?id={{$publication->parent_id}}">View Original Version</a></h5>
+							<h5 class=" mb-3"><a class="text-success" href="{{ url('records/resource') }}?id={{$publication->parent_id}}">View Original Version</a></h5>
+						@endif
+
+						@if(count($publication->summaries)>0)
+							<h6 class="ft-medium fs-sm mb-3">Summaries and Abstracts</h6>
+							<ul class="list-group mb-3">
+								@foreach($publication->summaries as $summary)
+									<li>
+										<h6 class="text-muted"><a href="{{ url('records/shortened') }}?id={{$summary->id}}">{{ truncate($summary->title,100) }} by {{$summary->author->name}}</a></h6>
+								    </li>
+								@endforeach
+							</ul>
 						@endif
 			
 						<h4 class="ft-medium fs-md mb-3">Got something to say about this resource?</h4>
@@ -207,7 +226,7 @@
 							<textarea name="comment" class="form-control" placeholder="Your comment" required>{{ old('comment') }}</textarea>
 					
 
-						<div class="form-group">
+						<div class="form-group mt-4">
 							<button type="submit" class="btn btn-md rounded theme-bg text-light ft-medium fs-sm full-width">Submit Comment</button>
 						</div>
 

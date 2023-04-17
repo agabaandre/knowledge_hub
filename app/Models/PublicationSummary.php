@@ -5,9 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ThemeticArea extends Model
+class PublicationSummary extends Model
 {
     use HasFactory;
-    protected $table = "thematic_area";
 
+    public function author(){
+
+        return $this->belongsTo(Author::class);
+    }
 }

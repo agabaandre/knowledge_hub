@@ -25,11 +25,24 @@
 										<label>Last Name</label>
 										<input type="text" class="form-control @error('lastname') is-invalid @enderror" name="lastname" placeholder="Last Name" value="{{ old('lastname') }}" required autocomplete="lastname" autofocus>
                                         @error('lastname')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
+											<span class="invalid-feedback" role="alert">
+												<strong>{{ $message }}</strong>
+											</span>
                                         @enderror
 									</div>
+
+									<div class="form-group col-md-12">
+										<label>Preferences *</label>
+										<select class="form-control @error('preferences') is-invalid @enderror" name="preferences">
+											<option></option>
+										</select>
+                                        @error('preferences')
+											<span class="invalid-feedback" role="alert">
+												<strong>{{ $message }}</strong>
+											</span>
+                                        @enderror
+									</div>
+
 								</div>
 								
 								<div class="form-group">
@@ -82,5 +95,11 @@
 				</div>
 			</section>
 
+
+@endsection
+
+@section('scripts')
+
+ @include('common.select2')
 
 @endsection

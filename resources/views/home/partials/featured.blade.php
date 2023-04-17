@@ -19,7 +19,7 @@
 
 						<!-- single review -->
 						@foreach ($featured as $row)
-							<a href="{{url('records/show')}}?id={{$row->id}}">
+							<a href="{{url('records/resource')}}?id={{$row->id}}">
 								<div class="single_review px-2" data-aos="fade-in">
 									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
 										<div class="rw-header d-flex justify-content-start">

@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateResourceVersionsTable extends Migration
+class CreateUserPreferencesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,13 +13,13 @@ class CreateResourceVersionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('resource_versions', function (Blueprint $table) {
+        Schema::create('user_preferences', function (Blueprint $table) {
+            
             $table->id();
-            $table->foreignId("resource_id");
-            $table->string('file_path');
-            $table->string('description');
-            $table->boolean('is_link')->default(0);
+            $table->foreignId('user_id');
+            $table->foreignId('tag_id');
             $table->timestamps();
+
         });
     }
 
@@ -30,6 +30,6 @@ class CreateResourceVersionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('resource_versions');
+        Schema::dropIfExists('user_preferences');
     }
 }

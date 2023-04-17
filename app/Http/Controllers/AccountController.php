@@ -81,4 +81,37 @@ class AccountController extends Controller
 
     }
 
+    public function create_summary(Request $request){
+
+        $data['publication'] = $this->publicationsRepo->find($request->id);
+        
+        return view('account.create_summary',$data);
+    }
+
+
+    public function submit_summary(Request $request){
+
+        $val_rules = [
+            'file_type'=>'required',
+            'summary'=>'required',
+            'title'=>'required'
+        ];
+
+        $request->validate($val_rules);
+
+        $saved = $this->publicationsRepo->save_summary($request);
+
+        $message = ($saved)?'Resource summary submitted successfully':'Request failed try again';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message']     = $data['alert']= $message;
+        $data['status']      = 200;
+
+        if($request->ajax())
+           return response($data);
+
+        return redirect()->url('records/show?id='.$request->original_id)->with($data);
+
+    }
+
 }

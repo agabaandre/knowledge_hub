@@ -41,9 +41,9 @@
 													@endphp
 
 												<div class="cats-box-caption">
-													<h4 class="fs-md mb-0 ft-medium"><a href="{{ url('records/show') }}?id={{$row->id}}">{!! truncate($row->title, 50) !!}</a></h4>
+													<h4 class="fs-md mb-0 ft-medium"><a href="{{ url('records/resource') }}?id={{$row->id}}">{!! truncate($row->title, 50) !!}</a></h4>
 													<div class="d-block mb-2 position-relative">
-													  <p class="text-nothern p-0"><a href="{{ url('records/show') }}id={{$row->id}}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description,60))) !!}</a></p>
+													  <p class="text-nothern p-0"><a href="{{ url('records/resource') }}id={{$row->id}}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description,60))) !!}</a></p>
 														<span class="text-muted medium">
 															Source: <i class="fa fa-bank mr-1"></i>{{$row->author->name}}</span>
 														
@@ -72,7 +72,7 @@
 													</div>
 												</div>
 												<div class="text-center mlb-last">
-													<a href="{{ url('records/show')}}?id={{ $row->id }}" class="btn theme-bg-light theme-cl ft-medium apply-btn fs-sm rounded">Browse Resource</a>
+													<a href="{{ url('records/resource')}}?id={{ $row->id }}" class="btn theme-bg-light theme-cl ft-medium apply-btn fs-sm rounded">Browse Resource</a>
 												</div>
 												
 											</div>

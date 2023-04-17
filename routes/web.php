@@ -10,8 +10,10 @@ use App\Http\Controllers\FaqsController;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicationsController;
 use App\Http\Controllers\Admin\ResourcesController;
+use App\Http\Controllers\AreasController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\ForumsController;
+use App\Http\Controllers\ThemesController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -40,12 +42,19 @@ Route::get('/logout',function(){
 
 Route::get('/privacy', [CommonController::class,'privacy'])->name('privacy');
 
+Route::group(["prefix"=>"browse"],function(){
+    Route::get("themes",[ThemesController::class,'index']);
+    Route::get("subthemes",[ThemesController::class,'subthemes']);
+    Route::get("authors",[AuthorsController::class,'index']);
+    Route::get("areas",[AreasController::class,"index"]);
+});
 
 Route::group(["prefix"=>"records"],function(){
-    Route::get("show",[PublicationsController::class,'show']);
+    Route::get("resource",[PublicationsController::class,'show']);
     Route::get("search",[PublicationsController::class,'search']);
     Route::get("subtheme",[PublicationsController::class,'subtheme_pubs']);
     Route::get("autocomplete",[PublicationsController::class,'autocomplete']);
+    Route::get("shortened",[PublicationsController::class,'shortened']);
 });
 
 Route::group(["prefix"=>"authors"],function(){
@@ -78,9 +87,11 @@ Route::group(["prefix"=>"account",'middleware'=>['auth','web']],function(){
     Route::get("/favourites",[AccountController::class,'favourites'])->name('account.favourites');
     Route::get("/publish",[AccountController::class,'publish'])->name('account.publish');
     Route::get("/publications",[AccountController::class,'publications'])->name('account.publications');
-    Route::get("publications/delete",[AccountController::class,'remove_favourite'])->name('account.pub_delete');
+    Route::get("/publications/delete",[AccountController::class,'remove_favourite'])->name('account.pub_delete');
     Route::post("/publication",[AccountController::class,'submit_publication'])->name('account.publication');
     Route::get("/newversion",[AccountController::class,'create_version'])->name('account.newversion');
+    Route::post("/summary",[AccountController::class,'submit_summary'])->name('account.summary');
+    Route::get("/summarize",[AccountController::class,'create_summary'])->name('account.summarize');
 
 });
 

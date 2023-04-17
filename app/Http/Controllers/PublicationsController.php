@@ -22,8 +22,23 @@ class PublicationsController extends Controller
     public function show(Request $request){
 
         $data['publication'] = $this->publicationsRepo->find($request->id);
+
+        if(!$data['publication'])
+         abort(404);
       
         return view('publications.show',$data);
+    }
+
+    public function shortened(Request $request){
+
+        $summary             = $this->publicationsRepo->find_shortened($request->id);
+        $data['publication'] = $this->publicationsRepo->find($summary->resource_id);
+        $data['abstract']     = $summary;
+
+        if(!$data['publication'] || !$summary)
+        abort(404);
+      
+        return view('publications.abstract',$data);
     }
 
     public function search(Request $request){
@@ -63,4 +78,6 @@ class PublicationsController extends Controller
         $this->publicationsRepo->remove_favourite($request->id);
         return back();
     }
+
+   
 }

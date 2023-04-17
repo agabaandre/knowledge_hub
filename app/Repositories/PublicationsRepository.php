@@ -5,6 +5,7 @@ use App\Models\Author;
 use App\Models\Favourite;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
+use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
 use App\Models\SubjectArea;
@@ -33,6 +34,9 @@ class PublicationsRepository{
 
          if($request->subtheme)
          $pubs->where('sub_thematic_area_id',$request->subtheme);
+
+         if($request->area)
+         $pubs->where('geographical_coverage_id',$request->area);
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
@@ -83,6 +87,10 @@ class PublicationsRepository{
 
     public function find_type($id){
         return PublicationType::find($id);
+    }
+
+    public function find_shortened($id){
+        return PublicationSummary::find($id);
     }
 
     public function save(Request $request){
@@ -151,6 +159,7 @@ class PublicationsRepository{
 
         return Publication::find($id);
     }
+
 
     public function delete($id){
         return Publication::find($id)->delete();
@@ -223,7 +232,6 @@ class PublicationsRepository{
            
             $file->move(storage_path().'/uploads/publications/',$file_path);
 
-    
         //insert if to be in different table
         if($publication_id):
 
@@ -241,6 +249,31 @@ class PublicationsRepository{
 
        $file_path;
     }
+
+    public function save_summary(Request $request){
+
+        $summary = new PublicationSummary();
+        $summary->resource_id = $request->original_id;
+        $summary->title       = $request->title;
+        $summary->description = $request->summary;
+
+        if($request->hasFile('file')):
+
+            //upload summary
+            $file        = $request->file('file');
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+            $file->move(storage_path().'/uploads/publications/summaries/',$file_path);
+            $summary->file_path  = $file_path;
+
+        endif;
+
+        $summary->save();
+   }
+
+
+    
 
 
 
