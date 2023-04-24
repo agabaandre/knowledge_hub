@@ -6,10 +6,14 @@
 @include('layouts.partials.header')
 
 @yield('styles')
+
+@include('layouts.partials.alerts')
+
 @yield('content')
-@yield('scripts')
 
 @include('layouts.partials.footer')
+
+@yield('scripts')
 
 
 	

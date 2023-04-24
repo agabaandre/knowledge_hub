@@ -4,7 +4,7 @@
 					<div class="row justify-content-between align-items-center">
 
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">							
-							<form action="{{ url('records/search') }}" class="search-form bg-white rounded" >
+							<form action="{{ url('records/search') }}" class="search-form" >
 								<div class="row no-gutters">
 									<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
@@ -12,8 +12,8 @@
 										</div>
 									</div>
 									<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 col-12">
-										<div class="form-group mb-0 position-relative">
-											<select class="custom-select  b-0 select2" name="type">
+										<div class="form-group">
+											<select class="select2 custom-select" name="type">
 											  <option value="" selected>All</option>
 											  @foreach ($file_types as $type)
 											  <option value="{{$type->id}}" 
@@ -25,7 +25,7 @@
 									</div>
 									<div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width py-3 theme-bg text-white fs-md" type="submit">Search</button>
+											<button class="btn full-width py-3 text-success fs-md" type="submit">Search</button>
 										</div>
 									</div>
 								</div>
@@ -36,5 +36,7 @@
 					</div>
 				</div>
 			</div>
+
+			
 
 

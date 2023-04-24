@@ -4,12 +4,14 @@
     
 // Select2
 $('.select2').select2({
-    width: '100%'
+    width: '100%',
+    dir: "ltr",
 });
 
 
 $('.select2Modal').select2({
     width: '100%',
+    dir: "ltr",
     dropdownParent: $(".modalselect")
 });
 

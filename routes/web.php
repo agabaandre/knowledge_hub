@@ -11,9 +11,17 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\PublicationsController;
 use App\Http\Controllers\Admin\ResourcesController;
 use App\Http\Controllers\AreasController;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CommonController;
 use App\Http\Controllers\ForumsController;
 use App\Http\Controllers\ThemesController;
+
+use App\Http\Controllers\Admin\GeoAreasController;
+use App\Http\Controllers\Admin\FileTypesController;
+use App\Http\Controllers\Admin\HealthThemesController;
+use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\SubHealthThemesController;
+use App\Http\Controllers\Admin\TagsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -29,8 +37,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 
-Auth::routes();
-
+Auth::routes(['verify' => true]);
 
 Route::get('/', [HomeController::class,'index'])->name('home');
 
@@ -39,6 +46,7 @@ Route::get('/logout',function(){
     return redirect()->route('home');
 });
 
+Route::post('/registration', [AuthController::class,'register'])->name('registration');
 
 Route::get('/privacy', [CommonController::class,'privacy'])->name('privacy');
 
@@ -92,6 +100,7 @@ Route::group(["prefix"=>"account",'middleware'=>['auth','web']],function(){
     Route::get("/newversion",[AccountController::class,'create_version'])->name('account.newversion');
     Route::post("/summary",[AccountController::class,'submit_summary'])->name('account.summary');
     Route::get("/summarize",[AccountController::class,'create_summary'])->name('account.summarize');
+    Route::get("/verify",[AccountController::class,'verifyAccount'])->name('account.verify');
 
 });
 
@@ -107,6 +116,57 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::post("/save",[ResourcesController::class,'store']);
         Route::get("/moderate",[ResourcesController::class,'moderate']);
         Route::get("/delete",[ResourcesController::class,'destroy']);
+    });
+
+    //geo areas
+    Route::group(["prefix"=>"areas"],function(){
+        
+        Route::get("/",[GeoAreasController::class,'index']);
+        Route::post("/save",[GeoAreasController::class,'store']);
+        Route::get("/delete",[GeoAreasController::class,'destroy']);
+    });
+
+
+    //filetypes
+    Route::group(["prefix"=>"filetypes"],function(){
+        
+        Route::get("/",[FileTypesController::class,'index']);
+        Route::post("/save",[FileTypesController::class,'store']);
+        Route::get("/delete",[FileTypesController::class,'destroy']);
+    });
+
+
+     //themes
+     Route::group(["prefix"=>"themes"],function(){
+        
+        Route::get("/",[HealthThemesController::class,'index']);
+        Route::post("/save",[HealthThemesController::class,'store']);
+        Route::get("/delete",[HealthThemesController::class,'destroy']);
+    });
+
+    //subthemes
+    Route::group(["prefix"=>"subthemes"],function(){
+        
+        Route::get("/",[SubHealthThemesController::class,'index']);
+        Route::post("/save",[SubHealthThemesController::class,'store']);
+        Route::get("/delete",[SubHealthThemesController::class,'destroy']);
+    });
+
+
+    //tags
+    Route::group(["prefix"=>"tags"],function(){
+        
+        Route::get("/",[TagsController::class,'index']);
+        Route::post("/save",[TagsController::class,'store']);
+        Route::get("/delete",[TagsController::class,'destroy']);
+    });
+
+     //quiz
+     Route::group(["prefix"=>"quiz"],function(){
+        
+        Route::get("/",[QuizController::class,'index']);
+        Route::post("/save",[QuizController::class,'store']);
+        Route::get("/delete",[QuizController::class,'destroy']);
     });
 
 });

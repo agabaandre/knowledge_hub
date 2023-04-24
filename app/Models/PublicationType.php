@@ -8,5 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 class PublicationType extends Model
 {
     use HasFactory;
-    protected $table = "file_type";
+    protected $table   = "file_type";
+    public $timestamps = false;
 }

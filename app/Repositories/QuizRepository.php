@@ -9,7 +9,11 @@ class QuizRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $qns = Question::paginate($rows_count);
+
+        if($request->term)
+        $qns = Question::orderBy('id',$request->term);
+        
+        $result = $qns->paginate($rows_count);
 
         return $qns;
     }
@@ -29,6 +33,14 @@ class QuizRepository{
 
         return Question::find($id);
     }
+
+
+    public function delete($id){
+
+        return Question::find($id)->delete();
+    }
+
+    
 
 
 }

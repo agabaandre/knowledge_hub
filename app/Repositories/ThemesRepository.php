@@ -1,7 +1,6 @@
 <?php
 namespace App\Repositories;
 
-use App\Models\Author;
 use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
 use Illuminate\Http\Request;
@@ -11,9 +10,14 @@ class ThemesRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:24;
-        $themes = ThemeticArea::paginate($rows_count);
 
-        return $themes;
+        $themes = ThemeticArea::orderBy('id','desc');
+
+        if($request->term)
+        $themes->where('description','like','%'.$request->term.'%');
+        $result = $themes->paginate($rows_count);
+
+        return $result;
     }
 
     public function get_subthemes(Request $request){
@@ -23,17 +27,49 @@ class ThemesRepository{
 
         return $themes;
     }
+
+    public function get_all_subthemes(Request $request){
+
+        $rows_count = ($request->rows)?$request->rows:24;
+        $themes = SubThemeticArea::orderBy('id','desc');
+        if($request->term)
+        $themes->where('description','like','%'.$request->term.'%');
+        $result = $themes->paginate($rows_count);
+
+        return $result;
+    }
     
     public function save(Request $request){
-        $quote = new ThemeticArea();
+        $theme = new ThemeticArea();
+        $theme->description = $request->name;
+        $theme->icon = $request->icon;
+        $theme->save();
 
-        return $quote;
+        return $theme;
     }
 
     public function find($id){
 
         return ThemeticArea::find($id);
     }
+
+    public function delete($id){
+        return ThemeticArea::find($id)->delete();
+    }
+
+    public function save_subtheme(Request $request){
+        $theme = new SubThemeticArea();
+        $theme->description = $request->name;
+        $theme->icon = $request->icon;
+        $theme->save();
+
+        return $theme;
+    }
+
+    public function delete_subtheme($id){
+        return SubThemeticArea::find($id)->delete();
+    }
+
 
 
 }

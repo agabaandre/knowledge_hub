@@ -34,8 +34,10 @@ if(!function_exists('settings')){
 
 
 function get_role($userId){
+
     $user_role = DB::table("model_has_roles")->where('model_id',$userId)->first();
-    $role = ($user_role)?Role::find($user_role->role_id):null;
+
+    $role = ($user_role)?(($user_role)?Role::find($user_role->role_id):null):null;
 
 	return $role;
 }
@@ -43,7 +45,7 @@ function get_role($userId){
 
 function is_admin(){
 	$role = get_role(current_user()->id);
-	return (strpos(strtolower($role->name),'admin') >-1)?true:false;
+	return ($role)?((strpos(strtolower($role->name),'admin') >-1)?true:false):false;
 }
 
 

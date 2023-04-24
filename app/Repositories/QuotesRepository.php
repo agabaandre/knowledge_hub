@@ -9,15 +9,22 @@ class QuotesRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs = Quote::paginate($rows_count);
+        $quotes = Quote::orderBy('id','desc');
 
-        return $pubs;
+        if($request->term)
+        $quotes->where('quote','like','%'.$request->term.'%');
+        
+        $result = $quotes->paginate($rows_count);
+
+        return $result;
     }
     
     public function save(Request $request){
-        $pub = new Quote();
+        $quote = new Quote();
+        $quote->quote = $request->name;
+        $quote->save();
 
-        return $pub;
+        return $quote;
     }
 
     public function find($id){
@@ -25,5 +32,10 @@ class QuotesRepository{
         return Quote::find($id);
     }
 
+
+    public function delete($id){
+
+        return Quote::find($id)->delete();
+    }
 
 }

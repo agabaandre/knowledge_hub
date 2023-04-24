@@ -44,6 +44,9 @@
 						 </td>
 					</tr>
 				@endforeach
+				@if(count($publications) == 0)
+
+				@endif
 			</table>
 
 			@include('account.partials.delete_pub')

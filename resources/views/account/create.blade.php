@@ -44,21 +44,29 @@
                             </div>
                  </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Type</label>
                         @include('partials.publications.filetype_dropdown',['field'=>'file_type'])
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
-                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme'])
+                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2'])
                             </div>
                  </div>
+
+                 <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Geographical Coverage</label>
+                                @include('partials.publications.area_dropdown',['class'=>'select2'])
+                            </div>
+                </div>
+
                  
-                 <div class="col-md-6">
+                 <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Publication URL Link</label>
                                 <input type="text" placeholder="URL Link" class="form-control url" id="publication" name="link" required>
@@ -66,13 +74,7 @@
                         </div>
                        
                         
-                 <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage</label>
-                                @include('partials.publications.area_dropdown')
-                            </div>
-                </div>
-
+                 
                 <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="summernote">Publication Description</label>
@@ -130,5 +132,6 @@
 @endsection
 
 @section('scripts')
+    @include('common.select2')
     @include('account.partials.create_js')
 @endsection

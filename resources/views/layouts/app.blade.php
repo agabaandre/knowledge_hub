@@ -11,14 +11,7 @@
 
 @yield('styles')
 
-@if(Session::has('alert'))
-
-<div class="alert alert-{{ ($alert_class)?$alert_class:'success' }}" role="alert">
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-hidden="true">×</button>
-        {!! Session::get('alert') !!}</a>
-</div>
-@endif
-
+@include('layouts.partials.alerts')
 
 @yield('content')
 @yield('scripts')

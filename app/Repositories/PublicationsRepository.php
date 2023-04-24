@@ -19,7 +19,7 @@ class PublicationsRepository{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs = Publication::orderBy('id','desc');
+        $pubs       = Publication::orderBy('id','desc');
 
         if($request->term){
             $pubs->where('title','like',$request->term.'%');
@@ -40,7 +40,7 @@ class PublicationsRepository{
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
-        return  $results;
+        return  $results->appends($request->all());
     }
 
     public function with_pending_comments($request){
@@ -53,6 +53,7 @@ class PublicationsRepository{
         });
         
         $results = $pubs->paginate($rows_count);
+        return $results;
     }
 
     public function my_publications(Request $request){
@@ -271,11 +272,6 @@ class PublicationsRepository{
 
         $summary->save();
    }
-
-
-    
-
-
 
 
 

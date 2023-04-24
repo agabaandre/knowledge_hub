@@ -9,7 +9,6 @@
 @section('content')
 
     @include('home.partials.spotlight')
-   {{-- @include('home.partials.banner') --}}
     @include('home.partials.top_categories')
     @include('home.partials.featured')
     @include('home.partials.top_searches')
@@ -19,8 +18,6 @@
 @endsection
 
 @section('scripts')
-
-
 
 
 <script>
@@ -40,17 +37,6 @@ function showComments(elem){
 				placement:'bottom',
                 manual:'hover'
 			});
-
-          //  $('.pop'+elem).popover();
-
-
-        
-    //    if(!showing){
-    //        $('.pop'+elem).show();
-    //     }
-    //     else{
-    //         $('.pop'+elem).hide();
-    //     }
 
 }
 

@@ -12,7 +12,6 @@
 	     <div class="card col-lg-12 single-border mb-2" data-aos="{{($i>2)?'zoom-in':''}}" data-aos-delay="100">
           <div class="card-body text-left">
           	<div class="row">
-			    <!--<a href="{{ url('records/resource')}}?id={{$row->id}}">-->
 						@php
 							if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
 								$image_link = storage_link('uploads/publications/'.$row->cover);

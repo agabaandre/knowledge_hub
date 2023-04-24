@@ -185,7 +185,7 @@
 			setTimeout(function(){
 
 				$('.alert').fadeOut('slow')
-			},3000);
+			},10000);
 
 		});
 
