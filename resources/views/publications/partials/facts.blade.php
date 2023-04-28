@@ -6,7 +6,7 @@
         <div class="card-body">
             <h5 class="card-title">{{$row->fact_title}}</h5>
             <h6 class="card-subtitle mb-2 text-muted">{{$row->fact_summary}}</h6>
-            <a href="#" class="card-link text-primary">Learn More</a>
+            <a href="{{ url('facts/fact') }}?ref={{$row->id}}" class="card-link text-primary">Learn More</a>
         </div>
         </div>
         @endforeach

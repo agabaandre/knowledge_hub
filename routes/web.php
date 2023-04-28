@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
+use App\Http\Controllers\FactsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -169,6 +170,8 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::get("/delete",[QuizController::class,'destroy']);
     });
 
+   
+
 });
 
 
@@ -198,6 +201,12 @@ Route::group(['prefix' => 'permissions','middleware'=>['auth','web']], function(
 Route::group(["prefix"=>"forums"],function(){
     Route::get("/",[ForumsController::class,'index'])->name('forums.index');
     Route::get("/thread",[ForumsController::class,'thread'])->name('forums.thread');
+});
+
+ //facts
+ Route::group(["prefix"=>"facts"],function(){
+        
+    Route::get("/fact",[FactsController::class,'details']);
 });
 
 

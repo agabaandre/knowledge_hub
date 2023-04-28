@@ -41,7 +41,7 @@
 				<i class="lni lni-archive mr-1"></i>Sub Theme: {!!$row->sub_theme->description!!}</span>
 				
 				<span class="muted medium ml-2 text-muted mt-1 "><br>
-				<i class="lni lni-empty-file mr-1"></i>Type: {{$row->file_type->name}}</span>
+				<i class="lni lni-empty-file mr-1"></i>Type: {{@$row->file_type->name}}</span>
 				
 				<span class="text-muted medium d-block mt-1">
 					<span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: {{time_ago($row->updated_at)}} </span>
