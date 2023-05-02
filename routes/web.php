@@ -230,10 +230,13 @@ Route::group(['prefix' => 'permissions','middleware'=>['auth','web']], function(
 
 
 Route::group(["prefix"=>"forums"],function(){
+
     Route::get("/",[ForumsController::class,'index'])->name('forums.index');
-    Route::get("/create",[ForumsController::class,'create'])->name('forums.index');
+    Route::get("/create",[ForumsController::class,'create'])->name('forums.create');
     Route::get("/thread",[ForumsController::class,'thread'])->name('forums.thread');
     Route::post("/comment",[ForumsController::class,'comment'])->name('forums.comment');
+    Route::post("/publish",[ForumsController::class,'publish'])->name('forums.publish');
+     
 });
 
  //facts

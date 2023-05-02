@@ -21,7 +21,7 @@
             <div class="modal-body">
                <div class="row">
                     
-                 <div class="col-md-6">
+                 <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Forum Title</label>
                                 <input type="text" placeholder="Forum Title" class="form-control url" id="title" name="title" required>
