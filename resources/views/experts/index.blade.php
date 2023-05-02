@@ -18,12 +18,17 @@
 				<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
 					<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
 						<h6 class="mb-0 ft-medium fs-sm" {{ (count($experts)==0)?'py-5':'' }}>
-							{{ count($experts) }} {{ (count($experts)>0 &&  isset($_GET['slug']) && !empty($_GET['slug']))?$experts[0]->type->type_name:'Resources' }} {{ (count($experts)>1)?'s':'' }} Available
+							{{ count($experts) }} {{ (count($experts)>0 &&  isset($_GET['slug']) && !empty($_GET['slug']))?$experts[0]->type->type_name:'Experts' }} {{ (count($experts)>1)?'':'' }} Available
 						</h6>
 					</div>
-					<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
-						<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
-					</div>
+					
+					@auth
+						@if(count($experts)>0)
+						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
+							<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+						</div>
+						@endif
+					@endif
 				</div>
 			</div>
 		</div>

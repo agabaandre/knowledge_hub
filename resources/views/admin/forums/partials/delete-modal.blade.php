@@ -4,7 +4,9 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
             </div>
             <div class="modal-body">
                 <p>
@@ -21,10 +23,11 @@
 </div>
 
     <script>
+        
         var toDeleteRow = '';
+
         function deleteRow () {
-            
-            let url = `{{ route('account.pub_delete')}}?id=${toDeleteRow}`;
+            let url = `{{ url('admin/forums/delete')}}?id=${toDeleteRow}`;
 
                 fetch(url)
                 .then(res => res.text())
@@ -35,8 +38,10 @@
                 })
         }
 
+
         function openDeleteModal (row = 0) {
             toDeleteRow = row;
             $('#delete-modal').modal('show');
         }
+
     </script>

@@ -114,4 +114,9 @@ class AccountController extends Controller
 
     }
 
+    public function delete_publication(Request $request)
+    {
+        $this->publicationsRepo->delete($request->id);
+    }
+
 }

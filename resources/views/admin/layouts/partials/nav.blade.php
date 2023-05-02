@@ -4,13 +4,13 @@
 		<nav class="horizontalMenu clearfix">
 			<ul class="horizontalMenu-list">
 				@can('view_dashboard')
-					<li aria-haspopup="true"><a href="{{ url('dashboard') }}" class="sub-icon"><i class=""></i>Main Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
+					<li aria-haspopup="true"><a href="{{ url('admin') }}" class="sub-icon"><i class=""></i>Main Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					</li>
 				@endcan
 
 				@can('view_rcc_dashboard')
 					
-				<li aria-haspopup="true"><a href="{{ url('rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
 				@endcan
 
 				</li>
@@ -20,7 +20,7 @@
 					<ul class="sub-menu">
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> Create New</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Publications</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Moderate Publications</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Comments Publications</a></li>
 					</ul>
 				</li>
 				@endcan
@@ -28,8 +28,8 @@
 				@can('view_forumns')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Forums<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('forums/admin') }}" class="slide-item">Forums</a></li>
-						<li aria-haspopup="true"><a href="{{ url('forums/moderate') }}" class="slide-item">Moderate Forums</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/forums') }}" class="slide-item">Forums</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/forums/moderate') }}" class="slide-item">Moderate Forums</a></li>
 					</ul>
 				</li>
 				@endcan
@@ -46,56 +46,51 @@
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
 						@can('view_file_types')
-						<li aria-haspopup="true"><a href="{{ url('filetypes') }}">Resource and Asset Types</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/filetypes') }}">Resource and Asset Types</a></li>
 						@endcan
 						
 						@can('view_sources')
-						<li aria-haspopup="true"><a href=" {{ url('authors') }}">Data Sources/Authors</a></li>
+						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
 						@endcan
 
 						@can('view_themes')
-						<li aria-haspopup="true"><a href="{{ url('healththemes') }}">Security Themes</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/healththemes') }}">Security Themes</a></li>
 						@endcan
 						@can('view_sub_themes')
-						<li aria-haspopup="true"><a href="{{ url('subthemes') }}">Security Sub-Themes</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/subthemes') }}">Security Sub-Themes</a></li>
 						@endcan
 
 						@can('view_geo_coverage')
-						<li aria-haspopup="true"><a href=" {{ url('geoareas') }}">Geographical Coverage</a></li>
-						@endcan
-
-						<!-- File Types -->
-						@can('view_file_types')
-						<li aria-haspopup="true"><a href="{{ url('filetypes') }}">File Types</a></li>
+						<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
 						@endcan
 
 						@can('view_tags')
-						<li aria-haspopup="true"><a href="{{ url('tags') }}">Search Tags</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Search Tags</a></li>
 						@endcan
 
 						@can('view_quotes')
-						<li aria-haspopup="true"><a href="{{ url('quotes') }}">Quotes</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/quotes') }}">Quotes</a></li>
 						@endcan
 
 						@can('view_quize')
-						<li aria-haspopup="true"><a href="{{ url('quize') }}">Quiz</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/quize') }}">Quiz</a></li>
 						@endcan
 
 						<!-- Privacy Policy -->
 						@can('view_asset_types')
-						<li aria-haspopup="true"><a href="{{ url('assettypes') }}">Health Asset Types</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/assettypes') }}">Health Asset Types</a></li>
 						@endcan
 
 						@can('view_assets')
-						<li aria-haspopup="true"><a href="{{ url('healthassets/admin') }}">Health Assets</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/healthassets') }}">Health Assets</a></li>
 						@endcan
 
 						@can('experts')
-						<li aria-haspopup="true"><a href="{{ url('experts/admin') }}">Health Experts</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Health Experts</a></li>
 						@endcan
 						
 						@can('view_privacy_policy')
-						<li aria-haspopup="true"><a href="{{ url('privacy_policy') }}">Privacy Policy</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/privacy_policy') }}">Privacy Policy</a></li>
 						@endcan
 					</ul>
 				</li>

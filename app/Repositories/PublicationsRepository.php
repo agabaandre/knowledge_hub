@@ -22,6 +22,9 @@ class PublicationsRepository{
         $rows_count = ($request->rows)?$request->rows:20;
         $pubs       = Publication::orderBy('id','desc');
 
+        if($request->order_by_visits)
+         $pubs->orderBy('id','desc');
+
         if($request->term){
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
@@ -38,6 +41,13 @@ class PublicationsRepository{
 
          if($request->area)
          $pubs->where('geographical_coverage_id',$request->area);
+
+         if($request->tag){
+
+            $tag = Tag::where('tag_text',$request->tag)->first();
+            $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
+            $pubs->whereIn('id',$tags->toArray());
+        }
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
@@ -284,6 +294,22 @@ class PublicationsRepository{
     $comment->save();
 
     return $comment;
+}
+
+public function approve_comment($id){
+
+    $comment = PublicationComment::find($id);
+    $comment->status = 'approved';
+    $comment->update();
+
+}
+
+public function reject_comment($id){
+
+    $comment = PublicationComment::find($id);
+    $comment->status='rejected';
+    $comment->update();
+
 }
 
 

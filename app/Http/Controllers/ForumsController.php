@@ -17,6 +17,7 @@ class ForumsController extends Controller
     public function index(Request $request){
 
         $data['forums'] = $this->forumsRepo->get($request);
+        $data['search'] = (object) $request->all();
         return view('forums.index',$data);
     }
 

@@ -18,9 +18,17 @@
 				<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
 					<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
 						<h6 class="mb-0 ft-medium fs-sm" {{ (count($assets)==0)?'py-5':'' }}>
-							{{ count($assets) }} {{ (count($assets)>0 &&  isset($_GET['slug']) && !empty($_GET['slug']))?$assets[0]->type->type_name:'Resources' }} {{ (count($assets)>1)?'s':'' }} Available
+							{{ count($assets) }} {{ (count($assets)>0 &&  isset($_GET['slug']) && !empty($_GET['slug']))?$assets[0]->type->type_name:'Resources' }} Available
 						</h6>
 					</div>
+
+					@auth
+						@if(count($assets)>0)
+						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
+							<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+						</div>
+						@endif
+					@endauth
 				</div>
 			</div>
 		</div>

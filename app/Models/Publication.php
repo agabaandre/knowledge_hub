@@ -10,7 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value','is_favourite'];
+    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -66,5 +66,19 @@ class Publication extends Model
 
     public function summaries(){
         return $this->hasMany(PublicationSummary::class,"resource_id");
+    }
+
+    public function getApprovedCommentsAttribute(){
+        $comments = PublicationComment::where('publication_id',$this->id)
+        ->where('status','approved')
+        ->get();
+        return $comments;
+    }
+
+    public function getPendingCommentsAttribute(){
+        $comments = PublicationComment::where('publication_id',$this->id)
+        ->where('status','pending')
+        ->get();
+        return $comments;
     }
 }

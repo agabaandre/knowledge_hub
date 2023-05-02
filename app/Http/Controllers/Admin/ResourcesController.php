@@ -76,5 +76,14 @@ class ResourcesController extends Controller
         return $this->publicationsRepo->delete($request->id);
     }
 
+    public function approve_comment(Request $request){
+        return $this->publicationsRepo->approve_comment($request->id);
+    }
+
+
+    public function reject_comment(Request $request){
+        return $this->publicationsRepo->reject_comment($request->id);
+    }
+
   
 }

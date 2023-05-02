@@ -18,6 +18,7 @@ use App\Http\Controllers\ThemesController;
 
 use App\Http\Controllers\Admin\GeoAreasController;
 use App\Http\Controllers\Admin\FileTypesController;
+use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
@@ -98,7 +99,8 @@ Route::group(["prefix"=>"account",'middleware'=>['auth','web']],function(){
     Route::get("/favourites",[AccountController::class,'favourites'])->name('account.favourites');
     Route::get("/publish",[AccountController::class,'publish'])->name('account.publish');
     Route::get("/publications",[AccountController::class,'publications'])->name('account.publications');
-    Route::get("/publications/delete",[AccountController::class,'remove_favourite'])->name('account.pub_delete');
+    Route::get("/publications/delete",[AccountController::class,'delete_publication'])->name('account.pub_delete');
+    Route::get("/publications/favdelete",[AccountController::class,'remove_favourite'])->name('account.fav_delete');
     Route::post("/publication",[AccountController::class,'submit_publication'])->name('account.publication');
     Route::get("/newversion",[AccountController::class,'create_version'])->name('account.newversion');
     Route::post("/summary",[AccountController::class,'submit_summary'])->name('account.summary');
@@ -119,6 +121,8 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::post("/save",[ResourcesController::class,'store']);
         Route::get("/moderate",[ResourcesController::class,'moderate']);
         Route::get("/delete",[ResourcesController::class,'destroy']);
+        Route::get("/approve_comment",[ResourcesController::class,'approve_comment']);
+        Route::get("/reject_comment",[ResourcesController::class,'reject_comment']);
     });
 
     //geo areas
@@ -171,6 +175,14 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::post("/save",[QuizController::class,'store']);
         Route::get("/delete",[QuizController::class,'destroy']);
     });
+
+    //filetypes
+    Route::group(["prefix"=>"forums"],function(){
+    
+        Route::get("/",[ForumsAdminController::class,'index']);
+        Route::get("/delete",[ForumsAdminController::class,'destroy']);
+    });
+
 
    
 

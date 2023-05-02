@@ -48,5 +48,9 @@ class ForumsRepository{
         return Forum::find($id);
     }
 
+    public function delete($id){
+        return Forum::find($id)->delete();
+    }
+
 
 }

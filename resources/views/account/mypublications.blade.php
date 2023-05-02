@@ -20,11 +20,10 @@
 			<table class="table table-striped table table-bordered">
 				<thead>
 					<tr>
-
-						<th>#</th>
+						<th></th>
 						<th>Title</th>
 						<th>Description</th>
-						<th>Edit/Delete</th>
+						<th>Action</th>
 					</tr>
 				</thead>
 				  @php
@@ -32,11 +31,11 @@
                   @endphp
 				@foreach ($publications as $row) 
 					<tr>
-						<td width="5%">{{$i++}} <i class="fa {{$row->file_type->icon}} text-muted"></i></td>
+						<td width="5%"><i class="fa {{$row->file_type->icon}} text-muted"></i></td>
 						<td>
-							<a href="{{ $row->publication}}" target="_blank">{{ truncate($row->title, 50) }} </a>
+							<a href="{{ $row->publication}}" target="_blank">{!! truncate($row->title, 50) !!} </a>
 						</td>
-						<td>{{ truncate($row->description, 100)}}</td>
+						<td>{!! truncate($row->description, 100) !!}</td>
 						<td>
 							<a href="#edit{{ $row->id}}"><i class="fa fa-edit"></i> Edit
 							<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger  ml-3">
@@ -48,6 +47,8 @@
 
 				@endif
 			</table>
+
+			{{ $publications->links() }}
 
 			@include('account.partials.delete_pub')
 

@@ -37,8 +37,10 @@
 								 <li><a href="{{ url('experts')}}">Work Force Rosters</a></li>
 								@endcan
 
-								<li><a href="{{ url('healthassets')}}?slug=health">Public Health Assets</a></li>
-								<li><a href="{{ url('healthassets')}}?slug=initiatives">Public Health Initiatives</a></li>
+								@foreach($asset_types as $type)
+								<li><a href="{{ url('healthassets')}}?slug={{trim($type->slug)}}">{{$type->type_name}}</a></li>
+								@endforeach
+
 							</ul>
 						</li>
 						<li><a href="{{ url('forums')}}">Forums</a></li>

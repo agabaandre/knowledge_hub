@@ -24,6 +24,7 @@
 	  </div>
 
 	<div class="col-lg-4">
+	@include('home.partials.tags')
     @include('publications.partials.facts')
 	<br/>
     </div>

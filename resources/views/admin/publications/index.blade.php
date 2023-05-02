@@ -64,7 +64,7 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
-						<th>#</th>
+						<th></th>
 						<th>Title</th>
 						<th>Description</th>
 						<th>Author</th>
@@ -80,7 +80,7 @@
 
 					@foreach($publications as $publication)
 						<tr>
-							<td width="5%">{{ $i++ }} <i class="fa {{ $publication->file_type->icon }} fa-2x text-muted"></i></td>
+							<td width="5%"><i class="fa {{ $publication->file_type->icon }} fa-2x text-muted"></i></td>
 							<td>
                               <a href="{{ $publication->publication }}" target="_blank">
 								{!!truncate($publication->title, 30) !!}

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\View\Composers\AdminStatsViewComposer;
+use App\View\Composers\AssetTypesViewComposer;
 use App\View\Composers\AuthorsViewComposer;
 use App\View\Composers\CountriesViewComposer;
 use App\View\Composers\FactsViewComposer;
@@ -41,9 +42,10 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['publications/partials/*','partials/publications/*'],SubThemesViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],GeoAreasViewComposer::class);
         View::composer(['partials/authors/*'],AuthorsViewComposer::class);
-        View::composer(['partials/tags/*'],TagsViewComposer::class);
+        View::composer(['partials/tags/*','publications/*'],TagsViewComposer::class);
         View::composer(['partials/countries/*'],CountriesViewComposer::class);
-        Facades\View::composer('*',AdminStatsViewComposer::class);
+        Facades\View::composer('admin/*',AdminStatsViewComposer::class);
+        Facades\View::composer('*',AssetTypesViewComposer::class);
         
     }
 }
