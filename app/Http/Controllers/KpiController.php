@@ -19,7 +19,7 @@ class KpiController extends Controller
 
         $data['search'] = (object) $request->all();
         $data['indicators'] = $this->indicatorsRepo->get($request);
-        return view('kpi.index',$data);
+        return view('admin.kpi.index',$data);
     }
 
     public function save(Request $request){
@@ -32,7 +32,7 @@ class KpiController extends Controller
 
         $data['search'] = (object) $request->all();
         $data['data'] = $this->indicatorsRepo->get_data($request);
-        return view('kpi.index',$data);
+        return view('admin.kpi.data',$data);
     }
 
     
