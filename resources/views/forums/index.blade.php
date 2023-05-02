@@ -46,7 +46,7 @@
 														{!! truncate($forum->forum_description,400) !!}
 													</a>
 													<br>
-													<a class="text-success" href="{{ url('forums/thread')}}?id={{$forum->id}}">View threads</a>
+													<a class="text-success" href="{{ url('forums/thread')}}?id={{$forum->id}}">View Discussion</a>
 													</p>
 											</div>
 											<div class="jb-list-01-info d-block mb-3">

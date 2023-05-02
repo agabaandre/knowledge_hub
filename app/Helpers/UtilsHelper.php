@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\URL;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -126,6 +127,30 @@ if(!function_exists('storage_link')){
      }
    
    }
+
+   if(!function_exists('current_url')){
+	function current_url(){
+
+	$current = URL::full();
+	$appendable = (strpos($current,'?')>-1)?"&":"?";
+	return $current.$appendable ;
+
+	}
+}
+
+function export_excel($records) {
+	$heading = false;
+		if(!empty($records))
+		  foreach($records as $row) {
+			if(!$heading) {
+			  // display field/column names as a first row
+			  echo implode("\t", array_keys($row)) . "\n";
+			  $heading = true;
+			}
+			echo implode("\t", array_values($row)) . "\n";
+		}
+	exit;
+}
 
    
 

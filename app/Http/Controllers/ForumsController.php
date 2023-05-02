@@ -24,8 +24,15 @@ class ForumsController extends Controller
 
         $data['forum'] = $this->forumsRepo->find($request->id);
         $request['rows'] = 6;
+        $data['search'] = (object) $request->all();
         $data['forums'] = $this->forumsRepo->get($request);
         return view('forums.show',$data);
+    }
+
+    public function comment(Request $request){
+        
+        $this->forumsRepo->save_comment($request);
+        return back();
     }
 
 }

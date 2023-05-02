@@ -50,7 +50,8 @@
                                 </span>
                                 <small class="text-muted">Posted By</small>
                                 <h3 class="text-muted">{{ $forum->user->name }}</h3>
-                                
+
+                               
                             </div>
                             
                         </div>
@@ -60,7 +61,7 @@
                             
                             <div class="comment-area">
                                 <div class="all-comments">
-                                    <h3 class="comments-title">{{ count($forum->comments)}} Comments</h3>
+                                    <h3 class="comments-title text-muted">{{ (count($forum->comments)>0)?count($forum->comments):'No '}} Comments</h3>
                                     <div class="comment-list">
                                         <ul>
                                             
@@ -71,12 +72,18 @@
                                                     <div class="comment-details">
                                                         <div class="comment-meta">
                                                             <div class="comment-left-meta">
-                                                                <h4 class="author-name">{{  $comment->user->name }}</h4>
-                                                                <div class="comment-date">{{ time_ago($comment->created_at)}}</div>
+                                                                @if(is_valid_image(storage_link('uploads/users/'.$comment->user->photo)))
+                                                                <img src="{{ storage_link('uploads/users/'.$comment->user->photo)}}" width="30px" class="avatar rounded" >
+                                                                @else
+                                                                    <img src="{{ storage_link('uploads/users/'.$forum->user->photo)}}"  width="30px" class="avatar rounded">
+                                                                @endif
+                                                                <h4 class="author-name">{{  (@current_user() && @current_user()->id == $comment->created_by )?'You':$comment->user->name }}</h4>
+                                                                <div class="comment-date"><small class="text-success">{{ time_ago($comment->created_at)}}</small></div>
                                                             </div>
-                                                            <div class="comment-reply">
+
+                                                            <!--<div class="comment-reply">
                                                                 <a href="#" class="reply text-success"><span class="icona"><i class="ti-back-left"></i></span> Reply</a>
-                                                            </div>
+                                                            </div>-->
                                                         </div>
                                                         <div class="comment-text">
                                                             <p>{{$comment->comment}}</p>
@@ -85,30 +92,29 @@
                                                     </div>
                                                 </article>
                                                 <!--replies-->
-                                                @foreach($comment->replies as $reply): 
-                                                        @include('forums.partials.comment_replies') 
-                                                @endforeach; 
+
+                                                @if($comment->replies)
+
+                                                    @foreach($comment->replies as $reply)
+                                                            @include('forums.partials.comment_replies') 
+                                                    @endforeach
+
+                                                @endif
                                                 
                                             </li>
                                             @endforeach
                                         </ul>
                                     </div>
                                 </div>
+
+                               @auth
                                 <div class="comment-box submit-form mt-4">
                                     <h3 class="reply-title">Post Comment</h3>
                                     <div class="comment-form">
-                                        <form action="{{ url('forums/index')}}">
+                                        <form action="{{ url('forums/comment')}}" method="post">
                                             <div class="row">
-                                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control" placeholder="Your Name">
-                                                    </div>
-                                                </div>
-                                                <div class="col-lg-6 col-md-6 col-sm-12">
-                                                    <div class="form-group">
-                                                        <input type="text" class="form-control" placeholder="Your Email">
-                                                    </div>
-                                                </div>
+                                                @csrf
+                                                <input type="hidden" name="id" value="{{$forum->id}}"/>
                                                 <div class="col-lg-12 col-md-12 col-sm-12">
                                                     <div class="form-group">
                                                         <textarea name="comment" class="form-control" cols="30" rows="6" placeholder="Type your comment...."></textarea>
@@ -123,6 +129,10 @@
                                         </form>
                                     </div>
                                 </div>
+                                @else
+                                 <h5 class="text-center text-danger mt-5 mb-5"><i class="fa fa-info-circle"></i> Only logged in users can comment</h5>
+                                @endauth
+
                             </div>
                             
                         </div>

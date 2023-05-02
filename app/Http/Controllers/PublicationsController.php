@@ -79,5 +79,11 @@ class PublicationsController extends Controller
         return back();
     }
 
+    public function comment(Request $request){
+        
+        $this->publicationsRepo->save_comment($request);
+        return back();
+    }
+
    
 }

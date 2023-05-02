@@ -59,11 +59,13 @@ Route::group(["prefix"=>"browse"],function(){
 });
 
 Route::group(["prefix"=>"records"],function(){
-    Route::get("resource",[PublicationsController::class,'show']);
-    Route::get("search",[PublicationsController::class,'search']);
-    Route::get("subtheme",[PublicationsController::class,'subtheme_pubs']);
-    Route::get("autocomplete",[PublicationsController::class,'autocomplete']);
-    Route::get("shortened",[PublicationsController::class,'shortened']);
+    Route::get("/",[PublicationsController::class,'search']);
+    Route::get("/resource",[PublicationsController::class,'show']);
+    Route::get("/search",[PublicationsController::class,'search']);
+    Route::get("/subtheme",[PublicationsController::class,'subtheme_pubs']);
+    Route::get("/autocomplete",[PublicationsController::class,'autocomplete']);
+    Route::get("/shortened",[PublicationsController::class,'shortened']);
+    Route::post("/comment",[PublicationsController::class,'comment']);
 });
 
 Route::group(["prefix"=>"authors"],function(){
@@ -201,6 +203,7 @@ Route::group(['prefix' => 'permissions','middleware'=>['auth','web']], function(
 Route::group(["prefix"=>"forums"],function(){
     Route::get("/",[ForumsController::class,'index'])->name('forums.index');
     Route::get("/thread",[ForumsController::class,'thread'])->name('forums.thread');
+    Route::post("/comment",[ForumsController::class,'comment'])->name('forums.comment');
 });
 
  //facts

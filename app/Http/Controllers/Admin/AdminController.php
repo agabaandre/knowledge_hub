@@ -25,7 +25,7 @@ class AdminController extends Controller
         $request['rows']      = 10;
 		$data['publications'] = $this->publicationsRepo->get($request);
       
-        return view('admin.home.index',$data);
+        return view('admin.dashboard.index',$data);
     }
 
 

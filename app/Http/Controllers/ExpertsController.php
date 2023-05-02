@@ -16,6 +16,7 @@ class ExpertsController extends Controller
 
     public function index(Request $request){
 
+        $data['search'] = (object) $request->all();
         $data['experts'] = $this->expertsRepo->get($request);
         return view('experts.index',$data);
     }

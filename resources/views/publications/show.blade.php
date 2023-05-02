@@ -163,9 +163,9 @@
 																<h4 class="author-name">{{ ($comment->user) ? $comment->user->name : 'Anonymous'}}></h4>
 																<div class="comment-date">{{ time_ago($comment->created_at)}}></div>
 															</div>
-															<div class="comment-reply">
+															<!--<div class="comment-reply">
 																<a href="#" class="reply text-success"><span class="icona"><i class="ti-back-left"></i></span> Reply</a>
-															</div>
+															</div>-->
 														</div>
 														<div class="comment-text">
 															<p>{{ nl2br($comment->comment) }}</p>
@@ -189,7 +189,9 @@
 				</div>
 
 				<!-- Sidebar -->
+				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+				@if(count($publication->summaries)>0 || count($publication->versioning)>0)
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
 					
 					
@@ -214,11 +216,16 @@
 								@endforeach
 							</ul>
 						@endif
+
+						
+				        @endif
+
+						@auth
 			
 						<h4 class="ft-medium fs-md mb-3">Got something to say about this resource?</h4>
 
-						<form action="{{ url('publications/comment') }}" class="_apply_form_form" >
-
+						<form action="{{ url('records/comment') }}" method="post" class="_apply_form_form" >
+						@csrf
 						<input type="hidden" name="publication_id" value="{{ $publication->id }}" />
 						<input type="hidden" name="user_id" value="{{ @current_user()->user_id }}" />
 						<div class="form-group">
@@ -231,6 +238,9 @@
 						</div>
 
                          </form>
+						 
+						 @endauth
+
 					</div>
 				</div>
 

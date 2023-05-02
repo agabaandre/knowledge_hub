@@ -21,6 +21,9 @@
 							{{ count($experts) }} {{ (count($experts)>0 &&  isset($_GET['slug']) && !empty($_GET['slug']))?$experts[0]->type->type_name:'Resources' }} {{ (count($experts)>1)?'s':'' }} Available
 						</h6>
 					</div>
+					<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
+						<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+					</div>
 				</div>
 			</div>
 		</div>

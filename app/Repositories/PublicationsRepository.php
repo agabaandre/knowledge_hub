@@ -5,6 +5,7 @@ use App\Models\Author;
 use App\Models\Favourite;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
+use App\Models\PublicationComment;
 use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
@@ -272,6 +273,18 @@ class PublicationsRepository{
 
         $summary->save();
    }
+
+   public function  save_comment(Request $request){
+
+    $comment = new PublicationComment();
+
+    $comment->user_id = current_user()->id;
+    $comment->publication_id = $request->publication_id;
+    $comment->comment = $request->comment;
+    $comment->save();
+
+    return $comment;
+}
 
 
 

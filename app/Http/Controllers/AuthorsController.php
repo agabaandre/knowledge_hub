@@ -20,6 +20,7 @@ class AuthorsController extends Controller
 
     public function index(Request $request){
 
+        $data['search'] = (object) $request->all();
         $data['authors'] = $this->authorsRepo->get($request);
         return view('authors.index',$data);
     }
