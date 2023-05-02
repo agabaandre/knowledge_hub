@@ -30,6 +30,11 @@ class ForumsController extends Controller
         return view('forums.show',$data);
     }
 
+    public function create(Request $request){
+
+        return view('forums.create');
+    }
+
     public function comment(Request $request){
         
         $this->forumsRepo->save_comment($request);
