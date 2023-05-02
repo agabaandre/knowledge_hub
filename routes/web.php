@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AuthorsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthorsController;
@@ -24,6 +25,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\FactsController;
+use App\Http\Controllers\KpiController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -183,8 +185,23 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
     });
 
+    //authors
+    Route::group(["prefix"=>"authors"],function(){
+    
+        Route::get("/",[AuthorsAdminController::class,'index']);
+        Route::get("/delete",[AuthorsAdminController::class,'destroy']);
+    });
 
-   
+    //authors
+    Route::group(["prefix"=>"kpi"],function(){
+    
+        Route::get("/",[KpiController::class,'index']);
+        Route::get("/data",[KpiController::class,'data']);
+        Route::get("/save",[KpiController::class,'save']);
+        Route::get("/delete",[KpiController::class,'destroy']);
+    });
+
+
 
 });
 

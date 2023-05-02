@@ -51,7 +51,7 @@ class PublicationsRepository{
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
-        return  $results->appends($request->all());
+        return   ($return_array)?$results:$results->appends($request->all());
     }
 
     public function with_pending_comments($request){

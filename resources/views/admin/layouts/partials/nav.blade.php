@@ -37,8 +37,8 @@
 				@can('view_performance')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Performance<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('kpi/create') }}" class="slide-item">Add Indicator</a></li>
-						<li aria-haspopup="true"><a href="{{ url('kpi/data') }}" class="slide-item">Inidicator Data</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/kpi') }}" class="slide-item">Add Indicator</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/kpi/data') }}" class="slide-item">Inidicator Data</a></li>
 					</ul>
 				</li>
 				@endcan

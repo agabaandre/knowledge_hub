@@ -7,5 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Kpi extends Model
 {
+    protected $table ="kpi";
+    
     use HasFactory;
 }
