@@ -56,7 +56,7 @@
 	</div>
 
 	<!-- Include delete-modal.php -->
-	@include('admin.indicators.partials.delete-modal')
-	@include('admin.indicators.partials.create-modal')
+	@include('admin.kpi.partials.delete-modal')
+	@include('admin.kpi.partials.create-modal')
 
     @endsection
