@@ -16,14 +16,11 @@
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
-           <form method="POST" action="{{ route('account.publication') }}" id='publications' class='publications'>
+           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications'>
             @csrf
             <div class="modal-body">
-                <input type="hidden" name="original_id" id="id" value="{{$publication->id}}" class="newform">
-                <div class="row">
+               <div class="row">
                     
-             
-
                  <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Forum Title</label>

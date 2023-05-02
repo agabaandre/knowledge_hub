@@ -41,4 +41,9 @@ class ForumsController extends Controller
         return back();
     }
 
+    public function publish(Request $request)
+    {
+         return back();
+    }
+
 }
