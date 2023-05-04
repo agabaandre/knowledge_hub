@@ -33,5 +33,9 @@ class AuthorsRepository{
         return Author::find($id)->delete();
     }
 
+    public function count(){
+        return count(Author::all());
+    }
+
 
 }

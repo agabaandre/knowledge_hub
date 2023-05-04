@@ -2,21 +2,28 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\AreasRepository;
 use App\Repositories\AuthorsRepository;
+use App\Repositories\ForumsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
+use App\Repositories\ThemesRepository;
 use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$areasRepo,$forumsRepo,$themesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo)
+    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,
+	AreasRepository $areasRepo,ForumsRepository $forumsRepo,ThemesRepository $themesRepo)
     {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
+		$this->areasRepo        = $areasRepo;
+		$this->forumsRepo 		= $forumsRepo;
+		$this->themesRepo       = $themesRepo;
     }
     
     public function index(Request $request){
@@ -48,28 +55,28 @@ class HomeController extends Controller
 				"icon"=>"fa fa-heart",
 				'link'=>"browse/themes",
 				"image"=>"theme.png",
-				"stats"=> 0
+				"stats"=> $this->themesRepo->count()
 			],
 			[
 				"title"=>"Resource Contibuting Sources",
 				"icon"=>"fa fa-business-time",
 				'link'=>"browse/authors",
 				"image"=>"author.png",
-				"stats"=> 0
+				"stats"=> $this->authorsRepo->count()
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
 				'link'=>"browse/areas",
 				"image"=>"location.png",
-				"stats"=>0
+				"stats"=>$this->areasRepo->count()
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
 				'link'=>"forums",
 				"image"=>"location.png",
-				"stats"=>0
+				"stats"=>$this->forumsRepo->count()
 			]
 		);
 	}

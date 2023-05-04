@@ -32,5 +32,10 @@ class AreasRepository{
         return Country::all();
     }
 
+    
+    public function count(){
+        return count(GeoCoverage::all());
+    }
+
 
 }

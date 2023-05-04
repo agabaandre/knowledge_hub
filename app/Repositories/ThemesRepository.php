@@ -70,6 +70,9 @@ class ThemesRepository{
         return SubThemeticArea::find($id)->delete();
     }
 
+    public function count(){
+        return count(ThemeticArea::all());
+    }
 
 
 }

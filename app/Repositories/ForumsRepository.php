@@ -52,5 +52,10 @@ class ForumsRepository{
         return Forum::find($id)->delete();
     }
 
+    public function count(){
+        return count(Forum::all());
+    }
+
+
 
 }

@@ -30,7 +30,7 @@
 
 						<li><a href="{{ url('/')}}">Home</a></li>
 						<li><a href="{{ url('records/search')}}">Search</a></li>
-						<li class=""><a href="javascript:void(0);">Resources<span class="submenu-indicator"></span></a>
+						<li class=""><a href="javascript:void(0);">Data Categories<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							   
 							    @can('view_experts')

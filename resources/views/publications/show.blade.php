@@ -160,8 +160,8 @@
 													<div class="comment-details app-comment" >
 														<div class="comment-meta">
 															<div class="comment-left-meta">
-																<h4 class="author-name">{{ ($comment->user) ? $comment->user->name : 'Anonymous'}}></h4>
-																<div class="comment-date">{{ time_ago($comment->created_at)}}></div>
+																<h4 class="author-name">{{ ($comment->user) ? $comment->user->name : 'Anonymous'}}</h4>
+																<div class="comment-date">{{ time_ago($comment->created_at)}}</div>
 															</div>
 															<!--<div class="comment-reply">
 																<a href="#" class="reply text-success"><span class="icona"><i class="ti-back-left"></i></span> Reply</a>
