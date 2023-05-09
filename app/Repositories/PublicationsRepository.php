@@ -281,7 +281,7 @@ class PublicationsRepository{
 
         endif;
 
-        $summary->save();
+       return $summary->save();
    }
 
    public function  save_comment(Request $request){

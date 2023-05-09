@@ -2,23 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\AssetsRepository;
 use App\Repositories\PublicationsRepository;
+use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 class AccountController extends Controller
 {
-    private $publicationsRepo;
+    private $publicationsRepo,$usersRepo;
 
-    public function __construct( PublicationsRepository $publicationsRepo)
+    public function __construct( PublicationsRepository $publicationsRepo,UsersRepository $usersRepo)
     {
         $this->publicationsRepo       = $publicationsRepo;
+        $this->usersRepo            = $usersRepo;
     }
 
 
     public function profile(Request $request){
 
         $data['profile'] = current_user();
-        
+        $data['preferences'] = [];
+
+        foreach(current_user()->preferences as $pref){
+            $data['preferences'][] = $pref->tag_id;
+        }
+
         return view('account.profile',$data);
     }
 
@@ -118,5 +124,7 @@ class AccountController extends Controller
     {
         $this->publicationsRepo->delete($request->id);
     }
+
+
 
 }

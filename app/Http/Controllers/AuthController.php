@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Repositories\FaqsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+
 class AuthController extends Controller
 {
     private $usersRepo;
@@ -52,6 +54,54 @@ class AuthController extends Controller
         }
   
       return redirect()->route('login')->with('message', $message);
+    }
+
+    
+    public function update_profile(Request $request){
+
+        $val_rules =[
+            'first_name'=>'required',
+            'last_name'=>'required',
+            'email'=>'required',
+            'preferences'=>'required'
+        ];
+
+        $request->validate($val_rules);
+
+        $saved   = $this->usersRepo->update_profile($request);
+
+        $message = ($saved)?'Profile update successfully':'Request failed try again';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message']     = $data['alert']= $message;
+        $data['status']      = 200;
+
+        return back()->with($data);
+    }
+
+    public function update_password(Request $request){
+
+        $val_rules =[
+            'old_pass'=>'required',
+            'password' => 'min:6|required_with:password_confirmation|same:password_confirmation',
+            'password_confirmation' => 'min:6'
+        ];
+
+        $credentials =['email'=>current_user()->email, 'password'=>$request->old_pass];
+
+        if(Auth::attempt($credentials)){
+            $saved   = $this->usersRepo->update_password($request);
+        }else{
+            $saved = false;
+        }
+        
+        $message = ($saved)?'Password update successful':'Request failed, provided current password is incorrect';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message']     = $data['alert']= $message;
+        $data['status']      = 200;
+
+        return back()->with($data);
     }
 
 }

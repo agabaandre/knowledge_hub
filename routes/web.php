@@ -108,6 +108,8 @@ Route::group(["prefix"=>"account",'middleware'=>['auth','web']],function(){
     Route::post("/summary",[AccountController::class,'submit_summary'])->name('account.summary');
     Route::get("/summarize",[AccountController::class,'create_summary'])->name('account.summarize');
     Route::get("/verify",[AccountController::class,'verifyAccount'])->name('account.verify');
+    Route::post("/update",[AuthController::class,'update_profile'])->name('account.update');
+    Route::post("/secureme",[AuthController::class,'update_password'])->name('account.auth_update');
 
 });
 

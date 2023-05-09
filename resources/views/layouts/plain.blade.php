@@ -7,8 +7,6 @@
 
 @yield('styles')
 
-@include('layouts.partials.alerts')
-
 @yield('content')
 
 @include('layouts.partials.footer')

@@ -10,6 +10,8 @@
 @section('content')
 <div class="row px-3">
 
+@include('layouts.partials.alerts')
+
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
 			<h3 class="card-title float-left">My Publications</h3>
@@ -37,7 +39,7 @@
 						</td>
 						<td>{!! truncate($row->description, 100) !!}</td>
 						<td>
-							<a href="#edit{{ $row->id}}"><i class="fa fa-edit"></i> Edit
+							<a href="{{('account.editpub'}}?ref={{ $row->id}}"><i class="fa fa-edit"></i> Edit
 							<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger  ml-3">
 							<i class="fa fa-trash"></i> Delete
 						 </td>

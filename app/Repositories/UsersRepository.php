@@ -63,6 +63,37 @@ class UsersRepository{
         return User::where('verification_token',$token)->first();
     }
 
+    public function update_profile(Request $request){
+        
+        $user = User::find(current_user()->id);
+
+        $user->first_name = $request->first_name;
+        $user->last_name  = $request->last_name;
+        $user->email      = $request->email;
+        $user->name  = $request->first_name." ".$request->last_name;
+        if($request->phone_number)
+        $user->phone_number      = $request->phone_number;
+
+        if($request->preferences){
+
+            $this->save_preferences(current_user()->id,$request->preferences);
+        }
+
+        $user->update();
+
+        return $user->update();
+    }
+
+    public function update_password(Request $request){
+
+        $user = User::find(current_user()->id);
+        $newpass = Hash::make($request->password);
+        $user->password = $newpass;
+        $user->is_changed = 1;
+
+        return $user->update();
+    }
+
   
 
 

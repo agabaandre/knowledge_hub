@@ -50,4 +50,9 @@ class User extends Authenticatable
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
     }
+
+    public function preferences(){
+       return $this->hasMany(UserPreference::class);
+    }
+
 }

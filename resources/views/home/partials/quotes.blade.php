@@ -1,6 +1,6 @@
 
 
-<div class="quotes-slider px-2">
+<div class="quotes-slider px-1">
 <!-- single review -->
 @foreach($quotes as $quote)
     <div class="single_review">

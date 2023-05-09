@@ -52,8 +52,12 @@ function deleteFile(index)  {
 
                 if(my_file.indexOf('image/png')>-1 || my_file.indexOf('image/jpeg')>-1){
                 
-                    htmlToAppend = $($.parseHTML('<span class="text-danger preview_'+newIndex+' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile('+newIndex+')">Remove</span> <h6 class="preview_'+newIndex+'">'+fileName+'</h6><img width="200px" class="mt-2 rounded preview_'+newIndex+'">')).attr('src',my_file);
-                
+                    htmlToAppend = $($.parseHTML('<span class="text-danger preview_'+newIndex+' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile('+newIndex+')">Remove</span> <h6 class="preview_'+newIndex+'">'+fileName+'</h6><img width="300px" class="mt-2 rounded preview_'+newIndex+'">')).attr('src',my_file);
+                    
+                    $(placeToInsertImagePreview).removeAttr('style');
+                    $(placeToInsertImagePreview).html(htmlToAppend);
+                    return;
+
                 }else{
 
                 htmlToAppend = $($.parseHTML('<span class="text-danger  preview_'+newIndex+'" style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile('+newIndex+')">Remove</span><h6 class="preview_'+newIndex+'">'+fileName+'</h6><iframe width="500px" class="mt-2 preview_'+newIndex+'" style="width:400px; height:400px; margin-right:10px;!important" frameborder="0">')).attr('src',my_file);
