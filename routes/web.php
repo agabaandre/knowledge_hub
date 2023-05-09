@@ -103,6 +103,7 @@ Route::group(["prefix"=>"account",'middleware'=>['auth','web']],function(){
     Route::get("/publications",[AccountController::class,'publications'])->name('account.publications');
     Route::get("/publications/delete",[AccountController::class,'delete_publication'])->name('account.pub_delete');
     Route::get("/publications/favdelete",[AccountController::class,'remove_favourite'])->name('account.fav_delete');
+    Route::get("/publications/edit",[AccountController::class,'edit_publication'])->name('account.publications.edit');
     Route::post("/publication",[AccountController::class,'submit_publication'])->name('account.publication');
     Route::get("/newversion",[AccountController::class,'create_version'])->name('account.newversion');
     Route::post("/summary",[AccountController::class,'submit_summary'])->name('account.summary');

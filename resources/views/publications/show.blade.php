@@ -3,10 +3,10 @@
 @section('content')
 
 	@php
-		if( is_valid_image(storage_link('uploads/publications/'.$publication->cover))):
+		if($publication->cover):
 			$image_link = storage_link('uploads/publications/'.$publication->cover);
 		else:
-				$image_link = storage_link('uploads/publications/cover.jpg');
+			$image_link = storage_link('uploads/publications/cover.jpg');
 		endif;
 	@endphp
 

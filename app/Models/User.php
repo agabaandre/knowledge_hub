@@ -45,7 +45,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ["names"];
+    protected $appends = ["names"."area"];
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
@@ -54,5 +54,13 @@ class User extends Authenticatable
     public function preferences(){
        return $this->hasMany(UserPreference::class);
     }
+
+    public function country(){
+        return $this->belongsTo(Country::class);
+     }
+
+     public function getAreaAttribute(){
+        return GeoCoverage::where('name','like','%'.$this->country->name.'%')->first();
+     }
 
 }

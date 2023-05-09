@@ -107,7 +107,7 @@ class PublicationsRepository{
 
     public function save(Request $request){
 
-        $pub = new Publication();
+        $pub = ($request->id)? Publication::find($request->id):new Publication();
 
         if($request->original_id):
 
@@ -122,7 +122,18 @@ class PublicationsRepository{
         else:
            
         $pub->sub_thematic_area_id      = $request->sub_theme;
-        $pub->geographical_coverage_id  = $request->geo_area_id;
+
+        if(!$request->geo_area_id):
+
+        $user = current_user();
+
+        $geo_id = ($user->country_id)?$user->area->id:1;
+        $pub->geographical_coverage_id = $geo_id;
+
+        else:
+            $pub->geographical_coverage_id  = $request->geo_area_id;
+        endif;
+        
         $pub->title                     = $request->title;
 
         endif;
@@ -144,6 +155,7 @@ class PublicationsRepository{
       
         //save cover
         if($request->hasFile('cover')):
+
             $file           = $request->file('cover');
             $cover_filepath = $this->save_attachments($file);
             $pub->cover     = $cover_filepath;
@@ -242,7 +254,7 @@ class PublicationsRepository{
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
            
-            $file->move(storage_path().'/uploads/publications/',$file_path);
+            $file->move(storage_path().'/app/public/uploads/publications/',$file_path);
 
         //insert if to be in different table
         if($publication_id):
@@ -259,7 +271,7 @@ class PublicationsRepository{
 
        }
 
-       $file_path;
+       return $file_path;
     }
 
     public function save_summary(Request $request){

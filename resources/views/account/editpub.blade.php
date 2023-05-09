@@ -9,11 +9,10 @@
 
 <div class="row">
 
- 
-   
+
     <div class="card col-lg-12">
         <div class="card-header text-left">
-            <h4 class="card-title float-left">Publish a resource</h4>
+            <h4 class="card-title float-left">Edit Publication</h4>
         </div>
 
         <div class="row mt-2">
@@ -25,10 +24,9 @@
 
         <div class="card-body text-left">
            
-           <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications'>
-            @csrf
-           
-             @include('account.partials.publication_form')
+           <form method="POST" enctype="multipart/form-data" action="{{ route('account.publication') }}" id='publications' class='publications'>
+             @csrf
+             @include('account.partials.publication_form',['row'=>$publication])
 
            </form>
 

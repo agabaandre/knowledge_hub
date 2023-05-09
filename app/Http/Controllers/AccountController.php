@@ -48,6 +48,12 @@ class AccountController extends Controller
         return view('account.create');
     }
 
+    public function edit_publication(Request $request){
+
+        $data['publication'] = $this->publicationsRepo->find($request->ref);
+        return view('account.editpub',$data);
+    }
+
     public function create_version(Request $request){
 
         $data['publication'] = $this->publicationsRepo->find($request->id);
@@ -58,23 +64,28 @@ class AccountController extends Controller
 
     public function submit_publication(Request $request){
 
-        $val_rules =[
+        $val_rules = [
             'cover'=>'required',
             'file_type'=>'required',
             'sub_theme'=>'required',
             'description'=>'required'
         ];
 
+    
         if($request->original_id):
             unset($val_rules['sub_theme']);
             unset($val_rules['title']);
+        endif;
+
+        if($request->id):
+            unset($val_rules['cover']);
         endif;
 
         $request->validate($val_rules);
 
         $saved = $this->publicationsRepo->save($request);
 
-        $message = ($saved)?'Resource submitted successfully':'Request failed try again';
+        $message = ($saved)?'Publication saved successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['message']     = $data['alert']= $message;
