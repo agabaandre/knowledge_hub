@@ -106,9 +106,9 @@
 						@endguest
 
 					</ul>
-					<div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
+					<!-- <div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
 					  @include('layouts.partials.language')
-					</div>
+					</div> -->
 				</div>
 			</nav>
 		</div>

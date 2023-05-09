@@ -45,42 +45,20 @@
          
             //
         }
+
+        const typeSelected = selectedType.name.toLowerCase();
+
+        if(typeSelected.indexOf('video')>-1 || typeSelected.indexOf('web')>-1  ){
+            $('.url').attr('required',true);
+            $('.url_wrapper').show();
+        
+        }else{
+
+            $('.url').removeAttr('required');
+            $('.url_wrapper').hide();
+        }
          
     });
 
 
-      $('#publications00').submit(function(e) {
-        e.preventDefault();
-
-        var form = $(this);
-
-        // Get the form data.]
-        var formData = new FormData(form.get(0));
-        var url = form.attr('action');
-
-        $.ajax({
-            url: url,
-            type: 'post',
-            data: formData,
-            cache: false,
-            contentType: false,
-            processData: false,
-            success: function(response) {
-                
-                if(response.status == 200) {
-                    
-                $('#publications').trigger("reset");
-                   swal('Successful', response.data.message,'success');
-            
-                } else {
-                    swal('Error!', response.data.message,'error');
-                }
-            },
-            error:function(error){
-                swal('Error!', error?.message,'error');
-            }
-        });
-
-
-    });
 </script>

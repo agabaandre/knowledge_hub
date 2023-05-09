@@ -3,16 +3,19 @@
 @section('content')
 
 	@php
-		if( is_valid_image(storage_link('uploads/publications/'.$publication->cover))):
+		if($publication->cover):
 			$image_link = storage_link('uploads/publications/'.$publication->cover);
 		else:
-				$image_link = storage_link('uploads/publications/cover.jpg');
+			$image_link = storage_link('uploads/publications/cover.jpg');
 		endif;
 	@endphp
 
     <!-- ======================= Publication Info ======================== -->
 	<div class="bg-light rounded py-5" style="background-image: url({{ asset('frontend/img/dots.png')}}); background-repeat:repeat-x; background-size:contain;">
 		<div class="container">
+
+		@include('layouts.partials.alerts')
+		
 			<div class="row">
 				<div class="col-xl-12 col-lg-12 col-md-12 col-12">
 					<div class="jbd-01 d-flex align-items-center justify-content-between">

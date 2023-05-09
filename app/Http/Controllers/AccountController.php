@@ -2,23 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Repositories\AssetsRepository;
 use App\Repositories\PublicationsRepository;
+use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 class AccountController extends Controller
 {
-    private $publicationsRepo;
+    private $publicationsRepo,$usersRepo;
 
-    public function __construct( PublicationsRepository $publicationsRepo)
+    public function __construct( PublicationsRepository $publicationsRepo,UsersRepository $usersRepo)
     {
         $this->publicationsRepo       = $publicationsRepo;
+        $this->usersRepo            = $usersRepo;
     }
 
 
     public function profile(Request $request){
 
         $data['profile'] = current_user();
-        
+        $data['preferences'] = [];
+
+        foreach(current_user()->preferences as $pref){
+            $data['preferences'][] = $pref->tag_id;
+        }
+
         return view('account.profile',$data);
     }
 
@@ -42,6 +48,12 @@ class AccountController extends Controller
         return view('account.create');
     }
 
+    public function edit_publication(Request $request){
+
+        $data['publication'] = $this->publicationsRepo->find($request->ref);
+        return view('account.editpub',$data);
+    }
+
     public function create_version(Request $request){
 
         $data['publication'] = $this->publicationsRepo->find($request->id);
@@ -52,23 +64,28 @@ class AccountController extends Controller
 
     public function submit_publication(Request $request){
 
-        $val_rules =[
+        $val_rules = [
             'cover'=>'required',
             'file_type'=>'required',
             'sub_theme'=>'required',
             'description'=>'required'
         ];
 
+    
         if($request->original_id):
             unset($val_rules['sub_theme']);
             unset($val_rules['title']);
+        endif;
+
+        if($request->id):
+            unset($val_rules['cover']);
         endif;
 
         $request->validate($val_rules);
 
         $saved = $this->publicationsRepo->save($request);
 
-        $message = ($saved)?'Resource submitted successfully':'Request failed try again';
+        $message = ($saved)?'Publication saved successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['message']     = $data['alert']= $message;
@@ -118,5 +135,7 @@ class AccountController extends Controller
     {
         $this->publicationsRepo->delete($request->id);
     }
+
+
 
 }

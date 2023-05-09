@@ -17,21 +17,20 @@
 							</form>
 
     <div  class="spot-row">
-        <div class="col-lg-4 px-3"></div>
-        <div class="col-lg-8 px-3">
-        <h3 class="text-center">You may be wrong about the following facts!</h3>
+        <div class="col-lg-8 col-md-12 col-sm-12 px-3">
+        <h3 class="text-center">Test your knowledge! Click on one of the themes below</h3>
         </div>
     </div>
 
 
-<div  class="spot-row col-sm-12">
+<div  class="row spot-row col-sm-12">
     
-    <div class="col-lg-4 px-3">
+    <div class="col-lg-4 col-md-12 col-sm-12 px-3">
         @include('home.partials.quotes')
         @include('home.partials.tags')
     </div>
 
-    <div class="slide_items col-lg-8 col-sm-12">
+    <div class="slide_items col-lg-8 col-md-12 col-sm-12">
     @foreach($subthemes as $subtheme)
 
     <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 item">

@@ -15,6 +15,10 @@
 			<h3 class="card-title float-left">My Publications</h3>
 		</div>
 
+		<div class="row mt-2">
+		@include('layouts.partials.alerts')
+		</div>
+
 
 		<div class="card-body text-left">
 			<table class="table table-striped table table-bordered">
@@ -37,7 +41,7 @@
 						</td>
 						<td>{!! truncate($row->description, 100) !!}</td>
 						<td>
-							<a href="#edit{{ $row->id}}"><i class="fa fa-edit"></i> Edit
+							<a href="{{ route('account.publications.edit') }}?ref={{ $row->id}}"><i class="fa fa-edit"></i> Edit
 							<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger  ml-3">
 							<i class="fa fa-trash"></i> Delete
 						 </td>

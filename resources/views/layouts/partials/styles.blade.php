@@ -54,6 +54,10 @@
             border-radius:8px; 
             margin-top:10px;
         }
+
+        label{
+            font-weight: bold!important;
+        }
     </style>
 
 </head>

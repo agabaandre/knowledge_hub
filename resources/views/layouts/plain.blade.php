@@ -5,9 +5,8 @@
 
 @include('layouts.partials.header')
 
-@yield('styles')
 
-@include('layouts.partials.alerts')
+@yield('styles')
 
 @yield('content')
 

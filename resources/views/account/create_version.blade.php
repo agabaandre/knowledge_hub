@@ -6,6 +6,7 @@
 
 @section('content')
 <div class="row">
+@include('layouts.partials.alerts')
 
     <div class="card col-lg-12">
         <div class="card-header text-left">

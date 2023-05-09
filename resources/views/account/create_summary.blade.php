@@ -7,6 +7,8 @@
 @section('content')
 <div class="row">
 
+@include('layouts.partials.alerts')
+
 <div class="card col-lg-12">
     <div class="card-header text-left">
         <h4 class="card-title float-left">Create resource summary</h4>
