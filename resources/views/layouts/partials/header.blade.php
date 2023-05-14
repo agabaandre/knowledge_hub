@@ -2,6 +2,7 @@
 	<!-- Top header  -->
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
+	<div id="langauge-container">
 	<div class="header">
 		<div class="container">
 			<nav id="navigation" class="navigation navigation-landscape">
