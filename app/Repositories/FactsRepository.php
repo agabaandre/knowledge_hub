@@ -15,14 +15,23 @@ class FactsRepository{
     }
     
     public function save(Request $request){
-        $fact = new Fact();
 
-        return $fact;
+        $fact = ($request->id)?Fact::find($request->id):new Fact();
+        $fact->fact_title = $request->title;
+        $fact->fact_summary = $request->summary;
+        $fact->fact_description = $request->description;
+
+        return ($request->id)?$fact->update():$fact->save();
     }
 
     public function find($id){
 
         return Fact::find($id);
+    }
+
+    public function delete($id){
+
+        return Fact::find($id)->delete();
     }
 
 

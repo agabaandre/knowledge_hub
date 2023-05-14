@@ -38,7 +38,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control newform" id="title" 
+                                <textarea placeholder="Title" rows="6" class="form-control summernote-sm" id="title" 
                                 name="title" 
                                 required>{{ form_edit('title',$publication,'title') }}</textarea>
                             </div>
@@ -47,7 +47,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Description</label>
-                                <textarea id="publication_description" placeholder="Descripion" class="form-control newform" name="description" style="min-height: 400px;">{{ form_edit('description',$publication,'description') }}</textarea>
+                                <textarea id="publication_description" placeholder="Descripion" class="form-control summernote" name="description" style="min-height: 400px;">{{ form_edit('description',$publication,'description') }}</textarea>
                             </div>
                         </div>
 
@@ -188,7 +188,9 @@
                 if (response.status == 'success') {
                     swal( 'Success!',response.message,'success');
 
-                    // $('#publications').trigger("reset");
+                    setTimeout(function(){
+                        window.location.assign("<?php echo url('admin/publications') ?>")
+                    },2000);
 
                 } else {
                     swal( 'Error!',response.message,'Error')
@@ -200,5 +202,9 @@
 
     });
 </script>
+
+
+@include('partials.general.summernote')
+@include('common.select2')
 
 @endsection
