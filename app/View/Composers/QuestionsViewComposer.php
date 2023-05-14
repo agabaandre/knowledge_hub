@@ -9,8 +9,8 @@ class QuestionsViewComposer{
 
     public function compose(View $view){
 
-        $file_types = Question::all();
-        $view->with('questions',$file_types);
+        $questions = Question::with('responses','answers')->get();
+        $view->with('questions',$questions);
     }
 
 }

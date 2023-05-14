@@ -27,6 +27,7 @@ use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\KpiController;
+use App\Http\Controllers\QuestionsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -254,6 +255,11 @@ Route::group(["prefix"=>"forums"],function(){
  Route::group(["prefix"=>"facts"],function(){
         
     Route::get("/fact",[FactsController::class,'details']);
+});
+
+Route::group(["prefix"=>"quiz"],function(){
+
+    Route::post("/save_stat",[QuestionsController::class,'save_stats'])->name('quiz.savestat');
 });
 
 
