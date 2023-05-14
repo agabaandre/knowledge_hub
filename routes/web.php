@@ -22,6 +22,7 @@ use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\FactsController;
@@ -202,6 +203,13 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::get("/data",[KpiController::class,'data']);
         Route::get("/save",[KpiController::class,'save']);
         Route::get("/delete",[KpiController::class,'destroy']);
+    });
+
+    //authors
+    Route::group(["prefix"=>"quotes"],function(){
+    
+        Route::get("/",[QuotesController::class,'index']);
+        Route::get("/delete",[QuotesController::class,'destroy']);
     });
 
 

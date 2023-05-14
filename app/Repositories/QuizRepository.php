@@ -9,13 +9,15 @@ class QuizRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-
+       
+        $qns = Question::orderBy('id','desc');
+        
         if($request->term)
-        $qns = Question::orderBy('id',$request->term);
+        $qns->where('question_text','like','%'.$request->term.'%');
         
         $result = $qns->paginate($rows_count);
 
-        return $qns;
+        return  $result;
     }
     
     public function save(Request $request){
@@ -24,6 +26,7 @@ class QuizRepository{
         $qn->question_text = $request->question;
         if($request->resource_id)
         $qn->resource_id   = $request->resource_id;
+        
         $qn->save();
 
         return $qn;
