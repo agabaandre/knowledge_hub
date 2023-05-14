@@ -17,7 +17,7 @@ class QuizController extends Controller
 
     public function index(Request $request){
 
-        $data['quizzes'] = $this->quizRepo->get($request);
+        $data['questions'] = $this->quizRepo->get($request);
         $data['search']       = (Object) $request->all();
         return view('admin.quiz.index',$data);
     }
@@ -26,7 +26,6 @@ class QuizController extends Controller
     public function store(Request $request){
 
         $saved = $this->quizRepo->save($request);
-
 
         if($saved):
             $data = ['message'=>'Quiz saved successfully','status'=>'success','data'=>$saved];

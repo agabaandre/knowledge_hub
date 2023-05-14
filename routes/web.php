@@ -22,10 +22,12 @@ use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\QuizController;
+use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\KpiController;
+use App\Http\Controllers\QuestionsController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -204,6 +206,22 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::get("/delete",[KpiController::class,'destroy']);
     });
 
+    //quotes
+    Route::group(["prefix"=>"quotes"],function(){
+    
+        Route::get("/",[QuotesController::class,'index']);
+        Route::post("/save",[QuotesController::class,'store']);
+        Route::get("/delete",[QuotesController::class,'destroy']);
+    });
+
+    //privacy
+    Route::group(["prefix"=>"privacy"],function(){
+    
+        Route::get("/",[QuotesController::class,'index']);
+        Route::post("/save",[QuotesController::class,'store']);
+    });
+
+
 
 
 });
@@ -246,6 +264,11 @@ Route::group(["prefix"=>"forums"],function(){
  Route::group(["prefix"=>"facts"],function(){
         
     Route::get("/fact",[FactsController::class,'details']);
+});
+
+Route::group(["prefix"=>"quiz"],function(){
+
+    Route::post("/save_stat",[QuestionsController::class,'save_stats'])->name('quiz.savestat');
 });
 
 

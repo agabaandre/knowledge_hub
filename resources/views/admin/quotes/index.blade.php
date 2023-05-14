@@ -8,7 +8,7 @@
 <div class="row">
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
-			<h3 class="card-title float-left">{{ $title ?? 'Quiz Questions' }}</h3>
+			<h3 class="card-title float-left">{{ $title ?? 'Quotes' }}</h3>
 			 <hr>
 		</div>
 		<!-- Card Header With Form Filters -->
@@ -17,7 +17,7 @@
 				  <div class="row">
 				   
 				    <div class="col-md-12 text-right">
-					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Question</a>
+					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Quote</a>
 					</div>
 
 					<div class="col-md-12">
@@ -51,7 +51,7 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
-						<th>Question</th>
+						<th>Quote</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -61,9 +61,9 @@
                     $i = 1;
                     @endphp
 
-					@foreach($questions as $row)
+					@foreach($quotes as $row)
 						<tr>
-							<td>{{ $row->question_text }}</td>
+							<td>{{ $row->quote }}</td>
 							<td>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
@@ -72,16 +72,16 @@
 				</tbody>
 			</table>
 
-            <div class="py-2"> {{$questions->links() }}</div>
+            <div class="py-2"> {{$quotes->links() }}</div>
 
 		</div>
 
 	</div>
 
-	@include('admin.quiz.partials.create-modal')
+	@include('admin.quotes.partials.create-modal')
 	<!-- Include edit-modal.php -->
-	@include('admin.quiz.partials.edit-modal')
+	@include('admin.quotes.partials.edit-modal')
 	<!-- Include delete-modal.php -->
-	@include('admin.quiz.partials.delete-modal')
+	@include('admin.quotes.partials.delete-modal')
 
     @endsection

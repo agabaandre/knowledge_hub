@@ -73,7 +73,7 @@
 						@endcan
 
 						@can('view_quize')
-						<li aria-haspopup="true"><a href="{{ url('admin/quize') }}">Quiz</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/quiz') }}">Quiz</a></li>
 						@endcan
 
 						<!-- Privacy Policy -->

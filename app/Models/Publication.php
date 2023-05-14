@@ -60,6 +60,9 @@ class Publication extends Model
     }
 
     public function getIsFavouriteAttribute(){
+        if(!current_user())
+        return false;
+        
         $fav = Favourite::where('user_id',current_user()->id)->where('publication_id',$this->id)->first();
         return ($fav)?true:false;
     }
