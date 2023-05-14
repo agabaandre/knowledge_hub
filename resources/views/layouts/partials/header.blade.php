@@ -14,9 +14,17 @@
 					<div class="mobile_nav">
 						<ul>
 							<li>
-								<a href="#" data-toggle="modal" data-target="#login" class="theme-cl fs-lg">
+								@guest
+								<a href="{{ route('account.profile')}}"  class="theme-cl fs-lg">
 									<i class="lni lni-user"></i>
 								</a>
+								@else
+
+								<a href="{{ route('login')}}"  class="theme-cl fs-lg">
+									<i class="lni lni-user"></i>
+								</a>
+
+								@endguest
 							</li>
 
 						</ul>
@@ -48,62 +56,13 @@
 						<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						<li><a href="{{ url('privacy')}}">Privacy</a></li>
 
+						@include('partials.account.authlinks',['class'=>'mobileonly'])
+
 					</ul>
 
 					<ul class="nav-menu nav-menu-social align-to-right">
-						@guest
-							<li>
-								<a href="{{ route('login')}}"  class="ft-medium text-bold">
-									<i class="lni lni-user mr-2"></i>Sign In
-								</a>
-							</li>
-
-							<li>
-								<a href="{{ route('register')}}" class="ft-medium text-bold">
-									Register
-								</a>
-							</li>
-
-						@else
-
-							<li><a href="#">My Account</a>
-									<ul class="nav-dropdown nav-submenu">
-										@if(is_admin())
-										<li>
-										<a href="{{ route('admin.index')}}">
-										   <i class="fa fa-link mr-1"></i>Admin Panel
-										</a>
-										</li>
-										@endif
-										<li>
-										<a href="{{ route('account.profile')}}">
-										   <i class="fa fa-user mr-1"></i> My Profile
-										</a>
-										</li>
-										<li>
-										<a href="{{ route('account.publications')}}">
-										   <i class="fa fa-list mr-1"></i> Our Publications
-										</a>
-										</li>
-										<li>
-										<a href="{{ route('account.favourites')}}">
-										   <i class="fa fa-star mr-1"></i> My Favourites
-										</a>
-										</li>
-										<li>
-										<a href="{{ route('account.publish')}}">
-											<i class="lni lni-circle-plus mr-1"></i>Publish a resource
-										</a>
-										</li>
-									</ul>
-								</li>
-
-							<li>
-								<a href="{{ url('logout')}}" class="ft-medium">
-									Logout
-								</a>
-							</li>
-						@endguest
+						
+					@include('partials.account.authlinks')
 
 					</ul>
 					<!-- <div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">

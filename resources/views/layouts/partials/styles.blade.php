@@ -58,6 +58,22 @@
         label{
             font-weight: bold!important;
         }
+
+        .mobileonly{
+            display: none;
+        }
+
+        @media only screen and  (max-width:800px){
+            .mobileonly{
+                display: block!important;
+            }
+        }
+
+        @media only screen and  (min-width:801px){
+            .mobileonly{
+                display: none!important;
+            }
+        }
     </style>
 
 </head>
