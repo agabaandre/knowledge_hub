@@ -21,6 +21,7 @@ use App\Http\Controllers\Admin\GeoAreasController;
 use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
+use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
@@ -217,8 +218,8 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
     //privacy
     Route::group(["prefix"=>"privacy"],function(){
     
-        Route::get("/",[QuotesController::class,'index']);
-        Route::post("/save",[QuotesController::class,'store']);
+        Route::get("/",[PrivacyAdminController::class,'index']);
+        Route::post("/save",[PrivacyAdminController::class,'store']);
     });
 
 

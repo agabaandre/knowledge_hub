@@ -90,7 +90,7 @@
 						@endcan
 						
 						@can('view_privacy_policy')
-						<li aria-haspopup="true"><a href="{{ url('admin/privacy_policy') }}">Privacy Policy</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
 						@endcan
 					</ul>
 				</li>

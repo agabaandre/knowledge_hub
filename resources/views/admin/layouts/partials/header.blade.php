@@ -8,6 +8,7 @@
 	<meta name="description" content="{{ @settings()->site_description }}" />
 	<meta name="robots" content="noindex">
 	<meta name="author" content="Africa CDC" />
+	<meta name="csrf-token" content="{{ csrf_token() }}" />
 
 	<!-- Title -->
 	<title>{{ @$title ?? 'Africa CDC Knowledge Hub' }}</title>
