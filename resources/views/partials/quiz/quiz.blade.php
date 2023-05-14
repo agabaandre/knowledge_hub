@@ -147,7 +147,7 @@
 				var stats = `<h3 class="text-white">Response Statistics:</h3><h4 class="text-success"><strong>${((right_answers/all_answers)*100).toFixed(1)}%</strong> were right</h4>`;
 				    stats += `<h4 class="text-danger"><strong>${((wrong_answers/all_answers)*100).toFixed(1)}%</strong> were wrong</h4>`
 
-				$('.question_stats').html(stats).show();
+				//$('.question_stats').html(stats).show();
 
 
 				if(increment_value>0)

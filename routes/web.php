@@ -206,12 +206,21 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::get("/delete",[KpiController::class,'destroy']);
     });
 
-    //authors
+    //quotes
     Route::group(["prefix"=>"quotes"],function(){
     
         Route::get("/",[QuotesController::class,'index']);
+        Route::post("/save",[QuotesController::class,'store']);
         Route::get("/delete",[QuotesController::class,'destroy']);
     });
+
+    //privacy
+    Route::group(["prefix"=>"privacy"],function(){
+    
+        Route::get("/",[QuotesController::class,'index']);
+        Route::post("/save",[QuotesController::class,'store']);
+    });
+
 
 
 
