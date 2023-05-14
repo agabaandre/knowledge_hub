@@ -56,7 +56,7 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Author</label>
+                                <label class="form-label" for="publication">Source</label>
                                 @include('partials.authors.dropdown',['field'=>'author','required'=>'required', 'selected'=>form_edit('author',$publication,'author_id')])
                             </div>
                         </div>
