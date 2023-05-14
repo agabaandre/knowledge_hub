@@ -440,66 +440,20 @@
 <link rel="stylesheet" href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap.min.css') }}" />
 <script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap.min.js') }}"></script>
 
-
-
-<!-- include summernote css/js -->
-<link href="{{ asset('assets/plugins/summernote/dist/summernote.css') }}" rel="stylesheet">
-<script src="{{ asset('assets/plugins/summernote/dist/summernote.js') }}"></script>
-
-<script>
-	$(document).ready(function() {
-
-		$('.select2').select2();
-	});
-
-	$('#publication_description').summernote({
-		minHeight: 300,
-	});
-
-	// privacy_policy
-	$('#privacy_policy').summernote({
-		minHeight: 400,
-		minWidth: 800,
-	});
-
-	$('#form-privacy-policy').on('submit', function(e) {
-		e.preventDefault();
-		var data = $(this).serialize();
-		
-		$.ajax({
-			url: '{{  url("privacypolicy/save") }}',
-			type: 'POST',
-			data: data,
-			success: function(response) {
-				if (response == 'success') {
-					Swal.fire({
-						icon: 'success',
-						title: 'Success',
-						text: 'Privacy Policy Updated Successfully',
-					});
-				} else {
-					Swal.fire({
-						icon: 'error',
-						title: 'Oops...',
-						text: 'Something went wrong!',
-					});
-				}
-			}
-		});
-	});
-</script>
-
 <!-- Create Quize  -->
 <script>
-	$('#create-quize-modal').on('show.bs.modal', function(event) {
-		console.log('Modal Opened');
-	});
-</script>
+	//CSRF setup
+	$.ajaxSetup({ headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                }
+        });
 
-<!-- Update Quize Script -->
-<script>
+
+	/*
 	$('#edit-quize-modal').on('show.bs.modal', function(event) {
+
 		console.log('Modal Opened');
+
 		var button = $(event.relatedTarget);
 		var id = button.data('id');
 		var question = button.data('question');
@@ -510,7 +464,9 @@
 
 		var answersArray = answers.split(',');
 		for (var i = 0; i < answersArray.length; i++) {
+
 			var answer = answersArray[i].split(':');
+
 			var id = answer[0];
 			var text = answer[1];
 			var is_correct = answer[2];
@@ -518,6 +474,7 @@
 			// Append the answer to the respective form input
 			// $("#answer" + (i + 1)).val(text);
 			modal.find('.modal-body #answer' + (i + 1)).val(text);
+
 			if (is_correct == 1) {
 				// $("#correct_answer").val(i + 1);
 				// Set the select otpion to the correct answer
@@ -525,11 +482,7 @@
 			}
 		}
 	});
-</script>
 
-
-<!-- Update Tag Script -->
-<script>
 	$('#edit-tag-modal').on('show.bs.modal', function(event) {
 		console.log('Modal Opened');
 		var button = $(event.relatedTarget);
@@ -539,10 +492,7 @@
 		modal.find('.modal-body #tag_id').val(tagId);
 		modal.find('.modal-body #tag_name').val(tagText);
 	});
-</script>
 
-<!-- Update Tag Script -->
-<script>
 	$('#edit-quote-modal').on('show.bs.modal', function(event) {
 		console.log('Modal Opened');
 		var button = $(event.relatedTarget);
@@ -557,10 +507,7 @@
 
 		$('#quote_description').summernote('code', quote);
 	});
-</script>
 
-<!-- Update Author Script -->
-<script>
 	$('#edit-author-modal').on('show.bs.modal', function(event) {
 		console.log('Update Author Modal Opened');
 		var button = $(event.relatedTarget);
@@ -585,11 +532,7 @@
 			isOrganizationSelect.val('0');
 		}
 	});
-</script>
 
-
-<!-- Datatables -->
-<script>
 	$(document).ready(function() {
 		var authorsTable = $('table#authors-table').DataTable({
 			"autoWidth": true,
@@ -610,12 +553,7 @@
 		});
 
 	});
-</script>
 
-<!-- Datatables -->
-
-
-<script>
 	$(document).ready(function() {
 		var table = $('#publicationTable').DataTable({
 			"autoWidth": true,
@@ -776,6 +714,7 @@
 			});
 		});
 	});
+	*/
 </script>
 
 

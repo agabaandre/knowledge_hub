@@ -5,10 +5,22 @@
 
 $(document).ready(function() {
 
-    $('#summernote').summernote({
-        placeholder: 'Discussion body here',
+    $('.summernote').summernote({
+        placeholder: 'Content here',
         tabsize: 2,
-        height: 200
+        height: 300
+    });
+
+    $('#summernote').summernote({
+        placeholder: 'Content here',
+        tabsize: 2,
+        height: 300
+    });
+
+    $('.summernote-lg').summernote({
+        placeholder: 'Content here',
+        tabsize: 2,
+        height: 700
     });
 
 });
