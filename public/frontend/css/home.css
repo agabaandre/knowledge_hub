@@ -47,6 +47,10 @@
 
 @media only screen and (max-width:800px) {
 
+  .crp_box .row a {
+    box-shadow: 1px 1px 4px 1px rgba(171, 171, 171,0.8);
+  }
+
   .spotlight .spot-row .col-lg-4,.spotlight .spot-row .col-lg-5,.spotlight .spot-row .col-lg-7, .spotlight .spot-row .col-lg-8{
      display: block!important;
      min-width: 100%!important;

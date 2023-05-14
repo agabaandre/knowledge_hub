@@ -10,7 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments'];
+    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -19,6 +19,11 @@ class Publication extends Model
     public function attachments(){
         return $this->hasMany(PublicationAttachment::class);
     }
+
+    public function getHasAttachmentsAttribute(){
+        return count($this->attachments)>0;
+    }
+
 
     public function tags(){
         return $this->hasMany(PublicationTag::class);

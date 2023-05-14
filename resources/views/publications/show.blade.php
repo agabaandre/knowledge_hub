@@ -41,27 +41,14 @@
 						
 					
 						<div class="jbd-01-right text-right">
-						
-							
+
 							<div class="jbl_button mb-2">
 
 							
 								@if(!$publication->has_attachments && $publication->is_video)
 								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium"><i class="fa fa-link"></i> Browse Resource</a>
 
-								@elseif ($publication->has_attachments)
-									
-										@php
-										$count = 1;
-										@endphp
-
-										@foreach($publication->attachments as $pub_file)
-											<a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a>
-										@php
-											$count++;
-										@endphp
-										@endforeach;
-									@endif
+								@endif
 									
 								@auth
 
@@ -194,6 +181,24 @@
 				<!-- Sidebar -->
 				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+
+				                 @if ($publication->has_attachments)
+										@php
+										$count = 1;
+										@endphp
+										<h5>Attachments</h5>
+										<ul class="list-group mb-3">
+										@foreach($publication->attachments as $pub_file)
+										<li class="list-group-item"><a href="{{ storage_link('uploads/publications/') }}{{$pub_file->file}}" target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i> {{$pub_file->description ?? 'View Attachment '.$count }}</a></li>
+										@php
+											$count++;
+										@endphp
+										
+										@endforeach
+
+										</ul>
+									@endif
+
 				@if(count($publication->summaries)>0 || count($publication->versioning)>0)
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
 					

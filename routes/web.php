@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AuthorsAdminController;
+use App\Http\Controllers\Admin\ExpertsAdminController;
+use App\Http\Controllers\Admin\FactsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthorsController;
@@ -222,6 +224,27 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::post("/save",[PrivacyAdminController::class,'store']);
     });
 
+     //facts
+     Route::group(["prefix"=>"facts"],function(){
+    
+        Route::get("/",[FactsAdminController::class,'index']);
+        Route::post("/save",[FactsAdminController::class,'store']);
+        Route::get("/delete",[FactsAdminController::class,'destroy']);
+    });
+
+    //experts
+    Route::group(["prefix"=>"experts"],function(){
+    
+        Route::get("/",[ExpertsAdminController::class,'index']);
+        Route::post("/save",[ExpertsAdminController::class,'store']);
+        Route::get("/delete",[ExpertsAdminController::class,'destroy']);
+
+        Route::group(["prefix"=>"types"],function(){
+            Route::get("/",[ExpertsAdminController::class,'types']);
+            Route::post("/save",[ExpertsAdminController::class,'save_type']);
+            Route::get("/delete",[ExpertsAdminController::class,'delete_type']);
+        });
+    });
 
 
 

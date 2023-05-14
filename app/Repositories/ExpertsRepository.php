@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Expert;
+use App\Models\ExpertType;
 use Illuminate\Http\Request;
 
 class ExpertsRepository{
@@ -63,13 +64,54 @@ class ExpertsRepository{
 
     
     public function save(Request $request){
-        $asset = new Expert();
-        return $asset;
+
+        $expert = ($request->id)?Expert::find($request->id):new Expert();
+
+        $expert->first_name = $request->first_name;
+        $expert->last_name  = $request->last_name;
+        $expert->job_title  = $request->job_title;
+        $expert->email      = $request->email;
+        $expert->phone_number    = $request->phone_number;
+        $expert->expert_type_id  = $request->type_id;
+        $expert->country_id      = $request->country_id;
+
+        return ($request->id)?$expert->update():$expert->save();
     }
 
     public function find($id){
-
         return Expert::find($id);
+    }
+
+    public function delete($id){
+
+        return Expert::find($id)->delete();
+    }
+
+    public function get_types(Request $request){
+
+        $rows_count = ($request->rows)?$request->rows:20;
+        $query    = ExpertType::orderBy('id','desc');
+
+        if($request->term):
+            $query->where('type_name','like','%'.$request->term.'%');
+        endif;
+        $results = $query->paginate($rows_count);
+        return $results;
+    }
+
+    public function save_type(Request $request){
+
+        $expert_type = ($request->id)?ExpertType::find($request->id):new ExpertType();
+
+        $expert_type->type_name = $request->type;
+        $expert_type->type_desc  = $request->description;
+
+        return ($request->id)?$expert_type->update():$expert_type->save();
+    }
+
+    public function delete_type($id){
+
+        return ExpertType::find($id)->delete();
     }
 
 

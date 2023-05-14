@@ -85,8 +85,13 @@
 						<li aria-haspopup="true"><a href="{{ url('admin/healthassets') }}">Health Assets</a></li>
 						@endcan
 
-						@can('experts')
-						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Health Experts</a></li>
+						@can('manage_experts')
+						<li aria-haspopup="true"><a href="{{ url('admin/experts/types') }}">Workforce Experts Types</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Workforce Experts Rosta</a></li>
+						@endcan
+
+						@can('manage_facts')
+						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
 						@endcan
 						
 						@can('view_privacy_policy')
