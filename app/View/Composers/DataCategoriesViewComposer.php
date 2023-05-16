@@ -7,7 +7,7 @@ use Illuminate\View\View;
 class DataCategoriesViewComposer{
 
     public function compose(View $view){
-        $categories = DataCategory::where('show_on_menu',1)->get();
+        $categories = DataCategory::with("sub_categories")->where('show_on_menu',1)->get();
         $view->with('data_categories',$categories);
     }
 

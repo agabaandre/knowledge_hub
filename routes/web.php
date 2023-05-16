@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AuthorsAdminController;
+use App\Http\Controllers\Admin\DataRecordsAdminController;
 use App\Http\Controllers\Admin\ExpertsAdminController;
 use App\Http\Controllers\Admin\FactsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
@@ -242,6 +243,16 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
             Route::post("/save",[ExpertsAdminController::class,'save_type']);
             Route::get("/delete",[ExpertsAdminController::class,'delete_type']);
         });
+    });
+
+
+    //data records
+    Route::group(["prefix"=>"datarecords"],function(){
+        
+        Route::get("/",[DataRecordsAdminController::class,'index']);
+        Route::post("/save",[DataRecordsAdminController::class,'store']);
+        Route::get("/edit",[DataRecordsAdminController::class,'edit']);
+        Route::get("/delete",[DataRecordsAdminController::class,'destroy']);
     });
 
 

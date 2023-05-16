@@ -75,13 +75,25 @@ class DataRecordsRepository{
     }
     
     public function save(Request $request){
-        $asset = new DataRecord();
-        return $asset;
+        $record = new DataRecord();
+
+        $record->title       = $request->title;
+        $record->description = $request->description;
+        $record->data_sub_category_id = $request->data_sub_category_id;
+        $record->country_id   = $request->country_id;
+        $record->file_type_id = $request->file_type_id;
+
+        return $record->save();
     }
 
     public function find($id){
 
         return DataRecord::find($id);
+    }
+
+    public function delete($id){
+
+        return DataRecord::find($id)->delete();
     }
 
 

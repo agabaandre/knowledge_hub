@@ -16,5 +16,10 @@ class DataRecord extends Model
     public function country(){
         return $this->belongsTo(Country::class,"country_id","id");
     }
+
+    public function file_type(){
+        return $this->belongsTo(PublicationType::class,"file_type_id","id");
+    }
+    
     
 }
