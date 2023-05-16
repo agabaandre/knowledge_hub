@@ -20,7 +20,6 @@ class AssetsController extends Controller
     }
 
     public function details(Request $request){
-
         $data['asset'] = $this->assetsRepo->find($request->id);
         return view('assets.details',$data);
     }

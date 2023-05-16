@@ -42,12 +42,21 @@
 						<li class=""><a href="javascript:void(0);">Data Categories<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							   
-							    @can('view_experts')
-								 <li><a href="{{ url('experts')}}">Work Force Rosters</a></li>
-								@endcan
+							   
 
-								@foreach($asset_types as $type)
-								<li><a href="{{ url('healthassets')}}?slug={{trim($type->slug)}}">{{$type->type_name}}</a></li>
+								@foreach($data_categories as $category)
+
+									@if($category->required_permission)
+										@can($category->required_permission)
+										<a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
+										@endcan
+									@else
+
+									<li>
+										<a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
+									</li>
+
+									@endif
 								@endforeach
 
 							</ul>

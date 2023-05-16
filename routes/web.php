@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
+use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\QuestionsController;
@@ -90,9 +91,6 @@ Route::group(["prefix"=>"faqs"],function(){
     Route::get("/",[FaqsController::class,'index']);
 });
 
-Route::group(["prefix"=>"experts"],function(){
-    Route::get("/",[ExpertsController::class,'index']);
-});
 
 Route::group(["prefix"=>"publications"],function(){
     Route::get("/",[PublicationsController::class,'index']);
@@ -294,5 +292,19 @@ Route::group(["prefix"=>"quiz"],function(){
 
     Route::post("/save_stat",[QuestionsController::class,'save_stats'])->name('quiz.savestat');
 });
+
+Route::group(["prefix"=>"categories"],function(){
+
+    Route::get("/workforce",  [ExpertsController::class,'index']);
+    Route::get("/phassets",   [AssetsController::class,'index']);
+    Route::get("/inititaives",[DataRecordsController::class,'index']);
+    Route::get("/research_dev",[DataRecordsController::class,'index']);
+    Route::get("/data_stats",  [DataRecordsController::class,'index']);
+    Route::get("/healthindicators",  [DataRecordsController::class,'index']);
+
+    Route::get("data/detail",  [DataRecordsController::class,'details']);
+
+});
+
 
 

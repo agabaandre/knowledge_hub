@@ -6,6 +6,7 @@ use App\View\Composers\AdminStatsViewComposer;
 use App\View\Composers\AssetTypesViewComposer;
 use App\View\Composers\AuthorsViewComposer;
 use App\View\Composers\CountriesViewComposer;
+use App\View\Composers\DataCategoriesViewComposer;
 use App\View\Composers\ExpertTypesViewComposer;
 use App\View\Composers\FactsViewComposer;
 use App\View\Composers\FileTypesViewComposer;
@@ -49,6 +50,7 @@ class ViewComposerServiceProvider extends ServiceProvider
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);
+        Facades\View::composer('*',DataCategoriesViewComposer::class);
         
     }
 }
