@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 02, 2023 at 12:56 PM
+-- Generation Time: May 16, 2023 at 07:27 AM
 -- Server version: 10.4.25-MariaDB
 -- PHP Version: 7.4.30
 
@@ -214,9 +214,10 @@ CREATE TABLE `asset_types` (
 --
 
 INSERT INTO `asset_types` (`id`, `type_name`, `type_desc`, `slug`) VALUES
-(1, 'Organizations', NULL, 'organizations-2'),
-(2, 'Initiatives', NULL, 'initiatives-2'),
-(3, 'Detrminants of Health Indicators', NULL, ' Indicators-2');
+(1, 'Laboratory', NULL, 'organizations-2'),
+(2, 'Training Schools', NULL, 'training-schools'),
+(3, 'Centres of Excellence', NULL, 'center-of-excellence'),
+(4, 'Hospitals', NULL, ' Hospitals');
 
 -- --------------------------------------------------------
 
@@ -489,6 +490,62 @@ INSERT INTO `data` (`id`, `kpi_id`, `value`, `period`, `country_id`, `data_sourc
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `data_categories`
+--
+
+CREATE TABLE `data_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `category_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url_path` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `show_on_menu` tinyint(1) NOT NULL DEFAULT 0,
+  `required_permission` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `is_special` tinyint(1) NOT NULL DEFAULT 0
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `data_categories`
+--
+
+INSERT INTO `data_categories` (`id`, `category_name`, `url_path`, `slug`, `created_at`, `updated_at`, `show_on_menu`, `required_permission`, `is_special`) VALUES
+(1, 'PH Assets', 'categories/phassets', 'phassets', NULL, NULL, 1, NULL, 1),
+(2, 'Workforce', 'categories/workforce', 'workforce', NULL, NULL, 1, NULL, 1),
+(3, 'Health Initiatives', 'categories/inititaives', 'health-inititaives', NULL, NULL, 1, NULL, 0),
+(4, 'Research and Development', 'categories/research_dev', 'research-developemnt', NULL, NULL, 1, NULL, 0),
+(5, 'Data and Statistics', 'categories/data_stats', 'data-statistics', NULL, NULL, 1, NULL, 0),
+(6, 'Determinants of Health Indicators', 'categories/healthindicators', 'determinants-health-indicators', NULL, NULL, 1, NULL, 0);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `data_records`
+--
+
+CREATE TABLE `data_records` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `description` text COLLATE utf8mb4_unicode_ci NOT NULL,
+  `url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `file_type_id` bigint(20) UNSIGNED NOT NULL,
+  `data_sub_category_id` bigint(20) UNSIGNED NOT NULL,
+  `country_id` bigint(20) UNSIGNED NOT NULL,
+  `cover_image` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'cover.jpg',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `data_records`
+--
+
+INSERT INTO `data_records` (`id`, `title`, `description`, `url`, `file_type_id`, `data_sub_category_id`, `country_id`, `cover_image`, `created_at`, `updated_at`) VALUES
+(1, 'Henry memorial Labs', 'Simple', '', 1, 1, 3, 'cover.jpg', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `data_sources`
 --
 
@@ -508,6 +565,27 @@ INSERT INTO `data_sources` (`id`, `source`, `description`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `data_sub_categories`
+--
+
+CREATE TABLE `data_sub_categories` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `sub_catgeory_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `data_category_id` bigint(20) UNSIGNED NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `data_sub_categories`
+--
+
+INSERT INTO `data_sub_categories` (`id`, `sub_catgeory_name`, `created_at`, `updated_at`, `data_category_id`) VALUES
+(1, 'Regional Initiatives', NULL, NULL, 3);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `experts`
 --
 
@@ -519,7 +597,7 @@ CREATE TABLE `experts` (
   `occupation` varchar(50) NOT NULL,
   `email` varchar(35) DEFAULT NULL,
   `phone_number` varchar(24) DEFAULT NULL,
-  `expert_type` varchar(35) NOT NULL,
+  `expert_type_id` varchar(35) NOT NULL,
   `photo` varchar(200) DEFAULT NULL,
   `country_id` int(11) DEFAULT NULL,
   `url` varchar(100) DEFAULT NULL,
@@ -531,10 +609,32 @@ CREATE TABLE `experts` (
 -- Dumping data for table `experts`
 --
 
-INSERT INTO `experts` (`id`, `first_name`, `last_name`, `job_title`, `occupation`, `email`, `phone_number`, `expert_type`, `photo`, `country_id`, `url`, `created_by`, `created_at`) VALUES
-(1, 'Agaba', 'Andrew', 'System Developer', 'IT', 'agaba@itsystems.com', '+256705678909', 'Rapid  responder', NULL, NULL, NULL, NULL, '2023-02-20 14:34:34'),
-(2, 'Lubega', 'Deo', 'Database Admin', 'IT', 'agaba@itsystems.com', '+256705678909', 'Rapid  responder', NULL, NULL, NULL, NULL, '2023-02-20 14:34:34'),
-(3, 'HENRY', 'NKUKE', 'Developer', 'ICT', 'nkukehenric@gmail.com', '07098987893', 'Rapid responder', NULL, 53, NULL, 10, '2023-03-10 09:47:10');
+INSERT INTO `experts` (`id`, `first_name`, `last_name`, `job_title`, `occupation`, `email`, `phone_number`, `expert_type_id`, `photo`, `country_id`, `url`, `created_by`, `created_at`) VALUES
+(1, 'Agaba', 'Andrew', 'System Developer', 'IT', 'agaba@itsystems.com', '+256705678909', '1', NULL, 1, NULL, NULL, '2023-05-14 20:53:30'),
+(2, 'Lubega', 'Deo', 'Database Admin', 'IT', 'agaba@itsystems.com', '+256705678909', '2', NULL, 1, NULL, NULL, '2023-05-14 20:55:18'),
+(3, 'HENRY', 'NKUKE MAYANJA', 'Developer', 'ICT', 'nkukehenric@gmail.com', '07098987893', '1', NULL, 53, NULL, 10, '2023-05-14 20:50:59');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `expert_types`
+--
+
+CREATE TABLE `expert_types` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `type_name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `type_desc` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `expert_types`
+--
+
+INSERT INTO `expert_types` (`id`, `type_name`, `type_desc`, `created_at`, `updated_at`) VALUES
+(1, 'Rapid Responder', NULL, '2023-05-14 17:20:33', '2023-05-14 17:20:33'),
+(2, 'Volunteer', NULL, '2023-05-14 17:55:01', '2023-05-14 17:55:01');
 
 -- --------------------------------------------------------
 
@@ -617,7 +717,8 @@ INSERT INTO `favourites` (`id`, `publication_id`, `user_id`) VALUES
 (16, 2, 10),
 (17, 1, 10),
 (25, 5, 1),
-(27, 6, 1);
+(27, 6, 1),
+(31, 1, 11);
 
 -- --------------------------------------------------------
 
@@ -962,7 +1063,18 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 (24, '2023_04_18_201152_add_user_fields_to_users_table', 20),
 (25, '2023_04_18_211421_add_last_name_to_users_table', 21),
 (26, '2023_04_18_212827_add_subscribe__to_users_table', 22),
-(27, '2023_04_21_080656_make_verification_token_varchar_in_users_table', 23);
+(27, '2023_04_21_080656_make_verification_token_varchar_in_users_table', 23),
+(28, '2023_05_14_074038_create_question_stats_table', 24),
+(29, '2023_05_14_200502_create_expert_types_table', 25),
+(30, '2023_05_14_202815_make_expert_type_foreign_in_experts_table', 26),
+(31, '2023_05_15_160052_create_data_categories_table', 27),
+(32, '2023_05_15_160907_add_show_on_menu_to_data_categories_table', 28),
+(33, '2023_05_15_161150_add_apply_permission_to_data_categories_table', 29),
+(34, '2023_05_15_162408_create_data_sub_categories_table', 30),
+(35, '2023_05_15_162523_create_data_records_table', 31),
+(36, '2023_05_16_042251_add_data_category_to_data_sub_categories_table', 32),
+(37, '2023_05_16_043113_rename_data_category_in_data_sub_categories_table', 33),
+(38, '2023_05_16_052129_add_is_special_to_data_categories_table', 34);
 
 -- --------------------------------------------------------
 
@@ -1079,7 +1191,9 @@ INSERT INTO `permissions` (`id`, `name`, `guard_name`, `created_at`, `updated_at
 (353, 'view_quize', 'web', NULL, NULL, 'view_quize'),
 (354, 'view_privacy_policy', 'web', NULL, NULL, 'view_privacy_policy'),
 (355, 'view_forumns', 'web', NULL, NULL, 'Access Forum details'),
-(380, 'view_experts', 'web', '2023-04-10 18:52:29', '2023-04-10 18:52:29', 'View Experts');
+(380, 'view_experts', 'web', '2023-04-10 18:52:29', '2023-04-10 18:52:29', 'View Experts'),
+(381, 'manage_facts', 'web', '2023-05-14 16:30:38', '2023-05-14 16:30:38', 'Manage Facts'),
+(382, 'manage_experts', 'web', '2023-05-14 16:31:08', '2023-05-14 16:31:08', 'Manage Experts');
 
 -- --------------------------------------------------------
 
@@ -1430,7 +1544,16 @@ INSERT INTO `publication` (`id`, `author_id`, `sub_thematic_area_id`, `publicati
 (246, 1, 1, 'publication1674501015.pdf', 'Simple item', '<p>Desktop</p>', 1, 1, 'cover1674501015.jpg', 'In-Active', 0, '2023-01-23 22:10:15', '2023-01-23 22:10:15', 0, 0, 0, NULL, NULL),
 (249, 1, 1, 'publication1674501913.pdf', 'Title yo', '<p>Description yo</p>', 1, 1, 'cover1674501913.jpg', 'In-Active', 0, '2023-01-23 22:25:13', '2023-01-23 22:25:13', 0, 0, 0, NULL, NULL),
 (488, 2, 4, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-03-30 23:32:57', '2023-04-02 09:18:34', 0, 1, 0, NULL, NULL),
-(489, 2, 4, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-04-02 09:54:17', '2023-04-02 09:54:17', 0, 1, 1, '1.0', 488);
+(489, 2, 4, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-04-02 09:54:17', '2023-04-02 09:54:17', 0, 1, 1, '1.0', 488),
+(522, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:40:32', '2023-05-09 05:40:32', 0, 1, 0, NULL, NULL),
+(523, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:45:07', '2023-05-09 05:45:07', 0, 1, 0, NULL, NULL),
+(524, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:46:43', '2023-05-09 05:46:43', 0, 1, 0, NULL, NULL),
+(525, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:48:09', '2023-05-09 05:48:09', 0, 1, 0, NULL, NULL),
+(526, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:49:02', '2023-05-09 05:49:02', 0, 1, 0, NULL, NULL),
+(527, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:50:12', '2023-05-09 05:50:12', 0, 1, 0, NULL, NULL),
+(529, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, NULL, 'Active', 0, '2023-05-09 05:55:01', '2023-05-09 05:55:01', 0, 1, 0, NULL, NULL),
+(530, 2, 1, 'https://www.youtube.com/embed/XTpLbBJTOM4', 'Managing information services at health level', '<p>There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form, by injected humour, or randomised words which don\'t look even slightly believable. If you are going to use a passage of Lorem Ipsum, you need to be sure there isn\'t anything embarrassing hidden in the middle of text. All the Lorem Ipsum generators on the Internet tend to repeat predefined chunks as necessary, making this the first true generator on the Internet.<br></p>', 18, 1, '2d74d4c713b69d373f209451ebc72756.jpg', 'Active', 0, '2023-05-09 05:56:35', '2023-05-09 05:56:35', 0, 1, 0, NULL, NULL),
+(535, 1, 1, NULL, '<p>SMplaaaaa</p>', '<p>fdffffffffffffffffffffffffffffffffff</p>', 2, 1, '77c1d2f0a43b5c157dc030b64735c3a5.jpg', 'Active', 0, '2023-05-14 21:20:21', '2023-05-14 21:20:21', 0, 0, 0, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -1450,7 +1573,9 @@ CREATE TABLE `publication_attachments` (
 --
 
 INSERT INTO `publication_attachments` (`id`, `publication_id`, `file`, `description`) VALUES
-(1, 491, '77c1d2f0a43b5c157dc030b64735c3a5.jpg', 'ISW-cert.jpg');
+(1, 491, '77c1d2f0a43b5c157dc030b64735c3a5.jpg', 'ISW-cert.jpg'),
+(2, 535, '77c1d2f0a43b5c157dc030b64735c3a5.jpg', 'ISW-cert.jpg'),
+(3, 535, '9d3f905195cd3eaf172880b5c6af0bc9.pdf', 'Nkuke Henry-Dev-CV- 2023-latest.pdf');
 
 -- --------------------------------------------------------
 
@@ -1558,7 +1683,18 @@ INSERT INTO `publication_tags` (`id`, `tag_id`, `publication_id`) VALUES
 (33, 1, 519),
 (34, 2, 519),
 (35, 1, 519),
-(36, 2, 519);
+(36, 2, 519),
+(37, 1, 531),
+(38, 2, 531),
+(39, 1, 532),
+(40, 2, 532),
+(41, 1, 533),
+(42, 2, 533),
+(43, 1, 534),
+(44, 1, 535),
+(45, 2, 535),
+(46, 1, 535),
+(47, 2, 535);
 
 -- --------------------------------------------------------
 
@@ -1579,7 +1715,39 @@ CREATE TABLE `questions` (
 --
 
 INSERT INTO `questions` (`id`, `question_text`, `enabled`, `created_at`, `resource_id`) VALUES
-(1, 'Which country is currently experiencing EBOLA outbreak?', 1, '2022-11-21 01:32:56', NULL);
+(1, 'Which country is currently experiencing EBOLA outbreak?', 1, '2022-11-21 01:32:56', NULL),
+(2, 'Which is the longest lasting pandemic ever to happen?', 1, '2022-11-21 01:32:56', NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `question_stats`
+--
+
+CREATE TABLE `question_stats` (
+  `id` bigint(20) UNSIGNED NOT NULL,
+  `question_id` bigint(20) UNSIGNED NOT NULL,
+  `answer_id` bigint(20) UNSIGNED NOT NULL,
+  `user_id` bigint(20) UNSIGNED NOT NULL,
+  `is_correct` tinyint(1) NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `question_stats`
+--
+
+INSERT INTO `question_stats` (`id`, `question_id`, `answer_id`, `user_id`, `is_correct`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, 0, 1, '2023-05-14 05:46:24', '2023-05-14 05:46:24'),
+(2, 1, 3, 0, 0, '2023-05-14 05:46:53', '2023-05-14 05:46:53'),
+(3, 1, 2, 0, 0, '2023-05-14 05:47:05', '2023-05-14 05:47:05'),
+(4, 1, 3, 0, 0, '2023-05-14 05:47:32', '2023-05-14 05:47:32'),
+(5, 1, 1, 0, 1, '2023-05-14 05:58:56', '2023-05-14 05:58:56'),
+(6, 1, 3, 0, 0, '2023-05-14 06:00:17', '2023-05-14 06:00:17'),
+(7, 1, 1, 0, 1, '2023-05-14 06:00:27', '2023-05-14 06:00:27'),
+(8, 1, 2, 0, 0, '2023-05-14 06:00:35', '2023-05-14 06:00:35'),
+(9, 1, 2, 0, 0, '2023-05-14 06:01:06', '2023-05-14 06:01:06');
 
 -- --------------------------------------------------------
 
@@ -1700,7 +1868,9 @@ INSERT INTO `role_has_permissions` (`permission_id`, `role_id`) VALUES
 (353, 1),
 (354, 1),
 (355, 1),
-(380, 1);
+(380, 1),
+(381, 1),
+(382, 1);
 
 -- --------------------------------------------------------
 
@@ -1848,8 +2018,7 @@ CREATE TABLE `tags` (
 
 INSERT INTO `tags` (`id`, `tag_text`) VALUES
 (1, 'HIV'),
-(2, 'Population'),
-(3, 'Mortality Rate');
+(2, 'Population');
 
 -- --------------------------------------------------------
 
@@ -1952,7 +2121,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `name`, `email`, `email_verified_at`, `password`, `remember_token`, `created_at`, `updated_at`, `author_id`, `photo`, `first_name`, `last_name`, `organization_name`, `is_approved`, `is_verified`, `is_changed`, `status`, `verification_token`, `job_title`, `phone_number`, `country_id`, `is_subscribed`) VALUES
-(11, 'Reilly Schaefer', 'admin@gmail.com', '2023-03-27 19:37:04', '$2y$10$QKAs/6J0o54KTP8146/PLeXrJCLtctmjnmxGrbM7LC4Iw2Ll2ml4K', 'ANWsAtyaVYSWZtGhYjXLNbPucNcKy1sStDBQIxlNkgnj05WbuPksDVY7NUXl', '2023-03-27 19:37:04', '2023-03-27 19:37:04', 2, 'avatar.jpg', NULL, '', NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0),
+(11, 'DENIS AINEDEMBE', 'admin@gmail.com', '2023-03-27 19:37:04', '$2y$10$cpd0/YvRdkaRwNmRvaoz/ewz1pQmAAgoK6Gb1fB42nH4rgLqYTb4G', 'Xj5UI7TuExZpXBr7CACA23taTNx538qJpLZzQ4hXtVzAtjY0o4zEpNvvOEnQ', '2023-03-27 19:37:04', '2023-05-09 01:42:18', 2, 'avatar.jpg', 'DENIS', 'AINEDEMBE', NULL, 0, 0, 1, 0, NULL, NULL, '0706698700', NULL, 0),
 (12, 'Susanna Gorczany DVM', 'othiel@example.com', '2023-03-27 19:37:04', '$2y$10$QW29z/mSH1.LZOI.Bay0y.WNWKzBGL1pOli4q3qEp2MsQlw4uPeBy', 'A2DbjhGj4W', '2023-03-27 19:37:04', '2023-03-27 19:37:04', NULL, 'avatar.jpg', NULL, '', NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0),
 (13, 'Caterina Littel', 'fharris@example.org', '2023-03-27 19:37:04', '$2y$10$Fv291m9/5Crhm9EEhdhKZuFnOQPbuVpl6iV9iqMeOSQG1mj64//la', 'uxwS3aJ9Bi', '2023-03-27 19:37:04', '2023-03-27 19:37:04', NULL, 'avatar.jpg', NULL, '', NULL, 0, 0, 0, 0, NULL, NULL, NULL, NULL, 0),
 (14, 'Henry Nkuke', 'admi33n@gmail.com', NULL, '$2y$10$EogSDsqAMDNucby0gDxHhOF7LuSa1dyRb.tHxduLpVRHCMUQ6NXge', NULL, '2023-04-18 18:15:52', '2023-04-18 18:15:52', NULL, 'avatar.jpg', 'Henry', 'Nkuke', NULL, 0, 0, 0, 0, NULL, 'Health Professional', '0701234567', 1, 0),
@@ -3109,7 +3278,9 @@ INSERT INTO `user_preferences` (`id`, `user_id`, `tag_id`, `created_at`, `update
 (12, 24, 1, '2023-04-21 07:59:41', '2023-04-21 07:59:41'),
 (13, 25, 1, '2023-04-28 06:36:33', '2023-04-28 06:36:33'),
 (14, 26, 2, '2023-04-28 07:08:08', '2023-04-28 07:08:08'),
-(15, 26, 3, '2023-04-28 07:08:08', '2023-04-28 07:08:08');
+(15, 26, 3, '2023-04-28 07:08:08', '2023-04-28 07:08:08'),
+(16, 11, 1, '2023-05-09 01:23:50', '2023-05-09 01:23:50'),
+(17, 11, 2, '2023-05-09 01:23:58', '2023-05-09 01:23:58');
 
 -- --------------------------------------------------------
 
@@ -3148,6 +3319,12 @@ ALTER TABLE `access_sessions`
   ADD KEY `id` (`id`);
 
 --
+-- Indexes for table `answers`
+--
+ALTER TABLE `answers`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `asset_types`
 --
 ALTER TABLE `asset_types`
@@ -3173,9 +3350,33 @@ ALTER TABLE `data`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `data_categories`
+--
+ALTER TABLE `data_categories`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `data_records`
+--
+ALTER TABLE `data_records`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `data_sub_categories`
+--
+ALTER TABLE `data_sub_categories`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `experts`
 --
 ALTER TABLE `experts`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `expert_types`
+--
+ALTER TABLE `expert_types`
   ADD PRIMARY KEY (`id`);
 
 --
@@ -3320,6 +3521,18 @@ ALTER TABLE `questions`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `question_stats`
+--
+ALTER TABLE `question_stats`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `quotes`
+--
+ALTER TABLE `quotes`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `roles`
 --
 ALTER TABLE `roles`
@@ -3387,10 +3600,16 @@ ALTER TABLE `user_roles`
 --
 
 --
+-- AUTO_INCREMENT for table `answers`
+--
+ALTER TABLE `answers`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `asset_types`
 --
 ALTER TABLE `asset_types`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `captcha`
@@ -3405,16 +3624,40 @@ ALTER TABLE `data`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
+-- AUTO_INCREMENT for table `data_categories`
+--
+ALTER TABLE `data_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `data_records`
+--
+ALTER TABLE `data_records`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `data_sub_categories`
+--
+ALTER TABLE `data_sub_categories`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+
+--
 -- AUTO_INCREMENT for table `experts`
 --
 ALTER TABLE `experts`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
+-- AUTO_INCREMENT for table `expert_types`
+--
+ALTER TABLE `expert_types`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
 -- AUTO_INCREMENT for table `facts`
 --
 ALTER TABLE `facts`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `failed_jobs`
@@ -3426,7 +3669,7 @@ ALTER TABLE `failed_jobs`
 -- AUTO_INCREMENT for table `favourites`
 --
 ALTER TABLE `favourites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=32;
 
 --
 -- AUTO_INCREMENT for table `file_type`
@@ -3468,13 +3711,13 @@ ALTER TABLE `kpi`
 -- AUTO_INCREMENT for table `migrations`
 --
 ALTER TABLE `migrations`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `permissions`
 --
 ALTER TABLE `permissions`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=381;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=383;
 
 --
 -- AUTO_INCREMENT for table `permissions_one`
@@ -3492,13 +3735,13 @@ ALTER TABLE `personal_access_tokens`
 -- AUTO_INCREMENT for table `publication`
 --
 ALTER TABLE `publication`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=521;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=536;
 
 --
 -- AUTO_INCREMENT for table `publication_attachments`
 --
 ALTER TABLE `publication_attachments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `publication_comments`
@@ -3516,7 +3759,25 @@ ALTER TABLE `publication_summaries`
 -- AUTO_INCREMENT for table `publication_tags`
 --
 ALTER TABLE `publication_tags`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=48;
+
+--
+-- AUTO_INCREMENT for table `questions`
+--
+ALTER TABLE `questions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+
+--
+-- AUTO_INCREMENT for table `question_stats`
+--
+ALTER TABLE `question_stats`
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+
+--
+-- AUTO_INCREMENT for table `quotes`
+--
+ALTER TABLE `quotes`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `roles`
@@ -3558,7 +3819,7 @@ ALTER TABLE `user_activity`
 -- AUTO_INCREMENT for table `user_preferences`
 --
 ALTER TABLE `user_preferences`
-  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `user_roles`
