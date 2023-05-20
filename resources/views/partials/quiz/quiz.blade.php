@@ -28,6 +28,7 @@
 			    @foreach($qn->answers as $ans)
 				 <span class="answer-pill px-4 answer answer_{{$qn->id}}{{$ans->id}}" onclick="markQuestion({{$qn->id}},{{$ans->id}})">{{$ans->answer_text}}</span>
 				@endforeach
+				
 			</div>
 			@if($count>1)
 			<div class="d-flex justify-content-end">
@@ -45,9 +46,9 @@
 		   </div>
 		   <!--- end quiz slide -->
 		   @endforeach
-		   <div class="question_stats py-2 px-2"></div>
 		</div>
 
+		<div class="question_stats py-2 px-3 card mb-2"></div>
 		<script>
 
 			function getCookie(name) {
@@ -144,10 +145,12 @@
 				}
 
 
-				var stats = `<h3 class="text-white">Response Statistics:</h3><h4 class="text-success"><strong>${((right_answers/all_answers)*100).toFixed(1)}%</strong> were right</h4>`;
+				var stats = `<h3 class="text-teal">Response Statistics:</h3><h4 class="text-success"><strong>${((right_answers/all_answers)*100).toFixed(1)}%</strong> were right</h4>`;
 				    stats += `<h4 class="text-danger"><strong>${((wrong_answers/all_answers)*100).toFixed(1)}%</strong> were wrong</h4>`
 
-				//$('.question_stats').html(stats).show();
+				console.log(stats);
+
+				$('.question_stats').html(stats).show();
 
 
 				if(increment_value>0)
