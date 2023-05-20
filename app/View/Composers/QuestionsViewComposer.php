@@ -9,7 +9,7 @@ class QuestionsViewComposer{
 
     public function compose(View $view){
 
-        $questions = Question::with('responses','answers')->get();
+        $questions = Question::with('responses','answers')->whereHas('answers')->get();
         $view->with('questions',$questions);
     }
 

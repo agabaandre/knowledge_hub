@@ -1,7 +1,7 @@
 <div class="spotlight px-3 py-5" style="background-color:#03343b ;background-image:url(<?php echo asset('frontend/img/landing-bg.png') ?>); background-repeat:no-repeat;">
 
-<form action="{{ url('records/search') }}" class="bg-white rounded search-form" style="min-width: 70%;">
-							<div class="row no-gutters">
+<form action="{{ url('records/search') }}" class="" style="min-width: 70%;">
+							<div class="row no-gutters bg-white rounded search-form">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative">
 											<input type="text" class="form-control left-ico autocomplete term" name="term" value="{{ @old('term') }}" placeholder="Type Keywords to explore" />
@@ -13,12 +13,15 @@
 											<button class="btn full-width  theme-bg text-white fs-md py-3" type="submit">Explore</button>
 										</div>
 									</div>
+
 								</div>
-							</form>
+                @include('home.partials.advanced_search')
+	</form>
 
     <div  class="spot-row">
+
         <div class="col-lg-8 col-md-12 col-sm-12 px-3">
-        <h3 class="text-center">Test your knowledge! Click on one of the themes below</h3>
+        <h3 class="text-center">Test your knowledge! Click on one of the sub-themes below</h3>
         </div>
     </div>
 

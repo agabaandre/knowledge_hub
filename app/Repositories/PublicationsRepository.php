@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\Author;
 use App\Models\Favourite;
+use App\Models\GeoCoverage;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\PublicationComment;
@@ -28,7 +29,20 @@ class PublicationsRepository{
         if($request->term){
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
+            
+            $authors     = Author::where('name','like',$request->term.'%')->get()->pluck('id');
+            $tags        = Tag::where('tag_text','like',$request->term.'%')->get()->pluck('id');
+            $pub_tag_ids = PublicationTag::whereIn('tag_id',$tags)->get()->pluck('publication_id');
+            $coverage    = GeoCoverage::where('name','like','%'.$request->term.'%')->get()->pluck('id');
+
+            $pubs->orWhereIn('geographical_coverage_id',$coverage);
+            $pubs->orWhereIn('id',$pub_tag_ids);
+            $pubs->orWhereIn('author_id',$authors);
         }
+
+
+        // if($request->country_id)
+        //  $pubs->where('country_id',$request->author);
 
         if($request->author)
          $pubs->where('author_id',$request->author);
@@ -48,6 +62,8 @@ class PublicationsRepository{
             $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
             $pubs->whereIn('id',$tags->toArray());
         }
+
+        $pubs->orderBy('visits','desc');
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
@@ -181,7 +197,17 @@ class PublicationsRepository{
 
     public function find($id){
 
-        return Publication::find($id);
+        $pub = Publication::find($id);
+
+        $viewed = get_cookie("Viewed".$pub->id,'yes');
+
+        if(!$viewed):
+            $pub->visits = $pub->visits + 1;
+            $pub->update();
+            set_cookie("Viewed".$pub->id,'yes');
+        endif;
+
+        return $pub;
     }
 
 

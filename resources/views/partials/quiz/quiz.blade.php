@@ -19,7 +19,9 @@
 		@php
 			$count++;
 		@endphp
-		<!--quiz slide-->
+		<!--quiz slide, only ones with answers-->
+	
+		@if(count($qn->answers)>0)
 		<div class="card bg-transparent border-white">
 			<div class="card-body text-white">
 			<h4 class="text-white">{{$count}}.{{$qn->question_text}}</h4>
@@ -28,13 +30,17 @@
 			    @foreach($qn->answers as $ans)
 				 <span class="answer-pill px-4 answer answer_{{$qn->id}}{{$ans->id}}" onclick="markQuestion({{$qn->id}},{{$ans->id}})">{{$ans->answer_text}}</span>
 				@endforeach
-				
+
 			</div>
-			@if($count>1)
+			@if($count>0)
 			<div class="d-flex justify-content-end">
-				<button class="slide-pill bg-dark text-white" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickPrev')">
-					Prev Question
-				</button>
+			  
+			   @if($count>1)
+					<button class="slide-pill bg-dark text-white" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickPrev')">
+						Prev Question
+					</button>
+				@endif
+
 				@if($count < count($questions))
 				<button class="slide-pill bg-success text-white" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickNext')">
 					Next Question
@@ -44,11 +50,16 @@
 			@endif
 			</div>
 		   </div>
+
+		   @endif
 		   <!--- end quiz slide -->
+
 		   @endforeach
 		</div>
 
-		<div class="question_stats py-2 px-3 card mb-2"></div>
+		<?php //echo json_encode($questions->toArray()); ?>
+
+		<div class="question_stats py-2 px-3 card mb-2" style="display:none;"></div>
 		<script>
 
 			function getCookie(name) {
@@ -83,7 +94,9 @@
 
 			    $('.answer').removeClass('bg-success').removeClass('bg-danger').removeClass('text-white');
 
-				const questions   = JSON.parse('<?php echo json_encode($questions); ?>');
+				var qns = '<?php echo json_encode($questions->toArray()); ?>';
+
+				const questions   = JSON.parse(qns);
 				const current_qn  = questions.find((item)=>item.id === parseInt(question_id));
 
 				let all_answers    = current_qn.responses.length;
@@ -145,13 +158,13 @@
 				}
 
 
-				var stats = `<h3 class="text-teal">Response Statistics:</h3><h4 class="text-success"><strong>${((right_answers/all_answers)*100).toFixed(1)}%</strong> were right</h4>`;
+				var stats = `<h3 class="text-dark">Statistics from <strong> ${all_answers}</strong> visitors</h3><h4 class="text-success"><strong>${((right_answers/all_answers)*100).toFixed(1)}%</strong> were right</h4>`;
+				    stats += `<div class="progress" style="height: 15px;"><div class="progress-bar bg-success progress-bar-striped" role="progressbar" style="width: ${((right_answers/all_answers)*100).toFixed(1)}%;" aria-valuenow="${((right_answers/all_answers)*100).toFixed(1)}" aria-valuemin="0" aria-valuemax="100"><small>${((right_answers/all_answers)*100).toFixed(1)}%</small></div></div>`
 				    stats += `<h4 class="text-danger"><strong>${((wrong_answers/all_answers)*100).toFixed(1)}%</strong> were wrong</h4>`
-
-				console.log(stats);
-
+					stats += `<div class="progress" style="height: 15px;"><div class="progress-bar bg-danger progress-bar-striped" role="progressbar" style="width: ${((wrong_answers/all_answers)*100).toFixed(1)}%;" aria-valuenow="${((wrong_answers/all_answers)*100).toFixed(1)}" aria-valuemin="0" aria-valuemax="100"><small>${((wrong_answers/all_answers)*100).toFixed(1)}%</small></div></div>`
+					stats += `<h4 class="text-nothern">More about the answer</h4><p>${correct_ans.answer_explanation}</p>`;
+				
 				$('.question_stats').html(stats).show();
-
 
 				if(increment_value>0)
 				saveStats(question_id,answer_id);
