@@ -45,20 +45,6 @@
   box-shadow: 1px 1px 6px 1px#28b661;
 }
 
-label{
-  font-weight: bolder!important;
-  color: #28B661;
-  margin-top: 7px;
-
-}
-
-.bg-show{
-  display: block;
-}
-
-.sm-show{
-  display: none;
-}
 
 @media only screen and (max-width:800px) {
 
@@ -98,13 +84,6 @@ label{
     margin: auto 20px!important;
   }
 
-  .bg-show{
-    display: none;
-  }
-
-  .sm-show{
-    display: block;
-  }
-  
+ 
 }
 
