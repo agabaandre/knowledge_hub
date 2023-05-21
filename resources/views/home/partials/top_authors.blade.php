@@ -23,7 +23,7 @@
 									<div class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-3 theme-bg-light circle">
 										<i class="{{$author->icon}} fs-lg theme-cl"></i></div>
 									<div class="cats-box-caption">
-										<h4 class="fs-md mb-0 ft-medium m-catrio">{{$author->name}}</h4>
+										<h4 class="fs-md mb-0 ft-medium m-catrio">{{truncate($author->name,18)}}</h4>
 										<span class="text-muted">{{count($author->publications)}} Resources</span>
 									</div>
 								</a>
