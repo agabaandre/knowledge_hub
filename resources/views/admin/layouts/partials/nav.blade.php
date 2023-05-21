@@ -45,6 +45,7 @@
 
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Data Records<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
+					<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Create Record</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Records</a></li>
 					</ul>
 				</li>

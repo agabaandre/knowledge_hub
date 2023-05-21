@@ -56,7 +56,7 @@
 
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">COuntry</label>
+                                <label class="form-label" for="publication">Country</label>
                                 @include('partials.countries.dropdown',['field'=>'country_id','required'=>'required', 'selected'=>form_edit('country_id',$record,'country_id')])
                             </div>
                         </div>
