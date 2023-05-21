@@ -4,6 +4,12 @@
 
 <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet"/>
 
+<style>
+
+.spotlight:after {
+    max-height: 20%!important;
+}
+
 </style>
 
 @endsection
