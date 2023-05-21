@@ -74,6 +74,11 @@
                 display: none!important;
             }
         }
+        <style>
+        /* Hide the Google Translate top bar banner */
+        .skiptranslate {
+        display: none !important;
+        }
     </style>
 
 </head>

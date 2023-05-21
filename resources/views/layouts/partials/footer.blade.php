@@ -194,61 +194,29 @@
 		//Quizz
 	</script>
 
-	<script type="text/javascript">
-	const fs = require('fs');
-    const path = require('path');
+	<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+    <script type="text/javascript">
+    function googleTranslateElementInit() {
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: 'sw,ar,fr,pt,es',
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        multilanguagePage: true
+      }, 'googleTranslateElement');
+    }
 
-		// Add event listener to language selector
-		document.getElementById('language-selector').addEventListener('change', function() {
-		const targetLanguage = this.value;
-
-		// Check if translation file exists for the selected language
-		const filePath = path.join(__dirname, `${targetLanguage}.html`);
-		if (fs.existsSync(filePath)) {
-			// If translation file exists, use it to update content
-			const content = fs.readFileSync(filePath, 'utf-8');
-			updateContent(content);
-		} else {
-			// If translation file does not exist, make API request to DeepL
-			const content = document.getElementById('langauge-container').innerHTML;
-			translateContent(content, targetLanguage, filePath);
-		}
-		});
-
-		// Function to translate content using DeepL API
-		function translateContent(content, targetLanguage, filePath) {
-		// Make API request to DeepL
-		const xhr = new XMLHttpRequest();
-		xhr.open('POST', 'https://api-free.deepl.com/v2/translate');
-		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-		xhr.onload = function() {
-			if (xhr.status === 200) {
-			// Write response to file
-			const response = JSON.parse(xhr.responseText);
-			const translatedContent = response.translations[0].text;
-			fs.writeFile(filePath, translatedContent, function(err) {
-				if (err) {
-				console.log('Error writing file: ' + err);
-				} else {
-				console.log('File saved: ' + filePath);
-				}
-			});
-
-			// Update content with translated text
-			updateContent(translatedContent);
-			} else {
-			console.log('Error: ' + xhr.status);
-			}
-		};
-		xhr.send('auth_key=YOUR_AUTH_KEY&text=' + encodeURIComponent(content) + '&target_lang=' + targetLanguage);
-		}
-
-		// Function to update content on the page
-		function updateContent(content) {
-		document.getElementById('langauge-container').innerHTML = content;
-		}
-	</script>
-
+    function changeLanguage() {
+      var select = document.getElementById("languageSelect");
+      var language = select.options[select.selectedIndex].value;
+      document.getElementById('google_translate_element').style.display = 'none';
+      new google.translate.TranslateElement({
+        pageLanguage: 'en',
+        includedLanguages: language,
+        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+        multilanguagePage: true
+      }, 'googleTranslateElement');
+    }
+  </script>
 	</body>
 
 	</html>
