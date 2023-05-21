@@ -6721,5 +6721,9 @@ label{
     .sm-show{
       display: block;
     }
+
+    #container{
+       border: none;
+    }
     
   }
