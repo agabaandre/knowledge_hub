@@ -25,12 +25,12 @@ Advance your Search With Filters <i class="fa fa-angle-down"></i>
     </div>
 
     <div class="col-md-4">
-       <label class="text-bold"><small>Theme</small></label>
+       <label class="text-bold"><small>Thematic Area</small></label>
        @include('partials.publications.theme_dropdown',['class'=>'class'])
     </div>
 
     <div class="col-md-4">
-       <label class="text-bold"><small>Sub-Theme</small></label>
+       <label class="text-bold"><small>Sub-Thematic Area</small></label>
        @include('partials.publications.subtheme_dropdown',['class'=>'class'])
     </div>
 

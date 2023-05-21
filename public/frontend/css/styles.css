@@ -6725,5 +6725,9 @@ label{
     #container{
        border: none;
     }
+
+    .slick-next, .slick-prev{
+        display: none!important;
+    }
     
   }
