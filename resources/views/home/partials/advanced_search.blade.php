@@ -1,4 +1,4 @@
-<div class="row py-3">
+<div class="row py-3 advanced_filters">
 
 <a data-toggle="collapse" href="#collapseExample" role="button" aria-expanded="false" aria-controls="collapseExample" class="advanced col-lg-12" style="color:#bba66d; font-size:14px;">
 Advance your Search With Filters <i class="fa fa-angle-down"></i>
@@ -11,17 +11,35 @@ Advance your Search With Filters <i class="fa fa-angle-down"></i>
 
     <div class="col-md-4">
         <label class="text-bold"><small>RCC</small></label>
-        @include('partials.countries.dropdown',['class'=>'class'])
+        @include('partials.regions.dropdown',['class'=>'class'])
     </div>
 
     <div class="col-md-4">
        <label class="text-bold"><small>Country</small></label>
+       @include('partials.countries.dropdown',['class'=>'class'])
+    </div>
+
+    <div class="col-md-4">
+       <label class="text-bold"><small>Source</small></label>
        @include('partials.authors.dropdown',['class'=>'class'])
     </div>
+
     <div class="col-md-4">
-       <label class="text-bold"><small>Country</small></label>
-        <select class="form-control"></select>
+       <label class="text-bold"><small>Theme</small></label>
+       @include('partials.publications.theme_dropdown',['class'=>'class'])
     </div>
+
+    <div class="col-md-4">
+       <label class="text-bold"><small>Sub-Theme</small></label>
+       @include('partials.publications.subtheme_dropdown',['class'=>'class'])
+    </div>
+
+    <div class="col-md-4">
+       <label class="text-bold"><small>Type</small></label>
+       @include('partials.publications.filetype_dropdown',['class'=>'class'])
+    </div>
+
+
     </div>
 
 </div>

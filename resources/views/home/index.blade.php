@@ -4,6 +4,8 @@
 
 <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet"/>
 
+</style>
+
 @endsection
 
 @section('content')
@@ -19,6 +21,7 @@
 
 @section('scripts')
 
+@include('common.select2')
 
 <script>
 var showing = false;
