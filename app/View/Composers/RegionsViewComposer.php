@@ -8,7 +8,7 @@ class RegionsViewComposer{
 
     public function compose(View $view){
 
-        $geoareas = Region::all();
+        $geoareas = Region::with('countries')->get();
         $view->with('regions',$geoareas);
     }
 

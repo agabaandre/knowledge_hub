@@ -49,8 +49,8 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['partials/tags/*','publications/*'],TagsViewComposer::class);
         View::composer(['partials/countries/*'],CountriesViewComposer::class);
         View::composer(['partials/experts/*'],ExpertTypesViewComposer::class);
-        View::composer(['partials/regions/*'],RegionsViewComposer::class);
-        View::composer(['partials/publications/*'],ThemesViewComposer::class);
+        View::composer(['partials/regions/*','partials/search/*'],RegionsViewComposer::class);
+        View::composer(['partials/publications/*','partials/search/*'],ThemesViewComposer::class);
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);

@@ -10,7 +10,7 @@ class ThemesViewComposer{
 
     public function compose(View $view){
 
-        $subthemes = ThemeticArea::all();
+        $subthemes = ThemeticArea::with('subthemes')->get();
         $view->with('themes',$subthemes);
     }
 
