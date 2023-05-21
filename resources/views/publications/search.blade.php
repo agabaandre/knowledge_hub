@@ -34,3 +34,9 @@
 </div>
 
 @endsection
+
+@section('scripts')
+
+@include('common.select2')
+
+@endsection

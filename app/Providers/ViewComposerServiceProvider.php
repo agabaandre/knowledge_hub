@@ -12,8 +12,10 @@ use App\View\Composers\FactsViewComposer;
 use App\View\Composers\FileTypesViewComposer;
 use App\View\Composers\GeoAreasViewComposer;
 use App\View\Composers\QuestionsViewComposer;
+use App\View\Composers\RegionsViewComposer;
 use App\View\Composers\SubThemesViewComposer;
 use App\View\Composers\TagsViewComposer;
+use App\View\Composers\ThemesViewComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades;
@@ -47,6 +49,8 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['partials/tags/*','publications/*'],TagsViewComposer::class);
         View::composer(['partials/countries/*'],CountriesViewComposer::class);
         View::composer(['partials/experts/*'],ExpertTypesViewComposer::class);
+        View::composer(['partials/regions/*','partials/search/*'],RegionsViewComposer::class);
+        View::composer(['partials/publications/*','partials/search/*'],ThemesViewComposer::class);
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);

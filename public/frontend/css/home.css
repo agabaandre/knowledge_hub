@@ -45,6 +45,7 @@
   box-shadow: 1px 1px 6px 1px#28b661;
 }
 
+
 @media only screen and (max-width:800px) {
 
   .crp_box .row a {
@@ -77,6 +78,12 @@
   .spotlight form button{
     margin-top: 10px!important;
   }
-  
+
+  .filters{
+
+    margin: auto 20px!important;
+  }
+
+ 
 }
 

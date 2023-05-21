@@ -45,7 +45,7 @@
 
 								@foreach($data_categories as $category)
 
-									@if($category->required_permission)
+									@if(!empty($category->required_permission))
 										@can($category->required_permission)
 										<a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
 										@endcan

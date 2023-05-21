@@ -250,11 +250,11 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
     Route::group(["prefix"=>"datarecords"],function(){
         
         Route::get("/",[DataRecordsAdminController::class,'index']);
+        Route::get("/create",[DataRecordsAdminController::class,'create']);
         Route::post("/save",[DataRecordsAdminController::class,'store']);
-        Route::get("/edit",[DataRecordsAdminController::class,'edit']);
+        Route::get("/edit" ,[DataRecordsAdminController::class,'edit']);
         Route::get("/delete",[DataRecordsAdminController::class,'destroy']);
     });
-
 
 
 });

@@ -6695,3 +6695,39 @@ body {
     padding: 7px 5px!important;
     border-bottom: #121212 1px solid!important;
 }
+
+label{
+    font-weight: bolder!important;
+    color: #28B661;
+    margin-top: 7px;
+  
+  }
+  
+  .bg-show{
+    display: block;
+  }
+  
+  .sm-show{
+    display: none;
+  }
+  
+  @media only screen and (max-width:800px) {
+  
+   
+    .bg-show{
+      display: none;
+    }
+  
+    .sm-show{
+      display: block;
+    }
+
+    #container{
+       border: none;
+    }
+
+    .slick-next, .slick-prev{
+        display: none!important;
+    }
+    
+  }
