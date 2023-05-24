@@ -74,12 +74,24 @@
                 display: none!important;
             }
         }
-        <style>
-        /* Hide the Google Translate top bar banner */
-        .skiptranslate {
-        display: none !important;
+        
+        /* Hide the Google Translate top banner */
+        .goog-te-banner-frame {
+            display: none !important;
         }
-    </style>
+            
+        .goog-te-gadget-icon {
+                display:none !important;
+                background-color:#FFF;
+               
+         }
+         .VIpgJd-ZVi9od-ORHb-OEVmcd{
+            display:none !important;
+         }
+     
+        </style>
+
+  
 
 </head>
 

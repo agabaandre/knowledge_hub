@@ -1,7 +1,10 @@
-  <select id="languageSelect" onchange="changeLanguage()" style="border:#FFF;">
-    <option value="sw">Swahili</option>
-    <option value="ar">Arabic</option>
+<!-- <select id="language-select" style="border:#FFF;">
+    <option value="en">English</option>
     <option value="fr">French</option>
-    <option value="pt">Portuguese</option>
+    <option value="ar">Arabic</option>
     <option value="es">Spanish</option>
-  </select>
+    <option value="pt">Portuguese</option>
+    <option value="sw">Swahili</option>
+  </select> -->
+
+  <div id="google_translate_element" style="float:right;"></div>

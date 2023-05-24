@@ -202,31 +202,53 @@
 		});
 
 		//Quizz
-	</script>
 
-	<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-    <script type="text/javascript">
-    function googleTranslateElementInit() {
-      new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: 'sw,ar,fr,pt,es',
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        multilanguagePage: true
-      }, 'googleTranslateElement');
-    }
+       $(document).ready(function() {
+      var apiKey = '2ef42c1212d74e6b9ed7030a65f4e154';
+      var region = 'southafricanorth';
+ 	  $('#language-select').change(function() {
+        var selectedLanguage = $(this).val();
+        translateContent(selectedLanguage);
+      });
 
-    function changeLanguage() {
-      var select = document.getElementById("languageSelect");
-      var language = select.options[select.selectedIndex].value;
-      document.getElementById('google_translate_element').style.display = 'none';
-      new google.translate.TranslateElement({
-        pageLanguage: 'en',
-        includedLanguages: language,
-        layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-        multilanguagePage: true
-      }, 'googleTranslateElement');
-    }
+      function translateContent(language) {
+        var htmlToTranslate = document.documentElement.innerHTML;
+
+        var url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
+        url += '&to=' + language;
+
+        $.ajax({
+          url: url,
+          type: 'POST',
+          beforeSend: function(xhr) {
+            xhr.setRequestHeader('Ocp-Apim-Subscription-Key', apiKey);
+            xhr.setRequestHeader('Ocp-Apim-Subscription-Region', region);
+            xhr.setRequestHeader('Content-Type', 'application/json');
+            xhr.setRequestHeader('Accept', 'application/json');
+          },
+          data: JSON.stringify([{ 'Text': htmlToTranslate }]),
+          success: function(response) {
+            var translatedHtml = response[0].translations[0].text;
+            $('html').html(translatedHtml);
+          },
+          error: function(error) {
+            console.log('Translation Error:', error);
+          }
+        });
+      }
+    });
   </script>
+  <script type="text/javascript">
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,fr,ar,es,pt,sw',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 	</body>
 
 	</html>

@@ -2,7 +2,7 @@
 	<!-- Top header  -->
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
-	 <div id="googleTranslateElement"></div>
+	
 	<div class="header">
 		<div class="container">
 			<nav id="navigation" class="navigation navigation-landscape">
@@ -73,9 +73,7 @@
 					@include('partials.account.authlinks')
 
 					</ul>
-					<div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
-					  @include('layouts.partials.language')
-					</div>
+				
 				</div>
 			</nav>
 		</div>
