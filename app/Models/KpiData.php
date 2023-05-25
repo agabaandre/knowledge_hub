@@ -9,6 +9,7 @@ class KpiData extends Model
 {
     use HasFactory;
     protected $table ="data";
+    public $timestamps = false;
 
     public function kpi(){
 

@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class Kpi extends Model
 {
     protected $table ="kpi";
+    public $timestamps = false;
     
     use HasFactory;
 }

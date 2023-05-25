@@ -10,6 +10,7 @@ class SubjectArea extends Model
     use HasFactory;
 
     protected $appends = ['description'];
+    public $timestamps = false;
 
     public function getDescriptionAttribute(){
         return $this->name;
