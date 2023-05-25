@@ -335,6 +335,7 @@ Route::group(["prefix"=>"categories"],function(){
 Route::group(["prefix"=>"dashboards"],function(){
 
     Route::get("/",  [GraphController::class,'index']);
+    Route::get("/kpi",  [GraphController::class,'kpi_comparison']);
     Route::get("/kpi_comparison_data",  [GraphController::class,'kpi_comparison_data']);
 
 });

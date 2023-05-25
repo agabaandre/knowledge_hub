@@ -1,7 +1,7 @@
 
 @include('layouts.partials.styles')
 
-<div id="main-wrapper" style="background-color:aliceblue;">
+<div id="main-wrapper" style="background-color:#f2f2f2;">
 
 @include('layouts.partials.header')
 

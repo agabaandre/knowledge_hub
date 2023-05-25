@@ -8,11 +8,10 @@
 
 <div class="container">
 
-
     <div class="card row mt-2">
      <div class="card-body">
 
-        <form class="row" method="get" action="{{ url('dashboards/index') }}">
+        <form class="row filter_form" method="get" action="{{ url('dashboards') }}">
 
                 <div class="form-group col-md-3">
                     <label>Region</label>
@@ -66,8 +65,6 @@
 
 </div>
 </div>
-
- 
 
 <?php 
 
@@ -136,8 +133,7 @@ if($valid_data == 0):
     }
 
 
-    function fetchData(subjectAreaId) {
-
+    function fetchData(subjectAreaId='') {
 
         $.ajax({
             data: $('.filter_form').serialize(),
@@ -146,8 +142,10 @@ if($valid_data == 0):
                 
                 console.log('data response',response);
                 seriesData = JSON.parse(response);
-
-                renderChart(subjectAreaId);
+                
+                if(seriesData.data.length>0){
+                 renderChart(subjectAreaId);
+                }
                 //hideLoader();
             },
             error: function(error) {

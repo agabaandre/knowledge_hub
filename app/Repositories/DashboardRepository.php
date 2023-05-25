@@ -16,7 +16,7 @@ class DashboardRepository{
     public function get($filter = [], $group_by = null, $columns = null)
 	{
 
-        $query = KpiData::orderBY('id','desc');
+        $query = KpiData::orderBY('kpi_id','desc');
 
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
@@ -43,7 +43,6 @@ class DashboardRepository{
 
 		if ($group_by)
         $query->groupBy($group_by);
-
 
 		$results = ($columns)?$query->get($columns):$query->get();
 
@@ -144,8 +143,10 @@ class DashboardRepository{
 		$data      = [];
 		$count     = 0;
 
+		//get kpis that have data
 		foreach ($this->get_kpis($filter) as $kpi) :
 
+			//for each country, get value for the select kpi
 			foreach ($this->get_countries() as $country) {
 
 				$filter['kpi_id']     = $kpi->id;

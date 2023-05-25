@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 class KpiData extends Model
 {
     use HasFactory;
-    protected $table ="data";
+    protected $table ="kpi_data";
     public $timestamps = false;
 
     public function kpi(){

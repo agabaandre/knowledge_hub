@@ -78,7 +78,7 @@ class GraphController extends Controller
 		$data['kpis']      =  $this->dashRepo->get_kpis();
 		$data['years']     =  $this->dashRepo->get_periods_years();
 
-		return view('dashboards.kpi_comparison', $data);
+		return view('dashboards.kpi', $data);
 	}
 
 
@@ -101,10 +101,7 @@ class GraphController extends Controller
 
 	public function kpi_comparison_data(Request $request)
 	{
-        $subject_area_id = $request->subject_area_id;
-    
 		$filter = $request->all();
-
 
 		if(isset($filter['country_id']) && intval($filter['country_id'])>0):
 			$data = $this->dashRepo->countries_data($filter);

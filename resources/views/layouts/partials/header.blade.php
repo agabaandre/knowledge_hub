@@ -62,11 +62,23 @@
 
 							</ul>
 						</li>
+
+						<li class=""><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
+							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
+							<li>
+								<a href="{{ url('dashboards')}}">RCC Dashboard</a>
+							</li>
+							<li>
+								<a href="{{ url('dashboards/kpi')}}">KPI Comparison Dashboard</a>
+							</li>
+							</ul>
+						</li>
+						
 						<li><a href="{{ url('forums')}}">Forums</a></li>
 						<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						<li><a href="{{ url('privacy')}}">Privacy</a></li>
-						<li><a href="{{ url('dashboards')}}">Rcc Dashboard</a></li>
-
+						
+						
 						@include('partials.account.authlinks',['class'=>'mobileonly'])
 
 					</ul>

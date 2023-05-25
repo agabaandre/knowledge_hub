@@ -205,6 +205,7 @@
 	</script>
 
 	<script type="text/javascript">
+	/*
 	const fs = require('fs');
     const path = require('path');
 
@@ -257,6 +258,7 @@
 		function updateContent(content) {
 		document.getElementById('langauge-container').innerHTML = content;
 		}
+		*/
 	</script>
 
 	</body>
