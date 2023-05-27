@@ -45,9 +45,8 @@
 							<div class="jbl_button mb-2">
 
 							
-								@if(!$publication->has_attachments && $publication->is_video)
+								@if(!empty($publication->publication))
 								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium"><i class="fa fa-link"></i> Browse Resource</a>
-
 								@endif
 									
 								@auth

@@ -59,4 +59,16 @@ class DataRecordsAdminController extends Controller
         return $this->dataRecordsRepo->delete($request->id);
     }
 
+    public function categories(Request $request){
+
+        $data['categories'] = $this->dataRecordsRepo->get_categories($request);
+        $data['search']       = (Object) $request->all();
+        return view('admin.datarecords.categories',$data);
+    }
+
+    public function delete_category(Request $request){
+        return $this->dataRecordsRepo->delete_category($request->id);
+    }
+
+
 }

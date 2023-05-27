@@ -202,43 +202,65 @@
 		});
 
 		//Quizz
+	</script>
 
-       $(document).ready(function() {
-      var apiKey = '2ef42c1212d74e6b9ed7030a65f4e154';
-      var region = 'southafricanorth';
- 	  $('#language-select').change(function() {
-        var selectedLanguage = $(this).val();
-        translateContent(selectedLanguage);
-      });
+	<script type="text/javascript">
+	/*
+	const fs = require('fs');
+    const path = require('path');
 
-      function translateContent(language) {
-        var htmlToTranslate = document.documentElement.innerHTML;
+		// Add event listener to language selector
+		document.getElementById('language-selector').addEventListener('change', function() {
+		const targetLanguage = this.value;
 
-        var url = 'https://api.cognitive.microsofttranslator.com/translate?api-version=3.0';
-        url += '&to=' + language;
+		// Check if translation file exists for the selected language
+		const filePath = path.join(__dirname, `${targetLanguage}.html`);
+		if (fs.existsSync(filePath)) {
+			// If translation file exists, use it to update content
+			const content = fs.readFileSync(filePath, 'utf-8');
+			updateContent(content);
+		} else {
+			// If translation file does not exist, make API request to DeepL
+			const content = document.getElementById('langauge-container').innerHTML;
+			translateContent(content, targetLanguage, filePath);
+		}
+		});
 
-        $.ajax({
-          url: url,
-          type: 'POST',
-          beforeSend: function(xhr) {
-            xhr.setRequestHeader('Ocp-Apim-Subscription-Key', apiKey);
-            xhr.setRequestHeader('Ocp-Apim-Subscription-Region', region);
-            xhr.setRequestHeader('Content-Type', 'application/json');
-            xhr.setRequestHeader('Accept', 'application/json');
-          },
-          data: JSON.stringify([{ 'Text': htmlToTranslate }]),
-          success: function(response) {
-            var translatedHtml = response[0].translations[0].text;
-            $('html').html(translatedHtml);
-          },
-          error: function(error) {
-            console.log('Translation Error:', error);
-          }
-        });
-      }
-    });
-  </script>
-  <script type="text/javascript">
+		// Function to translate content using DeepL API
+		function translateContent(content, targetLanguage, filePath) {
+		// Make API request to DeepL
+		const xhr = new XMLHttpRequest();
+		xhr.open('POST', 'https://api-free.deepl.com/v2/translate');
+		xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+		xhr.onload = function() {
+			if (xhr.status === 200) {
+			// Write response to file
+			const response = JSON.parse(xhr.responseText);
+			const translatedContent = response.translations[0].text;
+			fs.writeFile(filePath, translatedContent, function(err) {
+				if (err) {
+				console.log('Error writing file: ' + err);
+				} else {
+				console.log('File saved: ' + filePath);
+				}
+			});
+
+			// Update content with translated text
+			updateContent(translatedContent);
+			} else {
+			console.log('Error: ' + xhr.status);
+			}
+		};
+		xhr.send('auth_key=YOUR_AUTH_KEY&text=' + encodeURIComponent(content) + '&target_lang=' + targetLanguage);
+		}
+
+		// Function to update content on the page
+		function updateContent(content) {
+		document.getElementById('langauge-container').innerHTML = content;
+		}
+		*/
+   </script>
+	<script type="text/javascript">
         function googleTranslateElementInit() {
             new google.translate.TranslateElement({
                 pageLanguage: 'en',
@@ -249,6 +271,8 @@
         }
     </script>
     <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+	
+
 	</body>
 
 	</html>

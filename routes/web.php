@@ -31,8 +31,10 @@ use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
+use App\Http\Controllers\GraphController;
 use App\Http\Controllers\KpiController;
 use App\Http\Controllers\QuestionsController;
+use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -51,6 +53,8 @@ use Illuminate\Support\Facades\Route;
 Auth::routes(['verify' => true]);
 
 Route::get('/', [HomeController::class,'index'])->name('home');
+
+Route::get('/test', [TestController::class,'index']);
 
 Route::get('/logout',function(){
     Auth::logout();
@@ -254,6 +258,17 @@ Route::group(["prefix"=>"admin",'middleware'=>['auth','web']],function(){
         Route::post("/save",[DataRecordsAdminController::class,'store']);
         Route::get("/edit" ,[DataRecordsAdminController::class,'edit']);
         Route::get("/delete",[DataRecordsAdminController::class,'destroy']);
+
+
+        Route::group(["prefix"=>"categories"],function(){
+
+            Route::get("/",[DataRecordsAdminController::class,'categories']);
+            Route::post("/save",[DataRecordsAdminController::class,'save_category']);
+            Route::get("/delete",[DataRecordsAdminController::class,'delete_category']);
+
+        });
+
+
     });
 
 
@@ -316,6 +331,15 @@ Route::group(["prefix"=>"categories"],function(){
     Route::get("data/detail",  [DataRecordsController::class,'details']);
 
 });
+
+Route::group(["prefix"=>"dashboards"],function(){
+
+    Route::get("/",  [GraphController::class,'index']);
+    Route::get("/kpi",  [GraphController::class,'kpi_comparison']);
+    Route::get("/kpi_comparison_data",  [GraphController::class,'kpi_comparison_data']);
+
+});
+
 
 
 

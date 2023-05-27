@@ -2,7 +2,7 @@
 	<!-- Top header  -->
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
-	
+	<div id="langauge-container">
 	<div class="header">
 		<div class="container">
 			<nav id="navigation" class="navigation navigation-landscape">
@@ -47,7 +47,9 @@
 
 									@if(!empty($category->required_permission))
 										@can($category->required_permission)
-										<a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
+										<li>
+										 <a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
+										</li>
 										@endcan
 									@else
 
@@ -60,10 +62,23 @@
 
 							</ul>
 						</li>
+
+						<li class=""><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
+							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
+							<li>
+								<a href="{{ url('dashboards')}}">RCC Dashboard</a>
+							</li>
+							<li>
+								<a href="{{ url('dashboards/kpi')}}">KPI Comparison Dashboard</a>
+							</li>
+							</ul>
+						</li>
+						
 						<li><a href="{{ url('forums')}}">Forums</a></li>
 						<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						<li><a href="{{ url('privacy')}}">Privacy</a></li>
-
+						
+						
 						@include('partials.account.authlinks',['class'=>'mobileonly'])
 
 					</ul>
@@ -73,7 +88,9 @@
 					@include('partials.account.authlinks')
 
 					</ul>
-				
+					<!-- <div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
+					  @include('layouts.partials.language')
+					</div> -->
 				</div>
 			</nav>
 		</div>

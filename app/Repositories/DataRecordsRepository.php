@@ -97,4 +97,18 @@ class DataRecordsRepository{
     }
 
 
+    public function get_categories(Request $request){
+
+        $rows_count = ($request->rows)?$request->rows:20;
+        $results    = DataCategory::orderBy('id','desc');
+
+        return $results->paginate($rows_count);
+    }
+
+    public function delete_category($id){
+
+        return DataCategory::find($id)->delete();
+    }
+
+
 }
