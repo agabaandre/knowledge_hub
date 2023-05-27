@@ -153,4 +153,4 @@
 
 </script>
 
-@endscript
+@endsection
