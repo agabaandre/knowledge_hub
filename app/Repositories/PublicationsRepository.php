@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Author;
+use App\Models\Country;
 use App\Models\Favourite;
 use App\Models\GeoCoverage;
 use App\Models\Publication;
@@ -10,6 +11,7 @@ use App\Models\PublicationComment;
 use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
+use App\Models\Region;
 use App\Models\SubjectArea;
 use App\Models\SubThemeticArea;
 use App\Models\Tag;
@@ -21,10 +23,15 @@ class PublicationsRepository{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs       = Publication::orderBy('id','desc');
+        $pubs       = Publication::orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');
+
+         
+
+         if($request->is_featured)
+         $pubs->where('is_featured',1);
 
         if($request->term){
             $pubs->where('title','like',$request->term.'%');
@@ -41,18 +48,16 @@ class PublicationsRepository{
         }
 
 
-        // if($request->country_id)
-        //  $pubs->where('country_id',$request->author);
-
+       
         if($request->author)
          $pubs->where('author_id',$request->author);
 
-         if($request->file_type)
-         $pubs->where('file_type_id',$request->file_type);
+         if($request->file_type || $request->file_type_id):
+            $file_type = ($request->file_type)?$request->file_type:$request->file_type_id;
+            $pubs->where('file_type_id',$file_type);
+         endif;
 
-         if($request->subtheme)
-         $pubs->where('sub_thematic_area_id',$request->subtheme);
-
+       
          if($request->area)
          $pubs->where('geographical_coverage_id',$request->area);
 
@@ -62,6 +67,31 @@ class PublicationsRepository{
             $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
             $pubs->whereIn('id',$tags->toArray());
         }
+
+        if($request->rcc){
+
+            $rcc = Region::where('id',$request->rcc)->first();
+            $country_ids = Country::where('region_id',$rcc->id)->get()->pluck('id');
+            $pubs->whereIn('geographical_coverage_id',$country_ids);
+
+        }
+
+        if($request->country_id)
+        $pubs->where('geographical_coverage_id',$request->country_id);
+
+        
+        if($request->thematic_area_id){
+
+            $subthems = SubThemeticArea::where('thematic_area_id',$request->thematic_area_id)->get()->pluck('id');
+            $pubs->whereIn('sub_thematic_area_id',$subthems);
+
+        }
+
+        if($request->subtheme || $request->sub_thematic_area_id):
+            $subtheme = ($request->subtheme)?$request->subtheme:$request->sub_thematic_area_id;
+            $pubs->where('sub_thematic_area_id',$subtheme);
+         endif;
+
 
         $pubs->orderBy('visits','desc');
 

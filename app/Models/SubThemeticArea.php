@@ -12,7 +12,7 @@ class SubThemeticArea extends Model
     protected $table="sub_thematic_area";
 
     public function theme(){
-        return $this->belongsTo(SubjectArea::class,"thematic_area_id","id");
+        return $this->belongsTo(ThemeticArea::class,"thematic_area_id","id");
     }
 
     public function getDescriptionAttribute($value)

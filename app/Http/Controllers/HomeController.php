@@ -35,6 +35,7 @@ class HomeController extends Controller
         $data['recent']       = $this->publicationsRepo->get($request);
         $data['authors']      = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
+		$request['is_featured'] = 1;
         $data['featured']     = $this->publicationsRepo->get($request);
         $data['tags']	      = $this->publicationsRepo->get_tags();
 		$data['types']        = $this->publicationsRepo->get_types();

@@ -9,5 +9,5 @@ class GeoCoverage extends Model
 {
     use HasFactory;
 
-    protected $table = "geographical_coverage";
+    protected $table = "country";
 }

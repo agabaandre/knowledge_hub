@@ -2,7 +2,7 @@
 
 @php
 
-$advanced_filter = (@$search->rcc || @$search->country_id || @$search->author_id || @$search->file_type_id)?true:false;
+$advanced_filter = (@$search->rcc || @$search->country_id || @$search->author_id || @$search->file_type_id || @$search->thematic_area_id)?true:false;
 
 @endphp
 

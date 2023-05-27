@@ -16,7 +16,6 @@ class AreasController extends Controller
     }
 
     public function index(Request $request){
-
         $data['areas'] = $this->areasRepo->get($request);
         return view('areas.index',$data);
     }
