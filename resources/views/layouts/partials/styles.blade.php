@@ -74,7 +74,22 @@
                 display: none!important;
             }
         }
-    </style>
+        
+        /* Hide the Google Translate top banner */
+        .goog-te-banner-frame {
+            display: none !important;
+        }
+            
+        .goog-te-gadget-icon {
+                display:none !important;
+                background-color:#FFF;
+               
+         }
+         .VIpgJd-ZVi9od-ORHb-OEVmcd{
+            display:none !important;
+         }
+     
+        </style>
 
 </head>
 
