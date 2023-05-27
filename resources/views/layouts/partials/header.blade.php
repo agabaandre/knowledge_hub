@@ -66,10 +66,10 @@
 						<li class=""><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							<li>
-								<a href="{{ url('dashboards')}}">RCC Dashboard</a>
+								<a href="{{ url('dashboards')}}">RCCs</a>
 							</li>
 							<li>
-								<a href="{{ url('dashboards/kpi')}}">KPI Comparison Dashboard</a>
+								<a href="{{ url('dashboards/kpi')}}">Indicator Comparison</a>
 							</li>
 							</ul>
 						</li>
