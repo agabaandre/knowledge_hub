@@ -98,7 +98,7 @@
     display: none;
 }
 
-. .js #loader {
+.js #loader {
     display: block;
     position: absolute;
     left: 100px;
@@ -6730,4 +6730,8 @@ label{
         display: none!important;
     }
     
+  }
+
+  .theme-gold{
+    background-color:#b4a269;
   }

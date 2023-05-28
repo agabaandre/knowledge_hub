@@ -25,7 +25,7 @@
                 <div class="form-group col-md-2">
                     <label>Member State</label>
                     <select class="form-control select2 countries" name="country_id" onchange="$('.filter_form').submit();">
-                        <option value="">None</option>
+                        <option value="">All</option>
                         <?php foreach($countries as $country): ?>
                         <option value="<?php echo $country->id; ?>"  <?php echo (isset($filter['country_id']) && $filter['country_id'] == $country->id) ? "selected" : ""; ?>>
                         <?php echo $country->name; ?></option>
@@ -35,7 +35,7 @@
 
             <div class="form-group col-md-2">
                 <label>Period</label>
-                <select class="form-control select2" name="period_year" onchange="fetchData()">
+                <select class="form-control select2" name="period_year"  onchange="$('.filter_form').submit();">
                     <option value="">All</option>
                     <?php foreach ($years as $year): ?>
                         <option value="<?php echo $year; ?>" <?php echo (isset($filter['period_year']) && $filter['period_year'] == $year) ? "selected" : ""; ?>><?php echo $year; ?></option>
@@ -57,7 +57,7 @@
                 <label>Visualisation Type</label>
                 <select class="form-control select2" onchange="switchChartType($(this).val())">
                     <option value="spline">Line Chart</option>
-                    <option value="bar">Bar Graph</option>
+                    <option value="column">Bar Graph</option>
                 </select>
             </div>
 
@@ -117,21 +117,24 @@ if($valid_data == 0):
 @include('common.select2')
 
 <script type="text/javascript">
-    var chartType = 'spline';
+    var chartType = 'column';
     var seriesData = null;
     var reRender = false;
     var chart = null;
+    var charts = []; //to contain charts for future modifications
 
 
     function switchChartType(type) {
-        //var ui_chart = $('#countries_summary').highcharts();
-        chart.series.forEach(function(item) {
-            item.update({
-                type: type
+
+        charts.forEach(function(chart) {
+
+            chart.series.forEach(function(item) {
+                item.update({
+                    type: type
+                });
             });
         });
     }
-
 
     function fetchData(subjectAreaId='') {
 
@@ -201,16 +204,18 @@ if($valid_data == 0):
                 }]
             }
         });
+
+        charts.push(chart);
     }
 
 
     $(document).ready(function() {
 
-        //showLoader();
-
         var widget_data = JSON.parse('<?php echo json_encode($years_data); ?>');
 
-        console.log(widget_data);
+        widgets = widget_data;
+
+        console.log('years_data',widget_data);
 
         widget_data.forEach((subjectArea)=>{
 

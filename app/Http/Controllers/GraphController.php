@@ -14,7 +14,6 @@ class GraphController extends Controller
         $this->dashRepo = $dashRepo;
     }
 
-
 	public function index(Request $request)
 	{
 		
@@ -22,7 +21,7 @@ class GraphController extends Controller
 		$data['uptitle'] = "RCC Dashboards";
 
 		$filter = $request->all();
-		$current_year   = "2022"; //date('Y');
+		$current_year   = date('Y');
 
 		$data['countries']    = $this->dashRepo->get_countries($filter)->toArray();
 		$data['subjectareas'] = $this->dashRepo->get_subjectareas();
@@ -35,6 +34,7 @@ class GraphController extends Controller
 		foreach ($this->dashRepo->get_subject_area($subject_area_id) as $key=>$subject_area):
 
 			$filter['subject_area']  = $subject_area->id;
+			
 			$data['years_data'][$key]['subject_area']    = $subject_area->name;
 			$data['years_data'][$key]['subject_area_id'] = $subject_area->id;
 			$data['years_data'][$key]['data'] = $this->get_year_data($filter, $current_year);
@@ -64,6 +64,7 @@ class GraphController extends Controller
 
 			$filter['kpi_id']      = $row->kpi_id;
 			$filter['period_year'] = $previous_year;
+
 			$prev_year             = $this->dashRepo->get_country_kpis($filter, true);
 			$row->previous_year    = (isset($prev_year->kpi_value)) ? $prev_year->kpi_value : 0;
 		}

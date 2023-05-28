@@ -5,6 +5,7 @@ use App\Models\Author;
 use App\Models\Country;
 use App\Models\Kpi;
 use App\Models\KpiData;
+use App\Models\Region;
 use App\Models\SubjectArea;
 use App\Models\SubThemeticArea;
 use Illuminate\Http\Request;
@@ -22,13 +23,22 @@ class DashboardRepository{
 			foreach ($filter as $key => $value) {
 
 				if($key=='subject_area'):
-						$kpi_ids = $this->get_kpis(['subject_area'=>$filter['subject_area']],true);
+						$kpi_ids = $this->get_kpis($filter,true);
 
 						if(count($kpi_ids) == 0)
 							return [];
 						
 						if(count($kpi_ids) > 0)
                         $query->whereIn('kpi_id', $kpi_ids);
+				endif;
+
+				if($key=='region_id'):
+					
+					$country_ids = $this->region_countries($filter['region_id']);
+					
+					if(count($country_ids) > 0)
+					$query->whereIn('country_id', $country_ids->toArray());
+
 				endif;
 
 				if ($key=='kpi_id')
@@ -71,7 +81,7 @@ class DashboardRepository{
 
 	public function get_countries($filter=null)
 	{
-		$use_filters = (isset($filter['region_id']) && $filter['region_id']>0);
+		$use_filters = (isset($filter['region_id']) && $filter['region_id']>0)?true:false;
 
        $data_countries = array_column($this->exec_query('SELECT country_id from kpi_data GROUP BY country_id '),'country_id');
 
@@ -87,17 +97,20 @@ class DashboardRepository{
 		return $countries->get();
 	}
 
-	public function get_data_kpis()
+	public function get_data_kpis($filter=[])
 	{
-		$kpis     = $this->exec_query("SELECT id from kpi WHERE  id in(SELECT kpi_id from kpi_data)");
-		
-		$result =[];
+		$kpi_ids_with_data = KpiData::orderBy('kpi_id','desc');
 
-		foreach($kpis as $kpi){
-			array_push($result,$kpi->id);
+
+		if(isset($filter['region'])){
+			$country_ids = $this->region_countries($filter['region']);
+			$kpi_ids_with_data->whereIn('country_id',$country_ids);
 		}
+		
+		$kpi_ids = $kpi_ids_with_data->get()->pluck('kpi_id');
+		$kpis     =  Kpi::whereIn('id',$kpi_ids->toArray())->get()->pluck('id');
 
-		return $result;
+		return $kpis;
 	}
 
 	public function get_periods_years()
@@ -109,18 +122,21 @@ class DashboardRepository{
 	public function get_kpis($filter = [], $only_ids=false)
 	{
 
-		$query = Kpi::where('id',$this->get_data_kpis());
+		$query = Kpi::whereIn('id',$this->get_data_kpis($filter));
 
 		if(!empty($filter)) {
 			foreach ($filter as $key => $value) {
 
 				if (!empty($value)) {
+
 					if ($key == "kpi_id"){
 						$query->where('id', $value);
 					}
+
 				   else if ($key == "subject_area"){
 						$query->where("subject_area", $value);
 				   }
+
 				}
 			}
 		}
@@ -210,6 +226,11 @@ class DashboardRepository{
 		return array('labels' => $periods, 'data' => array_values($data));
 	}
 
+	public function region_countries($region_id){
+
+	  return Country::where('region_id',$region_id)->get()->pluck('id');
+	}
+
 	//get country kpi performance
 	public function get_country_kpis($filter = [], $get_row = false)
 	{
@@ -220,9 +241,21 @@ class DashboardRepository{
 			return [];
 
         $query = DB::table('kpi_data')
-         ->when(count($kpi_ids) > 0, function ($query, $kpi_ids) {
-             return $query->where('kpi_id', $kpi_ids);
+         ->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
+             return $query->whereIn('kpi_id',$kpi_ids->toArray());
          });
+
+		if(isset($filter['region_id'])){
+
+			$country_ids = $this->region_countries($filter['region_id']);
+
+			if(count($country_ids) == 0)
+			return [];
+
+			$query->when(count($country_ids) > 0, function ($query) use($country_ids) {
+				return $query->whereIn('country_id', $country_ids->toArray());
+			});
+		}
 
 
 		if (!empty($filter)) {
@@ -231,7 +264,7 @@ class DashboardRepository{
 
 				if (!empty($value)) {
 
-					$is_intended = ($key == "kpi_id" || $key == "country_id");
+					$is_intended = ($key == "kpi_id" || $key == "country_id")?true:false;
 
                     $query->when($is_intended, function ($query, $kpi_ids) use($key,$value) {
                         return $query->where($key, $value);
@@ -242,7 +275,7 @@ class DashboardRepository{
 		}
 
 		$query->select(DB::raw('kpi_name,AVG(kpi_value) as kpi_value,kpi_id'));
-        $results = $query->groupBy('country_id')->groupBy('kpi_id')->get();
+        $results = $query->groupBy(['kpi_id','country_id'])->get();
        
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
 	}
@@ -263,7 +296,7 @@ class DashboardRepository{
 
 		foreach ($this->get_kpis($filter) as $kpi) :
 
-            $row = $this->exec_query("SELECT kpi_name,AVG(kpi_value) as kpi_value,kpi_id FROM kpi_data")[0];
+            $row = $this->exec_query("SELECT kpi_name,AVG(kpi_value) as kpi_value,kpi_id FROM kpi_data where kpi_id='$kpi->id'")[0];
             
 			$data[$count]['name']   = $kpi->name;
 			$data[$count]['data'][] = intval($row->kpi_value);

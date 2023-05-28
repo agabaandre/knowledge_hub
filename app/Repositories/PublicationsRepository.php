@@ -28,12 +28,13 @@ class PublicationsRepository{
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');
 
-         
 
-         if($request->is_featured)
+        if($request->is_featured)
          $pubs->where('is_featured',1);
 
+         //search by keyword
         if($request->term){
+            
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
             
@@ -47,20 +48,21 @@ class PublicationsRepository{
             $pubs->orWhereIn('author_id',$authors);
         }
 
-
-       
+        //search by author
         if($request->author)
          $pubs->where('author_id',$request->author);
 
+         //search by file type
          if($request->file_type || $request->file_type_id):
             $file_type = ($request->file_type)?$request->file_type:$request->file_type_id;
             $pubs->where('file_type_id',$file_type);
          endif;
 
-       
+        //search by country
          if($request->area)
          $pubs->where('geographical_coverage_id',$request->area);
 
+         //search by tag
          if($request->tag){
 
             $tag = Tag::where('tag_text',$request->tag)->first();
@@ -68,6 +70,7 @@ class PublicationsRepository{
             $pubs->whereIn('id',$tags->toArray());
         }
 
+        //search by rcc
         if($request->rcc){
 
             $rcc = Region::where('id',$request->rcc)->first();
@@ -76,10 +79,11 @@ class PublicationsRepository{
 
         }
 
+         //search by country
         if($request->country_id)
         $pubs->where('geographical_coverage_id',$request->country_id);
 
-        
+         //search by theme
         if($request->thematic_area_id){
 
             $subthems = SubThemeticArea::where('thematic_area_id',$request->thematic_area_id)->get()->pluck('id');
@@ -87,11 +91,11 @@ class PublicationsRepository{
 
         }
 
+         //search by subtheme
         if($request->subtheme || $request->sub_thematic_area_id):
             $subtheme = ($request->subtheme)?$request->subtheme:$request->sub_thematic_area_id;
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
-
 
         $pubs->orderBy('visits','desc');
 

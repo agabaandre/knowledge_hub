@@ -11,7 +11,7 @@
                 <small class="mb-3 mt-3 text-muted">Current (<?php echo $year; ?>) Vs Previous year (<?php echo $year-1; ?>)</small>
             </div>
            
-            <div class="card-footer bg-primary text-white" style="padding: 5px!important; margin:0px!important;">
+            <div class="card-footer theme-gold text-white" style="padding: 5px!important; margin:0px!important; background-color:#b4a269;">
                 <div class="row text-center  py-0">
                     <div class="col pb-0">
                         <h5 class="m-0 text-white"><?php echo number_format($row->kpi_value,0); ?></h5>

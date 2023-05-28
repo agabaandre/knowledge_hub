@@ -18,7 +18,6 @@ class IndicatorsRepository{
             $authors->orWhere('name','like','%'.$request->term.'%');
         }
         
-
         $result = $authors ->paginate($rows_count);
 
         return  $result;
@@ -37,21 +36,16 @@ class IndicatorsRepository{
     }
 
     public function get_data(Request $request){
-
         $data = KpiData::paginate(20);
-
         return $data;
-
     }
 
     public function find($id){
-
-        return Author::find($id);
+        return Kpi::find($id);
     }
 
     public function delete($id){
-
-        return Author::find($id)->delete();
+        return Kpi::find($id)->delete();
     }
 
 
