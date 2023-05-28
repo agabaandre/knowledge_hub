@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\DB;
 class DashboardRepository{
 
 
+	 // Retrieves KPIData based on the provided filters, from specified columns, if any
     public function get($filter = [], $group_by = null, $columns = null)
 	{
 
@@ -22,18 +23,22 @@ class DashboardRepository{
 		if (!empty($filter)) {
 			foreach ($filter as $key => $value) {
 
+				///if filter has subject area, get kpis for that subject area
 				if($key=='subject_area'):
 						$kpi_ids = $this->get_kpis($filter,true);
 
+						//if no kpis for subject area return empty array
 						if(count($kpi_ids) == 0)
-							return [];
-						
+							return []; 
+
+						//if there're kpis, get there data
 						if(count($kpi_ids) > 0)
                         $query->whereIn('kpi_id', $kpi_ids);
 				endif;
 
 				if($key=='region_id'):
-					
+
+					//region was selected, retrieve kpi data for countries in that region
 					$country_ids = $this->region_countries($filter['region_id']);
 					
 					if(count($country_ids) > 0)
@@ -41,6 +46,7 @@ class DashboardRepository{
 
 				endif;
 
+				//kpi was supplied in filter, retrieve for just that kpi
 				if ($key=='kpi_id')
                   $query->where($key, $value);
 					
@@ -48,9 +54,13 @@ class DashboardRepository{
 
 			
 		if(isset($filter['country_id']))
+
+		   //if country selected, retrieve kpi data for that country
+
 			$query->where('country_id', $filter['country_id']);
 		}
 
+       //if group by was provided , use that to group
 		if ($group_by)
         $query->groupBy($group_by);
 
@@ -59,6 +69,8 @@ class DashboardRepository{
 		return $results->toArray();
 	}
 
+
+	//Retrieve subtheme by tematic area id
 	public function subject_sub_themes($id){
 
         $subtheme_ids= SubThemeticArea::where('thematic_area_id',$id)->get()->pluck('id');
