@@ -55,9 +55,9 @@
             
             <div class="form-group col-md-2">
                 <label>Visualisation Type</label>
-                <select class="form-control select2" onchange="switchChartType($(this).val())">
-                    <option value="spline">Line Chart</option>
-                    <option value="column">Bar Graph</option>
+                <select class="form-control select2" name="chart_type" onchange="$('.filter_form').submit();">
+                    <option value="line" <?php echo (isset($filter['chart_type']) && $filter['chart_type'] == 'line') ? "selected" : ""; ?>>Line Chart</option>
+                    <option value="bar" <?php echo (isset($filter['chart_type']) && $filter['chart_type'] == 'bar') ? "selected" : ""; ?>>Bar Graph</option>
                 </select>
             </div>
 
@@ -117,7 +117,7 @@ if($valid_data == 0):
 @include('common.select2')
 
 <script type="text/javascript">
-    var chartType = 'column';
+    var chartType = '<?php echo $filter['chart_type'] ?? 'bar'; ?>';
     var seriesData = null;
     var reRender = false;
     var chart = null;
@@ -133,6 +133,7 @@ if($valid_data == 0):
                     type: type
                 });
             });
+
         });
     }
 

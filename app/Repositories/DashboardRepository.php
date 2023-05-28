@@ -102,12 +102,13 @@ class DashboardRepository{
 		$kpi_ids_with_data = KpiData::orderBy('kpi_id','desc');
 
 
-		if(isset($filter['region'])){
-			$country_ids = $this->region_countries($filter['region']);
-			$kpi_ids_with_data->whereIn('country_id',$country_ids);
+		if(isset($filter['region_id'])){
+			$country_ids = $this->region_countries($filter['region_id']);
+			$kpi_ids_with_data->whereIn('country_id',$country_ids->toArray());
 		}
 		
 		$kpi_ids = $kpi_ids_with_data->get()->pluck('kpi_id');
+
 		$kpis     =  Kpi::whereIn('id',$kpi_ids->toArray())->get()->pluck('id');
 
 		return $kpis;
@@ -144,7 +145,6 @@ class DashboardRepository{
 		$results = $query->get();
 
 		if($only_ids){ //return an raary of ids
-
 			$ids = $results->pluck('id');
             return $ids;
 		}
@@ -163,7 +163,7 @@ class DashboardRepository{
 		foreach ($this->get_kpis($filter) as $kpi) :
 
 			//for each country, get value for the select kpi
-			foreach ($this->get_countries() as $country) {
+			foreach ($this->get_countries($filter) as $country) {
 
 				$filter['kpi_id']     = $kpi->id;
 				$filter['country_id'] = $country->id;
@@ -235,7 +235,7 @@ class DashboardRepository{
 	public function get_country_kpis($filter = [], $get_row = false)
 	{
 
-		$kpi_ids = $this->get_kpis(['subject_area'=>$filter['subject_area']],true);
+		$kpi_ids = $this->get_kpis($filter,true);
 
 		if(count($kpi_ids) == 0)
 			return [];

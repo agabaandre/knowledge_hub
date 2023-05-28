@@ -103,8 +103,10 @@ class GraphController extends Controller
 	public function kpi_comparison_data(Request $request)
 	{
 		$filter = $request->all();
+		$use_country_filter = (isset($filter['country_id']));
 
-		if(isset($filter['country_id']) && intval($filter['country_id'])>0):
+		//if country selected, compare year values for the country
+		if($use_country_filter):
 			$data = $this->dashRepo->countries_data($filter);
 	    else:
 	    	$data = $this->dashRepo->kpi_data($filter);
