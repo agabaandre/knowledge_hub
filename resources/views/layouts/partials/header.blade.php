@@ -75,7 +75,7 @@
 						</li>
 						
 						<li><a href="{{ url('forums')}}">Forums</a></li>
-						<li><a href="{{ url('faqs')}}">FAQs</a></li>
+						<li><a href="{{ url('faqs')}}">Need Help?</a></li>
 						<li><a href="{{ url('privacy')}}">Privacy</a></li>
 						
 						
