@@ -68,9 +68,9 @@
 							<li>
 								<a href="{{ url('dashboards')}}">RCCs</a>
 							</li>
-							<li>
+							<!-- <li>
 								<a href="{{ url('dashboards/kpi')}}">Indicator Comparison</a>
-							</li>
+							</li> -->
 							</ul>
 						</li>
 						
@@ -88,9 +88,6 @@
 					@include('partials.account.authlinks')
 
 					</ul>
-					<!-- <div class="align-to-right language-css" style="position:relative; margin-top:22px; margin-right:40px">
-					  @include('layouts.partials.language')
-					</div> -->
 				</div>
 			</nav>
 		</div>

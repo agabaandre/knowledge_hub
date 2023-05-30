@@ -1,4 +1,4 @@
-<select id="language-selector" style="border:#FFF;">
+<!-- <select id="language-selector" style="border:#FFF;">
         <option value="en">English</option>
         <option value="ar">Arabic</option>
         
@@ -9,4 +9,6 @@
         <option value="sw">Swahili</option>
 
 
-</select>
+</select> -->
+
+ <div id="google_translate_element" style="float:right;"></div>
