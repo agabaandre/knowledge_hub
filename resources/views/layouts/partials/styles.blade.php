@@ -88,6 +88,9 @@
          .VIpgJd-ZVi9od-ORHb-OEVmcd{
             display:none !important;
          }
+         .goog-te-gadget-simple{
+            border-radius: 4px;
+         }
      
         </style>
 
