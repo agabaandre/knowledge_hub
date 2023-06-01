@@ -3160,7 +3160,7 @@ CREATE TABLE IF NOT EXISTS `user_roles` (
 DROP TABLE IF EXISTS `kpi_data`;
 
 DROP VIEW IF EXISTS `kpi_data`;
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `kpi_data`  AS SELECT `k`.`id` AS `kpi_id`, sum(`d`.`value`) AS `kpi_value`, `d`.`period` AS `period`, year(concat(`d`.`period`,-('01'))) AS `period_year`, month(concat(`d`.`period`,-('01'))) AS `period_month`, `k`.`name` AS `kpi_name`, `k`.`subject_area` AS `subject_area_id`, `k`.`description` AS `description`, `k`.`frequency` AS `frequency`, `c`.`name` AS `name`, `c`.`color` AS `color`, `c`.`id` AS `country_id` FROM ((`data` `d` join `kpi` `k` on((`d`.`kpi_id` = `k`.`id`))) join `country` `c` on((`d`.`country_id` = `c`.`id`))) GROUP BY `d`.`kpi_id`, `d`.`period`;
+CREATE VIEW `kpi_data`  AS SELECT `k`.`id` AS `kpi_id`, sum(`d`.`value`) AS `kpi_value`, `d`.`period` AS `period`, year(concat(`d`.`period`,-('01'))) AS `period_year`, month(concat(`d`.`period`,-('01'))) AS `period_month`, `k`.`name` AS `kpi_name`, `k`.`subject_area` AS `subject_area_id`, `k`.`description` AS `description`, `k`.`frequency` AS `frequency`, `c`.`name` AS `name`, `c`.`color` AS `color`, `c`.`id` AS `country_id` FROM ((`data` `d` join `kpi` `k` on((`d`.`kpi_id` = `k`.`id`))) join `country` `c` on((`d`.`country_id` = `c`.`id`))) GROUP BY `d`.`kpi_id`, `d`.`period`;
 
 --
 -- Constraints for dumped tables
