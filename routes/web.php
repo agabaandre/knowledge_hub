@@ -52,6 +52,8 @@ use Illuminate\Support\Facades\Route;
 
 Auth::routes(['verify' => true]);
 
+Route::get('/test', [TestController::class,'index'])->name('test');
+
 Route::get('/', [HomeController::class,'index'])->name('home');
 
 Route::get('/test', [TestController::class,'index']);

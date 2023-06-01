@@ -17,10 +17,13 @@ class AuthorsRepository{
         return  $result;
     }
     
-    public function save(Request $request){
-        $quote = new Author();
+    public function save($name){
+        
+        $author = new Author();
+        $author->name = $name;
+        $author->save();
 
-        return $quote;
+        return $author;
     }
 
     public function find($id){

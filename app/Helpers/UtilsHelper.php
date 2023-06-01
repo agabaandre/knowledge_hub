@@ -3,6 +3,8 @@
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
+use PHPMailer\PHPMailer\PHPMailer;  
+use PHPMailer\PHPMailer\Exception;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -152,7 +154,59 @@ function export_excel($records) {
 	exit;
 }
 
-   
+
+function send_email($request){
+
+    $mail = new PHPMailer(true);     // Passing `true` enables exceptions
+
+    try {
+
+        // Email server settings
+        $mail->SMTPDebug = 0;
+        $mail->isSMTP();
+        $mail->Host = env('MAIL_HOST');             //  smtp host
+        $mail->SMTPAuth = true;
+        $mail->Username = env('MAIL_USERNAME');   //  sender username
+        $mail->Password = env('MAIL_PASSWORD');       // sender password
+        $mail->SMTPSecure = 'tls';                  // encryption - ssl/tls
+        $mail->Port = env('MAIL_PORT');                          // port - 587/465
+
+        $mail->setFrom(env('MAIL_USERNAME'), 'SenderName');
+        $mail->addAddress($request->email);
+      //  $mail->addCC($request->emailCc);
+      //  $mail->addBCC($request->emailBcc);
+
+        $mail->addReplyTo(env('MAIL_USERNAME'), 'SenderReplyName');
+
+        if(isset($_FILES['emailAttachments'])) {
+            for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {
+                $mail->addAttachment($_FILES['emailAttachments']['tmp_name'][$i], $_FILES['emailAttachments']['name'][$i]);
+            }
+        }
+
+
+        $mail->isHTML(true);                // Set email content format to HTML
+
+        $mail->Subject = $request->subject;
+        $mail->Body    = $request->body;
+
+        // $mail->AltBody = plain text version of email body;
+
+        if( !$mail->send() ) {
+             
+            return  (Object) array('success'=>false,'message'=>$mail->ErrorInfo);
+        }
+        else {
+
+            return array('success'=>true,'message'=>"Email has been sent.");
+        }
+
+    } catch (Exception $e) {
+
+          return array('success'=>false,'message'=>$e->getMessage());
+    }
+    
+}
 
 
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Repositories\AuthorsRepository;
 use App\Repositories\FaqsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
@@ -9,11 +10,12 @@ use Illuminate\Support\Facades\Auth;
 
 class AuthController extends Controller
 {
-    private $usersRepo;
+    private $usersRepo, $authorsRepo;
 
-    public function __construct( UsersRepository $usersRepo)
+    public function __construct( UsersRepository $usersRepo, AuthorsRepository $authorsRepo)
     {
         $this->usersRepo       = $usersRepo;
+        $this->authorsRepo     = $authorsRepo;
     }
 
     public function register(Request $request){
@@ -45,11 +47,18 @@ class AuthController extends Controller
             $user = $verifiedUser;
               
             if(!$user->email_verified_at) {
+
                 $user->email_verified_at = 1;
                 $user->save();
+
+                $this->authorsRepo->save($user->name);
+                
                 $message = "Your e-mail is verified. You can now login.";
+
             } else {
+
                 $message = "Your e-mail is already verified. You can now login.";
+
             }
         }
   

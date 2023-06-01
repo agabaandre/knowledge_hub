@@ -37,12 +37,16 @@ class UsersRepository{
 
         $this->save_preferences($user->id,$request->preferences);
 
-        // Mail::send('emails.email_verification', ['token' => $token], function($message) use($request){
-        //     $message->to($request->email);
-        //     $message->subject('Account Verification');
-        // });
+        $this->send_email($request, $token);
 
         return $user;
+    }
+
+    public function send_email($request, $token){
+
+        Mail::send('emails.email_verification', ['token' => $token], function($message) use($request){
+            $message->to($request->email)->subject('Account Verification');
+        });
     }
 
     public function save_preferences($user_id,$preferences){
