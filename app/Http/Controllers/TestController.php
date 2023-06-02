@@ -4,9 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendMailJob;
 use Illuminate\Http\Request;
-use App\Repositories\IndicatorsRepository;
 use App\Repositories\UsersRepository;
-
 
 class TestController extends Controller
 {
@@ -19,13 +17,12 @@ class TestController extends Controller
 
     public function index(Request $request){
 
-        $body = view('emails.email_verification',['token'=>'87487487'])->render();
-        $request['email']   = 'henricsanyu@gmail.com';
-        $request['subject'] = 'henricsanyu@gmail.com';
-        $request['body'] = $body;
+        $body            = view('emails.email_verification',['token'=>'87487487'])->render();
+        $data['email']   = 'henricsanyu@gmail.com';
+        $data['subject'] = 'Grretings from Us';
+        $data['body']    = $body;
         
-        SendMailJob::dispatch($request);
-        
+        SendMailJob::dispatch($data);
     }
 
   

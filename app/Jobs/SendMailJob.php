@@ -18,9 +18,11 @@ class SendMailJob implements ShouldQueue
      *
      * @return void
      */
-    public function __construct()
+    private $data;
+    public function __construct($data)
     {
         //
+        $this->data = $data;
     }
 
     /**
@@ -31,5 +33,8 @@ class SendMailJob implements ShouldQueue
     public function handle()
     {
         //
+
+        $request = (Object) $this->data;
+        send_email($request);
     }
 }

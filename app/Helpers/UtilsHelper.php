@@ -160,7 +160,6 @@ function send_email($request){
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
     try {
-
         // Email server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
@@ -178,11 +177,11 @@ function send_email($request){
 
         $mail->addReplyTo(env('MAIL_USERNAME'), 'SenderReplyName');
 
-        if(isset($_FILES['emailAttachments'])) {
-            for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {
-                $mail->addAttachment($_FILES['emailAttachments']['tmp_name'][$i], $_FILES['emailAttachments']['name'][$i]);
-            }
-        }
+        // if(isset($_FILES['emailAttachments'])) {
+        //     for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {
+        //         $mail->addAttachment($_FILES['emailAttachments']['tmp_name'][$i], $_FILES['emailAttachments']['name'][$i]);
+        //     }
+        // }
 
 
         $mail->isHTML(true);                // Set email content format to HTML

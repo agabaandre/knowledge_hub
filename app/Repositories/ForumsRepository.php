@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 
 class ForumsRepository{
 
-    public function get(Request $request){
+    public function get(Request $request,$pending=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
         $faqs = Forum::orderBy('id','desc');
@@ -17,6 +17,8 @@ class ForumsRepository{
             $faqs->where('forum_title','like','%'.$request->term.'%');
             $faqs->orWhere('forum_description','like','%'.$request->term.'%');
         }
+
+        $faqs->where('status',$pending);
 
         $results =  $faqs->paginate($rows_count);
 
@@ -55,6 +57,23 @@ class ForumsRepository{
     public function count(){
         return count(Forum::all());
     }
+
+    public function approve($id){
+        $forum = Forum::find($id);
+        $forum->status =1;
+        $forum->update();
+
+        return $forum;
+    }
+
+    public function reject($id){
+        $forum = Forum::find($id);
+        $forum->status =2;
+        $forum->update();
+
+        return $forum;
+    }
+
 
 
 

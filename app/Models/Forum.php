@@ -9,6 +9,8 @@ class Forum extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     public function comments(){
         return $this->hasMany(ForumComment::class);
     }
