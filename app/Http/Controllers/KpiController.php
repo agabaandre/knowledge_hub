@@ -15,25 +15,37 @@ class KpiController extends Controller
         $this->indicatorsRepo = $indicatorsRepo;
     }
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
         $data['search'] = (object) $request->all();
         $data['indicators'] = $this->indicatorsRepo->get($request);
-        return view('admin.kpi.index',$data);
+
+        $subject_areas = $this->indicatorsRepo->get_subject_areas();
+
+        $data['subject_areas'] = $subject_areas;
+
+        return view('admin.kpi.index', $data);
     }
 
-    public function save(Request $request){
-
+    public function save(Request $request)
+    {
         $this->indicatorsRepo->save($request);
         return back();
     }
 
-    public function data(Request $request){
+    public function data(Request $request)
+    {
 
         $data['search'] = (object) $request->all();
         $data['data'] = $this->indicatorsRepo->get_data($request);
-        return view('admin.kpi.data',$data);
+        return view('admin.kpi.data', $data);
     }
 
-    
+    public function destroy(Request $request)
+    {
+        $id = $request->id;
+        $this->indicatorsRepo->delete($id);
+        return true;
+    }
 }

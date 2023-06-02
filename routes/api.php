@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -14,6 +15,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
-});
+// Subscription Routes
+Route::post('/subscribe', [Subscription::class, 'subscribe']);
+Route::post('/unsubscribe', [Subscription::class, 'unsubscribe']);
