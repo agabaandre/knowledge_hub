@@ -23,11 +23,17 @@ class ForumsAdminController extends Controller
         return view('admin.forums.index',$data);
     }
 
- 
+
+    public function moderate(Request $request) {
+        $data['forums'] = $this->forumsRepo->get($request);
+        return view('admin.forums.moderate', $data);
+    }
+
+
     public function destroy(Request $request){
 
         return $this->forumsRepo->delete($request->id);
     }
 
-  
+
 }

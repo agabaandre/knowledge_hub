@@ -195,6 +195,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [ForumsAdminController::class, 'index']);
         Route::get("/delete", [ForumsAdminController::class, 'destroy']);
+        Route::get("/moderate", [ForumsAdminController::class, 'moderate'])->name('forums.moderate');
+        // Approve
+        Route::post("/approve", [ForumsAdminController::class, 'approve'])->name('forums.approve');
+        // Decline
+        Route::post("/decline", [ForumsAdminController::class, 'decline'])->name('forums.decline');
     });
 
     //authors
@@ -300,6 +305,7 @@ Route::group(["prefix" => "forums"], function () {
     Route::get("/thread", [ForumsController::class, 'thread'])->name('forums.thread');
     Route::post("/comment", [ForumsController::class, 'comment'])->name('forums.comment');
     Route::post("/publish", [ForumsController::class, 'publish'])->name('forums.publish');
+
 });
 
 //facts

@@ -9,41 +9,45 @@ class ForumsController extends Controller
 {
     private $forumsRepo;
 
-    public function __construct( ForumsRepository $forumsRepo)
+    public function __construct(ForumsRepository $forumsRepo)
     {
-        $this->forumsRepo       = $forumsRepo;
+        $this->forumsRepo = $forumsRepo;
     }
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
 
         $data['forums'] = $this->forumsRepo->get($request);
         $data['search'] = (object) $request->all();
-        return view('forums.index',$data);
+        return view('forums.index', $data);
     }
 
-    public function thread(Request $request){
+    public function thread(Request $request)
+    {
 
         $data['forum'] = $this->forumsRepo->find($request->id);
         $request['rows'] = 6;
         $data['search'] = (object) $request->all();
         $data['forums'] = $this->forumsRepo->get($request);
-        return view('forums.show',$data);
+        return view('forums.show', $data);
     }
 
-    public function create(Request $request){
+    public function create(Request $request)
+    {
 
         return view('forums.create');
     }
 
-    public function comment(Request $request){
-        
+    public function comment(Request $request)
+    {
+
         $this->forumsRepo->save_comment($request);
         return back();
     }
 
     public function publish(Request $request)
     {
-         return back();
+        return back();
     }
 
 }
