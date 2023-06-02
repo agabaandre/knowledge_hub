@@ -14,16 +14,18 @@ class IndicatorsRepository
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
-        $authors = Kpi::orderBy('id', 'desc');
+        $kpis = Kpi::with('subjectArea');
+        $kpis->orderBy('id', 'desc');
+        $kpis->get();
 
         if ($request->term) {
-            $authors->where('name', 'like', '%' . $request->term . '%');
-            $authors->orWhere('name', 'like', '%' . $request->term . '%');
+            $kpis->where('name', 'like', '%' . $request->term . '%');
+            $kpis->orWhere('name', 'like', '%' . $request->term . '%');
         }
 
-        $result = $authors->paginate($rows_count);
+        $kpis = $kpis->paginate($rows_count);
 
-        return  $result;
+        return $kpis;
     }
 
     public function save(Request $request)

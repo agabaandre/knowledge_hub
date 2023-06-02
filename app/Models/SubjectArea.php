@@ -12,7 +12,13 @@ class SubjectArea extends Model
     protected $appends = ['description'];
     public $timestamps = false;
 
-    public function getDescriptionAttribute(){
+    public function getDescriptionAttribute()
+    {
         return $this->name;
+    }
+
+    public function kpis()
+    {
+        return $this->hasMany(Kpi::class, 'subject_area', 'id');
     }
 }

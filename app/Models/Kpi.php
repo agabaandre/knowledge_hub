@@ -18,4 +18,9 @@ class Kpi extends Model
         'subject_area_id',
         'frequency'
     ];
+
+    public function subjectArea()
+    {
+        return $this->belongsTo(SubjectArea::class, 'subject_area');
+    }
 }
