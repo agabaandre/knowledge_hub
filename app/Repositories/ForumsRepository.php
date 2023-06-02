@@ -11,7 +11,7 @@ class ForumsRepository{
     public function get(Request $request,$pending=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $faqs = Forum::orderBy('id','desc');
+        $faqs = Forum::with(['user', 'tags', 'comments'])->orderBy('created_at','desc');
 
         if($request->term){
             $faqs->where('forum_title','like','%'.$request->term.'%');
@@ -24,7 +24,7 @@ class ForumsRepository{
 
         return $results;
     }
-    
+
     public function save(Request $request){
         $faq = new Faq();
 
@@ -43,7 +43,7 @@ class ForumsRepository{
         return $comment;
     }
 
-   
+
 
     public function find($id){
 

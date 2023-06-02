@@ -52,7 +52,18 @@
 	<script src="{{ asset('assets/plugins/highcharts/modules/export-data.js') }}"></script>
 	<script src="{{ asset('assets/plugins/highcharts/modules/accessibility.js') }}"></script>
 	<script src="{{ asset('assets/plugins/blockui/jquery.blockui.min.js') }}"></script>
-	
+
+    <!-- DataTables css -->
+    <!-- <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet"> -->
+
+    <!-- DataTables js -->
+    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
 	<script>
 
 		function showLoader(message="Please wait..."){
