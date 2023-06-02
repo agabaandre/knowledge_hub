@@ -428,6 +428,7 @@
 <!-- Custom js -->
 <script src="{{  asset('assets/js/custom.js') }}"></script>
 
+
 <!-- Add Select2 Nodemodules -->
 <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js') }}"></script>
@@ -436,9 +437,6 @@
 <link rel="stylesheet" href="{{ asset('assets/plugins/sweet-alert/sweetalert.css') }}"  />
 <script src="{{ asset('assets/plugins/sweet-alert/sweetalert.min.js') }}"></script>
 
-<!-- <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/v/dt/dt-1.13.1/b-2.3.3/b-html5-2.3.3/datatables.min.css') }}" /> -->
-<link rel="stylesheet" href="{{ asset('assets/plugins/datatable/css/dataTables.bootstrap.min.css') }}" />
-<script src="{{ asset('assets/plugins/datatable/js/dataTables.bootstrap.min.js') }}"></script>
 
 <!-- Create Quize  -->
 <script>
@@ -635,11 +633,11 @@
 		// 		['view', ['fullscreen', 'codeview', 'help']],
 		// 	],
 		// });
-		
+
 		// Set summernote content for description
 		$('#publication_description').summernote('code', desc);
 
-		
+
 
 		$('#edit-publication-form').on('submit', function(e) {
 			e.preventDefault();

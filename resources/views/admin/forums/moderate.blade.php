@@ -25,6 +25,34 @@
         line-height: 1.2;
         margin: 5px 0 0;
     }
+
+    .comment-wrapper {
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 10px;
+        margin-bottom: 10px;
+    }
+
+    .comment-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .comment-username {
+        font-weight: bold;
+    }
+
+    .comment-time {
+        color: #999;
+    }
+
+    .comment-content {
+        margin-top: 5px;
+    }
+
+    .comment-actions {
+        margin-top: 10px;
+    }
 </style>
 
 @endsection
@@ -127,10 +155,15 @@
                             <div class="collapse" id="collapseComments{{ $forum->id }}">
                                 <div class="card card-body mt-3">
                                     @foreach($forum->comments as $comment)
-                                    <div class="d-flex justify-content-between align-items-center mb-2">
-                                        <p class="mb-0">{{ $comment->text }}</p>
-                                        <div>
-                                            <button class="btn btn-sm btn-outline-danger mr-2" data-toggle="modal" data-target="#deleteCommentModal{{ $comment->id }}">Delete</button>
+                                    <div class="comment-wrapper">
+                                        <div class="comment-header">
+                                            <span class="comment-username">{{ $comment->user->name }}</span>
+                                            <span class="comment-time">{{ $comment->created_at }}</span>
+                                        </div>
+                                        <div class="comment-content">
+                                            <p>{{ Str::limit($comment->comment, 100) }}</p>
+                                        </div>
+                                        <div class="comment-actions">
                                             <button class="btn btn-sm btn-outline-primary" data-toggle="modal" data-target="#editCommentModal{{ $comment->id }}">Edit</button>
                                         </div>
                                     </div>
@@ -189,10 +222,7 @@
 
     @section('scripts')
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
     <script type="text/javascript">
         $(document).ready(function() {
             $('#filterButton').click(function() {
