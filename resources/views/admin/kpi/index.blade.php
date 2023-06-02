@@ -19,7 +19,7 @@
 				  <div class="col-md-12 text-right">
 					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Indicator</a>
 					</div>
-				   
+
 					<div class="col-md-12">
 						<div class="form-group">
 							<label for="title">Search</label>
@@ -30,7 +30,7 @@
 						</div>
 					</div>
 
-					
+
 				</div>
 
 				<div class="row">
@@ -39,10 +39,10 @@
 						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
 						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-						
+
 					</div>
-					
-					
+
+
 				</div>
             </form>
 		</div>
@@ -53,12 +53,13 @@
 					<tr>
 						<th>Inidcator</th>
 						<th>Description</th>
+                        <th>Subject Area</th>
 						<th></th>
 					</tr>
 				</thead>
 				<tbody>
 
-					@php 
+					@php
                     $i = 1;
                     @endphp
 
@@ -66,6 +67,7 @@
 						<tr>
 							<td>{{ $row->name }}</td>
 							<td>{!! $row->description !!}</td>
+                            <td>{!! $row->subject_area->name !!}</td>
 							<td>
 								<a class="text-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 								<a class=" ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"  class="text-danger"> Preview</a>
