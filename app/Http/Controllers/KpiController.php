@@ -36,9 +36,15 @@ class KpiController extends Controller
 
     public function data(Request $request)
     {
+        $subject_areas = $this->indicatorsRepo->get_subject_areas();
 
-        $data['search'] = (object) $request->all();
-        $data['data'] = $this->indicatorsRepo->get_data($request);
+        $data['subject_areas'] = $subject_areas;
+
+        // $data['search'] = (object) $request->all();
+        // $data['data'] = $this->indicatorsRepo->get_data($request);
+        // return view('admin.kpi.data', $data);
+
+        $data['kpi_data'] = $this->indicatorsRepo->get_kpi_data();
         return view('admin.kpi.data', $data);
     }
 

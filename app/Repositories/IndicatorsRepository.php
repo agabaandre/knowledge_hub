@@ -47,6 +47,12 @@ class IndicatorsRepository
         return $data;
     }
 
+    public function get_kpi_data()
+    {
+        $data = KpiData::all();
+        return $data;
+    }
+
     public function find($id)
     {
         return Kpi::find($id);
