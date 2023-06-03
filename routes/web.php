@@ -193,7 +193,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
     //filetypes
-<<<<<<< HEAD
+
     Route::group(["prefix"=>"forums"],function(){
     
         Route::get("/",[ForumsAdminController::class,'index']);
@@ -201,17 +201,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
         Route::get("/approve",[ForumsAdminController::class,'approve']);
         Route::get("/reject",[ForumsAdminController::class,'reject']);
-=======
-    Route::group(["prefix" => "forums"], function () {
 
-        Route::get("/", [ForumsAdminController::class, 'index']);
-        Route::get("/delete", [ForumsAdminController::class, 'destroy']);
-        Route::get("/moderate", [ForumsAdminController::class, 'moderate'])->name('forums.moderate');
-        // Approve
-        Route::post("/approve", [ForumsAdminController::class, 'approve'])->name('forums.approve');
-        // Decline
-        Route::post("/decline", [ForumsAdminController::class, 'decline'])->name('forums.decline');
->>>>>>> ab054183050325e7dc6cf91ad7ea1ac8570210aa
     });
 
     //authors

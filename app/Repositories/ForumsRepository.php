@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Jobs\SendMailJob;
 use App\Models\Faq;
 use App\Models\Forum;
 use App\Models\ForumComment;
@@ -63,6 +64,14 @@ class ForumsRepository{
         $forum->status =1;
         $forum->update();
 
+        $alert = array(
+            'title' => "Forum Post $forum->title Approved",
+            'body'=>'We are happy to inform you that your forum post has been approved and is live now',
+            'email'=>$forum->user->email
+        );
+
+        SendMailJob::dispatch( $alert);
+
         return $forum;
     }
 
@@ -70,6 +79,15 @@ class ForumsRepository{
         $forum = Forum::find($id);
         $forum->status =2;
         $forum->update();
+
+
+        $alert = array(
+            'title' => "Forum Post $forum->title Rejected",
+            'body'=>'We are sorry to inform you that your forum post has been rejected',
+            'email'=>$forum->user->email
+        );
+
+        SendMailJob::dispatch( $alert);
 
         return $forum;
     }
