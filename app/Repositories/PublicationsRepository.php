@@ -391,8 +391,6 @@ public function reject_comment($id){
     $comment->status='rejected';
     $comment->update();
 
-
-    
     $alert = array(
         'title' => "Comment  $comment->comment has been Rejected",
         'body'=>'We are sorry to inform you that your comment has been rejected',
