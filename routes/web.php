@@ -127,7 +127,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
 
-    Route::get("/rccdashboards", [AdminController::class, 'rccdashboards'])->name('admin.rccdashboards');
+    Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
 
     Route::group(["prefix" => "publications"], function () {
 

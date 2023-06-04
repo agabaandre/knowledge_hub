@@ -50,6 +50,42 @@ class GraphController extends Controller
 
 	}
 
+	public function rcc_admin(Request $request)
+	{
+		
+		$data['title']   = "RRC Dashboards";
+		$data['uptitle'] = "RCC Dashboards";
+
+		$filter = $request->all();
+		$current_year   = date('Y');
+
+		$data['countries']    = $this->dashRepo->get_countries($filter)->toArray();
+		$data['subjectareas'] = $this->dashRepo->get_subjectareas();
+
+        $data['filter']       = $filter;
+		$data['year']         = $current_year;
+
+		$subject_area_id      = (isset($filter['subject_area']))?$filter['subject_area']:null;//subject area option
+
+		foreach ($this->dashRepo->get_subject_area($subject_area_id) as $key=>$subject_area):
+
+			$filter['subject_area']  = $subject_area->id;
+			
+			$data['years_data'][$key]['subject_area']    = $subject_area->name;
+			$data['years_data'][$key]['subject_area_id'] = $subject_area->id;
+			$data['years_data'][$key]['data'] = $this->get_year_data($filter, $current_year);
+
+			$graph_filter = $filter;
+			$graph_filter['period_year'] = $current_year;
+
+	    endforeach;
+
+        $data['years']     =  $this->dashRepo->get_periods_years();
+
+		return view('admin.dashboard.rcc', $data);
+
+	}
+
 	public function get_year_data($filter, $current_year)
 	{
 
