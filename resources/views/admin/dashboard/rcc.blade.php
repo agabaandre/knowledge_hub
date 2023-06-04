@@ -10,9 +10,18 @@
                     </div>
                     <div class="card-body">
 
+                    @include('dashboards.partials.rcc_chart')
+
                     </div>
                 </div>
             </div>
         </div>
     </div>
+@endsection
+
+@section('scripts')
+
+@include('common.select2')
+@include('dashboards.partials.rcc_chart_js',['chart_url'=>'']) 
+
 @endsection
