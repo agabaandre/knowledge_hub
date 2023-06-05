@@ -16,11 +16,21 @@
 				</li>
 
 				@can('view_publications')
-				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish Resource<i class="fe fe-chevron-down horizontal-icon"></i></a>
+				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> Create New</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Publications</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Comments Publications</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New Resource</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Resources</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
+						<br/>
+
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">New Data Category</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Data</a></li>
+                        <br/>
+
+						@can('manage_experts')
+						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
+						@endcan
+
 					</ul>
 				</li>
 				@endcan
@@ -42,14 +52,6 @@
 					</ul>
 				</li>
 				@endcan
-
-				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Data Records<i class="fe fe-chevron-down horizontal-icon"></i></a>
-					<ul class="sub-menu">
-					    <li aria-haspopup="true"><a href="{{ url('admin/datarecords/categories') }}" class="slide-item">Categories</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Create Record</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Records</a></li>
-					</ul>
-				</li>
 				
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
@@ -59,6 +61,8 @@
 						
 						@can('view_sources')
 						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/categories') }}">Categories</a></li>
+					
 						@endcan
 
 						@can('view_themes')
@@ -81,6 +85,7 @@
 						@endcan
 
 						@can('view_quize')
+						
 						<li aria-haspopup="true"><a href="{{ url('admin/quiz') }}">Quiz</a></li>
 						@endcan
 
@@ -94,8 +99,8 @@
 						@endcan
 
 						@can('manage_experts')
-						<li aria-haspopup="true"><a href="{{ url('admin/experts/types') }}">Workforce Experts Types</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Workforce Experts Rosta</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/experts/types') }}">Workforce Types</a></li>
+
 						@endcan
 
 						@can('manage_facts')
