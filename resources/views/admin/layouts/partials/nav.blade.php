@@ -29,7 +29,7 @@
 						@endcan
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Other Data Categories</a></li>
 
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Other Categories Data</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Categories Data</a></li>
 						@can('manage_facts')
 						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
 						@endcan
