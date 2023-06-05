@@ -18,11 +18,11 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li><h3 class="fs-14 mb-1" style="color:#000 !important;">PH Resources</h3></li>
+						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">PH Resources</h3></li> -->
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
-						<li><h3 class="fs-14 mb-1" style="color:#000 !important;">DATA CATEGORIES</h3></li>
+						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">DATA CATEGORIES</h3></li> -->
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">New Data Category</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Data</a></li>
 						@can('manage_experts')
