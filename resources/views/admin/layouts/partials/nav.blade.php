@@ -31,6 +31,23 @@
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
 
+						<br/>
+						@can('manage_facts')
+						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
+						@endcan
+
+						@can('view_tags')
+						<li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Search Tags</a></li>
+				 	@endcan
+
+					@can('view_quotes')
+						 	<li aria-haspopu="true"><a href="{{ url('admin/quotes') }}">Quotes</a></li>
+					@endcan
+		
+					@can('view_quize')
+							<li aria-haspopup="true"><a href="{{ url('admin/quiz') }}">Quiz</a></li>
+					@endcan
+
 					</ul>
 				</li>
 				@endcan
@@ -76,18 +93,7 @@
 						<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
 						@endcan
 
-						@can('view_tags')
-						<li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Search Tags</a></li>
-						@endcan
-
-						@can('view_quotes')
-						<li aria-haspopup="true"><a href="{{ url('admin/quotes') }}">Quotes</a></li>
-						@endcan
-
-						@can('view_quize')
 						
-						<li aria-haspopup="true"><a href="{{ url('admin/quiz') }}">Quiz</a></li>
-						@endcan
 
 						<!-- Privacy Policy -->
 						@can('view_asset_types')
@@ -103,9 +109,7 @@
 
 						@endcan
 
-						@can('manage_facts')
-						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
-						@endcan
+						
 						
 						@can('view_privacy_policy')
 						<li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
