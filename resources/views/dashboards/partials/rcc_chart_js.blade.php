@@ -75,24 +75,7 @@
             credits: {
             enabled: false
             },
-            exporting: {
-              buttons: {
-                contextButton: {
-                  menuItems: [
-                    'viewFullscreen', 'separator', 'downloadPNG',
-                    'downloadSVG', 'downloadPDF', 'separator', 'downloadXLS'
-                  ]
-                },
-              },
-              enabled: true,
-            },
-            navigation: {
-              buttonOptions: {
-                align: 'right',
-                verticalAlign: 'top',
-                y: 0
-              }
-            },
+         
             series: seriesData.data,
             responsive: {
                 rules: [{
