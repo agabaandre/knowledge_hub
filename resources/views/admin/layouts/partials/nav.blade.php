@@ -18,8 +18,8 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New Resource</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Resources</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
 						<br/>
 
