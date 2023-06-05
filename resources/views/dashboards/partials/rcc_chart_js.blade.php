@@ -50,6 +50,7 @@
         chart = Highcharts.chart(`countries_summary${subjectAreaId}`, {
             chart: {
                 type: chartType,
+            
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
@@ -71,6 +72,28 @@
                 align: 'right',
                 verticalAlign: 'middle'
             },
+            credits: {
+            enabled: false
+            },
+            exporting: {
+                  buttons: {
+                    contextButton: {
+                      menuItems: [
+                        'viewFullscreen', 'separator', 'downloadPNG',
+                        'downloadSVG', 'downloadPDF', 'separator', 'downloadXLS'
+                      ]
+                    },
+                  },
+                  enabled: true,
+                },
+            navigation: {
+              buttonOptions: {
+                align: 'right',
+                verticalAlign: 'top',
+                y: 0
+              }
+            },
+         
             series: seriesData.data,
             responsive: {
                 rules: [{
@@ -108,4 +131,10 @@
         });
 
     });
+
+     Highcharts.setOptions({
+      colors: ['#4B5430','#6B4C24','#782C2D', '#C45B39Y','#8085e9','#000000', '#f15c80', '#e4d354', '#2b908f', '#f45b5b', '#91e8e1',  '#1aadce', '#492970', '#f28f43', '#77a1e5', '#c42525',  '#a6c96a', '#4572A7', '#AA4643', '#89A54E', '#80699B',  '#3D96AE', '#DB843D', '#92A8CD', '#A47D7C', '#B5CA92',  '#058DC7', '#50B432', '#ED561B', '#DDDF00']
+
+    });
+
 </script>
