@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddLatLongToAccessLogging extends Migration
+class AddToAccesslogLatLog extends Migration
 {
     /**
      * Run the migrations.
@@ -13,11 +13,10 @@ class AddLatLongToAccessLogging extends Migration
      */
     public function up()
     {
-        Schema::create('access_logs', function (Blueprint $table) {
-            $table->id();
+        Schema::table('access_logs', function (Blueprint $table) {
+            //
             $table->string("lat");
             $table->string("long");
-            $table->timestamps();
         });
     }
 
@@ -28,6 +27,8 @@ class AddLatLongToAccessLogging extends Migration
      */
     public function down()
     {
-        
+        Schema::table('access_logs', function (Blueprint $table) {
+            //
+        });
     }
 }
