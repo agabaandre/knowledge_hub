@@ -12,10 +12,11 @@ class Access
 
     public function handle(Request $request, Closure $next)
     {
-        // $ip = '162.159.24.227'; /* Static IP address */
+        //  /* Static IP address */
         // $visitorInfo = Location::get($ip);
 
-        // AccessLogJob::dispatch($visitorInfo);
+        $ip = env('APP_DEBUG')?'41.210.143.17':$request->ip();
+         AccessLogJob::dispatch($ip);
 
         return $next($request);
     }
