@@ -50,7 +50,7 @@
         chart = Highcharts.chart(`countries_summary${subjectAreaId}`, {
             chart: {
                 type: chartType,
-                height: 500,
+            
             },
             colors: Array(seriesData.data.length).fill().map(() => `#${Math.floor(Math.random()*16777215).toString(16)}`),
             title: {
