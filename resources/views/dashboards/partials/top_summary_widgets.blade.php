@@ -6,7 +6,7 @@
         <div class="card" style="background-color: transparent!important;">
             <div class="card-body pb-0 bg-white">
                 <h4 class="m-0"><?php echo number_format($row->kpi_value,0); ?></h4>
-                <span class="text-primary"><?php echo $row->kpi_name; ?></span>
+                <span class="text-primary" style="font-size:13px;"><?php echo $row->kpi_name; ?></span>
                 <br>
                 <small class="mb-3 mt-3 text-muted">Current (<?php echo $year; ?>) Vs Previous year (<?php echo $year-1; ?>)</small>
             </div>
