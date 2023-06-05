@@ -1,4 +1,4 @@
-<div class="spotlight px-3 py-5" style="background-color:#03343b ;background-image:url(<?php echo asset('frontend/img/landing-bg.png') ?>); background-repeat:no-repeat;">
+<div class="spotlight px-3 py-5" style="background-color:#7a7a7a; background-image;; background-repeat:no-repeat;">
 <div class="col-md-12 py-4" style="display: flex; justify-content: right;">
                                           @include('layouts.partials.language')
 </div>
