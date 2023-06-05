@@ -18,24 +18,19 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
+						<li><h3 class="fs-14 mb-1">PH Resources</h3></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
-						<br/>
-
+						<li><h3 class="fs-14 mb-1">DATA CATEGORIES</h3></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">New Data Category</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Data</a></li>
-                        <br/>
-
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
-
-						<br/>
 						@can('manage_facts')
 						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
 						@endcan
-
 						@can('view_tags')
 						<li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Search Tags</a></li>
 				 	@endcan
