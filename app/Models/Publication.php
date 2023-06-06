@@ -39,7 +39,7 @@ class Publication extends Model
 
 
     public function getThemeAttribute(){
-        return $this->sub_theme->theme;
+        return @$this->sub_theme->theme;
     }
 
     public function getLabelAttribute(){

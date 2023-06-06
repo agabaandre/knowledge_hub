@@ -16,4 +16,13 @@ use App\Http\Controllers\Api\PublicationsApiController;
 
 // Publications Routes
 
-Route::resource('publications', PublicationsApiController::class);
+//Route::resource('publications', PublicationsApiController::class);
+
+Route::group(["prefix" =>"publications"],function(){
+
+    Route::resource('/', PublicationsApiController::class);
+    Route::get('/{id}', [PublicationsApiController::class,"show"]);
+    Route::get('/filetypes', [PublicationsApiController::class,"file_types"]);
+
+});
+

@@ -17,10 +17,134 @@
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term if any",
+                        "description": "Search term for search fro specific records",
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Create Publication"
+                ],
+                "summary": "Create Publication",
+                "description": "Allows users to submit publications for amdin approval",
+                "operationId": "CreatePublication",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "cover",
+                                    "file_type",
+                                    "sub_theme",
+                                    "description",
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "cover": {
+                                        "type": "file"
+                                    },
+                                    "file_type": {
+                                        "type": "integer"
+                                    },
+                                    "sub_theme": {
+                                        "type": "integer"
+                                    },
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "author": {
+                                        "type": "integer"
+                                    },
+                                    "user_id": {
+                                        "type": "integer"
+                                    },
+                                    "link": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/knowhub/api/publications/filetypes": {
+            "get": {
+                "tags": [
+                    "List  File Types"
+                ],
+                "summary": "List  File Types",
+                "description": "Returns a list of all file types",
+                "operationId": "List Publications File Types",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/knowhub/api/publications/{id}": {
+            "get": {
+                "tags": [
+                    "Retrieve Single Publication"
+                ],
+                "summary": "Retrieve Single Publication",
+                "description": "Retrieve Single Publication",
+                "operationId": "Retrieve Single Publication",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
                         }
                     }
                 ],
