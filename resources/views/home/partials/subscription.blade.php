@@ -1,5 +1,5 @@
 <!-- ======================= Newsletter Start ============================ -->
-<section class="space bg-cover" style="background-color:#03343b ;background-image:url(<?php echo asset('frontend/img/landing-bg.png') ?>); background-repeat:no-repeat;">
+<section class="space bg-cover" style="background-color:#7a7a7a; background-repeat:no-repeat;">
     <div class="container">
 
         <div class="row justify-content-center">
