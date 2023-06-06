@@ -150,9 +150,33 @@ class PublicationsApiController extends Controller
             ];
         }
 
-    public function show(Publication $publication)
+    /**
+        * @OA\Get(
+        * path="/knowhub/api/publications/{id}",
+        * operationId="Retrieve Single Publication",
+        * tags={"Retrieve Single Publication"},
+        * summary="Retrieve Single Publication",
+        * description="Retrieve Single Publication",
+        * @OA\Parameter(
+        *      name="id",
+        *      in="path",
+        *      required=true,
+        *      description="Record Id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+    public function show($publication_id)
     {
-       
+        $publication = $this->publicationsRepo->find($publication_id);
+        
         return [
             "status" => 200,
             "data" =>$publication

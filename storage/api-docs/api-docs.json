@@ -128,6 +128,37 @@
                     }
                 }
             }
+        },
+        "/knowhub/api/publications/{id}": {
+            "get": {
+                "tags": [
+                    "Retrieve Single Publication"
+                ],
+                "summary": "Retrieve Single Publication",
+                "description": "Retrieve Single Publication",
+                "operationId": "Retrieve Single Publication",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }
