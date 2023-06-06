@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Jobs\SendMailJob;
 use App\Models\Author;
 use App\Models\Country;
 use App\Models\GeoCoverage;
@@ -44,9 +45,11 @@ class UsersRepository{
 
     public function send_email($request, $token){
 
-        Mail::send('emails.email_verification', ['token' => $token], function($message) use($request){
-            $message->to($request->email)->subject('Account Verification');
-        });
+        $mail['body'] = 'Account confirmation';
+        $mail['email'] = $request->email;
+        $mail['body'] = view('emails.email_verification', ['token' => $token])->render();
+
+        SendMailJob::dispatch($mail);
     }
 
     public function save_preferences($user_id,$preferences){

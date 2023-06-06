@@ -71,7 +71,6 @@ class AccountController extends Controller
             'description'=>'required'
         ];
 
-    
         if($request->original_id):
             unset($val_rules['sub_theme']);
             unset($val_rules['title']);
