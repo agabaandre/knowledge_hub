@@ -16,6 +16,7 @@ use App\Models\Region;
 use App\Models\SubjectArea;
 use App\Models\SubThemeticArea;
 use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Http\Request;
 
 class PublicationsRepository{
@@ -176,7 +177,11 @@ class PublicationsRepository{
 
         if(!$request->geo_area_id):
 
-        $user = current_user();
+        $user = @current_user();
+
+        if(!$user):
+            $user = User::find($request->user_id);
+        endif;
 
         $geo_id = ($user->country_id)?$user->area->id:1;
         $pub->geographical_coverage_id = $geo_id;
@@ -189,11 +194,11 @@ class PublicationsRepository{
 
         endif;
 
-        $pub->author_id            = ($request->author)?$request->author:current_user()->author_id;
+        $pub->author_id            = ($request->author)?$request->author:$user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
         $pub->file_type_id         = $request->file_type;
-        $pub->visits                   = 0;
+        $pub->visits               = 0;
 
         if($request->is_active)
         $pub->is_active = $request->is_active;
