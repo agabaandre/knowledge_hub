@@ -1,8 +1,7 @@
 <?php
-
-use App\Http\Controllers\Subscription;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\PublicationsApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,6 +14,6 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-// Subscription Routes
-Route::post('/subscribe', [Subscription::class, 'subscribe']);
-Route::post('/unsubscribe', [Subscription::class, 'unsubscribe']);
+// Publications Routes
+
+Route::resource('publications', PublicationsApiController::class);

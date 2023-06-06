@@ -1,0 +1,40 @@
+{
+    "openapi": "3.0.0",
+    "info": {
+        "title": "AFRICA CDC KnowledgeHub API",
+        "version": "1.0.0"
+    },
+    "paths": {
+        "/knowhub/api/publications": {
+            "get": {
+                "tags": [
+                    "List Publications"
+                ],
+                "summary": "List Publications",
+                "description": "Returns a list of all publications",
+                "operationId": "List Publications",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "Search term if any",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
