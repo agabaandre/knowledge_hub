@@ -31,8 +31,8 @@ class PublicationsController extends Controller
 
     public function shortened(Request $request){
 
-        $summary             = $this->publicationsRepo->find_shortened($request->id);
-        $data['publication'] = $this->publicationsRepo->find($summary->resource_id);
+        $summary              = $this->publicationsRepo->find_shortened($request->id);
+        $data['publication']  = $this->publicationsRepo->find($summary->resource_id);
         $data['abstract']     = $summary;
 
         if(!$data['publication'] || !$summary)
@@ -45,6 +45,7 @@ class PublicationsController extends Controller
 
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
+
         return view('publications.search',$data);
     }
 
@@ -52,6 +53,7 @@ class PublicationsController extends Controller
 
         $data['author']       = $this->authorsRepo->find($request->author);
         $data['publications'] = $this->publicationsRepo->get($request);
+
         return view('publications.author_pubs',$data);
     }
 
@@ -59,6 +61,7 @@ class PublicationsController extends Controller
 
         $data['subtheme']     = $this->publicationsRepo->get_subtheme($request->subtheme);
         $data['publications'] = $this->publicationsRepo->get($request);
+
         return view('publications.subtheme_pubs',$data);
     }
 
@@ -69,12 +72,14 @@ class PublicationsController extends Controller
     }
 
     public function add_favourite(Request $request){
+
         //logic here
         $this->publicationsRepo->add_favourite($request->id);
         return back();
     }
 
     public function remove_favourite(Request $request){
+
         $this->publicationsRepo->remove_favourite($request->id);
         return back();
     }

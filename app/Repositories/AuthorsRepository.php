@@ -4,14 +4,20 @@ namespace App\Repositories;
 use App\Models\Author;
 use Illuminate\Http\Request;
 
-class AuthorsRepository{
+class AuthorsRepository extends SharedRepo{
 
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:24;
         $authors = Author::orderBy('id','desc');
+
+
         if($request->term)
         $authors->where('name','like','%'.$request->term.'%');
+
+        //Access levels effect to query results
+        $this->access_filter($authors);
+
         $result = $authors ->paginate($rows_count);
 
         return  $result;

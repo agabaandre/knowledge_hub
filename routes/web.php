@@ -68,13 +68,16 @@ Route::post('/registration', [AuthController::class, 'register'])->name('registr
 Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
 
 Route::group(["prefix" => "browse"], function () {
+
     Route::get("themes", [ThemesController::class, 'index']);
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
     Route::get("authors", [AuthorsController::class, 'index']);
     Route::get("areas", [AreasController::class, "index"]);
+
 });
 
 Route::group(["prefix" => "records"], function () {
+
     Route::get("/", [PublicationsController::class, 'search']);
     Route::get("/resource", [PublicationsController::class, 'show']);
     Route::get("/search", [PublicationsController::class, 'search']);
@@ -82,27 +85,36 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/autocomplete", [PublicationsController::class, 'autocomplete']);
     Route::get("/shortened", [PublicationsController::class, 'shortened']);
     Route::post("/comment", [PublicationsController::class, 'comment']);
+
 });
 
 Route::group(["prefix" => "authors"], function () {
+
     Route::get("/", [AuthorsController::class, 'index']);
     Route::get("publications", [PublicationsController::class, 'author_pubs']);
+
 });
 
 Route::group(["prefix" => "healthassets"], function () {
+
     Route::get("/", [AssetsController::class, 'index']);
     Route::get("/detail", [AssetsController::class, 'details']);
+
 });
 
 Route::group(["prefix" => "faqs"], function () {
+
     Route::get("/", [FaqsController::class, 'index']);
+
 });
 
 
 Route::group(["prefix" => "publications"], function () {
+
     Route::get("/", [PublicationsController::class, 'index']);
     Route::get("/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
+
 });
 
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
@@ -251,9 +263,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [ExpertsAdminController::class, 'destroy']);
 
         Route::group(["prefix" => "types"], function () {
+
             Route::get("/", [ExpertsAdminController::class, 'types']);
             Route::post("/save", [ExpertsAdminController::class, 'save_type']);
             Route::get("/delete", [ExpertsAdminController::class, 'delete_type']);
+            
         });
     });
 
@@ -276,6 +290,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         });
     });
 });
+
+/////
+
+
+
 
 
 

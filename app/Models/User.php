@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -61,6 +60,10 @@ class User extends Authenticatable
 
      public function getAreaAttribute(){
         return GeoCoverage::where('name','like','%'.$this->country->name.'%')->first();
+     }
+
+     public function access_level(){
+        return $this->belongsTo(AccessLevel::class,"access_level_id","id");
      }
 
 }

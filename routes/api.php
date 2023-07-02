@@ -16,8 +16,6 @@ use App\Http\Controllers\Api\PublicationsApiController;
 
 // Publications Routes
 
-//Route::resource('publications', PublicationsApiController::class);
-
 Route::group(["prefix" =>"publications"],function(){
 
     Route::resource('/', PublicationsApiController::class);

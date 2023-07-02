@@ -19,7 +19,7 @@ use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 
-class PublicationsRepository{
+class PublicationsRepository extends SharedRepo{
 
 
     public function get(Request $request,$return_array=false){
@@ -30,6 +30,7 @@ class PublicationsRepository{
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');
 
+        
 
         if($request->is_featured)
          $pubs->where('is_featured',1);
@@ -78,7 +79,6 @@ class PublicationsRepository{
             $rcc = Region::where('id',$request->rcc)->first();
             $country_ids = Country::where('region_id',$rcc->id)->get()->pluck('id');
             $pubs->whereIn('geographical_coverage_id',$country_ids);
-
         }
 
          //search by country
@@ -98,6 +98,9 @@ class PublicationsRepository{
             $subtheme = ($request->subtheme)?$request->subtheme:$request->sub_thematic_area_id;
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
+
+         //Access levels effect to query results
+        $this->access_filter($pubs);
 
         $pubs->orderBy('visits','desc');
 

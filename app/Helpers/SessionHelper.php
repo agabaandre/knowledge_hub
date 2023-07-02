@@ -48,6 +48,26 @@ function is_admin(){
 	return ($role)?((strpos(strtolower($role->name),'admin') >-1)?true:false):false;
 }
 
+function filter_access($query){
+	$user = @current_user();
+
+	if($user && $user->access_level){
+
+		$level = $user->access_level;
+
+		if($level->access_level_name     == "Viewer" || $level->access_level_name == "Country"):
+		 // get for own country
+		 
+		elseif($level->access_level_name == "RCC"):
+             // get for countries in rcc
+		elseif($level->access_level_name == "Overall"):
+			// get normally
+	    endif;
+
+	}
+
+}
+
 
 
 
