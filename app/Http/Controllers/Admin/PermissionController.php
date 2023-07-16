@@ -13,10 +13,18 @@ use App\Models\AuditTrail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Traits\Utils;
 use App\Http\Controllers\Controller;
+use App\Repositories\SharedRepo;
 
 class PermissionController extends Controller
 {
    
+    private $sharedRepo;
+
+    public function __construct(SharedRepo $sharedRepo)
+    {
+        $this->sharedRepo = $sharedRepo;
+    }
+
     /*
         Renders a list of all roles
     */
@@ -50,6 +58,11 @@ class PermissionController extends Controller
                 })
                 ->when($locationId, function ($query, $locationId) {
                     return $query->where('users.location_id',$locationId);
+                })
+                ->when(true,function($query){ //apply access filter
+
+                    return $this->sharedRepo->access_filter($query,true,true);
+               
                 })
                 ->orderBy('users.id','desc')
                 ->paginate($count);

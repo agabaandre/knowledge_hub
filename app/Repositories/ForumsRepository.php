@@ -7,21 +7,24 @@ use App\Models\Forum;
 use App\Models\ForumComment;
 use Illuminate\Http\Request;
 
-class ForumsRepository{
+class ForumsRepository extends SharedRepo{
 
     public function get(Request $request,$pending=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $faqs = Forum::with(['user', 'tags', 'comments'])->orderBy('created_at','desc');
+        $forums = Forum::with(['user', 'tags', 'comments'])->orderBy('created_at','desc');
 
         if($request->term){
-            $faqs->where('forum_title','like','%'.$request->term.'%');
-            $faqs->orWhere('forum_description','like','%'.$request->term.'%');
+            $forums->where('forum_title','like','%'.$request->term.'%');
+            $forums->orWhere('forum_description','like','%'.$request->term.'%');
         }
 
-        $faqs->where('status',$pending);
+        $forums->where('status',$pending);
 
-        $results =  $faqs->paginate($rows_count);
+         //Access levels effect to query results
+         $this->access_filter($forums);
+
+        $results =  $forums->paginate($rows_count);
 
         return $results;
     }

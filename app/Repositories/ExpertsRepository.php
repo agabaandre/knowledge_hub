@@ -5,7 +5,7 @@ use App\Models\Expert;
 use App\Models\ExpertType;
 use Illuminate\Http\Request;
 
-class ExpertsRepository{
+class ExpertsRepository extends SharedRepo{
 
     public function get(Request $request){
 
@@ -24,6 +24,8 @@ class ExpertsRepository{
             return;
         }
        
+        $this->access_filter($query);
+
         $results = $query->paginate($rows_count);
         return $results;
     }

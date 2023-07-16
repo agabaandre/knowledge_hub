@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Mail;
 
-class UsersRepository{
+class UsersRepository {
 
     
 

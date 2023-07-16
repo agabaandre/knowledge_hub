@@ -2,6 +2,8 @@
 
 @section('styles')
 
+<link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
+
 @endsection
 
 @section('content')
@@ -34,11 +36,19 @@
 
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
+
+
 </div>
+
+@include('account.tabs')
+
 
 @endsection
 
 @section('scripts')
+
     @include('common.select2')
     @include('account.partials.create_js')
+    @include('account.partials.wizard_js')
+    
 @endsection

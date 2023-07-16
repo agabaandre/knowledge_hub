@@ -5,10 +5,9 @@ use App\Models\AssetType;
 use App\Models\DataCategory;
 use App\Models\DataRecord;
 use App\Models\DataSubCategory;
-use App\Models\HealthAsset;
 use Illuminate\Http\Request;
 
-class DataRecordsRepository{
+class DataRecordsRepository extends SharedRepo{
 
     public function get(Request $request){
 
@@ -38,6 +37,8 @@ class DataRecordsRepository{
             $this->excel_export($results);
             return;
         }
+
+        $this->access_filter($results);
 
         return $results->paginate($rows_count);
     }

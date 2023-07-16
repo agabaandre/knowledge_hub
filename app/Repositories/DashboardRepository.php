@@ -11,7 +11,7 @@ use App\Models\SubThemeticArea;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class DashboardRepository{
+class DashboardRepository extends SharedRepo{
 
 
 	 // Retrieves KPIData based on the provided filters, from specified columns, if any
@@ -60,6 +60,9 @@ class DashboardRepository{
 			$query->where('country_id', $filter['country_id']);
 		}
 
+
+		$this->access_filter($query,true);
+
        //if group by was provided , use that to group
 		if ($group_by)
         $query->groupBy($group_by);
@@ -104,7 +107,10 @@ class DashboardRepository{
 
                     return $query->where('region_id',$filter['region_id']);
 
-                });
+                })->when(true,function($query){
+
+					return $this->access_filter($query,true);
+				});
 
 		return $countries->get();
 	}
@@ -119,6 +125,8 @@ class DashboardRepository{
 			$kpi_ids_with_data->whereIn('country_id',$country_ids->toArray());
 		}
 		
+		$this->access_filter($kpi_ids_with_data,true);
+
 		$kpi_ids = $kpi_ids_with_data->get()->pluck('kpi_id');
 
 		$kpis     =  Kpi::whereIn('id',$kpi_ids->toArray())->get()->pluck('id');
