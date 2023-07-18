@@ -11,6 +11,7 @@ use App\View\Composers\ExpertTypesViewComposer;
 use App\View\Composers\FactsViewComposer;
 use App\View\Composers\FileTypesViewComposer;
 use App\View\Composers\GeoAreasViewComposer;
+use App\View\Composers\PublicationCategoryViewComposer;
 use App\View\Composers\QuestionsViewComposer;
 use App\View\Composers\RegionsViewComposer;
 use App\View\Composers\SubThemesViewComposer;
@@ -39,8 +40,8 @@ class ViewComposerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        
         View::composer(['home/partials/*','partials/publications/*','account/*','admin/publications/*'],FileTypesViewComposer::class);
+        View::composer(['home/partials/*','partials/publications/*','account/*','admin/publications/*'],PublicationCategoryViewComposer::class);
         View::composer(['partials/quiz/*'],QuestionsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],FactsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],SubThemesViewComposer::class);

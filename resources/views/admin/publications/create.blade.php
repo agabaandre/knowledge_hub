@@ -92,13 +92,20 @@
                         </div>
 
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Type</label>
                                 @include('partials.publications.filetype_dropdown',['field'=>'file_type','required'=>'required','selected'=>form_edit('file_type',$publication,'file_type_id')])
                             </div>
                         </div>
 
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">File Category</label>
+                                @include('partials.publications.filecategory_dropdown',['field'=>'publication_category_id',
+                                'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
+                            </div>
+                        </div>
                      
                         <div class="col-md-12">
                             <div class="mb-3">

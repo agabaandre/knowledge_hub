@@ -72,7 +72,7 @@
 													</div>
 												</div>
 												<div class="text-center mlb-last">
-													<a href="{{ url('records/resource')}}?id={{ $row->id }}" class="btn theme-bg-light theme-cl ft-medium apply-btn fs-sm rounded">Browse Resource</a>
+													<a href="{{ url('records/resource')}}?id={{ $row->id }}" class="btn theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse Resource</a>
 												</div>
 												
 											</div>

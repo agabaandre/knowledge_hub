@@ -8,10 +8,8 @@
 
 @section('content')
 
-
 <div class="row">
 
- 
    
     <div class="card col-lg-12">
         <div class="card-header text-left">
@@ -26,6 +24,10 @@
 
 
         <div class="card-body text-left">
+
+        
+
+         <div class=" container">
            
            <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications'>
             @csrf
@@ -40,7 +42,11 @@
 
 </div>
 
-@include('account.tabs')
+<!-- @include('account.tabs')
+ -->
+
+</div>
+
 
 
 @endsection

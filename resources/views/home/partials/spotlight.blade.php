@@ -1,4 +1,4 @@
-<div class="spotlight px-3 py-5" style="background-color:#7a7a7a; background-image;; background-repeat:no-repeat;">
+<div class="spotlight px-3 py-5" style="background-color:#7a7a7a; background-image:url({{ asset('frontend/img/overlay.png') }}); background-repeat:no-repeat;">
 <div class="col-md-12 py-4" style="display: flex; justify-content: right;">
                                           @include('layouts.partials.language')
 </div>

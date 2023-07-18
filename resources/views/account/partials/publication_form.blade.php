@@ -21,7 +21,7 @@
                             </div>
                  </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Type</label>
                         @include('partials.publications.filetype_dropdown',['field'=>'file_type',
@@ -29,21 +29,21 @@
                     </div>
                 </div>
 
-                <div class="col-md-6">
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">File Category</label>
+                        @include('partials.publications.filecategory_dropdown',['field'=>'file_type',
+                        'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
                                 @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2',
                                 'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
                             </div>
                  </div>
-
-                 <!-- <div class="col-md-4">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage</label>
-                                @include('partials.publications.area_dropdown',['class'=>'select2',
-                                'selected'=>(@$row->georgaphical_coverage_id)?$row->georgaphical_coverage_id:''])
-                            </div>
-                </div> -->
 
                  
                  <div class="col-md-12 url_wrapper">
