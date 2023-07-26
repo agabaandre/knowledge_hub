@@ -1,82 +1,249 @@
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12 col-lg-6 d-none d-lg-flex col-img">
-    </div>
-    <div class="col-12 col-lg-6 align-self-center">
-      <div class="m-3 m-lg-5">
 
-        <div class="text-center mt-4 mb-3">
-          <h1 class="h3">Multi-step Form Wizard</h1>
-          <p class="lead">
-            Navigate between steps in this multi-step Bootstrap 5 Form Wizard example.
-          </p>
+@php
+      if( @$row && @$row->cover):
+          $image_link = storage_link('uploads/publications/'.$row->cover);
+      else:
+          $image_link = asset('assets/images/placeholder.jpg');
+      endif;
+  @endphp
+
+<!-- SmartWizard html -->
+<div id="smartwizard" class="mt-3">
+    <ul class="nav">
+        <li>
+            <a class="nav-link" href="#step-1"> <strong>Step 1</strong>
+                <br>Start Here</a>
+        </li>
+        <li>
+            <a class="nav-link" href="#step-2"> <strong>Step 2</strong>
+                <br>Resource categorization</a>
+        </li>
+        <li>
+            <a class="nav-link" href="#step-3"> <strong>Step 3</strong>
+                <br>Resource Details</a>
+        </li>
+
+        <li>
+            <a class="nav-link" href="#step-4"> <strong>Step 4</strong>
+                <br>Resource Attachments</a>
+        </li>
+
+    </ul>
+
+   
+    <div class="tab-content">
+        <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
+           <div class="row">
+
+                <div class="col-md-12 mt-3">
+
+                     <input type="hidden" name="id" id="id" class="newform" value="{{ @$row->id ?? old('id')}}">
+
+                    <h3>What is the title of the resource you what to publish?</h3>
+
+                        <div class="mb-3">
+                            <input placeholder="Resource Title"  class="form-control newform"  id="title" name="title" 
+                            value="{{ @$row->title ?? old('title')}}"
+                            required/>
+                        </div>
+                 </div>
+
+                </div>
+
         </div>
 
-        <ul id="steps-native" class="nav nav-pills justify-content-center"></ul>
-        
-        <form id="wizard" class="my-2 py-2">
-          <section data-step="1. Account">
-            <div class="mb-3">
-              <label class="form-label" for="email">Email</label>
-              <input class="form-control" type="email" name="email" placeholder="Email.." required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="password">Password</label>
-              <input class="form-control" type="password" name="password" placeholder="Password.." required>
-            </div>
-            <div class="row">
-              <div class="col-12 text-right">
-                <button class="btn btn-primary" data-next>Next</button>
-              </div>
-            </div>
-          </section>
-        
-          <section data-step="2. Profile">
-            <div class="mb-3">
-              <label class="form-label" for="first-name">First name</label>
-              <input class="form-control" type="text" name="first-name" placeholder="First name.." required>
-            </div>
-            
-            <div class="mb-3">
-              <label class="form-label" for="last-name">Last name</label>
-              <input class="form-control" type="text" name="last-name" placeholder="Last name.." required>
-            </div>
 
-            <div class="row">
-              <div class="col-6 text-left">
-                <button class="btn btn-outline-primary" data-prev>Previous</button>
+        <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
+          <br>
+          <h3>Choose resource categorization</h3>
+          <div class="row">
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">File Type</label>
+                        @include('partials.publications.filetype_dropdown',['field'=>'file_type',
+                        'selected'=>(@$row->file_type_id)?$row->file_type_id:''])
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">File Category</label>
+                        @include('partials.publications.filecategory_dropdown',['field'=>'file_type',
+                        'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
+                    </div>
+                </div>
+                
+                <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Sub Theme</label>
+                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2',
+                                'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
+                            </div>
+                 </div>
+
+                </div>
+            
+        </div>
+
+        <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
+          <br>
+          <h3>Provide publication details</h3>
+          <div class="row">
+
+              <div class="col-md-12 url_wrapper">
+                        <div class="mb-3">
+                            <label class="form-label" for="publication">Publication URL Link</label>
+                            <input type="text" placeholder="URL Link" class="form-control url" id="publication" 
+                              name="link"  value="{{ @$row->publication ?? old('publication')}}">
+                        </div>
               </div>
-              <div class="col-6 text-right">
-                <button class="btn btn-primary" data-next>Next</button>
+                   
+            <div class="col-md-12">
+                        <div class="mb-3">
+                            <label class="form-label" for="summernote">Publication Description</label>
+                            <textarea placeholder="Descripion" class="form-control newform" id="summernote"
+                             name="description" required>{!! $row->description ?? old('description') !!}</textarea>
+                        </div>
               </div>
-            </div>
-          </section>
-        
-          <section data-step="3. Social">
-            <div class="mb-3">
-              <label class="form-label" for="facebook">Facebook</label>
-              <input class="form-control" type="date" name="facebook" placeholder="Facebook.." required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="twitter">Twitter</label>
-              <input class="form-control" type="text" name="twitter" placeholder="Twitter.." required>
-            </div>
-            <div class="mb-3">
-              <label class="form-label" for="instagram">Instagram</label>
-              <input class="form-control" type="text" name="instagram" placeholder="Instagram.." required>
-            </div>
-        
-            <div class="row">
-              <div class="col-6 text-left">
-                <button class="btn btn-outline-primary" data-prev>Previous</button>
-              </div>
-              <div class="col-6 text-right">
-                <button class="btn btn-primary" type="submit">Sign up</button>
-              </div>
-            </div>
-          </section>
-        </form>
-      </div>
+
+          </div>
+            
+        </div>
+
+        <div id="step-4" class="tab-pane" role="tabpanel" aria-labelledby="step-4">
+          <br>
+          <h3>Provide Attachments</h3>
+          <div class="row" style="min-height: 300px;">
+
+              
+                        <div class="col-md-6" >
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Cover Image</label>
+                                <div class="custom-file">
+                                    <input type="file" style="display: none;" name="cover" id="cover">
+                                   <div onclick="$('#cover').click()" class="cover_preview py-2 rounded" style="max-width:300px; min-height:200px; max-height:550px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat;">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    <div class="col-md-6 attachment" >
+                      <div class="mb-3">
+                                <label class="form-label" for="publication">Publication Attachments</label>
+
+                                @if (@$row && @$row->has_attachments)
+                  
+                    @php
+                    $count = 1;
+                    @endphp
+
+                    @foreach($publication->attachments as $pub_file)
+                      <a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a>
+                    @php
+                      $count++;
+                    @endphp
+                    @endforeach;
+                @endif
+
+                 <div class="custom-file">
+                          <input  type="file" class="custom-file-input" name="files" id="attachments">
+                          <label class="custom-file-label" for="validatedCustomFile">Choose file.s..</label>
+                          <div class="preview py-2"></div>
+                      </div>
+                  </div>
+
+                  </div>
+
+                  <div class="col-md-6 justify-content-center video" style="display: none;">
+                       <label class="form-label" for="publication">Video</label>
+                      <div class="mb-3">
+                          <iframe width="450" height="260"class="vid" src="">
+                          </iframe>
+                      </div>
+                  </div>
+
+          </div>
+
+          <div class="row mt-3 mb-3">
+                    <div class="col-lg-8 mt-5  float-end">
+                    </div>
+                    <div class="col-lg-3 mt-5  float-end">
+                    <button class="btn btn-dark col-lg-12" type="submit">
+                        {{ (@$row)?'Save Changes':'Submit'}}
+                    </button>
+                    </div>
+           </div>
+            
+        </div>
+
+
     </div>
-  </div>
+
+
+    <!-- Include optional progressbar HTML -->
+    <div class="progress">
+      <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+
+    <br>
+
+
 </div>
+ 
+
+<script type="text/javascript">
+      
+  $(document).ready(function() {
+
+
+
+    // Smart Wizard
+    $('#smartwizard').smartWizard({
+      autoAdjustHeight: false,
+      selected: 0,
+      theme: 'dots',
+      toolbarSettings: {
+        toolbarPosition: 'both', // both bottom
+      },
+
+    });
+
+    // Step show event
+    $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
+
+      $("#prev-btn").removeClass('disabled');
+      $("#next-btn").removeClass('disabled');
+
+      if (stepPosition === 'first') {
+        $("#prev-btn").addClass('disabled');
+      } 
+      else if (stepPosition === 'last') {
+        $("#next-btn").addClass('disabled');
+      } 
+      else {
+        $("#prev-btn").removeClass('disabled');
+        $("#next-btn").removeClass('disabled');
+      }
+
+    });
+
+
+    $("#prev-btn").on("click", function() {
+      // Navigate previous
+      $('#smartwizard').smartWizard("prev");
+      return true;
+    });
+
+
+    $("#next-btn").on("click", function() {
+      // Navigate next
+      $('#smartwizard').smartWizard("next");
+      return true;
+    });
+    
+
+  });
+
+  
+  </script>

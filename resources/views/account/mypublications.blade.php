@@ -35,7 +35,7 @@
                   @endphp
 				@foreach ($publications as $row) 
 					<tr>
-						<td width="5%"><i class="fa {{$row->file_type->icon}} text-muted"></i></td>
+						<td width="5%"><i class="fa {{@$row->file_type->icon}} text-muted"></i></td>
 						<td>
 							<a href="{{ $row->publication}}" target="_blank">{!! truncate($row->title, 50) !!} </a>
 						</td>

@@ -23,10 +23,39 @@
     <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
     <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
     <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
-    
-	<script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
+
+
+<!-- CSS -->
+<link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" />
+
+ <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
 
     <style>
+         :root {
+            --sw-border-color:  #eeeeee;
+            --sw-toolbar-btn-color:  #ffffff;
+            --sw-toolbar-btn-background-color:  #28a745;
+            --sw-anchor-default-primary-color:  #82ba8f;
+            --sw-anchor-default-secondary-color:  #b0b0b1;
+            --sw-anchor-active-primary-color:  #28a745;
+            --sw-anchor-active-secondary-color:  #ffffff;
+            --sw-anchor-done-primary-color:  #82ba8f;
+            --sw-anchor-done-secondary-color:  #fefefe;
+            --sw-anchor-disabled-primary-color:  #82ba8f;
+            --sw-anchor-disabled-secondary-color:  #dbe0e5;
+            --sw-anchor-error-primary-color:  #dc3545;
+            --sw-anchor-error-secondary-color:  #ffffff;
+            --sw-anchor-warning-primary-color:  #ffc107;
+            --sw-anchor-warning-secondary-color:  #ffffff;
+            --sw-progress-color:  #28a745;
+            --sw-progress-background-color:  #82ba8f;
+            --sw-loader-color:  #28a745;
+            --sw-loader-background-color:  #82ba8f;
+            --sw-loader-background-wrapper-color:  rgba(255, 255, 255, 0.7);
+          }
+          .sw-btn{
+            padding: 0.775rem .95rem!important;
+          }
         .goog-te-banner-frame.skiptranslate {
             display: none !important;
         }

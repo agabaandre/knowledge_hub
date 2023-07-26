@@ -3,6 +3,7 @@
 @include('common.attachment_js')
 @include('common.sweet-alert')
 
+
 <script>
 
     var isVideo=false;
