@@ -155,6 +155,8 @@
 	<script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
 	<script src="{{ asset('frontend/js/custom.js')}}"></script>
 	<script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
+
+	@include('layouts.partials.tour')
 	<!-- ============================================================== -->
 	<!-- This page plugins -->
 	<!-- ============================================================== -->

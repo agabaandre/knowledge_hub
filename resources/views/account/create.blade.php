@@ -41,7 +41,7 @@
             @csrf
            
              
-              @include('account.tabs')
+              @include('account.wizard')
 
            </form>
 

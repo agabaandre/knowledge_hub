@@ -5,8 +5,8 @@
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
 							<div class="row no-gutters bg-white rounded search-form">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
-										<div class="form-group mb-0 position-relative">
-											<input type="text" class="form-control left-ico autocomplete term" name="term" value="{{ @old('term') }}" placeholder="Type Keywords to explore" />
+										<div class="form-group mb-0 position-relative main_search">
+											<input type="text" class="form-control left-ico autocomplete term " name="term" value="{{ @old('term') }}" placeholder="Type Keywords to explore" />
 										</div>
 									</div>
 								

@@ -38,7 +38,7 @@
 					<ul class="nav-menu">
 
 						<li><a href="{{ url('/')}}">Home</a></li>
-						<li class=""><a href="javascript:void(0);">Categories<span class="submenu-indicator"></span></a>
+						<li class="categories"><a href="javascript:void(0);">Categories<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							   
 							   
@@ -63,7 +63,7 @@
 							</ul>
 						</li>
 
-						<li class=""><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
+						<li class="dashboards"><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							<li>
 								<a href="{{ url('dashboards')}}">RCCs</a>
