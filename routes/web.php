@@ -57,7 +57,7 @@ Route::get('/test', [TestController::class, 'index'])->name('test');
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-Route::get('/test', [TestController::class, 'index']);
+Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
 Route::get('/logout', function () {
     Auth::logout();

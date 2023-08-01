@@ -19,4 +19,13 @@ class CommonController extends Controller
         return view('privacy.index',$data);
     }
 
+    
+    public function endtour(Request $request){
+
+        set_cookie('CDC_Tour_Finished',"YES09983kjfiejk");
+
+        return 'Finished';
+    }
+
+
 }

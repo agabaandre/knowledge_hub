@@ -1,3 +1,6 @@
+
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE')):
+
 <script src="{{ asset('assets/plugins/tour/tour.js')}}"></script>
 
 <script>
@@ -5,13 +8,11 @@
 let tourOptions = {
     
     options : {
-    
         darkLayerPersistence : true,
         next : 'Next',
         prev : 'Previous',
         finish : 'Okay!',
         mobileThreshold: 768
-    
     },
     
     tips : [
@@ -41,6 +42,18 @@ let tourOptions = {
         onSelected : false
     },
     {
+        title : 'Advanced Search',
+        description : 'You the form here to apply advanced filters',
+       // image : 'my/image/path.png',
+        selector : '.filter',
+        x : 50,
+        y : 50,
+        offx : 10,
+        offy : 20,
+        position : 'top',
+        onSelected : false
+    },
+    {
         title : 'Search resources',
         description : 'Here you can use keywords to search for resources or use the suggestions.',
        // image : 'my/image/path.png',
@@ -48,16 +61,23 @@ let tourOptions = {
         x : 50,
         y : 50,
         offx : 10,
-        offy : 5,
+        offy : 45,
         position : 'bottom',
-        onSelected : false
+        onSelected : function(){
+          fetch("{{ url('/endtour')}}");
+        }
     }
     
     
-    ]
+    ],
+    'on-product-tour-js-exit':function(){
+    console.log('TOur ended');
+    }
 };
 
 ProductTourJS.init(tourOptions); 
 ProductTourJS.start();
 
 </script>
+
+@endif
