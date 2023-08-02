@@ -16,7 +16,7 @@ class Access
         // $visitorInfo = Location::get($ip);
 
         $ip = env('APP_DEBUG')?'41.210.143.17':$request->ip();
-         AccessLogJob::dispatch($ip);
+         AccessLogJob::dispatch($ip,$request->all());
 
         return $next($request);
     }

@@ -50,6 +50,10 @@
 								<div class="form-group pt-3">
 									<button type="submit" class="btn btn-md full-width theme-bg text-light fs-md ft-medium">Login</button>
 								</div>
+
+								<div class="form-group pt-3">
+								   <h4 class="text-center"><a href="{{ route('register') }}" class="text-success">Register</a></h4>
+								</div>
 							</form>
 						</div>
 						

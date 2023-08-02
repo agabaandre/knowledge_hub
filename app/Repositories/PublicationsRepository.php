@@ -25,7 +25,9 @@ class PublicationsRepository extends SharedRepo{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs       = Publication::orderBy('id','desc')->where('is_version',0);
+        $pubs       = Publication::with([
+            'file_type',
+            'author','sub_theme'])->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');
@@ -238,7 +240,12 @@ class PublicationsRepository extends SharedRepo{
 
     public function find($id){
 
-        $pub = Publication::find($id);
+        $pub = Publication::with([
+            'file_type',
+            'attachments',
+            'author','sub_theme',
+            'comments','parent',
+            'summaries','versioning'])->find($id);
 
         $viewed = get_cookie("Viewed".$pub->id,'yes');
 

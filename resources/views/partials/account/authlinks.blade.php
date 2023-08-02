@@ -5,11 +5,11 @@
 								</a>
 							</li>
 
-							<li class=" {{ $class ?? ''}}">
+							<!-- <li class=" {{ $class ?? ''}}">
 								<a href="{{ route('register')}}" class="ft-medium text-bold">
 									Register
 								</a>
-							</li>
+							</li> -->
 
 						@else
 

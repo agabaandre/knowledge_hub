@@ -15,17 +15,18 @@ class AccessLogJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     
-    private $ip_address;
+    private $ip_address,$request;
 
     /**
      * Create a new job instance.
      *
      * @return void
      */
-    public function __construct($ip)
+    public function __construct($ip,$request)
     {
         //
         $this->ip_address = $ip;
+        $this->request    = $request;
     }
 
     /**
@@ -63,6 +64,8 @@ class AccessLogJob implements ShouldQueue
         $locationLog->city    = $data->City;
         $locationLog->lat     = $data->Latitude;
         $locationLog->long    = $data->Longitude;
+        $locationLog->publication_id = ($this->request)?$this->request['id']:null;
+        $locationLog->user_id = (current_user())?current_user()->id:null;
         $locationLog->save();
 
         endif;

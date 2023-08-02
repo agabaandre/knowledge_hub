@@ -71,9 +71,13 @@
 		<div class="container">
 			<div class="row">
 
-			   
+			   @php
 
-				<div class="col-xl-7 col-lg-7 col-md-7 col-sm-12">
+			    $col =(count($publication->summaries)>0 || $publication->has_attachments)?"7":"12";
+			   
+				@endphp
+
+				<div class="col-xl-{{$col}} col-lg-{{$col}} col-md-{{$col}} col-sm-12">
 					<div class="rounded mb-4">
 						<div class="jbd-01 pr-3">
 								<div class="jbd-details mb-4">
@@ -178,6 +182,8 @@
 				</div>
 
 				<!-- Sidebar -->
+
+				@if(count($publication->summaries)>0 || $publication->has_attachments)
 				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 
@@ -250,6 +256,8 @@
 
 					</div>
 				</div>
+
+				@endif
 
 			</div>
 		</div>
