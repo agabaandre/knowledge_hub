@@ -27,6 +27,14 @@ class AreasRepository{
         return Author::find($id);
     }
 
+    public function member_states(){
+        return Country::where('region_id','>',0)->get();
+    }
+
+    public function member_state($id){
+        return Country::where('id',$id)->first();
+    }
+
     public function countries(){
 
         return Country::all();

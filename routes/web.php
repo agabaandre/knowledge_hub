@@ -38,6 +38,7 @@ use App\Http\Controllers\TestController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\CountriesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -62,6 +63,13 @@ Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 Route::get('/logout', function () {
     Auth::logout();
     return redirect()->route('home');
+});
+
+Route::group(["prefix" => "countries"], function () {
+
+    Route::get('/', [CountriesController::class, 'index'])->name('countries');
+    Route::get('/details', [CountriesController::class, 'country']);
+
 });
 
 Route::post('/registration', [AuthController::class, 'register'])->name('registration');

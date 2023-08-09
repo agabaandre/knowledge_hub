@@ -1,6 +1,6 @@
-<div class="spotlight px-3 py-5" style="background-color:#7a7a7a; background-image:url({{ asset('frontend/img/overlay.png') }}); background-repeat:no-repeat;">
-<div class="col-md-12 py-4" style="display: flex; justify-content: right;">
-                                          @include('layouts.partials.language')
+<div class="spotlight px-3 py-3" style="background-color:#7a7a7a; background-image:url({{ asset('frontend/img/overlay.png') }}); background-repeat:no-repeat; background-size:cover;">
+<div class="col-md-12 pt-4" style="display: flex; justify-content: right;">
+           @include('layouts.partials.language')
 </div>
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
 							<div class="row no-gutters bg-white rounded search-form">
@@ -25,14 +25,7 @@
             </div>
 	</form>
 
-    <div  class="spot-row">
-
-        <div class="col-lg-8 col-md-12 col-sm-12 px-3">
-        <h3 class="text-center">Test your knowledge! Click on one of the sub-themes below</h3>
-        </div>
-    </div>
-
-
+ 
 <div  class="row spot-row col-sm-12">
     
     <div class="col-lg-4 col-md-12 col-sm-12 px-3">
@@ -40,23 +33,13 @@
         @include('home.partials.tags')
     </div>
 
-    <div class="slide_items col-lg-8 col-md-12 col-sm-12">
-    @foreach($subthemes as $subtheme)
+    <div class="col-lg-8 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
+      <div class="row justify-content-center mb-2">
+      <h3 class="text-center">Test your knowledge! Click on one of the themes below</h3>
+      </div>
+      @include('home.partials.theme_tabs')
+    </div>
 
-    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 item" >
-        <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important;">
-            <a href="{{ url('records/subtheme')}}?subtheme={{$subtheme->id}}" class="cats-box d-block rounded bg-white px-2 py-4">
-                <div class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-3 py-3 " >
-                    <img src="{{ asset('frontend/img/icons/'.$subtheme->icon)}}" style="max-width: 60%;"/>
-                </div>
-                <div class="cats-box-caption">
-                    <h4 class="fs-sm mb-0 ft-sm m-catrio" data-bs-toggle="tool-tip" data-bs-title="{{$subtheme->description}}">{{truncate($subtheme->description,16)}}</h4>
-                </div>
-            </a>
-        </div>
-    </div>
-    @endforeach
-    </div>
 </div>
 
 <div  class="spot-row">

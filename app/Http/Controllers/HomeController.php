@@ -40,7 +40,8 @@ class HomeController extends Controller
         $data['tags']	      = $this->publicationsRepo->get_tags();
 		$data['types']        = $this->publicationsRepo->get_types();
         $data['quotes']       = $this->quotesRepo->get($request);
-		$data['subthemes']		  = $this->publicationsRepo->get_subthemes();
+		$data['subthemes']	  = $this->publicationsRepo->get_subthemes();
+		$data['themes']		  = $this->themesRepo->get($request);
         $data['is_home']      = true;
 
         return view('home.index',$data);
@@ -55,28 +56,28 @@ class HomeController extends Controller
 				"title"=>"Health Security Themes",
 				"icon"=>"fa fa-heart",
 				'link'=>"browse/themes",
-				"image"=>"theme.png",
+				"image"=>"health.png",
 				"stats"=> $this->themesRepo->count()
 			],
 			[
 				"title"=>"Resource Contibuting Sources",
 				"icon"=>"fa fa-business-time",
 				'link'=>"browse/authors",
-				"image"=>"author.png",
+				"image"=>"resource.png",
 				"stats"=> $this->authorsRepo->count()
 			],
 			[
 				"title"=>"Geographical Coverage",
 				"icon"=>"fa fa-map-pin",
 				'link'=>"browse/areas",
-				"image"=>"location.png",
+				"image"=>"map.png",
 				"stats"=>$this->areasRepo->count()
 			],
 			[
 				"title"=>"Public Discussion Forums",
 				"icon"=>"fa fa-comments",
 				'link'=>"forums",
-				"image"=>"location.png",
+				"image"=>"forum.png",
 				"stats"=>$this->forumsRepo->count()
 			]
 		);

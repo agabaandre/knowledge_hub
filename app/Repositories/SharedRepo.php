@@ -74,7 +74,7 @@ class SharedRepo{
     }
     
 
-    private function get_country_authors($id,$is_region=false){
+    public function get_country_authors($id,$is_region=false){
 
         if( is_array($is_region)):
             $countries = Country::where('region_id',$id->region_id)->get()->pluck('id');

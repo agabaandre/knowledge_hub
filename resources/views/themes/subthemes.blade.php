@@ -7,29 +7,35 @@
 @section('content')
 
 <div class="py-3 gray">
-<div class="container">
-<div class="row align-items-center">
-					
-@foreach ($subthemes as $theme)
-		<!-- Single -->
-			<div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-12">
-				<div class="jbr-wrap text-left border rounded">
-					<div class="cats-box mlb-res rounded bg-white d-flex align-items-center justify-content-between px-3 py-3">
-						<div class="cats-box rounded bg-white d-flex align-items-center">
-							<div class="text-center">
-								<i class="fa {{$theme->icon}} fa-2x text-success"></i>
-						    </div>
-							<div class="cats-box-caption px-2">
-								<h4 class="fs-md mb-0 ft-medium">{!! truncate($theme->description,100) !!}</h4>
-							</div>
-						</div>
-						<div class="text-center mlb-last"><a href="{{ url('records/subtheme')}}?subtheme={{$theme->id }}" class="btn gray ft-medium apply-btn fs-sm rounded">View Publications<i class="lni lni-arrow-right-circle ml-1"></i></a></div>
-					</div>
-				</div>
-			</div>
+<div class="container text-center">
 
-@endforeach
+@if(count($subthemes)>0)
+<h3 class="py-3">Thematic Area: {{ $subthemes[0]->theme->description}}</h3>
+<div class="row justify-content-center">
+					
+@foreach($subthemes as $subtheme)
+        <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 item" >
+            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important;">
+                <a href="{{ url('records/subtheme')}}?subtheme={{$subtheme->id}}" class="cats-box d-block rounded bg-white px-2 py-4">
+                    <div class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-3 py-3 " >
+                        <img src="{{ asset('frontend/img/icons/'.$subtheme->icon)}}" style="max-width: 60%;"/>
+                    </div>
+                    <div class="cats-box-caption">
+                        <h4 class="fs-sm mb-0 ft-sm m-catrio" data-bs-toggle="tool-tip" data-bs-title="{{$subtheme->description}}">{{truncate($subtheme->description,35)}}</h4>
+                    </div>
+                </a>
+            </div>
+        </div>
+    @endforeach
+
 </div>
+@else
+
+<div class="row justify-content-center py-5">
+  <h3 class="text-muted">No sub-themes found!</h3>
+</div>
+
+@endif
 </div>
 </div>
 

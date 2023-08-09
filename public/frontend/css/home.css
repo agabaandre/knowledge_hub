@@ -38,11 +38,11 @@
   color: #fff;
   font-size: 19pt;
   line-break: auto;
-  padding-top: 30px;
+  padding-top: 10px;
 }
 
 .spot-item:hover{
-  box-shadow: 1px 1px 6px 1px#28b661;
+  box-shadow: 1px 1px 6px 1px#b4a269;
 }
 
 

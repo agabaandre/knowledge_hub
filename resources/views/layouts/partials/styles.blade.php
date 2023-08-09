@@ -12,18 +12,18 @@
 
     <!-- Custom CSS -->
     <!-- Favicon -->
-	<link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
-    <link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
-    <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css')}}">
-    <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css')}}">
-    <link rel="stylesheet" href="{{ asset('frontend/css/cookie-alert.css')}}">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
-    <link rel="stylesheet" href="//code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
-    <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
-    <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
-
+<link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
+<link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('frontend/css/quiz.css')}}">
+<link rel="stylesheet" href="{{ asset('frontend/css/sharing.css')}}">
+<link rel="stylesheet" href="{{ asset('frontend/css/cookie-alert.css')}}">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
+<link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
 
 <!-- CSS -->
 <link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" />

@@ -1,10 +1,7 @@
 	<section class="middle gray" style="background-image:url(<?php echo asset('frontend/img/dots.png') ?>); background-repeat:repeat;">
 		<div class="container">
 
-			<div class="row justify-content-center" 
-				data-aos="zoom-in"
-				data-aos-offset="200"
-				data-aos-delay="50">
+			<div class="row justify-content-center">
 				<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 					<div class="sec_title position-relative text-center mb-5">
 						<h2 class="ft-bold">Recommended</span></h2>
@@ -12,8 +9,7 @@
 				</div>
 			</div>
 
-			<div class="row justify-content-center" 	
-			    data-aos="slide-in">
+			<div class="row justify-content-center">
 				<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 					<div class="review-slide px-3">
 
