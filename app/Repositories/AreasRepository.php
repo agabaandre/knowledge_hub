@@ -28,7 +28,7 @@ class AreasRepository{
     }
 
     public function member_states(){
-        return Country::where('region_id','>',0)->get();
+        return Country::where('region_id','>',0)->orderBy('name','asc')->get();
     }
 
     public function member_state($id){
