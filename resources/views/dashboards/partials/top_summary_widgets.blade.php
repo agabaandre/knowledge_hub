@@ -2,7 +2,7 @@
 
  <?php foreach ($year_data as $row): ?>
     <!-- support1-section start -->
-    <div class="col-xl-3 col-md-4">
+    <div class="col-xl-3 col-md-4 mb-1">
         <div class="card" style="background-color: transparent!important;">
             <div class="card-body pb-0 bg-white">
                 <h4 class="m-0"><?php echo number_format($row->kpi_value,0); ?></h4>

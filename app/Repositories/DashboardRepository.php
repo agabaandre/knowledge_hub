@@ -107,12 +107,16 @@ class DashboardRepository extends SharedRepo{
 
                     return $query->where('region_id',$filter['region_id']);
 
-                })->when(true,function($query){
+                });
+				
+				// ->when(true,function($query){
 
-					return $this->access_filter($query,true);
-				});
+				// 	return $this->access_filter($query,true);
+				// });
 
-		return $countries->get();
+				$records = $countries->get();
+
+		return $records;
 	}
 
 	public function get_data_kpis($filter=[])
