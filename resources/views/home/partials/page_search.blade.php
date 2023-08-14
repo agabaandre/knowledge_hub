@@ -10,7 +10,7 @@
 
 				<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">	
 					<div class="col-md-12 py-2 pb-4" style="display: flex; justify-content: right;">
-									@include('layouts.partials.language')
+						@include('layouts.partials.language')
 					</div>
 				
 					<div class="single_widgets widget_search px-0 py-0" style="background-color: transparent!important; border:none!important;">

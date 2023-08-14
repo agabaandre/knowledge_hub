@@ -17,8 +17,9 @@ class ForumsController extends Controller
     public function index(Request $request)
     {
 
-        $data['forums'] = $this->forumsRepo->get($request);
-        $data['search'] = (object) $request->all();
+        $data['forums']    = $this->forumsRepo->get($request);
+        $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
+        $data['search']    = (object) $request->all();
 
         return view('forums.index', $data);
     }
@@ -26,17 +27,27 @@ class ForumsController extends Controller
     public function thread(Request $request)
     {
 
-        $data['forum']   = $this->forumsRepo->find($request->id);
-        $request['rows'] = 6;
-        $data['search']  = (object) $request->all();
-        $data['forums']  = $this->forumsRepo->get($request);
+        $data['forum']     = $this->forumsRepo->find($request->id);
+        $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
+        $request['rows']   = 6;
+        $data['search']    = (object) $request->all();
+        $data['forums']    = $this->forumsRepo->get($request);
 
         return view('forums.show', $data);
     }
 
+    public function join(Request $request)
+    {
+        if(!@current_user()->id)
+         return redirect('login');
+       
+        $this->forumsRepo->join_forum($request);
+
+       return redirect('forums/thread?id='.$request->id);
+    }
+
     public function create(Request $request)
     {
-
         return view('forums.create');
     }
 
@@ -48,6 +59,7 @@ class ForumsController extends Controller
 
     public function publish(Request $request)
     {
+        $this->forumsRepo->save($request);
         return back();
     }
 

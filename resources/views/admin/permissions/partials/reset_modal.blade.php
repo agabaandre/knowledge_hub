@@ -17,7 +17,7 @@
                                             <i class="icon-collaboration mr-2"></i>
                                             {{ __('general.select') }} {{ __('auth.login_status') }}
                                         </label>
-                                        {{--
+                                       
                                         <select class="form-control form-control-select2 select" name="status" required="">
                                           <option value="" selected disbaled>Select Status</option>
                                             @if($user->status ==1)
@@ -34,7 +34,7 @@
                                               @endif
                                               <option value="3">Reset Password</option>
                                             @endif
-                                        </select> --}}
+                                        </select> 
                                     </div>
                                     <input name="user_id" value="{{$user->id}}" type="hidden">
 

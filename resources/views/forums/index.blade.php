@@ -40,13 +40,13 @@
                         <div class="job_grid d-block border rounded px-3 pt-3 pb-2">
                             <div class="jb-list01">
                                 <div class="jb-list-01-title">
-                                    <a href="{{ url('forums/thread')}}?id={{ $forum->id}}">
+                                    <a   href="{{ (in_array($forum->id,$my_forums))?url('forums/thread')."?id=".$forum->id:'#'}}">
                                         <h5 class="ft-medium mb-1">{!! $forum->forum_title !!}</h5>
                                         <p>
                                             {!! truncate($forum->forum_description,400) !!}
                                     </a>
                                     <br>
-                                    <a class="text-success" href="{{ url('forums/thread')}}?id={{$forum->id}}">View Discussion</a>
+                                   
                                     </p>
                                 </div>
                                 <div class="jb-list-01-info d-block mb-3">
@@ -59,6 +59,12 @@
                                     <span class="mr-2 mb-2 d-inline-flex px-2 py-1 rounded theme-cl theme-bg-light"><?php echo $tag->tag; ?></span>
                                     @endforeach
                                 </div>
+
+                                   @if(in_array($forum->id,$my_forums))
+                                      <a class="text-success mb-2" href="{{ url('forums/thread')}}?id={{$forum->id}}">Read More</a>
+                                    @else
+                                      <a class="text-white round btn btn-sm btn-dark mt-1 mb-2" id="join{{$forum->id}}" href="{{ url('forums/join')}}?id={{$forum->id}}"><i class="fa fa-link"></i> Join This Discussion</a>
+                                    @endif
                             </div>
                         </div>
                         @endforeach

@@ -14,7 +14,7 @@
 
 <!-- Blog Detail -->
 <div class="col-lg-8 col-md-12 col-sm-12 col-12">
-@include('forums.partials.forum_details')
+    @include('forums.partials.forum_details')
 </div>
 
 <!-- Single blog Grid -->
@@ -25,18 +25,18 @@
         <h4 class="title">Recent Forums</h4>
         <ul>
 
-        @foreach($forums as $forum)
+        @foreach($forums as $other)
             <li>
                 <span class="left">
-                    @if(is_valid_image(storage_link("uploads/forums/".$forum->forum_image)))
-                        <img class="img-fluid" src="{{ storage_link('uploads/forums/'.$forum->forum_image) }}" alt="">
+                    @if(is_valid_image(storage_link("uploads/forums/".$other->forum_image)))
+                        <img class="img-fluid" src="{{ storage_link('uploads/forums/'.$other->forum_image) }}" alt="">
                     @endif
                 </span>
                 <span class="right">
-                    <a class="feed-title" href="{{ url('forums/thread')}}?id={{$forum->id}}">{!! $forum->forum_title !!}</a> 
+                    <a class="feed-title" href="{{ url('forums/thread')}}?id={{$other->id}}">{!! $other->forum_title !!}</a> 
                     
                     <span class="post-date"><i class="ti-calendar text-success"></i>
-                        {{time_ago($forum->created_at)}}
+                        {{time_ago($other->created_at)}}
                     </span>
 
                 </span>
@@ -65,4 +65,10 @@
 </div>
                     
 </section>
+@endsection
+
+@section('scripts')
+
+    @include('partials.general.summernote')
+
 @endsection

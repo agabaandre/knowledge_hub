@@ -6746,3 +6746,13 @@ label{
   .color-black{
     color:#000000;
   }
+
+  .text-bold{
+    font-weight: bold;
+  }
+
+  .btn-sm{
+    padding: 5px 20px!important;
+    font-size: 10pt!important;
+    border-radius: 8px;
+  }

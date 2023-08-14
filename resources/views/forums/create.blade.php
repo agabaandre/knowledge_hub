@@ -41,7 +41,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" name="cover" id="cover">
+                                    <input type="file" class="custom-file-input" name="image" id="image">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
                                     <div class="cover_preview py-2"></div>
                                 </div>

@@ -5,11 +5,13 @@ use App\Jobs\SendMailJob;
 use App\Models\Faq;
 use App\Models\Forum;
 use App\Models\ForumComment;
+use App\Models\ForumSubscription;
+use App\Models\ForumTag;
 use Illuminate\Http\Request;
 
 class ForumsRepository extends SharedRepo{
 
-    public function get(Request $request,$pending=1){
+    public function get(Request $request,$approved=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
         $forums = Forum::with(['user', 'tags', 'comments'])->orderBy('created_at','desc');
@@ -19,7 +21,13 @@ class ForumsRepository extends SharedRepo{
             $forums->orWhere('forum_description','like','%'.$request->term.'%');
         }
 
-        $forums->where('status',$pending);
+        if($request->tag){
+            $tagged_forums = ForumTag::where('tag',$request->tag)->get()->pluck('forum_id');
+            $forums->whereIn('id',$tagged_forums);
+        }
+
+        if($approved !== 3)
+        $forums->where('status',$approved);
 
          //Access levels effect to query results
          $this->access_filter($forums);
@@ -30,9 +38,26 @@ class ForumsRepository extends SharedRepo{
     }
 
     public function save(Request $request){
-        $faq = new Faq();
+        $forum = new Forum();
+        $forum->forum_title = $request->title;
+        $forum->forum_description = $request->description;
+        $forum->created_by = current_user()->id;
+        $forum->status =0;
 
-        return $faq;
+        if($request->hasFile('image')):
+
+            $file           = $request->file('image');  
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+           
+            $file->move(storage_path().'/app/public/uploads/publications/',$file_path);
+            $forum->forum_image     = $file_path;
+        endif;
+
+        $forum->save();
+
+        return $forum;
     }
 
     public function  save_comment(Request $request){
@@ -63,6 +88,7 @@ class ForumsRepository extends SharedRepo{
     }
 
     public function approve($id){
+
         $forum = Forum::find($id);
         $forum->status =1;
         $forum->update();
@@ -79,6 +105,7 @@ class ForumsRepository extends SharedRepo{
     }
 
     public function reject($id){
+
         $forum = Forum::find($id);
         $forum->status =2;
         $forum->update();
@@ -93,6 +120,27 @@ class ForumsRepository extends SharedRepo{
         SendMailJob::dispatch( $alert);
 
         return $forum;
+    }
+
+    public function getJoinedForums(Request $request){
+     
+    if(@current_user()->id):
+        return ForumSubscription::where('user_id', current_user()->id)->get()->pluck('forum_id')->toArray();
+    else:
+        return [];
+     endif;
+
+    }
+
+    public function join_forum($request){
+
+        $joining = ForumSubscription::create([
+            'user_id'=>current_user()->id,
+            'forum_id'=>$request->id
+        ]);
+
+        $joining->save();
+
     }
 
 

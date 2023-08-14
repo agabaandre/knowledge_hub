@@ -1,5 +1,5 @@
 <div id="user{{$user->id}}0" class="modal fade" tabindex="-1">
-                    <div class="modal-dialog modal-sm mt-lg-5">
+                    <div class="modal-dialog modal-sm">
                         <div class="modal-content">
                       <form action="{{ route('permissions.userrole') }}" class="feeFormuser{{$user->id}}" method="POST">
                             <div class="modal-header">

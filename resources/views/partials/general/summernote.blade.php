@@ -8,7 +8,7 @@ $(document).ready(function() {
     $('.summernote').summernote({
         placeholder: 'Content here',
         tabsize: 2,
-        height: 300
+        height: 200
     });
 
     $('#summernote').summernote({

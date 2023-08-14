@@ -23,6 +23,9 @@ return [
     'status' => 'Status',
     'email'  => 'Email',
     'phone'  => 'Phone',
-    'name'   => 'Name'
+    'name'   => 'Name',
+    'details'=> "Details",
+    "change" => "Change",
+    "select" => "Select"
 
 ];

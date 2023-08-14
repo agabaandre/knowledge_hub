@@ -1,9 +1,6 @@
 <ul class="children">
 <li class="article_comments_wrap">
   <article>
-    <div class="article_comments_thumb">
-      <img src="https://via.placeholder.com/500x500" width="120px" alt="">
-    </div>
     <div class="comment-details">
       <div class="comment-meta">
         <div class="comment-left-meta">
@@ -12,7 +9,7 @@
         </div>
       </div>
       <div class="comment-text">
-        <p><{!! $reply->comment !!}</p>
+        {!! nl2br($reply->comment) !!}
       </div>
     </div>
   </article>

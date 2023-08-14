@@ -294,7 +294,12 @@ class DashboardRepository extends SharedRepo{
 			}
 		}
 
-		$query->select(DB::raw('kpi_name,AVG(kpi_value) as kpi_value,kpi_id'));
+		$latest_periods = DB::table('kpi_data')->select(DB::raw('max(period) as period'))
+		->groupBy(['kpi_id','country_id'])
+		->pluck('period');
+
+		$query->select(DB::raw('kpi_name,max(period) as period,kpi_value,kpi_id'));
+		$query->whereIn('period',$latest_periods);
         $results = $query->groupBy(['kpi_id','country_id'])->get();
        
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
@@ -314,9 +319,13 @@ class DashboardRepository extends SharedRepo{
 		$data    = [];
 		$count   = 0;
 
+		$latest_periods = DB::table('kpi_data')->select(DB::raw('max(period) as period'))
+		->groupBy(['kpi_id','country_id'])
+		->pluck('period');
+
 		foreach ($this->get_kpis($filter) as $kpi) :
 
-            $row = $this->exec_query("SELECT kpi_name,AVG(kpi_value) as kpi_value,kpi_id FROM kpi_data where kpi_id='$kpi->id'")[0];
+            $row = $this->exec_query("SELECT kpi_name,kpi_value,kpi_id FROM kpi_data where kpi_id='$kpi->id' and period in $latest_periods")[0];
             
 			$data[$count]['name']   = $kpi->name;
 			$data[$count]['data'][] = intval($row->kpi_value);

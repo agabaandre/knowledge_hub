@@ -18,7 +18,7 @@ class ForumsAdminController extends Controller
 
     public function index(Request $request){
 
-        $data['forums'] = $this->forumsRepo->get($request);
+        $data['forums'] = $this->forumsRepo->get($request,3);
         $data['search']       = (Object) $request->all();
         return view('admin.forums.index',$data);
     }

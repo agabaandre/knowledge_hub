@@ -22,6 +22,7 @@ return [
     'roles'      =>'Roles',
     'users'  => 'Users',
     'user'   => 'User',
+    'login_status'=> " Account Status"
     
 
 ];
