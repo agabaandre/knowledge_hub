@@ -27,7 +27,7 @@ class PublicationsRepository extends SharedRepo{
         $rows_count = ($request->rows)?$request->rows:20;
         $pubs       = Publication::with([
             'file_type',
-            'author','sub_theme'])->orderBy('id','desc')->where('is_version',0);
+            'author','sub_theme','category'])->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');

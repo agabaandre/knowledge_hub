@@ -16,6 +16,10 @@ class Publication extends Model
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
     }
 
+    public function category(){
+        return $this->belongsTo(PublicationCategory::class,"publication_catgory_id","id");
+    }
+
     public function attachments(){
         return $this->hasMany(PublicationAttachment::class);
     }

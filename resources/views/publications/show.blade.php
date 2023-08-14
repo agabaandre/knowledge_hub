@@ -103,6 +103,10 @@
 										<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }} Visits</span>
 									</div>
 									<div class="details ft-medium">
+										<label class="text-muted">Category</label>
+										<span class="text-dark">{{ $publication->category->category_name }}</span>
+									</div>
+									<div class="details ft-medium">
 										<label class="text-muted">Type</label>
 										<span class="text-dark">{{ $publication->file_type->name }}</span>
 									</div>
