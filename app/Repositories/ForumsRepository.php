@@ -38,11 +38,12 @@ class ForumsRepository extends SharedRepo{
     }
 
     public function save(Request $request){
+
         $forum = new Forum();
         $forum->forum_title = $request->title;
         $forum->forum_description = $request->description;
         $forum->created_by = current_user()->id;
-        $forum->status =0;
+        $forum->status = 0;
 
         if($request->hasFile('image')):
 
@@ -51,11 +52,14 @@ class ForumsRepository extends SharedRepo{
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
            
-            $file->move(storage_path().'/app/public/uploads/publications/',$file_path);
+            $file->move(storage_path().'/app/public/uploads/forums/',$file_path);
             $forum->forum_image     = $file_path;
+
         endif;
 
         $forum->save();
+        
+        @$this->join_forum($forum);
 
         return $forum;
     }
@@ -109,7 +113,6 @@ class ForumsRepository extends SharedRepo{
         $forum = Forum::find($id);
         $forum->status =2;
         $forum->update();
-
 
         $alert = array(
             'title' => "Forum Post $forum->title Rejected",

@@ -73,6 +73,7 @@
 		function hideLoader(){
 			$.unblockUI();
 		}
+		
 	</script>
 
 	<style>
