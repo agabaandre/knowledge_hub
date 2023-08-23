@@ -4,5 +4,6 @@
 </a>
 <br>
   
-Please verify your email with bellow link: 
-<a href="{{ route('account.verify', $token) }}">Verify Email</a>
+Please verify your email with bellow link:
+<br> 
+<a href="{{ route('account_verify')}}?t={{$token}}">Verify Email</a>

@@ -9,6 +9,8 @@
     @include('home.partials.page_search')
 @endif
 
+@include('layouts.partials.alerts')
+
 @yield('styles')
 
 @include('layouts.partials.alerts')

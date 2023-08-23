@@ -15,11 +15,7 @@
 			<h3 class="card-title float-left">My Publications</h3>
 		</div>
 
-		<div class="row mt-2">
-		@include('layouts.partials.alerts')
-		</div>
-
-
+	
 		<div class="card-body text-left">
 			<table class="table table-striped table table-bordered">
 				<thead>

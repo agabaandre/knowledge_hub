@@ -126,6 +126,8 @@ Route::group(["prefix" => "publications"], function () {
 
 });
 
+Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
+
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AccountController::class, 'profile'])->name('account.profile');
@@ -139,10 +141,10 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
     Route::get("/newversion", [AccountController::class, 'create_version'])->name('account.newversion');
     Route::post("/summary", [AccountController::class, 'submit_summary'])->name('account.summary');
     Route::get("/summarize", [AccountController::class, 'create_summary'])->name('account.summarize');
-    Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account.verify');
     Route::post("/update", [AuthController::class, 'update_profile'])->name('account.update');
     Route::post("/secureme", [AuthController::class, 'update_password'])->name('account.auth_update');
 });
+
 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 

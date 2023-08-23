@@ -5,8 +5,13 @@
 
 @include('layouts.partials.header')
 
-
 @yield('styles')
+
+@if(Session::has('alert') || Session::has('message') || $errors->any())
+ <div class="container">
+    @include('layouts.partials.alerts')
+ </div>
+@endif;
 
 @yield('content')
 

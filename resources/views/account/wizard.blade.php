@@ -35,9 +35,21 @@
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
            <div class="row">
 
+               <div class="col-md-12 mt-3">
+                            <!-- Section Label -->
+                            <label class="form-label mb-3" for="publication">Content Type</label>
+                        <label class="form-check-inline">
+                              <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
+                          </label>
+                          <label class="form-check-inline">
+                              <input type="radio" name="upload_type" value="link" class="form-check-input">External Link
+                          </label>
+                </div>
+
                 <div class="col-md-12 mt-3">
 
                      <input type="hidden" name="id" id="id" class="newform" value="{{ @$row->id ?? old('id')}}">
+                     
 
                     <h3>What is the title of the resource you what to publish?</h3>
 
@@ -195,6 +207,16 @@
 <script type="text/javascript">
       
   $(document).ready(function() {
+
+    $('input[name="upload_type"]').on('change', function() {
+        if ($(this).val() == 'upload') {
+            $('.url_wrapper').show();
+            $('.url_wrapper').hide();
+        } else {
+            $('.url_wrapper').hide();
+            $('.url_wrapper').show();
+        }
+    });
 
 
 

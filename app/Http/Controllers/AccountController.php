@@ -28,6 +28,15 @@ class AccountController extends Controller
         return view('account.profile',$data);
     }
 
+    public function verifyAccount(Request $request){
+
+        $verified = $this->usersRepo->verify_account($request);
+        $message  = ($verified)?'Account Verified  successfully':'Verification failed try again, Invalid token.';
+        $alert_class  = ($verified)?'success':'danger';
+
+        return redirect()->route('login')->with(['alert'=>$message,'alert_class'=>$alert_class]);
+    }
+
 
     public function favourites(Request $request){
 
@@ -85,7 +94,7 @@ class AccountController extends Controller
         $message = ($saved)?'Publication saved successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';
-        $data['message']     = $data['alert']= $message;
+        $data['message']     = $data['alert'] = $message;
         $data['status']      = 200;
 
         if($request->ajax())

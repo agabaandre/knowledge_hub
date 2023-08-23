@@ -17,7 +17,7 @@ class TestController extends Controller
 
     public function index(Request $request){
 
-        $body            = view('emails.email_verification',['token'=>'87487487'])->render();
+        $body            = view('emails.email_verification',['token'=>'B65AjtMKwG'])->render();
         $data['email']   = 'henricsanyu@gmail.com';
         $data['subject'] = 'Grretings from Us';
         $data['body']    = $body;

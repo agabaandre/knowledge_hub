@@ -70,6 +70,19 @@ class UsersRepository {
         return User::where('verification_token',$token)->first();
     }
 
+    public function verify_account($request){
+        
+        $user = $this->user_by_token($request->t);
+
+        if($user):
+        $user->is_verified = 1;
+        $user->verification_token = 0;
+        return $user->update();
+        else:
+            return null;
+        endif;
+    }
+
     public function update_profile(Request $request){
         
         $user = User::find(current_user()->id);
