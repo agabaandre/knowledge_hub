@@ -21,6 +21,8 @@ class Access
 
         unset($logData['cover']);
         unset($logData['files']);
+        unset($logData['image']);
+        unset($logData['photo']);
 
          AccessLogJob::dispatch($ip,$logData);
 

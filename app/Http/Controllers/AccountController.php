@@ -65,9 +65,9 @@ class AccountController extends Controller
     public function submit_publication(Request $request){
 
         $val_rules = [
-            'cover'=>'required',
-            'file_type'=>'required',
-            'sub_theme'=>'required',
+            'cover'      =>'required',
+            'file_type'  =>'required',
+            'sub_theme'  =>'required',
             'description'=>'required'
         ];
 
@@ -81,9 +81,7 @@ class AccountController extends Controller
         endif;
 
         $request->validate($val_rules);
-
-        $saved = $this->publicationsRepo->save($request);
-
+        $saved   = $this->publicationsRepo->save($request);
         $message = ($saved)?'Publication saved successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';
@@ -100,7 +98,6 @@ class AccountController extends Controller
     public function create_summary(Request $request){
 
         $data['publication'] = $this->publicationsRepo->find($request->id);
-        
         return view('account.create_summary',$data);
     }
 
@@ -109,14 +106,13 @@ class AccountController extends Controller
 
         $val_rules = [
             'file_type'=>'required',
-            'summary'=>'required',
-            'title'=>'required'
+            'summary'  =>'required',
+            'title'    =>'required'
         ];
 
         $request->validate($val_rules);
 
-        $saved = $this->publicationsRepo->save_summary($request);
-
+        $saved   = $this->publicationsRepo->save_summary($request);
         $message = ($saved)?'Resource summary submitted successfully':'Request failed try again';
 
         $data['alert_class'] = ($saved)?'success':'danger';

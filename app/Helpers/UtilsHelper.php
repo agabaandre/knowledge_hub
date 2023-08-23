@@ -167,10 +167,10 @@ function send_email($request){
         $mail->SMTPAuth = true;
         $mail->Username = env('MAIL_USERNAME');   //  sender username
         $mail->Password = env('MAIL_PASSWORD');       // sender password
-        $mail->SMTPSecure = 'tls';                  // encryption - ssl/tls
-        $mail->Port = env('MAIL_PORT');                          // port - 587/465
+        $mail->SMTPSecure = env('MAIL_ENCRYPTION','ssl');                  // encryption - ssl/tls
+        $mail->Port = env('MAIL_PORT','465');                          // port - 587/465
 
-        $mail->setFrom(env('MAIL_USERNAME'), 'SenderName');
+        $mail->setFrom(env('MAIL_USERNAME'), env('MAIL_SENDERNAME'));
         $mail->addAddress($request->email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);

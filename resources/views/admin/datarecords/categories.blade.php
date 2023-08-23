@@ -10,7 +10,8 @@
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
 			<h3 class="card-title float-left">{{ $title ?? '' }}</h3>
-			 <hr>
+				<a href="" class="btn btn-info">Add Category</a>
+			    <hr>
 		</div>
 		<!-- Card Header With Form Filters -->
 		<div class="card-header">
@@ -55,8 +56,8 @@
 
 	</div>
 
-	
 	<!-- Include delete-modal.php -->
 	@include('admin.datarecords.partials.delete-category-modal')
+	@include('admin.datarecords.partials.add-category-modal')
 
     @endsection
