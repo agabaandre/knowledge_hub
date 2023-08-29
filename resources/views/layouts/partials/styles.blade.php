@@ -123,6 +123,13 @@
             border-radius: 4px;
          }
      
+         .custom-bg{
+            background-color:#7a7a7a!important; 
+            background-image:url(<?php echo asset('frontend/img/overlay.png'); ?>); 
+            background-repeat:no-repeat; 
+            background-size:cover;
+         }
+
         </style>
 
 </head>

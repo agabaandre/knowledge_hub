@@ -3,13 +3,13 @@
 namespace App\Http\Controllers;
 
 
-use App\Repositories\DashboardRepository;
+use App\Repositories\GraphsRepository;
 use Illuminate\Http\Request;
 class GraphController extends Controller
 {
     private $dashRepo;
 
-    public function __construct(DashboardRepository $dashRepo)
+    public function __construct(GraphsRepository $dashRepo)
     {
         $this->dashRepo = $dashRepo;
     }

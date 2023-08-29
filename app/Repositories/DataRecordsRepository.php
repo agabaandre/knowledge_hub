@@ -6,6 +6,7 @@ use App\Models\DataCategory;
 use App\Models\DataRecord;
 use App\Models\DataSubCategory;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 
 class DataRecordsRepository extends SharedRepo{
 
@@ -18,6 +19,7 @@ class DataRecordsRepository extends SharedRepo{
         if($request->slug){
 
           $category       = DataCategory::where('slug','like',$request->slug)->first();
+        
           $sub_categories = DataSubCategory::where('data_category_id',$category->id)
                                             ->get()
                                             ->pluck('id');
@@ -83,6 +85,7 @@ class DataRecordsRepository extends SharedRepo{
         $record->data_sub_category_id = $request->data_sub_category_id;
         $record->country_id   = $request->country_id;
         $record->file_type_id = $request->file_type_id;
+        $record->is_embedded  = $request->embedded;
 
         return $record->save();
     }
@@ -106,10 +109,39 @@ class DataRecordsRepository extends SharedRepo{
         return $results->paginate($rows_count);
     }
 
+    public function get_subcategories(Request $request){
+
+        $rows_count = ($request->rows)?$request->rows:20;
+        $results    = DataSubCategory::orderBy('id','desc');
+
+        return $results->paginate($rows_count);
+    }
+
     public function delete_category($id){
 
         return DataCategory::find($id)->delete();
     }
 
+
+    public function save_category(Request $request){
+        $record = new DataCategory();
+
+        $record->category_name    = $request->name;
+        $record->url_path         = $request->url;
+        $record->slug             = Str::slug($request->title);
+        $record->show_on_menu     = $request->show_menu;
+
+        return $record->save();
+    }
+
+    public function save_subcategory(Request $request){
+
+        $record = new DataSubCategory();
+
+        $record->sub_catgeory_name   = $request->name;
+        $record->data_category_id         = $request->category_id;
+
+        return $record->save();
+    }
 
 }

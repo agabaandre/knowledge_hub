@@ -24,6 +24,7 @@ class DataRecordsAdminController extends Controller
         return view('admin.datarecords.index',$data);
     }
 
+    
     public function create(Request $request){
 
         $data['record'] = null;
@@ -50,7 +51,8 @@ class DataRecordsAdminController extends Controller
         if($request->ajax()){
             return response($data,200);
         }
-        return back(200)->with($data);
+
+        return back()->with($data);
     }
 
 
@@ -66,8 +68,49 @@ class DataRecordsAdminController extends Controller
         return view('admin.datarecords.categories',$data);
     }
 
+
+    public function subcategories(Request $request){
+
+        $data['subcategories'] = $this->dataRecordsRepo->get_subcategories($request);
+        $data['categories']    = $this->dataRecordsRepo->get_categories($request);
+        $data['search']        = (Object) $request->all();
+        return view('admin.datarecords.subcategories',$data);
+    }
+
     public function delete_category(Request $request){
         return $this->dataRecordsRepo->delete_category($request->id);
+    }
+
+    public function save_category(Request $request){
+
+        $saved = $this->dataRecordsRepo->save_category($request);
+
+        if($saved):
+            $data = ['message'=>'Record saved successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        if($request->ajax()){
+            return response($data,200);
+        }
+        return back()->with($data);
+    }
+
+    public function save_subcategory(Request $request){
+
+        $saved = $this->dataRecordsRepo->save_subcategory($request);
+
+        if($saved):
+            $data = ['message'=>'Record saved successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        if($request->ajax()){
+            return response($data,200);
+        }
+        return back()->with($data);
     }
 
 

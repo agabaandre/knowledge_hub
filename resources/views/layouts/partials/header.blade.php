@@ -76,7 +76,7 @@
 						
 						<li><a href="{{ url('forums')}}">Forums</a></li>
 						<li><a href="{{ url('countries')}}">Member States</a></li>
-						<li><a href="{{ url('faqs')}}">Need Help?</a></li>
+						<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						
 						@include('partials.account.authlinks',['class'=>'mobileonly'])
 

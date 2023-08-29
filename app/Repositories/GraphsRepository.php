@@ -11,7 +11,7 @@ use App\Models\SubThemeticArea;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
-class DashboardRepository extends SharedRepo{
+class GraphsRepository extends SharedRepo{
 
 
 	 // Retrieves KPIData based on the provided filters, from specified columns, if any

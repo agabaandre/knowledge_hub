@@ -35,15 +35,13 @@
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
            <div class="row">
 
-               <div class="col-md-12 mt-3">
-                            <!-- Section Label -->
-                            <label class="form-label mb-3" for="publication">Content Type</label>
-                        <label class="form-check-inline">
+               <div class="col-md-12 mt-3 ml-3">
+                        <label class="form-check-inline px-2">
                               <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
                           </label>
-                          <label class="form-check-inline">
+                        <label class="form-check-inline px-2">
                               <input type="radio" name="upload_type" value="link" class="form-check-input">External Link
-                          </label>
+                        </label>
                 </div>
 
                 <div class="col-md-12 mt-3">

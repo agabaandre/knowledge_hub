@@ -21,6 +21,7 @@ class DataRecordsController extends Controller
     }
 
     public function details(Request $request){
+        
         $data['record'] = $this->dataRecordsRepo->find($request->id);
         return view('datarecords.details',$data);
     }
