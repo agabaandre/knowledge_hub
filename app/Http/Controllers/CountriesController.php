@@ -6,6 +6,7 @@ use App\Repositories\AreasRepository;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\DashboardRepository;
 use App\Repositories\ForumsRepository;
+use App\Repositories\GraphsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
@@ -17,7 +18,7 @@ class CountriesController extends Controller
 
     public function __construct(PublicationsRepository $publicationsRepo, 
     AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,
-	AreasRepository $areasRepo,ForumsRepository $forumsRepo,ThemesRepository $themesRepo,DashboardRepository $dashRepo)
+	AreasRepository $areasRepo,ForumsRepository $forumsRepo,ThemesRepository $themesRepo,GraphsRepository $dashRepo)
     {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;

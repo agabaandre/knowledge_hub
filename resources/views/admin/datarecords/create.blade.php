@@ -99,8 +99,14 @@
                             </div>
                         </div>
 
+                        <div class="col-md-6">
+                        <div class="mb-3">
+                            <label class="form-label" for="description">Embed on Page?</label>
+                            <input type="checkbox" value="1" name="embedded"/>
+                        </div>
+                        </div>
 
-                        <div class="col-md-12">
+                        <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Type</label>
                                 @include('partials.publications.filetype_dropdown',['field'=>'file_type_id','required'=>'required','selected'=>form_edit('file_type',$record,'file_type_id')])
