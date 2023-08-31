@@ -133,7 +133,14 @@
 
 						</div>
 
-						<div class="jbd-02 pt-4 pr-3">
+						<div class="row container">
+							<div class="col-lg-12">
+							<h5 class="text-bold text-success">Rating</h5>
+						    @include('partials.general.rating')
+							</div>
+						</div>
+
+						<div class="jbd-02 pt-4 pr-3 container">
 							<h5 class="text-bold text-success">Share this</h5>
 							<div class="row justify-content-center">
 								{{ share_buttons( url('records/resource')."?id=".$publication->id) }}

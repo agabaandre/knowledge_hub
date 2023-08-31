@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('layouts.plain')
 
 @section('styles')
 
@@ -8,7 +8,20 @@
 
 <div class="gray pt-2">
 <div class="container">
-<div class="row">
+<form class="row container">
+	<div class="form-group col-lg-6">
+			<label>RCC</label>
+			<select class="form-control">
+				<option>Select</option>
+			</select>
+		</div>
+		<div class="form-group col-lg-6">
+			<label>Country</label>
+			<select class="form-control">
+				<option>Select</option>
+			</select>
+		</div>
+</form>
 			
 	<!-- Item Wrap Start -->
 	<div class="col-lg-12 col-md-12 col-sm-12 ">
@@ -47,15 +60,15 @@
 									<h5 class="ft-medium mb-1">{{ $record->title }}</h5>
 									<p>{{ $record->sub_category->category->category_name }}</p>
 									<hr>
-									<a href="{{$record->url}}" target="_blank" class="text-success">{{ $record->url }}</a>
-									<p>{{ truncate($record->description,182) }}</p>
+							
+									<p>{!! truncate($record->description,182) !!}</p>
 								</a>
 								<a class="text-success" href="{{ asset('categories/data/detail') }}?id={{$record->id}}">View Details</a>
 								</p>
 						</div>
 						<div class="jb-list-01-info d-block mb-3">
 							<span class="text-muted mr-2"><i class="lni lni-alarm-clock mr-1"></i>
-							Added: {{ time_ago($record->created_at) }}
+							Published: {{ time_ago($record->created_at) }}
 							</span>
 						</div>
 					</div>

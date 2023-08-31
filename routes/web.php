@@ -298,7 +298,6 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/", [DataRecordsAdminController::class, 'categories']);
             Route::post("/save", [DataRecordsAdminController::class, 'save_category']);
             Route::get("/delete", [DataRecordsAdminController::class, 'delete_category']);
-
             
             Route::get("/subcategories", [DataRecordsAdminController::class, 'subcategories']);
             Route::post("/savesub", [DataRecordsAdminController::class, 'save_subcategory']);
