@@ -59,6 +59,23 @@
 
 	</div>
 
+    @include('partials.general.summernote')
     @include('admin.quiz.partials.create-answer-modal')
+
+    <script  type="text/javascript">
+      
+    $(document).ready(function() {
+
+    $('input[name="answer_type"]').on('change', function() {
+
+        if ($(this).val() == 'correct') {
+            $('.explanation').show();
+        } else {
+            $('.explanation').hide();
+        }
+    });
+
+     });
+    </script>
 
     @endsection
