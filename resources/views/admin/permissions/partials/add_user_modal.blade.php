@@ -36,10 +36,23 @@
                         </label>
                         <select class="form-control form-control-select2 select" name="role_id" data-fouc readonly>
                             @if(empty(old('role_id')))
-                            <option>Choose Role</option>
+                            <option selected disabled>Choose Role</option>
                             @endif
                             @foreach($roles as $role)
                             <option value="{{ $role->id }}" {{ ($role->id == old('role_id'))?'selected':'' }}>{{ strtoupper($role->name) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group col-md-6  col-sm-12">
+                        <label class="text-bold">
+                            <i class="icon-collaboration mr-2"></i>
+                            Access Level
+                        </label>
+                        <select class="form-control form-control-select2 select" name="level_id" data-fouc readonly>
+                            <option selected disabled>Choose Level</option>
+                            @foreach($levels as $level)
+                            <option value="{{ $level->id }}" {{ ($level->id == @$user->access_level_id)?'selected':'' }}>{{ strtoupper($level->level_name) }}</option>
                             @endforeach
                         </select>
                     </div>

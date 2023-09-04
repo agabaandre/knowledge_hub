@@ -16,31 +16,12 @@
             <form class="container-fluid">
                 <div class="row">
 
-                    <div class="col-md-12 text-right">
-                        <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Indicator</a>
+                    <div class="col-md-12 text-right py-4">
+                        <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Indicator Data</a>
                     </div>
-
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label for="title">Search</label>
-                            <input type="text" name="term" id="filterTitle" class="form-control" placeholder="Filter by name" value="{{ @$search->term ?? ''}}">
-                        </div>
-                    </div>
-
 
                 </div>
 
-                <div class="row">
-                    <div class="col-md-12 text-right">
-                        <!-- Export Button -->
-                        <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                        <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
-                        <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-
-                    </div>
-
-
-                </div>
             </form>
         </div>
         <div class="card-body text-left">
@@ -51,16 +32,32 @@
                     <thead>
                         <tr>
                             <th>Name</th>
-                            <th>Description</th>
+                            <th>Country</th>
+                            <th>Period</th>
+                            <th>Value</th>
+                        </tr>
+                    </thead>
+                    <tbody>
 
+                    @foreach($kpi_data as $data)
+                        <tr>
+                            <th>{{$data->kpi->name}}</th>
+                            <th>{{($data->country)?$data->country->country_name:'N/A'}}</th>
+                            <th>{{$data->period}}</th>
+                            <th>{{$data->kpi_value}}</th>
+                        </tr>
+                    @endforeach
 
+                    </tbody>
+                </table>
+
+                {{ $kpi_data->links() }}
 
             </div>
 
         </div>
 
         <!-- Include delete-modal.php -->
-        @include('admin.kpi.partials.delete-modal')
-        @include('admin.kpi.partials.create-modal')
+        @include('admin.kpi.partials.add-indicator-data-modal')
 
         @endsection

@@ -119,7 +119,7 @@
 						<h6>{{ @current_user()->name ?? 'Administrator' }}</h6><span>{{ ucwords(@current_user()->group_name) ?? '' }}</span>
 					</div>
 					<a class="dropdown-item" href="{{ route('home') }}"><i class="bx bx-link"></i> View Site</a>
-					<a class="dropdown-item" href="{{ url('admin/profile') }}"><i class="bx bx-user-circle"></i> My Profile</a>
+					<a class="dropdown-item" href="{{ url('permissions/profile') }}"><i class="bx bx-user-circle"></i> My Profile</a>
 					<a class="dropdown-item" href="auth/profile"><i class="bx bx-cog"></i> Change Password</a>
 					<a class="dropdown-item" href="{{ url('logout') }}"><i class="bx bx-log-out-circle"></i> Log Out</a>
 				</div>

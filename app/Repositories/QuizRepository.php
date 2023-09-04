@@ -35,10 +35,8 @@ class QuizRepository{
     }
 
     public function find($id){
-
         return Question::find($id);
     }
-
 
     public function delete($id){
 
@@ -59,6 +57,11 @@ class QuizRepository{
        set_cookie('answered_'.$request->qn_id,1);
        
        return $stat->save();
+    }
+
+    public function get_answers($qn_id){
+
+        return Answer::where('question_id',$qn_id)->paginate(5);
     }
 
 

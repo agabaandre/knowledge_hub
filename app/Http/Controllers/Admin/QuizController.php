@@ -44,5 +44,15 @@ class QuizController extends Controller
         return $this->quizRepo->delete($request->id);
     }
 
+    public function answers(Request $request){
+
+        if(!$request->qn)
+         return redirect()->back();
+
+        $data['question'] = $this->quizRepo->find($request->qn);
+        $data['answers']  = $this->quizRepo->get_answers($request->qn);
+        return view('admin.quiz.answers',$data);
+    }
+
   
 }

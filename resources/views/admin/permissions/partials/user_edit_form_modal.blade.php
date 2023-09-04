@@ -1,7 +1,7 @@
 <div id="user{{$user->id}}0" class="modal fade" tabindex="-1">
                     <div class="modal-dialog modal-sm">
                         <div class="modal-content">
-                      <form action="{{ route('permissions.userrole') }}" class="feeFormuser{{$user->id}}" method="POST">
+                         <form action="{{ route('permissions.userrole') }}" class="feeFormuser{{$user->id}}" method="POST">
                             <div class="modal-header">
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.edit') }} <span class="text-success"> {{$user->name }}'s</span>  {{ __('auth.role') }} 
@@ -19,10 +19,23 @@
                                         </label>
                                         <select class="form-control form-control-select2 select" name="role_id" data-fouc readonly>
                                             @if(empty(@$userRole->id))
-                                            <option>Choose Role</option>
+                                            <option selected disabled>Choose Role</option>
                                             @endif
                                             @foreach($roles as $role)
                                             <option value="{{ $role->id }}" {{ ($role->id == @$userRole->id)?'selected':'' }}>{{ strtoupper($role->name) }}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group ">
+                                        <label class="text-bold">
+                                            <i class="icon-collaboration mr-2"></i>
+                                            Access Level
+                                        </label>
+                                        <select class="form-control form-control-select2 select" name="level_id" data-fouc readonly>
+                                           <option selected disabled>Choose Level</option>
+                                            @foreach($levels as $level)
+                                            <option value="{{ $level->id }}" {{ ($level->id == @$user->access_level_id)?'selected':'' }}>{{ strtoupper($level->level_name) }}</option>
                                             @endforeach
                                         </select>
                                     </div>

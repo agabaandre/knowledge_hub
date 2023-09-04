@@ -65,6 +65,7 @@
 						<tr>
 							<td>{{ $row->question_text }}</td>
 							<td>
+							    <a class="btn btn-sm btn-primary ml-1" href="{{ url('admin/quiz/answers') }}?qn={{$row->id}}"  class="text-info"> Answers</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>

@@ -13,6 +13,7 @@ use App\Models\AuditTrail;
 use Illuminate\Support\Facades\DB;
 use App\Http\Traits\Utils;
 use App\Http\Controllers\Controller;
+use App\Models\AccessLevel;
 use App\Repositories\SharedRepo;
 
 class PermissionController extends Controller
@@ -30,7 +31,7 @@ class PermissionController extends Controller
     */
     public function index(){
 
-        $data['roles'] = Role::paginate(15);
+        $data['roles']  = Role::paginate(15);
         $data['permissions'] = Permission::all();
         return view('admin.permissions.roles')->with($data);
         
@@ -42,6 +43,7 @@ class PermissionController extends Controller
     public function users(Request $request){
 
         $data['roles'] = Role::all();
+        $data['levels'] = AccessLevel::all();
 
         $name     = $request->name;
         $locationId  = $request->location_id;
@@ -271,7 +273,11 @@ class PermissionController extends Controller
 
         $userId = $request->user_id;
         $roleId = $request->role_id;
+        
         $user   = User::find($userId);
+        $user->access_level_id = $request->level_id;
+        $user->update();
+
         //first revoke all
         $user->syncRoles([]); 
         //assign new
@@ -362,6 +368,11 @@ class PermissionController extends Controller
         $alert_class = ($deleted)?'success':'danger';
         $alert = ['alert-'.$alert_class=>$msg];
         return back()->with($alert);
+    }
+
+    public function profile(Request $request){
+        $data['user'] = current_user();
+        return view('admin.profile.index')->with($data);
     }
 
 

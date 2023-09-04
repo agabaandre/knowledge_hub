@@ -213,6 +213,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [QuizController::class, 'index']);
         Route::post("/save", [QuizController::class, 'store']);
         Route::get("/delete", [QuizController::class, 'destroy']);
+        Route::get("/answers", [QuizController::class, 'answers']);
     });
 
     //filetypes
@@ -240,6 +241,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [KpiController::class, 'index']);
         Route::get("/data", [KpiController::class, 'data']);
         Route::post("/save", [KpiController::class, 'save']);
+        Route::post("/save_data", [KpiController::class, 'save_data']);
         Route::get("/delete", [KpiController::class, 'destroy']);
     });
 
@@ -330,6 +332,7 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], funct
 
     Route::post('/delete',  [PermissionController::class, 'deleteUser'])->name('permissions.delete');
     Route::any('/trail',  [PermissionController::class, 'trail'])->name('permissions.trail');
+    Route::any('/profile',  [PermissionController::class, 'profile'])->name('permissions.profile');
 });
 
 

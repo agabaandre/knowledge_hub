@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Country;
 use Illuminate\Http\Request;
 use App\Repositories\IndicatorsRepository;
 
@@ -34,17 +35,19 @@ class KpiController extends Controller
         return back();
     }
 
+    public function save_data(Request $request)
+    {
+        $this->indicatorsRepo->save_data($request);
+        return back();
+    }
+
     public function data(Request $request)
     {
         $subject_areas = $this->indicatorsRepo->get_subject_areas();
 
-        $data['subject_areas'] = $subject_areas;
-
-        // $data['search'] = (object) $request->all();
-        // $data['data'] = $this->indicatorsRepo->get_data($request);
-        // return view('admin.kpi.data', $data);
-
-        $data['kpi_data'] = $this->indicatorsRepo->get_kpi_data();
+        $data['kpis']      = $this->indicatorsRepo->get_kpis();
+        $data['countries'] = Country::where('national','National')->get();
+        $data['kpi_data']  = $this->indicatorsRepo->get_kpi_data();
         return view('admin.kpi.data', $data);
     }
 

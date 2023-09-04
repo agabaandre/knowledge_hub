@@ -4,15 +4,15 @@
     </a>
     <div class="dropdown-menu dropdown-menu-right">
     
-        <a href="#user{{$user->id}}0" data-toggle="modal" class="dropdown-item"><i class="icon-touch-pinch"></i> 
+        <a href="#user{{$user->id}}0" data-toggle="modal" class="dropdown-item">
         {{ __('general.change') }}  {{ __('auth.role') }} </a>
 
-    <a href="#login_state{{$user->id}}0" data-toggle="modal" class="dropdown-item"><i class="fa fa-expand">Change Login Status</i> 
+    <a href="#login_state{{$user->id}}0" data-toggle="modal" class="dropdown-item">Change Login Status</i> 
     
-    <a href="{{ url('profile', $user->id)}}" class="dropdown-item"><i class="fa fa-expand"></i> 
+    <a href="{{ url('profile', $user->id)}}" class="dropdown-item">
         {{ __('general.details') }}  </a>
     
-    <a href="#delete{{$user->id}}0" data-toggle="modal" class="dropdown-item text-danger"><i class="icon-trash"></i> 
+    <a href="#delete{{$user->id}}0" data-toggle="modal" class="dropdown-item text-danger">
         Delete </a>
     </div>
 </div>

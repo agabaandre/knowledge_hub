@@ -27,9 +27,9 @@
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Other Data Categories</a></li>
-
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Manage Categories Data</a></li>
+						
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Categories Data</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Publish Category Data </a></li>
 						@can('manage_facts')
 						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
 						@endcan

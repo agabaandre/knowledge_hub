@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\Author;
 use App\Models\Kpi;
 use App\Models\KpiData;
+use App\Models\KpiDataRecord;
 use Illuminate\Http\Request;
 
 class IndicatorsRepository
@@ -41,6 +42,20 @@ class IndicatorsRepository
         return $kpi;
     }
 
+    public function save_data(Request $request)
+    {
+
+        $kpi = new KpiDataRecord();
+        $kpi->kpi_id     = $request->kpi_id;
+        $kpi->country_id = $request->country_id;
+        $kpi->value      = $request->indicator_value;
+        $kpi->period     = $request->year."-".$request->month;
+        $kpi->save();
+
+        return $kpi;
+    }
+
+
     public function get_data(Request $request)
     {
         $data = KpiData::paginate(20);
@@ -49,7 +64,7 @@ class IndicatorsRepository
 
     public function get_kpi_data()
     {
-        $data = KpiData::all();
+        $data = KpiData::paginate(15);
         return $data;
     }
 
@@ -71,4 +86,11 @@ class IndicatorsRepository
         $subject_areas = Author::all();
         return $subject_areas;
     }
+
+    public function get_kpis()
+    {
+        $kpis = Kpi::all();
+        return $kpis;
+    }
+
 }

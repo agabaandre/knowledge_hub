@@ -15,8 +15,9 @@
 		<!-- Card Header With Form Filters -->
 		<div class="card-header">
 			<form  class="container-fluid">
+				
 				  <div class="row">
-					<div class="col-md-3">
+					<div class="col-md-4">
 						<div class="form-group">
 							<label for="title">Title</label>
 							<input type="text" name="term" id="filterTitle" class="form-control"
@@ -25,7 +26,7 @@
 							>
 						</div>
 					</div>
-					<div class="col-md-3">
+					<div class="col-md-4">
 						<div class="form-group">
 							<label for="source">Description</label>
 							<input type="text" name="description" id="filterDesc" class="form-control" 
@@ -33,7 +34,12 @@
                               placeholder="Filter by Description">
 						</div>
 					</div>
+					<div class="col-lg-4">
+						
+					   <a href="{{ url('admin/datarecords/create') }}" class="btn btn-dark mt-4">Add Categories Data</a>
                     
+					</div>
+
 				</div>
 
 				<div class="row">
@@ -44,6 +50,7 @@
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 						
 					</div>
+					
 				</div>
             </form>
 		</div>
