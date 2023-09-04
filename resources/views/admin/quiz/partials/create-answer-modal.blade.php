@@ -12,11 +12,11 @@
       <form action="{{ url('admin/quiz/save_answer') }}" method="post" id='filetypes' class='filetypes'>
         @csrf
       <div class="modal-body">
-        <input type="hidden" name="id" id="id" class="newform">
+        <input type="hidden" name="question_id" id="question_id" class="newform" value="{{$question->id}}">
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Answer</label>
+              <label class="form-label" for="answer">Answer</label>
               <input type="text" placeholder="Enter Answer" class="form-control newform" id="answer" name="answer" required>
             </div>
           </div>
@@ -31,7 +31,7 @@
           </div>
         <div class="col-md-12 explanation" style="display: none;">
                 <div class="mb-3">
-                <label class="form-label" for="name">Answer Explanation</label>
+                <label class="form-label" for="explanation">Answer Explanation</label>
                 <textarea type="text" placeholder="Enter Explanation" class="form-control summernote" id="explanation" name="explanation" ></textarea>
                 </div>
         </div>

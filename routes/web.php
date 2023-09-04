@@ -212,6 +212,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [QuizController::class, 'index']);
         Route::post("/save", [QuizController::class, 'store']);
+        Route::post("/save_answer", [QuizController::class, 'save_answer']);
         Route::get("/delete", [QuizController::class, 'destroy']);
         Route::get("/answers", [QuizController::class, 'answers']);
     });

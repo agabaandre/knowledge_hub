@@ -36,7 +36,7 @@ class QuizController extends Controller
         if($request->ajax()){
             return response($data,200);
         }
-        return back(200)->with($data);
+        return back()->with($data);
     }
  
     public function destroy(Request $request){
@@ -54,5 +54,20 @@ class QuizController extends Controller
         return view('admin.quiz.answers',$data);
     }
 
+    public function save_answer(Request $request){
+
+        $saved = $this->quizRepo->save_answer($request);
+
+        if($saved):
+            $data = ['message'=>'Answer saved successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        if($request->ajax()){
+            return response($data,200);
+        }
+        return back()->with($data);
+    }
   
 }

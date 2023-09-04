@@ -64,6 +64,20 @@ class QuizRepository{
         return Answer::where('question_id',$qn_id)->paginate(5);
     }
 
+    public function save_answer(Request $request){
+
+        $answer = new Answer();
+        $answer->answer_text = $request->answer;
+        $answer->question_id = $request->question_id;
+        $answer->is_correct  = ($request->answer_type=='correct')?1:0;
+        $answer->answer_explanation = ($request->answer_type=='correct')?$request->explanation:null;
+        $answer->save();
+
+        return $answer;
+
+
+    }
+
 
     
 
