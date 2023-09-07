@@ -20,11 +20,11 @@ class DataRecordsRepository extends SharedRepo{
 
           $category       = DataCategory::where('slug','like',$request->slug)->first();
         
-          $sub_categories = DataSubCategory::where('data_category_id',$category->id)
-                                            ->get()
-                                            ->pluck('id');
+        //   $sub_categories = DataSubCategory::where('data_category_id',$category->id)
+        //                                     ->get()
+        //                                     ->pluck('id');
 
-          $results->whereIn('data_sub_category_id',$sub_categories);
+          $results->where('data_category_id',$category->id);
 
         }
 
