@@ -36,7 +36,7 @@ class UsersRepository {
 
         $user->save();
 
-        $this->save_preferences($user->id,$request->preferences);
+        @$this->save_preferences($user->id,$request->preferences);
 
         $this->send_email($request, $token);
 
