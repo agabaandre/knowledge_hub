@@ -82,6 +82,7 @@ class DataRecordsRepository extends SharedRepo{
 
         $record->title       = $request->title;
         $record->description = $request->description;
+        $record->url = $request->link;
         $record->data_category_id =$request->data_category_id;;
         $record->data_sub_category_id = $request->data_sub_category_id;
         $record->country_id   = $request->country_id;
