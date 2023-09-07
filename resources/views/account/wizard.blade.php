@@ -129,7 +129,7 @@
                       <div class="col-md-12">
                           <div class="mb-3">
                               <label class="form-label" for="publication">Search Tags</label>
-                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',git add <div class=""></div>@$row->publication_catgory_id,'tag_ids')])
+                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',@$row->publication_catgory_id,'tag_ids')])
                           </div>
                       </div>
                         <div class="col-md-6" >
