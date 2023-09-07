@@ -102,8 +102,8 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Category</label>
-                                @include('partials.publications.filecategory_dropdown',['field'=>'publication_category_id',
-                                'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
+                                @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
+                                'selected'=>(@$row->publication_catgory_id)?$row->publication_catgory_id:''])
                             </div>
                         </div>
                      

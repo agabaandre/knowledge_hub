@@ -79,7 +79,7 @@
                 <div class="col-md-4">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Category</label>
-                        @include('partials.publications.filecategory_dropdown',['field'=>'file_type',
+                        @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
                         'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
                     </div>
                 </div>
@@ -126,7 +126,12 @@
           <h3>Provide Attachments</h3>
           <div class="row" style="min-height: 300px;">
 
-              
+                      <div class="col-md-12">
+                          <div class="mb-3">
+                              <label class="form-label" for="publication">Search Tags</label>
+                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',@$row->publication_catgory_id,'tag_ids')])
+                          </div>
+                      </div>
                         <div class="col-md-6" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
