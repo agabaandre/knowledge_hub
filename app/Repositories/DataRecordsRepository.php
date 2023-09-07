@@ -86,7 +86,7 @@ class DataRecordsRepository extends SharedRepo{
         $record->data_sub_category_id = $request->data_sub_category_id;
         $record->country_id   = $request->country_id;
         $record->file_type_id = $request->file_type_id;
-        $record->is_embedded  = $request->embedded;
+        $record->is_embedded  = (@$request->embedded)?1:0;
 
         return $record->save();
     }
