@@ -20,7 +20,7 @@
 
             <div class="col-lg-12 text-center pt-2 pb-2">
                 <h2 class="post-title text-center">{!! $record->title !!}</h2>
-                <h5>Categorization: {{ $record->sub_category->category->category_name }}</h5>
+                <h5>Categorization: {{ @$record->category->category_name }}</h5>
                 <p>{!! $record->description !!}</p>
             </div>
 
