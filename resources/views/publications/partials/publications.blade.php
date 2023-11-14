@@ -13,14 +13,14 @@
           <div class="card-body text-left">
           	<div class="row">
 						@php
-							if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
+							//if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
 								$image_link = storage_link('uploads/publications/'.$row->cover);
-							else:
-								$image_link = storage_link('uploads/publications/cover.jpg');
-							endif;
+							//else:
+							//	$image_link = storage_link('uploads/publications/cover.jpg');
+							//endif;
 						@endphp
 			      </a>
-          	  <div class="col-md-2" style=" background-image:url({{ $image_link }}); background-size:cover;">
+          	  <div class="col-md-2" style=" background-image:url({{ $image_link }}); background-size:cover; background-position:center;">
 				       
           	  </div>
           	 <div class="col-md-10">

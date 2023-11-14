@@ -3,12 +3,13 @@
     <span class="text-success">Tags:</span>
 
     @php
-     $colors = ['dark','green','brown'];
+     $colors = ['dark','blue','green'];
     @endphp
 
     @foreach($tags as $tag)
-
         <a href="{{ url('records')}}?tag={{$tag->tag_text}}" class="px-3 py-1 medium bg-{{ $colors[mt_rand(0,2)] }} text-white rounded">{{ $tag->tag_text }}</a>
     @endforeach
+
+    </div>
 
 </div>

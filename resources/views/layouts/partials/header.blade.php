@@ -45,12 +45,16 @@
 
 								@foreach($data_categories as $category)
 
-									@if(!empty($category->required_permission))
-										@can($category->required_permission)
-										<li>
-										 <a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
-										</li>
-										@endcan
+									@if(strlen($category->required_permission)>0)
+										
+									   @auth
+											@can($category->required_permission)
+											<li>
+											<a href="{{ url($category->url_path)}}?slug={{$category->slug}}">{{$category->category_name}}</a>
+											</li>
+											@endcan
+										@endauth
+
 									@else
 
 									<li>

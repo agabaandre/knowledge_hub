@@ -201,6 +201,7 @@ class PublicationsRepository extends SharedRepo{
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
         $pub->file_type_id         = $request->file_type;
+        $pub->publication_catgory_id  = $request->category_id;
         $pub->visits               = 0;
 
         if($request->is_active)

@@ -20,11 +20,11 @@ class DataRecordsRepository extends SharedRepo{
 
           $category       = DataCategory::where('slug','like',$request->slug)->first();
         
-          $sub_categories = DataSubCategory::where('data_category_id',$category->id)
-                                            ->get()
-                                            ->pluck('id');
+        //   $sub_categories = DataSubCategory::where('data_category_id',$category->id)
+        //                                     ->get()
+        //                                     ->pluck('id');
 
-          $results->whereIn('data_sub_category_id',$sub_categories);
+          $results->where('data_category_id',$category->id);
 
         }
 
@@ -82,10 +82,12 @@ class DataRecordsRepository extends SharedRepo{
 
         $record->title       = $request->title;
         $record->description = $request->description;
+        $record->url = $request->link;
+        $record->data_category_id =$request->data_category_id;;
         $record->data_sub_category_id = $request->data_sub_category_id;
         $record->country_id   = $request->country_id;
         $record->file_type_id = $request->file_type_id;
-        $record->is_embedded  = $request->embedded;
+        $record->is_embedded  = (@$request->embedded)?1:0;
 
         return $record->save();
     }

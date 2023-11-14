@@ -36,10 +36,10 @@ class UsersRepository {
 
         $user->save();
 
-        $this->save_preferences($user->id,$request->preferences);
-
         $this->send_email($request, $token);
 
+        @$this->save_preferences($user->id,$request->preferences);
+        
         return $user;
     }
 

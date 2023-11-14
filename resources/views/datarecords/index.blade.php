@@ -8,18 +8,14 @@
 
 <div class="gray pt-2">
 <div class="container">
-<form class="row container">
+<form class="row container" action="">
 	<div class="form-group col-lg-6">
 			<label>RCC</label>
-			<select class="form-control">
-				<option>Select</option>
-			</select>
+			@include('partials.regions.dropdown',['class'=>'select2'])
 		</div>
 		<div class="form-group col-lg-6">
-			<label>Country</label>
-			<select class="form-control">
-				<option>Select</option>
-			</select>
+			<label>Member State</label>
+			@include('partials.countries.dropdown',['class'=>'select2'])
 		</div>
 </form>
 			
@@ -58,7 +54,7 @@
 						<div class="jb-list-01-title">
 								<a href="{{url('categories/data/detail')}}?id={{$record->id}}">
 									<h5 class="ft-medium mb-1">{{ $record->title }}</h5>
-									<p>{{ $record->sub_category->category->category_name }}</p>
+									<p>{{ @$record->category->category_name }}</p>
 									<hr>
 							
 									<p>{!! truncate($record->description,182) !!}</p>
