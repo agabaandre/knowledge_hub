@@ -43,7 +43,14 @@ class Publication extends Model
 
 
     public function getThemeAttribute(){
-        return @$this->sub_theme->theme;
+
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $theme = cache()->remember('Theme'.$this->id,$minutes, function () {
+            return  @$this->sub_theme->theme;
+        });
+
+        return $theme;
     }
 
     public function getLabelAttribute(){

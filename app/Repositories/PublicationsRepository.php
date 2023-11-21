@@ -25,7 +25,7 @@ class PublicationsRepository extends SharedRepo{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs       = Publication::with(['file_type','author','sub_theme','category'])->orderBy('id','desc')->where('is_version',0);
+        $pubs       = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits)
          $pubs->orderBy('id','desc');
@@ -125,7 +125,7 @@ class PublicationsRepository extends SharedRepo{
         $rows_count = ($request->rows)?$request->rows:20;
         $author_id  = current_user()->author_id;
 
-        $pubs = Publication::orderBy('id','desc');
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
         $pubs->where('author_id',$author_id);
         $result = $pubs->paginate($rows_count);
 
@@ -142,7 +142,7 @@ class PublicationsRepository extends SharedRepo{
         ->pluck('publication_id')
         ->toArray();
     
-        $pubs = Publication::orderBy('id','desc');
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
         $pubs->whereIn('id',$favs);
 
         $result = $pubs->paginate($rows_count);
