@@ -19,7 +19,7 @@ let tourOptions = {
 
     {
         title : 'Data Categories',
-        description : 'Choose Data categorie to browse tthrough a list of data of that category',
+        description : 'Choose a data category to browse',
        // image : 'my/image/path.png',
         selector : '.categories',
         x : 50,
@@ -31,7 +31,7 @@ let tourOptions = {
     },
     {
         title : 'Dashboards',
-        description : 'Here you will accees to the different data Dashboards',
+        description : 'Here you will access the different data Dashboards',
        // image : 'my/image/path.png',
         selector : '.dashboards',
         x : 50,
@@ -43,7 +43,7 @@ let tourOptions = {
     },
     {
         title : 'Advanced Search',
-        description : 'You the form here to apply advanced filters',
+        description : 'Use this form here to apply advanced filters',
        // image : 'my/image/path.png',
         selector : '.filter',
         x : 50,
@@ -55,7 +55,7 @@ let tourOptions = {
     },
     {
         title : 'Search resources',
-        description : 'Here you can use keywords to search for resources or use the suggestions.',
+        description : 'Here you can use keywords to search for resources.',
        // image : 'my/image/path.png',
         selector : '.main_search',
         x : 50,
