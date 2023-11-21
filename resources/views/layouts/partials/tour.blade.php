@@ -6,7 +6,7 @@
 <script>
 
 let tourOptions = {
-
+    
     options : {
         darkLayerPersistence : true,
         next : 'Next',
@@ -14,12 +14,12 @@ let tourOptions = {
         finish : 'Okay!',
         mobileThreshold: 768
     },
-
+    
     tips : [
 
     {
         title : 'Data Categories',
-        description : 'Choose a data category to browse ',
+        description : 'Choose Data categorie to browse tthrough a list of data of that category',
        // image : 'my/image/path.png',
         selector : '.categories',
         x : 50,
@@ -31,7 +31,7 @@ let tourOptions = {
     },
     {
         title : 'Dashboards',
-        description : 'Here you will have accees to the different data dashboards',
+        description : 'Here you will accees to the different data Dashboards',
        // image : 'my/image/path.png',
         selector : '.dashboards',
         x : 50,
@@ -43,7 +43,7 @@ let tourOptions = {
     },
     {
         title : 'Advanced Search',
-        description : 'Use the form here to apply advanced filters and refine your search results',
+        description : 'You the form here to apply advanced filters',
        // image : 'my/image/path.png',
         selector : '.filter',
         x : 50,
@@ -55,7 +55,7 @@ let tourOptions = {
     },
     {
         title : 'Search resources',
-        description : 'Here you can use keywords to search for resources or the automatic suggestions.',
+        description : 'Here you can use keywords to search for resources or use the suggestions.',
        // image : 'my/image/path.png',
         selector : '.main_search',
         x : 50,
@@ -67,15 +67,15 @@ let tourOptions = {
           fetch("{{ url('/endtour')}}");
         }
     }
-
-
+    
+    
     ],
     'on-product-tour-js-exit':function(){
     console.log('TOur ended');
     }
 };
 
-ProductTourJS.init(tourOptions);
+ProductTourJS.init(tourOptions); 
 ProductTourJS.start();
 
 </script>
