@@ -8,7 +8,12 @@ class FileTypesViewComposer{
 
     public function compose(View $view){
 
-        $file_types = PublicationType::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $file_types  = cache()->remember('file_types',$minutes, function () {
+            return   PublicationType::all();
+        });
+        
         $view->with('file_types',$file_types);
     }
 

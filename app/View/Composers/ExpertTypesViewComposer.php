@@ -9,7 +9,12 @@ class ExpertTypesViewComposer{
 
     public function compose(View $view){
 
-        $types = ExpertType::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $types  = cache()->remember('types',$minutes, function () {
+            return   ExpertType::all();
+        });
+
         $view->with('expert_types',$types);
     }
 

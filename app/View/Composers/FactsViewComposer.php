@@ -8,7 +8,12 @@ class FactsViewComposer{
 
     public function compose(View $view){
 
-        $facts = Fact::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $facts  = cache()->remember('facts',$minutes, function () {
+            return   Fact::all();
+        });
+        
         $view->with('facts',$facts);
     }
 

@@ -7,7 +7,13 @@ use Illuminate\View\View;
 class DataCategoriesViewComposer{
 
     public function compose(View $view){
-        $categories = DataCategory::with("sub_categories")->where('show_on_menu',1)->get();
+       
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        
+        $categories  = cache()->remember('categories',$minutes, function () {
+            return   DataCategory::with("sub_categories")->where('show_on_menu',1)->get();
+        });
+    
         $view->with('data_categories',$categories);
     }
 

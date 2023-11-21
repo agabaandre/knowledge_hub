@@ -10,7 +10,12 @@ class ThemesViewComposer{
 
     public function compose(View $view){
 
-        $subthemes = ThemeticArea::with('subthemes')->get();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $subthemes = cache()->remember('subthemes',$minutes, function () {
+            return   ThemeticArea::with('subthemes')->get();
+        });
+
         $view->with('themes',$subthemes);
     }
 

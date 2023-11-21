@@ -8,7 +8,12 @@ class CountriesViewComposer{
 
     public function compose(View $view){
 
-        $countries = Country::where("national","National")->get();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+        
+        $countries  = cache()->remember('countries',$minutes, function () {
+            return   Country::where("national","National")->get();
+        });
+    
         $view->with('countries',$countries);
     }
 

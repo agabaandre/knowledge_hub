@@ -10,7 +10,12 @@ class GeoAreasViewComposer{
 
     public function compose(View $view){
 
-        $geoareas = GeoCoverage::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $geoareas  = cache()->remember('geoareas',$minutes, function () {
+            return   GeoCoverage::all();
+        });
+
         $view->with('geoareas',$geoareas);
     }
 

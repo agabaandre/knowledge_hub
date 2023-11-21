@@ -32,7 +32,7 @@ class HomeController extends Controller
         $request['rows']      = 10;
 
         $data['publications'] = $this->publicationsRepo->get($request);
-        $data['recent']       = $this->publicationsRepo->get($request);
+        $data['recent']       = $data['publications']; //$this->publicationsRepo->get($request);
         $data['authors']      = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
 		$request['is_featured'] = 1;

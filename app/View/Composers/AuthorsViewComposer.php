@@ -8,7 +8,12 @@ class AuthorsViewComposer{
 
     public function compose(View $view){
 
-        $authors = Author::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $authors = cache()->remember('authors',$minutes, function () {
+            return  Author::all();
+        });
+    
         $view->with('authors',$authors);
     }
 

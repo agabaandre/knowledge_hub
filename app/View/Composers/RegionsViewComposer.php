@@ -8,7 +8,12 @@ class RegionsViewComposer{
 
     public function compose(View $view){
 
-        $geoareas = Region::with('countries')->get();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $geoareas = cache()->remember('geoareas',$minutes, function () {
+            return   Region::with('countries')->get();
+        });
+
         $view->with('regions',$geoareas);
     }
 

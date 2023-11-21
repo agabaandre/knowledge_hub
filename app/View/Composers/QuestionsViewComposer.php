@@ -9,7 +9,12 @@ class QuestionsViewComposer{
 
     public function compose(View $view){
 
-        $questions = Question::with('responses','answers')->whereHas('answers')->get();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $questions = cache()->remember('questions',$minutes, function () {
+            return   Question::with('responses','answers')->whereHas('answers')->get();
+        });
+        
         $view->with('questions',$questions);
     }
 

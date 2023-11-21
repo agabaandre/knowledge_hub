@@ -8,7 +8,12 @@ class TagsViewComposer{
 
     public function compose(View $view){
 
-        $tags = Tag::all();
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $tags = cache()->remember('tags',$minutes, function () {
+            return   Tag::all();
+        });
+
         $view->with('tags',$tags);
     }
 
