@@ -71,7 +71,7 @@ let tourOptions = {
     
     ],
     'on-product-tour-js-exit':function(){
-    console.log('TOur ended');
+    console.log('Tour ended');
     }
 };
 

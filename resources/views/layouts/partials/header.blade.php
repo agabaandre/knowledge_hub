@@ -72,6 +72,26 @@
 							<li>
 								<a href="{{ url('dashboards')}}">RCCs</a>
 							</li>
+							@foreach($dashboard_categories as $cat)
+
+							@if(strlen($cat->required_permission)>0)
+								
+							@auth
+									@can($cat->required_permission)
+									<li>
+									<a href="{{ url($cat->url_path)}}?slug={{$cat->slug}}">{{$cat->category_name}}</a>
+									</li>
+									@endcan
+								@endauth
+
+							@else
+
+							<li>
+								<a href="{{ url($cat->url_path)}}?slug={{$cat->slug}}">{{$cat->category_name}}</a>
+							</li>
+
+							@endif
+							@endforeach
 							<!-- <li>
 								<a href="{{ url('dashboards/kpi')}}">Indicator Comparison</a>
 							</li> -->

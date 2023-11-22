@@ -12,4 +12,10 @@
             </a>
             </span>
             @endif
+        @else
+           <span class="mr-1">
+            <a href="{{ url('login') }}">
+                <span class=" mr-2"><i class="fa fa-star mr-1"></i> Add to Favourites </span>
+            </a>
+            </span>
         @endauth

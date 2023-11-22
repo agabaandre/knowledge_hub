@@ -118,7 +118,6 @@
 										<label class="text-muted">Sub-Theme</label>
 										<span class="text-dark">{!! nl2br($publication->sub_theme->description) !!}</span>
 									</div>
-									@auth()
 									<div class="details ft-medium">
 										<div class="btn btn-outline-dark mt-2"> 
                                          @php
@@ -127,7 +126,6 @@
 									     @include('common.favourites_btn')
 										</div>
 									</div>
-									@endauth
 								</div>
 							</div>
 
@@ -262,7 +260,18 @@
 						</div>
 
                          </form>
-						 
+
+						 @else
+
+						 <div class="form-group">
+							<label class="text-success mb-1 ft-medium medium">Your comment</label>
+							<textarea name="comment" class="form-control" placeholder="Login to comment" disabled required>{{ old('comment') }}</textarea>
+						 </div>
+
+						 <div class="form-group mt-4">
+							<a href="{{ url('/login') }}" class="btn btn-md rounded theme-bg text-light ft-medium fs-sm full-width">Login to Comment</a>
+						</div>
+						
 						 @endauth
 
 					</div>
