@@ -15,13 +15,13 @@
 <script type="text/javascript"
     src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-TTKTS2SF82"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-6GMM9ZKQTD"></script>
 <script>
     window.dataLayer = window.dataLayer || [];
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
-    gtag('config', 'G-TTKTS2SF82');
+    gtag('config', 'G-6GMM9ZKQTD');
 </script>
 <link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
 <link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
