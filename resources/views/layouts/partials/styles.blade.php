@@ -1,17 +1,28 @@
 <!DOCTYPE html>
 <html lang="en" xmlns="https://www.w3.org/1999/xhtml">
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="description" content="{{ @$setting->site_description }}" />
-	<meta name="keywords" content="{{ @$setting->seo_keywords }}">
-	<meta name="author" content="Africa CDC" />
-	<!-- Title -->
-	<title>{{ 'Africa CDC Knowledge Hub - '.@$title ?? 'Africa CDC Knowledge Hub' }}</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="description" content="{{ @$setting->site_description }}" />
+<meta name="keywords" content="{{ @$setting->seo_keywords }}">
+<meta name="author" content="Africa CDC" />
+<!-- Title -->
+<title>{{ 'Africa CDC Knowledge Hub - '.@$title ?? 'Africa CDC Knowledge Hub' }}</title>
 
     <!-- Custom CSS -->
     <!-- Favicon -->
+<script type="text/javascript"
+    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TTKTS2SF82"></script>
+<script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-TTKTS2SF82');
+</script>
 <link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
 <link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css')}}">
