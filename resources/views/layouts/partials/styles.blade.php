@@ -142,7 +142,7 @@
          }
 
         
-         @media only screen and (min-device-width: 320px)  and (max-device-width: 480px) {
+         @media only screen and (min-device-width: 100px)  and (max-device-width: 850px) {
             .custom-row{
               display: flex;
               justify-content: center;
@@ -152,6 +152,11 @@
                 max-width: 45.5%;
             }
 
+        }
+
+        .select2-selection__rendered{
+            /*fixes jquery ui dropdown arrow merging with content */
+            padding-left: 17px!important;
         }
         
         </style>

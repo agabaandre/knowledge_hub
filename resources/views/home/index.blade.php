@@ -21,7 +21,7 @@
     @include('home.partials.featured')
     @include('home.partials.top_searches')
     @include('home.partials.top_authors')
-    @include('home.partials.subscription')
+    {{-- @include('home.partials.subscription') --}}
 
 @endsection
 

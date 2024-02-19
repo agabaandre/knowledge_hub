@@ -45,6 +45,7 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
        <label class="text-bold"><small>Type</small></label>
        @include('partials.publications.filetype_dropdown',['class'=>'filetype select2','selected'=>@$search->file_type_id,'allfield'=>'All'])
     </div>
+    
     </div>
 
 </div>
