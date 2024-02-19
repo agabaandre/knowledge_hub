@@ -130,6 +130,19 @@
             background-size:cover;
          }
 
+        
+         @media only screen and (min-device-width: 320px)  and (max-device-width: 480px) {
+            .custom-row{
+              display: flex;
+              justify-content: center;
+            }
+
+            .custom-row-item{ 
+                max-width: 45.5%;
+            }
+
+        }
+        
         </style>
 
 </head>
