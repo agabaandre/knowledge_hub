@@ -8,11 +8,13 @@
 <div class="row">
 
     <div class="card col-lg-12">
-        <div class="card-header text-left">
-            <h4 class="card-title float-left">Create Forum</h4>
+        <div class="card-header">
+            <h4 class="card-title mb-0">Create Forum</h4>
+            <p class="mt-0">Start a new discussion, interested individuals will be alert and will join you!</p>
         </div>
 
         <div class="card-body text-left">
+            <div class="container">
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
@@ -69,6 +71,8 @@
             </div>
 
            </form>
+
+            </div>
 
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

@@ -95,6 +95,11 @@
 			display: inline-block;
 		}
 
+		.select2-selection__rendered{
+            /*fixes jquery ui dropdown arrow merging with content */
+            padding-left: 17px!important;
+        }
+
 	</style>
 
 </head>

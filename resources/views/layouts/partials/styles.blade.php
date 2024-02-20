@@ -158,6 +158,10 @@
             /*fixes jquery ui dropdown arrow merging with content */
             padding-left: 17px!important;
         }
+
+        .nav-dropdown{
+            z-index: 1000!important;
+        }
         
         </style>
 

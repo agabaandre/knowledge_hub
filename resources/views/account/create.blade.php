@@ -31,11 +31,10 @@
 		</div>
 
 
-        <div class="card-body text-left">
+        <div class="card-body text-left  py-5">
 
-        
 
-         <div class=" container">
+         <div class="container">
            
            <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications'>
             @csrf

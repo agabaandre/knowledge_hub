@@ -18,6 +18,7 @@ use App\View\Composers\RegionsViewComposer;
 use App\View\Composers\SubThemesViewComposer;
 use App\View\Composers\TagsViewComposer;
 use App\View\Composers\ThemesViewComposer;
+use App\View\Composers\CommunitiesOfPracticeViewComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades;
@@ -58,6 +59,8 @@ class ViewComposerServiceProvider extends ServiceProvider
         Facades\View::composer('*',AssetTypesViewComposer::class);
         Facades\View::composer('*',DataCategoriesViewComposer::class);
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
+
+        View::composer(['partials/publications/*'],CommunitiesOfPracticeViewComposer::class);
         
     }
 }
