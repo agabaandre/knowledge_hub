@@ -24,3 +24,38 @@ Route::group(["prefix" =>"publications"],function(){
 
 });
 
+Route::get('/test',function(){
+
+$userIp = "45.56.197.35";// $_SERVER['REMOTE_ADDR']; // Get the user's IP address
+$apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
+
+    // Use file_get_contents to fetch the data
+    $response = file_get_contents($apiUrl);
+    $geoData = json_decode($response, true); // Decode the JSON response
+
+    echo explode('/',$geoData['timezone'])[0];
+
+    die(json_encode( $geoData));
+
+    if (!empty($geoData['country'])) {
+        echo "Country: " . $geoData['country']; // Print the user's country
+    } else {
+        echo "Country could not be determined.";
+    }
+
+
+    if (isset($_SERVER['HTTP_ACCEPT_LANGUAGE'])) {
+        $langs = explode(',', $_SERVER['HTTP_ACCEPT_LANGUAGE']);
+        $primaryLang = explode('-', $langs[0]);
+
+        if (!empty($primaryLang[0])) {
+            echo "Accept-Language " . $primaryLang[0];
+        } else {
+            echo "Could not determine country from Accept-Language header.";
+        }
+    } else {
+        echo "Accept-Language header not set.";
+    }
+
+});
+

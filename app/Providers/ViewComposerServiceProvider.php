@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\View\Composers\AccessGroupsViewComposer;
 use App\View\Composers\AdminStatsViewComposer;
 use App\View\Composers\AssetTypesViewComposer;
 use App\View\Composers\AuthorsViewComposer;
@@ -61,6 +62,7 @@ class ViewComposerServiceProvider extends ServiceProvider
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
 
         View::composer(['partials/publications/*'],CommunitiesOfPracticeViewComposer::class);
+        View::composer(['partials/publications/*'],AccessGroupsViewComposer::class);
         
     }
 }

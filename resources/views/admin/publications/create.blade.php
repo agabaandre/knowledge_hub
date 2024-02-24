@@ -120,6 +120,21 @@
                                 @include('partials.publications.area_dropdown',['field'=>'geo_area_id','required'=>'required','selected'=>form_edit('geo_area_id',$publication,'geographical_coverage_id')])
                             </div>
                         </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
+                            <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
+                            @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
+                                'selected'=>(@$row->communities)?$row->communities:[]])
+                        </div>
+
+                        <div class="col-md-12">
+                            <label class="form-label" for="accessgroups">Access Groups</label>
+                            @include('partials.publications.accessgroups_dropdown',['field'=>'accessgroups[]',
+                                'selected'=>(@$row->accessgroups)?$row->accessgroups:[]])
+                        </div>
+
+
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>

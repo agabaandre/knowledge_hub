@@ -36,25 +36,31 @@ class AccessLogJob implements ShouldQueue
      */
     public function handle()
     {
-        $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
+       // $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
 
-        Log::info(json_encode($user_ip_address_info));
+        $apiUrl = "http://ipinfo.io/{$this->ip_address}/json"; // Construct the query URL
+
+        // Use file_get_contents to fetch the data
+        $response = file_get_contents($apiUrl);
+        $geoData = json_decode($response, true); 
+
+        Log::info(json_encode($response));
 
         $visitorInfo = [
-        'Country Code'=>$user_ip_address_info->geoplugin_countryCode
-        ,'CountryName'=>$user_ip_address_info->geoplugin_countryName 
-        ,'City'=>$user_ip_address_info->geoplugin_city 
-        ,'Region'=>$user_ip_address_info->geoplugin_region 
-        ,'Latitude'=>$user_ip_address_info->geoplugin_latitude 
-        ,'Longitude'=>$user_ip_address_info->geoplugin_longitude 
-        ,'Time_zone'=>$user_ip_address_info->geoplugin_timezone  
-        ,'ContinentCode'=>$user_ip_address_info->geoplugin_continentCode 
-        ,'ContinentName'=>$user_ip_address_info->geoplugin_continentName 
-        ,'CurrencyCode'=>$user_ip_address_info->geoplugin_currencyCode
+        'Country Code'=>$geoData->country
+        ,'CountryName'=>explode('/',$geoData->timezone)[0]
+        ,'City'=>$geoData->city
+        ,'Region'=>$geoData->region 
+        ,'Latitude'=>explode(',',$geoData->loc)[0] 
+        ,'Longitude'=>explode(',',$geoData->loc)[1]
+        ,'Time_zone'=>$geoData->timezone  
+        //,'ContinentCode'=>$user_ip_address_info->geoplugin_continentCode 
+       // ,'ContinentName'=>$user_ip_address_info->geoplugin_continentName 
+       // ,'CurrencyCode'=>$user_ip_address_info->geoplugin_currencyCode
         ];
 
 
-        if($visitorInfo && @$user_ip_address_info->geoplugin_status==200):
+        if($visitorInfo && @$geoData->country):
         
         $data = (Object) $visitorInfo;
 

@@ -7,8 +7,10 @@ use App\Models\Country;
 use App\Models\Favourite;
 use App\Models\GeoCoverage;
 use App\Models\Publication;
+use App\Models\PublicationAccessGroup;
 use App\Models\PublicationAttachment;
 use App\Models\PublicationComment;
+use App\Models\PublicationCommunityOfPractice;
 use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
@@ -234,6 +236,16 @@ class PublicationsRepository extends SharedRepo{
             $this->save_tags($request->tags,$id);
         endif;
 
+        //attach communitites
+        if(@$request->communities):
+            $this->attach_to_community($request->communities,$id);
+        endif;
+
+         //attach access groups
+         if(@$request->accessgroups):
+            $this->attach_to_access_group($request->accessgroups,$id);
+        endif;
+
         return $pub;
     }
 
@@ -273,6 +285,31 @@ class PublicationsRepository extends SharedRepo{
 
              $pub_tag = new PublicationTag();
              $pub_tag->tag_id = $tags[$i];
+             $pub_tag->publication_id = $publication_id;
+             $pub_tag->save();
+        }
+
+    }
+
+    public function attach_to_community($comunities,$publication_id){
+
+        for($i=0;$i<count($comunities);$i++){
+
+             $pub_tag = new PublicationCommunityOfPractice();
+             $pub_tag->community_of_practice_id= $comunities[$i];
+             $pub_tag->publication_id = $publication_id;
+             $pub_tag->save();
+        }
+
+    }
+
+
+    public function attach_to_access_group($groups,$publication_id){
+
+        for($i=0;$i<count($groups);$i++){
+
+             $pub_tag = new PublicationAccessGroup();
+             $pub_tag->user_access_group_id= $groups[$i];
              $pub_tag->publication_id = $publication_id;
              $pub_tag->save();
         }

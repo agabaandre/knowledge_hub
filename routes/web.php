@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AccessGroupsController;
 use App\Http\Controllers\Admin\AuthorsAdminController;
+use App\Http\Controllers\Admin\CommsOfPracticeController;
 use App\Http\Controllers\Admin\DataRecordsAdminController;
 use App\Http\Controllers\Admin\ExpertsAdminController;
 use App\Http\Controllers\Admin\FactsAdminController;
@@ -29,6 +31,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -149,9 +152,10 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
-
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
-
+    Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
+    Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
+    Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');  
     Route::group(["prefix" => "publications"], function () {
 
         Route::get("/", [ResourcesController::class, 'index']);
@@ -283,8 +287,26 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/delete", [ExpertsAdminController::class, 'delete_type']);
             
         });
+
     });
 
+    
+
+    //accessgroup
+    Route::group(["prefix" => "accessgroups"], function () {
+
+        Route::get("/", [AccessGroupsController::class, 'index']);
+        Route::post("/save", [AccessGroupsController::class, 'store']);
+        Route::get("/delete", [AccessGroupsController::class, 'destroy']);
+    });
+
+       //accessgroup
+       Route::group(["prefix" => "commsofpractice"], function () {
+
+        Route::get("/", [CommsOfPracticeController::class, 'index']);
+        Route::post("/save", [CommsOfPracticeController::class, 'store']);
+        Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
+    });
 
     //data records
     Route::group(["prefix" => "datarecords"], function () {

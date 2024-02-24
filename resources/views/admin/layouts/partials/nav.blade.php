@@ -72,6 +72,8 @@
 						@can('view_file_types')
 						<li aria-haspopup="true"><a href="{{ url('admin/filetypes') }}">Resource and Asset Types</a></li>
 						@endcan
+
+						<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
 						
 						@can('view_sources')
 						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
@@ -116,13 +118,13 @@
 
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Settings <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-
+					    <li class=""><a href="{{ url('admin/configure') }}" class="">System Configurations</a></li>
+						<li class=""><a href="{{ url('admin/accessgroups') }}" class="">Content Access Groups</a></li>
 						<li class=""><a href="{{ url('permissions/users') }}" class="">Manage Users</a></li>
 						<li class=""><a href="{{ url('permissions/roles') }}" class="">Roles</a></li>
 						<li class=""><a href="{{ url('permissions') }}" class="">Permissions</a></li>
 						<li class=""><a href="{{ url('auth/logs') }}" class="">User Logs</a></li>
 						<li class=""><a href="{{ url('constants') }}" class="">Constants</a></li>
-						
 						@can('view_mailing_list')
 						<li class=""><a href="{{ url('mailing_list') }}" class="">Mailing List</a></li>
 						@endcan
