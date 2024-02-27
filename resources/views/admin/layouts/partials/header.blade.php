@@ -16,6 +16,8 @@
 	<!-- Favicon -->
 	<link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
 
+	@include('partials.theming.colors')
+	
 	<!-- Icons css -->
 	<link href="{{ asset('assets/css/icons.css') }}" rel="stylesheet">
 

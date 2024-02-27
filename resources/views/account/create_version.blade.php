@@ -13,7 +13,7 @@
             <h4 class="card-title float-left">Publish resource version <br>Resource: <span class="text-dark"> {{$publication->title }} by {{ $publication->author->name}}</span></h4>
         </div>
 
-        <div class="card-body text-left">
+        <div class="container card-body text-left">
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
@@ -48,7 +48,7 @@
 
                 <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="summernote">Version Description</label>
+                                <label class="form-label" for="summernote">Version Content</label>
                                 <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required></textarea>
                             </div>
                         </div>

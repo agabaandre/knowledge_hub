@@ -26,9 +26,9 @@ class SettingsController extends Controller
         $saved = $this->settingsRepo->save($request);
 
         if($saved):
-            $data = ['message'=>'Settings saved successfully','status'=>'success','data'=>$saved];
+            $data = ['alert-success'=>'Settings saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
         endif;
 
         if($request->ajax()){

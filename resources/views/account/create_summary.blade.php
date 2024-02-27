@@ -14,7 +14,7 @@
         <h4 class="card-title float-left">Create resource summary</h4>
     </div>
 
-    <div class="card-body text-left">
+    <div class="container card-body text-left">
         @if(@$message)
             <div class="alert alert-danger">{{ $message }}</div>
         @endif

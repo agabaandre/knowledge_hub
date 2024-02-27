@@ -68,12 +68,14 @@ Route::get('/logout', function () {
     return redirect()->route('home');
 });
 
-Route::group(["prefix" => "countries"], function () {
+if(states_enabled()):
+    Route::group(["prefix" => "countries"], function () {
 
-    Route::get('/', [CountriesController::class, 'index'])->name('countries');
-    Route::get('/details', [CountriesController::class, 'country']);
+        Route::get('/', [CountriesController::class, 'index'])->name('countries');
+        Route::get('/details', [CountriesController::class, 'country']);
 
-});
+    });
+endif;
 
 Route::post('/registration', [AuthController::class, 'register'])->name('registration');
 
@@ -152,7 +154,10 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
+   
+    if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
+
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');  

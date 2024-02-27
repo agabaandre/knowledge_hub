@@ -39,7 +39,7 @@ class SharedRepo{
             if($level->level_name     == "Viewer" || $level->level_name == "Country"):
              // get for own country
             
-                if($use_country_id):
+                if($use_country_id && states_enabled()):
                     $query->where($country_col,$user->country_id);
                 elseif($use_user_id):
                     $authors = $this->get_country_users($user->country_id);
@@ -49,7 +49,7 @@ class SharedRepo{
                     $query->whereIn($col,$authors);
                 endif;
              
-            elseif($level->level_name == "RCC"):
+            elseif($level->level_name == "RCC" && states_enabled()):
     
              
                 if($use_country_id):
@@ -76,7 +76,7 @@ class SharedRepo{
 
     public function get_country_authors($id,$is_region=false){
 
-        if( is_array($is_region)):
+        if( is_array($is_region) && states_enabled()):
             $countries = Country::where('region_id',$id->region_id)->get()->pluck('id');
             return User::whereIn('country_id',$countries)->get()->pluck('author_id');
         else:
@@ -86,7 +86,7 @@ class SharedRepo{
 
     private function get_country_users($id,$is_region=false){
 
-        if( is_array($is_region)):
+        if( is_array($is_region) && states_enabled()):
             $countries = Country::where('region_id',$id->region_id)->get()->pluck('id');
             return User::whereIn('country_id',$countries)->get()->pluck('id');
         else:

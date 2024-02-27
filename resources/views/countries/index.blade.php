@@ -13,7 +13,7 @@
         <div class="row justify-content-center" data-aos="slide-down">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div class="sec_title position-relative text-center mb-5">
-                    <h2 class="ft-bold">Member States </h2>
+                    <h2 class="ft-bold">Member States</h2>
                 </div>
             </div>
         </div>

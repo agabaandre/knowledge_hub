@@ -28,7 +28,10 @@ if(!function_exists('current_user')){
 if(!function_exists('settings')){
 	 function settings()
 	 {
-		return null;
+		$settings = DB::table("setting")->first();
+		$settings->logo = asset('storage/uploads/config/'.$settings->logo);
+
+		return $settings;
 	 }
 }
 
@@ -68,6 +71,18 @@ function filter_access($query){
 
 }
 
+if(!function_exists('states_enabled')){
+	function states_enabled(){
+		return config('deployment.states_enabled');
+	}
+}
+
+
+if(!function_exists('admin_units_enabled')){
+	function admin_units_enabled(){
+		return config('deployment.admin_units_enabled');
+	}
+}
 
 
 

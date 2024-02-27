@@ -23,6 +23,8 @@ class Access
         unset($logData['files']);
         unset($logData['image']);
         unset($logData['photo']);
+        unset($logData['logo']);
+        unset($logData['favicon']);
 
          AccessLogJob::dispatch($ip,$logData);
 

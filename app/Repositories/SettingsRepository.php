@@ -13,14 +13,14 @@ class SettingsRepository{
     
     public function save(Request $request){
 
-        $settings = new Setting();
+        $settings = Setting::find(1);
 
-        $settings->site_name            = $request->name;
+        $settings->site_name            = $request->site_name;
         $settings->title                = $request->title;
         $settings->site_description     = $request->site_description;
         $settings->seo_keywords         = $request->seo_keywords;
         $settings->address      = $request->address;
-        $settings->phone        = $request->contact;
+        $settings->phone        = $request->phone;
         $settings->email        = $request->email;
         $settings->timezone     = $request->timezone;
         $settings->primary_color   = $request->primary_color;

@@ -20,9 +20,9 @@
         </div>
     </div>
    <!-- PAGE-HEADER END -->
-  <form action="{{ route('admin.config.save') }}">
+  <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data">
     <div class="row bg-white bg-white py-4 px-3 rounded">
-                         
+             @csrf
             <div class="col-lg-4">
                     <div class="form-group">
                         <label class="text-muted">Title </label>
@@ -75,7 +75,7 @@
                     <div class="input-group-append">
                     <span class="input-group-text color-preview"></span>
                     </div>
-                    <input type="text" name="primary_color" value="#563d7c" class="form-control" />
+                    <input type="text" name="primary_color" value="{{ $settings->primary_color }}" class="form-control" />
                 </div>
             </div>
 
@@ -85,16 +85,20 @@
                     <div class="input-group-append">
                     <span class="input-group-text color-preview"></span>
                     </div>
-                    <input type="text"  name="secondary_color" value="#ff0000" class="form-control" />
+                    <input type="text"  name="secondary_color" value="{{ $settings->secondary_color }}" class="form-control" />
                 </div>
             </div>
 
             <div class="row mt-3">
                 <label>Site Logo:</label>
                 <div class="form-group">
-                    <input type="file" name="logo" id="attachments" multiple>
+                    <input type="file" name="logo" id="attachments">
                     <div class="preview" style="max-width: 150px;"></div>
                 </div>
+            </div>
+
+            <div class="row mt-3 px-2">
+                <input type="submit" class="btn btn-dark" value="Save Changes">
             </div>
               
             </div>

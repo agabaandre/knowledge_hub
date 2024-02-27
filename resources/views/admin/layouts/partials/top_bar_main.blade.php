@@ -1,15 +1,15 @@
 <!-- Main-content -->
-<div class="main-header main-header-fixed" style="background:rgba(52, 143, 65, 1); color:#FFF !important;">
+<div class="main-header main-header-fixed" style="background: var(--theme-color-primary); color:#FFF !important;">
 	<div class=" container">
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
 			<a class="header-brand" href="{{ url('/') }}">
-				<img src="{{ asset('assets/images/logo.png') }}" id="change-image" style="filter: brightness(0) invert(1);" width=200>
+				<img src="{{ settings()->logo }}" id="change-image" style="filter: brightness(0) invert(1);" width=200>
 			</a>
 		</div>
 		<div class="main-header-center">
 			<div class="responsive-logo">
-				<img src="{{ asset('assets/images/logo.png') }}" id="change-image" style="filter: brightness(0) invert(1);" width=200px>
+				<img src="{{ settings()->logo }}" id="change-image" style="filter: brightness(0) invert(1);" width=200px>
 			</div>
 		</div>
 		<div class="main-header-right">

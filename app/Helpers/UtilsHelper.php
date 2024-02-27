@@ -71,8 +71,8 @@ if (!function_exists('is_past')) {
 
     function is_past($date)
     {
-        $date_now = new DateTime();
-        $date2    = new DateTime($date);
+        $date_now = new \DateTime();
+        $date2    = new \DateTime($date);
         return ($date_now > $date2);
     }
 }

@@ -8,7 +8,7 @@
 			<nav id="navigation" class="navigation navigation-landscape">
 				<div class="nav-header">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ asset('assets/images/logo.png') }}" class="logo" alt="" style="width:280px;" />
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:280px;" />
 					</a>
 					<div class="nav-toggle"></div>
 					<div class="mobile_nav">
@@ -66,7 +66,7 @@
 
 							</ul>
 						</li>
-
+						@if(states_enabled())
 						<li class="dashboards"><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							<li>
@@ -97,9 +97,12 @@
 							</li> -->
 							</ul>
 						</li>
+						@endif
 						
 						<li><a href="{{ url('forums')}}">Forums</a></li>
+						@if(states_enabled())
 						<li><a href="{{ url('countries')}}">Member States</a></li>
+						@endif
 						<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						
 						@include('partials.account.authlinks',['class'=>'mobileonly'])

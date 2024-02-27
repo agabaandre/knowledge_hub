@@ -44,9 +44,12 @@ class PublicationsRepository extends SharedRepo{
             $authors     = Author::where('name','like',$request->term.'%')->get()->pluck('id');
             $tags        = Tag::where('tag_text','like',$request->term.'%')->get()->pluck('id');
             $pub_tag_ids = PublicationTag::whereIn('tag_id',$tags)->get()->pluck('publication_id');
-            $coverage    = GeoCoverage::where('name','like','%'.$request->term.'%')->get()->pluck('id');
 
-            $pubs->orWhereIn('geographical_coverage_id',$coverage);
+            if(states_enabled()):
+                $coverage    = GeoCoverage::where('name','like','%'.$request->term.'%')->get()->pluck('id');
+                $pubs->orWhereIn('geographical_coverage_id',$coverage);
+            endif;
+
             $pubs->orWhereIn('id',$pub_tag_ids);
             $pubs->orWhereIn('author_id',$authors);
         }
@@ -74,7 +77,7 @@ class PublicationsRepository extends SharedRepo{
         }
 
         //search by rcc
-        if($request->rcc){
+        if($request->rcc && states_enabled()){
 
             $rcc = Region::where('id',$request->rcc)->first();
             $country_ids = Country::where('region_id',$rcc->id)->get()->pluck('id');
@@ -269,11 +272,9 @@ class PublicationsRepository extends SharedRepo{
         return $pub;
     }
 
-
     public function delete($id){
         return Publication::find($id)->delete();
     }
-
 
     public function get_tags(){
         return Tag::all();

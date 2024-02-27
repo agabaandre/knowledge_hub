@@ -47,7 +47,7 @@
 -------------------------------------------------------------*/
 
 :root {
-    color-eastern: #9F2241;
+    color-eastern: var(--theme-color-secondary);
     color-central: #348f41;
     color-nothern: #b4a269;
     color-western: #a3a3a3;
@@ -309,7 +309,7 @@ h3,
 h4,
 h5,
 h6 {
-    color: #8b263a;
+    color: var(--theme-color-secondary);
     font-weight: 400;
 }
 
@@ -371,7 +371,7 @@ html body .db {
 }
 
 .theme-bg {
-    background: #28b661 !important;
+    background: var(--theme-color-primary) !important;
 }
 
 .dark-theme-bg {
@@ -400,7 +400,7 @@ html body .db {
 }
 
 .theme-cl {
-    color: #28b661 !important;
+    color: var(--theme-color-primary) !important;
 }
 
 .dark_bg {
@@ -457,7 +457,7 @@ html body .db {
 
 .hover-theme:hover,
 .hover-theme:focus {
-    background: #28b661 !important;
+    background: var(--theme-color-primary) !important;
     color: #ffffff !important;
 }
 
@@ -526,7 +526,7 @@ ul.icons_lists li:before {
 }
 
 ul.icons_lists.colors li:before {
-    color: #28b661;
+    color: var(--theme-color-primary);
     background: rgba(40, 182, 97, 0.11) !important;
 }
 
@@ -1461,16 +1461,16 @@ table.table tr th {
 }
 
 .theme-btn-light {
-    color: #28b661;
+    color: var(--theme-color-primary);
     background: #ffffff;
-    border: 1px solid #28b661;
+    border: 1px solid var(--theme-color-primary);
     transition: all ease 0.4s;
 }
 
 .theme-btn-light:hover,
 .btn-light:focus {
-    background: #28b661;
-    border: 1px solid #28b661;
+    background: var(--theme-color-primary);
+    border: 1px solid var(--theme-color-primary);
     color: #ffffff;
 }
 
@@ -1542,10 +1542,10 @@ button.close {
 .pagination>li>a:focus,
 .pagination>li>a:hover {
     z-index: 2;
-    color: #28b661;
+    color: var(--theme-color-primary);
     cursor: pointer;
     background-color: transparent;
-    border-color: #28b661;
+    border-color: var(--theme-color-primary);
 }
 
 .pagination li:first-child a {
@@ -1568,9 +1568,9 @@ button.close {
 
 .page-item.active .page-link {
     z-index: 2;
-    color: #28b661;
+    color: var(--theme-color-primary);
     background-color: transparent;
-    border-color: #28b661;
+    border-color: var(--theme-color-primary);
 }
 
 
@@ -1654,8 +1654,8 @@ button.close {
 }
 
 .radio-custom:checked+.radio-custom-label:before {
-    background: #28b661;
-    border-color: #28b661;
+    background: var(--theme-color-primary);
+    border-color: var(--theme-color-primary);
     box-shadow: inset 0px 0px 0px 4px #fff;
 }
 
@@ -2069,7 +2069,7 @@ nav a:hover {
 .nav-menu>.active>a,
 .nav-menu>.focus>a,
 .nav-menu>li:hover>a {
-    color: #28b661 !important;
+    color: var(--theme-color-primary) !important;
 }
 
 .nav-menu>li>a>[class*=ion-],
@@ -2154,7 +2154,7 @@ nav a:hover {
 .nav-menu>.active>a .submenu-indicator-chevron,
 .nav-menu>.focus>a .submenu-indicator-chevron,
 .nav-menu>li:hover>a .submenu-indicator-chevron {
-    border-color: transparent #28b661 #28b661 transparent
+    border-color: transparent var(--theme-color-primary) var(--theme-color-primary) transparent
 }
 
 .light-menu .nav-menu>.active>a .submenu-indicator-chevron,
@@ -2438,7 +2438,7 @@ nav a:hover {
 .nav-dropdown>li>a:hover,
 .nav-dropdown>li>a:focus {
     padding-left: 20px;
-    color: #28b661;
+    color: var(--theme-color-primary);
 }
 
 .social-icon a i,
@@ -2451,7 +2451,7 @@ nav a:hover {
 
 .nav-dropdown>.focus>a,
 .nav-dropdown>li:hover>a {
-    color: #28b661;
+    color: var(--theme-color-primary);
 }
 
 .nav-dropdown.nav-dropdown-left {
@@ -2516,7 +2516,7 @@ nav a {
 
 .nav-dropdown>.focus>a .submenu-indicator-chevron,
 .nav-dropdown>li:hover>a .submenu-indicator-chevron {
-    border-color: transparent #28b661 #28b661 transparent;
+    border-color: transparent var(--theme-color-primary) var(--theme-color-primary) transparent;
 }
 
 .navigation-landscape .nav-dropdown-left .submenu-indicator {
@@ -3649,8 +3649,8 @@ li.login-attri .account-drop a {
 
 .crp_box.fl_color .dro_141.de {
     background: rgba(40, 182, 97, 0.1);
-    color: #28b661;
-    border: 1px dashed #28b661;
+    color: var(--theme-color-primary);
+    border: 1px dashed var(--theme-color-primary);
 }
 
 .crp_box.fl_color .dro_142 {
@@ -3811,7 +3811,7 @@ li.login-attri .account-drop a {
     background: #def3e7;
     padding: 2px 12px;
     border-radius: 2px;
-    color: #28b661;
+    color: var(--theme-color-primary);
 }
 
 .cats-wrap,
@@ -3995,7 +3995,7 @@ ul.jbd-social li a {
     background: rgba(40, 182, 97, 0.1);
     display: flex;
     align-items: center;
-    color: #28b661 !important;
+    color: var(--theme-color-primary) !important;
     cursor: pointer;
     border-radius: 4px;
     justify-content: center;
@@ -4339,7 +4339,7 @@ select.form-control:focus {
     justify-content: center;
     border-radius: 50%;
     background: rgba(40, 182, 97, 0.1);
-    color: #28b661;
+    color: var(--theme-color-primary);
     left: 0;
     position: absolute;
     top: 5px;
@@ -4360,7 +4360,7 @@ select.form-control:focus {
     background: #ffffff;
     border: 4px solid rgba(40, 182, 97, 0.15);
     border-radius: 50px;
-    color: #28b661;
+    color: var(--theme-color-primary);
     font-weight: 600;
     font-size: 18px;
     transition: all ease 0.4s;
@@ -4370,7 +4370,7 @@ select.form-control:focus {
 .btn.choose_package:focus {
     background: rgba(40, 182, 97, 0.15);
     border: 4px solid rgba(40, 182, 97, 0.15);
-    color: #28b661;
+    color: var(--theme-color-primary);
 }
 
 .recommended {
@@ -4385,8 +4385,8 @@ select.form-control:focus {
 }
 
 .btn.choose_package.active {
-    background: #28b661;
-    border-color: #28b661;
+    background: var(--theme-color-primary);
+    border-color: var(--theme-color-primary);
     color: #ffffff;
 }
 
@@ -4433,7 +4433,7 @@ select.form-control:focus {
 .nav-pills .nav-link.active,
 .show>.nav-pills .nav-link {
     color: #fff;
-    background-color: #28b661;
+    background-color: var(--theme-color-primary);
 }
 
 .nav-link {
@@ -4681,13 +4681,13 @@ button:focus {
 
 .dashboard-nav ul li.active,
 .dashboard-nav ul li:hover {
-    border-color: #28b661;
+    border-color: var(--theme-color-primary);
     background-color: rgba(40, 182, 97, 0.1);
 }
 
 .dashboard-nav ul li.active a,
 .dashboard-nav ul li:hover a {
-    color: #28b661;
+    color: var(--theme-color-primary);
 }
 
 .dashboard-nav ul li a {
@@ -5329,7 +5329,7 @@ span._user_status.busy {
     justify-content: flex-start;
     height: 30px;
     border-radius: 4px;
-    color: #28b661;
+    color: var(--theme-color-primary);
     font-size: 13px;
     font-weight: 600;
     padding: 0.2rem 0.8rem;
@@ -6698,7 +6698,7 @@ body {
 
 label{
     font-weight: bolder!important;
-    color: #28B661;
+    color: var(--theme-color-primary);
     margin-top: 7px;
   
   }
@@ -6741,7 +6741,7 @@ label{
   }
 
   .color-red{
-    color: #9F2241;
+    color: var(--theme-color-secondary);
   }
   .color-black{
     color:#000000;

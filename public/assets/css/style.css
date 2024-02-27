@@ -540,25 +540,21 @@ h3,
 
 }
 .theme-primary{
-    background: #28b661;
+    background: var(--theme-color-primary);
     color: #fff;
     border-radius:3px;
 }
 .theme-secondary{
-    background: #8b263a;
+    background: var(--theme-color-secondary);
     color:#FFF;
     border-radius: 3px;
-    
 }
 .text-primary {
-    color: #008a00;
-   
+    color: var(--theme-color-primary);
 }
 
 .text-secondary {
-    color: #8b263a;
-   
-
+    color: var(--theme-color-secondary);
 }
 h4,
 .h4 {

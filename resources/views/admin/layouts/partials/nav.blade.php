@@ -9,8 +9,9 @@
 				@endcan
 
 				@can('view_rcc_dashboard')
-					
-				<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+					@if(states_enabled())
+					<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+					@endif
 				@endcan
 
 				</li>
@@ -18,12 +19,9 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">PH Resources</h3></li> -->
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
-						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">DATA CATEGORIES</h3></li> -->
-						
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
@@ -89,10 +87,10 @@
 						@endcan
 
 						@can('view_geo_coverage')
-						<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
+							@if(states_enabled())
+							<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
+							@endif
 						@endcan
-
-						
 
 						<!-- Privacy Policy -->
 						@can('view_asset_types')

@@ -15,7 +15,8 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
 <div class="card card-body">
     
     <div class="row">
-
+      
+   @if(@states_enabled())
     <div class="col-md-4">
         <label class="text-bold"><small>RCC</small></label>
         @include('partials.regions.dropdown',['class'=>'rcc select2','selected'=>@$search->rcc,'allfield'=>'All'])
@@ -30,6 +31,8 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
        <label class="text-bold"><small>Source</small></label>
        @include('partials.authors.dropdown',['class'=>'author select2','selected'=>@$search->author_id,'allfield'=>'All'])
     </div>
+
+    @endif
 
     <div class="col-md-4">
        <label class="text-bold"><small>Thematic Area</small></label>

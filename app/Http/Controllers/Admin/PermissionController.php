@@ -42,7 +42,7 @@ class PermissionController extends Controller
     */
     public function users(Request $request){
 
-        $data['roles'] = Role::all();
+        $data['roles']  = Role::all();
         $data['levels'] = AccessLevel::all();
 
         $name     = $request->name;

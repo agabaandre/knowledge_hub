@@ -1,7 +1,7 @@
 	
 .spotlight {
   position: relative;
-  background-color: #28B661;
+  background-color: var(--theme-color-primary);
   display: flex;
   justify-content: center;
   align-items: center;

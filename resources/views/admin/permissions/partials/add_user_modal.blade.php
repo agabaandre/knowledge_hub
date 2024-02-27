@@ -43,7 +43,7 @@
                             @endforeach
                         </select>
                     </div>
-
+                    @if(states_enabled())
                     <div class="form-group col-md-6  col-sm-12">
                         <label class="text-bold">
                             <i class="icon-collaboration mr-2"></i>
@@ -56,6 +56,17 @@
                             @endforeach
                         </select>
                     </div>
+                    @endif
+
+                    @if(states_enabled())
+                    <div class="form-group col-md-6  col-sm-12">
+                        <label class="text-bold">
+                            <i class="icon-collaboration mr-2"></i>
+                            Member State
+                        </label>
+                        @include('partials.countries.dropdown')
+                    </div>
+                    @endif
 
                     <div class="form-group col-md-6  col-sm-12 ">
                         <label><i class="icon-lock mr-2"></i>Password</label>
