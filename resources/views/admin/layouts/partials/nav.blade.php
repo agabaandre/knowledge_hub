@@ -89,6 +89,8 @@
 						@can('view_geo_coverage')
 							@if(states_enabled())
 							<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
+							@else
+							<li aria-haspopup="true"><a href=" {{ url('admin/adminunits') }}">Administrative Units</a></li>
 							@endif
 						@endcan
 

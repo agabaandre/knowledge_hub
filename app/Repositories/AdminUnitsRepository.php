@@ -9,7 +9,7 @@ class AdminUnitsRepository{
     public function get(Request $request){
 
         $records = AdministrativeUnit::orderBy('created_at','desc');
-        
+
         if($request->term){
             $records->where('name','like',$request->term.'%');
         }
@@ -60,6 +60,18 @@ class AdminUnitsRepository{
         endforeach;
 
        return $file_path;
+    }
+
+
+    public function find($id){
+
+        return AdministrativeUnit::find($id);
+    }
+
+
+    public function child_units($id){
+
+        return AdministrativeUnit::where('parent_id',$id)->get();
     }
 
     public function delete($id){

@@ -54,6 +54,13 @@ class PublicationsRepository extends SharedRepo{
             $pubs->orWhereIn('author_id',$authors);
         }
 
+        //search administrative unit authors
+        if($request->admin_unit){
+          
+            $authors     = User::where('administrative_unit_id',$request->admin_unit)->get()->pluck('author_id');
+            $pubs->whereIn('author_id',$authors);
+        }
+
         //search by author
         if($request->author)
          $pubs->where('author_id',$request->author);

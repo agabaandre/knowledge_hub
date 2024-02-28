@@ -33,6 +33,7 @@ use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -69,14 +70,27 @@ Route::get('/logout', function () {
     return redirect()->route('home');
 });
 
+
 if(states_enabled()):
+
     Route::group(["prefix" => "countries"], function () {
 
-        Route::get('/', [CountriesController::class, 'index'])->name('countries');
-        Route::get('/details', [CountriesController::class, 'country']);
+            Route::get('/', [CountriesController::class, 'index'])->name('countries');
+            Route::get('/details', [CountriesController::class, 'country']);
 
     });
+
+else:
+
+    Route::group(["prefix" => "adminunits"], function () {
+
+        Route::get('/', [AdminUnitFrontEndController::class, 'index'])->name('adminunits');
+        Route::get('/details', [AdminUnitFrontEndController::class, 'show']);
+
+    });
+
 endif;
+
 
 Route::post('/registration', [AuthController::class, 'register'])->name('registration');
 
@@ -293,7 +307,6 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
     });
 
-    
 
     //accessgroup
     Route::group(["prefix" => "accessgroups"], function () {

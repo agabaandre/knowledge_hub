@@ -99,11 +99,13 @@
 						</li>
 						@endif
 						
-						<li><a href="{{ url('forums')}}">Forums</a></li>
+							<li><a href="{{ url('forums')}}">Forums</a></li>
 						@if(states_enabled())
-						<li><a href="{{ url('countries')}}">Member States</a></li>
+							<li><a href="{{ url('countries')}}">Member States</a></li>
+						@else
+							<li><a href="{{ url('adminunits')}}">Administrative Units</a></li>
 						@endif
-						<li><a href="{{ url('faqs')}}">FAQs</a></li>
+							<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						
 						@include('partials.account.authlinks',['class'=>'mobileonly'])
 
