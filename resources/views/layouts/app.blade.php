@@ -1,4 +1,3 @@
-
 @include('layouts.partials.styles')
 
 <div id="main-wrapper">
@@ -8,8 +7,6 @@
 @if(!@$is_home )
     @include('home.partials.page_search')
 @endif
-
-@include('layouts.partials.alerts')
 
 @yield('styles')
 

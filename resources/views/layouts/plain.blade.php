@@ -11,7 +11,7 @@
  <div class="container">
     @include('layouts.partials.alerts')
  </div>
-@endif;
+@endif
 
 @yield('content')
 
