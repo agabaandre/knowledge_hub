@@ -68,6 +68,14 @@
             </div>
 
             <div class="col-lg-4">
+
+            <div class="row">
+                <div class="form-group col-lg-12">
+                    <label class="text-muted">Google Analytics Scripts </label>
+                    <textarea  name="analytics_script" placeholder="Paste here" class="form-control w-100">{{ $settings->analytics_script }}</textarea>
+                </div>
+            </div>
+
                 
             <div class="row mt-3">
                 <label>Primary Site Color:</label>
@@ -90,14 +98,16 @@
             </div>
 
             <div class="row mt-3">
-                <label>Site Logo:</label>
                 <div class="form-group">
+                   <label>Site Logo:</label>
                     <input type="file" name="logo" id="attachments">
-                    <div class="preview" style="max-width: 150px;"></div>
+                    <div class="preview" style="max-width: 150px;">
+                        <img src="{{ settings()->logo }}"/>
+                     </div>
                 </div>
             </div>
 
-            <div class="row mt-3 px-2">
+            <div class="row mt-2 px-2">
                 <input type="submit" class="btn btn-dark" value="Save Changes">
             </div>
               

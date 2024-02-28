@@ -3733,10 +3733,10 @@ body.dark-theme {
 
   .step-steps {
     .step1.done a, .step2.done a, .step3.done a {
-      background-color: #51bb25;
+      background-color: var(--theme-color-primary);
       box-shadow: 0px 4px 9px 0px rgba(48, 206, 72, 0.3);
       color: $white;
-      border: 1px solid #51bb25;
+      border: 1px solid var(--theme-color-primary);
     }
   }
 
@@ -4021,7 +4021,7 @@ body.dark-theme {
   }
 
   .main-toggle-success.on {
-    background-color: #51bb25 !important;
+    background-color: var(--theme-color-primary) !important;
   }
 
 
@@ -4244,7 +4244,7 @@ body.dark-theme {
     background: #ff5353;
 }
 .dark-theme .done .scrum-board-item:before {
-    background: #51bb25;
+    background: var(--theme-color-primary);
 }
 
 .dark-theme .ql-snow.ql-toolbar {

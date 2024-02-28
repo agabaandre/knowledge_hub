@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\Admin\AccessGroupsController;
+use App\Http\Controllers\Admin\AdminUnitsController;
 use App\Http\Controllers\Admin\AuthorsAdminController;
 use App\Http\Controllers\Admin\CommsOfPracticeController;
 use App\Http\Controllers\Admin\DataRecordsAdminController;
@@ -106,20 +107,17 @@ Route::group(["prefix" => "authors"], function () {
 
     Route::get("/", [AuthorsController::class, 'index']);
     Route::get("publications", [PublicationsController::class, 'author_pubs']);
-
 });
 
 Route::group(["prefix" => "healthassets"], function () {
 
     Route::get("/", [AssetsController::class, 'index']);
     Route::get("/detail", [AssetsController::class, 'details']);
-
 });
 
 Route::group(["prefix" => "faqs"], function () {
 
     Route::get("/", [FaqsController::class, 'index']);
-
 });
 
 
@@ -305,13 +303,22 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [AccessGroupsController::class, 'destroy']);
     });
 
-       //accessgroup
-       Route::group(["prefix" => "commsofpractice"], function () {
+    //commsofpractice
+    Route::group(["prefix" => "commsofpractice"], function () {
 
         Route::get("/", [CommsOfPracticeController::class, 'index']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
     });
+
+    //AdminUnits
+       Route::group(["prefix" => "adminunits"], function () {
+
+        Route::get("/", [AdminUnitsController::class, 'index']);
+        Route::post("/save", [AdminUnitsController::class, 'store']);
+        Route::get("/delete", [AdminUnitsController::class, 'destroy']);
+    });
+
 
     //data records
     Route::group(["prefix" => "datarecords"], function () {

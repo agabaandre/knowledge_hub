@@ -24,4 +24,8 @@
     --sw-loader-background-color:  #82ba8f;
     --sw-loader-background-wrapper-color:  rgba(255, 255, 255, 0.7);
     }
+
+    .w-100{
+            min-width: 100%!important;
+        }
 </style>

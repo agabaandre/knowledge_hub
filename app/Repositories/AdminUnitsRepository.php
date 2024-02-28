@@ -8,7 +8,13 @@ class AdminUnitsRepository{
 
     public function get(Request $request){
 
-        return AdministrativeUnit::first()->toArray();
+        $records = AdministrativeUnit::orderBy('created_at','desc');
+        
+        if($request->term){
+            $records->where('name','like',$request->term.'%');
+        }
+
+        return $records->paginate(15);
     }
     
     public function save(Request $request){
@@ -54,6 +60,11 @@ class AdminUnitsRepository{
         endforeach;
 
        return $file_path;
+    }
+
+    public function delete($id){
+
+        return AdministrativeUnit::find($id)->delete();
     }
 
 }
