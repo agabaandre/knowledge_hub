@@ -163,19 +163,19 @@ function send_email($request){
         // Email server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = env('MAIL_HOST');             //  smtp host
-        $mail->SMTPAuth = true;
-        $mail->Username = env('MAIL_USERNAME');   //  sender username
-        $mail->Password = env('MAIL_PASSWORD');       // sender password
-        $mail->SMTPSecure = env('MAIL_ENCRYPTION','ssl');                  // encryption - ssl/tls
-        $mail->Port = env('MAIL_PORT','465');                          // port - 587/465
+        $mail->Host       = config('emails.host');             //  smtp host
+        $mail->SMTPAuth   = true;
+        $mail->Username   = config('emails.username');   //  sender username
+        $mail->Password   = config('emails.password');       // sender password
+        $mail->SMTPSecure = config('emails.smtp_secure');                  // encryption - ssl/tls
+        $mail->Port       = config('emails.port');                          // port - 587/465
 
-        $mail->setFrom(env('MAIL_USERNAME'), env('MAIL_SENDERNAME'));
+        $mail->setFrom(config('emails.username'), config('emails.sender'));
         $mail->addAddress($request->email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);
 
-        $mail->addReplyTo(env('MAIL_USERNAME'), 'SenderReplyName');
+        $mail->addReplyTo(config('emails.username'), 'No Reply');
 
         // if(isset($_FILES['emailAttachments'])) {
         //     for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {

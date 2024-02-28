@@ -19,12 +19,13 @@ class SettingsRepository{
         $settings->title                = $request->title;
         $settings->site_description     = $request->site_description;
         $settings->seo_keywords         = $request->seo_keywords;
-        $settings->address      = $request->address;
-        $settings->phone        = $request->phone;
-        $settings->email        = $request->email;
-        $settings->timezone     = $request->timezone;
-        $settings->primary_color   = $request->primary_color;
-        $settings->secondary_color = $request->secondary_color;
+        $settings->address           = $request->address;
+        $settings->phone             = $request->phone;
+        $settings->email             = $request->email;
+        $settings->timezone          = $request->timezone;
+        $settings->primary_color     = $request->primary_color;
+        $settings->secondary_color   = $request->secondary_color;
+        $settings->analytics_script  = $request->analytics_script;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')):
