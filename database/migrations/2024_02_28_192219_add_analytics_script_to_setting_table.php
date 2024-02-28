@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddDefaultColorsToSettingTable extends Migration
+class AddAnalyticsScriptToSettingTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,8 +15,9 @@ class AddDefaultColorsToSettingTable extends Migration
     {
         Schema::table('setting', function (Blueprint $table) {
             //
-            $table->string('default_primary_color')->default('#563D7C');
-            $table->string('default_secondary_color')->default('#2F2424');
+
+            $table->text('analytics_script')->nullable();
+            $table->text('icon_font_color')->default('#2F2424');
         });
     }
 
