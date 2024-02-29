@@ -3,13 +3,13 @@
 	<div class=" container">
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
-			<a class="header-brand" href="{{ url('/') }}">
-				<img src="{{ settings()->logo }}" id="change-image" style="filter: brightness(0) invert(1);" width=200>
-			</a>
+			<!-- <a class="header-brand" href="{{ url('/') }}">
+				<img src="{{ settings()->logo }}" id="change-image"  width=150>
+			</a> -->
 		</div>
 		<div class="main-header-center">
-			<div class="responsive-logo">
-				<img src="{{ settings()->logo }}" id="change-image" style="filter: brightness(0) invert(1);" width=200px>
+			<div class="">
+				<img src="{{ settings()->logo }}" id="change-image"  width=180 style="border-radius:2px;">
 			</div>
 		</div>
 		<div class="main-header-right">

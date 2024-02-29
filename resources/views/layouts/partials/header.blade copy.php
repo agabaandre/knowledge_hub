@@ -2,60 +2,13 @@
 	<!-- Top header  -->
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
-<div id="langauge-container">
-<div class="header">
-	<div class="header-top text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="ht-left d-flex">
-                    <div class="mail-service mr-2">
-                       
-                    </div>
-                    <div class="phone-service">
-                       
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="ht-right">
-                   
-                 
-                    <div class="top-social" style="color:;">
-
-                      <ul class="language-switcher-locale-url">
-						
-						Langauges:
-						<li class="ar first ml-2"><a href="/ar" class="language-link" xml:lang="ar">العربية</a></li>
-						<li class="en ml-2"><a href="/en" class="language-link active" xml:lang="en">English</a></li>
-						<li class="fr ml-2"><a href="/fr" class="language-link" xml:lang="fr">Français</a></li>
-						<li class="pt ml-2"><a href="/pt" class="language-link" xml:lang="pt">Português</a></li>
-						<li class="es ml-2"><a href="/es" class="language-link" xml:lang="es">Español</a></li>
-						<li class="sw last"><a href="/sw" class="language-link" xml:lang="sw">Kiswahili</a></li></ul> 
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-	</div>
-	
-			<div class="row mr-5 " style="max-height:200px; border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
-			<div class="col-md-12 row" >
-					<a class="nav-brand d-flex ml-5" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:150px;" />
-					</a>
-					<h2 class="d-flex mt-8">{{ settings()->site_name }}</h2>
-
-			</div>
-		</div>
-
+	<div id="langauge-container">
+	<div class="header">
 		<div class="container">
-			
 			<nav id="navigation" class="navigation navigation-landscape">
-				
 				<div class="nav-header">
 					<a class="nav-brand" href="{{ url('/') }}">
-						
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:280px;" />
 					</a>
 					<div class="nav-toggle"></div>
 					<div class="mobile_nav">
@@ -92,7 +45,7 @@
 
 								@foreach($data_categories as $category)
 
-									@if(strlen($category->required_permission) > 0)
+									@if(strlen($category->required_permission)>0)
 										
 									   @auth
 											@can($category->required_permission)
@@ -121,7 +74,7 @@
 							</li>
 							@foreach($dashboard_categories as $cat)
 
-							@if(strlen($cat->required_permission) > 0)
+							@if(strlen($cat->required_permission)>0)
 								
 							@auth
 									@can($cat->required_permission)
@@ -154,7 +107,7 @@
 						@endif
 							<li><a href="{{ url('faqs')}}">FAQs</a></li>
 						
-						@include('partials.account.authlinks', ['class' => 'mobileonly'])
+						@include('partials.account.authlinks',['class'=>'mobileonly'])
 
 					</ul>
 

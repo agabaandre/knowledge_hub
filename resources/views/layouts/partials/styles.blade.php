@@ -144,6 +144,10 @@
         .nav-dropdown{
             z-index: 1000!important;
         }
+        .header-top{
+           background: var(--theme-color-primary) !important;
+           color:#FFFF;
+        }
 
         
         
