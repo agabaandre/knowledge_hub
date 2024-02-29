@@ -41,10 +41,17 @@
 	
 			<div class="row mr-5 " style="max-height:200px; border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
 			<div class="col-md-12 row" >
-					<a class="nav-brand d-flex ml-5" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:150px;" />
+				    <div id="logo" class="ml-5 col-md-4">
+					<a class="nav-brand" href="{{ url('/') }}">
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:200px;" />
 					</a>
-					<h2 class="d-flex mt-8">{{ settings()->site_name }}</h2>
+					
+					<h2 class="d-flex title">{{ settings()->site_name }}</h2>
+				  
+				      <h4 class="slogan"><small>Unveiling all the hidden information across Africa</small></h4>
+					
+					</div>
+				
 
 			</div>
 		</div>
