@@ -41,14 +41,15 @@
 	
 			<div class="row mr-5 " style="max-height:200px; border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
 			<div class="col-md-12 row" >
-				    <div id="logo" class="ml-5 col-md-4">
+				    <div id="logo" class="ml-5 col-md-12">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:200px;" />
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px;" />
 					</a>
+					<!-- <a class="nav-brand" href="{{ url('/') }}">
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px;" />
+					</a> -->
 					
-					<h2 class="d-flex title">{{ settings()->site_name }}</h2>
-				  
-				      <h4 class="slogan"><small>Unveiling all the hidden information across Africa</small></h4>
+					<h4 class="slogan"><small>Unveiling all the hidden information across Africa</small></h4>
 					
 					</div>
 				
