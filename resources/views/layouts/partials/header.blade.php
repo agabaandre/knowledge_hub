@@ -23,15 +23,13 @@
                  
                     <div class="top-social" style="color:;">
 
-                      <ul class="language-switcher-locale-url">
+                      
 						
-						Langauges:
-						<li class="ar first ml-2"><a href="/ar" class="language-link" xml:lang="ar">العربية</a></li>
-						<li class="en ml-2"><a href="/en" class="language-link active" xml:lang="en">English</a></li>
-						<li class="fr ml-2"><a href="/fr" class="language-link" xml:lang="fr">Français</a></li>
-						<li class="pt ml-2"><a href="/pt" class="language-link" xml:lang="pt">Português</a></li>
-						<li class="es ml-2"><a href="/es" class="language-link" xml:lang="es">Español</a></li>
-						<li class="sw last"><a href="/sw" class="language-link" xml:lang="sw">Kiswahili</a></li></ul> 
+						
+						
+						Langauge:	@include('layouts.partials.language')
+					
+						
                     </div>
                 </div>
             </div>
@@ -49,7 +47,7 @@
 						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px;" />
 					</a> -->
 					
-					<h4 class="slogan"><small>Unveiling all the hidden information across Africa</small></h4>
+					<h4 class="slogan fst-italic fs-2"><small>Unveiling all the hidden information across Africa</small></h4>
 					
 					</div>
 				

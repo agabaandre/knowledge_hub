@@ -23,6 +23,7 @@
 
     gtag('config', 'G-6GMM9ZKQTD');
 </script>
+<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
 
 @include('partials.theming.colors')
@@ -38,6 +39,31 @@
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
+
+<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
+<script type="text/javascript">
+    function googleTranslateElementInit() {
+        new google.translate.TranslateElement({
+            pageLanguage: 'en',
+            includedLanguages: 'en,fr,ar,es,pt,sw',
+            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+            autoDisplay: false,
+            disableAutoHover: true,
+            showBanner: false
+        }, 'google_translate_element');
+
+        // Manually set the language of the Google Translate widget to English
+        var dropdown = document.querySelector('.goog-te-combo');
+        dropdown.value = 'en';
+    }
+</script>
+
+
+
+
+
+
+
 
 <!-- CSS -->
 <link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" />
