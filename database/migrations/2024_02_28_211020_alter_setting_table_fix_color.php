@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddAnalyticsScriptToSettingTable extends Migration
+class AlterSettingTableFixColor extends Migration
 {
     /**
      * Run the migrations.
@@ -14,10 +14,9 @@ class AddAnalyticsScriptToSettingTable extends Migration
     public function up()
     {
         Schema::table('setting', function (Blueprint $table) {
-            //
-
-            $table->text('analytics_script')->nullable();
-            $table->string('icon_font_color')->default('#2F2424');
+            
+           
+            $table->string('icon_font_color')->default('#2F2424')->change();
         });
     }
 
@@ -28,8 +27,6 @@ class AddAnalyticsScriptToSettingTable extends Migration
      */
     public function down()
     {
-        Schema::table('setting', function (Blueprint $table) {
-            //
-        });
+       
     }
 }
