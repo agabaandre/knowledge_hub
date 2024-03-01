@@ -38,7 +38,7 @@
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control summernote-sm" id="title" 
+                                <textarea placeholder="Title" rows="3" class="form-control summernote-sm" id="title" 
                                 name="title" 
                                 required>{{ form_edit('title',$publication,'title') }}</textarea>
                             </div>
@@ -103,7 +103,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Category</label>
                                 @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
-                                'selected'=>(@$row->publication_catgory_id)?$row->publication_catgory_id:''])
+                                'selected'=>(@$publication->publication_catgory_id)?$publication->publication_catgory_id:''])
                             </div>
                         </div>
                      
@@ -114,24 +114,26 @@
                             </div>
                         </div>
 
+                        @if(states_enabled())
                         <div class="col-md-12">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Geographical Coverage</label>
                                 @include('partials.publications.area_dropdown',['field'=>'geo_area_id','required'=>'required','selected'=>form_edit('geo_area_id',$publication,'geographical_coverage_id')])
                             </div>
                         </div>
+                        @endif
 
                         <div class="col-md-12">
                             <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
                             <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
                             @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
-                                'selected'=>(@$row->communities)?$row->communities:[]])
+                                'selected'=>(@$publication->communities)?$publication->communities:[]])
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label" for="accessgroups">Access Groups</label>
                             @include('partials.publications.accessgroups_dropdown',['field'=>'accessgroups[]',
-                                'selected'=>(@$row->accessgroups)?$row->accessgroups:[]])
+                                'selected'=>(@$publication->accessgroups)?$publication->accessgroups:[]])
                         </div>
 
 
@@ -140,9 +142,13 @@
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
                                     <input type="file" class="form-control" name="cover" id="">
-
                                 </div>
-                            </div>
+                                <div class="preview">
+                                  @if(@$publication->cover)
+                                    <img class="mt-3" src="{{storage_link('uploads/publications/'.@$publication->cover)}}" width="200px" />
+                                  @endif
+                                </div>
+                            </div> 
                         </div>
                         <div class="col-md-12">
                             <div class="mb-3">
