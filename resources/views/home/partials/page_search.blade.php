@@ -4,7 +4,7 @@
       $show_types = (strpos(current_url(),'record') >-1 || strpos(current_url(),'publication') >-1 )?true:false;
    @endphp
 
-<div class="py-1 custom-bg">
+<div class="py-5 custom-bg">
 		<div class="container">
 			<div class="row justify-content-between align-items-center">
 

@@ -120,7 +120,7 @@
 							</ul>
 						</li>
 						@if(states_enabled())
-						<li class="dashboards"><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
+						<!-- <li class="dashboards"><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 							<li>
 								<a href="{{ url('dashboards')}}">RCCs</a>
@@ -145,11 +145,9 @@
 
 							@endif
 							@endforeach
-							<!-- <li>
-								<a href="{{ url('dashboards/kpi')}}">Indicator Comparison</a>
-							</li> -->
+							
 							</ul>
-						</li>
+						</li> -->
 						@endif
 						
 							<li><a href="{{ url('forums')}}">Forums</a></li>
