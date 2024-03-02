@@ -39,15 +39,11 @@
 	
 			<div class="row mr-5 " style="max-height:200px; border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
 			<div class="col-md-12 row" >
-				    <div id="logo" class="ml-5 col-md-12">
+				    <div id="logo" class="ml-5 mb-0 col-md-12">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px;" />
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px; margin-bottom:-25px;" />
 					</a>
-					<!-- <a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px;" />
-					</a> -->
-					
-					<h4 class="slogan fst-italic fs-2"><small>Unveiling all the hidden information across Africa</small></h4>
+					<p class="slogan mt-2 fw-bold"><small>Unveiling all the hidden information across Africa</small></p>
 					
 					</div>
 				
