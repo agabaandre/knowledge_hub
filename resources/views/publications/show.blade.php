@@ -47,7 +47,7 @@
 						
 								@if(!empty($publication->publication))
 								<div class="row col-12 d-flex" style="float:right !importntant;">
-								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-eye-open"></i> Browse Resource</a>
+								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-eye"></i> Browse Resource</a>
 								</div>
 								@endif
 									
