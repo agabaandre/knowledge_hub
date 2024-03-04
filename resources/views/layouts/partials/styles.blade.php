@@ -66,9 +66,9 @@
 
 
 <!-- CSS -->
-<link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" />
-
- <link rel="stylesheet" href="{{ asset('assets/plugins/tour/tour.css')}}">
+<!-- <link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" /> -->
+<link rel="stylesheet" href="{{ asset('assets/plugins/tour/tour.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/css/smart_wizard_all.min.css')}}">
 
  <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
 

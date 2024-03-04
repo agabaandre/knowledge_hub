@@ -46,12 +46,20 @@ return [
     |                    "custom", "stack"
     |
     */
-
+    // 'stack' => [
+    //     'driver' => 'stack',
+    //     'channels' => ['single'],
+    //     'ignore_exceptions' => false,
+    // ],
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['daily', 'flare'],
             'ignore_exceptions' => false,
+        ],
+
+        'flare' => [
+            'driver' => 'flare',
         ],
 
         'single' => [

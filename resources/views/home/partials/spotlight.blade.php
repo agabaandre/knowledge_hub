@@ -1,7 +1,4 @@
 <div class="spotlight px-3 py-3 custom-bg">
-<div class="col-md-12 pt-4" style="display: flex; justify-content: right;">
-           @include('layouts.partials.language')
-</div>
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
 							<div class="row no-gutters bg-white rounded search-form">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -35,7 +32,7 @@
 
     <div class="col-lg-8 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
       <div class="row justify-content-center mb-2">
-      <h3 class="text-center">Test your knowledge! Click on one of the themes below</h3>
+      <h3 class="text-center">You want to test your knowledge! Click on one of the themes below</h3>
       </div>
       @include('home.partials.theme_tabs') 
     </div>

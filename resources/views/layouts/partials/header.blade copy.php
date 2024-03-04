@@ -8,7 +8,7 @@
 			<nav id="navigation" class="navigation navigation-landscape">
 				<div class="nav-header">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:280px;" />
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:240px;" />
 					</a>
 					<div class="nav-toggle"></div>
 					<div class="mobile_nav">
