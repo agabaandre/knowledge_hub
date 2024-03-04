@@ -11,4 +11,4 @@
 
 </select> -->
 
- <div id="google_translate_element" style="float:right;"></div>
+ <div id="google_translate_element" class="justify-content-right" >Langauge</div>

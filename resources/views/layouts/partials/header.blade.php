@@ -4,51 +4,23 @@
 	<!-- Start Navigation -->
 <div id="langauge-container">
 <div class="header">
-	<div class="header-top text-white">
-    <div class="container">
-        <div class="row">
-            <div class="col-md-6">
-                <div class="ht-left d-flex">
-                    <div class="mail-service mr-2">
-                       
-                    </div>
-                    <div class="phone-service">
-                       
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="ht-right">
-                   
-                 
-                    <div class="top-social" style="color:;">
-
-                      
-						
-						
-						
-						Langauge:	@include('layouts.partials.language')
-					
-						
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-	</div>
-	
-			<div class="row mr-5 " style="max-height:200px; border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
-			<div class="col-md-12 row" >
-				    <div id="logo" class="ml-5 mb-0 col-md-12">
+			<div class="row d-flex" style="border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
+		
+				    <div  class="ml-5 col-md-6 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px; margin-bottom:-25px;" />
-					</a>
-					<p class="slogan mt-2 fw-bold"><small>Unveiling all the hidden information across Africa</small></p>
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px; margin-bottom:-25px;" >
+					    <p class="slogan mt-2 fw-bold" style="font-size:14px;"><small>Unveiling all the hidden information across Africa</small></p>
 					
+					</a>
 					</div>
+			
+					<div class="ml-5 col-md-4 d-flex justify-content-end">
+							@include('layouts.partials.language')
+					</div>
+
 				
 
-			</div>
+
 		</div>
 
 		<div class="container">
