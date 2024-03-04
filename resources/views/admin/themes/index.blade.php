@@ -50,6 +50,7 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
+						<th>#</th>
 						<th>Thematic Area</th>
 						<th>Actions</th>
 					</tr>
@@ -62,6 +63,7 @@
 
 					@foreach($themes as $row)
 						<tr>
+							<td>{{ $i++ }}</td>
 							<td>{{ $row->description }}</td>
 							<td>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>

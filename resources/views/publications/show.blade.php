@@ -44,18 +44,22 @@
 
 							<div class="jbl_button mb-2">
 
-							
+						
 								@if(!empty($publication->publication))
-								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium"><i class="fa fa-link"></i> Browse Resource</a>
+								<div class="row col-12 d-flex" style="float:right !importntant;">
+								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-eye-open"></i> Browse Resource</a>
+								</div>
 								@endif
 									
 								@auth
+								<div class="row col-12 d-flex" style="float:right !importntant;">
 
-								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}"  class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
-								<i class="fa fa-info-circle"></i> Submit a Version</a>
-								<a href="{{ route('account.summarize')}}?id={{ $publication->id }}" class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
-								<i class="fa fa-file"></i> Submit a Summary / Abstract</a>
+								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}"  class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium mb-2" style="width:180px !important;">
+								<i class="fa fa-plus"></i> Submit a Version</a>
 
+								<a href="{{ route('account.summarize')}}?id={{ $publication->id }}" class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium" style="width:180px !important;">
+								<i class="fa fa-file"></i> Submit a Summary</a>
+								</div>
 							  @endauth
 							</div>
 						</div>

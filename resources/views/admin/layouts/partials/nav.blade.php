@@ -80,7 +80,7 @@
 						@endcan
 
 						@can('view_themes')
-						<li aria-haspopup="true"><a href="{{ url('admin/healththemes') }}">Security Themes</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/themes') }}">Security Themes</a></li>
 						@endcan
 						@can('view_sub_themes')
 						<li aria-haspopup="true"><a href="{{ url('admin/subthemes') }}">Security Sub-Themes</a></li>
