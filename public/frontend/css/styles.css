@@ -2786,7 +2786,7 @@ nav a {
 }
 
 .nav-brand img {
-    max-width: 280px;
+    max-width: 300px;
     position: relative;
     top: 0px;
     margin-top: 0px;
@@ -3159,7 +3159,7 @@ span.expiration {
     }
 
     .nav-brand img {
-        max-width: 110px;
+        max-width: 150px;
         position: relative;
         top: 0px;
     }
@@ -6416,7 +6416,7 @@ footer.skin-dark-footer ul.footer-bottom-social li a:focus {
 
 @media (max-width: 767px) {
     .nav-brand img {
-        max-width: 100px;
+        max-width: 150px;
         position: relative;
         top: -1px;
     }

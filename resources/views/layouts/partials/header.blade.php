@@ -3,8 +3,7 @@
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
 <div id="langauge-container">
-<div class="header">
-			<div class="row d-flex" style="border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
+<div class="row d-flex" style="border-bottom:solid 1px var(--theme-color-primary) ; width:100%;  " >
 		
 				    <div  class="ml-5 col-md-6 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
@@ -13,16 +12,16 @@
 					
 					</a>
 					</div>
-			
-					<div class="ml-5 col-md-4 d-flex justify-content-end">
+					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end">
 							@include('layouts.partials.language')
 					</div>
 
 				
 
 
-		</div>
-
+</div>
+<div class="header">
+		
 		<div class="container">
 			
 			<nav id="navigation" class="navigation navigation-landscape">

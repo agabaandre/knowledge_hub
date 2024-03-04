@@ -7,8 +7,7 @@
 					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
 						<div class="footer_widget">
 						<h4 class="widget_title">Address</h4>
-							<img src="{{ asset('assets/images/icon_Africa_cdc.png') }}" class="img-footer small mb-2" alt="" />
-
+							<img src="{{ settings()->logo }}" class="logo img-footer small mb-2" alt="" style="width:220px; margin-bottom:-25px;" >
 							<div class="address mt-2">
 								Addis Ababa <br>Ethiopia
 							</div>
