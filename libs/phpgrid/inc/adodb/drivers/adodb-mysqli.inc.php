@@ -784,10 +784,10 @@ class ADODB_mysqli extends ADOConnection {
 		if(strpos($sql,'pg_tmp')==false && strpos($sql,'count'))
 		 $sql = $sql." pg_tmp";
 
-			//print_r($sql);
+			//
 
 			$sql = $this->insertWhereClauseIfNeeded($sql);
-			  
+ 
 		//  try{
 			   	$rs = @mysqli_query($this->_connectionID, $sql , $ADODB_COUNTRECS ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT);
 				if ($rs) return $rs;
@@ -833,7 +833,7 @@ class ADODB_mysqli extends ADOConnection {
             $end = ' WHERE' . substr(trim($end), 3);
         } else {
             // If there's no immediate AND, just add WHERE 1=1 as a no-op condition
-            $end = ' WHERE 1=1 ' . $end;
+            $end = ' ' . $end;
         }
 
         // Reconstruct the query with the WHERE clause inserted

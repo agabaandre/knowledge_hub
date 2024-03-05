@@ -35,7 +35,7 @@ function insertWhereClauseIfNeeded($query) {
             $end = ' WHERE' . substr(trim($end), 3);
         } else {
             // If there's no immediate AND, just add WHERE 1=1 as a no-op condition
-            $end = ' WHERE 1=1 ' . $end;
+            $end = ' ' . $end;
         }
 
         // Reconstruct the query with the WHERE clause inserted
