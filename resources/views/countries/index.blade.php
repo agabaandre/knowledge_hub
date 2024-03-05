@@ -3,6 +3,7 @@
 
 @section('styles')
 
+<link rel="stylesheet" href="{{ asset('assets/css/map.css')}}">
 
 @endsection
 @section('content')      	
@@ -10,18 +11,18 @@
 <section class="space gray">
     <div class="container">
     
-        <div class="row justify-content-center" data-aos="slide-down">
+        <!-- <div class="row justify-content-center" data-aos="slide-down">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div class="sec_title position-relative text-center mb-5">
                     <h2 class="ft-bold">Member States</h2>
                 </div>
             </div>
-        </div>
+        </div> -->
         
         <!-- row -->
         <div class="row align-items-center justify-content-center">
             
-        @foreach($countries as $country)
+       {{--@foreach($countries as $country)
 
             <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 col-6" data-aos="flip-left">
                 <div class="cats-wrap text-center" style="box-shadow: rgba(99, 99, 99, 0.2) 0px 2px 8px 0px;">
@@ -36,7 +37,10 @@
             </div>
 
         @endforeach
+--}}
             
+
+        @include('countries.map')
             
         </div>
         <!-- /row -->
@@ -46,4 +50,5 @@
 <!-- ======================= Countries ======================== -->
 @endsection
 @section('scripts')
+ <script  src="{{ asset('assets/js/map.js')}}"></script>
 @endsection

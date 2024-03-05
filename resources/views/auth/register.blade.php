@@ -124,7 +124,13 @@
 										<input type="password" name="password_confirmation" class="form-control" placeholder="Confirm Password*">
 									</div>
 								</div>
-								
+
+								<div class="row">
+									<div class="form-group col-md-12">
+										@include('auth.captcha')
+									</div>
+								</div>
+
 								<div class="form-group">
 									<p>By registering your details, you agree with our Terms & Conditions, and Privacy and Cookie Policy.</p>
 								</div>

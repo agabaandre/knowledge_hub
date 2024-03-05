@@ -41,6 +41,10 @@
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
 
+{{-- Captcha CSS --}}
+<link href="{{ captcha_layout_stylesheet_url() }}" type="text/css" rel="stylesheet">
+
+
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 <script type="text/javascript">
     function googleTranslateElementInit() {
