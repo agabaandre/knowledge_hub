@@ -173,6 +173,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');  
+    
     Route::group(["prefix" => "publications"], function () {
 
         Route::get("/", [ResourcesController::class, 'index']);
@@ -253,7 +254,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //authors
     Route::group(["prefix" => "authors"], function () {
 
-        Route::get("/", [AuthorsAdminController::class, 'index']);
+        Route::any("/", [AuthorsAdminController::class, 'index']);
         Route::get("/delete", [AuthorsAdminController::class, 'destroy']);
     });
 
@@ -319,7 +320,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //commsofpractice
     Route::group(["prefix" => "commsofpractice"], function () {
 
-        Route::get("/", [CommsOfPracticeController::class, 'index']);
+        Route::any("/", [CommsOfPracticeController::class, 'index']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
     });
