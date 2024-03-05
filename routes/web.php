@@ -217,6 +217,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [SubHealthThemesController::class, 'index']);
         Route::post("/save", [SubHealthThemesController::class, 'store']);
+        Route::post("/edit", [SubHealthThemesController::class, 'edit']);
         Route::get("/delete", [SubHealthThemesController::class, 'destroy']);
     });
 

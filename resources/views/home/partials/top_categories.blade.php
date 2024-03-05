@@ -12,8 +12,8 @@
 								<a href="{{url($category['link'])}}">
 										<div class="dro_140">
 											<div class="dro_141 de">
-												<!-- <i class="{{$category['icon']}}"></i> -->
-												<img src="{{ asset('assets/img/categories/'.$category['image'])}}" style="max-width:35px;"/>
+												<i class="{{$category['icon']}}"></i>
+												<!-- <img src="{{ asset('assets/img/categories/'.$category['image'])}}" style="max-width:35px;"/> -->
 											</div>
 											<div class="dro_142">
 												<h6>{{$category['title']}}</h6>
