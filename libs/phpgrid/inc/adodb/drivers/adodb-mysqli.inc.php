@@ -781,8 +781,12 @@ class ADODB_mysqli extends ADOConnection {
 			}
 		} else {
 
-		//if(strpos($sql,'pg_tmp')>=0)
-		//  return @mysqli_query($this->_connectionID, "select 2" , $ADODB_COUNTRECS ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT);
+		if(strpos($sql,'pg_tmp')==false && strpos($sql,'count'))
+		 $sql = $sql." pg_tmp";
+
+			//print_r($sql);
+
+			$sql = $this->insertWhereClauseIfNeeded($sql);
 			  
 		//  try{
 			   	$rs = @mysqli_query($this->_connectionID, $sql , $ADODB_COUNTRECS ? MYSQLI_STORE_RESULT : MYSQLI_USE_RESULT);
@@ -801,6 +805,44 @@ class ADODB_mysqli extends ADOConnection {
 		return false;
 
 	}
+
+	function insertWhereClauseIfNeeded($query) {
+    // Check if the query already contains a WHERE clause
+    if (stripos($query, ' WHERE ') !== false) {
+        // No need to insert WHERE, return the original query
+        return $query;
+    }
+
+    // Attempt to find the FROM clause to determine the insertion point for WHERE
+    if (preg_match('/FROM\s+([a-zA-Z0-9_]+)/i', $query, $matches, PREG_OFFSET_CAPTURE)) {
+        // Found the FROM clause, capture the table name and its position
+        $tableName = $matches[1][0];
+        $fromPosition = $matches[0][1];
+
+        // Determine the position right after the table name
+        $insertPosition = $fromPosition + strlen($matches[0][0]);
+
+        // Split the query at the determined position
+        $start = substr($query, 0, $insertPosition);
+        $end = substr($query, $insertPosition);
+
+        // Prepare to insert the WHERE clause
+        // We need to check if there's an immediate AND or if we just need to add WHERE
+        if (stripos(trim($end), 'AND ') === 0) {
+            // If the remaining part starts with AND, replace it with WHERE
+            $end = ' WHERE' . substr(trim($end), 3);
+        } else {
+            // If there's no immediate AND, just add WHERE 1=1 as a no-op condition
+            $end = ' WHERE 1=1 ' . $end;
+        }
+
+        // Reconstruct the query with the WHERE clause inserted
+        $query = $start . $end;
+    }
+
+    return $query;
+}
+
 
 	/*	Returns: the last error message from previous database operation	*/
 	function ErrorMsg()
