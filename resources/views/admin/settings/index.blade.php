@@ -76,6 +76,11 @@
                 </div>
             </div>
 
+            <div class="form-group">
+                    <label class="text-muted">Slogan </label>
+                    <input value="{{ $settings->slogan }}" name="slogan" class="form-control" placeholder="Slogan">
+            </div>
+
                 
             <div class="row mt-3">
                 <label>Primary Site Color:</label>

@@ -9,7 +9,10 @@
         
       @foreach($countries as $country)
        @if($country->svg_path)
-            <path class="st0 our-member" id="{{$country->name}}"  d="{{$country->svg_path}}">Member</path>
+            <path class="st0 our-member" 
+            id="{{$country->id}}"  
+            data-info="<div>{{$country->name}}</div>"
+            d="{{$country->svg_path}}">Member</path>
         @endif
       @endforeach
 
@@ -24,9 +27,9 @@
 
       </div>
 
-      <div class="detail">
-        <div class="mapcontent">
-
+      <div class="detail" >
+        <div class="mapcontent" >
+          
         </div>
       </div>
     </div>

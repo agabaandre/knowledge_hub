@@ -7,12 +7,12 @@
 		
 				    <div  class="ml-5 col-md-6 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:220px; margin-bottom:-25px;" >
-					    <p class="slogan mt-2 fw-bold" style="font-size:14px;"><small>Unveiling all the hidden information across Africa</small></p>
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:180px;" >
+					    <div class="slogan fw-bold" style="font-size:14px;"><small>{{ settings()->slogan}}</small></div>
 					
 					</a>
 					</div>
-					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-3">
+					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0">
 							@include('layouts.partials.language')
 					</div>
 

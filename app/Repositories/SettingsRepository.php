@@ -26,6 +26,7 @@ class SettingsRepository{
         $settings->primary_color     = $request->primary_color;
         $settings->secondary_color   = $request->secondary_color;
         $settings->analytics_script  = $request->analytics_script;
+        $settings->slogan            = $request->slogan;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')):
