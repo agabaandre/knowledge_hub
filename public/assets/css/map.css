@@ -2,14 +2,13 @@
   .map-section-container {
     width: 100%;
     padding-bottom: 80px;
-    /*background-color: #9e9d9d;*/
     color: #e3e3e3;
   }
   .map-section-container a {
-    color: #F2C200;
+    color: var(--theme-color-secondary);
   }
   .map-section-container a:hover {
-    color: #F2C200;
+    color: var(--theme-color-secondary)
   }
   
   .map-heading {
@@ -26,7 +25,8 @@
   }
   
   svg {
-    width: 80%;
+    width: 100%;
+    height: 75vh;
     float: center;
     padding-left: 40px;
   }
@@ -52,29 +52,25 @@
   }
   
   .our-member {
-    fill: #F2C200;
+    fill: var(--theme-color-primary);
     cursor: pointer;
   }
   
   .our-member:hover {
-    fill: rgba(0, 0, 0, 0.6);
+    fill: var(--theme-color-primary);
   }
-  
-  .mapcontainer, .detail, .map {
-    box-sizing: border-box;
-    position: relative;
+
+  .our-member-focused {
+    fill: var(--theme-color-secondary);
+    cursor: pointer;
   }
-  
-  .mapcontainer {
-    display: grid;
-    grid-template-columns: 60% 40%;
-    min-width: 95%;
-    overflow: hidden;
-  }
+
   
   .map {
     width: 100%;
-    border-right: solid #422828 0.5px;
+    justify-content: center;
+    display: flex;
+    align-items: center;
   }
   
   .detail {
@@ -95,11 +91,17 @@
     padding-bottom: 20px;
     padding-top: 10px;
     margin: auto;
-    color: white!important;
+    color: red!important;
   }
   
   .map-image {
     width: 100%;
+  }
+  .country_img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
   }
   
   .country-click {
@@ -107,53 +109,54 @@
   }
   
   @media only screen and (max-width: 900px) {
-    .mapcontainer {
-      margin: auto;
-      display: block;
-      width: 95%;
+
+    
+    svg {
+      min-width: 100%;
+      height: 100vh;
+      float: center;
+      padding-left: 40px;
     }
-    .mapcontainer img {
-      width: 50%;
-    }
-    .mapcontainer h2 {
-      font-size: 20px;
-    }
-    .mapcontainer .map {
+
+     .map {
       display: block;
       position: relative;
-      width: 100%;
-      height: 75vh;
+      min-width: 50%;
+      height: 50;
       margin: auto;
       z-index: 1;
       border: none;
+      overflow: auto;
       margin-bottom: 0px;
       padding-bottom: 0px;
     }
-    .mapcontainer svg {
-      width: auto;
-      height: 70vh;
-      margin: auto;
-      padding-right: 40px;
-      position: relative;
-      margin-bottom: 0px;
-      padding-bottom: 0px;
-    }
+    
     .mapcontainer .detail {
       width: 100%;
-      display: block;
+      display: flex;
       position: relative;
       margin: auto;
       padding: 0px;
       z-index: 0;
       text-align: center;
+      justify-content: center;
+      align-items: center;
     }
     .mapcontainer p {
       width: 100%;
       padding-top: 0px;
       margin-top: 10px;
     }
-   
+
   }
   .note {
     padding: 10px;
   }
+
+  .mappopover {
+    display: none;
+    color: red;
+    border-radius: 4px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+  
