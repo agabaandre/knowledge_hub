@@ -10,6 +10,10 @@
   .map-section-container a:hover {
     color: var(--theme-color-secondary)
   }
+
+  .states-tiles{
+    /*display: none;*/
+  }
   
   .map-heading {
     padding: 20px;
@@ -26,7 +30,7 @@
   
   svg {
     width: 100%;
-    height: 75vh;
+    height: 120vh;
     float: center;
     padding-left: 40px;
   }
@@ -71,6 +75,7 @@
     justify-content: center;
     display: flex;
     align-items: center;
+     min-height: 100vh;
   }
   
   .detail {
@@ -110,7 +115,14 @@
   
   @media only screen and (max-width: 900px) {
 
-    
+    .states-tiles{
+      display: flex;
+    }
+
+    .states-map{
+      display: none;
+    }
+
     svg {
       min-width: 100%;
       height: 100vh;
