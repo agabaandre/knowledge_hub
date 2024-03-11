@@ -4057,10 +4057,10 @@ ul.jbd-social li a {
 
 .form-control,
 select.form-control {
-    height: 54px !important;
-    padding: 10px 15px;
+   
+    padding: 0px 15px;
     font-size: 15px;
-    border-radius: 1px;
+    border-radius: 2px;
     border-color: #e5e5e5;
 }
 

@@ -12,8 +12,7 @@
 
     <!-- Custom CSS -->
     <!-- Favicon -->
-<script type="text/javascript"
-    src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+
 <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-6GMM9ZKQTD"></script>
 <script>
@@ -23,6 +22,8 @@
 
     gtag('config', 'G-6GMM9ZKQTD');
 </script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
 
@@ -38,7 +39,6 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
-<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
 
 {{-- Captcha CSS --}}
@@ -79,9 +79,13 @@
 
     <style>
 
-          .sw-btn{
-            padding: 0.775rem .95rem!important;
-          }
+        .sw-btn{
+        padding: 0.775rem .95rem!important;
+        }
+        .main-search{
+        height: 54px !important;
+        padding: 10px 15px;
+        }
         .goog-te-banner-frame.skiptranslate {
             display: none !important;
         }
