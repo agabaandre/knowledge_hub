@@ -166,6 +166,7 @@
             background-image:url('{{ settings()->spotlight_banner}}'); 
             background-repeat:no-repeat; 
             background-size:cover;
+            background-position: center;
          }
 
         

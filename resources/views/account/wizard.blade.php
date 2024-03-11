@@ -192,7 +192,7 @@
                     <div class="col-lg-8 mt-5  float-end">
                     </div>
                     <div class="col-lg-3 mt-5  float-end">
-                    <button class="btn btn-dark col-lg-12" type="submit">
+                    <button class="btn btn-dark col-lg-12 savebtn" type="submit">
                         {{ (@$row)?'Save Changes':'Submit'}}
                     </button>
                     </div>
@@ -241,6 +241,8 @@
       },
 
     });
+
+
 
     // Step show event
     $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
