@@ -4,7 +4,7 @@
 
     <div class="row px-2 custom-row">
     @php 
-     $colors = [settings()->primary_color,settings()->secondary_color,'black'];
+     $colors = [settings()->primary_color,settings()->secondary_color,'#58595B'];
     @endphp
 
     @foreach($tags as $tag)

@@ -25,61 +25,75 @@
              @csrf
             <div class="col-lg-4">
                     <div class="form-group">
-                        <label class="text-muted">Title </label>
+                        <label>Title </label>
                         <input value="{{$settings->title}}" name="title" class="form-control" placeholder="">
                     </div>
                     <div class="form-group">
-                        <label class="text-muted">Site name </label>
+                        <label>Site name </label>
                         <input value="{{$settings->site_name}}" name="site_name" class="form-control" placeholder="">
                     </div>
                     <div class="form-group">
-                        <label class="text-muted">Site description </label>
+                        <label>Slogan </label>
+                        <input value="{{ $settings->slogan }}" name="slogan" class="form-control" placeholder="Slogan">
+                    </div>
+                    <div class="form-group">
+                        <label>Site description </label>
                         <textarea name="site_description" rows="5" class="form-control" placeholder="">{{$settings->site_description}}</textarea>
                     </div>
                     
                     <div class="form-group">
-                        <label class="text-muted">Seo keywords </label>
+                        <label>Seo keywords </label>
                         <textarea name="seo_keywords" class="form-control" placeholder="">{{$settings->seo_keywords}}</textarea>
+                    </div>
+
+                 
+                    <div class="form-group">
+                    <label>Favicon: (350*350)</label>
+                    <input type="file" name="logo" id="attachments">
+                    <div class="preview" style="max-width: 150px;">
+                        <img src="{{ settings()->favicon }}"/>
+                     </div>
+               
                     </div>
             </div>
 
             <div class="col-lg-4">
 
                 <div class="form-group">
-                    <label class="text-muted">Address </label>
+                    <label>Address </label>
                     <textarea value="" name="address" class="form-control" placeholder="Enter Site Address">{{ $settings->address }}</textarea>
                 </div>
                 <div class="form-group">
-                    <label class="text-muted">Email </label>
+                    <label>Email </label>
                     <input value="{{ $settings->email }}" name="email" class="form-control" placeholder="">
                 </div>
                 <div class="form-group">
-                    <label class="text-muted">Phone </label>
+                    <label>Phone </label>
                     <input value="{{ $settings->phone }}" name="phone" class="form-control" placeholder="">
                 </div>
                 <div class="form-group">
-                    <label class="text-muted">Language </label>
+                    <label>Language </label>
                     <input value="{{ $settings->language }}" name="language" class="form-control" placeholder="">
                 </div>
                 <div class="form-group">
-                    <label class="text-muted">Timezone </label>
+                    <label>Timezone </label>
                     @include('partials.general.timezones',['selected'=>$settings->timezone])
+                </div>
+                <div class="form-group">
+                    <label>Google Analytics Scripts </label>
+                    <textarea  name="analytics_script" placeholder="Paste here" class="form-control w-100">{{ $settings->analytics_script }}</textarea>
+                </div>
+            
+                <div class="form-group">
+                   <label>Site Logo: (500*230)</label>
+                    <input type="file" name="logo" id="attachments">
+                    <div class="preview" style="max-width: 150px;">
+                        <img src="{{ settings()->logo }}"/>
+                     </div>
                 </div>
             </div>
 
             <div class="col-lg-4">
-
-            <div class="row">
-                <div class="form-group col-lg-12">
-                    <label class="text-muted">Google Analytics Scripts </label>
-                    <textarea  name="analytics_script" placeholder="Paste here" class="form-control w-100">{{ $settings->analytics_script }}</textarea>
-                </div>
-            </div>
-
-            <div class="form-group">
-                    <label class="text-muted">Slogan </label>
-                    <input value="{{ $settings->slogan }}" name="slogan" class="form-control" placeholder="Slogan">
-            </div>
 
                 
             <div class="row mt-3">
@@ -101,16 +115,36 @@
                     <input type="text"  name="secondary_color" value="{{ $settings->secondary_color }}" class="form-control" />
                 </div>
             </div>
+             <div class="row mt-3">
+                <label>Primary Text Color:</label>
+                <div class="input-group colorPicker">
+                    <div class="input-group-append">
+                    <span class="input-group-text color-preview"></span>
+                    </div>
+                    <input type="text"  name="primary_text_color" value="{{ $settings->primary_text_color }}" class="form-control" />
+                </div>
+            </div>
+              <div class="row mt-3">
+                <label>Links Active Color:</label>
+                <div class="input-group colorPicker">
+                    <div class="input-group-append">
+                    <span class="input-group-text color-preview"></span>
+                    </div>
+                    <input type="text"  name="secondary_text_color" value="{{ $settings->links_active_color }}" class="form-control" />
+                </div>
+            </div>
 
             <div class="row mt-3">
                 <div class="form-group">
-                   <label>Site Logo:</label>
-                    <input type="file" name="logo" id="attachments">
+                   <label>Spotlight Banner: (1894*658)</label>
+                    <input type="file" name="spotlight_banner" id="attachments">
                     <div class="preview" style="max-width: 150px;">
-                        <img src="{{ settings()->logo }}"/>
+                        <img src="{{ settings()->spotlight_banner }}"/>
                      </div>
                 </div>
             </div>
+
+            
 
             <div class="row mt-2 px-2">
                 <input type="submit" class="btn btn-dark" value="Save Changes">

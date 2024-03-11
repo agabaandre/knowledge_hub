@@ -20,7 +20,7 @@
 									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
 										<div class="rw-header d-flex justify-content-start">
 											<div class="rv-110-caption pl-0">
-												<h4 class="ft-medium fs-md mb-0 lh-1">{{ truncate($row->title, 30) }}</h4>
+												<h4 class="fs-md mb-0 ft-medium">{{ truncate($row->title, 30) }}</h4>
 												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i>{{truncate(@$row->author->name,30)}}</p>
 											</div>
 										</div>
