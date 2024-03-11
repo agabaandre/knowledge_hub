@@ -15,14 +15,24 @@ class FaqsRepository{
     }
     
     public function save(Request $request){
-        $faq = new Faq();
 
+        $faq = ($request->id)?Faq::find($request->id):new Faq();
+        
+        $faq->question = $request->question;
+        $faq->answer   = $request->answer;
+
+        $save = ($request->id)?$faq->update(): $faq->save();
         return $faq;
     }
 
     public function find($id){
 
         return Faq::find($id);
+    }
+
+    public function delete($id){
+
+        return Faq::find($id)->delete();
     }
 
 

@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\CommsOfPracticeController;
 use App\Http\Controllers\Admin\DataRecordsAdminController;
 use App\Http\Controllers\Admin\ExpertsAdminController;
 use App\Http\Controllers\Admin\FactsAdminController;
+use App\Http\Controllers\Admin\FaqsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthorsController;
@@ -160,6 +161,7 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
     Route::get("/summarize", [AccountController::class, 'create_summary'])->name('account.summarize');
     Route::post("/update", [AuthController::class, 'update_profile'])->name('account.update');
     Route::post("/secureme", [AuthController::class, 'update_password'])->name('account.auth_update');
+
 });
 
 
@@ -291,6 +293,15 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [FactsAdminController::class, 'store']);
         Route::get("/delete", [FactsAdminController::class, 'destroy']);
     });
+
+    //faq
+    Route::group(["prefix" => "faqs"], function () {
+
+        Route::get("/", [FaqsAdminController::class, 'index']);
+        Route::post("/save", [FaqsAdminController::class, 'store']);
+        Route::get("/delete", [FaqsAdminController::class, 'destroy']);
+    });
+
 
     //experts
     Route::group(["prefix" => "experts"], function () {

@@ -82,8 +82,13 @@
 						@can('view_themes')
 						<li aria-haspopup="true"><a href="{{ url('admin/themes') }}">Security Themes</a></li>
 						@endcan
+						
 						@can('view_sub_themes')
 						<li aria-haspopup="true"><a href="{{ url('admin/subthemes') }}">Security Sub-Themes</a></li>
+						@endcan
+						
+						@can('view_faqs')
+						<li aria-haspopup="true"><a href="{{ url('admin/faqs') }}">FAQs</a></li>
 						@endcan
 
 						@can('view_geo_coverage')

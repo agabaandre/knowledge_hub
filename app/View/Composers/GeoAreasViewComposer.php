@@ -3,7 +3,7 @@ namespace App\View\Composers;
 
 use App\Models\GeoCoverage;
 use App\Models\PublicationType;
-use App\Models\SubThemeticArea;
+use App\Models\Country;
 use Illuminate\View\View;
 
 class GeoAreasViewComposer{
@@ -13,7 +13,7 @@ class GeoAreasViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $geoareas  = cache()->remember('geoareas',$minutes, function () {
-            return   GeoCoverage::all();
+            return   Country::where('national','national')->get();
         });
 
         $view->with('geoareas',$geoareas);
