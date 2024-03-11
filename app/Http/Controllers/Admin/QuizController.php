@@ -69,5 +69,11 @@ class QuizController extends Controller
         }
         return back()->with($data);
     }
+
+    public function delete_answer(Request $request){
+
+        return $this->quizRepo->delete_answer($request->id);
+    }
+
   
 }

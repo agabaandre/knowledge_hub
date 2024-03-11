@@ -23,13 +23,13 @@ class QuizRepository{
     }
     
     public function save(Request $request){
-        $qn = new Question();
+        $qn = ($request->id)? Question::find($request->id):new Question();
         
         $qn->question_text = $request->question;
         if($request->resource_id)
         $qn->resource_id   = $request->resource_id;
         
-        $qn->save();
+        $save = ($request->id)?$qn->update():$qn->save();
 
         return $qn;
     }
@@ -66,16 +66,19 @@ class QuizRepository{
 
     public function save_answer(Request $request){
 
-        $answer = new Answer();
+        $answer = ($request->id)? Answer::find($request->id):new Answer();
         $answer->answer_text = $request->answer;
         $answer->question_id = $request->question_id;
         $answer->is_correct  = ($request->answer_type=='correct')?1:0;
         $answer->answer_explanation = ($request->answer_type=='correct')?$request->explanation:null;
-        $answer->save();
+        $saved = ($request->id)?$answer->update():$answer->save();
 
         return $answer;
+    }
 
+    public function delete_answer($id){
 
+        return Answer::find($id)->delete();
     }
 
 

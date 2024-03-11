@@ -3,21 +3,21 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Question</h5>
+        <h5 class="modal-title" id="id">Create Question</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
       
-      <form action="{{ url('admin/tags/save') }}" method="post" id='filetypes' class='filetypes'>
+      <form action="{{ url('admin/quiz/save') }}" method="post" id='filetypes' class='filetypes'>
         @csrf
       <div class="modal-body">
         <input type="hidden" name="id" id="id" class="newform">
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Tag</label>
-              <input type="text" placeholder="Enter Tag" class="form-control newform" id="name" name="name" required>
+              <label class="form-label" for="name">Question</label>
+              <textarea rows="8" placeholder="Enter Question" class="form-control newform" id="question" name="question" required></textarea>
             </div>
           </div>
 
