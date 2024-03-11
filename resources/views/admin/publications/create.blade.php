@@ -4,6 +4,10 @@
 @section('content')
 <div class="row">
 
+@php
+     //dd($publication->accessgroups);
+@endphp
+
     <div class="card col-lg-12">
         <div class="card-header text-left">
             <h4 class="card-title float-left">{{ $title ?? '' }}</h4>
@@ -82,6 +86,12 @@
                                 <div id="file-input">
                                     <!-- <label class="form-label" for="publication">Publication Doc</label> -->
                                     <input placeholder="Attach publication document" type="file" name="files" class="form-control" multiple>
+                                     @if(count($publication->attachments)>0)
+                                     <h4 class="mt-3">Attachment(s): </h4>
+                                        @foreach($publication->attachments as $attachment)
+                                             <div class="py-2 mt-1"><a target="_blank" href="{{ storage_link('uploads/publications/') }}{{$attachment->file}}"><i class="fa fa-file fa-2x"></i> {{$attachment->description}}</a></div>
+                                        @endforeach
+                                    @endif
                                 </div>
 
                                 <div id="link-input" style="display:none;">
@@ -117,23 +127,22 @@
                         @if(states_enabled())
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage</label>
+                                <label class="form-label" for="publication">Geographical Coverage </label>
                                 @include('partials.publications.area_dropdown',['field'=>'geo_area_id','required'=>'required','selected'=>form_edit('geo_area_id',$publication,'geographical_coverage_id')])
                             </div>
                         </div>
                         @endif
 
-                        <div class="col-md-12">
+                         <div class="col-md-12">
                             <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
-                            <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
                             @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
-                                'selected'=>(@$publication->communities)?$publication->communities:[]])
+                                'selected'=>(@$publication->communities)?$publication->communities->pluck('id')->toArray():[]])
                         </div>
 
                         <div class="col-md-12">
                             <label class="form-label" for="accessgroups">Access Groups</label>
                             @include('partials.publications.accessgroups_dropdown',['field'=>'accessgroups[]',
-                                'selected'=>(@$publication->accessgroups)?$publication->accessgroups:[]])
+                                'selected'=>(@$publication->accessgroups)?$publication->accessgroups->pluck('id')->toArray():[]])
                         </div>
 
 

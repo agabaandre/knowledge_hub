@@ -66,6 +66,7 @@
 							<td>{{ $row->question_text }}</td>
 							<td>
 							    <a class="btn btn-sm btn-primary ml-1" href="{{ url('admin/quiz/answers') }}?qn={{$row->id}}"  class="text-info"> Answers</a>
+								<a class="btn btn-sm btn-danger mr-2" href="javascript:void(0);" onclick="openEditModal('{{ $row->id }}')" > Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>
@@ -80,9 +81,50 @@
 	</div>
 
 	@include('admin.quiz.partials.create-modal')
-	<!-- Include edit-modal.php -->
-	@include('admin.quiz.partials.edit-modal')
 	<!-- Include delete-modal.php -->
 	@include('admin.quiz.partials.delete-modal')
 
     @endsection
+
+	@section('scripts')
+
+<script>
+	
+	var toDeleteRow = '';
+
+	function deleteRow () {
+		let url = `{{ url('admin/quiz/delete')}}?id=${toDeleteRow}`;
+
+			fetch(url)
+			.then(res => res.text())
+			.then(res => {
+				console.log(res)
+				$('#delete-modal').modal('hide');
+				 window.location.reload();
+			})
+	}
+
+
+	function openDeleteModal (row = 0) {
+		toDeleteRow = row;
+		$('#delete-modal').modal('show');
+	}
+
+	function openEditModal (rowId = 0) {
+
+		var rows = JSON.parse(@json($questions->toJson()));
+
+		console.log(rows);
+
+		var target_row = rows.data.find(item=>item.id === parseInt(rowId));
+
+		$('#question').text(target_row.question_text);
+		$('#id').val(target_row.id);
+		$('#title').html("Update Question");
+	   
+		$('#create-modal').modal('show');
+	}
+
+</script>
+
+@endsection

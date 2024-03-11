@@ -65,6 +65,7 @@
 						<tr>
 							<td>{{ $row->quote }}</td>
 							<td>
+							<a class="btn btn-sm text-primary mr-2" href="javascript:void(0);" onclick="openEditModal('{{ $row->id }}')" > Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>
@@ -79,9 +80,50 @@
 	</div>
 
 	@include('admin.quotes.partials.create-modal')
-	<!-- Include edit-modal.php -->
-	@include('admin.quotes.partials.edit-modal')
 	<!-- Include delete-modal.php -->
 	@include('admin.quotes.partials.delete-modal')
 
     @endsection
+
+	@section('scripts')
+
+	<script>
+        
+        var toDeleteRow = '';
+
+        function deleteRow () {
+            let url = `{{ url('admin/quotes/delete')}}?id=${toDeleteRow}`;
+
+                fetch(url)
+                .then(res => res.text())
+                .then(res => {
+                    console.log(res)
+                    $('#delete-modal').modal('hide');
+                     window.location.reload();
+                })
+        }
+
+
+        function openDeleteModal (row = 0) {
+            toDeleteRow = row;
+            $('#delete-modal').modal('show');
+        }
+
+		function openEditModal (rowId = 0) {
+
+			var rows = JSON.parse(@json($quotes->toJson()));
+
+			console.log(rows);
+
+			var target_row = rows.data.find(item=>item.id === parseInt(rowId));
+
+			$('#quote').text(target_row.quote);
+			$('#id').val(target_row.id);
+			$('#title').html("Update Quote");
+           
+            $('#create-modal').modal('show');
+        }
+
+    </script>
+
+	@endsection

@@ -100,4 +100,29 @@ class Publication extends Model
         ->get();
         return $comments;
     }
+
+    public function accessgroups(){
+
+        return $this->hasManyThrough(
+            UserAccessGroup::class,
+            PublicationAccessGroup::class,
+            'publication_id', // Foreign key on PublicationAccessGroup table.
+            'id', // Foreign key on UserAccessGroup table. Assuming 'id' is the primary key.
+            'id', // Local key on Publication table.
+            'user_access_group_id' // Local key on PublicationAccessGroup table that relates to UserAccessGroup.
+        );
+    }
+
+    public function communities(){
+       
+        return $this->hasManyThrough(
+            CommunityOfPractice::class, //get access to these
+            PublicationCommunityOfPractice::class, //thru these
+            'publication_id', // Foreign key on PublicationCommunityOfPractice table.
+            'id', // Foreign key on UserAccessGroup table. Assuming 'id' is the primary key.
+            'id', // Local key on Publication table.
+            'community_of_practice_id' // Local key on PublicationCommunityOfPractice table that relates to UserAccessGroup.
+        );
+    }
+
 }

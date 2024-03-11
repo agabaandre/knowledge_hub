@@ -22,26 +22,3 @@
     </div>
 </div>
 
-    <script>
-        
-        var toDeleteRow = '';
-
-        function deleteRow () {
-            let url = `{{ url('admin/quotes/delete')}}?id=${toDeleteRow}`;
-
-                fetch(url)
-                .then(res => res.text())
-                .then(res => {
-                    console.log(res)
-                    $('#delete-modal').modal('hide');
-                     window.location.reload();
-                })
-        }
-
-
-        function openDeleteModal (row = 0) {
-            toDeleteRow = row;
-            $('#delete-modal').modal('show');
-        }
-
-    </script>

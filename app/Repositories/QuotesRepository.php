@@ -20,9 +20,10 @@ class QuotesRepository{
     }
     
     public function save(Request $request){
-        $quote = new Quote();
-        $quote->quote = $request->name;
-        $quote->save();
+
+        $quote = ($request->id)?Quote::find($request->id):new Quote();
+        $quote->quote = $request->quote;
+        $save=  ($request->id)? $quote->update():$quote->save();
 
         return $quote;
     }
