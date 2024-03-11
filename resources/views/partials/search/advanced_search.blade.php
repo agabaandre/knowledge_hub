@@ -7,7 +7,7 @@ $advanced_filter = (@$search->rcc || @$search->country_id || @$search->author_id
 @endphp
 
 <a data-toggle="collapse" href="#collapseExample" role="button" 
-aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-lg-12" style="color:{{ $text_color ?? '#bba66d'}}; font-size:14px;">
+aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-lg-12" style="color:var(--banner-text-color) !important; font-size:14px;">
 <span class="filter"> Advance your Search With Filters</span> <i class="fa fa-angle-down"></i>
 </a>
 

@@ -35,7 +35,7 @@
 }
 
 .spot-row h3{
-  color: #fff;
+  color: var(--banner-text-color) !important;
   font-size: 19pt;
   line-break: auto;
   padding-top: 10px;
