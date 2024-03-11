@@ -30,6 +30,8 @@ if(!function_exists('settings')){
 	 {
 		$settings = DB::table("setting")->first();
 		$settings->logo = asset('storage/uploads/config/'.$settings->logo);
+		$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
+		$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
 
 		return $settings;
 	 }

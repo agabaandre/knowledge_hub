@@ -86,6 +86,13 @@ function deleteFile(index)  {
     $('#cover').on('change', function() {
         imagesPreview(this, 'div.cover_preview');
     });
+      $('#favicon').on('change', function() {
+        imagesPreview(this, 'div.favicon_preview');
+    });
+     $('#spotlight').on('change', function() {
+        imagesPreview(this, 'div.spotlight_preview');
+    });
+  
 
 });
 

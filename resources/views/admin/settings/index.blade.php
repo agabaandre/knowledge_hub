@@ -49,8 +49,8 @@
                  
                     <div class="form-group">
                     <label>Favicon: (350*350)</label>
-                    <input type="file" name="logo" id="attachments">
-                    <div class="preview" style="max-width: 150px;">
+                    <input type="file" name="favicon" id="favicon">
+                    <div class="favicon_preview" style="max-width: 50px;">
                         <img src="{{ settings()->favicon }}"/>
                      </div>
                
@@ -87,7 +87,7 @@
                 <div class="form-group">
                    <label>Site Logo: (500*230)</label>
                     <input type="file" name="logo" id="attachments">
-                    <div class="preview" style="max-width: 150px;">
+                    <div class="preview" style="max-width: 100px;">
                         <img src="{{ settings()->logo }}"/>
                      </div>
                 </div>
@@ -130,15 +130,33 @@
                     <div class="input-group-append">
                     <span class="input-group-text color-preview"></span>
                     </div>
-                    <input type="text"  name="secondary_text_color" value="{{ $settings->links_active_color }}" class="form-control" />
+                    <input type="text"  name="links_active_color" value="{{ $settings->links_active_color }}" class="form-control" />
+                </div>
+            </div>
+              <div class="row mt-3">
+                <label>Icon Font Color:</label>
+                <div class="input-group colorPicker">
+                    <div class="input-group-append">
+                    <span class="input-group-text color-preview"></span>
+                    </div>
+                    <input type="text"  name="icon_font_color" value="{{ $settings->icon_font_color }}" class="form-control" />
+                </div>
+            </div>
+              <div class="row mt-3">
+                <label>Banner Text Color:</label>
+                <div class="input-group colorPicker">
+                    <div class="input-group-append">
+                    <span class="input-group-text color-preview"></span>
+                    </div>
+                    <input type="text"  name="banner_text" value="{{ $settings->banner_text }}" class="form-control" />
                 </div>
             </div>
 
             <div class="row mt-3">
                 <div class="form-group">
                    <label>Spotlight Banner: (1894*658)</label>
-                    <input type="file" name="spotlight_banner" id="attachments">
-                    <div class="preview" style="max-width: 150px;">
+                    <input type="file" name="spotlight_banner" id="spotlight">
+                    <div class="spotlight_preview" style="max-width: 100px;">
                         <img src="{{ settings()->spotlight_banner }}"/>
                      </div>
                 </div>

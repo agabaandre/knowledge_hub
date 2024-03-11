@@ -3,6 +3,10 @@
     :root {
     --theme-color-primary: {{settings()->primary_color}};
     --theme-color-secondary: {{settings()->secondary_color}};
+    --text-color-primary: {{settings()->primary_text_color}};
+    --text-color-secondary: {{settings()->links_active_color}};
+    --icon-color: {{settings()->icon_font_color}};
+    --banner-text-color: {{settings()->banner_text}};
     --sw-border-color:  #eeeeee;
     --sw-toolbar-btn-color:  #ffffff;
     --sw-toolbar-btn-background-color:  #28a745;

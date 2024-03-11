@@ -6,29 +6,15 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="description" content="{{ @$setting->site_description }}" />
 <meta name="keywords" content="{{ @$setting->seo_keywords }}">
-<meta name="author" content="Africa CDC" />
+<meta name="author" content="{{@$setting->site_name }}" />
 <!-- Title -->
-<title>{{ 'Africa CDC Knowledge Hub - '.@$title ?? 'Africa CDC Knowledge Hub' }}</title>
-
-    <!-- Custom CSS -->
-    <!-- Favicon -->
-
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-6GMM9ZKQTD"></script>
-<script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag() { dataLayer.push(arguments); }
-    gtag('js', new Date());
-
-    gtag('config', 'G-6GMM9ZKQTD');
-</script>
+<title>{{@$setting->title }}</title>
+{{ @$setting->analytics_script }}
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
-<link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
-
+<link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
 @include('partials.theming.colors')
-
 <link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css')}}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css')}}">
@@ -46,29 +32,6 @@
 
 
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
-<script type="text/javascript">
-    function googleTranslateElementInit() {
-        new google.translate.TranslateElement({
-            pageLanguage: 'en',
-            includedLanguages: 'en,fr,ar,es,pt,sw',
-            layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-            autoDisplay: false,
-            disableAutoHover: true,
-            showBanner: false
-        }, 'google_translate_element');
-
-        // Manually set the language of the Google Translate widget to English
-        var dropdown = document.querySelector('.goog-te-combo');
-        dropdown.value = 'en';
-    }
-</script>
-
-
-
-
-
-
-
 
 <!-- CSS -->
 <!-- <link href="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/css/smart_wizard_all.min.css" rel="stylesheet" type="text/css" /> -->
@@ -77,7 +40,54 @@
 
  <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
 
+ <script>
+        function initGoogleTranslate() {
+            // Initialize the Google Translate widget
+            googleTranslateElementInit();
+
+            // Add event listener to ensure a language is selected
+            var observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.attributeName === "value") {
+                        var dropdown = document.querySelector('.goog-te-combo');
+                        if (dropdown.value === 'en') {
+                            dropdown.setAttribute("required", true);
+                        } else {
+                            dropdown.removeAttribute("required");
+                        }
+                    }
+                });
+            });
+            observer.observe(document.querySelector('.goog-te-combo'), {
+                attributes: true
+            });
+        }
+
+        // Function called by the Google Translate script
+        function googleTranslateElementInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'en,fr,ar,es,pt,sw',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false,
+                disableAutoHover: true,
+                showBanner: false
+            }, 'google_translate_element');
+
+            // Manually set the language of the Google Translate widget to English
+            var dropdown = document.querySelector('.goog-te-combo');
+            dropdown.value = 'en';
+        }
+    </script>
+
     <style>
+        .VIpgJd-ZVi9od-vH1Gmf-ibnC6b div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:link div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:visited div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:active div{
+          color:#000 !important;
+        }
+        .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:hover div {
+        color: #FFF;
+        background: --;
+        }
 
         .sw-btn{
         padding: 0.775rem .95rem!important;
@@ -152,8 +162,8 @@
          }
      
          .custom-bg{
-            background-color:#7a7a7a!important; 
-            background-image:url(<?php echo asset('frontend/img/overlay.png'); ?>); 
+            background-color:var(--theme-color-primary)!important; 
+            background-image:url('{{ settings()->spotlight_banner}}'); 
             background-repeat:no-repeat; 
             background-size:cover;
          }
@@ -190,7 +200,8 @@
 
 </head>
 
-<body>
+<body onload="initGoogleTranslate()">
+ 
     <!-- ============================================================== -->
     <!-- Preloader - style you can find in spinners.css -->
     <!-- ============================================================== -->

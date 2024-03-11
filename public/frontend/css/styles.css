@@ -93,6 +93,9 @@
 .text-southern {
     color: var(--color-southern) !important;
 }
+.icon-color{
+ color: var(--icon-color) !important;
+}
 
 .no-js #loader {
     display: none;
@@ -309,7 +312,7 @@ h3,
 h4,
 h5,
 h6 {
-    color: var(--theme-color-secondary);
+    color: var(--text-color-secondary);
     font-weight: 400;
 }
 
@@ -4057,7 +4060,7 @@ ul.jbd-social li a {
 
 .form-control,
 select.form-control {
-   
+    height: 35px;
     padding: 0px 15px;
     font-size: 15px;
     border-radius: 2px;

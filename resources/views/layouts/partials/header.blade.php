@@ -3,7 +3,7 @@
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
 <div id="langauge-container">
-<div class="row d-flex" style="border-bottom:solid 0.4px var(--theme-color-primary) ; width:100%;  " >
+<div class="row d-flex" style="border-bottom: solid 0.4px var(--text-color-primary); border-top: solid 0.4px grey; box-shadow: 0 2px 0 grey, 0 2px 0 grey; width: 100%;" >
 		
 				    <div  class="ml-5 col-md-6 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">

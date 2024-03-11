@@ -9,7 +9,7 @@
 		</div>
 		<div class="main-header-center">
 			<div class="">
-				<img src="{{ settings()->logo }}" id="change-image"  width=180 style="border-radius:2px; background:#FFF;">
+				<img src="{{ settings()->logo }}" id="change-image"  width=145 style="border-radius:2px; background:#FFF;">
 			</div>
 		</div>
 		<div class="main-header-right">
@@ -113,7 +113,7 @@
 			
 			<!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
-				<a  class=""><img class="rounded-circle" src="{{ asset('assets/images/user.jpg') }}" style="width:35px;"></a>
+				<a  class=""><img class="rounded-circle" src="{{ asset('assets/images/user.jpg') }}" style="width:34px;"></a>
 				<div class="dropdown-menu animated fadeInUp">
 					<div class="main-header-profile header-img">
 						<h6>{{ @current_user()->name ?? 'Administrator' }}</h6><span>{{ ucwords(@current_user()->group_name) ?? '' }}</span>

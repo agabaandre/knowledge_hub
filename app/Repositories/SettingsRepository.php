@@ -29,7 +29,8 @@ class SettingsRepository{
         $settings->slogan            = $request->slogan;
         $settings->primary_text_color = $request->primary_text_color;
         $settings->links_active_color = $request->links_active_color;
-        $settings->links_active_color = $request->links_active_color;
+        $settings->icon_font_color = $request->icon_font_color;
+        $settings->banner_text = $request->banner_text;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):
@@ -46,9 +47,9 @@ class SettingsRepository{
                 $settings->favicon  = $favicon_filepath;
             endif;
             if ($request->hasFile('spotlight_banner')):
-                $favicon_file = $request->file('spotlight_banner');
-                $favicon_filepath = $this->save_attachments($favicon_file);
-                $settings->favicon = $favicon_filepath;
+                $banner_file = $request->file('spotlight_banner');
+                $banner_filepath = $this->save_attachments($banner_file);
+                $settings->spotlight_banner = $banner_filepath;
             endif;
 
         endif;
