@@ -95,8 +95,10 @@
 			    $('.answer').removeClass('bg-success').removeClass('bg-danger').removeClass('text-white');
 
 				var qns = '<?php echo json_encode($questions->toArray()); ?>';
-
+				
 				const questions   = JSON.parse(qns);
+				console.log(questions);
+
 				const current_qn  = questions.find((item)=>item.id === parseInt(question_id));
 
 				let all_answers    = current_qn.responses.length;
