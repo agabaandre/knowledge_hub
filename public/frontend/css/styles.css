@@ -40,8 +40,8 @@
 	Fonts
 ------------------------------------ */
 
-@import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap');
-
+/* @import url('https://fonts.googleapis.com/css2?family=Jost:wght@300;400;500;600;700&display=swap'); */
+@import url('https://fonts.cdnfonts.com/css/universe');
 /*------------------------------------------------------------
 	Page Loader
 -------------------------------------------------------------*/
@@ -135,7 +135,7 @@ body {
     background: #ffffff;
     color: #65656a;
     font-size: 14px;
-    font-family: 'Jost', sans-serif;
+    font-family: 'Universe', Arial, sans-serif; /* Using 'Universe' font first, then fallback to Arial and finally sans-serif */
     margin: 0;
     overflow-x: hidden !important;
     font-weight: 400;
