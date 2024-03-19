@@ -43,7 +43,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ["names"."area"];
+    protected $appends = ["names","area"];
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
