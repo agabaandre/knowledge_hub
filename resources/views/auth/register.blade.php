@@ -92,8 +92,7 @@
                                         @enderror
 									</div>
 								
-
-									<div class="form-group col-md-12">
+									<div class="form-group col-md-6">
 										<label>Preferences *</label>
 
 										@include('partials.tags.dropdown',['field'=>'preferences[]','selected'=>[]])
@@ -105,8 +104,13 @@
                                         @enderror
 									</div>
 
+									<div class="form-group col-md-6">
+										<label class="form-label" for="communities">Preferred Communities to Join</label>
+										@include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
+											'selected'=>(@$row->communities)?$row->communities:[]])
+									</div>
+
 								</div>
-								
 							
 								<div class="row">
 									<div class="form-group col-md-6">

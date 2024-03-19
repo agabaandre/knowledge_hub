@@ -247,6 +247,8 @@
     // Step show event
     $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
 
+      console.log('Step Position',stepNumber);
+
       $("#prev-btn").removeClass('disabled');
       $("#next-btn").removeClass('disabled');
 
@@ -271,8 +273,8 @@
     });
 
 
-    $("#next-btn").on("click", function() {
-      // Navigate next
+    $("#next-btn").on("click",  function(){
+  
       $('#smartwizard').smartWizard("next");
       return true;
     });

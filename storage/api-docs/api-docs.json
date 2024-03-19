@@ -33,7 +33,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
             },
             "post": {
                 "tags": [
@@ -109,7 +114,7 @@
                 }
             }
         },
-        "/knowhub/api/publications/filetypes": {
+        "/knowhub/api/lookup/filetypes": {
             "get": {
                 "tags": [
                     "List  File Types"
@@ -117,6 +122,26 @@
                 "summary": "List  File Types",
                 "description": "Returns a list of all file types",
                 "operationId": "List Publications File Types",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/knowhub/api/members": {
+            "get": {
+                "tags": [
+                    "List  Member States"
+                ],
+                "summary": "List  Member States",
+                "description": "Returns a list of all member statess",
+                "operationId": "List Member States",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -160,5 +185,23 @@
                 }
             }
         }
-    }
+    },
+    "components": {
+        "securitySchemes": {
+            "sanctum": {
+                "type": "http",
+                "description": "Enter API token authentication",
+                "scheme": "bearer",
+                "bearerFormat": "JWT"
+            }
+        }
+    },
+    "security": [
+        {
+            "sanctum": [
+                "read",
+                "write"
+            ]
+        }
+    ]
 }
