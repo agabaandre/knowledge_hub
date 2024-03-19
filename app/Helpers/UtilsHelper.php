@@ -206,7 +206,31 @@ function send_email($request){
     }
     
 }
+function isValidWebLink($link) {
+    // Define a regular expression pattern to match web links
+    $pattern = '/^(http|https|ftp|ftps):\/\/.+/i';
+    
+    // Check if the link matches the pattern
+    if (preg_match($pattern, $link)) {
+        return true; // Link is valid
+    } else {
+        return false; // Link is not valid
+    }
+}
 
+
+function getFileMimeType($file_path)
+{
+    if (!file_exists($file_path)) {
+        return "File not found";
+    }
+
+    $finfo = finfo_open(FILEINFO_MIME_TYPE); // Open fileinfo extension
+    $mime_type = finfo_file($finfo, $file_path); // Get MIME type
+    finfo_close($finfo); // Close fileinfo extension
+
+    return $mime_type;
+}
 
 
 

@@ -14,7 +14,7 @@
 	<title>{{ @$title ?? 'Africa CDC Knowledge Hub' }}</title>
 
 	<!-- Favicon -->
-	<link rel="icon" href="{{ asset('assets/images/fav.png')}}" type="image/x-icon" />
+    <link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
 
 	@include('partials.theming.colors')
 	

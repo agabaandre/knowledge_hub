@@ -5796,13 +5796,13 @@ h3.pa-name {
     bottom: 0px;
     cursor: pointer;
     border-radius: 4px;
-    background: #03b97c;
+    background: var(--theme-color-primary);
     color: #ffffff;
     border: 0;
     font-size: 14px;
     line-height: 50px;
     height: 50px;
-    width: 52px;
+    width: 150px;
     outline: none;
 }
 

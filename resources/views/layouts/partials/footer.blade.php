@@ -47,13 +47,13 @@
 					</div>
 					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
 						<div class="footer_widget">
-							<h4 class="widget_title">Knowledge Hub Social Platforms </h4>
+							<h4 class="widget_title">Find us On </h4>
 							<ul class="footer-menu">
-								<li><a href="https://facebook.com"><i class="lni lni-facebook-filled"></i> Facebook</a></li>
-								<li><a href="https://twitter.com" target="_blank"><i class="lni lni-twitter-filled"></i> Twitter</a></li>
-								<li><a href="https://linkedin.com"><i class="lni lni-linkedin-filled"></i>LinkedIn</a></li>
-								<li><a href="https://acacdemia.edu">Academia</a></li>
-								<li><a href="https://www.researchgate.net/">Research Gate</a></li>
+								<li><a href="{{ settings()->facebook }}"><i class="fa-brands fa-facebook"></i>Facebook</a></li>
+								<li><a href="{{ settings()->twitter }}" target="_blank"><i class="fa-brands fa-x-twitter"></i> Twitter</a></li>
+								<li><a href="{{ settings()->linkedin }}"><i class="fa-brands fa-linkedin-in"></i>LinkedIn</a></li>
+								<li><a href="{{ settings()->academia }}"><i class="fa-solid fa-a"></i>Academia</a></li>
+								<li><a href="{{ settings()->researchgate }}"><i class="fa-brands fa-researchgate"></i>Research Gate</a></li>
 							</ul>
 						</div>
 					</div>

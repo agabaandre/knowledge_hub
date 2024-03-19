@@ -8,7 +8,7 @@
 				    <div  class="ml-5 col-md-6 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
 						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:180px;" >
-					    <div class="slogan fw-bold" style="font-size:14px;"><small>{{ settings()->slogan}}</small></div>
+					    <div class="slogan fw-bold" style="font-size:14px; text-align:center;"><small>{{ settings()->slogan}}</small></div>
 					
 					</a>
 					</div>
