@@ -7,13 +7,11 @@ use Illuminate\Http\Request;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
-use App\Http\Controllers\Controller;
+use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
 
-
-class PublicationsApiController extends Controller
+class PublicationsApiController extends ApiController
 {
-
     private $publicationsRepo,$authorsRepo,$quotesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
@@ -24,10 +22,9 @@ class PublicationsApiController extends Controller
         $this->quotesRepo       = $quotesRepo;
     }
    
-
     /**
         * @OA\Get(
-        * path="/knowhub/api/publications",
+        * path="/api/publications",
         * operationId="List Publications",
         * tags={"List Publications"},
         * summary="List Publications",
@@ -58,10 +55,9 @@ class PublicationsApiController extends Controller
         ];
     }
 
-   
     /**
     * @OA\Post(
-    ** path="/knowhub/api/publications",
+    ** path="/api/publications",
     *   tags={"Create Publication"},
     *   summary="Create Publication",
     *   operationId="CreatePublication",
@@ -130,56 +126,10 @@ class PublicationsApiController extends Controller
         ];
     }
 
-    /**
-        * @OA\Get(
-        * path="/knowhub/api/lookup/filetypes",
-        * operationId="List Publications File Types",
-        * tags={"List  File Types"},
-        * summary="List  File Types",
-        * description="Returns a list of all file types",
-        *      @OA\Response(
-        *          response=200,
-        *          description="Successful",
-        *          @OA\JsonContent()
-        *       )
-        * )
-        */
-        public function file_types()
-        {
-            $file_types = $this->publicationsRepo->get_types();
-            return [
-                "status" => 200,
-                "data" => $file_types
-            ];
-        }
 
     /**
         * @OA\Get(
-        * path="/knowhub/api/members",
-        * operationId="List Member States",
-        * tags={"List  Member States"},
-        * summary="List  Member States",
-        * description="Returns a list of all member statess",
-        *      @OA\Response(
-        *          response=200,
-        *          description="Successful",
-        *          @OA\JsonContent()
-        *       )
-        * )
-        */
-        public function member_states()
-        {
-            $countries = Country::where('national','national')->get();
-            return [
-                "status" => 200,
-                "data" => $countries
-            ];
-        }
-
-
-    /**
-        * @OA\Get(
-        * path="/knowhub/api/publications/{id}",
+        * path="/api/publications/{id}",
         * operationId="Retrieve Single Publication",
         * tags={"Retrieve Single Publication"},
         * summary="Retrieve Single Publication",

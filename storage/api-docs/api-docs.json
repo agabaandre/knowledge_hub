@@ -4,8 +4,58 @@
         "title": "AFRICA CDC KnowledgeHub API",
         "version": "1.0.0"
     },
+    "servers": [
+        {
+            "url": "http://localhost/knowhub",
+            "description": "Local Development server"
+        },
+        {
+            "url": "https://khub.africacdc.org/",
+            "description": "Production server"
+        }
+    ],
     "paths": {
-        "/knowhub/api/publications": {
+        "/api/lookup/filetypes": {
+            "get": {
+                "tags": [
+                    "List  File Types"
+                ],
+                "summary": "List  File Types",
+                "description": "Returns a list of all file types",
+                "operationId": "List Publications File Types",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/members": {
+            "get": {
+                "tags": [
+                    "List  Member States"
+                ],
+                "summary": "List  Member States",
+                "description": "Returns a list of all member statess",
+                "operationId": "List Member States",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/publications": {
             "get": {
                 "tags": [
                     "List Publications"
@@ -114,47 +164,7 @@
                 }
             }
         },
-        "/knowhub/api/lookup/filetypes": {
-            "get": {
-                "tags": [
-                    "List  File Types"
-                ],
-                "summary": "List  File Types",
-                "description": "Returns a list of all file types",
-                "operationId": "List Publications File Types",
-                "responses": {
-                    "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/knowhub/api/members": {
-            "get": {
-                "tags": [
-                    "List  Member States"
-                ],
-                "summary": "List  Member States",
-                "description": "Returns a list of all member statess",
-                "operationId": "List Member States",
-                "responses": {
-                    "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/knowhub/api/publications/{id}": {
+        "/api/publications/{id}": {
             "get": {
                 "tags": [
                     "Retrieve Single Publication"

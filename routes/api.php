@@ -1,4 +1,7 @@
 <?php
+
+use App\Http\Controllers\Api\LookupApiController;
+use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
@@ -19,17 +22,16 @@ use App\Http\Controllers\TestController;
 ///,"middleware"=>["auth:sanctum"]
 
 Route::group(["prefix" =>"publications"],function(){
-
     Route::resource('/', PublicationsApiController::class);
     Route::get('/{id}', [PublicationsApiController::class,"show"]);
 });
 
 Route::group(["prefix" =>"members"],function(){
-    Route::get('/', [PublicationsApiController::class,"member_states"]);
+    Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
 Route::group(["prefix" =>"lookup"],function(){
-    Route::get('/filetypes', [PublicationsApiController::class,"file_types"]);
+    Route::get('/filetypes', [LookupApiController::class,"file_types"]);
 });
 
 
