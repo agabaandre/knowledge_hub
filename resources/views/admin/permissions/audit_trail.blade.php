@@ -40,12 +40,13 @@
                         @php
                             $actions = ["Delete","Update","Create","Confirm","Load","Approved","Rejected"];
                         @endphp
-                            <select class="form-control" name="action">
-                                <option value="">All</option>
-                                @foreach($actions as $key=>$value)
-                                <option value="{{$value}}" {{ ($value == @$search->action)?'selected':''}}>{{$key=>$value}}</option>
-                                @endforeach
-                            </select>
+                        <select class="form-control" name="action">
+                            <option value="">All</option>
+                            @foreach($actions as $key => $value)
+                                <option value="{{ $value }}" {{ ($value == @$search->action) ? 'selected' : '' }}>{{ $key }} => {{ $value }}</option>
+                            @endforeach
+                        </select>
+
                         </div>
                         <div class="form-group col-md-3 col-sm-12">
 
