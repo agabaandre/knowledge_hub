@@ -8,6 +8,8 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Controller;
+use App\Models\Country;
+
 
 class PublicationsApiController extends Controller
 {
@@ -29,6 +31,7 @@ class PublicationsApiController extends Controller
         * operationId="List Publications",
         * tags={"List Publications"},
         * summary="List Publications",
+        * security={ {"sanctum": {} }},
         * description="Returns a list of all publications",
         *  @OA\Parameter(
         *      name="term",
@@ -129,7 +132,7 @@ class PublicationsApiController extends Controller
 
     /**
         * @OA\Get(
-        * path="/knowhub/api/publications/filetypes",
+        * path="/knowhub/api/lookup/filetypes",
         * operationId="List Publications File Types",
         * tags={"List  File Types"},
         * summary="List  File Types",
@@ -149,6 +152,30 @@ class PublicationsApiController extends Controller
                 "data" => $file_types
             ];
         }
+
+    /**
+        * @OA\Get(
+        * path="/knowhub/api/members",
+        * operationId="List Member States",
+        * tags={"List  Member States"},
+        * summary="List  Member States",
+        * description="Returns a list of all member statess",
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function member_states()
+        {
+            $countries = Country::where('national','national')->get();
+            return [
+                "status" => 200,
+                "data" => $countries
+            ];
+        }
+
 
     /**
         * @OA\Get(

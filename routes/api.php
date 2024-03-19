@@ -2,6 +2,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
+use App\Http\Controllers\TestController;
 
 /*
 |--------------------------------------------------------------------------
@@ -15,16 +16,25 @@ use App\Http\Controllers\Api\PublicationsApiController;
 */
 
 // Publications Routes
+///,"middleware"=>["auth:sanctum"]
 
 Route::group(["prefix" =>"publications"],function(){
 
     Route::resource('/', PublicationsApiController::class);
     Route::get('/{id}', [PublicationsApiController::class,"show"]);
-    Route::get('/filetypes', [PublicationsApiController::class,"file_types"]);
-
 });
 
-Route::get('/test',function(){
+Route::group(["prefix" =>"members"],function(){
+    Route::get('/', [PublicationsApiController::class,"member_states"]);
+});
+
+Route::group(["prefix" =>"lookup"],function(){
+    Route::get('/filetypes', [PublicationsApiController::class,"file_types"]);
+});
+
+
+
+Route::get('/log',function(){
 
 $userIp = "45.56.197.35";// $_SERVER['REMOTE_ADDR']; // Get the user's IP address
 $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
@@ -58,4 +68,6 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
     }
 
 });
+
+Route::get('/test',[TestController::class,"index"]);
 

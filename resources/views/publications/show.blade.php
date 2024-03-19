@@ -108,7 +108,7 @@
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Category</label>
-										<span class="text-dark">{{ $publication->category->category_name }}</span>
+										<span class="text-dark">{{ @$publication->category->category_name }}</span>
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Type</label>

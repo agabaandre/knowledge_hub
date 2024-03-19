@@ -5,7 +5,7 @@ return [
     'documentations' => [
         'default' => [
             'api' => [
-                'title' => 'L5 Swagger UI',
+                'title' => 'Africa CDC KnowledgeHub API',
             ],
 
             'routes' => [
@@ -64,7 +64,7 @@ return [
                 'api' => [],
                 'asset' => [],
                 'docs' => [],
-                'oauth2_callback' => [],
+                'oauth2_callback' => []
             ],
 
             /*
@@ -191,13 +191,18 @@ return [
                         ],
                     ],
                 ],
-                'sanctum' => [ // Unique name of security
-                    'type' => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
-                    'description' => 'Enter token in format (Bearer <token>)',
-                    'name' => 'Authorization', // The name of the header or query parameter to be used.
-                    'in' => 'header', // The location of the API key. Valid values are "query" or "header".
-                ],
+                
                 */
+                'sanctum' => [ // Unique name of security
+                    'type' => 'http',
+                    'description' => 'Enter API token authentication',
+                    'scheme' => 'bearer',
+                    'bearerFormat' => 'JWT'
+                    // 'type' => 'apiKey', // Valid values are "basic", "apiKey" or "oauth2".
+                    // 'description' => 'Enter token in format (Bearer --token--)',
+                    // 'name' => 'Authorization', // The name of the header or query parameter to be used.
+                    // 'in' => 'header', // The location of the API key. Valid values are "query" or "header".
+                ],
             ],
             'security' => [
                 /*
@@ -209,9 +214,11 @@ return [
                         'read',
                         'write'
                     ],
-
-                    'passport' => []
                     */
+
+                    'sanctum' => [
+                    'read',
+                    'write']
                 ],
             ],
         ],
