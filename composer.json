@@ -14,6 +14,7 @@
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.75",
         "laravel/sanctum": "*",
+        "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.5",
         "phpmailer/phpmailer": "^6.8",
         "spatie/laravel-ignition": "^1.6",
@@ -57,9 +58,10 @@
     },
     "extra": {
         "laravel": {
-            "dont-discover": []
+            "dont-discover": ["laravel/telescope"]
         }
     },
+
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",

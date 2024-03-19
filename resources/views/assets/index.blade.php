@@ -48,7 +48,7 @@
 									<p>{{ $asset->type->type_name }}</p>
 									<hr>
 									<a href="{{$asset->url}}" target="_blank" class="text-success">{{ $asset->url }}</a>
-									<p>{{ truncate($asset->asset_desc,182); }}</p>
+									<p>{{ truncate($asset->asset_desc,182)}}</p>
 								</a>
 								<a class="text-success" href="{{ asset('healthassets/detail') }}?id={{$asset->id}}">View Details</a>
 								</p>
