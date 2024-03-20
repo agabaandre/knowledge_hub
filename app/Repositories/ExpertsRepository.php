@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Models\Country;
 use App\Models\Expert;
 use App\Models\ExpertType;
 use Illuminate\Http\Request;
@@ -16,7 +17,12 @@ class ExpertsRepository extends SharedRepo{
             $query->where('first_name','like','%'.$request->term.'%');
             $query->orWhere('last_name','like','%'.$request->term.'%');
             $query->orWhere('job_title','like','%'.$request->term.'%');
-            $query->orWhere('expert_type','like','%'.$request->term.'%');
+            
+            $query->orWhereIn('expert_type_id',
+            ExpertType::where('type_name','like','%'.$request->term.'%')->pluck('id'));
+            
+            $query->orWhereIn('country_id',
+            Country::where('name','like','%'.$request->term.'%')->pluck('id'));
         endif;
 
         if($request->export == 1){
@@ -42,12 +48,12 @@ class ExpertsRepository extends SharedRepo{
                $data_row =  [
                 "First Name"   => $row->first_name
                 ,"Last Name"   => $row->last_name
-                ,"Job"=>$row->job_title
-                ,"Occupation"=>$row->occupation
-                ,"Expert Type"=>$row->expert_type
-                ,"Email"    => $row->email
-                ,"Telephone"=>$row->phone_number
-                ,"Country"  =>($row->country)?$row->country->name:''
+                ,"Job"         =>$row->job_title
+                ,"Occupation"  =>$row->occupation
+                ,"Expert Type" =>$row->expert_type
+                ,"Email"       => $row->email
+                ,"Telephone"   =>$row->phone_number
+                ,"Country"     =>($row->country)?$row->country->name:''
                ];
 
                array_push($export_data,$data_row);

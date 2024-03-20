@@ -2,9 +2,11 @@
 namespace App\Repositories;
 
 use App\Jobs\SendMailJob;
+use App\Models\CommunityOfPracticeMembers;
 use App\Models\Faq;
 use App\Models\Forum;
 use App\Models\ForumComment;
+use App\Models\ForumCommunityOfPractice;
 use App\Models\ForumSubscription;
 use App\Models\ForumTag;
 use Illuminate\Http\Request;
@@ -24,6 +26,26 @@ class ForumsRepository extends SharedRepo{
         if($request->tag){
             $tagged_forums = ForumTag::where('tag',$request->tag)->get()->pluck('forum_id');
             $forums->whereIn('id',$tagged_forums);
+        }
+
+        if(current_user() && current_user()->id){
+
+            //Protect Forums from non target audiences if targte audience was defined
+
+            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
+            ->pluck("community_of_practice_id");
+           
+            //forums for user communities
+            $commForums = ForumCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('forum_id');
+
+            $forums->whereIn('id',$commForums)
+            ->orWhere('created_by',current_user()->id)
+            ->orWhereDoesntHave("communities");
+
+        }else
+        {
+            //only those without targets
+            $forums->whereDoesntHave("communities");
         }
 
         if($approved !== 3)
@@ -58,6 +80,20 @@ class ForumsRepository extends SharedRepo{
         endif;
 
         $forum->save();
+
+        
+        if($request->communities && count($request->communities)){
+
+            for($i=0;$i<count($request->communities);$i++){
+
+                $forumComm = new ForumCommunityOfPractice();
+                $forumComm->forum_id = $forum->id;
+                $forumComm->community_of_practice_id = $request->communities[$i];
+
+                $forumComm->save();
+            }
+            
+        }
         
         @$this->join_forum($forum);
 

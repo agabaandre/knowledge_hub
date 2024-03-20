@@ -1,4 +1,4 @@
-<div class="row py-3 advanced_filters">
+<div class="row py-3 advanced_filters main_search">
 
 @php
 

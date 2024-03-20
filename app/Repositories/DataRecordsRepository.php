@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\AssetType;
+use App\Models\Country;
 use App\Models\DataCategory;
 use App\Models\DataRecord;
 use App\Models\DataSubCategory;
@@ -19,21 +20,20 @@ class DataRecordsRepository extends SharedRepo{
         if($request->slug){
 
           $category       = DataCategory::where('slug','like',$request->slug)->first();
-        
-        //   $sub_categories = DataSubCategory::where('data_category_id',$category->id)
-        //                                     ->get()
-        //                                     ->pluck('id');
-
           $results->where('data_category_id',$category->id);
-
         }
 
         if($request->term){
 
          $results->where('title','like','%'.$request->term.'%');
          $results->orWhere('description','like','%'.$request->term.'%');
-
         }
+
+        if($request->rcc)
+            $results->whereIn('country_id',Country::where('region_id',$request->rcc)->pluck('id'));
+        
+        if($request->country_id)
+            $results->where('country_id',$request->country_id);
       
         if($request->export == 1){
             $this->excel_export($results);
@@ -57,9 +57,9 @@ class DataRecordsRepository extends SharedRepo{
 
                $data_row =  [
                 "Title"   => $row->title
-                ,"Catgeory"   => $row->sub_category->category->category_name
+                ,"Category"   => $row->sub_category->category->category_name ?? ''
                 ,"Description"   => $row->description
-                ,"Url"=>$row->url
+                //,"Url"=>$row->url
                 ,"Country"  =>($row->country)?$row->country->name:''
                ];
 

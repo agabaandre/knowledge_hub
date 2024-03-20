@@ -51,16 +51,30 @@ class ForumsController extends Controller
         return view('forums.create');
     }
 
-    public function comment(Request $request)
+    
+    public function publish(Request $request)
     {
-        $this->forumsRepo->save_comment($request);
+       $saved = $this->forumsRepo->save($request);
+   
+        $message = ($saved)?'Forum submitted for approval':'Request failed try again';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message']     = $data['alert'] = $message;
+        $data['status']      = 200;
         return back();
     }
 
-    public function publish(Request $request)
+    public function comment(Request $request)
     {
-        $this->forumsRepo->save($request);
-        return back();
+        $saved =$this->forumsRepo->save_comment($request);
+
+        $message = ($saved)?'Comment saved successfully':'Request failed try again';
+
+        $data['alert_class'] = ($saved)?'success':'danger';
+        $data['message']     = $data['alert'] = $message;
+        $data['status']      = 200;
+        return back()->with($data);
     }
+
 
 }
