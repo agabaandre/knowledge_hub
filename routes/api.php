@@ -1,10 +1,12 @@
 <?php
 
+use App\Http\Controllers\Api\ExpertsApiController;
 use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
+use App\Http\Controllers\ExpertsController;
 use App\Http\Controllers\TestController;
 
 /*
@@ -19,21 +21,22 @@ use App\Http\Controllers\TestController;
 */
 
 // Publications Routes
-///,"middleware"=>["auth:sanctum"]
+///,
+Route::group(["middleware"=>["api"]],function(){
 
-Route::group(["prefix" =>"publications"],function(){
-    Route::resource('/', PublicationsApiController::class);
-    Route::get('/{id}', [PublicationsApiController::class,"show"]);
-});
+Route::apiResource("publications",PublicationsApiController::class);
 
 Route::group(["prefix" =>"members"],function(){
     Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
+Route::apiResource("experts",ExpertsApiController::class);
+
 Route::group(["prefix" =>"lookup"],function(){
     Route::get('/filetypes', [LookupApiController::class,"file_types"]);
 });
 
+});
 
 
 Route::get('/log',function(){
