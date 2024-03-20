@@ -77,7 +77,7 @@
                                     "phone_number": {
                                         "type": "string"
                                     },
-                                    "expert_type_id": {
+                                    "type_id": {
                                         "type": "integer"
                                     },
                                     "country_id": {
@@ -139,7 +139,7 @@
                                     "phone_number": {
                                         "type": "string"
                                     },
-                                    "expert_type_id": {
+                                    "type_id": {
                                         "type": "integer"
                                     },
                                     "country_id": {

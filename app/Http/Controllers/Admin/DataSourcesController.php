@@ -24,6 +24,7 @@ class DataSourcesController extends Controller
 
     public function index(Request $request){
 
+        $request['is_admin'] = true;
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
         return view('admin.publications.index',$data);

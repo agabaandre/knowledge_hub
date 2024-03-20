@@ -109,8 +109,12 @@ class PublicationsRepository extends SharedRepo{
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
 
+
          //Access levels effect to query results
         $this->access_filter($pubs);
+        
+        if(!$request->is_admin)
+        $pubs->where('is_active','Active');
 
         $pubs->orderBy('visits','desc');
 

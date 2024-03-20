@@ -86,7 +86,7 @@
                                 <div id="file-input">
                                     <!-- <label class="form-label" for="publication">Publication Doc</label> -->
                                     <input placeholder="Attach publication document" type="file" name="files" class="form-control" multiple>
-                                     @if(count($publication->attachments)>0)
+                                     @if(@$publication && count(@$publication->attachments)>0)
                                      <h4 class="mt-3">Attachment(s): </h4>
                                         @foreach($publication->attachments as $attachment)
                                              <div class="py-2 mt-1"><a target="_blank" href="{{ storage_link('uploads/publications/') }}{{$attachment->file}}"><i class="fa fa-file fa-2x"></i> {{$attachment->description}}</a></div>
@@ -127,7 +127,7 @@
                         @if(states_enabled())
                         <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage </label>
+                                <label class="form-label" for="publication">Geographical Coverage</label>
                                 @include('partials.publications.area_dropdown',['field'=>'geo_area_id','required'=>'required','selected'=>form_edit('geo_area_id',$publication,'geographical_coverage_id')])
                             </div>
                         </div>

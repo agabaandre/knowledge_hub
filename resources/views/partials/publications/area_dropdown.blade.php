@@ -2,7 +2,7 @@
 <option disabled selected value="">Select</option>
 @foreach ($geoareas as $geoarea)
     <option value="{{$geoarea->id}}" {{($geoarea->id == @$selected)?'selected':''}}>
-        {{$geoarea->name}}
+        {{$geoarea->name ?? $geoarea->country_name}}
     </option>
 @endforeach
 </select>

@@ -84,6 +84,9 @@ class AccountController extends Controller
             unset($val_rules['sub_theme']);
             unset($val_rules['title']);
         endif;
+        
+        if(!$request->is_active)
+         $request['is_active']='In-Active';
 
         if($request->id):
             unset($val_rules['cover']);
