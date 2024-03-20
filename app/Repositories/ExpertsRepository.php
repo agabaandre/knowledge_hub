@@ -77,7 +77,9 @@ class ExpertsRepository extends SharedRepo{
         $expert->expert_type_id  = $request->type_id;
         $expert->country_id      = $request->country_id;
 
-        return ($request->id)?$expert->update():$expert->save();
+        $saved= ($request->id)?$expert->update():$expert->save();
+
+        return $expert;
     }
 
     public function find($id){

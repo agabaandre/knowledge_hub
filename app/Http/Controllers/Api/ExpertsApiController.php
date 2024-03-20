@@ -60,7 +60,7 @@ class ExpertsApiController extends ApiController
     *               @OA\Property(property="job_title", type="string"),
     *               @OA\Property(property="email", type="string"),
     *               @OA\Property(property="phone_number", type="string"),
-    *               @OA\Property(property="expert_type_id", type="integer"),
+    *               @OA\Property(property="type_id", type="integer"),
     *               @OA\Property(property="country_id", type="integer")
     *            ),
     *        ),
@@ -91,7 +91,7 @@ class ExpertsApiController extends ApiController
      *)
      **/
    
-    public function create(Request $request)
+    public function store(Request $request)
     {
         return  [
             "status" => 201,
@@ -123,7 +123,7 @@ class ExpertsApiController extends ApiController
     *               @OA\Property(property="job_title", type="string"),
     *               @OA\Property(property="email", type="string"),
     *               @OA\Property(property="phone_number", type="string"),
-    *               @OA\Property(property="expert_type_id", type="integer"),
+    *               @OA\Property(property="type_id", type="integer"),
     *               @OA\Property(property="country_id", type="integer")
     *            ),
     *        ),

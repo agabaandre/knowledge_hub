@@ -105,7 +105,7 @@ class PublicationsApiController extends ApiController
      *     )
      *)
      **/
-    public function create(Request $request)
+    public function store(Request $request)
     {
 
         $val_rules = [
