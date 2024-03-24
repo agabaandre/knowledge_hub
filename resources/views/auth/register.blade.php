@@ -131,7 +131,7 @@
 
 								<div class="row">
 									<div class="form-group col-md-12">
-										@include('auth.captcha')
+									    {!! htmlFormSnippet() !!}
 									</div>
 								</div>
 

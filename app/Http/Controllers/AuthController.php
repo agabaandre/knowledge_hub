@@ -7,6 +7,7 @@ use App\Repositories\FaqsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -27,11 +28,27 @@ class AuthController extends Controller
             'password' => ['required', 'string', 'min:8', 'confirmed'],
         ]);
 
+        $validator = Validator::make(request()->all(), ['g-recaptcha-response' => 'recaptcha']);
+        
+        $errors ="";
+        // check if validator fails
+        if($validator->fails()) {
+
+            $errors = $validator->errors();
+
+            $data['alert_class']="danger";
+            $data['alert']  ="We are unable able to prove you are human";
+
+        }
+        else{
+
         $saved = $this->usersRepo->save($request);
         
         $message = ($saved)?'Resgistration successful,Check Email to activate':'Request failed try again';
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['alert']       = $message;
+
+        }
 
         return back()->with($data);
     }
