@@ -14,10 +14,10 @@ class AddColumnsToCountriesTable extends Migration
     public function up()
     {
         Schema::table('country', function (Blueprint $table) {
-            // $table->string('iso_code', 2)->nullable()->after('name');
-            // $table->string('iso3_code', 3)->nullable()->after('iso_code');
-            // $table->smallInteger('numcode')->nullable()->after('iso3_code');
-            // $table->string('phonecode')->nullable()->after('numcode');
+            $table->string('iso_code', 2)->nullable()->after('name');
+            $table->string('iso3_code', 3)->nullable()->after('iso_code');
+            $table->smallInteger('numcode')->nullable()->after('iso3_code');
+            $table->string('phonecode')->nullable()->after('numcode');
         });
     }
 
