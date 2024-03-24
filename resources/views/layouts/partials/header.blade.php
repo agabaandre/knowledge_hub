@@ -12,7 +12,7 @@
 					
 					</a>
 					</div>
-					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0">
+					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0" id="language">
 							@include('layouts.partials.language')
 					</div>
 

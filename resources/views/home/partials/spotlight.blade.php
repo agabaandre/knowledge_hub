@@ -1,6 +1,6 @@
 <div class="spotlight px-3 py-3 custom-bg">
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
-							<div class="row no-gutters bg-white rounded search-form">
+							<div class="row no-gutters bg-white rounded search-form" id="simple_search">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
 										<div class="form-group mb-0 position-relative main_search">
 											<input type="text" class="form-control left-ico autocomplete term main-search" name="term" value="{{ @old('term') }}" placeholder="Type Keywords" />

@@ -3,6 +3,7 @@
 @section('styles')
 
 <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet"/>
+@include('partials.tour.css')
 
 <style>
 
@@ -28,6 +29,10 @@
 @section('scripts')
 
 @include('common.select2')
+
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE')):
+    @include('partials.tour.js')
+@endif
 
 <script>
 var showing = false;
