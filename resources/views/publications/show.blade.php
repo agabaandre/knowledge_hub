@@ -77,7 +77,7 @@
 
 			   @php
 
-			    $col =(count($publication->summaries)>0 || $publication->has_attachments)?"7":"12";
+			    $col =(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)?"7":"12";
 			   
 				@endphp
 
@@ -193,7 +193,7 @@
 
 				<!-- Sidebar -->
 
-				@if(count($publication->summaries)>0 || $publication->has_attachments)
+				@if(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)
 				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 
@@ -214,7 +214,7 @@
 										</ul>
 									@endif
 
-				@if(count($publication->summaries)>0 || count($publication->versioning)>0)
+				@if(count($publication->summaries)>0 || count($publication->versioning)>0 || $publication->parent_id>0)
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
 					
 					
@@ -225,8 +225,8 @@
 									<li><h5 class="text-muted"><a href="{{ url('records/resource') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
 								@endforeach
 							</ul>
-						@elseif($publication->parent_id)
-							<h5 class=" mb-3"><a class="text-success" href="{{ url('records/resource') }}?id={{$publication->parent_id}}">View Original Version</a></h5>
+						@elseif($publication->parent_id>0)
+							<h5 class=" mb-3"><a class=" col-lg-12 text-center btn btn-sm btn-outline-success rounded" href="{{ url('records/resource') }}?id={{$publication->parent_id}}"><i class="fa fa-link"></i> Original Version</a></h5>
 						@endif
 
 						@if(count($publication->summaries)>0)

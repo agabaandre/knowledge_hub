@@ -4,8 +4,350 @@
         "title": "AFRICA CDC KnowledgeHub API",
         "version": "1.0.0"
     },
+    "servers": [
+        {
+            "url": "http://localhost/knowhub",
+            "description": "Local Development server"
+        },
+        {
+            "url": "https://khub.africacdc.org/",
+            "description": "Production server"
+        }
+    ],
     "paths": {
-        "/knowhub/api/publications": {
+        "/api/auth/get_token": {
+            "post": {
+                "tags": [
+                    "Authenticates Client and returns JWT token"
+                ],
+                "summary": "Authenticates Client and returns JWT token",
+                "description": "Authenticates Client and returns JWT token",
+                "operationId": "Authenticates Client and returns JWT token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "api_key": {
+                                        "type": "string"
+                                    },
+                                    "api_secret": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid Client DCredentials"
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh_token": {
+            "post": {
+                "tags": [
+                    "Refresh JWT token"
+                ],
+                "summary": "Refresh JWT token",
+                "description": "Refresh JWT token",
+                "operationId": "Refresh JWT token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "token": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid Token"
+                    }
+                }
+            }
+        },
+        "/api/experts": {
+            "get": {
+                "tags": [
+                    "List Country Experts"
+                ],
+                "summary": "List Country Experts",
+                "description": "Returns a list of all Country Experts",
+                "operationId": "List Country Experts",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "Search term for search for specific records",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "sanctum": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Create Country Expert"
+                ],
+                "summary": "Create Country Expert",
+                "description": "Allows users to submit country experts for amdin approval",
+                "operationId": "CreateExpert",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "job_title": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "type_id": {
+                                        "type": "integer"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you sent the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            }
+        },
+        "/api/experts/{id}": {
+            "post": {
+                "tags": [
+                    "Update Country Expert"
+                ],
+                "summary": "Update Country Expert",
+                "description": "Allows users to update Country Expert Record",
+                "operationId": "UpdateExpert",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "job_title": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "type_id": {
+                                        "type": "integer"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you sent the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Delete Expert"
+                ],
+                "summary": "Delete Single Expert Record",
+                "description": "Deletes a single expert record based on the ID.",
+                "operationId": "DeleteSingleExpertRecord",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            }
+        },
+        "/api/lookup/filetypes": {
+            "get": {
+                "tags": [
+                    "List  File Types"
+                ],
+                "summary": "List  File Types",
+                "description": "Returns a list of all file types",
+                "operationId": "List Publications File Types",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/members": {
+            "get": {
+                "tags": [
+                    "List  Member States"
+                ],
+                "summary": "List  Member States",
+                "description": "Returns a list of all member statess",
+                "operationId": "List Member States",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/publications": {
             "get": {
                 "tags": [
                     "List Publications"
@@ -114,47 +456,7 @@
                 }
             }
         },
-        "/knowhub/api/lookup/filetypes": {
-            "get": {
-                "tags": [
-                    "List  File Types"
-                ],
-                "summary": "List  File Types",
-                "description": "Returns a list of all file types",
-                "operationId": "List Publications File Types",
-                "responses": {
-                    "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/knowhub/api/members": {
-            "get": {
-                "tags": [
-                    "List  Member States"
-                ],
-                "summary": "List  Member States",
-                "description": "Returns a list of all member statess",
-                "operationId": "List Member States",
-                "responses": {
-                    "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "/knowhub/api/publications/{id}": {
+        "/api/publications/{id}": {
             "get": {
                 "tags": [
                     "Retrieve Single Publication"
@@ -188,8 +490,8 @@
     },
     "components": {
         "securitySchemes": {
-            "sanctum": {
-                "type": "http",
+            "jwt": {
+                "type": "apiKey",
                 "description": "Enter API token authentication",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
@@ -198,7 +500,7 @@
     },
     "security": [
         {
-            "sanctum": [
+            "jwt": [
                 "read",
                 "write"
             ]

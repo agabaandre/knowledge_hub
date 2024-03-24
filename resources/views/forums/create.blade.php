@@ -18,7 +18,7 @@
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
-           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications'>
+           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications' enctype="multipart/form-data">
             @csrf
             <div class="modal-body">
                <div class="row">
@@ -28,6 +28,13 @@
                                 <label class="form-label" for="publication">Forum Title</label>
                                 <input type="text" placeholder="Forum Title" class="form-control url" id="title" name="title" required>
                             </div>
+                  </div>
+
+                  
+                  <div class="form-group col-lg-12">
+                    <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
+                      @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
+                        'selected'=>[]])
                   </div>
                        
 
@@ -83,5 +90,6 @@
 @section('scripts')
 
     @include('account.partials.create_js')
+    @include('common.select2')
 
 @endsection

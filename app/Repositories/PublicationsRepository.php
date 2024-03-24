@@ -18,6 +18,7 @@ use App\Models\Region;
 use App\Models\SubjectArea;
 use App\Models\SubThemeticArea;
 use App\Models\Tag;
+use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
 use Illuminate\Http\Request;
 
@@ -109,8 +110,30 @@ class PublicationsRepository extends SharedRepo{
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
 
+         if(current_user() && current_user()->id){
+
+            //Protect Resources from non target audiences if targte audience was defined
+
+            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
+            ->pluck("community_of_practice_id");
+           
+            //forums for user communities
+            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
+
+            $pubs->whereIn('id',$commPubs)
+            ->orWhereDoesntHave("communities");
+
+        }else
+        {
+            //only those without targets
+            $pubs->whereDoesntHave("communities");
+        }
+
          //Access levels effect to query results
         $this->access_filter($pubs);
+        
+        if(!$request->is_admin)
+        $pubs->where('is_active','Active');
 
         $pubs->orderBy('visits','desc');
 
@@ -173,6 +196,11 @@ class PublicationsRepository extends SharedRepo{
     public function save(Request $request){
 
         $pub = ($request->id)? Publication::find($request->id):new Publication();
+        $user = @current_user();
+       
+        if(!$user):
+            $user = User::find($request->user_id);
+        endif;
 
         if($request->original_id):
 
@@ -182,40 +210,34 @@ class PublicationsRepository extends SharedRepo{
             $pub->is_version = 1;
             $pub->title                    = $parent->title;
             $versions_now = count($parent->versioning);
-            $pub->version_no               = ($versions_now ==0)?$versions_now +2: $versions_now+1;
-
+            $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
+            $request['category_id']= $parent->publication_catgory_id;
         else:
            
-        $pub->sub_thematic_area_id      = $request->sub_theme;
+            $pub->sub_thematic_area_id      = $request->sub_theme;
 
-        if(!$request->geo_area_id):
+            if(!$request->geo_area_id):
 
-        $user = @current_user();
+                $geo_id = ($user->country_id)?$user->area->id:1;
+                $pub->geographical_coverage_id = $geo_id;
 
-        if(!$user):
-            $user = User::find($request->user_id);
-        endif;
-
-        $geo_id = ($user->country_id)?$user->area->id:1;
-        $pub->geographical_coverage_id = $geo_id;
-
-        else:
-            $pub->geographical_coverage_id  = $request->geo_area_id;
-        endif;
-        
-        $pub->title                     = $request->title;
+            else:
+                $pub->geographical_coverage_id  = $request->geo_area_id;
+            endif;
+            
+            $pub->title                     = $request->title;
 
         endif;
 
-        $pub->author_id            = ($request->author)?$request->author:$user->author_id;
+        $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
         $pub->file_type_id         = $request->file_type;
         $pub->publication_catgory_id  = $request->category_id;
-        $pub->visits               = 0;
+        $pub->visits               = ($request->id)?$pub->visits:0;
 
         if($request->is_active)
-        $pub->is_active = $request->is_active;
+            $pub->is_active = $request->is_active;
 
         $file_type = $this->find_type($request->file_type);
 
@@ -236,23 +258,23 @@ class PublicationsRepository extends SharedRepo{
         $id = ($request->id)?$request->id:$pub->id;
 
         //save attachments
-        if($request->hasFile('files')):
+        if($request->hasFile('files') && $saved):
             $files = $request->file('files');
             $this->save_attachments($files,$id);
         endif;
 
         //save tags
-        if($request->tags):
+        if($request->tags && $saved):
             $this->save_tags($request->tags,$id);
         endif;
 
         //attach communitites
-        if(@$request->communities):
+        if(@$request->communities && $saved):
             $this->attach_to_community($request->communities,$id);
         endif;
 
          //attach access groups
-         if(@$request->accessgroups):
+         if(@$request->accessgroups && $saved):
             $this->attach_to_access_group($request->accessgroups,$id);
         endif;
 
@@ -398,6 +420,14 @@ class PublicationsRepository extends SharedRepo{
         $summary->resource_id = $request->original_id;
         $summary->title       = $request->title;
         $summary->description = $request->summary;
+
+        $user = @current_user();
+       
+        if(!$user):
+            $user = User::find($request->user_id);
+        endif;
+
+        $summary->author_id = $user->author_id;
 
         if($request->hasFile('file')):
 

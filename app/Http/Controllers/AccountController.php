@@ -74,8 +74,8 @@ class AccountController extends Controller
     public function submit_publication(Request $request){
 
         $val_rules = [
-            'cover'      =>'required',
-            'file_type'  =>'required',
+            //'cover'      =>'required',
+            //'file_type'  =>'required',
             'sub_theme'  =>'required',
             'description'=>'required'
         ];
@@ -83,7 +83,11 @@ class AccountController extends Controller
         if($request->original_id):
             unset($val_rules['sub_theme']);
             unset($val_rules['title']);
+            $request['file_type'] = 1;
         endif;
+        
+        if(!$request->is_active)
+         $request['is_active']='In-Active';
 
         if($request->id):
             unset($val_rules['cover']);
@@ -114,7 +118,7 @@ class AccountController extends Controller
     public function submit_summary(Request $request){
 
         $val_rules = [
-            'file_type'=>'required',
+            //'file_type'=>'required',
             'summary'  =>'required',
             'title'    =>'required'
         ];
@@ -131,7 +135,7 @@ class AccountController extends Controller
         if($request->ajax())
            return response($data);
 
-        return redirect()->url('records/show?id='.$request->original_id)->with($data);
+        return redirect(url('records/resource?id='.$request->original_id))->with($data);
 
     }
 

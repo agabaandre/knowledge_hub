@@ -12,7 +12,7 @@
 				
 				
 					<div class="single_widgets widget_search px-0 py-0" style="background-color: transparent!important; border:none!important;">
-					<form action="{{ (strpos(current_url(),'record') >-1)?url('records'):((strpos(current_url(),'thread') >-1)?url('forums'):'')}}" class="sidebar-search-form px-0 py-0">
+					<form action="{{ (strpos(current_url(),'record') >-1)?url('records'):((strpos(current_url(),'thread') >-1)?url('forums'):'')}}" class="sidebar-search-form px-0 py-0 filter">
 						<input class="px-3 py-0 main_search" style="font-size: 12pt;" value="{{ @$search->term }}" type="search" name="term" placeholder="What are you looking for?">
 						
 						<button type="submit" class="bg-show"><i class="ti-search"></i></button>

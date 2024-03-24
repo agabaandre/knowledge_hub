@@ -25,7 +25,7 @@
 					@auth
 						@if(count($assets)>0)
 						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
-							<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+							<a href="{{ current_url()}}export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
 						</div>
 						@endif
 					@endauth

@@ -12,7 +12,7 @@
 					
 					</a>
 					</div>
-					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0">
+					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0" id="language">
 							@include('layouts.partials.language')
 					</div>
 
@@ -58,11 +58,9 @@
 					<ul class="nav-menu">
 
 						<li><a href="{{ url('/')}}">Home</a></li>
-						<li class="categories"><a href="javascript:void(0);">Categories<span class="submenu-indicator"></span></a>
+						<li class="categories "><a href="javascript:void(0);">Categories<span class="submenu-indicator"></span></a>
 							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
-							   
-							   
-
+						
 								@foreach($data_categories as $category)
 
 									@if(strlen($category->required_permission) > 0)
@@ -83,6 +81,7 @@
 
 									@endif
 								@endforeach
+
 
 							</ul>
 						</li>

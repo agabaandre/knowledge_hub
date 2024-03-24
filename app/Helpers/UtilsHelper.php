@@ -99,7 +99,7 @@ if (!function_exists('is_valid_image')) {
 
     function is_valid_image($image)
     {
-        if (file_exists($image)) {
+        if (Storage::disk('local')->exists($image)) {
             return TRUE;
         } else {
             return FALSE;
@@ -140,15 +140,17 @@ if(!function_exists('storage_link')){
 	}
 }
 
-function export_excel($records) {
-	$heading = false;
+function export_excel($records,$heading=false) {
+
 		if(!empty($records))
 		  foreach($records as $row) {
-			if(!$heading) {
+			
+            if(!$heading) {
 			  // display field/column names as a first row
 			  echo implode("\t", array_keys($row)) . "\n";
 			  $heading = true;
 			}
+            
 			echo implode("\t", array_values($row)) . "\n";
 		}
 	exit;

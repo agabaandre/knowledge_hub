@@ -8,14 +8,19 @@
 
 <div class="gray pt-2">
 <div class="container">
-<form class="row container" action="">
-	<div class="form-group col-lg-6">
+<form class="row container justify-content-center align-items-center" action="">
+	<div class="form-group col-lg-4">
 			<label>RCC</label>
-			@include('partials.regions.dropdown',['class'=>'select2'])
+			@include('partials.regions.dropdown',['class'=>'select2','allfield'=>'ALL','selected'=>@$_GET['rcc']])
 		</div>
-		<div class="form-group col-lg-6">
+		<div class="form-group col-lg-4">
 			<label>Member State</label>
-			@include('partials.countries.dropdown',['class'=>'select2'])
+			<select class='form-control select2 text-left form-select' name="country_id" id="country_id">
+				<option value="">ALL</option>
+			</select>
+		</div>
+		<div class="form-group col-lg-4">
+			<button type="submit" class="btn btn btn-md btn-success mt-4">Apply Filter</button>
 		</div>
 </form>
 			
@@ -34,7 +39,7 @@
 					@auth
 						@if(count($records)>0)
 						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
-							<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+							<a href="{{ current_url() }}export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
 						</div>
 						@endif
 					@endauth
@@ -84,5 +89,51 @@
 </div>
 </div>
 </div>
+
+@endsection
+
+@section('scripts')
+
+<script>
+
+   var countries = @json($countries);
+
+   console.log(countries);
+
+    var selectedCountry = '<?php echo @$_GET['country_id']; ?>';
+	var selectedRcc = '<?php echo @$_GET['rcc']; ?>';
+
+	if(parseInt(selectedCountry)>0){
+
+		const selected_country = countries.find(item=>(item.region_id === parseInt(selectedCountry) || item.region_id === parseInt(selectedRcc)));
+		let rc_countries = countries.filter(item=>item.region_id === parseInt(selected_country.region_id));
+		
+		rc_countries.forEach(country => {
+			$('#country_id').append(`<option ${(country.id  === selected_country.id)?'selected':''} value="${country.id}">${country.name}</option>`);
+		});
+
+		$('#country_id').val(selected_country.id).trigger('change');
+
+	}
+
+
+	$('#rcc').on('change', function(e){
+
+		const rcc_countries = countries.filter(item=>item.region_id === parseInt(e.target.value));
+
+		console.log('RCC Countries',rcc_countries);
+
+		$('#country_id').empty();
+
+		rcc_countries.forEach(country => {
+
+			$('#country_id').append(`<option value="${country.id}">${country.name}</option>`);
+		});
+		
+
+	});
+
+</script>
+
 
 @endsection

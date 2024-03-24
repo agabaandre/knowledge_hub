@@ -10,15 +10,14 @@
         "captcha-com/laravel-captcha": "4.*",
         "darkaonline/l5-swagger": "^8.5",
         "doctrine/dbal": "^3.6",
-        "fruitcake/laravel-cors": "^2.0",
         "guzzlehttp/guzzle": "^7.0.1",
         "laravel/framework": "^8.75",
-        "laravel/sanctum": "*",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.5",
         "phpmailer/phpmailer": "^6.8",
         "spatie/laravel-ignition": "^1.6",
-        "spatie/laravel-permission": "^5.10"
+        "spatie/laravel-permission": "^5.10",
+        "tymon/jwt-auth": "*"
     },
     "require-dev": {
         "facade/ignition": "^2.5",

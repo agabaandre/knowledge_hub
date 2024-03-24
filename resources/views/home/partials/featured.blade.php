@@ -1,5 +1,5 @@
 	<section class="middle gray" style="background-image:url(<?php echo asset('frontend/img/dots.png') ?>); background-repeat:repeat;">
-		<div class="container">
+		<div class="container" id="recommendations">
 
 			<div class="row justify-content-center">
 				<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">

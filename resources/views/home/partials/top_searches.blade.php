@@ -12,8 +12,7 @@
 					</div>
 
 					<!-- row -->
-					<div class="row align-items-center" 
-					>
+					<div class="row align-items-center" id="top_searches">
 
 							@php 
 								$i=0; 
@@ -91,7 +90,7 @@
 					<div class="row justify-content-center">
 						<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
 							<div class="position-relative text-center">
-								<a href="{{ url('records')}}" class="btn btn-md theme-bg rounded text-light hover-theme">Explore More Resources<i class="lni lni-arrow-right-circle ml-2"></i></a>
+								<a id="explore" href="{{ url('records')}}" class="btn btn-md theme-bg rounded text-light hover-theme">Explore More Resources<i class="lni lni-arrow-right-circle ml-2"></i></a>
 							</div>
 						</div>
 					</div>
