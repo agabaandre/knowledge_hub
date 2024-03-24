@@ -4,12 +4,12 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="description" content="{{ @$setting->site_description }}" />
-<meta name="keywords" content="{{ @$setting->seo_keywords }}">
-<meta name="author" content="{{@$setting->site_name }}" />
+<meta name="description" content="{{ @setting()->site_description }}" />
+<meta name="keywords" content="{{ @setting()->seo_keywords }}">
+<meta name="author" content="{{@setting()->site_name }}" />
 <!-- Title -->
-<title>{{@$setting->title }}</title>
-{{ @$setting->analytics_script }}
+<title>{{@setting()->title }}</title>
+{{ @setting()->analytics_script }}
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
