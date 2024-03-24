@@ -24,9 +24,10 @@ class TestController extends Controller
         // $data['body']    = $body;
         // SendMailJob::dispatch($data);
 
-            $user  = ApiClient::first();
-            $token = $user->createToken("API Client");
-            return response(json_encode(['token' => $token->plainTextToken]));
+            $client  = ApiClient::first();
+            $credentials =['api_key'=>$client->api_key,'api_secret'=>base64_encode($client->api_secret)];
+
+            return response(json_encode($credentials));
     }
 
   

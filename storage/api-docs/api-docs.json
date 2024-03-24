@@ -15,6 +15,97 @@
         }
     ],
     "paths": {
+        "/api/auth/get_token": {
+            "post": {
+                "tags": [
+                    "Authenticates Client and returns JWT token"
+                ],
+                "summary": "Authenticates Client and returns JWT token",
+                "description": "Authenticates Client and returns JWT token",
+                "operationId": "Authenticates Client and returns JWT token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "api_key": {
+                                        "type": "string"
+                                    },
+                                    "api_secret": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid Client DCredentials"
+                    }
+                }
+            }
+        },
+        "/api/auth/refresh_token": {
+            "post": {
+                "tags": [
+                    "Refresh JWT token"
+                ],
+                "summary": "Refresh JWT token",
+                "description": "Refresh JWT token",
+                "operationId": "Refresh JWT token",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "token": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid Token"
+                    }
+                }
+            }
+        },
         "/api/experts": {
             "get": {
                 "tags": [
@@ -119,6 +210,17 @@
                 "summary": "Update Country Expert",
                 "description": "Allows users to update Country Expert Record",
                 "operationId": "UpdateExpert",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Record Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -388,8 +490,8 @@
     },
     "components": {
         "securitySchemes": {
-            "sanctum": {
-                "type": "http",
+            "jwt": {
+                "type": "apiKey",
                 "description": "Enter API token authentication",
                 "scheme": "bearer",
                 "bearerFormat": "JWT"
@@ -398,7 +500,7 @@
     },
     "security": [
         {
-            "sanctum": [
+            "jwt": [
                 "read",
                 "write"
             ]

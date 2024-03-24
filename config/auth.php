@@ -41,7 +41,7 @@ return [
             'provider' => 'users',
         ],
         'api' => [
-            'driver' => 'sanctum',
+            'driver' => 'jwt',
             'provider' => 'api_clients',
         ]
     ],
@@ -70,7 +70,7 @@ return [
             'model' => App\Models\User::class,
         ],
         'api_clients' => [
-            'driver' => 'eloquent',
+            'driver' => 'custom-eloquent',
             'model' => App\Models\ApiClient::class,
         ],
         

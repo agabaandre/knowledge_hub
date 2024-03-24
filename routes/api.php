@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\ExpertsApiController;
 use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
@@ -22,7 +23,14 @@ use App\Http\Controllers\TestController;
 
 // Publications Routes
 ///,
-Route::group(["middleware"=>["api"]],function(){
+
+
+Route::group(["prefix" =>"auth"],function(){
+    Route::post('/get_token', [AuthApiController::class,"login"]);
+    Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
+});
+
+Route::group(['middleware' => 'api'],function(){
 
 Route::apiResource("publications",PublicationsApiController::class);
 

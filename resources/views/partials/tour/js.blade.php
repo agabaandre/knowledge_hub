@@ -51,6 +51,18 @@ var steps = [
       placement: 'top-start',
     },
     {
+      element: '#categorization',
+      title: 'Resource Categorization',
+      content: 'These tabs represent our resource categorizations, click on them to visit there detailed pages.',
+      placement: 'bottom-start',
+    },
+    {
+      element: '#recommendations',
+      title: 'Recommended Publications',
+      content: 'Here are tour recommended resources, check the out anytime!',
+      placement: 'top-start',
+    },
+    {
       element: '#top_searches',
       title: 'Top Searches',
       content: 'Here are the most searched published resources, we think you might be interested in them too!',

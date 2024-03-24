@@ -438,3 +438,7 @@ Route::group(["prefix" => "dashboards"], function () {
     Route::get("/kpi",  [GraphController::class, 'kpi_comparison']);
     Route::get("/kpi_comparison_data",  [GraphController::class, 'kpi_comparison_data']);
 });
+
+// Route::get("/test", function(){
+//     dd(Hash::make("1234"));
+// });

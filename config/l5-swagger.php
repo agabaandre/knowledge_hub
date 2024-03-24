@@ -190,11 +190,9 @@ return [
                             "scopes" => []
                         ],
                     ],
-                ],
-                
-                */
-                'sanctum' => [ // Unique name of security
-                    'type' => 'http',
+                ],*/
+                'jwt' => [ // Unique name of security
+                    'type' => 'apiKey',
                     'description' => 'Enter API token authentication',
                     'scheme' => 'bearer',
                     'bearerFormat' => 'JWT'
@@ -202,21 +200,20 @@ return [
                     // 'description' => 'Enter token in format (Bearer --token--)',
                     // 'name' => 'Authorization', // The name of the header or query parameter to be used.
                     // 'in' => 'header', // The location of the API key. Valid values are "query" or "header".
-                ],
+                ]
+                
             ],
             'security' => [
                 /*
                  * Examples of Securities
                 */
                 [
-                    /*
-                    'oauth2_security_example' => [
+                   /* 'oauth2_security_example' => [
                         'read',
                         'write'
-                    ],
-                    */
+                    ], */
 
-                    'sanctum' => [
+                    'jwt' => [
                     'read',
                     'write']
                 ],

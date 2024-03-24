@@ -128,6 +128,15 @@ class ExpertsApiController extends ApiController
     *            ),
     *        ),
     *    ),
+    * @OA\Parameter(
+    *      name="id",
+    *      in="path",
+    *      required=true,
+    *      description="Record Id",
+    *      @OA\Schema(
+    *           type="integer"
+    *      )
+    *   ),
      *   @OA\Response(
      *      response=201,
      *       description="Success",
