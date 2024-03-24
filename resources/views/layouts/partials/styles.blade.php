@@ -27,10 +27,6 @@
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
 
-{{-- Captcha CSS --}}
-<link href="{{ captcha_layout_stylesheet_url() }}" type="text/css" rel="stylesheet">
-
-
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 
 <!-- CSS -->
@@ -198,6 +194,9 @@
         
         
         </style>
+
+        
+   {!! ReCaptcha::htmlScriptTagJsApi() !!}
 
 </head>
 
