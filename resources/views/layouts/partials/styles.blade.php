@@ -9,7 +9,7 @@
 <meta name="author" content="{{@settings()->site_name }}" />
 <!-- Title -->
 <title>{!!@settings()->title!!}</title>
-{{ @settings()->analytics_script }}
+{!!@settings()->analytics_script!!}
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
