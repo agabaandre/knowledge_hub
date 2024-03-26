@@ -9,10 +9,10 @@
 						<h4 class="widget_title">Address</h4>
 							<img src="{{ settings()->logo }}" class="logo img-footer small mb-2" alt="" style="width:220px; margin-bottom:-25px;" >
 							<div class="address mt-2">
-								Addis Ababa <br>Ethiopia
+								{!! settings()->address !!}
 							</div>
 							<div class="address mt-3">
-								+251 11 551 7700<br>africacdc@africa-union.org
+								{!! settings()->phone !!}<br>	{!! settings()->email !!}
 							</div>
 							<div class="address mt-2">
 					

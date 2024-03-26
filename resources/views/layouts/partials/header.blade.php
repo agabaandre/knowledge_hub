@@ -16,9 +16,6 @@
 							@include('layouts.partials.language')
 					</div>
 
-				
-
-
 </div>
 <div class="header">
 		
@@ -123,6 +120,7 @@
 							<li><a href="{{ url('adminunits')}}">Administrative Units</a></li>
 						@endif
 							<li><a href="{{ url('faqs')}}">FAQs</a></li>
+							<li><a href="{{ url('tools')}}">Tools</a></li>
 						
 						@include('partials.account.authlinks', ['class' => 'mobileonly'])
 
