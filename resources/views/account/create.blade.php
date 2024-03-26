@@ -11,13 +11,7 @@
 @section('content')
 
 <div class="row">
-<!-- 
-    <div class="card col-lg-12">
-        <div class="card-body">
-        @include('account.partials.publication_form')
-        </div>
-    </div>
- -->
+
    
     <div class="card col-lg-12">
         <div class="card-header text-left">
