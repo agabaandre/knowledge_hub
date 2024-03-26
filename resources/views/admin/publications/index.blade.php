@@ -87,7 +87,7 @@
                               </a>
 							</td>
 							<td>
-								{!! truncate($publication->description, 50) !!}
+								{!! truncate(html_to_text($publication->description), 50) !!}
 							</td>
 							<td>
 								{{ $publication->author->name ?? '' }}

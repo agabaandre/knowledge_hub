@@ -3,8 +3,7 @@
 @foreach ($communities as $comm)
     <option 
     value="{{$comm->id}}"
-    {{ (in_array($comm->id,@$selected))?'selected':''}}
-    >
+    {{ (in_array($comm->id,@$selected))?'selected':''}} >
         {{$comm->community_name}}
     </option>
 @endforeach

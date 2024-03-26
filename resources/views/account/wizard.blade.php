@@ -68,39 +68,40 @@
           <h3>Choose resource categorization</h3>
           <div class="row">
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Type</label>
                         @include('partials.publications.filetype_dropdown',['field'=>'file_type',
-                        'selected'=>(@$row->file_type_id)?$row->file_type_id:''])
+                        'selected'=>(@$row->file_type_id)?$row->file_type_id:old('file_type')])
                     </div>
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-3">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Category</label>
                         @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
-                        'selected'=>(@$row->publication_category_id)?$row->publication_category_id:''])
+                        'selected'=>(@$row->publication_category_id)?$row->publication_category_id:old('category_id')])
                     </div>
                 </div>
+
+                <div class="col-md-3">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Thematic Area</label>
+                                @include('partials.publications.theme_dropdown',['field'=>'theme','class'=>'select2 theme',
+                                'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:old('theme')])
+                            </div>
+                 </div>
+
                 
-                <div class="col-md-4">
+                <div class="col-md-3">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
-                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2',
+                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2 subtheme',
                                 'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
                             </div>
                  </div>
 
-                </div>
-            
-        </div>
-
-        <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
-          <br>
-          <h3>Provide publication details</h3>
-          <div class="row">
-
+                    
               <div class="col-md-12 url_wrapper">
                         <div class="mb-3">
                             <label class="form-label" for="publication">Publication URL Link</label>
@@ -108,7 +109,18 @@
                               name="link"  value="{{ @$row->publication ?? old('publication')}}">
                         </div>
               </div>
-                   
+              
+
+                </div>
+             
+            
+        </div>
+
+        <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
+          <br>
+          <h3>Provide publication details</h3>
+          <div class="row">
+     
             <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label" for="summernote">Publication Description</label>
@@ -218,6 +230,20 @@
 <script type="text/javascript">
       
   $(document).ready(function() {
+
+    $('.theme').on('change',function(e){
+
+      var themes  =  @json($themes);
+      const theme = themes.find((item)=> item.id === parseFloat(e.target.value));
+      theme_subs  = theme.subthemes;
+      
+      $('.subtheme').html('');
+
+      theme_subs.forEach(item=>{
+        $('.subtheme').append(`<option value="${item.id}">${item.description}</option>`);
+      });
+
+    });
 
     $('input[name="upload_type"]').on('change', function() {
         if ($(this).val() == 'upload') {
