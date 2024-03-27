@@ -234,7 +234,24 @@ function getFileMimeType($file_path)
     return $mime_type;
 }
 
-
+function html_to_text($html) {
+    // Remove HTML tags
+    $text = strip_tags($html);
+    
+    // Decode HTML entities
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    
+    // Convert special characters to plain text
+    $text = htmlspecialchars_decode($text, ENT_QUOTES | ENT_HTML5);
+    
+    // Convert multiple spaces into single spaces
+    $text = preg_replace('/\s+/', ' ', $text);
+    
+    // Trim leading and trailing spaces
+    $text = trim($text);
+    
+    return $text;
+}
 
 
 ?>

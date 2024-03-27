@@ -9,7 +9,7 @@ class UITableService{
 
     public function __construct()
     {
-        require_once PHPGRID_LIBPATH.'inc\jqgrid_dist.php';
+        require_once PHPGRID_LIBPATH.'inc/jqgrid_dist.php';
         
         $this->phpGrid = new \jqgrid(config('uitable.db_config'));
         $this->gridOpts["forceFit"]  = true;

@@ -28,6 +28,7 @@ use App\Http\Controllers\Admin\GeoAreasController;
 use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
+use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
@@ -366,6 +367,13 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/subcategories", [DataRecordsAdminController::class, 'subcategories']);
             Route::post("/savesub", [DataRecordsAdminController::class, 'save_subcategory']);
         });
+    });
+
+    
+
+    Route::group(["prefix" => "logs"], function () {
+
+        Route::get("/access", [LogsController::class, 'index']);
     });
 });
 

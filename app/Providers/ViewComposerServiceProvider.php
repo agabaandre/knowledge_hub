@@ -54,7 +54,7 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['partials/countries/*','dashboards/*','datarecords/*'],CountriesViewComposer::class);
         View::composer(['partials/experts/*'],ExpertTypesViewComposer::class);
         View::composer(['partials/regions/*','partials/search/*','dashboards/*'],RegionsViewComposer::class);
-        View::composer(['partials/publications/*','partials/search/*'],ThemesViewComposer::class);
+        View::composer(['partials/publications/*','partials/search/*','account/*'],ThemesViewComposer::class);
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);
