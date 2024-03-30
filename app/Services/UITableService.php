@@ -61,7 +61,6 @@ class UITableService{
         $g->set_options($g_options);
         $g->table = $table_name;
 
-
         $out = $g->render("list1");
 
         return $out;

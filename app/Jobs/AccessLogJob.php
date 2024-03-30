@@ -25,7 +25,7 @@ class AccessLogJob implements ShouldQueue
     public function __construct($ip,$request)
     {
         //
-        $this->ip_address = $ip;
+        $this->ip_address = $ip; //"197.239.5.102"
         $this->request    = $request;
     }
 
@@ -37,18 +37,20 @@ class AccessLogJob implements ShouldQueue
     public function handle()
     {
        // $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
-
+        try{
         $apiUrl = "http://ipinfo.io/{$this->ip_address}/json"; // Construct the query URL
 
         // Use file_get_contents to fetch the data
         $response = file_get_contents($apiUrl);
-        $geoData = json_decode($response, true); 
+        $geoData  = json_decode($response); 
 
         Log::info(json_encode($response));
 
+        if(@$geoData->country){
+
         $visitorInfo = [
         'Country Code'=>$geoData->country
-        ,'CountryName'=>explode('/',$geoData->timezone)[0]
+        ,'CountryName'=>$geoData->country //explode('/',$geoData->timezone)[0]
         ,'City'=>$geoData->city
         ,'Region'=>$geoData->region 
         ,'Latitude'=>explode(',',$geoData->loc)[0] 
@@ -75,7 +77,14 @@ class AccessLogJob implements ShouldQueue
         $locationLog->save();
 
         endif;
+    }
 
     }
+   catch(\Exception $exception){
+    Log::info($exception->getMessage());
+   }
+
+ }
+
 }
 

@@ -25,7 +25,7 @@ class CommsOfPracticeController extends Controller
         $col["name"]     = "id"; 
         $col["width"]    = "30"; 
         $col["editable"] = false;
-        $col["hidden"] = true;
+        $col["hidden"]   = true;
         $cols[] = $col;
 
         $col = array();
@@ -50,20 +50,21 @@ class CommsOfPracticeController extends Controller
         $col["title"]    = "Created By"; 
         $col["name"]     = "created_by"; 
         $col["width"]    = "10"; 
-        $col["editable"] = true;
+        $col["editable"] = false;
+        $col["hidden"]   = true;
         $col["edittype"] = "select";
         //$cols["editoptions"]["sql"] = "select id as k, name as v from users";
         
-        $users = User::select("id","name")->get();
-        $options = "";
+        // $users   = User::select("id","name")->get();
+        // $options = "";
 
-        $count =0;
-        foreach($users as $user):
-            $options.= (($count>0)?";":"").$user->id.":".$user->name;
-            $count++;
-        endforeach;
+        // $count = 0;
+        // foreach($users as $user):
+        //     $options.= (($count>0)?";":"").$user->id.":".$user->name;
+        //     $count++;
+        // endforeach;
 
-        $col["editoptions"] = array("value"=>$options);
+       // $col["editoptions"] = array("value"=>$options);
      
       //  $col["edittype"] = "lookup"; 
        // $col["editoptions"] = array("table"=>"users", "id"=>"id", "label"=>"concat(name,' ','')");
