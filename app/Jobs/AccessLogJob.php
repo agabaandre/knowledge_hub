@@ -78,3 +78,4 @@ class AccessLogJob implements ShouldQueue
 
     }
 }
+

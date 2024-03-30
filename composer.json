@@ -11,6 +11,7 @@
         "darkaonline/l5-swagger": "^8.5",
         "doctrine/dbal": "^3.6",
         "guzzlehttp/guzzle": "^7.0.1",
+        "itstructure/laravel-grid-view": "~1.1.1",
         "laravel/framework": "^8.75",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.5",
