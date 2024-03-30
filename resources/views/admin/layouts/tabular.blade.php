@@ -2,7 +2,7 @@
 
 @php
  $table_assets = config('uitable.js_asset_path');
- $theme = "blitzer";//"pepper-grinder";
+ $theme = "material";//"pepper-grinder";
 @endphp
 
 
