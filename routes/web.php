@@ -374,6 +374,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "logs"], function () {
 
         Route::get("/access", [LogsController::class, 'index']);
+        Route::get("/user", [LogsController::class, 'trail']);
     });
 });
 

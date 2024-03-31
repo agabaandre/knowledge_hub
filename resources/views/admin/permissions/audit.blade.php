@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="card-body services-body">
-                    <form class="row bg-white" action="{{ route('permissions.trail') }}" method="POST">
+                    <form class="row bg-white" action="{{ url('/admin/logs/user') }}" method="GET">
                         @csrf    
                     <div class="form-group col-md-2 mt-2">
                         <label><i class="icon-calendar mr-2"></i>Start Date</label>
@@ -29,21 +29,24 @@
                         </div>
                         <div class="form-group col-md-3">
                         <label><i class="icon-user mr-2"></i>User</label>
-                            <select class="form-control" name="user">
-                                <option value="">Select</option>
+                            <select class="form-control select2" name="user">
+                                @foreach($users as $user)
+                                <option value="{{$user->id}}">{{$user->name}}</option>
+                                @endforeach
                             </select>
                         </div>
                         <div class="form-group col-md-2">
                         <label><i class="icon-user mr-2"></i>Action</label>
                         @php
-                            $actions = ["Delete","Update","Create","Confirm","Load"];
+                            $actions = ["Delete","Update","Create","Confirmed","Approved","Rejected"];
                         @endphp
-                            <select class="form-control" name="action">
-                                <option value="">All</option>
-                                @foreach($actions as $key=>$value)
-                                <option value="{{$value}}" {{ ($value == @$search->action)?'selected':''}}>Delete</option>
-                                @endforeach
-                            </select>
+                        <select class="form-control" name="action">
+                            <option value="">All</option>
+                            @foreach($actions as $key => $value)
+                                <option value="{{ $value }}" {{ ($value == @$search->action) ? 'selected' : '' }}> {{ $value }}</option>
+                            @endforeach
+                        </select>
+
                         </div>
                         <div class="form-group col-md-3 col-sm-12">
 

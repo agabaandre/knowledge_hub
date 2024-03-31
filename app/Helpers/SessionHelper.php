@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\AuditTrailJob;
+use App\Models\AuditTrail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -86,6 +88,13 @@ if(!function_exists('admin_units_enabled')){
 	}
 }
 
+if(!function_exists('log_user_trail')){
+	function log_user_trail($action,$description=null){
+		$user_id = current_user()->id;
+		$auditTrail = new AuditTrailJob($action,$user_id,$description);
+		dispatch($auditTrail);
+	}
+}
 
 
 ?>

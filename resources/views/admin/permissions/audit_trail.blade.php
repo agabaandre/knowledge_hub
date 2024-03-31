@@ -17,7 +17,7 @@
                     </div>
                 </div>
                 <div class="card-body services-body">
-                    <form class="row bg-white" action="{{ route('permissions.trail') }}" method="POST">
+                    <form class="row bg-white" action="{{ url('/admin/logs/user') }}" method="GET">
                         @csrf    
                     <div class="form-group col-md-2 mt-2">
                         <label><i class="icon-calendar mr-2"></i>Start Date</label>

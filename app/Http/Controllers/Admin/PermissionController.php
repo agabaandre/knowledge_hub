@@ -320,42 +320,6 @@ class PermissionController extends Controller
     }
 
 
-     public function trail(Request $request){
-
-        $userId = $request->user_id;
-        $start  = $request->start;
-        $end    = $request->end;
-        $action = $request->action;
-
-        $data['users'] = User::all();
-
-        $data['search'] = (Object) $request->all();
-
-        $data['trails'] = [];
-        /*
-                AuditTrail::when($userId, 
-                function ($query, $userId) {
-                    return $query->where('user_id', $userId);
-                })
-                ->when($start, 
-                function ($query, $start) {
-                    $start = date('Y-m-d',(strtotime('+0 day',strtotime($start))));
-                    return $query->where('created_at','>=', $start);
-                })
-                ->when($end, 
-                function ($query, $end) {
-                    $end = date('Y-m-d',(strtotime('+1 day',strtotime($end))));
-                    return $query->where('created_at','<=', $end);
-                })
-                ->when($action, 
-                function ($query, $action) {
-                    return $query->where('action','like', "%$action%");
-                })
-                ->orderBy('id','desc')->paginate(25);
-                */
-
-        return view('admin.permissions.audit')->with($data);
-    }
 
 
      public function deleteUser(Request $request){
