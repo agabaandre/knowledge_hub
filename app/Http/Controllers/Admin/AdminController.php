@@ -28,7 +28,8 @@ class AdminController extends Controller
 
         $request['rows']      = 10;
         $request['order_by_visits'] = true;
-
+        $request['is_admin']  = 1;
+        
 		$data['publications'] = $this->publicationsRepo->get($request);
         $data['authors'] = $this->authorsRepo->get($request);
         $data['experts'] = $this->expertsRepo->get($request);

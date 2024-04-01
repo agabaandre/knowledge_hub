@@ -29,8 +29,6 @@
 
 <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 
-<link rel="stylesheet" href="{{ asset('assets/css/smart_wizard_all.min.css')}}">
-
  <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
 
  <script>

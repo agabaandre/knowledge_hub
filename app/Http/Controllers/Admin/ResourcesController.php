@@ -20,11 +20,10 @@ class ResourcesController extends Controller
         $this->quotesRepo       = $quotesRepo;
     }
 
-
-
     public function index(Request $request){
 
         $data['publications'] = $this->publicationsRepo->get($request);
+        $request['is_admin']  = 1;
         $data['search']       = (Object) $request->all();
         return view('admin.publications.index',$data);
     }
@@ -71,7 +70,6 @@ class ResourcesController extends Controller
     public function store(Request $request){
 
         $saved = $this->publicationsRepo->save($request);
-
 
         if($saved):
             $data = ['message'=>'Resource saved successfully','status'=>'success','data'=>$saved];

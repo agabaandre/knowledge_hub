@@ -1,6 +1,7 @@
 
 
-<script src="https://cdn.jsdelivr.net/npm/smartwizard@6/dist/js/jquery.smartWizard.min.js" type="text/javascript"></script>
+<link rel="stylesheet" href="{{ asset('assets/css/smart_wizard_all.min.css')}}">
+<script src="{{ asset('assets/js/jquery.smartWizard.min.js') }}" type="text/javascript"></script>
 
 
 
