@@ -73,7 +73,7 @@ class CommsOfPracticeController extends Controller
 
         $data['communities'] = $this->commsOfPracticeRepository->get($request);
         $data['search']    = (Object) $request->all();
-        $sql = "SELECT c.id,community_name,description,is_active,u.name as created_by FROM community_of_practices c join users u on u.id=c.created_by";
+        $sql = "SELECT c.id,community_name,description,is_active,u.name as created_by FROM community_of_practices c left join users u on u.id=c.created_by";
         $data['uitable'] = $this->uiTableService->get_ui_table("community_of_practices",$cols,$sql);
         return view('admin.commsofpractice.index',$data);
     }
