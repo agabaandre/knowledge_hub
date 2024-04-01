@@ -153,13 +153,8 @@
 	<script src="{{ asset('frontend/js/custom.js')}}"></script>
 	<script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
 
-	@include('layouts.partials.tour')
-	<!-- ============================================================== -->
-	<!-- This page plugins -->
-	<!-- ============================================================== -->
-
-<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
-<script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
+	<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
+	<script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
 
 	<script type="text/javascript">
 
