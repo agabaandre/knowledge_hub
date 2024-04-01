@@ -21,9 +21,8 @@ class ResourcesController extends Controller
     }
 
     public function index(Request $request){
-
-        $data['publications'] = $this->publicationsRepo->get($request);
         $request['is_admin']  = 1;
+        $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
         return view('admin.publications.index',$data);
     }

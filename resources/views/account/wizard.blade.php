@@ -141,15 +141,15 @@
                       <div class="col-md-12">
                           <div class="mb-3">
                               <label class="form-label" for="publication">Search Tags</label>
-                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',@$row->publication_catgory_id,'tag_ids')])
+                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',@$row->tag_ids,'tag_ids')])
                           </div>
                       </div>
                         <div class="col-md-6" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" style="display: none;" name="cover" id="cover" required="">
-                                   <div onclick="$('#cover').click()" class="cover_preview py-2 rounded" style="max-width:300px; min-height:200px; max-height:550px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat;">
+                                    <input type="file" style="display: none;" name="cover" id="cover" {{ (@$row)?'':'required'}}>
+                                    <div onclick="$('#cover').click()" class="cover_preview py-2 rounded" style="max-width:300px; min-height:200px; max-height:550px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat;">
                                     </div>
                                 </div>
                             </div>
@@ -184,7 +184,7 @@
                     <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
                     <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
                      @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
-                        'selected'=>(@$row->communities)?$row->communities:[]])
+                        'selected'=>(@$row->communities)?$row->communities->pluck('id')->toArray():[]])
                   </div>
 
 

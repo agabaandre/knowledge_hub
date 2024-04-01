@@ -124,6 +124,10 @@ if(!function_exists('storage_link')){
 
         $field = str_replace('[','',$field);
         $field = str_replace(']','',$field);
+
+        if(is_array($data)){
+            return $data;
+        }
         
         return ($data)?$data->{$data_field}:old($field);
      }

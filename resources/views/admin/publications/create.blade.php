@@ -43,7 +43,7 @@
                 @csrf
             <input type="hidden" value="{{ form_edit('id',$publication,'id') }}" name="id" />
 
-            @include('account.wizard')
+            @include('account.wizard',['row'=>$publication])
 
             </form>
             @else

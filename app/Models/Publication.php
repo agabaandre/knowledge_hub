@@ -10,7 +10,7 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments'];
+    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments','tag_ids'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -128,5 +128,12 @@ class Publication extends Model
     public function user(){
         return $this->belongsTo(User::class);
     }
+
+    public function getTagIdsAttribute(){
+        $tag_ids = PublicationTag::where('publication_id',$this->id)
+        ->get()->pluck('id');
+        return $tag_ids->toArray();
+    }
+
 
 }

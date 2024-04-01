@@ -297,6 +297,8 @@ class PublicationsRepository extends SharedRepo{
             set_cookie("Viewed".$pub->id,'yes');
         endif;
 
+       // dd($pub->tag_ids);
+
         return $pub;
     }
 

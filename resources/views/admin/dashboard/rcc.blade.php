@@ -10,7 +10,7 @@
                     </div>
                     <div class="card-body">
 
-                    @include('dashboards.partials.rcc_chart',['chart_url'=>url('admin/rccdashboards')])
+                     @include('dashboards.partials.rcc_chart',['chart_url'=>url('admin/rccdashboards')])
 
                     </div>
                 </div>
