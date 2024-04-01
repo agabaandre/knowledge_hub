@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCitationLinkAndAuthorsToPublicationsTable extends Migration
+class AddApprovedRejectedToPublicationTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,8 +15,8 @@ class AddCitationLinkAndAuthorsToPublicationsTable extends Migration
     {
         Schema::table('publication', function (Blueprint $table) {
             //
-            $table->string('citation_link',500)->nullable();
-            $table->string('citation_authors',100)->nullable();
+            $table->boolean('is_approved')->default(0);
+            $table->boolean('is_rejected')->default(0);
         });
     }
 
@@ -27,7 +27,7 @@ class AddCitationLinkAndAuthorsToPublicationsTable extends Migration
      */
     public function down()
     {
-        Schema::table('publications', function (Blueprint $table) {
+        Schema::table('publication', function (Blueprint $table) {
             //
         });
     }

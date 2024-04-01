@@ -47,6 +47,27 @@ class ResourcesController extends Controller
         return view('admin.publications.create',$data);
     }
 
+    public function details(Request $request){
+
+        $publication          =  $this->publicationsRepo->find($request->id);
+        $data['publication']  = $publication;       
+        return view('admin.publications.details',$data);
+    }
+
+
+    public function summaries(Request $request){
+
+        $data['summaries']        =  $this->publicationsRepo->get_summaries($request);    
+        return view('admin.publications.summaries',$data);
+    }
+    
+    public function summary(Request $request){
+
+        $summary          =  $this->publicationsRepo->find_summary($request);
+        $data['summary']  = $summary;       
+        return view('admin.publications.summary',$data);
+    }
+
     public function store(Request $request){
 
         $saved = $this->publicationsRepo->save($request);
@@ -64,6 +85,31 @@ class ResourcesController extends Controller
         return back(200)->with($data);
     }
 
+    public function approval(Request $request){
+
+        $saved   = $this->publicationsRepo->change_approval_status($request);
+
+        if($saved):
+            $data = ['message'=>'Resource updated successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        return back()->with($data);
+    }
+
+    public function summary_approval(Request $request){
+
+        $saved   = $this->publicationsRepo->change_approval_status($request);
+
+        if($saved):
+            $data = ['message'=>'Resource updated successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        return back()->with($data);
+    }
     public function moderate(Request $request){
 
         $data['publications'] = $this->publicationsRepo->with_pending_comments($request);

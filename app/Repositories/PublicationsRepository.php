@@ -132,8 +132,10 @@ class PublicationsRepository extends SharedRepo{
          //Access levels effect to query results
         $this->access_filter($pubs);
         
-        if(!$request->is_admin)
-        $pubs->where('is_active','Active');
+        if(!$request->is_admin){
+         $pubs->where('is_active','Active');
+         $pubs->where('is_approved',1);
+        }
 
         $pubs->orderBy('visits','desc');
 
@@ -195,13 +197,9 @@ class PublicationsRepository extends SharedRepo{
 
     public function save(Request $request){
 
-        $pub = ($request->id)? Publication::find($request->id):new Publication();
-        $user = @current_user();
-       
-        if(!$user):
-            $user = User::find($request->user_id);
-        endif;
-
+        $pub  = ($request->id)? Publication::find($request->id):new Publication();
+        $user = ($request->user_id)?User::find($request->user_id):@current_user();
+  
         if($request->original_id):
 
             $parent = $this->find($request->original_id);
@@ -228,7 +226,8 @@ class PublicationsRepository extends SharedRepo{
             $pub->title                     = $request->title;
 
         endif;
-
+        
+        $pub->user_id              = $user->id;
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
@@ -456,6 +455,43 @@ class PublicationsRepository extends SharedRepo{
     return $comment;
 }
 
+public function change_approval_status(Request $request){
+
+    $publication = Publication::find($request->id);
+    
+    if($request->approved){
+
+     $publication->is_approved= 1;
+     $publication->is_rejected= 0;
+     $publication->is_active= 'Active';
+
+     $msg = 'We are happy to inform you that your publication has been approved';
+     $action = "Approved";
+
+    }
+    else if($request->rejected){
+
+     $publication->is_rejected= 1;
+     $publication->is_approved= 0;
+     $publication->is_active= 'In-Active';
+     $action = "Rejected";
+
+     $msg = 'We are sorry to inform you that your publication has been rejected';
+
+    }
+
+    $publication->update();
+    
+    $alert = array(
+        'title' => "Resource  $publication->title has been $action",
+        'body'=>$msg,
+        'email'=>@$publication->user->email
+    );
+    SendMailJob::dispatch( $alert);
+
+    return $publication;
+}
+
 public function approve_comment($id){
 
     $comment = PublicationComment::find($id);
@@ -487,6 +523,52 @@ public function reject_comment($id){
     SendMailJob::dispatch( $alert);
 
 }
+
+public function get_summaries($request){
+    $qry =  PublicationSummary::orderBy('id','desc');
+    return $qry->paginate(15);
+}
+
+public function find_summary(Request $request){
+    return PublicationSummary::find($request->id);
+}
+
+public function sumamry_approval_status(Request $request){
+
+    $record = PublicationSummary::find($request->id);
+    
+    if($request->approved){
+
+     $record->is_approved= 1;
+     $record->is_rejected= 0;
+
+     $msg = 'We are happy to inform you that your sumamry/abstract has been approved';
+     $action = "Approved";
+
+    }
+    
+    else if($request->rejected){
+
+     $record->is_rejected= 1;
+     $record->is_approved= 0;
+     $action = "Rejected";
+
+     $msg = 'We are sorry to inform you that your sumamry/abstract has been rejected';
+
+    }
+
+    $record->update();
+    
+    $alert = array(
+        'title' => "Resource  $record->title has been $action",
+        'body'=>$msg,
+        'email'=>@$record->user->email
+    );
+    SendMailJob::dispatch( $alert);
+
+    return $record;
+}
+
 
 
 

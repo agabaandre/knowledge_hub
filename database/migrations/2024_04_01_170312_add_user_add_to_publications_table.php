@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class AddCitationLinkAndAuthorsToPublicationsTable extends Migration
+class AddUserAddToPublicationsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -15,8 +15,8 @@ class AddCitationLinkAndAuthorsToPublicationsTable extends Migration
     {
         Schema::table('publication', function (Blueprint $table) {
             //
-            $table->string('citation_link',500)->nullable();
-            $table->string('citation_authors',100)->nullable();
+
+            $table->foreignId('user_id')->nullable();
         });
     }
 

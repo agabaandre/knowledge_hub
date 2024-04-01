@@ -3,7 +3,10 @@
 @section('styles')
 
 <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet"/>
-@include('partials.tour.css')
+
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
+    @include('partials.tour.css')
+@endif
 
 <style>
 
@@ -30,7 +33,7 @@
 
 @include('common.select2')
 
-@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE')):
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
     @include('partials.tour.js')
 @endif
 

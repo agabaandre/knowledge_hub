@@ -13,4 +13,14 @@ class PublicationSummary extends Model
 
         return $this->belongsTo(Author::class);
     }
+
+    public function user(){
+
+        return $this->belongsTo(User::class);
+    }
+
+    public function publication(){
+
+        return $this->belongsTo(Publication::class,"resource_id");
+    }
 }

@@ -96,12 +96,17 @@
 								{{ $publication->is_active }}
 							</td>
 							<td>
-							
-								<!-- Edit Modal Action -->
-								<a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}" type="button" class="btn btn-primary btn-sm" 
-								>Edit</a>
-								<!-- Delete Modal Action -->
+								<a href="{{ url('admin/publications/details') }}?id={{$publication->id}}"  class="btn btn-primary btn-sm" 
+									>Details</a>
+
+								@if($publication->user_id == current_user()->id)
+									<a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}"  class="btn btn-primary btn-sm" 
+									>Edit</a>
+								@endif
+
+								@can('delete_publications')
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')" class="text-danger"> Delete</a>
+								@endcan
 							</td>
 						</tr>
 					@endforeach

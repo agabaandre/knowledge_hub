@@ -160,6 +160,7 @@
 									<ul>
 
 										@foreach ($publication->comments as $comment)
+										  @if($comment->status =='approved')
 											<li class="article_comments_wrap">
 
 												<article>
@@ -180,6 +181,7 @@
 												</article>
 
 											</li>
+											@endif
 										@endforeach
 									</ul>
 								</div>
@@ -233,9 +235,11 @@
 							<h6 class="ft-medium fs-sm mb-3">Summaries and Abstracts</h6>
 							<ul class="list-group mb-3">
 								@foreach($publication->summaries as $summary)
+								 @if($comment->is_approved ==1)
 									<li>
 										<h6 class="text-muted"><a href="{{ url('records/shortened') }}?id={{$summary->id}}">{{ truncate($summary->title,100) }} by {{$summary->author->name}}</a></h6>
 								    </li>
+								@endif
 								@endforeach
 							</ul>
 						@endif

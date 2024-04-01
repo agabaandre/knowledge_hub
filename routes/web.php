@@ -182,11 +182,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [ResourcesController::class, 'index']);
         Route::get("/create", [ResourcesController::class, 'create']);
         Route::get("/edit", [ResourcesController::class, 'edit']);
+        Route::get("/details", [ResourcesController::class, 'details']);
         Route::post("/save", [ResourcesController::class, 'store']);
+        Route::post("/approval", [ResourcesController::class, 'approval']);
         Route::get("/moderate", [ResourcesController::class, 'moderate']);
         Route::get("/delete", [ResourcesController::class, 'destroy']);
         Route::get("/approve_comment", [ResourcesController::class, 'approve_comment']);
         Route::get("/reject_comment", [ResourcesController::class, 'reject_comment']);
+        Route::get("/summaries", [ResourcesController::class, 'summaries']);
+        Route::get("/summary", [ResourcesController::class, 'summary']);
+        Route::post("/summary_approval", [ResourcesController::class, 'summary_approval']);
     });
 
     //geo areas
