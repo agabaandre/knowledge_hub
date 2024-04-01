@@ -34,11 +34,14 @@
 <script src="{{  asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
 <script src="{{  asset('assets/plugins/perfect-scrollbar/p-scroll.js') }}"></script>
 
+<script src="{{  asset('assets/plugins/parsleyjs/parsley.min.js') }}"></script>
+
 <!-- Horizontalmenu js-->
 <script src="{{  asset('assets/plugins/horizontal-menu/horizontal-menu.js') }}"></script>
 
 <!--- Colorchange js -->
 <script src="{{  asset('assets/js/color-change.js') }}"></script>
+
 
 <!-- Internal Flot js-->
 <!-- <script src="{{  asset('assets/plugins/jquery.flot/jquery.flot.js') }}"></script>

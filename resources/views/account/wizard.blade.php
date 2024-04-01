@@ -54,7 +54,7 @@
                         <div class="mb-3">
                             <input placeholder="Resource Title"  class="form-control newform"  id="title" name="title" 
                             value="{{ @$row->title ?? old('title')}}"
-                            required/>
+                            required="">
                         </div>
                  </div>
 
@@ -125,7 +125,7 @@
                         <div class="mb-3">
                             <label class="form-label" for="summernote">Publication Description</label>
                             <textarea placeholder="Descripion" class="form-control newform" id="summernote"
-                             name="description" required>{!! $row->description ?? old('description') !!}</textarea>
+                             name="description" required="">{!! $row->description ?? old('description') !!}</textarea>
                         </div>
               </div>
 
@@ -148,7 +148,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" style="display: none;" name="cover" id="cover" required>
+                                    <input type="file" style="display: none;" name="cover" id="cover" required="">
                                    <div onclick="$('#cover').click()" class="cover_preview py-2 rounded" style="max-width:300px; min-height:200px; max-height:550px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat;">
                                     </div>
                                 </div>
@@ -307,6 +307,18 @@
     
 
   });
+
+
+  $(function () {
+  $('#publication_form').parsley().on('field:validated', function() {
+    var ok = $('.parsley-error').length === 0;
+    $('.bs-callout-info').toggleClass('hidden', !ok);
+    $('.bs-callout-warning').toggleClass('hidden', ok);
+  })
+  .on('form:submit', function() {
+    return false; // Don't submit form for this demo
+  });
+});
 
   
   </script>

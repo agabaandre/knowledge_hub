@@ -30,7 +30,7 @@
 
          <div class="container">
            
-           <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications'>
+           <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications' id="publication_form" data-parsley-validate="">
             @csrf
            
              
