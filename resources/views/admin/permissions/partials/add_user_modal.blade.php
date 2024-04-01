@@ -44,29 +44,47 @@
                         </select>
                     </div>
                     @if(states_enabled())
-                    <div class="form-group col-md-6  col-sm-12">
-                        <label class="text-bold">
-                            <i class="icon-collaboration mr-2"></i>
-                            Access Level
-                        </label>
-                        <select class="form-control form-control-select2 select" name="level_id" data-fouc readonly>
-                            <option selected disabled>Choose Level</option>
-                            @foreach($levels as $level)
-                            <option value="{{ $level->id }}" {{ ($level->id == @$user->access_level_id)?'selected':'' }}>{{ strtoupper($level->level_name) }}</option>
-                            @endforeach
-                        </select>
-                    </div>
+                        <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Access Level
+                            </label>
+                            <select class="form-control form-control-select2 select" name="level_id" data-fouc readonly>
+                                <option selected disabled>Choose Level</option>
+                                @foreach($levels as $level)
+                                <option value="{{ $level->id }}" {{ ($level->id == @$user->access_level_id)?'selected':'' }}>{{ strtoupper($level->level_name) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     @endif
 
                     @if(states_enabled())
-                    <div class="form-group col-md-6  col-sm-12">
-                        <label class="text-bold">
-                            <i class="icon-collaboration mr-2"></i>
-                            Member State
-                        </label>
-                        @include('partials.countries.dropdown')
-                    </div>
+                        <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Member State
+                            </label>
+                            @include('partials.countries.dropdown')
+                        </div>
+                    @else
+
+                       <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Administrative Unit
+                            </label>
+                            @include('partials.adminunits.dropdown')
+                        </div>
+
                     @endif
+
+                    <div class="form-group col-md-6  col-sm-12">
+                            <label class="text-bold">
+                                <i class="icon-collaboration mr-2"></i>
+                                Author Account
+                            </label>
+                            @include('partials.authors.dropdown',['allfield'=>'None'])
+                    </div>
 
                     <div class="form-group col-md-6  col-sm-12 ">
                         <label><i class="icon-lock mr-2"></i>Password</label>

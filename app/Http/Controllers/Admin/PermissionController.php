@@ -118,6 +118,7 @@ class PermissionController extends Controller
         $user->nin       = $nin;
         $user->email     = $email;
         $user->name      = $lastName." ".$firstName;
+        $user->author_id =  $request->author_id;
        
         if(!empty($password)){
           $user->password  = Hash::make($password);
@@ -275,7 +276,10 @@ class PermissionController extends Controller
         $roleId = $request->role_id;
         
         $user   = User::find($userId);
+        $old_data = $user;
+
         $user->access_level_id = $request->level_id;
+        $user->author_id       = $request->author_id;
         $user->update();
 
         //first revoke all
@@ -288,6 +292,8 @@ class PermissionController extends Controller
         $data["message"] = $msg;
         $data['data'] = [$userId,$roleId];
         $alert_class = ($saved)?'success':'danger';
+
+        log_user_trail('UPDATED',"Updated User $userId Details",$old_data,$user);
 
         $alert = ['alert-'.$alert_class=>$msg];
 
@@ -318,8 +324,6 @@ class PermissionController extends Controller
         $alert = ['alert-'.$alert_class=>$msg];
         return redirect()->route('permissions.users')->with($alert);
     }
-
-
 
 
      public function deleteUser(Request $request){

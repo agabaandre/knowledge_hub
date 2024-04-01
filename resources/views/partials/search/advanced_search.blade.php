@@ -48,7 +48,10 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
        <label class="text-bold"><small>Type</small></label>
        @include('partials.publications.filetype_dropdown',['class'=>'filetype select2','selected'=>@$search->file_type_id,'allfield'=>'All'])
     </div>
-    
+
+    <div class="col-md-6 offset-md-6">
+      <input type="submit" class="btn theme-bg text-white ft-medium apply-btn fs-sm rounded mt-3" value="Apply Filters">
+    </div>
     </div>
 
 </div>

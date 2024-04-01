@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\View\Composers\AccessGroupsViewComposer;
 use App\View\Composers\AdminStatsViewComposer;
+use App\View\Composers\AdminUnitsViewComposer;
 use App\View\Composers\AssetTypesViewComposer;
 use App\View\Composers\AuthorsViewComposer;
 use App\View\Composers\CountriesViewComposer;
@@ -55,6 +56,8 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['partials/experts/*'],ExpertTypesViewComposer::class);
         View::composer(['partials/regions/*','partials/search/*','dashboards/*'],RegionsViewComposer::class);
         View::composer(['partials/publications/*','partials/search/*','account/*'],ThemesViewComposer::class);
+
+        View::composer(['partials/adminunits/*'],AdminUnitsViewComposer::class);
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);

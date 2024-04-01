@@ -32,6 +32,8 @@
                 </div>
                 <!-- end toast -->
             </div>
+            
+            @if(current_user()->author_id)
             <form action="{{ url('admin/publications/save') }}" id='publications' class='publications'>
                 @csrf
                 <input type="hidden" value="{{ form_edit('id',$publication,'id') }}" name="id" />
@@ -184,6 +186,13 @@
             </div>
 
             </form>
+            @else
+
+            <div class="alert alert-danger">
+                <p>No Author Account is associated to the logged in account.</p>
+            </div>
+
+            @endif
 
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->

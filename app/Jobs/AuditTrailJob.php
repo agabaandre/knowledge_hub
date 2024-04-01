@@ -19,12 +19,14 @@ class AuditTrailJob implements ShouldQueue
      *
      * @return void
      */
-    private $action,$description,$user_id;
-    public function __construct($action,$user_id,$description)
+    private $action,$description,$user_id,$old_data,$new_data;
+    public function __construct($action,$user_id,$description=null,$old_data=null,$new_data=null)
     {
         $this->action      = $action;
         $this->user_id     = $user_id;
         $this->description = $description;
+        $this->old_data = $old_data;
+        $this->new_data = $new_data;
     }
 
     /**
@@ -38,6 +40,13 @@ class AuditTrailJob implements ShouldQueue
 		$trail->action      = $this->action;
 		$trail->user_id     = $this->user_id;
 		$trail->description = $this->description;
+        
+        if($this->old_data)
+        $trail->old_data = json_encode($this->old_data);
+
+        if($this->new_data)
+        $trail->new_data = json_encode($this->new_data);
+
 		$trail->save();
     }
 }

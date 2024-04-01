@@ -43,7 +43,6 @@ if(!function_exists('settings')){
 function get_role($userId){
 
     $user_role = DB::table("model_has_roles")->where('model_id',$userId)->first();
-
     $role = ($user_role)?(($user_role)?Role::find($user_role->role_id):null):null;
 
 	return $role;
@@ -89,9 +88,9 @@ if(!function_exists('admin_units_enabled')){
 }
 
 if(!function_exists('log_user_trail')){
-	function log_user_trail($action,$description=null){
+	function log_user_trail($action,$description=null,$old_data=null,$new_data=null){
 		$user_id = current_user()->id;
-		$auditTrail = new AuditTrailJob($action,$user_id,$description);
+		$auditTrail = new AuditTrailJob($action,$user_id,$description,$old_data,$new_data);
 		dispatch($auditTrail);
 	}
 }
