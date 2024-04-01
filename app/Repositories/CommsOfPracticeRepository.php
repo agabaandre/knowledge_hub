@@ -21,6 +21,8 @@ class CommsOfPracticeRepository{
         $access_grp->created_by = current_user()->id;
         $access_grp->save();
 
+        clear_cache();
+        
         return $access_grp;
     }
 

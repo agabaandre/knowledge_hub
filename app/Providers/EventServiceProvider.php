@@ -17,6 +17,10 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            
+        ],
+        'Illuminate\Database\Events\StatementExecuted' => [
+            'App\Listeners\ClearCacheAfterInsert',
         ],
     ];
 

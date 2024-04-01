@@ -5,6 +5,7 @@ use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use PHPMailer\PHPMailer\PHPMailer;  
 use PHPMailer\PHPMailer\Exception;
+use Illuminate\Support\Facades\Cache;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -257,5 +258,8 @@ function html_to_text($html) {
     return $text;
 }
 
+function clear_cache(){
+  Cache::flush();
+}
 
 ?>

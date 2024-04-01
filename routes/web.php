@@ -69,6 +69,7 @@ Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
 Route::get('/logout', function () {
     Auth::logout();
+    clear_cache();
     return redirect()->route('home');
 });
 
