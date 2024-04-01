@@ -22,7 +22,7 @@
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}" class="slide-item">Resource Sumaries & Abstracts</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Moderate Comments</a></li>
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan

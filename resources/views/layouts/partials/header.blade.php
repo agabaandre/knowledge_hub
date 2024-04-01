@@ -83,34 +83,7 @@
 							</ul>
 						</li>
 						@if(states_enabled())
-						<!-- <li class="dashboards"><a href="javascript:void(0);">Dashboards<span class="submenu-indicator"></span></a>
-							<ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
-							<li>
-								<a href="{{ url('dashboards')}}">RCCs</a>
-							</li>
-							@foreach($dashboard_categories as $cat)
-
-							@if(strlen($cat->required_permission) > 0)
-								
-							@auth
-									@can($cat->required_permission)
-									<li>
-									<a href="{{ url($cat->url_path)}}?slug={{$cat->slug}}">{{$cat->category_name}}</a>
-									</li>
-									@endcan
-								@endauth
-
-							@else
-
-							<li>
-								<a href="{{ url($cat->url_path)}}?slug={{$cat->slug}}">{{$cat->category_name}}</a>
-							</li>
-
-							@endif
-							@endforeach
-							
-							</ul>
-						</li> -->
+					
 						@endif
 						
 							<li><a href="{{ url('forums')}}">Forums</a></li>
