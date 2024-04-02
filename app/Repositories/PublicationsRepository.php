@@ -30,8 +30,11 @@ class PublicationsRepository extends SharedRepo{
         $rows_count = ($request->rows)?$request->rows:20;
         $pubs       = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc')->where('is_version',0);
 
-        if($request->order_by_visits)
+        if($request->order_by_visits):
+         $pubs->orderBy('visits','desc');
+        else:
          $pubs->orderBy('id','desc');
+        end;
 
         if($request->is_featured)
          $pubs->where('is_featured',1);
@@ -137,7 +140,6 @@ class PublicationsRepository extends SharedRepo{
          $pubs->where('is_approved',1);
         }
 
-        $pubs->orderBy('visits','desc');
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
