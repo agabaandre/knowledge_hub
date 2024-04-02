@@ -148,7 +148,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
                                 <div class="custom-file">
-                                    <input type="file" style="display: none;" name="cover" id="cover" {{ (@$row)?'':'required'}}>
+                                    <input type="file" style="display: none;" name="cover" id="cover" >
                                     <div onclick="$('#cover').click()" class="cover_preview py-2 rounded" style="max-width:300px; min-height:200px; max-height:550px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat;">
                                     </div>
                                 </div>

@@ -252,6 +252,9 @@ class PublicationsRepository extends SharedRepo{
             $file           = $request->file('cover');
             $cover_filepath = $this->save_attachments($file);
             $pub->cover     = $cover_filepath;
+        else:
+            if(!$request->id)
+             $pub->cover     =  "cover.jpg";
         endif;
 
         $saved = ($request->id)?$pub->update():$pub->save();
