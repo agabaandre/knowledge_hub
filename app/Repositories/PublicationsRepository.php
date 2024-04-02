@@ -34,7 +34,7 @@ class PublicationsRepository extends SharedRepo{
          $pubs->orderBy('visits','desc');
         else:
          $pubs->orderBy('id','desc');
-        end;
+        endif;
 
         if($request->is_featured)
          $pubs->where('is_featured',1);
