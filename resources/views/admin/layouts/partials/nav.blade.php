@@ -73,6 +73,7 @@
 						@endcan
 
 						<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
+						<li class=""><a href="{{ url('admin/tools') }}" class="">Tools</a></li>
 						
 						@can('view_sources')
 						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>

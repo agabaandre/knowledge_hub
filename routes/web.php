@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
@@ -47,6 +48,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
+use App\Http\Controllers\ToolsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -146,7 +148,7 @@ Route::group(["prefix" => "publications"], function () {
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
 
 });
-
+Route::get("/tools", [ToolsController::class, 'index', 'middleware' => ['auth', 'web']])->name('tools');
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
 
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
@@ -387,6 +389,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "metrics"], function () {
 
         Route::get("/", [MetricsController::class, 'index']);
+    });
+
+    Route::group(["prefix" => "tools"], function () {
+
+        Route::any("/", [ToolsAdminController::class, 'index']);
     });
 });
 
