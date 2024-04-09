@@ -29,6 +29,7 @@ use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\LogsController;
+use App\Http\Controllers\Admin\MetricsController;
 use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
@@ -381,6 +382,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/access", [LogsController::class, 'index']);
         Route::get("/user", [LogsController::class, 'trail']);
+    });
+
+    Route::group(["prefix" => "metrics"], function () {
+
+        Route::get("/", [MetricsController::class, 'index']);
     });
 });
 

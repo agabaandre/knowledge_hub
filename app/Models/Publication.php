@@ -129,6 +129,11 @@ class Publication extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function favourited(){
+        return $this->hasMany(Favourite::class);
+    }
+
+
     public function getTagIdsAttribute(){
         $tag_ids = PublicationTag::where('publication_id',$this->id)
         ->get()->pluck('id');

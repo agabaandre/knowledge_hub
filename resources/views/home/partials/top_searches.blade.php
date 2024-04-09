@@ -22,7 +22,8 @@
 
 							@php 
 								$i++;
-							@endphp
+				                $likes = count($row->favourited)
+			                @endphp
 							
 							<!-- Single -->
 							
@@ -35,7 +36,7 @@
 														if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
 															$image_link = storage_link('uploads/publications/'.$row->cover);
 														else:
-																$image_link = storage_link('uploads/publications/cover.jpg');
+															$image_link = storage_link('uploads/publications/cover.jpg');
 														endif;
 													@endphp
 
@@ -53,10 +54,14 @@
 														
 														<span class="muted medium ml-2 text-muted mt-1 "><br>
 														<i class="lni lni-empty-file mr-1"></i>Category: {{@$row->category->category_name}}</span>
+														@if($likes>0)
+															<br><span ><i class="lni lni-heart theme-text mr-1"></i> {{$likes }} Like{{($likes>0)?'s':''}} </span>
+														@endif
 														
 														<span class="text-muted medium d-block mt-1">
 														    <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated: {{time_ago($row->updated_at)}} </span>
 															<span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{$row->visits}} Views </span>
+															
 														    <span><span class="mr-1 ml-2 text-muted d-inline pop{{$row->id}}"
 															         data-bs-toggle="popover"
 																	 data-bs-trigger="hover"
@@ -71,7 +76,7 @@
 													</div>
 												</div>
 												<div class="text-center mlb-last">
-													<a href="{{ url('records/resource')}}?id={{ $row->id }}" class="btn theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse Resource</a>
+													<a href="{{ url('records/resource')}}?id={{ $row->id }}" class="btn  btn-sm theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse Resource</a>
 												</div>
 												
 											</div>
