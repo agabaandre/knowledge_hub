@@ -17,14 +17,20 @@ class MetricsController extends Controller
 
     public function index(Request $request){
 
-        $data['visits_by_country'] = $this->metricsRepository->country_access();
-        $data['signups_by_country']= $this->metricsRepository->country_signups();
-        $data['monthly_signups']= $this->metricsRepository->monthly_signups();
-        $data['monthly_publications']= $this->metricsRepository->monthly_publications();
+      //cache for 6 hours
+        $minutes = 60*6;
         
-        //dd(json_encode($data));
+        $chart_data  = cache()->remember('metrics_chart_data',$minutes, function () {
 
-        return view('admin.metrics.index',["chart_data"=>$data]);
+            $data['visits_by_country'] = $this->metricsRepository->country_access();
+            $data['signups_by_country']= $this->metricsRepository->country_signups();
+            $data['monthly_signups']= $this->metricsRepository->monthly_signups();
+            $data['monthly_publications']= $this->metricsRepository->monthly_publications();
+
+            return $data;
+        });
+
+        return view('admin.metrics.index',["chart_data"=>$chart_data]);
     }
 
 

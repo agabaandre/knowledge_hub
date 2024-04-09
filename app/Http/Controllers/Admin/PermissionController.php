@@ -322,6 +322,8 @@ class PermissionController extends Controller
         $alert_class = ($saved)?'success':'danger';
     	
         $alert = ['alert-'.$alert_class=>$msg];
+        $alert = ['message'=>$msg];
+        
         return redirect()->route('permissions.users')->with($alert);
     }
 
