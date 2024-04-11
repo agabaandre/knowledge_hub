@@ -18,16 +18,16 @@ class TestController extends Controller
 
     public function index(Request $request){
 
-        // $body            = view('emails.email_verification',['token'=>'B65AjtMKwG'])->render();
-        // $data['email']   = 'henricsanyu@gmail.com';
-        // $data['subject'] = 'Grretings from Us';
-        // $data['body']    = $body;
-        // SendMailJob::dispatch($data);
+        $body            = view('emails.email_verification',['token'=>'B65AjtMKwG'])->render();
+        $data['email']   = 'agabaandre@gmail.com';
+        $data['subject'] = 'Grretings from Us';
+        $data['body']    = $body;
+        SendMailJob::dispatch($data);
 
-            $client  = ApiClient::first();
-            $credentials =['api_key'=>$client->api_key,'api_secret'=>base64_encode($client->api_secret)];
+            // $client  = ApiClient::first();
+            // $credentials =['api_key'=>$client->api_key,'api_secret'=>base64_encode($client->api_secret)];
 
-            return response(json_encode($credentials));
+            // return response(json_encode($credentials));
     }
 
   
