@@ -63,9 +63,10 @@
 					@foreach($forums as $row)
 						<tr>
 							<td>{{ $row->forum_title }}</td>
-						<td>{!! truncate(htmlspecialchars($row->forum_description), 100) !!}</td>
-						<td>{!! truncate(htmlspecialchars($row->user->name), 100) !!}</td>
+						<td>{!! truncate(strip_tags($row->forum_description), 100) !!}</td>
+						<td>{!! truncate(strip_tags($row->user->name), 100) !!}</td>
 						<td>{!! time_ago($row->created_at) !!}</td>
+
 
 							<td>
 							    <a class="btn btn-primary text-white btn-sm mr-1"  href="{{ url('admin/forums/details')}}?id={{$row->id}}"  class="text-danger"> Details</a>
