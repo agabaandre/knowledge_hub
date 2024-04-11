@@ -83,8 +83,7 @@
                                     
                                     <br>
                                     <h5 class="ft-medium fs-md">Description</h5>
-                                  <td>{!! htmlspecialchars($forum->forum_description) !!}</td>
-
+                                    <p>{!! $forum->forum_description !!}</p>
 									<div class="details ft-medium">
 										<label class="text-muted">Publisher/Author</label>
 										<span class="text-dark">{{ $forum->user->name }}</span>
@@ -115,7 +114,7 @@
 															</div>
 														</div>
 														<div class="comment-text">
-															<p>{{ nl2br($comment->comment) }}</p>
+															<p>{{!!($comment->comment) !!}}</p>
                                                             <br>
                                                             <label class="badge theme-bg text-white">{{ ucwords($comment->status) }}</label>
 														</div>
