@@ -81,7 +81,7 @@
                               </a>
 							</td>
 							<td>
-								{!! truncate(strip_tags($record->description, 50)) !!}
+								{!! strip_tags(truncate($record->description, 50)) !!}
 							</td>
 							<td>
 								{{ $record->country->name ?? '' }}
