@@ -83,7 +83,8 @@
                                     
                                     <br>
                                     <h5 class="ft-medium fs-md">Description</h5>
-                                    <p>{!! $forum->forum_description !!}</p>
+                                  <td>{!! htmlspecialchars($forum->forum_description) !!}</td>
+
 									<div class="details ft-medium">
 										<label class="text-muted">Publisher/Author</label>
 										<span class="text-dark">{{ $forum->user->name }}</span>
