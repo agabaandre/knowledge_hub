@@ -17,7 +17,7 @@
 				  <div class="row">
 
 				    <div class="col-md-12 text-right">
-					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Sub Thematic Area</a>
+					 <a href="#create-subtheme-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Sub Thematic Area</a>
 					</div>
 
 					<div class="col-md-12">
@@ -82,10 +82,13 @@
 
 	</div>
 
-	@include('admin.themes.partials.create-modal')
+	@include('admin.subthemes.partials.create-modal', [
+		'themes' => $themes])
 	<!-- Include edit-modal.php -->
-	@include('admin.themes.partials.edit-modal')
+	@include('admin.subthemes.partials.edit-modal', [
+		'themes' => $themes
+	])
 	<!-- Include delete-modal.php -->
-	@include('admin.themes.partials.delete-modal')
+	@include('admin.subthemes.partials.delete-modal')
 
     @endsection
