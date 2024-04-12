@@ -51,7 +51,7 @@
 						<th>Description</th>
 						<th>Author</th>
 						<th width="10%">Published</th>
-						<th width="20%">Actions</th>
+						<th width="30%">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -69,11 +69,13 @@
 
 
 							<td>
+							    <a class="btn btn-sm btn-secondary" href="#details{{$row->id}}" data-toggle="modal" >Preview</a>
 							    <a class="btn btn-primary text-white btn-sm mr-1"  href="{{ url('admin/forums/details')}}?id={{$row->id}}"  class="text-danger"> Details</a>
 								<a class="btn btn-danger btn-sm" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
-								<a class=" btn btn-dark btn-sm ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"  class="text-danger"> Preview</a>
+								<a class=" btn btn-dark btn-sm ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"  class="text-danger"> View On Site</a>
 							</td>
 						</tr>
+						@include('admin.forums.partials.details-modal',['forum'=>$row])
 					@endforeach
 				</tbody>
 			</table>

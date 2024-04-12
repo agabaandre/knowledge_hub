@@ -260,8 +260,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/",[ForumsAdminController::class,'index']);
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
-        Route::post("/approve",[ForumsAdminController::class,'approve']);
-        Route::post("/reject",[ForumsAdminController::class,'reject']);
+        Route::any("/approve",[ForumsAdminController::class,'approve']);
+        Route::any("/reject",[ForumsAdminController::class,'reject']);
         Route::get("/details", [ForumsAdminController::class, 'details']);
 
     });
