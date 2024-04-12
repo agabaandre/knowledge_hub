@@ -30,7 +30,9 @@ class MetricsController extends Controller
             return $data;
         });
 
-        return view('admin.metrics.index',["chart_data"=>$chart_data]);
+        $view = ($request->ajax())?'admin.metrics.graphs':'admin.metrics.index';
+
+        return view($view,["chart_data"=>$chart_data]);
     }
 
 
