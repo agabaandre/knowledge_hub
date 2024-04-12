@@ -114,7 +114,7 @@
 															</div>
 														</div>
 														<div class="comment-text">
-															<p>{{ nl2br($comment->comment) }}</p>
+															<p>{!!($comment->comment) !!}</p>
                                                             <br>
                                                             <label class="badge theme-bg text-white">{{ ucwords($comment->status) }}</label>
 														</div>

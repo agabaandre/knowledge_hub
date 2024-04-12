@@ -36,7 +36,7 @@
 					@foreach($categories as $record)
 						<tr>
 							<td>
-								{!!truncate($record->category_name, 100) !!}
+								{!!truncate(strip_tags($record->category_name, 100)) !!}
 							</td>
 							<td>
 							
