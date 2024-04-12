@@ -16,6 +16,11 @@
 		<div class="card-header">
 			<form  class="container-fluid">
 				  <div class="row">
+
+                    <div class="col-md-12 text-right">
+                        <a href="#create-area-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add New Area</a>
+                       </div>
+
 					<div class="col-md-12">
 						<div class="form-group">
 							<label for="title">Search</label>
@@ -25,7 +30,7 @@
 							>
 						</div>
 					</div>
-					
+
 				</div>
 
 				<div class="row">
@@ -34,7 +39,7 @@
 						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
 						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-						
+
 					</div>
 				</div>
             </form>
@@ -50,7 +55,7 @@
 				</thead>
 				<tbody>
 
-					@php 
+					@php
                     $i = 1;
                     @endphp
 
@@ -58,6 +63,7 @@
 						<tr>
 							<td>{{ $row->name }}</td>
 							<td>
+                                <a href="#edit-area-modal" data-toggle="modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" class="btn btn-sm btn-success ml-1">Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>
@@ -71,6 +77,8 @@
 
 	</div>
 
+    <!-- Include create-modal.php -->
+    @include('admin.areas.partials.create-modal')
 	<!-- Include edit-modal.php -->
 	@include('admin.areas.partials.edit-modal')
 	<!-- Include delete-modal.php -->

@@ -109,9 +109,9 @@
         }
 
         .app-comment{
-            padding: 10px; 
-            background-color:rgba(222, 224, 222,0.5); 
-            border-radius:8px; 
+            padding: 10px;
+            background-color:rgba(222, 224, 222,0.5);
+            border-radius:8px;
             margin-top:10px;
         }
 
@@ -134,16 +134,16 @@
                 display: none!important;
             }
         }
-        
+
         /* Hide the Google Translate top banner */
         .goog-te-banner-frame {
             display: none !important;
         }
-            
+
         .goog-te-gadget-icon {
                 display:none !important;
                 background-color:#FFF;
-               
+
          }
          .VIpgJd-ZVi9od-ORHb-OEVmcd{
             display:none !important;
@@ -151,23 +151,23 @@
          .goog-te-gadget-simple{
             border-radius: 4px;
          }
-     
+
          .custom-bg{
-            background-color:var(--theme-color-primary)!important; 
-            background-image:url('{{ settings()->spotlight_banner}}'); 
-            background-repeat:no-repeat; 
+            background-color:var(--theme-color-primary)!important;
+            background-image:url('{{ settings()->spotlight_banner}}');
+            background-repeat:no-repeat;
             background-size:cover;
             background-position: center;
          }
 
-        
+
          @media only screen and (min-device-width: 100px)  and (max-device-width: 850px) {
             .custom-row{
               display: flex;
               justify-content: center;
             }
 
-            .custom-row-item{ 
+            .custom-row-item{
                 max-width: 45.5%;
             }
 
@@ -185,18 +185,17 @@
            background: var(--theme-color-primary) !important;
            color:#FFFF;
         }
-
-        
-        
         </style>
 
-        
-   {!! ReCaptcha::htmlScriptTagJsApi() !!}
+
+        {!! ReCaptcha::htmlScriptTagJsApi() !!}
+
+        @notifyCss
 
 </head>
 
 <body onload="initGoogleTranslate()">
- 
+
     <!-- ============================================================== -->
     <!-- Preloader - style you can find in spinners.css -->
     <!-- ============================================================== -->

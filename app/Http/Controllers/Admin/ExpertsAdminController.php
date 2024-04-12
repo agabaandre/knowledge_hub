@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Models\ExpertType;
 use App\Repositories\ExpertsRepository;
 
 class ExpertsAdminController extends Controller
@@ -18,6 +19,7 @@ class ExpertsAdminController extends Controller
     public function index(Request $request){
 
         $data['experts'] = $this->expertsRepo->get($request);
+        $data['types'] = ExpertType::all();
         $data['search']  = (Object) $request->all();
         return view('admin.experts.index',$data);
     }

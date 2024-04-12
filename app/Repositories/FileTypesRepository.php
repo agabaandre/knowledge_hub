@@ -12,7 +12,7 @@ class FileTypesRepository{
         $areas = PublicationType::orderBy('id','desc');
 
         if($request->term)
-        $areas->where('name','like','%'.$request->term.'%');
+            $areas->where('name','like','%'.$request->term.'%');
 
         $result = $areas->paginate($rows_count);
 
@@ -22,10 +22,31 @@ class FileTypesRepository{
 
     public function save(Request $request){
 
-        $row = new PublicationType();
-        $row->name = $request->name;
-        $row->save();
+        // dd($request->all());
 
+        // Check if ID is provided to determine if it's an edit or create operation
+        if ($request->has('id')) {
+            // Editing an existing publication type
+            $row = PublicationType::find($request->id);
+    
+            // If the ID is provided but the publication type is not found, return an error response
+            if (!$row) {
+                return null;
+            }
+        } else {
+            // Creating a new publication type
+            $row = new PublicationType();
+        }
+    
+        // Update or set attributes
+        $row->name = $request->name;
+        $row->icon = $request->icon;
+    
+        // Convert 'is_downloadable' value to boolean before assigning
+        $row->is_downloadable = $request->downloadable == 1 ? true : false;
+    
+        $row->save();
+    
         return $row;
     }
 

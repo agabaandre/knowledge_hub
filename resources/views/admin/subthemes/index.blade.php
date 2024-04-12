@@ -15,7 +15,7 @@
 		<div class="card-header">
 			<form  class="container-fluid">
 				  <div class="row">
-				   
+
 				    <div class="col-md-12 text-right">
 					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Sub Thematic Area</a>
 					</div>
@@ -29,7 +29,7 @@
 						</div>
 					</div>
 
-					
+
 				</div>
 
 				<div class="row">
@@ -38,10 +38,10 @@
 						<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
 						<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-						
+
 					</div>
-					
-					
+
+
 				</div>
             </form>
 		</div>
@@ -50,20 +50,25 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
+                        <th>ID</th>
+                        <th>Sub Thematic Area</th>
 						<th>Thematic Area</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
 				<tbody>
 
-					@php 
+					@php
                     $i = 1;
                     @endphp
 
-					@foreach($themes as $row)
+					@foreach($subthemes as $row)
 						<tr>
-							<td>{{ $row->description }}</td>
+                            <td>{{ $row->id }}</td>
+                            <td>{{ $row->description }}</td>
+							<td>{{ $row->theme->description }}</td>
 							<td>
+                                <a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}" data-description="{{ $row->description }}" data-icon="{{ $row->icon }}" data-thematic_area_id="{{ $row->thematic_area_id }}" class="btn btn-sm btn-primary ml-1">Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>
@@ -71,7 +76,7 @@
 				</tbody>
 			</table>
 
-            <div class="py-2"> {{$themes->links() }}</div>
+            <div class="py-2"> {{$subthemes->links() }}</div>
 
 		</div>
 

@@ -9,3 +9,5 @@ run composer install
 ## Access Levels Seeder
 
 php artisan db:seed --class=AccessLevelsSeeder
+php artisan db:seed --class=IscoClassificationSeeder
+php artisan db:seed --class=JobTitleSeeder    

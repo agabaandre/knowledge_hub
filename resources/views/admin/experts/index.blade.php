@@ -71,7 +71,7 @@
 				</div>
 			</div>
 
-			@include('admin.experts.partials.create-modal',['record'=>$expert])
+			@include('admin.experts.partials.create-modal',['record'=>$expert, 'expert_types' => $types])
 
 			@endforeach
 		</div>

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\ThemeticArea;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\ThemesRepository;
@@ -17,8 +18,10 @@ class SubHealthThemesController extends Controller
 
     public function index(Request $request){
 
-        $data['themes'] = $this->themesRepo->get_all_subthemes($request);
+        $data['themes'] = ThemeticArea::all();
+        $data['subthemes'] = $this->themesRepo->get_all_subthemes($request);
         $data['search'] = (Object) $request->all();
+
         return view('admin.subthemes.index',$data);
     }
 
@@ -29,7 +32,7 @@ class SubHealthThemesController extends Controller
         if($saved):
             $data = ['message'=>'Subtheme saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         if($request->ajax()){
@@ -39,10 +42,10 @@ class SubHealthThemesController extends Controller
         return back()->with($data);
     }
 
-   
+
     public function destroy(Request $request){
         return $this->themesRepo->delete_subtheme($request->id);
     }
 
-  
+
 }
