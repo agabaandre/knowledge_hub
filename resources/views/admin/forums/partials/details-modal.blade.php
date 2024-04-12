@@ -12,8 +12,9 @@
             </div>
             <div class="modal-footer">
                 <!-- Toogle to second dialog -->
-                @if($forum->status == 0)
+                @if($forum->is_approved == 0)
                  <a href="{{ url('admin/forums/approve') }}?id={{$forum->id}}" class="btn btn-outline-success">Approve & Post</a>
+                 @else
                  <a href="{{ url('admin/forums/reject') }}?id={{$forum->id}}" class="btn btn-outline-danger">Reject Forum</a>
                 @endif
             </div>
