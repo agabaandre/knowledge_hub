@@ -131,6 +131,9 @@ class ForumsRepository extends SharedRepo{
 
         $forum = Forum::find($id);
         $forum->status =1;
+        $forum->is_approved =1;
+        $forum->is_rejected =0;
+        $forum->approved_by = current_user()->id;
         $forum->update();
 
         $alert = array(
@@ -147,7 +150,10 @@ class ForumsRepository extends SharedRepo{
     public function reject($id){
 
         $forum = Forum::find($id);
-        $forum->status =2;
+        $forum->status =0;
+        $forum->is_approved =0;
+        $forum->is_rejected =1;
+        $forum->rejected_by = current_user()->id;
         $forum->update();
 
         $alert = array(

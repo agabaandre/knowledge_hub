@@ -73,6 +73,7 @@
 						@endcan
 
 						<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
+						<li class=""><a href="{{ url('admin/tools') }}" class="">Tools</a></li>
 						
 						@can('view_sources')
 						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
@@ -132,6 +133,7 @@
 						<li class=""><a href="{{ url('admin/logs/user') }}" class="">User Logs</a></li>
 						<li class=""><a href="{{ url('constants') }}" class="">Constants</a></li>
 						<li class=""><a href="{{ url('admin/logs/access') }}" class="">Site Access Logs</a></li>
+						<li class=""><a href="{{ url('admin/metrics') }}" class="">System Metrics</a></li>
 						@can('view_mailing_list')
 						<li class=""><a href="{{ url('mailing_list') }}" class="">Mailing List</a></li>
 						@endcan

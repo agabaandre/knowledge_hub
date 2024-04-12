@@ -45,10 +45,10 @@ class PermissionController extends Controller
         $data['roles']  = Role::all();
         $data['levels'] = AccessLevel::all();
 
-        $name     = $request->name;
-        $locationId  = $request->location_id;
-        $phone    = $request->mobile;
-        $count    = (!empty($request->count))?$request->count:20;
+        $name        = $request->name;
+        $country_id  = $request->country_id;
+        $phone       = $request->mobile;
+        $count       = (!empty($request->count))?$request->count:20;
        
       
         $users = DB::table('users')
@@ -58,8 +58,8 @@ class PermissionController extends Controller
                 ->when($name, function ($query, $name) {
                     return $query->where('users.name','like', $name.'%');
                 })
-                ->when($locationId, function ($query, $locationId) {
-                    return $query->where('users.location_id',$locationId);
+                ->when($country_id, function ($query, $country_id) {
+                    return $query->where('users.country_id',$country_id);
                 })
                 ->when(true,function($query){ //apply access filter
 
@@ -75,7 +75,7 @@ class PermissionController extends Controller
 
 
         $data['search'] = (object) array(
-            "location"=>$locationId,
+            "country_id"=>$country_id,
             "name"=>$name,
             "count" =>$count,
             "phone" =>$phone
@@ -100,7 +100,7 @@ class PermissionController extends Controller
 
         $lastName       = $request->last_name;
         $firstName      = $request->first_name;
-        $locationId  = $request->location_id;
+        $country_id  = $request->country_id;
         $nin       = $request->nin;
         $email     = $request->email;
         $mobile    = $request->mobile;
@@ -111,14 +111,15 @@ class PermissionController extends Controller
         if($request->id)
          $user = User::find($request->id);
 
-        $user->firstname = $firstName;
-        $user->lastname  = $lastName;
-        $user->location_id  = $locationId;
-        $user->mobile    = $mobile;
-        $user->nin       = $nin;
+        $user->first_name = $firstName;
+        $user->last_name  = $lastName;
+        $user->country_id  = $country_id;
+        $user->phone_number    = $mobile;
         $user->email     = $email;
         $user->name      = $lastName." ".$firstName;
         $user->author_id =  $request->author_id;
+        $user->access_level_id =  $request->level_id;
+        $user->administrative_unit_id =  $request->administrative_unit_id;
        
         if(!empty($password)){
           $user->password  = Hash::make($password);
@@ -322,6 +323,8 @@ class PermissionController extends Controller
         $alert_class = ($saved)?'success':'danger';
     	
         $alert = ['alert-'.$alert_class=>$msg];
+        $alert = ['message'=>$msg];
+        
         return redirect()->route('permissions.users')->with($alert);
     }
 

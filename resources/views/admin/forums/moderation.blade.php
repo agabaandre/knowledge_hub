@@ -61,7 +61,7 @@
 					@foreach($forums as $row)
 						<tr>
 							<td>{{ $row->forum_title }}</td>
-							<td>{!! truncate($row->forum_description,100) !!}</td>
+							<td>{!! truncate(strip_tags($row->forum_description), 100) !!}</td>
 							<td>{!! truncate($row->user->name,100) !!}</td>
 							<td>
 								<a class="btn btn-sm btn-default" href="#details{{$row->id}}" data-toggle="modal" >Details</a>

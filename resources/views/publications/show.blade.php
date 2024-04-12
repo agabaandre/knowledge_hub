@@ -35,6 +35,12 @@
 								</div>
 								<div class="jbl_info01">
 									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ (!$publication->is_version)?$publication->sub_theme->description:'Version '.$publication->version_no }}</span>
+									@if(count($publication->favourited)>0)
+									@php
+									 $likes = count($publication->favourited)
+									@endphp
+									<span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i class="lni lni-heart mr-1"></i> {{ $likes }} User{{ ($likes>1)?"s":"" }} liked this</span>
+									@endif
 								</div>
 							</div>
 						</div>
@@ -105,6 +111,10 @@
 									<div class="details ft-medium">
 										<label class="text-muted">No. of Visits</label>
 										<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }} Visits</span>
+									</div>
+									<div class="details ft-medium">
+										<label class="text-muted">Likes</label>
+										<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }} Likes</span>
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Category</label>

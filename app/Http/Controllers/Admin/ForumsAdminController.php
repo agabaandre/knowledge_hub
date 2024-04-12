@@ -35,6 +35,14 @@ class ForumsAdminController extends Controller
         return $this->forumsRepo->delete($request->id);
     }
 
+    
+    public function details(Request $request){
+        $forum          =  $this->forumsRepo->find($request->id);
+        $data['forum']  = $forum;       
+        return view('admin.forums.details',$data);
+    }
+
+
     public function approve(Request $request){
         $this->forumsRepo->approve($request->id);
         return back();

@@ -13,6 +13,7 @@
     <!-- Main Content -->
     <div class="main-content" style="margin-right: 20px; margin-left: 20px; margin-top: 20px;">
         <div class="container-fluid">
+            @include('layouts.partials.alerts')
             @yield('content')
         </div>
     </div>

@@ -53,11 +53,13 @@
 						
 								@if($publication->is_approved == 0)
 								<div class="row col-12 d-flex">
+								   @if($publication->is_rejected==1)<label class="badge badge-danger">Rejected</label>@endif
 								    <a href="#approval-modal" data-toggle="modal"  class="btn btn-sm rounded btn-success fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-check-circle"></i> {{ ($publication->is_rejected== 0)?'Approve':'Reconsider'}}</a>
 								</div>
 								@endif
                                 @if( ($publication->is_rejected== 0 && $publication->is_approved==1) || ($publication->is_rejected== 0 && $publication->is_approved==0))
 								<div class="row col-12 d-flex">
+								    @if($publication->is_approved==1)<label class="badge badge-success">Approved</label>@endif
 								    <a href="#reject-modal" data-toggle="modal" class="btn btn-sm rounded btn-danger fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-times-circle"></i> {{ ($publication->is_approved==1)?'Recall':'Reject'}}</a>
 								</div>
 								@endif

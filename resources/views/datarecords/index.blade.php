@@ -9,18 +9,17 @@
 <div class="gray pt-2">
 <div class="container">
 <form class="row container justify-content-center align-items-center" action="">
-	<div class="form-group col-lg-4">
+	    <div class="form-group col-lg-4">
 			<label>RCC</label>
 			@include('partials.regions.dropdown',['class'=>'select2','allfield'=>'ALL','selected'=>@$_GET['rcc']])
 		</div>
 		<div class="form-group col-lg-4">
 			<label>Member State</label>
-			<select class='form-control select2 text-left form-select' name="country_id" id="country_id">
-				<option value="">ALL</option>
-			</select>
+			@include('partials.countries.dropdown',['class'=>'select2','allfield'=>'All'])
 		</div>
+		<input type="hidden" name="slug" value="<?php echo (isset($_GET['slug']))?$_GET['slug']:''; ?>" />
 		<div class="form-group col-lg-4">
-			<button type="submit" class="btn btn btn-md btn-success mt-4">Apply Filter</button>
+			<button type="submit" class="btn btn btn-md btn-sm btn-success mt-4">Apply Filter</button>
 		</div>
 </form>
 			
@@ -30,8 +29,8 @@
 		<div class="row">
 			<div class="col-xl-12 col-lg-12 col-md-12 col-12">
 				<div class="row align-items-center justify-content-between mx-0 bg-white rounded py-4 mb-4">
-					<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12">
-						<h6 class="mb-0 ft-medium fs-sm" {{ (count($records)==0)?'py-5':'' }}>
+					<div class="col-sm-12">
+						<h6 class="mb-0 ft-medium fs-sm text-center" {{ (count($records)==0)?'py-5':'' }}>
 							{{ count($records) }} Data Records Available
 						</h6>
 					</div>
@@ -93,6 +92,7 @@
 @endsection
 
 @section('scripts')
+@include('common.select2')
 
 <script>
 

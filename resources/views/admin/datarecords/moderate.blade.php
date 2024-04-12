@@ -46,7 +46,7 @@
                                         <tbody>
                                             @foreach ($publication->pending_comments as $comment)
                                                 <tr>
-                                                    <td>{{ $comment->comment }}</td>
+                                                    <td>{!! $comment->comment !!}</td>
                                                     <td>{{ $comment->user->name }}</td>
                                                     <td>{{ $comment->created_at }}</td>
                                                     <td>

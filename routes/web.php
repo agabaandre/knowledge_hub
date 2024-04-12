@@ -29,12 +29,14 @@ use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\LogsController;
+use App\Http\Controllers\Admin\MetricsController;
 use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
@@ -46,6 +48,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
+use App\Http\Controllers\ToolsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -148,7 +151,7 @@ Route::group(["prefix" => "publications"], function () {
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
 
 });
-
+Route::get("/tools", [ToolsController::class, 'index', 'middleware' => ['auth', 'web']])->name('tools');
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
 
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
@@ -261,8 +264,9 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/",[ForumsAdminController::class,'index']);
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
-        Route::get("/approve",[ForumsAdminController::class,'approve']);
-        Route::get("/reject",[ForumsAdminController::class,'reject']);
+        Route::post("/approve",[ForumsAdminController::class,'approve']);
+        Route::post("/reject",[ForumsAdminController::class,'reject']);
+        Route::get("/details", [ForumsAdminController::class, 'details']);
 
     });
 
@@ -387,6 +391,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/access", [LogsController::class, 'index']);
         Route::get("/user", [LogsController::class, 'trail']);
+    });
+
+    Route::group(["prefix" => "metrics"], function () {
+
+        Route::get("/", [MetricsController::class, 'index']);
+    });
+
+    Route::group(["prefix" => "tools"], function () {
+
+        Route::any("/", [ToolsAdminController::class, 'index']);
     });
 });
 

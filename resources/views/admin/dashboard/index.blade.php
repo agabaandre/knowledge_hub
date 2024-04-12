@@ -131,6 +131,8 @@ $percentage = ($users_count / 1000) * 100;
         </div>
     </div>
 
+    <div class="row charts"></div>
+
     <div class="row">
         <div class="col-md-12">
 
@@ -235,8 +237,18 @@ $percentage = ($users_count / 1000) * 100;
 
         $('.dataTables_wrapper').removeClass('form-inline');
 
-        // Date range picker
-        $('#filter_date').daterangepicker()
+        $.ajax({
+            method:'GET',
+            url:'<?php echo url('admin/metrics'); ?>',
+            success:function(response){
+                
+                console.log('Metrics',response)
+                $('.charts').html(response);
+            },
+            error:function(error){
+                console.log(error);
+            }
+        })
     })
 </script>
 

@@ -18,8 +18,7 @@ class DataRecordsRepository extends SharedRepo{
 
        
         if($request->slug){
-
-          $category       = DataCategory::where('slug','like',$request->slug)->first();
+          $category       = DataCategory::where('slug',$request->slug)->first();
           $results->where('data_category_id',$category->id);
         }
 
