@@ -10,7 +10,7 @@ class DataRecord extends Model
     use HasFactory;
 
     public function category(){
-        return $this->belongsTo(DataSubCategory::class,"data_category_id","id");
+        return $this->belongsTo(DataCategory::class,"data_category_id","id");
     }
     public function sub_category(){
         return $this->belongsTo(DataSubCategory::class,"data_sub_category_id","id");

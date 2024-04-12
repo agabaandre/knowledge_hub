@@ -377,7 +377,7 @@ namespace App\Models{
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $is_embedded
  * @property int $data_category_id
- * @property-read \App\Models\DataSubCategory|null $category
+ * @property-read \App\Models\DataCategory|null $category
  * @property-read \App\Models\Country|null $country
  * @property-read \App\Models\PublicationType|null $file_type
  * @property-read \App\Models\DataSubCategory|null $sub_category

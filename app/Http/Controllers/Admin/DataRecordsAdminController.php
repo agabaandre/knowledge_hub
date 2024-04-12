@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\DataSubCategory;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\DataRecordsRepository;
@@ -21,6 +22,8 @@ class DataRecordsAdminController extends Controller
 
         $data['records'] = $this->dataRecordsRepo->get($request);
         $data['search']       = (Object) $request->all();
+        $data['countries'] = $this->dataRecordsRepo->get_json_countries();
+        $data['categories'] = $this->dataRecordsRepo->get_json_categories();
         return view('admin.datarecords.index',$data);
     }
 
@@ -111,6 +114,18 @@ class DataRecordsAdminController extends Controller
             return response($data,200);
         }
         return back()->with($data);
+    }
+
+
+    public function getSubcategories(Request $request)
+    {
+        $category_id = $request->input('category_id');
+        
+        // Fetch subcategories based on the selected category ID
+        $subcategories = DataSubCategory::where('data_category_id', $category_id)->get();
+
+        // Return subcategories as JSON response
+        return response()->json($subcategories);
     }
 
 
