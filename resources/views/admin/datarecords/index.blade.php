@@ -63,32 +63,23 @@
                         $i = 1;
                     @endphp
 
-					@foreach($records as $record)
-						<tr>
-							<td width="5%"><i class="fa {{ $record->file_type->icon }} fa-2x text-muted"></i></td>
-							<td>
-                              <a href="{{ $record->publication }}" target="_blank">
-								{!!truncate($record->title, 30) !!}
-                              </a>
-							</td>
-							<td>
-								{!! truncate($record->description, 50) !!}
-							</td>
-							<td>
-								{{ $record->country->name ?? '' }}
-							</td>
-							<td>
-							
-								<!-- Edit Modal Action -->
-								<a href="{{ url('admin/datarecords/edit') }}?id={{$record->id}}" type="button" class="btn btn-primary btn-sm" 
-								>Edit</a>
-								<!-- Delete Modal Action -->
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> Delete</a>
-							</td>
-						</tr>
-					@endforeach
-				</tbody>
-			</table>
+                    @foreach($records as $row)
+                        <tr>
+							<td>{{ $row->id }}</td>
+                            <td>{{ $row->title }}</td>
+							<td>{!!  truncate(html_to_text($row->description), 80) !!}</td>
+							<td>{{ $row->country->name }}</td>
+							<td>{{ $row->category->category_name }}/{{ optional($row->sub_category)->sub_category_name }}</td>
+
+                            <td>
+                                <a href="{{ url('/admin/datarecords/edit?id=' . $row->id)}}" class="btn btn-sm btn-primary ml-1">Edit</a>
+                                <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
+                                   onclick="openDeleteModal('{{ $row->id }}')">Delete</a>
+                            </td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
 
                 <div class="py-2"> {{$records->links() }}</div>
 
