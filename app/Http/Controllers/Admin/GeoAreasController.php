@@ -22,22 +22,20 @@ class GeoAreasController extends Controller
         return view('admin.areas.index',$data);
     }
 
- 
     public function store(Request $request){
 
         $saved = $this->areasRepo->save($request);
 
-
         if($saved):
             $data = ['message'=>'Goegraphical area saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         if($request->ajax()){
             return response($data,200);
         }
-        return back(200)->with($data);
+        return back()->with($data);
     }
 
 
@@ -46,5 +44,5 @@ class GeoAreasController extends Controller
         return $this->areasRepo->delete($request->id);
     }
 
-  
+
 }

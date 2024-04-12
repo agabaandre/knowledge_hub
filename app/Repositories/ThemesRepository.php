@@ -31,18 +31,23 @@ class ThemesRepository{
     public function get_all_subthemes(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:24;
-        $themes = SubThemeticArea::orderBy('id','desc');
+        $themes = SubThemeticArea::with('theme')->orderBy('id','desc');
         if($request->term)
         $themes->where('description','like','%'.$request->term.'%');
         $result = $themes->paginate($rows_count);
 
         return $result;
     }
-    
+
     public function save(Request $request){
-        $theme = new ThemeticArea();
-        $theme->description = $request->name;
+        // Find the record by 'id' if present, otherwise instantiate a new one
+        $theme = ThemeticArea::findOrNew($request->id);
+
+        // Update fields
+        $theme->description = $request->description;
         $theme->icon = $request->icon;
+
+        // Save the record
         $theme->save();
 
         return $theme;

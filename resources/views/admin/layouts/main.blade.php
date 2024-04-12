@@ -24,6 +24,8 @@
 
 @yield('scripts')
 
+@stack('modal-scripts')
+
 </body>
 
 </html>

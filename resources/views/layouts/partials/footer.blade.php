@@ -15,7 +15,7 @@
 								{!! settings()->phone !!}<br>	{!! settings()->email !!}
 							</div>
 							<div class="address mt-2">
-					
+
 							</div>
 						</div>
 					</div>
@@ -31,7 +31,7 @@
 								<li><a href="{{ url('account/publish') }}">Publish a resource</a></li>
 								@endguest
 								<li><a href="{{ url('forums') }}">Discussion Forums</a></li>
-								
+
 							</ul>
 						</div>
 					</div>
@@ -70,7 +70,7 @@
 				</div>
 			</div>
 		</div>
-</div> 
+</div>
 	<!-- closes langauge translator -->
 	</footer>
 	<!-- ============================ Footer End ================================== -->
@@ -198,10 +198,12 @@
 		//Quizz
 	</script>
 
-	
-	
 
-  
+
+
+
+
+
 
 	</body>
 

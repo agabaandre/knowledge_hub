@@ -9,5 +9,7 @@ class ExpertType extends Model
 {
     use HasFactory;
 
+    protected $table = 'isco_classifications';
+
    
 }

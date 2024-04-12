@@ -1,5 +1,7 @@
 @include('layouts.partials.styles')
 
+@notifyCss
+
 <div id="main-wrapper">
 
 @include('layouts.partials.header')
@@ -15,7 +17,7 @@
 @yield('content')
 @yield('scripts')
 
+<x-notify::notify />
+@notifyJs
+
 @include('layouts.partials.footer')
-
-
-	

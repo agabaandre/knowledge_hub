@@ -26,6 +26,7 @@ class FileTypesController extends Controller
     public function store(Request $request){
 
         $saved = $this->fileTypesRepo->save($request);
+    
 
         if($saved):
             $data = ['message'=>'File type saved successfully','status'=>'success','data'=>$saved];

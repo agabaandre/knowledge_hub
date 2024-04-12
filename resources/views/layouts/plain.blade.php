@@ -20,4 +20,3 @@
 @yield('scripts')
 
 
-	

@@ -31,7 +31,7 @@ class HealthThemesController extends Controller
         if($saved):
             $data = ['message'=>'Subject Area saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         if($request->ajax()){
@@ -41,10 +41,10 @@ class HealthThemesController extends Controller
         return back()->with($data);
     }
 
-   
+
     public function destroy(Request $request){
         return $this->themesRepo->delete($request->id);
     }
 
-  
+
 }

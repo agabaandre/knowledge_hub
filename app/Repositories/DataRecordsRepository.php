@@ -97,10 +97,8 @@ class DataRecordsRepository extends SharedRepo{
     }
 
     public function delete($id){
-
         return DataRecord::find($id)->delete();
     }
-
 
     public function get_categories(Request $request){
 
@@ -116,6 +114,17 @@ class DataRecordsRepository extends SharedRepo{
         $results    = DataSubCategory::orderBy('id','desc');
 
         return $results->paginate($rows_count);
+    }
+
+    public function get_json_countries() {
+        $results = Country::all();
+        return $results;
+    }
+
+    public function get_json_categories()
+    {
+        $results = DataCategory::all();
+        return $results;
     }
 
     public function delete_category($id){

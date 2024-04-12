@@ -105,7 +105,10 @@ Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
 Route::group(["prefix" => "browse"], function () {
 
     Route::get("themes", [ThemesController::class, 'index']);
+
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
+    Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
+
     Route::get("authors", [AuthorsController::class, 'index']);
     Route::get("areas", [AreasController::class, "index"]);
 
@@ -173,14 +176,14 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
-   
+
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
 
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
-    Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');  
-    
+    Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+
     Route::group(["prefix" => "publications"], function () {
 
         Route::get("/", [ResourcesController::class, 'index']);
@@ -199,19 +202,19 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
     //geo areas
-    Route::group(["prefix" => "areas"], function () {
+    Route::group(["prefix" => "areas", "as" => "areas."], function () {
 
         Route::get("/", [GeoAreasController::class, 'index']);
-        Route::post("/save", [GeoAreasController::class, 'store']);
+        Route::post("/save", [GeoAreasController::class, 'store'])->name('store');
         Route::get("/delete", [GeoAreasController::class, 'destroy']);
     });
 
 
     //filetypes
-    Route::group(["prefix" => "filetypes"], function () {
+    Route::group(["prefix" => "filetypes", "as"=> "filetypes."], function () {
 
         Route::get("/", [FileTypesController::class, 'index']);
-        Route::post("/save", [FileTypesController::class, 'store']);
+        Route::post("/save", [FileTypesController::class, 'store'])->name('store');
         Route::get("/delete", [FileTypesController::class, 'destroy']);
     });
 
@@ -235,10 +238,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
 
     //tags
-    Route::group(["prefix" => "tags"], function () {
+    Route::group(["prefix" => "tags", 'as' => 'tags.'], function () {
 
         Route::get("/", [TagsController::class, 'index']);
         Route::post("/save", [TagsController::class, 'store']);
+        Route::put('/update', [TagsController::class, 'update'])->name('update');
         Route::get("/delete", [TagsController::class, 'destroy']);
     });
 
@@ -256,7 +260,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //filetypes
 
     Route::group(["prefix"=>"forums"],function(){
-    
+
         Route::get("/",[ForumsAdminController::class,'index']);
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
@@ -299,10 +303,10 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
     //facts
-    Route::group(["prefix" => "facts"], function () {
+    Route::group(["prefix" => "facts", 'as' => 'facts.'], function () {
 
         Route::get("/", [FactsAdminController::class, 'index']);
-        Route::post("/save", [FactsAdminController::class, 'store']);
+        Route::post("/save", [FactsAdminController::class, 'store'])->name('store');
         Route::get("/delete", [FactsAdminController::class, 'destroy']);
     });
 
@@ -327,7 +331,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/", [ExpertsAdminController::class, 'types']);
             Route::post("/save", [ExpertsAdminController::class, 'save_type']);
             Route::get("/delete", [ExpertsAdminController::class, 'delete_type']);
-            
+
         });
 
     });
@@ -373,13 +377,15 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/", [DataRecordsAdminController::class, 'categories']);
             Route::post("/save", [DataRecordsAdminController::class, 'save_category']);
             Route::get("/delete", [DataRecordsAdminController::class, 'delete_category']);
-            
+
             Route::get("/subcategories", [DataRecordsAdminController::class, 'subcategories']);
             Route::post("/savesub", [DataRecordsAdminController::class, 'save_subcategory']);
+
+            Route::get('/ajax/subcategories', [DataRecordsAdminController::class, 'getSubcategories'])->name('get-subcategories');
         });
     });
 
-    
+
 
     Route::group(["prefix" => "logs"], function () {
 

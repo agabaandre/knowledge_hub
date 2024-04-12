@@ -3,20 +3,31 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Thematic Area</h5>
+        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Sub Thematic Area</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      
+
       <form action="{{ url('admin/themes/save') }}" method="post" id='themes' class='themes'>
         @csrf
       <div class="modal-body">
         <input type="hidden" name="id" id="id" class="newform">
         <div class="row">
+
+            <div class="col-md-12">
+                <div class="mb-3">
+                    <select class="form-control select2 form-select">
+                        @foreach ($themes as $theme)
+                            <option>{{ $theme->description }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Thematic Area</label>
+              <label class="form-label" for="name">Sub Thematic Area</label>
               <input type="text" placeholder="Thematic Area" class="form-control" id="name" name="name" required>
             </div>
           </div>

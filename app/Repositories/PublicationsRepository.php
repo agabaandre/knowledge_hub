@@ -28,16 +28,17 @@ class PublicationsRepository extends SharedRepo{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs       = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc')->where('is_version',0);
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+            ->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits):
-         $pubs->orderBy('visits','desc');
+            $pubs->orderBy('visits','desc');
         else:
-         $pubs->orderBy('id','desc');
+            $pubs->orderBy('id','desc');
         endif;
 
         if($request->is_featured)
-         $pubs->where('is_featured',1);
+            $pubs->where('is_featured',1);
 
          //search by keyword
         if($request->term){

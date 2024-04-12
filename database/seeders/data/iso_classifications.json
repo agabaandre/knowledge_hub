@@ -1,0 +1,1838 @@
+[
+    {
+      "isco_id": "0110",
+      "name": "Commissioned armed forces officers"
+    },
+    {
+      "isco_id": "0210",
+      "name": "Armed forces officers"
+    },
+    {
+      "isco_id": "0310",
+      "name": "Armed forces occupations, other ranks"
+    },
+    {
+      "isco_id": "1111",
+      "name": "Legislators"
+    },
+    {
+      "isco_id": "1112",
+      "name": "Senior government officials"
+    },
+    {
+      "isco_id": "1113",
+      "name": "Traditional chiefs and heads of village"
+    },
+    {
+      "isco_id": "1114",
+      "name": "Senior officials of special-interest organizations"
+    },
+    {
+      "isco_id": "1120",
+      "name": "Directors, CEO, ES & Deputies"
+    },
+    {
+      "isco_id": "1211",
+      "name": "Finance managers"
+    },
+    {
+      "isco_id": "1212",
+      "name": "Human Resource"
+    },
+    {
+      "isco_id": "1213",
+      "name": "Health Planner"
+    },
+    {
+      "isco_id": "1219",
+      "name": "Communication Officer & PRO"
+    },
+    {
+      "isco_id": "1221",
+      "name": "Sales and marketing managers"
+    },
+    {
+      "isco_id": "1222",
+      "name": "Public Health Officer"
+    },
+    {
+      "isco_id": "1223",
+      "name": "Research and development managers"
+    },
+    {
+      "isco_id": "1311",
+      "name": "Agricultural and forestry production managers"
+    },
+    {
+      "isco_id": "1312",
+      "name": "Aquaculture and fisheries production managers"
+    },
+    {
+      "isco_id": "1321",
+      "name": "Manufacturing managers"
+    },
+    {
+      "isco_id": "1322",
+      "name": "Mining managers"
+    },
+    {
+      "isco_id": "1323",
+      "name": "Ophthalmology"
+    },
+    {
+      "isco_id": "1324",
+      "name": "Supply & Logistics"
+    },
+    {
+      "isco_id": "1330",
+      "name": "ICT"
+    },
+    {
+      "isco_id": "1341",
+      "name": "Child care services managers"
+    },
+    {
+      "isco_id": "1342",
+      "name": "Health services managers"
+    },
+    {
+      "isco_id": "1343",
+      "name": "Aged care services managers"
+    },
+    {
+      "isco_id": "1344",
+      "name": "Social welfare managers"
+    },
+    {
+      "isco_id": "1345",
+      "name": "Education managers"
+    },
+    {
+      "isco_id": "1346",
+      "name": "Financial and insurance services branch managers"
+    },
+    {
+      "isco_id": "1349",
+      "name": "Professional services managers not elsewhere classified"
+    },
+    {
+      "isco_id": "1411",
+      "name": "Hotel managers"
+    },
+    {
+      "isco_id": "1412",
+      "name": "Restaurant managers"
+    },
+    {
+      "isco_id": "1420",
+      "name": "Retail and wholesale trade managers"
+    },
+    {
+      "isco_id": "1431",
+      "name": "Sports, recreation and cultural centre managers"
+    },
+    {
+      "isco_id": "1439",
+      "name": "Services managers not elsewhere classified"
+    },
+    {
+      "isco_id": "2111",
+      "name": "Radiologists & Physicists"
+    },
+    {
+      "isco_id": "2112",
+      "name": "Meteorologists"
+    },
+    {
+      "isco_id": "2113",
+      "name": "Chemists"
+    },
+    {
+      "isco_id": "2114",
+      "name": "Geologists and geophysicists"
+    },
+    {
+      "isco_id": "2120",
+      "name": "Statisticians & Mathematicians"
+    },
+    {
+      "isco_id": "2131",
+      "name": "Biologists & Parasitologist"
+    },
+    {
+      "isco_id": "2132",
+      "name": "Farming & Geographers"
+    },
+    {
+      "isco_id": "2133",
+      "name": "Environmental protection professionals"
+    },
+    {
+      "isco_id": "2141",
+      "name": "Sanitary & Industrial"
+    },
+    {
+      "isco_id": "2142",
+      "name": "Civil engineers"
+    },
+    {
+      "isco_id": "2143",
+      "name": "Environmental engineers"
+    },
+    {
+      "isco_id": "2144",
+      "name": "Mechanical engineers"
+    },
+    {
+      "isco_id": "2145",
+      "name": "Chemical engineers"
+    },
+    {
+      "isco_id": "2146",
+      "name": "Miners"
+    },
+    {
+      "isco_id": "2149",
+      "name": "Biomedical"
+    },
+    {
+      "isco_id": "2151",
+      "name": "Electrical engineers"
+    },
+    {
+      "isco_id": "2152",
+      "name": "Electronics engineers"
+    },
+    {
+      "isco_id": "2153",
+      "name": "Telecommunications engineers"
+    },
+    {
+      "isco_id": "2161",
+      "name": "Building Architects"
+    },
+    {
+      "isco_id": "2162",
+      "name": "Landscape architects"
+    },
+    {
+      "isco_id": "2163",
+      "name": "Product and garment designers"
+    },
+    {
+      "isco_id": "2164",
+      "name": "Town and traffic planners"
+    },
+    {
+      "isco_id": "2165",
+      "name": "Cartographers and surveyors"
+    },
+    {
+      "isco_id": "2166",
+      "name": "Graphic and multimedia designers"
+    },
+    {
+      "isco_id": "2211",
+      "name": "Medical practitioners"
+    },
+    {
+      "isco_id": "2212",
+      "name": "Specialist Medical"
+    },
+    {
+      "isco_id": "2221",
+      "name": "Midwifery associates"
+    },
+    {
+      "isco_id": "2222",
+      "name": "Midwifery professionals"
+    },
+    {
+      "isco_id": "2230",
+      "name": "Pharmacist"
+    },
+    {
+      "isco_id": "2240",
+      "name": "Clinical Officer"
+    },
+    {
+      "isco_id": "2250",
+      "name": "Veterinarians"
+    },
+    {
+      "isco_id": "2261",
+      "name": "Dental Technician"
+    },
+    {
+      "isco_id": "2262",
+      "name": "Pharmacists"
+    },
+    {
+      "isco_id": "2263",
+      "name": "Environmental & hygiene professionals"
+    },
+    {
+      "isco_id": "2264",
+      "name": "Physiotherapists"
+    },
+    {
+      "isco_id": "2265",
+      "name": "Dieticians and nutritionists"
+    },
+    {
+      "isco_id": "2266",
+      "name": "Audiologists and speech therapists"
+    },
+    {
+      "isco_id": "2267",
+      "name": "Opticians"
+    },
+    {
+      "isco_id": "2269",
+      "name": "Laboratory"
+    },
+    {
+      "isco_id": "2310",
+      "name": "University & higher Education"
+    },
+    {
+      "isco_id": "2320",
+      "name": "Vocational"
+    },
+    {
+      "isco_id": "2330",
+      "name": "Secondary"
+    },
+    {
+      "isco_id": "2341",
+      "name": "Primary"
+    },
+    {
+      "isco_id": "2342",
+      "name": "Early childhood educators"
+    },
+    {
+      "isco_id": "2351",
+      "name": "Education methods specialists"
+    },
+    {
+      "isco_id": "2352",
+      "name": "Special needs teachers"
+    },
+    {
+      "isco_id": "2353",
+      "name": "Other language teachers"
+    },
+    {
+      "isco_id": "2354",
+      "name": "Other music teachers"
+    },
+    {
+      "isco_id": "2355",
+      "name": "Other arts teachers"
+    },
+    {
+      "isco_id": "2356",
+      "name": "ICT trainers"
+    },
+    {
+      "isco_id": "2359",
+      "name": "Teaching professionals not elsewhere classified"
+    },
+    {
+      "isco_id": "2411",
+      "name": "Accountants"
+    },
+    {
+      "isco_id": "2412",
+      "name": "Financial and investment advisers"
+    },
+    {
+      "isco_id": "2413",
+      "name": "Financial analysts"
+    },
+    {
+      "isco_id": "2421",
+      "name": "Manager & Registrars"
+    },
+    {
+      "isco_id": "2422",
+      "name": "Policy Professionals"
+    },
+    {
+      "isco_id": "2423",
+      "name": "Personnel and careers professionals"
+    },
+    {
+      "isco_id": "2424",
+      "name": "Training Officers"
+    },
+    {
+      "isco_id": "2431",
+      "name": "Advertising and marketing professionals"
+    },
+    {
+      "isco_id": "2432",
+      "name": "Public relations professionals"
+    },
+    {
+      "isco_id": "2433",
+      "name": "Technical and medical sales professionals (excluding ICT)"
+    },
+    {
+      "isco_id": "2434",
+      "name": "Information and communications technology sales professionals"
+    },
+    {
+      "isco_id": "2511",
+      "name": "Systems analysts"
+    },
+    {
+      "isco_id": "2512",
+      "name": "Software developers"
+    },
+    {
+      "isco_id": "2513",
+      "name": "Web and multimedia developers"
+    },
+    {
+      "isco_id": "2514",
+      "name": "Applications programmers"
+    },
+    {
+      "isco_id": "2519",
+      "name": "Software and applications developers and analysts not elsewhere classified"
+    },
+    {
+      "isco_id": "2521",
+      "name": "Database designers and administrators"
+    },
+    {
+      "isco_id": "2522",
+      "name": "Systems administrators"
+    },
+    {
+      "isco_id": "2523",
+      "name": "Computer network professionals"
+    },
+    {
+      "isco_id": "2529",
+      "name": "Hospital Administrator"
+    },
+    {
+      "isco_id": "2611",
+      "name": "Lawyers"
+    },
+    {
+      "isco_id": "2612",
+      "name": "Judges"
+    },
+    {
+      "isco_id": "2619",
+      "name": "Legal workers"
+    },
+    {
+      "isco_id": "2621",
+      "name": "Archivists and curators"
+    },
+    {
+      "isco_id": "2622",
+      "name": "Librarians & Archivists"
+    },
+    {
+      "isco_id": "2631",
+      "name": "Economists"
+    },
+    {
+      "isco_id": "2632",
+      "name": "Therapist"
+    },
+    {
+      "isco_id": "2633",
+      "name": "Philosophers & gender"
+    },
+    {
+      "isco_id": "2634",
+      "name": "Psychiatry"
+    },
+    {
+      "isco_id": "2635",
+      "name": "Occupational Health Officer"
+    },
+    {
+      "isco_id": "2636",
+      "name": "Religious professionals"
+    },
+    {
+      "isco_id": "2641",
+      "name": "Authors and related writers"
+    },
+    {
+      "isco_id": "2642",
+      "name": "Journalists"
+    },
+    {
+      "isco_id": "2643",
+      "name": "Translators, interpreters and other linguists"
+    },
+    {
+      "isco_id": "2651",
+      "name": "Visual artists"
+    },
+    {
+      "isco_id": "2652",
+      "name": "Musicians, singers and composers"
+    },
+    {
+      "isco_id": "2653",
+      "name": "Dancers and choreographers"
+    },
+    {
+      "isco_id": "2654",
+      "name": "Film, stage and related directors and producers"
+    },
+    {
+      "isco_id": "2655",
+      "name": "Actors"
+    },
+    {
+      "isco_id": "2656",
+      "name": "Ecologist"
+    },
+    {
+      "isco_id": "2659",
+      "name": "Cytologist"
+    },
+    {
+      "isco_id": "3111",
+      "name": "Chemical and physical science technicians"
+    },
+    {
+      "isco_id": "3112",
+      "name": "Engineering technicians"
+    },
+    {
+      "isco_id": "3113",
+      "name": "Electrical technicians"
+    },
+    {
+      "isco_id": "3114",
+      "name": "Electronics engineering technicians"
+    },
+    {
+      "isco_id": "3115",
+      "name": "Mechanical engineering technicians"
+    },
+    {
+      "isco_id": "3116",
+      "name": "Chemical engineering technicians"
+    },
+    {
+      "isco_id": "3117",
+      "name": "Mining and metallurgical technicians"
+    },
+    {
+      "isco_id": "3118",
+      "name": "Draughtspersons"
+    },
+    {
+      "isco_id": "3119",
+      "name": "Physical planners"
+    },
+    {
+      "isco_id": "3121",
+      "name": "Mining supervisors"
+    },
+    {
+      "isco_id": "3122",
+      "name": "Manufacturing supervisors"
+    },
+    {
+      "isco_id": "3123",
+      "name": "Construction supervisors"
+    },
+    {
+      "isco_id": "3131",
+      "name": "Power production plant operators"
+    },
+    {
+      "isco_id": "3132",
+      "name": "Incinerator & Sterilisation"
+    },
+    {
+      "isco_id": "3133",
+      "name": "Chemical processing plant controllers"
+    },
+    {
+      "isco_id": "3134",
+      "name": "Petroleum and natural gas refining plant operators"
+    },
+    {
+      "isco_id": "3135",
+      "name": "Metal production process controllers"
+    },
+    {
+      "isco_id": "3139",
+      "name": "Telephone Operators"
+    },
+    {
+      "isco_id": "3141",
+      "name": "Life & Biochemist"
+    },
+    {
+      "isco_id": "3142",
+      "name": "Agricultural technicians"
+    },
+    {
+      "isco_id": "3143",
+      "name": "Forestry technicians"
+    },
+    {
+      "isco_id": "3151",
+      "name": "Ships' engineers"
+    },
+    {
+      "isco_id": "3152",
+      "name": "Ships' deck officers and pilots"
+    },
+    {
+      "isco_id": "3153",
+      "name": "Aircraft pilots and related associate professionals"
+    },
+    {
+      "isco_id": "3154",
+      "name": "Air traffic controllers"
+    },
+    {
+      "isco_id": "3155",
+      "name": "Air traffic safety electronics technicians"
+    },
+    {
+      "isco_id": "3211",
+      "name": "Imaging"
+    },
+    {
+      "isco_id": "3212",
+      "name": "Blood Donor & Recruiter"
+    },
+    {
+      "isco_id": "3213",
+      "name": "Pharmaceutical technicians and assistants"
+    },
+    {
+      "isco_id": "3214",
+      "name": "Medical and dental prosthetic technicians"
+    },
+    {
+      "isco_id": "3221",
+      "name": "Nursing Assistant & Aides"
+    },
+    {
+      "isco_id": "3222",
+      "name": "Enrolled Midwifery"
+    },
+    {
+      "isco_id": "3230",
+      "name": "Training"
+    },
+    {
+      "isco_id": "3240",
+      "name": "Veterinary"
+    },
+    {
+      "isco_id": "3251",
+      "name": "Dentists/ Dental Officer"
+    },
+    {
+      "isco_id": "3252",
+      "name": "Data & Health Records"
+    },
+    {
+      "isco_id": "3253",
+      "name": "Community health workers"
+    },
+    {
+      "isco_id": "3254",
+      "name": "Dispensing opticians"
+    },
+    {
+      "isco_id": "3255",
+      "name": "Physiotherapy technicians and assistants"
+    },
+    {
+      "isco_id": "3256",
+      "name": "Medical assistants"
+    },
+    {
+      "isco_id": "3257",
+      "name": "Environmental & health inspectors"
+    },
+    {
+      "isco_id": "3258",
+      "name": "Ambulance workers"
+    },
+    {
+      "isco_id": "3259",
+      "name": "Health Mentor"
+    },
+    {
+      "isco_id": "3311",
+      "name": "Securities and finance dealers and brokers"
+    },
+    {
+      "isco_id": "3312",
+      "name": "Credit and loans officers"
+    },
+    {
+      "isco_id": "3313",
+      "name": "Accounting associate professionals"
+    },
+    {
+      "isco_id": "3314",
+      "name": "Statistical, mathematical and related associate professionals"
+    },
+    {
+      "isco_id": "3315",
+      "name": "Valuers and loss assessors"
+    },
+    {
+      "isco_id": "3321",
+      "name": "Insurance representatives"
+    },
+    {
+      "isco_id": "3322",
+      "name": "Commercial sales representatives"
+    },
+    {
+      "isco_id": "3323",
+      "name": "Buyers & sales"
+    },
+    {
+      "isco_id": "3324",
+      "name": "Trade brokers"
+    },
+    {
+      "isco_id": "3331",
+      "name": "Clearing and forwarding agents"
+    },
+    {
+      "isco_id": "3332",
+      "name": "Conference and event planners"
+    },
+    {
+      "isco_id": "3333",
+      "name": "Employment agents and contractors"
+    },
+    {
+      "isco_id": "3334",
+      "name": "Real estate agents and property managers"
+    },
+    {
+      "isco_id": "3339",
+      "name": "Embryologist"
+    },
+    {
+      "isco_id": "3341",
+      "name": "Office supervisors"
+    },
+    {
+      "isco_id": "3342",
+      "name": "Legal secretaries"
+    },
+    {
+      "isco_id": "3343",
+      "name": "Executive secretaries"
+    },
+    {
+      "isco_id": "3344",
+      "name": "Medical secretaries"
+    },
+    {
+      "isco_id": "3351",
+      "name": "Customs and border inspectors"
+    },
+    {
+      "isco_id": "3352",
+      "name": "Government tax and excise officials"
+    },
+    {
+      "isco_id": "3353",
+      "name": "Government social benefits officials"
+    },
+    {
+      "isco_id": "3354",
+      "name": "Government licensing officials"
+    },
+    {
+      "isco_id": "3355",
+      "name": "Police inspectors and detectives"
+    },
+    {
+      "isco_id": "3359",
+      "name": "Radiographer"
+    },
+    {
+      "isco_id": "3411",
+      "name": "Police inspectors and detectives"
+    },
+    {
+      "isco_id": "3412",
+      "name": "Social work associate professionals"
+    },
+    {
+      "isco_id": "3413",
+      "name": "Religious Associates"
+    },
+    {
+      "isco_id": "3421",
+      "name": "Athletes and sports players"
+    },
+    {
+      "isco_id": "3422",
+      "name": "Sports coaches, instructors and officials"
+    },
+    {
+      "isco_id": "3423",
+      "name": "Fitness and recreation instructors and program leaders"
+    },
+    {
+      "isco_id": "3431",
+      "name": "Photographers"
+    },
+    {
+      "isco_id": "3432",
+      "name": "Interior designers and decorators"
+    },
+    {
+      "isco_id": "3433",
+      "name": "Gallery, museum and library technicians"
+    },
+    {
+      "isco_id": "3434",
+      "name": "Chefs"
+    },
+    {
+      "isco_id": "3435",
+      "name": "Other artistic and cultural associate professionals"
+    },
+    {
+      "isco_id": "3511",
+      "name": "ICT Technicians"
+    },
+    {
+      "isco_id": "3512",
+      "name": "ICT technicians"
+    },
+    {
+      "isco_id": "3513",
+      "name": "Computer network and systems technicians"
+    },
+    {
+      "isco_id": "3514",
+      "name": "Web technicians"
+    },
+    {
+      "isco_id": "3521",
+      "name": "Audio-visual & Broadcasters"
+    },
+    {
+      "isco_id": "3522",
+      "name": "Telecommunications engineering technicians"
+    },
+    {
+      "isco_id": "4110",
+      "name": "General office clerks"
+    },
+    {
+      "isco_id": "4120",
+      "name": "Secretaries (general)"
+    },
+    {
+      "isco_id": "4131",
+      "name": "Typists"
+    },
+    {
+      "isco_id": "4132",
+      "name": "Data Entry Clerks"
+    },
+    {
+      "isco_id": "4211",
+      "name": "Bank tellers and related clerks"
+    },
+    {
+      "isco_id": "4212",
+      "name": "Perfusion"
+    },
+    {
+      "isco_id": "4213",
+      "name": "Pawnbrokers and money-lenders"
+    },
+    {
+      "isco_id": "4214",
+      "name": "Debt-collectors"
+    },
+    {
+      "isco_id": "4221",
+      "name": "Travel consultants and clerks"
+    },
+    {
+      "isco_id": "4222",
+      "name": "information clerks"
+    },
+    {
+      "isco_id": "4223",
+      "name": "Telephone operators"
+    },
+    {
+      "isco_id": "4224",
+      "name": "Hotel receptionists"
+    },
+    {
+      "isco_id": "4225",
+      "name": "Enquiry clerks"
+    },
+    {
+      "isco_id": "4226",
+      "name": "Receptionists & Front Desk"
+    },
+    {
+      "isco_id": "4227",
+      "name": "Survey and market research interviewers"
+    },
+    {
+      "isco_id": "4229",
+      "name": "Client care"
+    },
+    {
+      "isco_id": "4311",
+      "name": "Theatre Assistant"
+    },
+    {
+      "isco_id": "4312",
+      "name": "Statistical, finance and insurance clerks"
+    },
+    {
+      "isco_id": "4313",
+      "name": "Payroll clerks"
+    },
+    {
+      "isco_id": "4321",
+      "name": "Stores"
+    },
+    {
+      "isco_id": "4322",
+      "name": "Sterilisation"
+    },
+    {
+      "isco_id": "4323",
+      "name": "Transport clerks"
+    },
+    {
+      "isco_id": "4411",
+      "name": "Library clerks"
+    },
+    {
+      "isco_id": "4412",
+      "name": "Mail carriers and sorting clerks"
+    },
+    {
+      "isco_id": "4413",
+      "name": "Coding, proof-reading and related clerks"
+    },
+    {
+      "isco_id": "4414",
+      "name": "Scribes and related workers"
+    },
+    {
+      "isco_id": "4415",
+      "name": "Filing and copying clerks"
+    },
+    {
+      "isco_id": "4416",
+      "name": "Personnel clerks"
+    },
+    {
+      "isco_id": "4419",
+      "name": "Clerical support workers not elsewhere classified"
+    },
+    {
+      "isco_id": "5111",
+      "name": "Travel attendants and travel stewards"
+    },
+    {
+      "isco_id": "5112",
+      "name": "Transporters"
+    },
+    {
+      "isco_id": "5113",
+      "name": "Travel guides"
+    },
+    {
+      "isco_id": "5120",
+      "name": "cooks"
+    },
+    {
+      "isco_id": "5131",
+      "name": "Waiters"
+    },
+    {
+      "isco_id": "5132",
+      "name": "Bartenders"
+    },
+    {
+      "isco_id": "5141",
+      "name": "Hairdressers"
+    },
+    {
+      "isco_id": "5142",
+      "name": "Beauticians and related workers"
+    },
+    {
+      "isco_id": "5151",
+      "name": "Neurosurgery"
+    },
+    {
+      "isco_id": "5152",
+      "name": "Domestic housekeepers"
+    },
+    {
+      "isco_id": "5153",
+      "name": "Building caretakers"
+    },
+    {
+      "isco_id": "5161",
+      "name": "Administrative Assistant"
+    },
+    {
+      "isco_id": "5162",
+      "name": "Companions and valets"
+    },
+    {
+      "isco_id": "5163",
+      "name": "Mortuary"
+    },
+    {
+      "isco_id": "5164",
+      "name": "Pet groomers and animal care workers"
+    },
+    {
+      "isco_id": "5165",
+      "name": "Driving instructors"
+    },
+    {
+      "isco_id": "5169",
+      "name": "Personal services workers not elsewhere classified"
+    },
+    {
+      "isco_id": "5211",
+      "name": "Stall and market salespersons"
+    },
+    {
+      "isco_id": "5212",
+      "name": "Street food salespersons"
+    },
+    {
+      "isco_id": "5221",
+      "name": "Shop keepers"
+    },
+    {
+      "isco_id": "5222",
+      "name": "Shop supervisors"
+    },
+    {
+      "isco_id": "5223",
+      "name": "Shop sales assistants"
+    },
+    {
+      "isco_id": "5230",
+      "name": "Cashiers and ticket clerks"
+    },
+    {
+      "isco_id": "5241",
+      "name": "Fashion and other models"
+    },
+    {
+      "isco_id": "5242",
+      "name": "Sales demonstrators"
+    },
+    {
+      "isco_id": "5243",
+      "name": "Door to door salespersons"
+    },
+    {
+      "isco_id": "5244",
+      "name": "Contact centre salespersons"
+    },
+    {
+      "isco_id": "5245",
+      "name": "Service station attendants"
+    },
+    {
+      "isco_id": "5246",
+      "name": "Food service counter attendants"
+    },
+    {
+      "isco_id": "5249",
+      "name": "Sales workers not elsewhere classified"
+    },
+    {
+      "isco_id": "5311",
+      "name": "Child care workers"
+    },
+    {
+      "isco_id": "5312",
+      "name": "Teachers' aides"
+    },
+    {
+      "isco_id": "5321",
+      "name": "Health care assistants"
+    },
+    {
+      "isco_id": "5322",
+      "name": "Home-based personal care workers"
+    },
+    {
+      "isco_id": "5329",
+      "name": "Personal care"
+    },
+    {
+      "isco_id": "5411",
+      "name": "Fire-fighters"
+    },
+    {
+      "isco_id": "5412",
+      "name": "Police officers"
+    },
+    {
+      "isco_id": "5413",
+      "name": "Prison guards"
+    },
+    {
+      "isco_id": "5414",
+      "name": "Security guards"
+    },
+    {
+      "isco_id": "5419",
+      "name": "Protective services workers not elsewhere classified"
+    },
+    {
+      "isco_id": "6111",
+      "name": "Field crop and vegetable growers"
+    },
+    {
+      "isco_id": "6112",
+      "name": "Tree and shrub crop growers"
+    },
+    {
+      "isco_id": "6113",
+      "name": "Gardeners, horticultural and nursery growers"
+    },
+    {
+      "isco_id": "6114",
+      "name": "Mixed crop growers"
+    },
+    {
+      "isco_id": "6121",
+      "name": "Livestock and dairy producers"
+    },
+    {
+      "isco_id": "6122",
+      "name": "Poultry producers"
+    },
+    {
+      "isco_id": "6123",
+      "name": "Entomology"
+    },
+    {
+      "isco_id": "6129",
+      "name": "Animal producers not elsewhere classified"
+    },
+    {
+      "isco_id": "6130",
+      "name": "Mixed crop and animal producers"
+    },
+    {
+      "isco_id": "6210",
+      "name": "Forestry and related workers"
+    },
+    {
+      "isco_id": "6221",
+      "name": "Aquaculture workers"
+    },
+    {
+      "isco_id": "6222",
+      "name": "Inland and coastal waters fishery workers"
+    },
+    {
+      "isco_id": "6223",
+      "name": "Deep-sea fishery workers"
+    },
+    {
+      "isco_id": "6224",
+      "name": "Hunters and trappers"
+    },
+    {
+      "isco_id": "6310",
+      "name": "Subsistence crop farmers"
+    },
+    {
+      "isco_id": "6320",
+      "name": "Subsistence livestock farmers"
+    },
+    {
+      "isco_id": "6330",
+      "name": "Subsistence mixed crop and livestock farmers"
+    },
+    {
+      "isco_id": "6340",
+      "name": "Subsistence fishers, hunters, trappers and gatherers"
+    },
+    {
+      "isco_id": "7111",
+      "name": "House builders"
+    },
+    {
+      "isco_id": "7112",
+      "name": "Assistant"
+    },
+    {
+      "isco_id": "7113",
+      "name": "Stonemasons, stone cutters, splitters and carvers"
+    },
+    {
+      "isco_id": "7114",
+      "name": "Concrete workers"
+    },
+    {
+      "isco_id": "7115",
+      "name": "Carpenters and joiners"
+    },
+    {
+      "isco_id": "7119",
+      "name": "Buildings"
+    },
+    {
+      "isco_id": "7121",
+      "name": "Roofers"
+    },
+    {
+      "isco_id": "7122",
+      "name": "Floor layers and tile setters"
+    },
+    {
+      "isco_id": "7123",
+      "name": "Plasterers"
+    },
+    {
+      "isco_id": "7124",
+      "name": "Insulation workers"
+    },
+    {
+      "isco_id": "7125",
+      "name": "Glaziers"
+    },
+    {
+      "isco_id": "7126",
+      "name": "Plumbers and pipe fitters"
+    },
+    {
+      "isco_id": "7127",
+      "name": "Cold chain"
+    },
+    {
+      "isco_id": "7131",
+      "name": "Painters and related workers"
+    },
+    {
+      "isco_id": "7132",
+      "name": "Spray painters and varnishers"
+    },
+    {
+      "isco_id": "7133",
+      "name": "Building structure cleaners"
+    },
+    {
+      "isco_id": "7211",
+      "name": "Metal moulders and coremakers"
+    },
+    {
+      "isco_id": "7212",
+      "name": "Welders and flamecutters"
+    },
+    {
+      "isco_id": "7213",
+      "name": "Sheet-metal workers"
+    },
+    {
+      "isco_id": "7214",
+      "name": "Structural-metal preparers and erectors"
+    },
+    {
+      "isco_id": "7215",
+      "name": "Riggers and cable splicers"
+    },
+    {
+      "isco_id": "7221",
+      "name": "Blacksmiths, hammersmiths and forging press workers"
+    },
+    {
+      "isco_id": "7222",
+      "name": "Toolmakers and related workers"
+    },
+    {
+      "isco_id": "7223",
+      "name": "Metal working machine tool setters and operators"
+    },
+    {
+      "isco_id": "7224",
+      "name": "Metal polishers, wheel grinders and tool sharpeners"
+    },
+    {
+      "isco_id": "7231",
+      "name": "Motor vehicle mechanics and repairers"
+    },
+    {
+      "isco_id": "7232",
+      "name": "Aircraft engine mechanics and repairers"
+    },
+    {
+      "isco_id": "7233",
+      "name": "Religious Leader"
+    },
+    {
+      "isco_id": "7234",
+      "name": "Bicycle and related repairers"
+    },
+    {
+      "isco_id": "7311",
+      "name": "Precision-instrument makers and repairers"
+    },
+    {
+      "isco_id": "7312",
+      "name": "Musical instrument makers and tuners"
+    },
+    {
+      "isco_id": "7313",
+      "name": "Jewellery and precious-metal workers"
+    },
+    {
+      "isco_id": "7314",
+      "name": "Porters"
+    },
+    {
+      "isco_id": "7315",
+      "name": "Glass makers, cutters, grinders and finishers"
+    },
+    {
+      "isco_id": "7316",
+      "name": "Sign writers, decorative painters, engravers and etchers"
+    },
+    {
+      "isco_id": "7317",
+      "name": "Handicraft workers in wood, basketry and related materials"
+    },
+    {
+      "isco_id": "7318",
+      "name": "Handicraft workers"
+    },
+    {
+      "isco_id": "7319",
+      "name": "Handicraft workers not elsewhere classified"
+    },
+    {
+      "isco_id": "7321",
+      "name": "Pre-press technicians"
+    },
+    {
+      "isco_id": "7322",
+      "name": "Printers"
+    },
+    {
+      "isco_id": "7323",
+      "name": "Print & Binding"
+    },
+    {
+      "isco_id": "7411",
+      "name": "Building and related electricians"
+    },
+    {
+      "isco_id": "7412",
+      "name": "Electrical mechanics and fitters"
+    },
+    {
+      "isco_id": "7413",
+      "name": "Electrical line installers and repairers"
+    },
+    {
+      "isco_id": "7421",
+      "name": "Electronics mechanics and servicers"
+    },
+    {
+      "isco_id": "7422",
+      "name": "Information and communications technology installers and servicers"
+    },
+    {
+      "isco_id": "7511",
+      "name": "Butchers, fishmongers and related food preparers"
+    },
+    {
+      "isco_id": "7512",
+      "name": "Bakers, pastry-cooks and confectionery makers"
+    },
+    {
+      "isco_id": "7513",
+      "name": "Dairy-products makers"
+    },
+    {
+      "isco_id": "7514",
+      "name": "Fruit, vegetable and related preservers"
+    },
+    {
+      "isco_id": "7515",
+      "name": "Food and beverage tasters and graders"
+    },
+    {
+      "isco_id": "7516",
+      "name": "Tobacco preparers and tobacco products makers"
+    },
+    {
+      "isco_id": "7521",
+      "name": "Wood treaters"
+    },
+    {
+      "isco_id": "7522",
+      "name": "Cabinet-makers and related workers"
+    },
+    {
+      "isco_id": "7523",
+      "name": "Woodworking-machine tool setters and operators"
+    },
+    {
+      "isco_id": "7531",
+      "name": "Tailors, dressmakers, furriers and hatters"
+    },
+    {
+      "isco_id": "7532",
+      "name": "Garment and related pattern-makers and cutters"
+    },
+    {
+      "isco_id": "7533",
+      "name": "Sewing, embroidery and related workers"
+    },
+    {
+      "isco_id": "7534",
+      "name": "Upholsterers and related workers"
+    },
+    {
+      "isco_id": "7535",
+      "name": "Pelt dressers, tanners and fellmongers"
+    },
+    {
+      "isco_id": "7536",
+      "name": "Shoemakers and related workers"
+    },
+    {
+      "isco_id": "7541",
+      "name": "Underwater divers"
+    },
+    {
+      "isco_id": "7542",
+      "name": "Shotfirers and blasters"
+    },
+    {
+      "isco_id": "7543",
+      "name": "Quality Assurance"
+    },
+    {
+      "isco_id": "7544",
+      "name": "Vector & Fumigators"
+    },
+    {
+      "isco_id": "7549",
+      "name": "Craft and related workers not elsewhere classified"
+    },
+    {
+      "isco_id": "8111",
+      "name": "Miners and quarriers"
+    },
+    {
+      "isco_id": "8112",
+      "name": "Mineral and stone processing plant operators"
+    },
+    {
+      "isco_id": "8113",
+      "name": "Well drillers and borers and related workers"
+    },
+    {
+      "isco_id": "8114",
+      "name": "Cement, stone and other mineral products machine operators"
+    },
+    {
+      "isco_id": "8121",
+      "name": "Metal processing plant operators"
+    },
+    {
+      "isco_id": "8122",
+      "name": "Metal finishing, plating and coating machine operators"
+    },
+    {
+      "isco_id": "8131",
+      "name": "Chemical products plant and machine operators"
+    },
+    {
+      "isco_id": "8132",
+      "name": "Photographic products machine operators"
+    },
+    {
+      "isco_id": "8141",
+      "name": "Rubber products machine operators"
+    },
+    {
+      "isco_id": "8142",
+      "name": "Plastic products machine operators"
+    },
+    {
+      "isco_id": "8143",
+      "name": "Paper products machine operators"
+    },
+    {
+      "isco_id": "8151",
+      "name": "Fibre preparing, spinning and winding machine operators"
+    },
+    {
+      "isco_id": "8152",
+      "name": "Weaving and knitting machine operators"
+    },
+    {
+      "isco_id": "8153",
+      "name": "Sewing machine operators"
+    },
+    {
+      "isco_id": "8154",
+      "name": "Research Officer"
+    },
+    {
+      "isco_id": "8155",
+      "name": "Fur and leather preparing machine operators"
+    },
+    {
+      "isco_id": "8156",
+      "name": "Shoemaking and related machine operators"
+    },
+    {
+      "isco_id": "8157",
+      "name": "Laundry machine operators"
+    },
+    {
+      "isco_id": "8159",
+      "name": "Theatre Attendant"
+    },
+    {
+      "isco_id": "8160",
+      "name": "Food and related products machine operators"
+    },
+    {
+      "isco_id": "8171",
+      "name": "Pulp and papermaking plant operators"
+    },
+    {
+      "isco_id": "8172",
+      "name": "Wood processing plant operators"
+    },
+    {
+      "isco_id": "8181",
+      "name": "Glass and ceramics plant operators"
+    },
+    {
+      "isco_id": "8182",
+      "name": "Steam engine and boiler operators"
+    },
+    {
+      "isco_id": "8183",
+      "name": "Packing, bottling and labelling machine operators"
+    },
+    {
+      "isco_id": "8189",
+      "name": "Stationary plant and machine operators not elsewhere classified"
+    },
+    {
+      "isco_id": "8211",
+      "name": "Mechanical machinery assemblers"
+    },
+    {
+      "isco_id": "8212",
+      "name": "Electrical and electronic equipment assemblers"
+    },
+    {
+      "isco_id": "8219",
+      "name": "Assemblers not elsewhere classified"
+    },
+    {
+      "isco_id": "8311",
+      "name": "Locomotive engine drivers"
+    },
+    {
+      "isco_id": "8312",
+      "name": "Railway brake, signal and switch operators"
+    },
+    {
+      "isco_id": "8321",
+      "name": "Motorcycle drivers"
+    },
+    {
+      "isco_id": "8322",
+      "name": "Car, taxi and van drivers"
+    },
+    {
+      "isco_id": "8331",
+      "name": "Bus and tram drivers"
+    },
+    {
+      "isco_id": "8332",
+      "name": "Heavy truck and lorry drivers"
+    },
+    {
+      "isco_id": "8341",
+      "name": "Mobile farm and forestry plant operators"
+    },
+    {
+      "isco_id": "8342",
+      "name": "Earthmoving and related plant operators"
+    },
+    {
+      "isco_id": "8343",
+      "name": "Crane, hoist and related plant operators"
+    },
+    {
+      "isco_id": "8344",
+      "name": "Lifting truck operators"
+    },
+    {
+      "isco_id": "8350",
+      "name": "Ships & other drivers"
+    },
+    {
+      "isco_id": "9111",
+      "name": "Domestic cleaners and helpers"
+    },
+    {
+      "isco_id": "9112",
+      "name": "Donor Care"
+    },
+    {
+      "isco_id": "9121",
+      "name": "Hand launderers and pressers"
+    },
+    {
+      "isco_id": "9122",
+      "name": "Vehicle Attendants & cleaners"
+    },
+    {
+      "isco_id": "9123",
+      "name": "Window cleaners"
+    },
+    {
+      "isco_id": "9129",
+      "name": "Other cleaning workers"
+    },
+    {
+      "isco_id": "9211",
+      "name": "Crop farm labourers"
+    },
+    {
+      "isco_id": "9212",
+      "name": "Livestock farm labourers"
+    },
+    {
+      "isco_id": "9213",
+      "name": "Mixed crop and livestock farm labourers"
+    },
+    {
+      "isco_id": "9214",
+      "name": "Garden and horticultural labourers"
+    },
+    {
+      "isco_id": "9215",
+      "name": "Forestry labourers"
+    },
+    {
+      "isco_id": "9216",
+      "name": "Fishery and aquaculture labourers"
+    },
+    {
+      "isco_id": "9311",
+      "name": "Mining and quarrying labourers"
+    },
+    {
+      "isco_id": "9312",
+      "name": "Civil engineering labourers"
+    },
+    {
+      "isco_id": "9313",
+      "name": "Building construction labourers"
+    },
+    {
+      "isco_id": "9321",
+      "name": "Hand packers"
+    },
+    {
+      "isco_id": "9329",
+      "name": "Manufacturing labourers not elsewhere classified"
+    },
+    {
+      "isco_id": "9331",
+      "name": "Hand and pedal vehicle drivers"
+    },
+    {
+      "isco_id": "9332",
+      "name": "Drivers of animal-drawn vehicles and machinery"
+    },
+    {
+      "isco_id": "9333",
+      "name": "Freight handlers"
+    },
+    {
+      "isco_id": "9334",
+      "name": "Shelf fillers"
+    },
+    {
+      "isco_id": "9411",
+      "name": "Fast food preparers"
+    },
+    {
+      "isco_id": "9412",
+      "name": "Kitchen helpers"
+    },
+    {
+      "isco_id": "9510",
+      "name": "Street and related service workers"
+    },
+    {
+      "isco_id": "9520",
+      "name": "Street vendors (excluding food)"
+    },
+    {
+      "isco_id": "9611",
+      "name": "Garbage and recycling collectors"
+    },
+    {
+      "isco_id": "9612",
+      "name": "Refuse sorters"
+    },
+    {
+      "isco_id": "9613",
+      "name": "Sweepers and related labourers"
+    },
+    {
+      "isco_id": "9621",
+      "name": "Messengers, package deliverers and luggage porters"
+    },
+    {
+      "isco_id": "9622",
+      "name": "Orthopaedics"
+    },
+    {
+      "isco_id": "9623",
+      "name": "Meter readers and vending-machine collectors"
+    },
+    {
+      "isco_id": "9624",
+      "name": "Water and firewood collectors"
+    },
+    {
+      "isco_id": "9629",
+      "name": "Elementary workers"
+    },
+    {
+      "isco_id": "9630",
+      "name": "Clinical"
+    },
+    {
+      "isco_id": "9631",
+      "name": "Attendant"
+    },
+    {
+      "isco_id": "9632",
+      "name": "House Keeper"
+    },
+    {
+      "isco_id": "9633",
+      "name": "Nutritionist"
+    },
+    {
+      "isco_id": "9634",
+      "name": "Dispenser"
+    },
+    {
+      "isco_id": "9635",
+      "name": "Dental Surgeon"
+    },
+    {
+      "isco_id": "9636",
+      "name": "Nursing Professionals"
+    },
+    {
+      "isco_id": "9637",
+      "name": "Enrolled Nursing"
+    },
+    {
+      "isco_id": "9638",
+      "name": "Anaesthetics"
+    },
+    {
+      "isco_id": "9639",
+      "name": "Anaesthetic Attendant"
+    },
+    {
+      "isco_id": "9640",
+      "name": "Procurement"
+    },
+    {
+      "isco_id": "9641",
+      "name": "TB/Leprosy"
+    },
+    {
+      "isco_id": "9642",
+      "name": "Sonographer"
+    },
+    {
+      "isco_id": "9643",
+      "name": "Epidemiologist"
+    },
+    {
+      "isco_id": "9644",
+      "name": "Artisan"
+    },
+    {
+      "isco_id": "9645",
+      "name": "Cartographer"
+    },
+    {
+      "isco_id": "9646",
+      "name": "Community Rehabilitation Workers"
+    },
+    {
+      "isco_id": "9647",
+      "name": "Health Visitor"
+    },
+    {
+      "isco_id": "9648",
+      "name": "Echo"
+    },
+    {
+      "isco_id": "9649",
+      "name": "Radiography"
+    },
+    {
+      "isco_id": "9650",
+      "name": "Pathology"
+    },
+    {
+      "isco_id": "9651",
+      "name": "Microbiologist"
+    },
+    {
+      "isco_id": "9652",
+      "name": "Virologist"
+    }
+  ]
