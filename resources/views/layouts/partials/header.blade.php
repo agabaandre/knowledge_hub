@@ -7,7 +7,7 @@
 		
 				    <div  class="ml-5 col-md-4 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:180px; margin-bottom:-18px;" >
+						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:120px; height:85px; margin-bottom:-18px;">
 					    <div class="slogan fw-bold" style="font-size:14px; text-align:center;"><small>{{ settings()->slogan}}</small></div>
 					
 					</a>
