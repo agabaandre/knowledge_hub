@@ -1,6 +1,15 @@
 @extends('admin.layouts.main')
 
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Publication Details</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Publication Details</li>
+        </ol>
+    </div>
+</div>
 
 	@php
 		if($publication->cover):

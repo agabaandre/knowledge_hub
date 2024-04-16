@@ -6,10 +6,19 @@
 @endsection
 
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Publication Summaries</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Publication Summaries</li>
+        </ol>
+    </div>
+</div>
 <div class="row">
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
-			<h3 class="card-title float-left">{{ $title ?? 'Summaries and Abstracts' }}</h3>
+	
 			 <hr>
 		</div>
 		<!-- Card Header With Form Filters -->

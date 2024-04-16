@@ -1,6 +1,17 @@
 @extends('admin.layouts.main')
 
 @section('content')
+<!-- PAGE-HEADER -->
+<div class="page-header">
+    <h1 class="page-title">Dashboard</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
+        </ol>
+    </div>
+</div>
+<!-- PAGE-HEADER END -->
 
 <div class="container-fluid">
     <div class="row">
@@ -11,7 +22,7 @@
 
                     <i class="fa fa-pen"></i>
                     @php
-                    $percentage = ($publications_count / 10000) * 100;
+$percentage = ($publications_count / 10000) * 100;
                     @endphp
                     <div class="progress mt-1 mb-2" style="height: 5px;">
                         <div class="progress-bar progress-bar-striped" role="progress-bar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>

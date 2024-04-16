@@ -5,7 +5,7 @@
 <div id="langauge-container">
 <div class="row d-flex" style="border-bottom: solid 0.4px var(--text-color-primary); border-top: solid 0.4px grey; box-shadow: 0 2px 0 grey, 0 2px 0 grey; width: 100%;" >
 		
-				    <div  class="ml-5 col-md-6 d-flex">
+				    <div  class="ml-5 col-md-4 d-flex">
 					<a class="nav-brand" href="{{ url('/') }}">
 						<img src="{{ settings()->logo }}" class="logo" alt="" style="width:180px; margin-bottom:-18px;" >
 					    <div class="slogan fw-bold" style="font-size:14px; text-align:center;"><small>{{ settings()->slogan}}</small></div>

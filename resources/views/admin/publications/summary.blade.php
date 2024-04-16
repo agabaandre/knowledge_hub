@@ -1,6 +1,15 @@
 @extends('admin.layouts.main')
 
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Publication Summaries / Abstracts</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Publication Summaries</li>
+        </ol>
+    </div>
+</div>
 
 
     <!-- ======================= Publication Info ======================== -->
@@ -15,7 +24,7 @@
 						<div class="jbd-flex d-flex align-items-center justify-content-start">
 							<div class="jbd-01-caption pl-3">
 								<div class="tbd-title">
-									<h4 class="mb-0 ft-medium fs-md">Resource Summary/Abstract</h4>
+									
 								</div>
 								<div class="jbl_location mb-3">
 

@@ -5,12 +5,23 @@
  @include('common.table')
 @endsection
 
+
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Manage Public Health Resources</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage Public Health Resource</li>
+        </ol>
+    </div>
+</div>
+
 <div class="row">
+
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
-			<h3 class="card-title float-left">{{ $title ?? '' }}</h3>
-			 <hr>
+
 		</div>
 		<!-- Card Header With Form Filters -->
 		<div class="card-header">
@@ -37,7 +48,7 @@
 					<div class="col-md-3">
 						<div class="form-group">
 							<label for="source">Source / Author</label>
-							@include('partials.authors.dropdown',['field'=>'author','selected'=>@$search->author])
+							@include('partials.authors.dropdown', ['field' => 'author', 'selected' => @$search->author])
 						</div>
 					</div>
 					<div class="col-md-3">

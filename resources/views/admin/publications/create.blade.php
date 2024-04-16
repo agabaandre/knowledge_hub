@@ -7,11 +7,22 @@
 @endsection
   
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">New Public Health Resource</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New Public Health Resource</li>
+        </ol>
+    </div>
+</div>
 <div class="row">
 
 @php
-     //dd($publication->accessgroups);
+//dd($publication->accessgroups);
 @endphp
+
+
 
     <div class="card col-lg-12">
         <div class="card-header text-left">
