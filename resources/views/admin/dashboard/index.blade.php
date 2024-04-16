@@ -217,9 +217,9 @@ $percentage = ($users_count / 1000) * 100;
                                 <tr>
                                     <td>#</td>
                                     <td>{!! time_ago($row->created_at) !!}</td>
-                                    <td>{!! $row->title !!}</td>
-                                    <td>{!! truncate($row->description, 20) !!}</td>
-                                    <td>{!! truncate($row->author->name, 20) !!}</td>
+                                    <td>{!! strip_tags($row->title) !!}</td>
+                                    <td>{!! truncate(strip_tags($row->description), 20) !!}</td>
+                                    <td>{!! truncate(strip_tags($row->author->name), 20) !!}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
