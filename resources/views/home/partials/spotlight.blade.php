@@ -32,7 +32,7 @@
 
     <div class="col-lg-8 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
       <div class="row justify-content-center mb-2">
-      <h3 class="text-center" style="font-size:20px;">You want to test your knowledge! Click on one of the themes below</h3>
+      <h3 class="text-center" style="font-size:20px;">Select a public health theme of interest for find resources</h3>
       </div>
       @include('home.partials.theme_tabs') 
     </div>
