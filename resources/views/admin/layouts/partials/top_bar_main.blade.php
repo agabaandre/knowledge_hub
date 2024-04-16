@@ -9,7 +9,7 @@
 		</div>
 		<div class="main-header-center">
 			<div class="">
-				<img src="{{ settings()->logo }}" id="change-image"  width=145 style="border-radius:2px; background:#FFF;">
+				<img src="{{ settings()->logo }}" id="change-image"  style="border-radius:2px; background:#FFF; height:85px;">
 			</div>
 		</div>
 		<div class="main-header-right">
