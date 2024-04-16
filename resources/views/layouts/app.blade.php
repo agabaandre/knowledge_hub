@@ -1,6 +1,6 @@
 @include('layouts.partials.styles')
 
-@notifyCss
+
 
 <div id="main-wrapper">
 

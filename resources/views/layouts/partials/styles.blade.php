@@ -10,7 +10,7 @@
 <!-- Title -->
 <title>{!!@settings()->title!!}</title>
 {!!@settings()->analytics_script!!}
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
+ <!-- @notifyCss -->
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
@@ -27,9 +27,9 @@
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
 
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
 
  <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
+  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
  <script>
         function initGoogleTranslate() {
@@ -70,6 +70,7 @@
             dropdown.value = 'en';
         }
     </script>
+  
 
     <style>
         .VIpgJd-ZVi9od-vH1Gmf-ibnC6b div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:link div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:visited div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:active div{
@@ -190,8 +191,8 @@
 
         {!! ReCaptcha::htmlScriptTagJsApi() !!}
 
-        @notifyCss
-
+  
+        
 </head>
 
 <body onload="initGoogleTranslate()">
