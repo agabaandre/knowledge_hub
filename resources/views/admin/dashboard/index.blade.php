@@ -8,8 +8,10 @@
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $publications_count }} Publications</h5>
+
+                    <i class="fa fa-pen"></i>
                     @php
-$percentage = ($publications_count / 10000) * 100;
+                    $percentage = ($publications_count / 10000) * 100;
                     @endphp
                     <div class="progress mt-1 mb-2" style="height: 5px;">
                         <div class="progress-bar progress-bar-striped" role="progress-bar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -23,8 +25,9 @@ $percentage = ($publications_count / 10000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $authors_count }} Resource Authors</h5>
+                    <i class="fa fa-users"></i>
                     @php
-$percentage = ($authors_count / 1000) * 100;
+                    $percentage = ($authors_count / 1000) * 100;
                     @endphp
                     <div class="progress mt-1 mb-2" style="height: 5px;">
                         <div class="progress-bar progress-bar-striped" role="progress-bar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
@@ -38,6 +41,7 @@ $percentage = ($authors_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $experts_count }} Experts</h5>
+                    <i class="fas fa-user-graduate"></i>
                     @php
 $percentage = ($experts_count / 1000) * 100;
                     @endphp
@@ -53,6 +57,7 @@ $percentage = ($experts_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $forums_count }} Forum Discussions</h5>
+                    <i class="fab fa-forumbee"></i>
                     @php
 $percentage = ($forums_count / 1000) * 100;
                     @endphp
@@ -70,6 +75,7 @@ $percentage = ($forums_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $states_count }} Total Member States</h5>
+                    <i class="fas fa-globe-africa"></i>
                     @php
 $percentage = ($states_count / 1000) * 100;
                     @endphp
@@ -86,6 +92,7 @@ $percentage = ($states_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $visits_count }} Daily Visits</h5>
+                    <i class="fas fa-signal"></i>
                     @php
 $percentage = ($visits_count / 1000) * 100;
                     @endphp
@@ -102,6 +109,7 @@ $percentage = ($visits_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $admin_units_count }} Total Administrative Units</h5>
+                    <i class="far fa-building"></i>
                     @php
 $percentage = ($admin_units_count / 1000) * 100;
                     @endphp
@@ -118,6 +126,7 @@ $percentage = ($admin_units_count / 1000) * 100;
             <div class="card">
                 <div class="card-body">
                     <h5 class="card-title">{{ $users_count }} Total Users</h5>
+                    <i class="fas fa-users-cog"></i>
                     @php
 $percentage = ($users_count / 1000) * 100;
                     @endphp
