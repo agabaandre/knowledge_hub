@@ -37,7 +37,7 @@
 					<div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 py-5">
 						
 						<!-- Single job -->
-						{{$i=0}}
+						<?php $i=1;?>
 						@foreach($faqs as $row)
 						<div class="job_grid d-block border rounded px-3 pt-3 pb-2" >
 							<div class="jb-list01 pl-2" style="border-left: 2px solid green;">
