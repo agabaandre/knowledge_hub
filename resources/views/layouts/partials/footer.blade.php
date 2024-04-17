@@ -141,8 +141,7 @@
             </div>
         </div>
 	@endif
-
-
+   
 	<script src="{{ asset('frontend/js/popper.min.js')}}"></script>
 	<script src="{{ asset('frontend/js/bootstrap.min.js')}}"></script>
 	<script src="{{ asset('frontend/js/slick.js')}}"></script>
@@ -155,6 +154,8 @@
 
 	<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
 	<script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
+
+	@include('layouts.partials.language')
 
 	<script type="text/javascript">
 

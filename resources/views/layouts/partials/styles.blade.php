@@ -11,68 +11,26 @@
 <title>{!!@settings()->title!!}</title>
 {!!@settings()->analytics_script!!}
  <!-- @notifyCss -->
+
 <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css')}}">
 <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 <link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
 @include('partials.theming.colors')
 <link href="{{ asset('frontend/css/styles.css')}}" rel="stylesheet">
+
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css')}}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css')}}">
 <link rel="stylesheet" href="{{ asset('frontend/css/cookie-alert.css')}}">
-<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/css/bootstrap-select.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.5.0/css/flag-icon.min.css" rel="stylesheet" type="text/css" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/Wruczek/Bootstrap-Cookie-Alert@gh-pages/cookiealert.css">
 <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/base/jquery-ui.css">
 <link rel="stylesheet" href="{{ asset('frontend/js/aos/dist/aos.css')}}">
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css')}}">
+<script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
+<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
 
-
- <script src="{{ asset('frontend/js/jquery.min.js')}}"></script>
-  <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
-
- <script>
-        function initGoogleTranslate() {
-            // Initialize the Google Translate widget
-            googleTranslateElementInit();
-
-            // Add event listener to ensure a language is selected
-            var observer = new MutationObserver(function(mutations) {
-                mutations.forEach(function(mutation) {
-                    if (mutation.attributeName === "value") {
-                        var dropdown = document.querySelector('.goog-te-combo');
-                        if (dropdown.value === 'en') {
-                            dropdown.setAttribute("required", true);
-                        } else {
-                            dropdown.removeAttribute("required");
-                        }
-                    }
-                });
-            });
-            observer.observe(document.querySelector('.goog-te-combo'), {
-                attributes: true
-            });
-        }
-
-        // Function called by the Google Translate script
-        function googleTranslateElementInit() {
-            new google.translate.TranslateElement({
-                pageLanguage: 'en',
-                includedLanguages: 'en,fr,ar,es,pt,sw',
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
-                autoDisplay: false,
-                disableAutoHover: true,
-                showBanner: false
-            }, 'google_translate_element');
-
-            // Manually set the language of the Google Translate widget to English
-            var dropdown = document.querySelector('.goog-te-combo');
-            dropdown.value = 'en';
-        }
-    </script>
-  
-
-    <style>
+ <style>
         .VIpgJd-ZVi9od-vH1Gmf-ibnC6b div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:link div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:visited div, .VIpgJd-ZVi9od-vH1Gmf-ibnC6b:active div{
           color:#000 !important;
         }
@@ -195,7 +153,7 @@
         
 </head>
 
-<body onload="initGoogleTranslate()">
+<body onload="">
 
     <!-- ============================================================== -->
     <!-- Preloader - style you can find in spinners.css -->
