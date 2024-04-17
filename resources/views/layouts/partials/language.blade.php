@@ -1,4 +1,4 @@
- <div id="google_translate_element"></div>
+ <div id="google_translate_element" style="display:none;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js" type="text/javascript"></script>
   <script type="text/javascript">
     function googleTranslateElementInit() {

@@ -95,10 +95,10 @@
         }
 
         /* Hide the Google Translate top banner */
-        .goog-te-banner-frame #google_translate_element{
+        .goog-te-banner-frame {
             display: none !important;
         }
-
+      
         .goog-te-gadget-icon {
                 display:none !important;
                 background-color:#FFF;
