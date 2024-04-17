@@ -8,7 +8,7 @@
       <div class="row align-items-center">
         <div class="col-lg-3 col-md-3 d-none d-md-block">
         <div><a class="nav-brand" href="{{ url('/') }}">
-                <img src="{{ settings()->logo }}" class="logo" alt="" style="height:85px; margin-bottom:-25px;">
+                <img src="{{ settings()->logo }}" class="logo" alt="" style="height:85px; margin-bottom:-16px;">
             </a>
 		</div>
           <div class="mt-1 text-secondary">
