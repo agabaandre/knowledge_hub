@@ -40,7 +40,7 @@
 						<?php $i=1;?>
 						@foreach($faqs as $row)
 						<div class="job_grid d-block border rounded px-3 pt-3 pb-2" >
-							<div class="jb-list01 pl-2" style="border-left: 2px solid green;">
+							<div class="jb-list01 pl-2" style="border-left: 2px var(--theme-color-primary);">
 								<div class="jb-list-01-title">
 									<h5 class="ft-medium mb-1"> {{$i++}}. {{$row->question }}</h5>
 									<p class="pl-2">
