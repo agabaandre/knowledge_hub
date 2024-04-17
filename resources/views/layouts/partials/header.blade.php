@@ -3,20 +3,33 @@
 	<!-- ============================================================== -->
 	<!-- Start Navigation -->
 <div id="langauge-container">
-<div class="row d-flex" style="border-bottom: solid 0.4px var(--text-color-primary); border-top: solid 0.4px grey; box-shadow: 0 2px 0 grey, 0 2px 0 grey; width: 100%;" >
-		
-				    <div  class="ml-5 col-md-4 d-flex">
-					<a class="nav-brand" href="{{ url('/') }}">
-						<img src="{{ settings()->logo }}" class="logo" alt="" style="height:85px; margin-bottom:-18px;">
-					    <div class="slogan fw-bold" style="font-size:14px; text-align:center;"><small>{{ settings()->slogan}}</small></div>
-					
-					</a>
-					</div>
-					<div class="ml-5 mt-lg-5 col-md-4 d-flex justify-content-end pt-0" id="language">
-							@include('layouts.partials.language')
-					</div>
-
+<div class="p-3 bg-light">
+    <div class="container">
+      <div class="row align-items-center">
+        <div class="col-lg-3 col-md-3 d-none d-md-block">
+        <div><a class="nav-brand" href="{{ url('/') }}">
+                <img src="{{ settings()->logo }}" class="logo" alt="" style="height:85px; margin-bottom:-25px;">
+            </a>
+		</div>
+          <div class="mt-1 text-secondary">
+			<!-- slogan -->
+          </div>
+        </div>
+        <div class="col-lg-6 col-md-6 text-center">
+          <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;">{{ settings()->site_name }}</h3>
+          <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">{{ settings()->slogan }}</h6>
+        </div>
+        <div class="col-lg-3 col-md-3 text-end d-none d-md-block">
+           <div id="language">
+                @include('layouts.partials.language')
+            </div>
+          <div class="mt-2"><strong>Langauge :</strong></div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
+
 <div class="header">
 		
 		<div class="container">
