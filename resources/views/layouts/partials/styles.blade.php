@@ -93,12 +93,13 @@
                 display: none!important;
             }
         }
-
-        /* Hide the Google Translate top banner */
         .goog-te-banner-frame {
             display: none !important;
         }
-      
+       .flag-icon {
+        font-size: 22px; 
+        border-radius:20px;
+       }
         .goog-te-gadget-icon {
                 display:none !important;
                 background-color:#FFF;
