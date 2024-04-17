@@ -95,7 +95,7 @@
         }
 
         /* Hide the Google Translate top banner */
-        .goog-te-banner-frame {
+        .goog-te-banner-frame #google_translate_element{
             display: none !important;
         }
 
