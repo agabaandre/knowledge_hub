@@ -13,48 +13,53 @@
    
     }
   </style>
-<!-- <div class="menu-language-menu-container">
+<div class="menu-language-menu-container">
  
       <ul id="menu-language-menu" class="language-menu">
 
         <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('en');return false;" title="English" class="glink">
-        <span class="flag-icon flag-icon-gb"></span>
+        English
     </a>
 </li>
+|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('fr');return false;" title="French" class="glink">
-        <span class="flag-icon flag-icon-fr"></span>
+       French 
     </a>
 </li>
+|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('ar');return false;" title="Arabic" class="glink nturl notranslate">
-        <span class="flag-icon flag-icon-sa"></span>
+      العربية
     </a>
 </li>
+|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('es');return false;" title="Spanish" class="glink nturl notranslate">
-        <span class="flag-icon flag-icon-es"></span>
+        Espanyol
     </a>
 </li>
+|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('pt');return false;" title="Portuguese" class="glink nturl notranslate">
-        <span class="flag-icon flag-icon-pt"></span> 
+        Portuguese
     </a>
 </li>
+|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('sw');return false;" title="Kiswahili" class="glink nturl notranslate">
-        <span class="flag-icon flag-icon-ke"></span>
+       Swahili
     </a>
 </li>
 
       </ul>
 
 
-    </div> -->
+    </div>
 
 
-     <div class="menu-language-menu-container">
+     <!-- <div class="menu-language-menu-container">
     
           <select class="form-control" data-width="140" onchange="doGTranslate(this.value);">
             <option data-content='<span class="flag-icon flag-icon-us"></span> English' value="en">English</option>
@@ -67,4 +72,4 @@
             <option data-content='<span class="flag-icon flag-icon-ke"></span> Kiswahili' value="sw">Kiswahili
             </option>
           </select>
-    </div>
+    </div> -->
