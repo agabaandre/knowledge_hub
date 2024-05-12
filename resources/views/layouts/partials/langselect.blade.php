@@ -56,7 +56,7 @@
 
      <div class="menu-language-menu-container">
     
-          <select class="selectpicker" data-width="140" onchange="doGTranslate(this.value);">
+          <select class="form-control" data-width="140" onchange="doGTranslate(this.value);">
             <option data-content='<span class="flag-icon flag-icon-us"></span> English' value="en">English</option>
             <option data-content='<span class="flag-icon flag-icon-fr"></span> Français' value="fr">Français
             </option>
