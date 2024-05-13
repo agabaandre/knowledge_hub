@@ -20,7 +20,6 @@
           <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">{{ settings()->slogan }}</h6>
         </div>
         <div class="col-lg-3 col-md-3 text-end d-none d-md-block justify-content-end">
-          <div>Select Langauge</div>
 		  @include('layouts.partials.langselect')
 		</div>
         </div>

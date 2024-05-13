@@ -1,6 +1,4 @@
-  
-
-    <style>
+<style>
     .language-menu {
       list-style-type: none;
       padding: 0;
@@ -16,33 +14,33 @@
 <div class="menu-language-menu-container">
  
       <ul id="menu-language-menu" class="language-menu">
-
+<b>Langauges:<b>
         <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('en');return false;" title="English" class="glink">
+    <a href="#" onclick="doGTranslate('en');return false;" title="English" class="link notranslate">
         English
     </a>
 </li>
 |
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('fr');return false;" title="French" class="glink">
+    <a href="#" onclick="doGTranslate('fr');return false;" title="French" class="link notranslate">
        French 
     </a>
 </li>
 |
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('ar');return false;" title="Arabic" class="glink nturl notranslate">
+    <a href="#" onclick="doGTranslate('ar');return false;" title="Arabic" class="link notranslate">
       العربية
     </a>
 </li>
 |
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('es');return false;" title="Spanish" class="glink nturl notranslate">
+    <a href="#" onclick="doGTranslate('es');return false;" title="Spanish" class="link notranslate">
         Espanyol
     </a>
 </li>
 |
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('pt');return false;" title="Portuguese" class="glink nturl notranslate">
+    <a href="#" onclick="doGTranslate('pt');return false;" title="Portuguese" class="link nturl notranslate">
         Portuguese
     </a>
 </li>
