@@ -18,7 +18,8 @@
         <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('en');return false;" title="English" class="link notranslate">English</a>
 </li>
-|<li style="position:relative;" class="menu-item menu-item-gtranslate">
+|
+<li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('fr');return false;" title="French" class="link notranslate">French </a>
 </li>|
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
