@@ -14,7 +14,7 @@
 <div class="menu-language-menu-container">
  
       <ul id="menu-language-menu" class="language-menu">
-<b>Langauges:<b>
+<b>Langauges:</b>
         <li style="position:relative;" class="menu-item menu-item-gtranslate">
     <a href="#" onclick="doGTranslate('en');return false;" title="English" class="link notranslate">
         English
@@ -28,8 +28,7 @@
 </li>
 |
 <li style="position:relative;" class="menu-item menu-item-gtranslate">
-    <a href="#" onclick="doGTranslate('ar');return false;" title="Arabic" class="link notranslate">
-      العربية
+    <a href="#" onclick="doGTranslate('ar');return false;" title="Arabic" class="link notranslate">Arabic
     </a>
 </li>
 |
