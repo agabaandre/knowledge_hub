@@ -145,6 +145,13 @@
            background: var(--theme-color-primary) !important;
            color:#FFFF;
         }
+        .circular{
+                min-width: 100px!important;
+                min-height: 100px!important;
+                max-width: 100px!important;
+                max-height: 100px!important;
+                border-radius: 50%;
+         }
         </style>
 
 

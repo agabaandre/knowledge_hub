@@ -1,6 +1,6 @@
 
 @php
-      if( @$row && @$row->cover):
+      if(@$row && @$row->cover):
           $image_link = storage_link('uploads/publications/'.$row->cover);
       else:
           $image_link = asset('assets/images/placeholder.jpg');
@@ -30,7 +30,7 @@
 
     </ul>
 
-   
+
     <div class="tab-content">
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
            <div class="row">
@@ -47,16 +47,24 @@
                 <div class="col-md-12 mt-3">
 
                      <input type="hidden" name="id" id="id" class="newform" value="{{ @$row->id ?? old('id')}}">
-                     
+
 
                     <h3>What is the title of the resource you what to publish?</h3>
 
                         <div class="mb-3">
-                            <input placeholder="Resource Title"  class="form-control newform"  id="title" name="title" 
+                            <input placeholder="Resource Title"  class="form-control newform"  id="title" name="title"
                             value="{{ @$row->title ?? old('title')}}"
                             required="">
                         </div>
                  </div>
+
+                 <div class="col-md-6">
+                  <div class="mb-3">
+                      <label class="form-label" for="publication">Member State</label>
+                      @include('partials.countries.dropdown',['field'=>'geo_area_id','required'=>'required','class'=>'select2 theme',
+                      'selected'=>(@$row->geographical_coverage_id)?$row->geographical_coverage_id:(old('geo_area_id') ?? current_user()->country_id)])
+                  </div>
+       </div>
 
                 </div>
 
@@ -92,7 +100,7 @@
                             </div>
                  </div>
 
-                
+
                 <div class="col-md-3">
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Sub Theme</label>
@@ -101,26 +109,26 @@
                             </div>
                  </div>
 
-                    
+
               <div class="col-md-12 url_wrapper">
                         <div class="mb-3">
                             <label class="form-label" for="publication">Publication URL Link</label>
-                            <input type="text" placeholder="URL Link" class="form-control url" id="publication" 
+                            <input type="text" placeholder="URL Link" class="form-control url" id="publication"
                               name="link"  value="{{ @$row->publication ?? old('publication')}}">
                         </div>
               </div>
-              
+
 
                 </div>
-             
-            
+
+
         </div>
 
         <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
           <br>
           <h3>Provide publication details</h3>
           <div class="row">
-     
+
             <div class="col-md-12">
                         <div class="mb-3">
                             <label class="form-label" for="summernote">Publication Description</label>
@@ -130,7 +138,7 @@
               </div>
 
           </div>
-            
+
         </div>
 
         <div id="step-4" class="tab-pane" role="tabpanel" aria-labelledby="step-4">
@@ -138,12 +146,7 @@
           <h3>Provide Attachments</h3>
           <div class="row" style="min-height: 300px;">
 
-                      <div class="col-md-12">
-                          <div class="mb-3">
-                              <label class="form-label" for="publication">Search Tags</label>
-                              @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',@$row->tag_ids,'tag_ids')])
-                          </div>
-                      </div>
+                      
                         <div class="col-md-6" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>
@@ -160,7 +163,7 @@
                                 <label class="form-label" for="publication">Publication Attachments</label>
 
                                 @if (@$row && @$row->has_attachments)
-                  
+
                     @php
                     $count = 1;
                     @endphp
@@ -186,10 +189,13 @@
                      @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
                         'selected'=>(@$row->communities)?$row->communities->pluck('id')->toArray():[]])
                   </div>
-
+                  <div class="form-group">
+                        <label class="form-label" for="sources">Associated Authors</label>
+                        <input type="text" class="form-control" name="associated_authors" placeholder="Associated Authors" value="{{ @$row->associated_authors ?? old('associated_authors')}}">
+                    </div>
+                </div>
 
                   </div>
-
                   <div class="col-md-6 justify-content-center video" style="display: none;">
                        <label class="form-label" for="publication">Video</label>
                       <div class="mb-3">
@@ -209,7 +215,7 @@
                     </button>
                     </div>
            </div>
-            
+
         </div>
 
 
@@ -225,10 +231,10 @@
 
 
 </div>
- 
+
 
 <script type="text/javascript">
-      
+
   $(document).ready(function() {
 
     $('.theme').on('change',function(e){
@@ -236,7 +242,7 @@
       var themes  =  @json($themes);
       const theme = themes.find((item)=> item.id === parseFloat(e.target.value));
       theme_subs  = theme.subthemes;
-      
+
       $('.subtheme').html('');
 
       theme_subs.forEach(item=>{
@@ -280,10 +286,10 @@
 
       if (stepPosition === 'first') {
         $("#prev-btn").addClass('disabled');
-      } 
+      }
       else if (stepPosition === 'last') {
         $("#next-btn").addClass('disabled');
-      } 
+      }
       else {
         $("#prev-btn").removeClass('disabled');
         $("#next-btn").removeClass('disabled');
@@ -300,11 +306,11 @@
 
 
     $("#next-btn").on("click",  function(){
-  
+
       $('#smartwizard').smartWizard("next");
       return true;
     });
-    
+
 
   });
 
@@ -320,5 +326,5 @@
   });
 });
 
-  
+
   </script>

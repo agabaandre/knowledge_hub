@@ -130,6 +130,10 @@
 										<label class="text-muted">Sub-Theme</label>
 										<span class="text-dark">{!! nl2br($publication->sub_theme->description) !!}</span>
 									</div>
+									<div class="details ft-medium">
+										<label class="text-muted">Associated Authors</label>
+										<span class="text-dark">{{ $publication->associated_authors ?? 'N/A' }}</span>
+									</div>
 								</div>
 							</div>
 

@@ -45,7 +45,7 @@ class PermissionController extends Controller
         $data['roles']  = Role::all();
         $data['levels'] = AccessLevel::all();
 
-        $name        = $request->name;
+        $name        = $request->term;
         $country_id  = $request->country_id;
         $phone       = $request->mobile;
         $count       = (!empty($request->count))?$request->count:20;
@@ -342,7 +342,14 @@ class PermissionController extends Controller
     }
 
     public function profile(Request $request){
-        $data['user'] = current_user();
+
+        $data['user']        = current_user();
+        $data['preferences'] = [];
+
+        foreach(current_user()->preferences as $pref){
+            $data['preferences'][] = $pref->subtheme_id;
+        }
+        
         return view('admin.profile.index')->with($data);
     }
 

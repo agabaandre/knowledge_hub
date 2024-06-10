@@ -18,13 +18,13 @@ class AccountController extends Controller
 
     public function profile(Request $request){
 
-        $data['profile'] = current_user();
+        $data['user'] = current_user();
         $data['preferences'] = [];
 
         foreach(current_user()->preferences as $pref){
-            $data['preferences'][] = $pref->tag_id;
+            $data['preferences'][] = $pref->subtheme_id;
         }
-
+        
         return view('account.profile',$data);
     }
 

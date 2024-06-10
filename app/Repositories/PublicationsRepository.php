@@ -218,10 +218,8 @@ class PublicationsRepository extends SharedRepo{
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
             if(!$request->geo_area_id):
-
                 $geo_id = ($user->country_id)?$user->area->id:1;
                 $pub->geographical_coverage_id = $geo_id;
-
             else:
                 $pub->geographical_coverage_id  = $request->geo_area_id;
             endif;
@@ -236,6 +234,7 @@ class PublicationsRepository extends SharedRepo{
         $pub->description          = $request->description;
         $pub->file_type_id         = $request->file_type;
         $pub->publication_catgory_id  = $request->category_id;
+        $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
 
         if($request->is_active)
@@ -269,9 +268,9 @@ class PublicationsRepository extends SharedRepo{
         endif;
 
         //save tags
-        if($request->tags && $saved):
-            $this->save_tags($request->tags,$id);
-        endif;
+        // if($request->tags && $saved):
+        //     $this->save_tags($request->tags,$id);
+        // endif;
 
         //attach communitites
         if(@$request->communities && $saved):
@@ -443,7 +442,7 @@ class PublicationsRepository extends SharedRepo{
             $file_name   = md5_file($file->getRealPath());
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
-            $file->move(storage_path().'/uploads/publications/summaries/',$file_path);
+            $file->move(storage_path().'/app/public/uploads/publications/summaries/',$file_path);
             $summary->file_path  = $file_path;
 
         endif;

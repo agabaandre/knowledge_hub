@@ -33,7 +33,7 @@
                 </div>
             </div>
 
-                        <form action="{{ route('permissions.filerusers') }}" method="POST">
+                        <form action="{{ route('permissions.filerusers') }}" method="GET">
                             @csrf
                             <div class="row bg-white pb-3">
                                 

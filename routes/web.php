@@ -65,9 +65,7 @@ use App\Http\Controllers\ToolsController;
 Auth::routes(['verify' => true]);
 
 Route::get('/test', [TestController::class, 'index'])->name('test');
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
 Route::get('/logout', function () {
@@ -76,39 +74,28 @@ Route::get('/logout', function () {
     return redirect()->route('home');
 });
 
-
 if(states_enabled()):
 
     Route::group(["prefix" => "countries"], function () {
-
             Route::get('/', [CountriesController::class, 'index'])->name('countries');
             Route::get('/details', [CountriesController::class, 'country']);
-
     });
-
 else:
-
     Route::group(["prefix" => "adminunits"], function () {
-
         Route::get('/', [AdminUnitFrontEndController::class, 'index'])->name('adminunits');
         Route::get('/details', [AdminUnitFrontEndController::class, 'show']);
-
     });
 
 endif;
 
 
 Route::post('/registration', [AuthController::class, 'register'])->name('registration');
-
 Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
-
 Route::group(["prefix" => "browse"], function () {
 
     Route::get("themes", [ThemesController::class, 'index']);
-
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
     Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
-
     Route::get("authors", [AuthorsController::class, 'index']);
     Route::get("areas", [AreasController::class, "index"]);
 
@@ -123,33 +110,27 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/autocomplete", [PublicationsController::class, 'autocomplete']);
     Route::get("/shortened", [PublicationsController::class, 'shortened']);
     Route::post("/comment", [PublicationsController::class, 'comment']);
-
 });
 
 Route::group(["prefix" => "authors"], function () {
-
     Route::get("/", [AuthorsController::class, 'index']);
     Route::get("publications", [PublicationsController::class, 'author_pubs']);
 });
 
 Route::group(["prefix" => "healthassets"], function () {
-
     Route::get("/", [AssetsController::class, 'index']);
     Route::get("/detail", [AssetsController::class, 'details']);
 });
 
 Route::group(["prefix" => "faqs"], function () {
-
     Route::get("/", [FaqsController::class, 'index']);
 });
 
 
 Route::group(["prefix" => "publications"], function () {
-
     Route::get("/", [PublicationsController::class, 'index']);
     Route::get("/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
-
 });
 Route::get("/tools", [ToolsController::class, 'index', 'middleware' => ['auth', 'web']])->name('tools');
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
@@ -176,7 +157,6 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
-
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
 
@@ -420,7 +400,7 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], funct
     Route::post('/permission',  [PermissionController::class, 'createPermission'])->name('permissions.permission');
     Route::post('/torole',  [PermissionController::class, 'permissionsToRole'])->name('permissions.torole');
     Route::get('/users',  [PermissionController::class, 'users'])->name('permissions.users');
-    Route::post('/user',  [PermissionController::class, 'users'])->name('permissions.filerusers');
+    Route::get('/user',  [PermissionController::class, 'users'])->name('permissions.filerusers');
     Route::post('/saveuser',  [PermissionController::class, 'saveUser'])->name('permissions.saveuser');
     Route::post('/userrole',  [PermissionController::class, 'roleToUser'])->name('permissions.userrole');
 
@@ -441,7 +421,6 @@ Route::group(["prefix" => "forums"], function () {
     Route::get("/join", [ForumsController::class, 'join'])->name('forums.join');
     Route::post("/comment", [ForumsController::class, 'comment'])->name('forums.comment');
     Route::post("/publish", [ForumsController::class, 'publish'])->name('forums.publish');
-
 });
 
 //facts
@@ -473,7 +452,3 @@ Route::group(["prefix" => "dashboards"], function () {
     Route::get("/kpi",  [GraphController::class, 'kpi_comparison']);
     Route::get("/kpi_comparison_data",  [GraphController::class, 'kpi_comparison_data']);
 });
-
-// Route::get("/test", function(){
-//     dd(Hash::make("1234"));
-// });

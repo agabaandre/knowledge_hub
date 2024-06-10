@@ -30,7 +30,7 @@ function deleteFile(index)  {
 
         var current_files = $('#attachments').prop("files");
 
-        newIndex = current_files.length;
+        newIndex = (current_files)?current_files.length:0;
 
         var filesCount = input.files.length;
 

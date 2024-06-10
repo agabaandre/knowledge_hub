@@ -8,8 +8,6 @@
 <div class="gray pt-2">
     <div class="container">
         <div class="row">
-
-
             <!-- Item Wrap Start -->
             <div class="col-lg-12 col-md-12 col-sm-12 ">
 
@@ -37,8 +35,8 @@
 
                         <!-- Single job -->
                         @foreach($forums as $forum)
-                        <div class="job_grid d-block border rounded px-3 pt-3 pb-2">
-                            <div class="jb-list01">
+                            <div class="job_grid d-block border rounded px-3 pt-3 pb-2">
+                                <div class="jb-list01">
                                 <div class="jb-list-01-title">
                                     <a   href="{{ (in_array($forum->id,$my_forums))?url('forums/thread')."?id=".$forum->id:'#'}}">
                                         <h5 class="ft-medium mb-1">{!! $forum->forum_title !!}</h5>
@@ -46,7 +44,6 @@
                                             {!! truncate($forum->forum_description,400) !!}
                                     </a>
                                     <br>
-                                   
                                     </p>
                                 </div>
                                 <div class="jb-list-01-info d-block mb-3">
@@ -68,8 +65,6 @@
                             </div>
                         </div>
                         @endforeach
-
-
                     </div>
                 </div>
 

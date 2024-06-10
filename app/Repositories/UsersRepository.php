@@ -34,6 +34,16 @@ class UsersRepository {
         if($request->subscribe)
         $user->is_subscribed     = ($request->subscribe=="on")?true:false;
 
+        if($request->hasFile('photo')):
+            //upload photo
+            $file        = $request->file('photo');
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
+            $user->photo  = $file_path;
+        endif;
+
         $user->save();
 
         $this->send_email($request, $token);
@@ -58,7 +68,7 @@ class UsersRepository {
 
             $pref = new UserPreference();
             $pref->user_id = $user_id;
-            $pref->tag_id  = $value;
+            $pref->subtheme_id  = $value;
             $pref->save();
 
         }
@@ -98,6 +108,16 @@ class UsersRepository {
 
             $this->save_preferences(current_user()->id,$request->preferences);
         }
+
+        if($request->hasFile('photo')):
+            //upload photo
+            $file        = $request->file('photo');
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
+            $user->photo  = $file_path;
+        endif;
 
         $user->update();
 
