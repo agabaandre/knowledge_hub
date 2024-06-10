@@ -27,6 +27,7 @@ class DataRecordsRepository extends SharedRepo{
          $results->where('title','like','%'.$request->term.'%');
          $results->orWhere('description','like','%'.$request->term.'%');
         }
+        
 
         if($request->rcc)
             $results->whereIn('country_id',Country::where('region_id',$request->rcc)->pluck('id'));

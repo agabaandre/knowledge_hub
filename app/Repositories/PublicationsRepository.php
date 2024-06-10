@@ -37,6 +37,27 @@ class PublicationsRepository extends SharedRepo{
             $pubs->orderBy('id','desc');
         endif;
 
+        
+        if(current_user() && current_user()->id){
+
+            //Protect Resources from non target audiences if targte audience was defined
+
+            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
+            ->pluck("community_of_practice_id");
+           
+            //forums for user communities
+            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
+
+            $pubs->whereIn('id',$commPubs)
+            ->orWhereDoesntHave("communities")
+            ->orWhere('user_id',current_user()->id);
+
+        }else
+        {
+            //only those without targets
+            $pubs->whereDoesntHave("communities");
+        }
+
         if($request->is_featured)
             $pubs->where('is_featured',1);
 
@@ -68,7 +89,7 @@ class PublicationsRepository extends SharedRepo{
 
         //search by author
         if($request->author)
-         $pubs->where('author_id',$request->author);
+         $pubs->where('author_id','=',$request->author);
 
          //search by file type
          if($request->file_type || $request->file_type_id):
@@ -114,31 +135,13 @@ class PublicationsRepository extends SharedRepo{
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
 
-         if(current_user() && current_user()->id){
-
-            //Protect Resources from non target audiences if targte audience was defined
-
-            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
-            ->pluck("community_of_practice_id");
-           
-            //forums for user communities
-            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
-
-            $pubs->whereIn('id',$commPubs)
-            ->orWhereDoesntHave("communities");
-
-        }else
-        {
-            //only those without targets
-            $pubs->whereDoesntHave("communities");
-        }
 
          //Access levels effect to query results
         $this->access_filter($pubs);
         
         if(!$request->is_admin){
-         $pubs->where('is_active','Active');
-         $pubs->where('is_approved',1);
+          $pubs->where('is_active','Active');
+          $pubs->where('is_approved',1);
         }
 
 
@@ -237,8 +240,7 @@ class PublicationsRepository extends SharedRepo{
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
 
-        if($request->is_active)
-            $pub->is_active = $request->is_active;
+        $pub->is_active = ($request->is_active || $pub->is_active=='Active')?'Active':'In-Active';
 
         $file_type = $this->find_type($request->file_type);
 
