@@ -114,7 +114,7 @@
 			<!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
 		
-				<a  class=""><img class="rounded-circle" src="{{user_profile_photo()}}" style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "><span>{{ ' '.ucwords(@current_user()->name) ?? '' }}</span></a>
+				<a  class=""><img class="rounded-circle notranslate" src="{{user_profile_photo()}}" style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "><span>{{ ' '.ucwords(@current_user()->name) ?? '' }}</span></a>
 				<div class="dropdown-menu animated fadeInUp">
 					
 					<a class="dropdown-item" href="{{ route('home') }}"><i class="bx bx-link"></i> View Khub Website</a>

@@ -13,7 +13,7 @@
 
 						@else
 
-							<li class="{{ $class ?? ''}}"><a href="#"><img class="rounded-circle" src="{{user_profile_photo()}}"
+							<li class="{{ $class ?? ''}}"><a href="#"><img class="rounded-circle notranslate" src="{{user_profile_photo()}}"
 								style=" width: 25px; height: 25px; border-radius: 50%;  border: 1px solid #7e7d80;">{{' ' . ucwords(current_user()->name)}}</a>
 									<ul class="nav-dropdown">
 										@if(is_admin())
