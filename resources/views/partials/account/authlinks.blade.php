@@ -13,8 +13,9 @@
 
 						@else
 
-							<li class=" {{ $class ?? ''}}"><a href="#">My Account</a>
-									<ul class="nav-dropdown nav-submenu">
+							<li class="{{ $class ?? ''}}"><a href="#"><img class="rounded-circle" src="{{user_profile_photo()}}"
+								style=" width: 25px; height: 25px; border-radius: 50%;  border: 1px solid #7e7d80;">{{' ' . ucwords(current_user()->name)}}</a>
+									<ul class="nav-dropdown">
 										@if(is_admin())
 										<li class=" {{ $class ?? ''}}">
 										<a href="{{ route('admin.index')}}">
@@ -42,12 +43,17 @@
 											<i class="lni lni-circle-plus mr-1"></i>Publish a resource
 										</a>
 										</li>
+										<li class=" {{ $class ?? ''}}">
+												<a href="{{ url('logout')}}">
+													<i class="fa fa-circle-arrow-right"></i>Log Out
+												</a>
+										</li>
 									</ul>
 								</li>
 
-							<li class=" {{ $class ?? ''}}">
+							<!-- <li class=" {{ $class ?? ''}}">
 								<a href="{{ url('logout')}}" class="ft-medium">
 									Logout
 								</a>
-							</li>
+							</li> -->
 						@endguest
