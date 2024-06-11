@@ -3,11 +3,11 @@
     @php
 $lang = !empty(current_user()->language) ? current_user()->language : 'en';
   @endphp
- <script type="text/javascript">
+    <script type="text/javascript">
     function googleTranslateElementInit() {
       new google.translate.TranslateElement({
-        pageLanguage: '{{$lang}}',
-                autoDisplay: false,
+        pageLanguage: 'en',
+        autoDisplay: false,
         disableAutoHover: true,
         showBanner: false
       },
@@ -25,7 +25,7 @@ $lang = !empty(current_user()->language) ? current_user()->language : 'en';
     function doGTranslate(lang_code) {
    
     
-            var lang = lang_code || '{{$lang}}'; // Default to English if no language code is provided
+            var lang = lang_code || 'en'; // Default to English if no language code is provided
       var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
 
       if (!teCombo || !teCombo.innerHTML) {
@@ -43,6 +43,11 @@ $lang = !empty(current_user()->language) ? current_user()->language : 'en';
     }
     $(function () {
       $('.selectpicker').selectpicker();
+    });
+
+
+    $(document).ready(function () {
+      doGTranslate('{{$lang}}'); // Translate the page to French on document ready
     });
 
     </script>
