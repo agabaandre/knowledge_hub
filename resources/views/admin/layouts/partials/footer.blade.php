@@ -85,6 +85,7 @@
 
 
 <!-- Create Quize  -->
+@include('layouts.partials.language')
 <script>
 	//CSRF setup
 	$.ajaxSetup({ headers: {
