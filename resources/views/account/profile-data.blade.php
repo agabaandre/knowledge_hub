@@ -2,6 +2,7 @@
     <div class="col-md-5 col-lg-5 col-xl-5 col-xs-12 col-md-pull-2">
         
         <div class="card">
+            current_user()->langauge
             <div class="card-header pb-0 border-bottom">
                 <div class="item-user pro-user">
                     <h4 class="pro-user-username tx-15 pt-2 mt-1 mb-4">

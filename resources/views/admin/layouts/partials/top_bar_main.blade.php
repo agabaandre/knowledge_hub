@@ -113,7 +113,8 @@
 			
 			<!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
-				<a  class=""><img class="rounded-circle" src="{{ asset('assets/images/user.jpg') }}" style="width:34px;"></a>
+		
+				<a  class=""><img class="rounded-circle" src="{{user_profile_photo()}}" style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "></a>
 				<div class="dropdown-menu animated fadeInUp">
 					<div class="main-header-profile header-img">
 						<h6>{{ @current_user()->name ?? 'Administrator' }}</h6><span>{{ ucwords(@current_user()->group_name) ?? '' }}</span>

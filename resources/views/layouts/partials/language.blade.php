@@ -18,7 +18,7 @@
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
 
     function doGTranslate(lang_code) {
-      var lang = lang_code || 'en'; // Default to English if no language code is provided
+      var lang = lang_code || '{!!current_user()->langauge!!}'; // Default to English if no language code is provided
       var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
 
       if (!teCombo || !teCombo.innerHTML) {
