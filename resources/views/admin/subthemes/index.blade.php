@@ -5,6 +5,15 @@
 @endsection
 
 @section('content')
+<div class="page-header">
+	<h1 class="page-title">{{ $description ?? 'Sub-Thematic Area' }}</h1>
+	<div>
+		<ol class="breadcrumb">
+			<li class="breadcrumb-item"><a href="javascript:void(0)">Dropdown Lists</a></li>
+			<li class="breadcrumb-item active" aria-current="page">Security Sub-Themes</li>
+		</ol>
+	</div>
+</div>
 <div class="row">
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
@@ -50,8 +59,9 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
-                        <th>ID</th>
+                        <th style="width:3px;">#</th>
                         <th>Sub Thematic Area</th>
+						<th>Icon</th>
 						<th>Thematic Area</th>
 						<th>Actions</th>
 					</tr>
@@ -59,16 +69,17 @@
 				<tbody>
 
 					@php
-                    $i = 1;
+$i = 1;
                     @endphp
 
 					@foreach($subthemes as $row)
 						<tr>
-                            <td>{{ $row->id }}</td>
-                            <td>{{ $row->description }}</td>
+							<td>{{ $i++ }}</td>
+							<td>{{ $row->description }}</td>
+							<td>{{ $row->icon }}</td>
 							<td>{{ $row->theme->description }}</td>
 							<td>
-                                <a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}" data-description="{{ $row->description }}" data-icon="{{ $row->icon }}" data-thematic_area_id="{{ $row->thematic_area_id }}" class="btn btn-sm btn-primary ml-1">Edit</a>
+								<a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}" data-description="{{ $row->description }}" data-icon="{{ $row->icon }}" data-thematic_area_id="{{ $row->thematic_area_id }}" class="btn btn-sm btn-primary ml-1">Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>
@@ -83,11 +94,12 @@
 	</div>
 
 	@include('admin.subthemes.partials.create-modal', [
-		'themes' => $themes])
+	'themes' => $themes
+])
 	<!-- Include edit-modal.php -->
 	@include('admin.subthemes.partials.edit-modal', [
-		'themes' => $themes
-	])
+	'themes' => $themes
+])
 	<!-- Include delete-modal.php -->
 	@include('admin.subthemes.partials.delete-modal')
 

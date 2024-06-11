@@ -5,12 +5,18 @@
 @endsection
 
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">{{ $description ?? 'Thematic Area' }}</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Dropdown Lists</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Security Themes</li>
+        </ol>
+    </div>
+</div>
     <div class="row">
         <div class="card col-lg-12">
-            <div class="card-header text-left">
-                <h3 class="card-description float-left">{{ $description ?? 'Thematic Area' }}</h3>
-                <hr>
-            </div>
+           
             <!-- Card Header With Form Filters -->
             <div class="card-header">
                 <form class="container-fluid">
@@ -52,22 +58,24 @@
                         <tr>
                             <th>#</th>
                             <th>Thematic Area</th>
+                            <th>Icon</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
 
                         @php
-                            $i = 1;
+$i = 1;
                         @endphp
 
                         @foreach ($themes as $row)
                             <tr>
                                 <td>{{ $i++ }}</td>
                                 <td>{{ $row->description }}</td>
+                                <td>{{ $row->icon }}</td>
                                 <td>
                                     <a href="#edit-theme-modal" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                        data-id="{{ $row->id }}" data-description="{!! $row->description !!}">Edit
+                                        data-id="{{ $row->id }}" data-description="{!! $row->description !!}" data-icon="{!! $row->icon !!}">Edit
                                         Theme</a>
 
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
