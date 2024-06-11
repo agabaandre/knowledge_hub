@@ -100,6 +100,7 @@ class UsersRepository {
         $user->first_name = $request->first_name;
         $user->last_name  = $request->last_name;
         $user->email      = $request->email;
+        $user->langauge = $request->langauge;
         $user->name  = $request->first_name." ".$request->last_name;
         if($request->phone_number)
         $user->phone_number      = $request->phone_number;

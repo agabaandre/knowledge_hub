@@ -1,13 +1,12 @@
 <div id="google_translate_element" style="display: none;"></div>
-    <select class="selectpicker" onchange="translateLanguage(this.value);" style="border:#FFF;">
-        <option value="English">English</option>
-        <option value="Arabic">Arabic</option>
-        
-        <option value="French">French</option>
-        <option  value="Portuguese">Portuguese
+    <select class="form-control select2" onchange="translateLanguage(this.value);" style="border:#FFF;" name="langauge">
+        <option value="en">English</option>
+        <option value="ar">Arabic</option>
+        <option value="fr">French</option>
+        <option  value="pt">Portuguese
         </option>
-        <option value="Spanish">Spanish</option>
-        <option value="Swahili">Swahili</option>
+        <option value="es">Spanish</option>
+        <option value="sw">Swahili</option>
 
 
 </select>
