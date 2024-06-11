@@ -12,13 +12,19 @@
 
     }
   </script>
+
+    @php
+      $lang = !empty(current_user()->language) ? current_user()->language : 'en';
+    @endphp
   
   <script type="text/javascript">
     function GTranslateGetCurrentLang() { var keyValue = document['cookie'].match('(^|;) ?googtrans=([^;]*)(;|$)'); return keyValue ? keyValue[2].split('/')[2] : null; }
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
 
     function doGTranslate(lang_code) {
-      var lang = lang_code || '{!!current_user()->langauge!!}'; // Default to English if no language code is provided
+   
+    
+            var lang = lang_code || '{{$lang}}'; // Default to English if no language code is provided
       var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
 
       if (!teCombo || !teCombo.innerHTML) {
