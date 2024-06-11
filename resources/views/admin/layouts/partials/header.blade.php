@@ -101,6 +101,32 @@
             /*fixes jquery ui dropdown arrow merging with content */
             padding-left: 17px!important;
         }
+		 .goog-te-banner-frame {
+            display: none !important;
+        }
+       .flag-icon {
+        font-size: 22px; 
+        border-radius:20px;
+       }
+        .goog-te-gadget-icon {
+                display:none !important;
+                background-color:#FFF;
+
+         }
+         .VIpgJd-ZVi9od-ORHb-OEVmcd{
+            display:none !important;
+         }
+         .goog-te-gadget-simple{
+            border-radius: 4px;
+         }
+
+         .custom-bg{
+            background-color:var(--theme-color-primary)!important;
+            background-image:url('{{ settings()->spotlight_banner}}');
+            background-repeat:no-repeat;
+            background-size:cover;
+            background-position: center;
+         }
 
 
 	</style>
