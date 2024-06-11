@@ -50,25 +50,10 @@ class CommsOfPracticeController extends Controller
         $col["title"]    = "Created By"; 
         $col["name"]     = "created_by"; 
         $col["width"]    = "10"; 
-        $col["editable"] = false;
-        $col["hidden"]   = true;
+        $col["editable"] = true;
+        //$col["hidden"]   = true;
         $col["edittype"] = "select";
-        //$cols["editoptions"]["sql"] = "select id as k, name as v from users";
-        
-        // $users   = User::select("id","name")->get();
-        // $options = "";
-
-        // $count = 0;
-        // foreach($users as $user):
-        //     $options.= (($count>0)?";":"").$user->id.":".$user->name;
-        //     $count++;
-        // endforeach;
-
-       // $col["editoptions"] = array("value"=>$options);
-     
-      //  $col["edittype"] = "lookup"; 
-       // $col["editoptions"] = array("table"=>"users", "id"=>"id", "label"=>"concat(name,' ','')");
-        //$col["editrules"]["readonly"] = true;
+        $col["editoptions"] = array("value"=>current_user()->id.":".current_user()->name);
         $cols[] = $col;
 
         $data['communities'] = $this->commsOfPracticeRepository->get($request);

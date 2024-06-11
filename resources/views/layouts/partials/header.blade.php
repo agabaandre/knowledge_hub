@@ -4,7 +4,7 @@
 	<!-- Start Navigation -->
 <div id="langauge-container" style="margin-bottom:-4px">
 <div class="p-3 bg-light">
-    <div class="container">
+    <div class="container" style="min-width: 90%;">
       <div class="row align-items-center">
         <div class="col-lg-3 col-md-3 d-none d-md-block">
         <div><a class="nav-brand" href="{{ url('/') }}">
@@ -15,11 +15,11 @@
 			<!-- slogan -->
           </div>
         </div>
-        <div class="col-lg-6 col-md-6 text-center ">
+        <div class="col-lg-5 col-md-5 text-center ">
           <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">{{ settings()->site_name }}</h3>
           <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">{{ settings()->slogan }}</h6>
         </div>
-        <div class="col-lg-3 col-md-3 text-end d-none d-md-block justify-content-end">
+        <div class="col-lg-4 col-md-4 text-end d-none d-md-block justify-content-end">
 		  @include('layouts.partials.langselect')
 		</div>
         </div>
