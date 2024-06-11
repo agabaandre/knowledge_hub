@@ -132,8 +132,15 @@ Route::group(["prefix" => "publications"], function () {
     Route::get("/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
 });
-Route::get("/tools", [ToolsController::class, 'index', 'middleware' => ['auth', 'web']])->name('tools');
+
+
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
+
+Route::group(["prefix" => "tools",'middleware' => ['auth', 'web']], function () {
+    Route::get("/", [ToolsController::class, 'index'])->name('tools');
+    Route::get("/flexmonster", [ToolsController::class, 'fleximonster'])->name('tools.flexmonster');
+    Route::get("/excel", [ToolsController::class, 'excel'])->name('tools.excel');
+});
 
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
 

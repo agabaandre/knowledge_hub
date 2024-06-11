@@ -6,7 +6,7 @@
 
 @include('layouts.partials.header')
 
-@if(!@$is_home )
+@if(!@$is_home && !@$hide_search)
     @include('home.partials.page_search')
 @endif
 

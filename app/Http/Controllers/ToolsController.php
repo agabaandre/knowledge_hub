@@ -20,4 +20,12 @@ class ToolsController extends Controller
         return view('tools.index',$data);
     }
 
+    public function fleximonster(Request $request){
+        return view('tools.flexmonster.index');
+    }
+
+    public function excel(Request $request){
+        return view('tools.excel.index');
+    }
+
 }
