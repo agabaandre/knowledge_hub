@@ -2052,10 +2052,10 @@ nav a:hover {
 }
 
 .nav-menu>li>a {
-    padding: 22px 18px;
+    padding: 22px 10px;
     display: inline-block;
     font-weight: 400;
-    font-size: 15px;
+    font-size: 0.95rem;
     color: #172228;
 }
 

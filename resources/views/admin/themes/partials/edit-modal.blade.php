@@ -17,6 +17,10 @@
                         <label for="description">Description</label>
                         <input type="text" class="form-control" id="theme_description" name="description" required>
                     </div>
+                    <div class="form-group">
+                        <label for="icon">Icon</label>
+                        <input type="text" class="form-control" id="theme_icon" name="icon" required>
+                    </div>
 
 
                 </div>
@@ -42,15 +46,18 @@
 
             // Assuming you want to populate the form fields with existing data
             var description = button.data('description');
+            var icon = button.data('icon');
 
             console.log({
                 id,
-                description
+                description,
+                icon
             })
 
             // Populate the form fields with the retrieved data
             $('#theme_id').val(id);
             $('#theme_description').val(description);
+             $('#theme_icon').val(icon);
         });
 
         // Optional: If you want to reset the form fields when the modal is closed

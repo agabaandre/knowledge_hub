@@ -262,4 +262,17 @@ function clear_cache(){
   Cache::flush();
 }
 
+function user_profile_photo(){
+
+
+    if (!empty(current_user()->photo)):
+        $image_link = asset('public/storage/uploads/users/' . current_user()->photo);
+    else:
+        $image_link = asset('assets/images/user.jpg');
+    endif;
+
+    return $image_link;
+				 
+}
+
 ?>

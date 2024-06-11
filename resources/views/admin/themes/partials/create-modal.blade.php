@@ -15,20 +15,11 @@
         <input type="hidden" name="id" id="id" class="newform">
         <div class="row">
 
-            <div class="col-md-12">
-                <div class="mb-3">
-                    <select class="form-control select2 form-select">
-                        @foreach ($themes as $theme)
-                            <option>{{ $theme->description }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
 
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Sub Thematic Area</label>
-              <input type="text" placeholder="Thematic Area" class="form-control" id="name" name="name" required>
+              <label class="form-label" for="name">Thematic Area</label>
+              <input type="text" placeholder="Thematic Area" class="form-control" id="name" name="description" required>
             </div>
           </div>
           <div class="col-md-12">
