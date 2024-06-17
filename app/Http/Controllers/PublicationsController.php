@@ -90,5 +90,23 @@ class PublicationsController extends Controller
         return back();
     }
 
+    public function request_content(Request $request){
+
+        if($request->getMethod()=='POST'){
+
+            $saved = $this->publicationsRepo->save_content_request($request);
+            if($saved):
+                $data = ['message'=>'Request submitted successfully','status'=>'success','data'=>$saved];
+            else:
+                $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            endif;
+        
+            return back()->with($data);;
+        }
+            
+
+        return view('publications.content_request');
+    }
+
    
 }

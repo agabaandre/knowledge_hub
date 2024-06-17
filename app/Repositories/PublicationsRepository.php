@@ -20,7 +20,9 @@ use App\Models\SubThemeticArea;
 use App\Models\Tag;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
+use App\Models\ContentRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 
 class PublicationsRepository extends SharedRepo{
 
@@ -37,32 +39,8 @@ class PublicationsRepository extends SharedRepo{
             $pubs->orderBy('id','desc');
         endif;
 
-        
-        if(current_user() && current_user()->id){
-
-            //Protect Resources from non target audiences if targte audience was defined
-
-            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
-            ->pluck("community_of_practice_id");
-           
-            //forums for user communities
-            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
-
-            $pubs->whereIn('id',$commPubs)
-            ->orWhereDoesntHave("communities")
-            ->orWhere('user_id',current_user()->id);
-
-        }else
-        {
-            //only those without targets
-            $pubs->whereDoesntHave("communities");
-        }
-
-        if($request->is_featured)
-            $pubs->where('is_featured',1);
-
-         //search by keyword
-        if($request->term){
+          //search by keyword
+          if($request->term){
             
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
@@ -79,7 +57,35 @@ class PublicationsRepository extends SharedRepo{
             $pubs->orWhereIn('id',$pub_tag_ids);
             $pubs->orWhereIn('author_id',$authors);
         }
+        
+        if(current_user() && current_user()->id){
 
+            //Protect Resources from non target audiences if targte audience was defined
+
+            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
+            ->pluck("community_of_practice_id");
+           
+            //forums for user communities
+            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
+
+           
+
+            $pubs->where(function($query) use($commPubs) {
+                $query->whereIn('id',$commPubs)
+                ->orWhereDoesntHave("communities")
+                ->orWhere('user_id',current_user()->id);
+            });
+
+        }else
+        {
+            //only those without targets
+            $pubs->whereDoesntHave("communities");
+        }
+
+        if($request->is_featured)
+            $pubs->where('is_featured',1);
+
+       
         //search administrative unit authors
         if($request->admin_unit){
           
@@ -576,6 +582,23 @@ public function sumamry_approval_status(Request $request){
     SendMailJob::dispatch( $alert);
 
     return $record;
+}
+
+public function save_content_request(Request $request){
+
+   $record = new ContentRequest();
+   $record->subject     = $request->title;
+   $record->description = $request->description;
+   $record->country_id  = $request->country_id;
+
+   if($request->email)
+   $record->email = $request->email;
+   $record->created_at= Carbon::now();
+   $record->updated_at= Carbon::now();
+
+   $record->save();
+
+   return $record;
 }
 
 

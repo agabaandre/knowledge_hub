@@ -129,6 +129,7 @@ Route::group(["prefix" => "faqs"], function () {
 
 Route::group(["prefix" => "publications"], function () {
     Route::get("/", [PublicationsController::class, 'index']);
+    Route::any("/request-content", [PublicationsController::class, 'request_content'])->name('content-request');
     Route::get("/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
 });
