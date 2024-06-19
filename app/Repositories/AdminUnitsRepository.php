@@ -39,9 +39,9 @@ class AdminUnitsRepository{
 
         endif;
 
-        $record->save();
+        $saved = ($request->id)?$record->update():$record->save();
 
-        return $record;
+        return $saved;
     }
 
     private function save_attachments($files){

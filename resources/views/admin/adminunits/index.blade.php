@@ -41,7 +41,9 @@
                         <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
 						
 					</div>
-					
+
+					@include('admin.adminunits.partials.create-modal',['row'=>null])
+	
 					
 				</div>
             </form>
@@ -73,8 +75,10 @@
 							<td>{{ ($row->parent)?$row->parent->name:"N/A" }}</td>
 							<td>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
+								<a class="btn btn-sm btn-primary ml-1" href="#edit{{$row->id}}" data-toggle="modal"  class="text-danger"> Edit</a>
 							</td>
 						</tr>
+						@include('admin.adminunits.partials.edit-modal',['row'=>$row])
 					@endforeach
 				</tbody>
 			</table>
@@ -85,9 +89,7 @@
 
 	</div>
 
-	@include('admin.adminunits.partials.create-modal')
-	<!-- Include edit-modal.php -->
-	@include('admin.adminunits.partials.edit-modal')
+	
 	<!-- Include delete-modal.php -->
 	@include('admin.adminunits.partials.delete-modal')
 
