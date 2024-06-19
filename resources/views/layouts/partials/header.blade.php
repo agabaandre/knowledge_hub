@@ -106,7 +106,7 @@
 							<li><a href="{{ url('faqs')}}">FAQs</a></li>
 							<li><a href="{{ url('tools')}}">Tools</a></li>
 						@include('partials.account.authlinks', ['class' => 'mobileonly'])
-						<li ><a  href="{{ url('request-content')}}">Request Content</a></li>
+						<li ><a  href="{{ url('publications/request-content')}}">Request Content</a></li>
 
 					</ul>
 
