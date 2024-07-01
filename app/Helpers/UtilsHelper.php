@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\PublicationType;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
@@ -232,11 +233,33 @@ function getFileMimeType($file_path)
         return "File not found";
     }
 
-    $finfo = finfo_open(FILEINFO_MIME_TYPE); // Open fileinfo extension
+    $finfo     = finfo_open(FILEINFO_MIME_TYPE); // Open fileinfo extension
     $mime_type = finfo_file($finfo, $file_path); // Get MIME type
     finfo_close($finfo); // Close fileinfo extension
 
     return $mime_type;
+}
+
+function get_file_type($file_path=null,$pub_url=null){
+
+
+   $mime_type = getFileMimeType($file_path);
+
+   if($mime_type){
+        $mime_type = str_replace('application/','',$mime_type);
+        $mime_type = str_replace('images/','',$mime_type);
+    }
+
+   //sdd($mime_type);
+  
+    $mime_type = ($mime_type)?$mime_type: $pub_url;
+
+    $type = PublicationType::where('mime_types','like','%'.strtolower($mime_type).'%')->first();
+    
+    if(!$type)
+        $type = PublicationType::where('name','like','%other%')->first();
+ 
+    return $type;
 }
 
 function html_to_text($html) {
@@ -271,8 +294,16 @@ function user_profile_photo(){
         $image_link = asset('assets/images/user.jpg');
     endif;
 
-    return $image_link;
-				 
+    return $image_link;		 
+}
+
+function get_publication_state($approved,$rejected){
+    if($rejected)
+        return 'Rejected';
+    if($approved)
+        return 'Active';
+    if(!$approved && ! $rejected)
+        return "Pending Approval";
 }
 
 ?>

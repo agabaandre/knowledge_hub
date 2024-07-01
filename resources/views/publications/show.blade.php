@@ -92,9 +92,9 @@
 						<div class="jbd-01 pr-3">
 								<div class="jbd-details mb-4">
 								@if($publication->is_video)
-								<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
+									<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
 								@else
-								<img src="{{ $image_link }}" class="rounded" width="500px"/>
+									<img src="{{ $image_link }}" class="rounded" width="500px"/>
 								@endif
 								<br>
 								<h5 class="ft-medium fs-md">Description</h5>

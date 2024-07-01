@@ -22,10 +22,9 @@
             <a class="nav-link" href="#step-3"> <strong>Step 3</strong>
                 <br>Resource Details</a>
         </li>
-
         <li>
             <a class="nav-link" href="#step-4"> <strong>Step 4</strong>
-                <br>Resource Attachments</a>
+            <br>Resource Attachments</a>
         </li>
 
     </ul>
@@ -65,63 +64,45 @@
                       'selected'=>(@$row->geographical_coverage_id)?$row->geographical_coverage_id:(old('geo_area_id') ?? current_user()->country_id)])
                   </div>
        </div>
-
-                </div>
-
-        </div>
-
+      </div>
+      </div>
 
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
           <br>
           <h3>Choose resource categorization</h3>
           <div class="row">
-
-                <div class="col-md-3">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">File Type</label>
-                        @include('partials.publications.filetype_dropdown',['field'=>'file_type',
-                        'selected'=>(@$row->file_type_id)?$row->file_type_id:old('file_type')])
-                    </div>
-                </div>
-
-                <div class="col-md-3">
+           
+                <div class="col-md-4">
                     <div class="mb-3">
                         <label class="form-label" for="publication">File Category</label>
                         @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
-                        'selected'=>(@$row->publication_category_id)?$row->publication_category_id:old('category_id')])
+                        'selected'=>(@$row->publication_catgory_id)?$row->publication_catgory_id:old('category_id')])
                     </div>
                 </div>
 
-                <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Thematic Area</label>
-                                @include('partials.publications.theme_dropdown',['field'=>'theme','class'=>'select2 theme',
-                                'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:old('theme')])
-                            </div>
+                <div class="col-md-4">
+                      <div class="mb-3">
+                          <label class="form-label" for="publication">Thematic Area</label>
+                          @include('partials.publications.theme_dropdown',['field'=>'theme','class'=>'select2 theme',
+                          'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:old('theme')])
+                      </div>
                  </div>
-
-
-                <div class="col-md-3">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Sub Theme</label>
-                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2 subtheme',
-                                'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
-                            </div>
+                <div class="col-md-4">
+                      <div class="mb-3">
+                          <label class="form-label" for="publication">Sub Theme</label>
+                          @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','class'=>'select2 subtheme',
+                          'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
+                      </div>
                  </div>
-
 
               <div class="col-md-12 url_wrapper">
-                        <div class="mb-3">
-                            <label class="form-label" for="publication">Publication URL Link</label>
-                            <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                              name="link"  value="{{ @$row->publication ?? old('publication')}}">
-                        </div>
+                  <div class="mb-3">
+                      <label class="form-label" for="publication">Publication URL Link</label>
+                      <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                        name="link"  value="{{ @$row->publication ?? old('publication')}}">
+                  </div>
               </div>
-
-
-                </div>
-
-
+            </div>
         </div>
 
         <div id="step-3" class="tab-pane" role="tabpanel" aria-labelledby="step-3">
@@ -136,9 +117,7 @@
                              name="description" required="">{!! $row->description ?? old('description') !!}</textarea>
                         </div>
               </div>
-
           </div>
-
         </div>
 
         <div id="step-4" class="tab-pane" role="tabpanel" aria-labelledby="step-4">
@@ -165,15 +144,15 @@
                                 @if (@$row && @$row->has_attachments)
 
                     @php
-                    $count = 1;
+                    $count = 1
                     @endphp
 
                     @foreach($publication->attachments as $pub_file)
-                      <a href="{{ url('uploads/publications') }}?id={{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-download"></i> View Attachment {{ $count }}</a>
+                      <br><a href="{{ url('uploads/publications/') }}{{$pub_file->file}}" target="_blank" class="btn btn-md rounded bg-white border fs-sm ft-medium col-lg-12 text-left"><i class="fa fa-file"></i> View Attachment {{ ($count>1)?$count:'' }}</a>
                     @php
-                      $count++;
+                      $count++
                     @endphp
-                    @endforeach;
+                    @endforeach
                 @endif
 
                  <div class="custom-file">
@@ -203,35 +182,26 @@
                           </iframe>
                       </div>
                   </div>
-
           </div>
 
-          <div class="row mt-3 mb-3">
+          <div class="row mt-3 mb-3 submit" >
                     <div class="col-lg-8 mt-5  float-end">
                     </div>
                     <div class="col-lg-3 mt-5  float-end">
-                    <button class="btn btn-dark col-lg-12 savebtn" type="submit">
+                    <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
                         {{ (@$row)?'Save Changes':'Submit'}}
                     </button>
                     </div>
            </div>
-
         </div>
-
-
     </div>
-
-
     <!-- Include optional progressbar HTML -->
     <div class="progress">
       <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
 
     <br>
-
-
 </div>
-
 
 <script type="text/javascript">
 
@@ -252,16 +222,19 @@
     });
 
     $('input[name="upload_type"]').on('change', function() {
-        if ($(this).val() == 'upload') {
+      
+      /*
+      if ($(this).val() == 'upload') {
             $('.url_wrapper').show();
             $('.url_wrapper').hide();
         } else {
             $('.url_wrapper').hide();
             $('.url_wrapper').show();
         }
+
+        */
+
     });
-
-
 
     // Smart Wizard
     $('#smartwizard').smartWizard({
@@ -271,10 +244,7 @@
       toolbarSettings: {
         toolbarPosition: 'both', // both bottom
       },
-
     });
-
-
 
     // Step show event
     $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
@@ -283,16 +253,23 @@
 
       $("#prev-btn").removeClass('disabled');
       $("#next-btn").removeClass('disabled');
+      $("#submit").addClass('disabled');
+      $(".submit").hide();
 
       if (stepPosition === 'first') {
         $("#prev-btn").addClass('disabled');
+        $("#submit").addClass('disabled');
       }
       else if (stepPosition === 'last') {
         $("#next-btn").addClass('disabled');
+        $("#submit").removeClass('disabled');
+        $(".submit").show();
       }
       else {
         $("#prev-btn").removeClass('disabled');
         $("#next-btn").removeClass('disabled');
+        $("#submit").addClass('disabled');
+        $(".submit").hide();
       }
 
     });
@@ -309,6 +286,7 @@
 
       $('#smartwizard').smartWizard("next");
       return true;
+
     });
 
 
@@ -317,9 +295,11 @@
 
   $(function () {
   $('#publication_form').parsley().on('field:validated', function() {
+
     var ok = $('.parsley-error').length === 0;
     $('.bs-callout-info').toggleClass('hidden', !ok);
     $('.bs-callout-warning').toggleClass('hidden', ok);
+
   })
   .on('form:submit', function() {
     return false; // Don't submit form for this demo

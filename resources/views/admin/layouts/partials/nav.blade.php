@@ -112,10 +112,7 @@
 
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts/types') }}">Workforce Types</a></li>
-
 						@endcan
-
-						
 						
 						@can('view_privacy_policy')
 						<li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>

@@ -78,9 +78,9 @@
 						<th></th>
 						<th>Title</th>
 						<th>Description</th>
-						<th>Author</th>
+						<th width="10%">Author</th>
 						<th>Status</th>
-						<th>Actions</th>
+						<th width="15%">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -91,7 +91,7 @@
 
 					@foreach($publications as $publication)
 						<tr>
-							<td width="5%"><i class="fa {{ $publication->file_type->icon }} fa-2x text-muted"></i></td>
+							<td width="5%"><i class="fa {{ $publication->file_type->icon }} text-muted"></i></td>
 							<td>
                               <a href="{{ $publication->publication }}" target="_blank">
 								{!!truncate($publication->title, 30) !!}
@@ -104,19 +104,19 @@
 								{{ $publication->author->name ?? '' }}
 							</td>
 							<td>
-								{{ $publication->is_active }}
+								{{  get_publication_state($publication->is_approved,$publication->is_rejected) }}
 							</td>
 							<td>
-								<a href="{{ url('admin/publications/details') }}?id={{$publication->id}}"  class="btn btn-primary btn-sm" 
+								<a href="{{ url('admin/publications/details') }}?id={{$publication->id}}" class="text-success" 
 									>Details</a>
 
 								@if($publication->user_id == current_user()->id)
-									<a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}"  class="btn btn-primary btn-sm" 
+									| <a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}"  class="text-primary" 
 									>Edit</a>
 								@endif
 
 								@can('delete_publications')
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')" class="text-danger"> Delete</a>
+								| <a href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')" class="text-danger"> Delete</a>
 								@endcan
 							</td>
 						</tr>

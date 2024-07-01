@@ -3,7 +3,6 @@
 @section('styles')
 
 <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
-
 @include('account.partials.wizard_res')
 
 @endsection

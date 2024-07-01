@@ -1,7 +1,8 @@
 @extends('layouts.plain')
 
 @section('styles')
-
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
+    @include('account.partials.wizard_res')
 @endsection
 
 @section('content')
@@ -26,7 +27,7 @@
            
            <form method="POST" enctype="multipart/form-data" action="{{ route('account.publication') }}" id='publications' class='publications'>
              @csrf
-             @include('account.partials.publication_form',['row'=>$publication])
+             @include('account.wizard',['row'=>$publication])
 
            </form>
 
@@ -39,4 +40,5 @@
 @section('scripts')
     @include('common.select2')
     @include('account.partials.create_js')
+    @include('account.partials.wizard_js')
 @endsection

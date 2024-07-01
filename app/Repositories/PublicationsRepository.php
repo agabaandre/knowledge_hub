@@ -241,25 +241,21 @@ class PublicationsRepository extends SharedRepo{
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
-        $pub->file_type_id         = $request->file_type;
         $pub->publication_catgory_id  = $request->category_id;
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
 
-        $pub->is_active = ($request->is_active || $pub->is_active=='Active')?'Active':'In-Active';
+        $pub->is_active   = 'In-Active';
+        $pub->is_approved = 0;
+        $pub->is_rejected = 0;
 
-        $file_type = $this->find_type($request->file_type);
-
-        //check if it's video type
-        if(strpos(strtolower($file_type->name),'video')>-1)
-         $pub->is_video = 1;
-      
         //save cover
         if($request->hasFile('cover')):
 
             $file           = $request->file('cover');
             $cover_filepath = $this->save_attachments($file);
             $pub->cover     = $cover_filepath;
+            $filepath = $cover_filepath;
         else:
             if(!$request->id)
              $pub->cover     =  "cover.jpg";
@@ -269,12 +265,25 @@ class PublicationsRepository extends SharedRepo{
 
         $id = ($request->id)?$request->id:$pub->id;
 
+        $attachment_path =null;
         //save attachments
         if($request->hasFile('files') && $saved):
             $files = $request->file('files');
-            $this->save_attachments($files,$id);
+            $attachment_path = $this->save_attachments($files,$id);
         endif;
 
+        $attachment_path = ($attachment_path)?storage_path().'/app/public/uploads/publications/'.$attachment_path:null;
+        $file_type = get_file_type($attachment_path,$request->link);
+
+        //$file_type = $this->find_type($request->file_type);
+
+        //check if it's video type
+        if(strpos(strtolower($file_type->name),'video')>-1)
+         $pub->is_video = 1;
+         
+        $pub->file_type_id =$file_type->id; //$request->file_type;
+        $pub->update();
+      
         //save tags
         // if($request->tags && $saved):
         //     $this->save_tags($request->tags,$id);
