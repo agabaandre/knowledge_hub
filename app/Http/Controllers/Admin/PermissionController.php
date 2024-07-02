@@ -343,7 +343,7 @@ class PermissionController extends Controller
 
     public function profile(Request $request){
 
-        $data['user']        = current_user();
+        $data['user']        = User::find($request->user) ?? current_user();
         $data['preferences'] = [];
 
         foreach(current_user()->preferences as $pref){

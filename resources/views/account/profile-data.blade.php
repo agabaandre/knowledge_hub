@@ -133,6 +133,25 @@
                             </div>
                         </div>
                     </div>
+
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Preferred Communities</label>
+                            </div>
+                            <div class="col-md-9">
+                                @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
+											'selected'=>(@$user->communities)?$user->communities:[]])
+                                    @error('communities')
+                                        <span class="invalid-feedback" role="alert">
+                                            <strong>{{ $message }}</strong>
+                                        </span>
+                                    @enderror
+										
+									
+                            </div>
+                        </div>
+                    </div>
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">

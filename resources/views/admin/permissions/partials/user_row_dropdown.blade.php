@@ -9,7 +9,7 @@
 
     <a href="#login_state{{$user->id}}0" data-toggle="modal" class="dropdown-item">Change Login Status</i> 
     
-    <a href="{{ route('permissions.profile')}}" class="dropdown-item">
+    <a href="{{ route('permissions.profile')}}?user={{$user->id}}" class="dropdown-item">
         {{ __('general.details') }}  </a>
     
     <a href="#delete{{$user->id}}0" data-toggle="modal" class="dropdown-item text-danger">
