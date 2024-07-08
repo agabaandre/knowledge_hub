@@ -140,5 +140,11 @@ class Publication extends Model
         return $tag_ids->toArray();
     }
 
+    public function country()
+    {
+
+       return  $this->belongsTo(Country::class,"geographical_coverage_id","id");
+    }
+
 
 }

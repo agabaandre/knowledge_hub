@@ -54,9 +54,13 @@
 					<div class="col-md-3">
 						<div class="form-group">
 							<label for="file_type">File Type</label>
-							@include('partials.publications.filetype_dropdown',['field'=>'file_type','selected'=>@$search->file_type])
+							@include('partials.publications.filetype_dropdown', ['field' => 'file_type', 'selected' => @$search->file_type])
 						</div>
 					</div>
+				</div>
+
+				<div class="row">
+					@include('partials.search.search_fields')
 				</div>
 
 				<div class="row">
@@ -79,6 +83,7 @@
 						<th>Title</th>
 						<th>Description</th>
 						<th width="10%">Author</th>
+						<th width="10%">Member State</th>
 						<th>Status</th>
 						<th width="15%">Actions</th>
 					</tr>
@@ -93,9 +98,9 @@
 						<tr>
 							<td width="5%"><i class="fa {{ $publication->file_type->icon }} text-muted"></i></td>
 							<td>
-                              <a href="{{ $publication->publication }}" target="_blank">
+							  <a href="{{ $publication->publication }}" target="_blank">
 								{!!truncate($publication->title, 30) !!}
-                              </a>
+							  </a>
 							</td>
 							<td>
 								{!! truncate(html_to_text($publication->description), 50) !!}
@@ -104,7 +109,10 @@
 								{{ $publication->author->name ?? '' }}
 							</td>
 							<td>
-								{{  get_publication_state($publication->is_approved,$publication->is_rejected) }}
+								{{ $publication->country->name ?? '' }}
+							</td>
+							<td>
+								{{  get_publication_state($publication->is_approved, $publication->is_rejected) }}
 							</td>
 							<td>
 								<a href="{{ url('admin/publications/details') }}?id={{$publication->id}}" class="text-success" 

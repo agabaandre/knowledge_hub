@@ -13,4 +13,5 @@ class Author extends Model
     public function publications(){
         return $this->hasMany(Publication::class);
     }
+
 }

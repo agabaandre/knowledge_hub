@@ -4,6 +4,7 @@ namespace App\Repositories;
 use App\Models\Author;
 use App\Models\Country;
 use App\Models\GeoCoverage;
+use App\Models\Region;
 use Illuminate\Http\Request;
 
 class AreasRepository{
@@ -35,6 +36,11 @@ class AreasRepository{
 
     public function member_state($id){
         return Country::where('id',$id)->first();
+    }
+
+    public function regions()
+    {
+        return Region::all();
     }
 
     public function countries(){

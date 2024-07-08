@@ -33,6 +33,7 @@ class CountriesController extends Controller
     public function index(Request $request){
 
         $data['countries'] = $this->areasRepo->member_states($request);
+        $data['regions']  = $this->areasRepo->regions();
 
         return view('countries.index',$data);
     }
