@@ -20,7 +20,7 @@ class AreasRepository{
 
         return $result;
     }
-    
+
 
     public function find($id){
 
@@ -28,7 +28,9 @@ class AreasRepository{
     }
 
     public function member_states(){
-        return Country::where('region_id','>',0)->orderBy('name','asc')->get();
+        return Country::where('region_id','>',0)
+        ->withCount('publications as resources')
+        ->orderBy('name','asc')->get();
     }
 
     public function member_state($id){
@@ -40,9 +42,20 @@ class AreasRepository{
         return Country::all();
     }
 
-    
+
     public function count(){
         return count(GeoCoverage::all());
+    }
+
+    public function save(Request $request) {
+        $id = $request->input('area_id');
+        $name = $request->input('area_name');
+
+        $area = GeoCoverage::findOrNew($id);
+        $area->name = $name;
+        $area->save();
+
+        return $area ?? null;
     }
 
 

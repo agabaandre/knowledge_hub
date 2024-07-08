@@ -22,4 +22,16 @@ class Forum extends Model
     public function user(){
        return  $this->belongsTo(User::class,"created_by","id");
     }
+
+    public function communities(){
+       
+        return $this->hasManyThrough(
+            CommunityOfPractice::class, //get access to these
+            ForumCommunityOfPractice::class, //thru these
+            'forum_id', // Foreign key on ForumCommunityOfPractice table.
+            'id', // Foreign key on UserAccessGroup table. Assuming 'id' is the primary key.
+            'id', // Local key on Forum table.
+            'community_of_practice_id' // Local key on ForumCommunityOfPractice table that relates to UserAccessGroup.
+        );
+    }
 }

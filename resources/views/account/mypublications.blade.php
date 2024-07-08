@@ -23,6 +23,7 @@
 						<th></th>
 						<th>Title</th>
 						<th>Description</th>
+						<th>Status</th>
 						<th>Action</th>
 					</tr>
 				</thead>
@@ -35,7 +36,8 @@
 						<td>
 							<a href="{{ $row->publication}}" target="_blank">{!! truncate($row->title, 50) !!} </a>
 						</td>
-						<td>{!! truncate($row->description, 100) !!}</td>
+						<td>{!!  truncate(html_to_text($row->description), 80) !!}</td>
+						<td><small>{{  get_publication_state($row->is_approved,$row->is_rejected)}}</small></td>
 						<td>
 							<a href="{{ route('account.publications.edit') }}?ref={{ $row->id}}"><i class="fa fa-edit"></i> Edit
 							<a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="text-danger  ml-3">

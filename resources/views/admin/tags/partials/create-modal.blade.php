@@ -1,5 +1,5 @@
 <!--  Extra Large modal example -->
-<div class="modal" id="create-modal">
+<div class="modal fade" id="create-modal">
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
@@ -8,7 +8,7 @@
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
-      
+
       <form action="{{ url('admin/tags/save') }}" method="post" id='filetypes' class='filetypes'>
         @csrf
       <div class="modal-body">

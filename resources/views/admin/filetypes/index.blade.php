@@ -51,7 +51,10 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
+						<th>#</th>
 						<th>Filetype Name</th>
+						<th>Filetype Icon</th>
+						<th>Is Downloadable</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -63,8 +66,12 @@
 
 					@foreach($filetypes as $row)
 						<tr>
+							<td>{{ $row->id }}</td>
 							<td>{{ $row->name }}</td>
+							<td>{{ $row->icon }}</td>
+							<td>{{ $row->is_downloadable ? 'YES' : 'NO' }}</td>
 							<td>
+							<a href="#edit-filetype-modal" data-toggle="modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" data-icon="{{ $row->icon }}" data-downloadable="{{ $row->is_downloadable }}" class="btn btn-sm btn-primary ml-1">Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>

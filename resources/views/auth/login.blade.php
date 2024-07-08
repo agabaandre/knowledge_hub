@@ -33,6 +33,17 @@
                                     </span>
                                     @enderror
 								</div>
+
+								<div class="form-group">
+									<div class="py-3">
+									    {!! htmlFormSnippet() !!}
+										@error('password')
+										<span class="invalid-feedback" role="alert">
+											<strong>{{ $message }}</strong>
+										</span>
+										@enderror
+									</div>
+								</div>
 								
 								<div class="form-group">
 									<div class="d-flex align-items-center justify-content-between">

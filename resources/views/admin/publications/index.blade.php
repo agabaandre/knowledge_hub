@@ -5,12 +5,23 @@
  @include('common.table')
 @endsection
 
+
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Manage Public Health Resources</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Manage Public Health Resource</li>
+        </ol>
+    </div>
+</div>
+
 <div class="row">
+
 	<div class="card col-lg-12">
 		<div class="card-header text-left">
-			<h3 class="card-title float-left">{{ $title ?? '' }}</h3>
-			 <hr>
+
 		</div>
 		<!-- Card Header With Form Filters -->
 		<div class="card-header">
@@ -37,7 +48,7 @@
 					<div class="col-md-3">
 						<div class="form-group">
 							<label for="source">Source / Author</label>
-							@include('partials.authors.dropdown',['field'=>'author','selected'=>@$search->author])
+							@include('partials.authors.dropdown', ['field' => 'author', 'selected' => @$search->author])
 						</div>
 					</div>
 					<div class="col-md-3">
@@ -67,9 +78,9 @@
 						<th></th>
 						<th>Title</th>
 						<th>Description</th>
-						<th>Author</th>
+						<th width="10%">Author</th>
 						<th>Status</th>
-						<th>Actions</th>
+						<th width="15%">Actions</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -80,28 +91,33 @@
 
 					@foreach($publications as $publication)
 						<tr>
-							<td width="5%"><i class="fa {{ $publication->file_type->icon }} fa-2x text-muted"></i></td>
+							<td width="5%"><i class="fa {{ $publication->file_type->icon }} text-muted"></i></td>
 							<td>
                               <a href="{{ $publication->publication }}" target="_blank">
 								{!!truncate($publication->title, 30) !!}
                               </a>
 							</td>
 							<td>
-								{!! truncate($publication->description, 50) !!}
+								{!! truncate(html_to_text($publication->description), 50) !!}
 							</td>
 							<td>
 								{{ $publication->author->name ?? '' }}
 							</td>
 							<td>
-								{{ $publication->is_active }}
+								{{  get_publication_state($publication->is_approved,$publication->is_rejected) }}
 							</td>
 							<td>
-							
-								<!-- Edit Modal Action -->
-								<a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}" type="button" class="btn btn-primary btn-sm" 
-								>Edit</a>
-								<!-- Delete Modal Action -->
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')" class="text-danger"> Delete</a>
+								<a href="{{ url('admin/publications/details') }}?id={{$publication->id}}" class="text-success" 
+									>Details</a>
+
+								@if($publication->user_id == current_user()->id)
+									| <a href="{{ url('admin/publications/edit') }}?id={{$publication->id}}"  class="text-primary" 
+									>Edit</a>
+								@endif
+
+								@can('delete_publications')
+								| <a href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')" class="text-danger"> Delete</a>
+								@endcan
 							</td>
 						</tr>
 					@endforeach

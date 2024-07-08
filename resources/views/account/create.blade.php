@@ -3,7 +3,6 @@
 @section('styles')
 
 <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
-
 @include('account.partials.wizard_res')
 
 @endsection
@@ -11,13 +10,7 @@
 @section('content')
 
 <div class="row">
-<!-- 
-    <div class="card col-lg-12">
-        <div class="card-body">
-        @include('account.partials.publication_form')
-        </div>
-    </div>
- -->
+
    
     <div class="card col-lg-12">
         <div class="card-header text-left">
@@ -31,13 +24,12 @@
 		</div>
 
 
-        <div class="card-body text-left">
+        <div class="card-body text-left  py-5">
 
-        
 
-         <div class=" container">
+         <div class="container">
            
-           <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications'>
+           <form method="POST" action="{{ route('account.publication') }}" id='publications' enctype="multipart/form-data" class='publications' id="publication_form" data-parsley-validate="">
             @csrf
            
              

@@ -5,12 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable,HasRoles;
+    use  HasFactory, Notifiable,HasRoles;
 
    // protected $table = "user";
 
@@ -44,7 +43,7 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ["names"."area"];
+    protected $appends = ["names","area"];
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
@@ -59,7 +58,7 @@ class User extends Authenticatable
      }
 
      public function getAreaAttribute(){
-        return GeoCoverage::where('name','like','%'.$this->country->name.'%')->first();
+        return ($this->country)?GeoCoverage::where('name','like','%'.$this->country->name.'%')->first():null;
      }
 
      public function access_level(){

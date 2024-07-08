@@ -8,15 +8,17 @@
 <div class="row">
 
     <div class="card col-lg-12">
-        <div class="card-header text-left">
-            <h4 class="card-title float-left">Create Forum</h4>
+        <div class="card-header">
+            <h4 class="card-title mb-0">Create Forum</h4>
+            <p class="mt-0">Start a new discussion, interested individuals will be alert and will join you!</p>
         </div>
 
         <div class="card-body text-left">
+            <div class="container">
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
-           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications'>
+           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications' enctype="multipart/form-data">
             @csrf
             <div class="modal-body">
                <div class="row">
@@ -26,6 +28,13 @@
                                 <label class="form-label" for="publication">Forum Title</label>
                                 <input type="text" placeholder="Forum Title" class="form-control url" id="title" name="title" required>
                             </div>
+                  </div>
+
+                  
+                  <div class="form-group col-lg-12">
+                    <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
+                      @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
+                        'selected'=>[]])
                   </div>
                        
 
@@ -70,6 +79,8 @@
 
            </form>
 
+            </div>
+
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
 </div>
@@ -79,5 +90,6 @@
 @section('scripts')
 
     @include('account.partials.create_js')
+    @include('common.select2')
 
 @endsection

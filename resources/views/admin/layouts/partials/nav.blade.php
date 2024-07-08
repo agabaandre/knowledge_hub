@@ -9,8 +9,9 @@
 				@endcan
 
 				@can('view_rcc_dashboard')
-					
-				<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+					@if(states_enabled())
+					<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+					@endif
 				@endcan
 
 				</li>
@@ -18,12 +19,10 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">PH Resources</h3></li> -->
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Resource Comments</a></li>
-						<!-- <li><h3 class="fs-14 mb-1" style="color:#000 !important;">DATA CATEGORIES</h3></li> -->
-						
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}" class="slide-item">Resource Sumaries & Abstracts</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Moderate Comments</a></li>
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
@@ -72,6 +71,9 @@
 						@can('view_file_types')
 						<li aria-haspopup="true"><a href="{{ url('admin/filetypes') }}">Resource and Asset Types</a></li>
 						@endcan
+
+						<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
+						<li class=""><a href="{{ url('admin/tools') }}" class="">Tools</a></li>
 						
 						@can('view_sources')
 						<li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
@@ -80,17 +82,24 @@
 						@endcan
 
 						@can('view_themes')
-						<li aria-haspopup="true"><a href="{{ url('admin/healththemes') }}">Security Themes</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/themes') }}">Security Themes</a></li>
 						@endcan
+						
 						@can('view_sub_themes')
 						<li aria-haspopup="true"><a href="{{ url('admin/subthemes') }}">Security Sub-Themes</a></li>
 						@endcan
-
-						@can('view_geo_coverage')
-						<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
+						
+						@can('view_faqs')
+						<li aria-haspopup="true"><a href="{{ url('admin/faqs') }}">FAQs</a></li>
 						@endcan
 
-						
+						@can('view_geo_coverage')
+							@if(states_enabled())
+							<li aria-haspopup="true"><a href=" {{ url('admin/areas') }}">Geographical Coverage</a></li>
+							@else
+							<li aria-haspopup="true"><a href=" {{ url('admin/adminunits') }}">Administrative Units</a></li>
+							@endif
+						@endcan
 
 						<!-- Privacy Policy -->
 						@can('view_asset_types')
@@ -103,10 +112,7 @@
 
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts/types') }}">Workforce Types</a></li>
-
 						@endcan
-
-						
 						
 						@can('view_privacy_policy')
 						<li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
@@ -116,13 +122,15 @@
 
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Settings <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-
+					    <li class=""><a href="{{ url('admin/configure') }}" class="">System Configurations</a></li>
+						<li class=""><a href="{{ url('admin/accessgroups') }}" class="">Content Access Groups</a></li>
 						<li class=""><a href="{{ url('permissions/users') }}" class="">Manage Users</a></li>
 						<li class=""><a href="{{ url('permissions/roles') }}" class="">Roles</a></li>
 						<li class=""><a href="{{ url('permissions') }}" class="">Permissions</a></li>
-						<li class=""><a href="{{ url('auth/logs') }}" class="">User Logs</a></li>
+						<li class=""><a href="{{ url('admin/logs/user') }}" class="">User Logs</a></li>
 						<li class=""><a href="{{ url('constants') }}" class="">Constants</a></li>
-						
+						<li class=""><a href="{{ url('admin/logs/access') }}" class="">Site Access Logs</a></li>
+						<li class=""><a href="{{ url('admin/metrics') }}" class="">System Metrics</a></li>
 						@can('view_mailing_list')
 						<li class=""><a href="{{ url('mailing_list') }}" class="">Mailing List</a></li>
 						@endcan

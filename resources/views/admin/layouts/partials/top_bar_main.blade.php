@@ -1,15 +1,15 @@
 <!-- Main-content -->
-<div class="main-header main-header-fixed" style="background:rgba(52, 143, 65, 1); color:#FFF !important;">
+<div class="main-header main-header-fixed" style="background: var(--theme-color-primary); color:#FFF !important;">
 	<div class=" container">
 		<div class="main-header-left ">
 			<a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
-			<a class="header-brand" href="{{ url('/') }}">
-				<img src="{{ asset('assets/images/logo.png') }}" id="change-image" style="filter: brightness(0) invert(1);" width=200>
-			</a>
+			<!-- <a class="header-brand" href="{{ url('/') }}">
+				<img src="{{ settings()->logo }}" id="change-image"  width=150>
+			</a> -->
 		</div>
 		<div class="main-header-center">
-			<div class="responsive-logo">
-				<img src="{{ asset('assets/images/logo.png') }}" id="change-image" style="filter: brightness(0) invert(1);" width=200px>
+			<div class="">
+				<img src="{{ settings()->logo }}" id="change-image"  style="border-radius:2px; background:#FFF; height:65px;">
 			</div>
 		</div>
 		<div class="main-header-right">
@@ -113,14 +113,12 @@
 			
 			<!-- Main-header-message closed -->
 			<div class="dropdown main-profile-menu nav nav-item nav-link">
-				<a  class=""><img class="rounded-circle" src="{{ asset('assets/images/user.jpg') }}" style="width:35px;"></a>
+		
+				<a  class=""><img class="rounded-circle notranslate" src="{{user_profile_photo()}}" style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "><span>{{ ' '.ucwords(@current_user()->name) ?? '' }}</span></a>
 				<div class="dropdown-menu animated fadeInUp">
-					<div class="main-header-profile header-img">
-						<h6>{{ @current_user()->name ?? 'Administrator' }}</h6><span>{{ ucwords(@current_user()->group_name) ?? '' }}</span>
-					</div>
-					<a class="dropdown-item" href="{{ route('home') }}"><i class="bx bx-link"></i> View Site</a>
+					
+					<a class="dropdown-item" href="{{ route('home') }}"><i class="bx bx-link"></i> View Khub Website</a>
 					<a class="dropdown-item" href="{{ url('permissions/profile') }}"><i class="bx bx-user-circle"></i> My Profile</a>
-					<a class="dropdown-item" href="auth/profile"><i class="bx bx-cog"></i> Change Password</a>
 					<a class="dropdown-item" href="{{ url('logout') }}"><i class="bx bx-log-out-circle"></i> Log Out</a>
 				</div>
 			</div><!-- Main-profile-menu closed -->

@@ -1,5 +1,7 @@
 <?php
 
+use App\Jobs\AuditTrailJob;
+use App\Models\AuditTrail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;
@@ -28,7 +30,12 @@ if(!function_exists('current_user')){
 if(!function_exists('settings')){
 	 function settings()
 	 {
-		return null;
+		$settings = DB::table("setting")->first();
+		$settings->logo = asset('storage/uploads/config/'.$settings->logo);
+		$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
+		$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+
+		return $settings;
 	 }
 }
 
@@ -36,7 +43,6 @@ if(!function_exists('settings')){
 function get_role($userId){
 
     $user_role = DB::table("model_has_roles")->where('model_id',$userId)->first();
-
     $role = ($user_role)?(($user_role)?Role::find($user_role->role_id):null):null;
 
 	return $role;
@@ -68,7 +74,26 @@ function filter_access($query){
 
 }
 
+if(!function_exists('states_enabled')){
+	function states_enabled(){
+		return config('deployment.states_enabled');
+	}
+}
 
+
+if(!function_exists('admin_units_enabled')){
+	function admin_units_enabled(){
+		return config('deployment.admin_units_enabled');
+	}
+}
+
+if(!function_exists('log_user_trail')){
+	function log_user_trail($action,$description=null,$old_data=null,$new_data=null){
+		$user_id = current_user()->id;
+		$auditTrail = new AuditTrailJob($action,$user_id,$description,$old_data,$new_data);
+		dispatch($auditTrail);
+	}
+}
 
 
 ?>

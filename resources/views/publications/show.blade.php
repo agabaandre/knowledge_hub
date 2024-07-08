@@ -35,6 +35,12 @@
 								</div>
 								<div class="jbl_info01">
 									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ (!$publication->is_version)?$publication->sub_theme->description:'Version '.$publication->version_no }}</span>
+									@if(count($publication->favourited)>0)
+									@php
+									 $likes = count($publication->favourited)
+									@endphp
+									<span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i class="lni lni-heart mr-1"></i> {{ $likes }} User{{ ($likes>1)?"s":"" }} liked this</span>
+									@endif
 								</div>
 							</div>
 						</div>
@@ -44,18 +50,22 @@
 
 							<div class="jbl_button mb-2">
 
-							
+						
 								@if(!empty($publication->publication))
-								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-md rounded btn-outline-success theme-cl fs-sm ft-medium"><i class="fa fa-link"></i> Browse Resource</a>
+								<div class="row col-12 d-flex" style="float:right !importntant;">
+								<a href="{{ $publication->publication }}" target="_blank" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2" style="width:180px !important;"><i class="fa fa-eye"></i> Browse Resource</a>
+								</div>
 								@endif
 									
 								@auth
+								<div class="row col-12 d-flex" style="float:right !importntant;">
 
-								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}"  class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
-								<i class="fa fa-info-circle"></i> Submit a Version</a>
-								<a href="{{ route('account.summarize')}}?id={{ $publication->id }}" class="btn btn-md btn-outline-danger rounded   fs-sm ft-medium">
-								<i class="fa fa-file"></i> Submit a Summary / Abstract</a>
+								<a href="{{ route('account.newversion')}}?id={{ $publication->id }}"  class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium mb-2" style="width:180px !important;">
+								<i class="fa fa-plus"></i> Submit a Version</a>
 
+								<a href="{{ route('account.summarize')}}?id={{ $publication->id }}" class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium" style="width:180px !important;">
+								<i class="fa fa-file"></i> Submit a Summary</a>
+								</div>
 							  @endauth
 							</div>
 						</div>
@@ -73,7 +83,7 @@
 
 			   @php
 
-			    $col =(count($publication->summaries)>0 || $publication->has_attachments)?"7":"12";
+			    $col =(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)?"7":"12";
 			   
 				@endphp
 
@@ -82,9 +92,9 @@
 						<div class="jbd-01 pr-3">
 								<div class="jbd-details mb-4">
 								@if($publication->is_video)
-								<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
+									<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
 								@else
-								<img src="{{ $image_link }}" class="rounded" width="500px"/>
+									<img src="{{ $image_link }}" class="rounded" width="500px"/>
 								@endif
 								<br>
 								<h5 class="ft-medium fs-md">Description</h5>
@@ -103,8 +113,12 @@
 										<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }} Visits</span>
 									</div>
 									<div class="details ft-medium">
+										<label class="text-muted">Likes</label>
+										<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }} Likes</span>
+									</div>
+									<div class="details ft-medium">
 										<label class="text-muted">Category</label>
-										<span class="text-dark">{{ $publication->category->category_name }}</span>
+										<span class="text-dark">{{ @$publication->category->category_name }}</span>
 									</div>
 									<div class="details ft-medium">
 										<label class="text-muted">Type</label>
@@ -117,6 +131,10 @@
 									<div class="details ft-medium">
 										<label class="text-muted">Sub-Theme</label>
 										<span class="text-dark">{!! nl2br($publication->sub_theme->description) !!}</span>
+									</div>
+									<div class="details ft-medium">
+										<label class="text-muted">Associated Authors</label>
+										<span class="text-dark">{{ $publication->associated_authors ?? 'N/A' }}</span>
 									</div>
 									<div class="details ft-medium">
 										<div class="btn btn-outline-dark mt-2"> 
@@ -156,6 +174,7 @@
 									<ul>
 
 										@foreach ($publication->comments as $comment)
+										  @if($comment->status =='approved')
 											<li class="article_comments_wrap">
 
 												<article>
@@ -165,9 +184,6 @@
 																<h4 class="author-name">{{ ($comment->user) ? $comment->user->name : 'Anonymous'}}</h4>
 																<div class="comment-date">{{ time_ago($comment->created_at)}}</div>
 															</div>
-															<!--<div class="comment-reply">
-																<a href="#" class="reply text-success"><span class="icona"><i class="ti-back-left"></i></span> Reply</a>
-															</div>-->
 														</div>
 														<div class="comment-text">
 															<p>{{ nl2br($comment->comment) }}</p>
@@ -179,6 +195,7 @@
 												</article>
 
 											</li>
+											@endif
 										@endforeach
 									</ul>
 								</div>
@@ -192,7 +209,7 @@
 
 				<!-- Sidebar -->
 
-				@if(count($publication->summaries)>0 || $publication->has_attachments)
+				@if(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)
 				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 
@@ -213,7 +230,7 @@
 										</ul>
 									@endif
 
-				@if(count($publication->summaries)>0 || count($publication->versioning)>0)
+				@if(count($publication->summaries)>0 || count($publication->versioning)>0 || $publication->parent_id>0)
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
 					
 					
@@ -224,17 +241,19 @@
 									<li><h5 class="text-muted"><a href="{{ url('records/resource') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
 								@endforeach
 							</ul>
-						@elseif($publication->parent_id)
-							<h5 class=" mb-3"><a class="text-success" href="{{ url('records/resource') }}?id={{$publication->parent_id}}">View Original Version</a></h5>
+						@elseif($publication->parent_id>0)
+							<h5 class=" mb-3"><a class=" col-lg-12 text-center btn btn-sm btn-outline-success rounded" href="{{ url('records/resource') }}?id={{$publication->parent_id}}"><i class="fa fa-link"></i> Original Version</a></h5>
 						@endif
 
 						@if(count($publication->summaries)>0)
 							<h6 class="ft-medium fs-sm mb-3">Summaries and Abstracts</h6>
 							<ul class="list-group mb-3">
 								@foreach($publication->summaries as $summary)
+								 @if($comment->is_approved ==1)
 									<li>
 										<h6 class="text-muted"><a href="{{ url('records/shortened') }}?id={{$summary->id}}">{{ truncate($summary->title,100) }} by {{$summary->author->name}}</a></h6>
 								    </li>
+								@endif
 								@endforeach
 							</ul>
 						@endif

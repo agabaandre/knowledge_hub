@@ -1,11 +1,10 @@
 <div class="article_detail_wrapss single_article_wrap format-standard">
         <div class="article_body_wrap">
             
-            @if(is_valid_image(storage_link('uploads/forums/'.$forum->forum_image)))
+           
             <div class="article_featured_image">
                 <img class="img-fluid" src="{{ storage_link('uploads/forums/'.$forum->forum_image) }}" alt="">
             </div>
-            @endif
 
             <h2 class="post-title mb-2">{!! $forum->forum_title !!}</h2>
             <div class="article_top_info">

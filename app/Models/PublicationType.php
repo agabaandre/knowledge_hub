@@ -10,4 +10,10 @@ class PublicationType extends Model
     use HasFactory;
     protected $table   = "file_type";
     public $timestamps = false;
+
+    protected $fillable = [
+        'name',
+        'icons',
+        'is_downloadable'
+    ];
 }

@@ -1,7 +1,7 @@
 	
 .spotlight {
   position: relative;
-  background-color: var(--theme-secondary);
+  background-color: var(--theme-color-secondary) !important;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -36,7 +36,7 @@
 }
 
 .spot-row h3{
-  color: #fff;
+  color: var(--banner-text-color) !important;
   font-size: 19pt;
   line-break: auto;
   padding-top: 10px;

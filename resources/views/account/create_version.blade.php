@@ -10,10 +10,10 @@
 
     <div class="card col-lg-12">
         <div class="card-header text-left">
-            <h4 class="card-title float-left">Publish resource version <br>Resource: <span class="text-dark"> {{$publication->title }} by {{ $publication->author->name}}</span></h4>
+            <h4 class="card-title float-left">Publish resource version <br>Resource: <span class="text-dark"> {!! $publication->title !!} by {{ $publication->author->name}}</span></h4>
         </div>
 
-        <div class="card-body text-left">
+        <div class="container card-body text-left">
             @if(@$message)
              <div class="alert alert-danger">{{ $message }}</div>
             @endif
@@ -23,37 +23,28 @@
                 <input type="hidden" name="original_id" id="id" value="{{$publication->id}}" class="newform">
                 <div class="row">
                     
-                <div class="col-md-12">
+                <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="description">Version Number</label>
-                                <input placeholder="Version Number"  class="form-control" 
-                                value="{{ (old('version'))?old('version'):number_format(count($publication->versioning->toArray())+1,1)}}"  id="version" name="version" readonly/>
+                                <label class="form-label" for="description">Version Number/Name</label>
+                                <input placeholder="Version Number/Name"  class="form-control" 
+                                value="{{ (old('version'))?old('version'):number_format(count($publication->versioning->toArray())+1,1)}}"  id="version" name="version" required/>
                             </div>
                  </div>
 
-                <div class="col-md-6">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">File Type</label>
-                        @include('partials.publications.filetype_dropdown',['field'=>'file_type'])
-                    </div>
-                </div>
-
                  <div class="col-md-6">
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Version  Link</label>
-                                <input type="text" placeholder="Version  Link" class="form-control url" id="publication" name="link" required>
+                                <label class="form-label" for="publication">Resource  Link (If External)</label>
+                                <input type="text" placeholder="Version  Link" class="form-control url" id="publication" name="link" >
                             </div>
-                        </div>
+                </div>
                        
-
-                <div class="col-md-12">
+                        <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="summernote">Version Description</label>
-                                <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required></textarea>
+                                <label class="form-label" for="summernote">Version Content</label>
+                                <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required>{{ (old('description') )}}</textarea>
                             </div>
                         </div>
-
-                   
+        
                         <div class="col-md-6" >
                             <div class="mb-3">
                                 <label class="form-label" for="publication">Cover Image</label>

@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\View\Composers\AccessGroupsViewComposer;
 use App\View\Composers\AdminStatsViewComposer;
+use App\View\Composers\AdminUnitsViewComposer;
 use App\View\Composers\AssetTypesViewComposer;
 use App\View\Composers\AuthorsViewComposer;
 use App\View\Composers\CountriesViewComposer;
@@ -18,6 +20,7 @@ use App\View\Composers\RegionsViewComposer;
 use App\View\Composers\SubThemesViewComposer;
 use App\View\Composers\TagsViewComposer;
 use App\View\Composers\ThemesViewComposer;
+use App\View\Composers\CommunitiesOfPracticeViewComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades;
@@ -49,15 +52,20 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['publications/partials/*','partials/publications/*'],GeoAreasViewComposer::class);
         View::composer(['partials/authors/*'],AuthorsViewComposer::class);
         View::composer(['partials/tags/*','publications/*'],TagsViewComposer::class);
-        View::composer(['partials/countries/*','dashboards/*'],CountriesViewComposer::class);
+        View::composer(['partials/countries/*','dashboards/*','datarecords/*'],CountriesViewComposer::class);
         View::composer(['partials/experts/*'],ExpertTypesViewComposer::class);
         View::composer(['partials/regions/*','partials/search/*','dashboards/*'],RegionsViewComposer::class);
-        View::composer(['partials/publications/*','partials/search/*'],ThemesViewComposer::class);
+        View::composer(['partials/publications/*','partials/search/*','account/*'],ThemesViewComposer::class);
+
+        View::composer(['partials/adminunits/*'],AdminUnitsViewComposer::class);
 
         Facades\View::composer('admin/*',AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);
         Facades\View::composer('*',DataCategoriesViewComposer::class);
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
+
+        View::composer(['partials/publications/*'],CommunitiesOfPracticeViewComposer::class);
+        View::composer(['partials/publications/*'],AccessGroupsViewComposer::class);
         
     }
 }

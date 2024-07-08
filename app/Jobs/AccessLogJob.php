@@ -25,7 +25,7 @@ class AccessLogJob implements ShouldQueue
     public function __construct($ip,$request)
     {
         //
-        $this->ip_address = $ip;
+        $this->ip_address = $ip; //"197.239.5.102"
         $this->request    = $request;
     }
 
@@ -36,25 +36,33 @@ class AccessLogJob implements ShouldQueue
      */
     public function handle()
     {
-        $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
+       // $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
+        try{
+        $apiUrl = "http://ipinfo.io/{$this->ip_address}/json"; // Construct the query URL
 
-        Log::info(json_encode($user_ip_address_info));
+        // Use file_get_contents to fetch the data
+        $response = file_get_contents($apiUrl);
+        $geoData  = json_decode($response); 
+
+        Log::info(json_encode($response));
+
+        if(@$geoData->country){
 
         $visitorInfo = [
-        'Country Code'=>$user_ip_address_info->geoplugin_countryCode
-        ,'CountryName'=>$user_ip_address_info->geoplugin_countryName 
-        ,'City'=>$user_ip_address_info->geoplugin_city 
-        ,'Region'=>$user_ip_address_info->geoplugin_region 
-        ,'Latitude'=>$user_ip_address_info->geoplugin_latitude 
-        ,'Longitude'=>$user_ip_address_info->geoplugin_longitude 
-        ,'Time_zone'=>$user_ip_address_info->geoplugin_timezone  
-        ,'ContinentCode'=>$user_ip_address_info->geoplugin_continentCode 
-        ,'ContinentName'=>$user_ip_address_info->geoplugin_continentName 
-        ,'CurrencyCode'=>$user_ip_address_info->geoplugin_currencyCode
+        'Country Code'=>$geoData->country
+        ,'CountryName'=>$geoData->country //explode('/',$geoData->timezone)[0]
+        ,'City'=>$geoData->city
+        ,'Region'=>$geoData->region 
+        ,'Latitude'=>explode(',',$geoData->loc)[0] 
+        ,'Longitude'=>explode(',',$geoData->loc)[1]
+        ,'Time_zone'=>$geoData->timezone  
+        //,'ContinentCode'=>$user_ip_address_info->geoplugin_continentCode 
+       // ,'ContinentName'=>$user_ip_address_info->geoplugin_continentName 
+       // ,'CurrencyCode'=>$user_ip_address_info->geoplugin_currencyCode
         ];
 
 
-        if($visitorInfo && @$user_ip_address_info->geoplugin_status==200):
+        if($visitorInfo && @$geoData->country):
         
         $data = (Object) $visitorInfo;
 
@@ -69,6 +77,14 @@ class AccessLogJob implements ShouldQueue
         $locationLog->save();
 
         endif;
+    }
 
     }
+   catch(\Exception $exception){
+    Log::info($exception->getMessage());
+   }
+
+ }
+
 }
+

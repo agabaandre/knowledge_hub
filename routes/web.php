@@ -2,10 +2,14 @@
 
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\AccountController;
+use App\Http\Controllers\Admin\AccessGroupsController;
+use App\Http\Controllers\Admin\AdminUnitsController;
 use App\Http\Controllers\Admin\AuthorsAdminController;
+use App\Http\Controllers\Admin\CommsOfPracticeController;
 use App\Http\Controllers\Admin\DataRecordsAdminController;
 use App\Http\Controllers\Admin\ExpertsAdminController;
 use App\Http\Controllers\Admin\FactsAdminController;
+use App\Http\Controllers\Admin\FaqsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\AssetsController;
 use App\Http\Controllers\AuthorsController;
@@ -24,11 +28,16 @@ use App\Http\Controllers\Admin\GeoAreasController;
 use App\Http\Controllers\Admin\FileTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
+use App\Http\Controllers\Admin\LogsController;
+use App\Http\Controllers\Admin\MetricsController;
 use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
+use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\ToolsAdminController;
+use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -39,6 +48,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
+use App\Http\Controllers\ToolsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -55,31 +65,37 @@ use App\Http\Controllers\CountriesController;
 Auth::routes(['verify' => true]);
 
 Route::get('/test', [TestController::class, 'index'])->name('test');
-
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
 Route::get('/logout', function () {
     Auth::logout();
+    clear_cache();
     return redirect()->route('home');
 });
 
-Route::group(["prefix" => "countries"], function () {
+if(states_enabled()):
 
-    Route::get('/', [CountriesController::class, 'index'])->name('countries');
-    Route::get('/details', [CountriesController::class, 'country']);
+    Route::group(["prefix" => "countries"], function () {
+            Route::get('/', [CountriesController::class, 'index'])->name('countries');
+            Route::get('/details', [CountriesController::class, 'country']);
+    });
+else:
+    Route::group(["prefix" => "adminunits"], function () {
+        Route::get('/', [AdminUnitFrontEndController::class, 'index'])->name('adminunits');
+        Route::get('/details', [AdminUnitFrontEndController::class, 'show']);
+    });
 
-});
+endif;
+
 
 Route::post('/registration', [AuthController::class, 'register'])->name('registration');
-
 Route::get('/privacy', [CommonController::class, 'privacy'])->name('privacy');
-
 Route::group(["prefix" => "browse"], function () {
 
     Route::get("themes", [ThemesController::class, 'index']);
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
+    Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
     Route::get("authors", [AuthorsController::class, 'index']);
     Route::get("areas", [AreasController::class, "index"]);
 
@@ -94,39 +110,38 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/autocomplete", [PublicationsController::class, 'autocomplete']);
     Route::get("/shortened", [PublicationsController::class, 'shortened']);
     Route::post("/comment", [PublicationsController::class, 'comment']);
-
 });
 
 Route::group(["prefix" => "authors"], function () {
-
     Route::get("/", [AuthorsController::class, 'index']);
     Route::get("publications", [PublicationsController::class, 'author_pubs']);
-
 });
 
 Route::group(["prefix" => "healthassets"], function () {
-
     Route::get("/", [AssetsController::class, 'index']);
     Route::get("/detail", [AssetsController::class, 'details']);
-
 });
 
 Route::group(["prefix" => "faqs"], function () {
-
     Route::get("/", [FaqsController::class, 'index']);
-
 });
 
 
 Route::group(["prefix" => "publications"], function () {
-
     Route::get("/", [PublicationsController::class, 'index']);
+    Route::any("/request-content", [PublicationsController::class, 'request_content'])->name('content-request');
     Route::get("/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
-
 });
 
+
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
+
+Route::group(["prefix" => "tools",'middleware' => ['auth', 'web']], function () {
+    Route::get("/", [ToolsController::class, 'index'])->name('tools');
+    Route::get("/flexmonster", [ToolsController::class, 'fleximonster'])->name('tools.flexmonster');
+    Route::get("/excel", [ToolsController::class, 'excel'])->name('tools.excel');
+});
 
 Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function () {
 
@@ -143,41 +158,51 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
     Route::get("/summarize", [AccountController::class, 'create_summary'])->name('account.summarize');
     Route::post("/update", [AuthController::class, 'update_profile'])->name('account.update');
     Route::post("/secureme", [AuthController::class, 'update_password'])->name('account.auth_update');
+
 });
 
 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
-
+    if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
+
+    Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
+    Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
+    Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
 
     Route::group(["prefix" => "publications"], function () {
 
         Route::get("/", [ResourcesController::class, 'index']);
         Route::get("/create", [ResourcesController::class, 'create']);
         Route::get("/edit", [ResourcesController::class, 'edit']);
+        Route::get("/details", [ResourcesController::class, 'details']);
         Route::post("/save", [ResourcesController::class, 'store']);
+        Route::post("/approval", [ResourcesController::class, 'approval']);
         Route::get("/moderate", [ResourcesController::class, 'moderate']);
         Route::get("/delete", [ResourcesController::class, 'destroy']);
         Route::get("/approve_comment", [ResourcesController::class, 'approve_comment']);
         Route::get("/reject_comment", [ResourcesController::class, 'reject_comment']);
+        Route::get("/summaries", [ResourcesController::class, 'summaries']);
+        Route::get("/summary", [ResourcesController::class, 'summary']);
+        Route::post("/summary_approval", [ResourcesController::class, 'summary_approval']);
     });
 
     //geo areas
-    Route::group(["prefix" => "areas"], function () {
+    Route::group(["prefix" => "areas", "as" => "areas."], function () {
 
         Route::get("/", [GeoAreasController::class, 'index']);
-        Route::post("/save", [GeoAreasController::class, 'store']);
+        Route::post("/save", [GeoAreasController::class, 'store'])->name('store');
         Route::get("/delete", [GeoAreasController::class, 'destroy']);
     });
 
 
     //filetypes
-    Route::group(["prefix" => "filetypes"], function () {
+    Route::group(["prefix" => "filetypes", "as"=> "filetypes."], function () {
 
         Route::get("/", [FileTypesController::class, 'index']);
-        Route::post("/save", [FileTypesController::class, 'store']);
+        Route::post("/save", [FileTypesController::class, 'store'])->name('store');
         Route::get("/delete", [FileTypesController::class, 'destroy']);
     });
 
@@ -195,15 +220,17 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [SubHealthThemesController::class, 'index']);
         Route::post("/save", [SubHealthThemesController::class, 'store']);
+        Route::post("/edit", [SubHealthThemesController::class, 'edit']);
         Route::get("/delete", [SubHealthThemesController::class, 'destroy']);
     });
 
 
     //tags
-    Route::group(["prefix" => "tags"], function () {
+    Route::group(["prefix" => "tags", 'as' => 'tags.'], function () {
 
         Route::get("/", [TagsController::class, 'index']);
         Route::post("/save", [TagsController::class, 'store']);
+        Route::put('/update', [TagsController::class, 'update'])->name('update');
         Route::get("/delete", [TagsController::class, 'destroy']);
     });
 
@@ -212,27 +239,29 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [QuizController::class, 'index']);
         Route::post("/save", [QuizController::class, 'store']);
-        Route::post("/save_answer", [QuizController::class, 'save_answer']);
         Route::get("/delete", [QuizController::class, 'destroy']);
         Route::get("/answers", [QuizController::class, 'answers']);
+        Route::post("/save_answer", [QuizController::class, 'save_answer']);
+        Route::get("/answer/delete", [QuizController::class, 'delete_answer']);
     });
 
     //filetypes
 
     Route::group(["prefix"=>"forums"],function(){
-    
+
         Route::get("/",[ForumsAdminController::class,'index']);
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
-        Route::get("/approve",[ForumsAdminController::class,'approve']);
-        Route::get("/reject",[ForumsAdminController::class,'reject']);
+        Route::any("/approve",[ForumsAdminController::class,'approve']);
+        Route::any("/reject",[ForumsAdminController::class,'reject']);
+        Route::get("/details", [ForumsAdminController::class, 'details']);
 
     });
 
     //authors
     Route::group(["prefix" => "authors"], function () {
 
-        Route::get("/", [AuthorsAdminController::class, 'index']);
+        Route::any("/", [AuthorsAdminController::class, 'index']);
         Route::get("/delete", [AuthorsAdminController::class, 'destroy']);
     });
 
@@ -262,12 +291,21 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
     //facts
-    Route::group(["prefix" => "facts"], function () {
+    Route::group(["prefix" => "facts", 'as' => 'facts.'], function () {
 
         Route::get("/", [FactsAdminController::class, 'index']);
-        Route::post("/save", [FactsAdminController::class, 'store']);
+        Route::post("/save", [FactsAdminController::class, 'store'])->name('store');
         Route::get("/delete", [FactsAdminController::class, 'destroy']);
     });
+
+    //faq
+    Route::group(["prefix" => "faqs"], function () {
+
+        Route::get("/", [FaqsAdminController::class, 'index']);
+        Route::post("/save", [FaqsAdminController::class, 'store']);
+        Route::get("/delete", [FaqsAdminController::class, 'destroy']);
+    });
+
 
     //experts
     Route::group(["prefix" => "experts"], function () {
@@ -281,8 +319,34 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/", [ExpertsAdminController::class, 'types']);
             Route::post("/save", [ExpertsAdminController::class, 'save_type']);
             Route::get("/delete", [ExpertsAdminController::class, 'delete_type']);
-            
+
         });
+
+    });
+
+
+    //accessgroup
+    Route::group(["prefix" => "accessgroups"], function () {
+
+        Route::get("/", [AccessGroupsController::class, 'index']);
+        Route::post("/save", [AccessGroupsController::class, 'store']);
+        Route::get("/delete", [AccessGroupsController::class, 'destroy']);
+    });
+
+    //commsofpractice
+    Route::group(["prefix" => "commsofpractice"], function () {
+
+        Route::any("/", [CommsOfPracticeController::class, 'index']);
+        Route::post("/save", [CommsOfPracticeController::class, 'store']);
+        Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
+    });
+
+    //AdminUnits
+       Route::group(["prefix" => "adminunits"], function () {
+
+        Route::get("/", [AdminUnitsController::class, 'index']);
+        Route::post("/save", [AdminUnitsController::class, 'store']);
+        Route::get("/delete", [AdminUnitsController::class, 'destroy']);
     });
 
 
@@ -301,10 +365,30 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
             Route::get("/", [DataRecordsAdminController::class, 'categories']);
             Route::post("/save", [DataRecordsAdminController::class, 'save_category']);
             Route::get("/delete", [DataRecordsAdminController::class, 'delete_category']);
-            
+
             Route::get("/subcategories", [DataRecordsAdminController::class, 'subcategories']);
             Route::post("/savesub", [DataRecordsAdminController::class, 'save_subcategory']);
+
+            Route::get('/ajax/subcategories', [DataRecordsAdminController::class, 'getSubcategories'])->name('get-subcategories');
         });
+    });
+
+
+
+    Route::group(["prefix" => "logs"], function () {
+
+        Route::get("/access", [LogsController::class, 'index']);
+        Route::get("/user", [LogsController::class, 'trail']);
+    });
+
+    Route::group(["prefix" => "metrics"], function () {
+
+        Route::get("/", [MetricsController::class, 'index']);
+    });
+
+    Route::group(["prefix" => "tools"], function () {
+
+        Route::any("/", [ToolsAdminController::class, 'index']);
     });
 });
 
@@ -324,7 +408,7 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], funct
     Route::post('/permission',  [PermissionController::class, 'createPermission'])->name('permissions.permission');
     Route::post('/torole',  [PermissionController::class, 'permissionsToRole'])->name('permissions.torole');
     Route::get('/users',  [PermissionController::class, 'users'])->name('permissions.users');
-    Route::post('/user',  [PermissionController::class, 'users'])->name('permissions.filerusers');
+    Route::get('/user',  [PermissionController::class, 'users'])->name('permissions.filerusers');
     Route::post('/saveuser',  [PermissionController::class, 'saveUser'])->name('permissions.saveuser');
     Route::post('/userrole',  [PermissionController::class, 'roleToUser'])->name('permissions.userrole');
 
@@ -345,7 +429,6 @@ Route::group(["prefix" => "forums"], function () {
     Route::get("/join", [ForumsController::class, 'join'])->name('forums.join');
     Route::post("/comment", [ForumsController::class, 'comment'])->name('forums.comment');
     Route::post("/publish", [ForumsController::class, 'publish'])->name('forums.publish');
-
 });
 
 //facts

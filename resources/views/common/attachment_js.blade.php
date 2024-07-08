@@ -30,7 +30,7 @@ function deleteFile(index)  {
 
         var current_files = $('#attachments').prop("files");
 
-        newIndex = current_files.length;
+        newIndex = (current_files)?current_files.length:0;
 
         var filesCount = input.files.length;
 
@@ -86,6 +86,13 @@ function deleteFile(index)  {
     $('#cover').on('change', function() {
         imagesPreview(this, 'div.cover_preview');
     });
+      $('#favicon').on('change', function() {
+        imagesPreview(this, 'div.favicon_preview');
+    });
+     $('#spotlight').on('change', function() {
+        imagesPreview(this, 'div.spotlight_preview');
+    });
+  
 
 });
 

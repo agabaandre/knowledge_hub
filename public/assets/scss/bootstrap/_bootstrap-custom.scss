@@ -1,9 +1,9 @@
 /* ###### Bootstrap ###### */
 
 :root {
-    --primary-bg-color: #28b661;
+    --primary-bg-color: var(--theme-color-primary);
     --primary-transparentcolor: #e4e9ff;
-    --primary-bg-color: #28b661;
+    --primary-bg-color: var(--theme-color-primary);
     --blue: $primary;
     --indigo: $primary;
     --purple: $purple;
@@ -13,14 +13,14 @@
     --yellow: $warning;
     --green: $success;
     --teal: $teal;
-    --cyan: #28b661;
+    --cyan: var(--theme-color-primary);
     --white: $white;
     --gray: $secondary;
     --gray-dark: $dark;
     --primary: $primary;
     --secondary: $secondary;
     --success: $success;
-    --info: #28b661;
+    --info: var(--theme-color-primary);
     --warning: $warning;
     --danger: #ff5353;
     --light: #e4ebf7;
@@ -2710,8 +2710,8 @@ fieldset:disabled a.btn {
 
 .btn-info {
     color: $white;
-    background-color: #28b661;
-    border-color: #28b661;
+    background-color: var(--theme-color-primary);
+    border-color: var(--theme-color-primary);
     &:hover {
         color: $white;
         background-color: #15a7de;
@@ -2724,8 +2724,8 @@ fieldset:disabled a.btn {
     &.disabled,
     &:disabled {
         color: $white;
-        background-color: #28b661;
-        border-color: #28b661;
+        background-color: var(--theme-color-primary);
+        border-color: var(--theme-color-primary);
     }
     &:not(:disabled):not(.disabled) {
         &:active,
@@ -3135,39 +3135,39 @@ fieldset:disabled a.btn {
 }
 
 .btn-outline-info {
-    color: #28b661;
-    border-color: #28b661;
+    color: var(--theme-color-primary);
+    border-color: var(--theme-color-primary);
     &:hover {
         color: $white;
-        background-color: #28b661;
-        border-color: #28b661;
+        background-color: var(--theme-color-primary);
+        border-color: var(--theme-color-primary);
     }
     &:focus,
     &.focus {
         color: $white;
-        background-color: #28b661;
-        border-color: #28b661;
+        background-color: var(--theme-color-primary);
+        border-color: var(--theme-color-primary);
         box-shadow: 0 0 0 0.2rem rgba(23, 162, 184, 0.5);
     }
     &.disabled,
     &:disabled {
-        color: #28b661;
+        color: var(--theme-color-primary);
         background-color: transparent;
     }
     &:not(:disabled):not(.disabled) {
         &:active,
         &.active {
             color: $white;
-            background-color: #28b661;
-            border-color: #28b661;
+            background-color: var(--theme-color-primary);
+            border-color: var(--theme-color-primary);
         }
     }
 }
 
 .show>.btn-outline-info.dropdown-toggle {
     color: $white;
-    background-color: #28b661;
-    border-color: #28b661;
+    background-color: var(--theme-color-primary);
+    border-color: var(--theme-color-primary);
 }
 
 .btn-outline-info:not(:disabled):not(.disabled) {
@@ -6108,7 +6108,7 @@ button.bg-success {
 }
 
 .bg-info {
-    background-color: #28b661 !important;
+    background-color: var(--theme-color-primary) !important;
 }
 
 a.bg-info {
@@ -9251,7 +9251,7 @@ a.text-success {
 }
 
 .text-info {
-    color: #28b661 !important;
+    color: var(--theme-color-primary) !important;
 }
 
 a.text-info {

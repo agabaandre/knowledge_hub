@@ -1,4 +1,4 @@
-<div class="row py-3 advanced_filters">
+<div class="row py-3 advanced_filters main_search" >
 
 @php
 
@@ -6,8 +6,8 @@ $advanced_filter = (@$search->rcc || @$search->country_id || @$search->author_id
 
 @endphp
 
-<a data-toggle="collapse" href="#collapseExample" role="button" 
-aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-lg-12" style="color:{{ $text_color ?? '#bba66d'}}; font-size:14px;">
+<a data-toggle="collapse" href="#collapseExample" role="button"  id="advanced_search"
+aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-lg-12" style="color:var(--banner-text-color) !important; font-size:14px;">
 <span class="filter"> Advance your Search With Filters</span> <i class="fa fa-angle-down"></i>
 </a>
 
@@ -15,7 +15,8 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
 <div class="card card-body">
     
     <div class="row">
-
+      
+   @if(@states_enabled())
     <div class="col-md-4">
         <label class="text-bold"><small>RCC</small></label>
         @include('partials.regions.dropdown',['class'=>'rcc select2','selected'=>@$search->rcc,'allfield'=>'All'])
@@ -31,6 +32,8 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
        @include('partials.authors.dropdown',['class'=>'author select2','selected'=>@$search->author_id,'allfield'=>'All'])
     </div>
 
+    @endif
+
     <div class="col-md-4">
        <label class="text-bold"><small>Thematic Area</small></label>
        @include('partials.publications.theme_dropdown',['class'=>'theme select2','selected'=>@$search->thematic_area_id,'allfield'=>'All'])
@@ -44,6 +47,10 @@ aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="ad
     <div class="col-md-4">
        <label class="text-bold"><small>Type</small></label>
        @include('partials.publications.filetype_dropdown',['class'=>'filetype select2','selected'=>@$search->file_type_id,'allfield'=>'All'])
+    </div>
+
+    <div class="col-md-6 offset-md-6">
+      <input type="submit" class="btn theme-bg text-white ft-medium apply-btn fs-sm rounded mt-3" value="Apply Filters">
     </div>
     </div>
 

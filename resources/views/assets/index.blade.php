@@ -25,7 +25,7 @@
 					@auth
 						@if(count($assets)>0)
 						<div class="col-xl-3 col-lg-4 col-md-5 col-sm-12 float-end">
-							<a href="?export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
+							<a href="{{ current_url()}}export=1" class="btn btn-sm btn-success rounded"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
 						</div>
 						@endif
 					@endauth
@@ -48,7 +48,7 @@
 									<p>{{ $asset->type->type_name }}</p>
 									<hr>
 									<a href="{{$asset->url}}" target="_blank" class="text-success">{{ $asset->url }}</a>
-									<p>{{ truncate($asset->asset_desc,182); }}</p>
+									<p>{{ truncate($asset->asset_desc,182)}}</p>
 								</a>
 								<a class="text-success" href="{{ asset('healthassets/detail') }}?id={{$asset->id}}">View Details</a>
 								</p>

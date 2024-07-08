@@ -15,7 +15,7 @@ class Access
         //  /* Static IP address */
         // $visitorInfo = Location::get($ip);
 
-        $ip = env('APP_DEBUG')?'41.210.143.17':$request->ip();
+        $ip = env('APP_DEBUG')?'127:0:0:1':$request->ip();
      
         $logData = $request->all();
 
@@ -23,6 +23,9 @@ class Access
         unset($logData['files']);
         unset($logData['image']);
         unset($logData['photo']);
+        unset($logData['logo']);
+        unset($logData['favicon']);
+        unset($logData['spotlight_banner']);
 
          AccessLogJob::dispatch($ip,$logData);
 

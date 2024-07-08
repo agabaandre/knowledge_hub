@@ -10,4 +10,6 @@ class GeoCoverage extends Model
     use HasFactory;
 
     protected $table = "country";
+
+    public $timestamps = false;
 }

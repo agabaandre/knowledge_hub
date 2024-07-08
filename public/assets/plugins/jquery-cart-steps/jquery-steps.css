@@ -157,10 +157,10 @@
     color: #fff;
 }
 .step-steps .step1.done  a , .step-steps  .step2.done a  , .step-steps .step3.done  a {
-    background-color: #51bb25;
+    background-color: var(--theme-color-primary);
 	box-shadow: 0px 4px 9px 0px rgba(48, 206, 72, 0.3);
     color: #fff;
-    border: 1px solid #51bb25;
+    border: 1px solid var(--theme-color-primary);
 }
 .step-steps .step1.done  a:hover , .step-steps  .step2.done a:hover  , .step-steps .step3.done  a:hover {
     background-color: #22c03c;

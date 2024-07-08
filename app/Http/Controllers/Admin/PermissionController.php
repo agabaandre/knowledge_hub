@@ -42,13 +42,13 @@ class PermissionController extends Controller
     */
     public function users(Request $request){
 
-        $data['roles'] = Role::all();
+        $data['roles']  = Role::all();
         $data['levels'] = AccessLevel::all();
 
-        $name     = $request->name;
-        $locationId  = $request->location_id;
-        $phone    = $request->mobile;
-        $count    = (!empty($request->count))?$request->count:20;
+        $name        = $request->term;
+        $country_id  = $request->country_id;
+        $phone       = $request->mobile;
+        $count       = (!empty($request->count))?$request->count:20;
        
       
         $users = DB::table('users')
@@ -58,8 +58,8 @@ class PermissionController extends Controller
                 ->when($name, function ($query, $name) {
                     return $query->where('users.name','like', $name.'%');
                 })
-                ->when($locationId, function ($query, $locationId) {
-                    return $query->where('users.location_id',$locationId);
+                ->when($country_id, function ($query, $country_id) {
+                    return $query->where('users.country_id',$country_id);
                 })
                 ->when(true,function($query){ //apply access filter
 
@@ -75,7 +75,7 @@ class PermissionController extends Controller
 
 
         $data['search'] = (object) array(
-            "location"=>$locationId,
+            "country_id"=>$country_id,
             "name"=>$name,
             "count" =>$count,
             "phone" =>$phone
@@ -100,7 +100,7 @@ class PermissionController extends Controller
 
         $lastName       = $request->last_name;
         $firstName      = $request->first_name;
-        $locationId  = $request->location_id;
+        $country_id  = $request->country_id;
         $nin       = $request->nin;
         $email     = $request->email;
         $mobile    = $request->mobile;
@@ -111,13 +111,15 @@ class PermissionController extends Controller
         if($request->id)
          $user = User::find($request->id);
 
-        $user->firstname = $firstName;
-        $user->lastname  = $lastName;
-        $user->location_id  = $locationId;
-        $user->mobile    = $mobile;
-        $user->nin       = $nin;
+        $user->first_name = $firstName;
+        $user->last_name  = $lastName;
+        $user->country_id  = $country_id;
+        $user->phone_number    = $mobile;
         $user->email     = $email;
         $user->name      = $lastName." ".$firstName;
+        $user->author_id =  $request->author_id;
+        $user->access_level_id =  $request->level_id;
+        $user->administrative_unit_id =  $request->administrative_unit_id;
        
         if(!empty($password)){
           $user->password  = Hash::make($password);
@@ -275,7 +277,10 @@ class PermissionController extends Controller
         $roleId = $request->role_id;
         
         $user   = User::find($userId);
+        $old_data = $user;
+
         $user->access_level_id = $request->level_id;
+        $user->author_id       = $request->author_id;
         $user->update();
 
         //first revoke all
@@ -288,6 +293,8 @@ class PermissionController extends Controller
         $data["message"] = $msg;
         $data['data'] = [$userId,$roleId];
         $alert_class = ($saved)?'success':'danger';
+
+        log_user_trail('UPDATED',"Updated User $userId Details",$old_data,$user);
 
         $alert = ['alert-'.$alert_class=>$msg];
 
@@ -316,45 +323,9 @@ class PermissionController extends Controller
         $alert_class = ($saved)?'success':'danger';
     	
         $alert = ['alert-'.$alert_class=>$msg];
+        $alert = ['message'=>$msg];
+        
         return redirect()->route('permissions.users')->with($alert);
-    }
-
-
-     public function trail(Request $request){
-
-        $userId = $request->user_id;
-        $start  = $request->start;
-        $end    = $request->end;
-        $action = $request->action;
-
-        $data['users'] = User::all();
-
-        $data['search'] = (Object) $request->all();
-
-        $data['trails'] = [];
-        /*
-                AuditTrail::when($userId, 
-                function ($query, $userId) {
-                    return $query->where('user_id', $userId);
-                })
-                ->when($start, 
-                function ($query, $start) {
-                    $start = date('Y-m-d',(strtotime('+0 day',strtotime($start))));
-                    return $query->where('created_at','>=', $start);
-                })
-                ->when($end, 
-                function ($query, $end) {
-                    $end = date('Y-m-d',(strtotime('+1 day',strtotime($end))));
-                    return $query->where('created_at','<=', $end);
-                })
-                ->when($action, 
-                function ($query, $action) {
-                    return $query->where('action','like', "%$action%");
-                })
-                ->orderBy('id','desc')->paginate(25);
-                */
-
-        return view('admin.permissions.audit')->with($data);
     }
 
 
@@ -371,7 +342,14 @@ class PermissionController extends Controller
     }
 
     public function profile(Request $request){
-        $data['user'] = current_user();
+
+        $data['user']        = User::find($request->user) ?? current_user();
+        $data['preferences'] = [];
+
+        foreach(current_user()->preferences as $pref){
+            $data['preferences'][] = $pref->subtheme_id;
+        }
+        
         return view('admin.profile.index')->with($data);
     }
 

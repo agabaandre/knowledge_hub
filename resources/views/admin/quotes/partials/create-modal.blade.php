@@ -3,7 +3,7 @@
   <div class="modal-dialog modal-md">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create Quote</h5>
+        <h5 class="modal-title" id="title">Create Quote</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -16,8 +16,8 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Tag</label>
-              <input type="text" placeholder="Enter Tag" class="form-control newform" id="name" name="name" required>
+              <label class="form-label" for="name">Quote</label>
+              <textarea type="text" placeholder="Enter Quote" rows="8" class="form-control newform" id="quote" name="quote" required></textarea>
             </div>
           </div>
 

@@ -62,6 +62,7 @@
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                 <div class="sec_title position-relative text-center mb-5 mt-3">
                     <h2 class="ft-bold">Published Resources</h2>
+                    <h4 class="ft-bold text-muted">Member State: {{$country->name}}</h4>
                 </div>
             </div>
         </div>

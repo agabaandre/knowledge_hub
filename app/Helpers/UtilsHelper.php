@@ -1,10 +1,12 @@
 <?php
 
+use App\Models\PublicationType;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\URL;
 use PHPMailer\PHPMailer\PHPMailer;  
 use PHPMailer\PHPMailer\Exception;
+use Illuminate\Support\Facades\Cache;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -71,8 +73,8 @@ if (!function_exists('is_past')) {
 
     function is_past($date)
     {
-        $date_now = new DateTime();
-        $date2    = new DateTime($date);
+        $date_now = new \DateTime();
+        $date2    = new \DateTime($date);
         return ($date_now > $date2);
     }
 }
@@ -99,7 +101,7 @@ if (!function_exists('is_valid_image')) {
 
     function is_valid_image($image)
     {
-        if (file_exists($image)) {
+        if (Storage::disk('local')->exists($image)) {
             return TRUE;
         } else {
             return FALSE;
@@ -124,6 +126,10 @@ if(!function_exists('storage_link')){
 
         $field = str_replace('[','',$field);
         $field = str_replace(']','',$field);
+
+        if(is_array($data)){
+            return $data;
+        }
         
         return ($data)?$data->{$data_field}:old($field);
      }
@@ -140,15 +146,17 @@ if(!function_exists('storage_link')){
 	}
 }
 
-function export_excel($records) {
-	$heading = false;
+function export_excel($records,$heading=false) {
+
 		if(!empty($records))
 		  foreach($records as $row) {
-			if(!$heading) {
+			
+            if(!$heading) {
 			  // display field/column names as a first row
 			  echo implode("\t", array_keys($row)) . "\n";
 			  $heading = true;
 			}
+            
 			echo implode("\t", array_values($row)) . "\n";
 		}
 	exit;
@@ -163,19 +171,19 @@ function send_email($request){
         // Email server settings
         $mail->SMTPDebug = 0;
         $mail->isSMTP();
-        $mail->Host = env('MAIL_HOST');             //  smtp host
-        $mail->SMTPAuth = true;
-        $mail->Username = env('MAIL_USERNAME');   //  sender username
-        $mail->Password = env('MAIL_PASSWORD');       // sender password
-        $mail->SMTPSecure = env('MAIL_ENCRYPTION','ssl');                  // encryption - ssl/tls
-        $mail->Port = env('MAIL_PORT','465');                          // port - 587/465
+        $mail->Host       = config('emails.host');             //  smtp host
+        $mail->SMTPAuth   = true;
+        $mail->Username   = config('emails.username');   //  sender username
+        $mail->Password   = config('emails.password');       // sender password
+        $mail->SMTPSecure = config('emails.smtp_secure');                  // encryption - ssl/tls
+        $mail->Port       = config('emails.port');                          // port - 587/465
 
-        $mail->setFrom(env('MAIL_USERNAME'), env('MAIL_SENDERNAME'));
+        $mail->setFrom(config('emails.username'), config('emails.sender'));
         $mail->addAddress($request->email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);
 
-        $mail->addReplyTo(env('MAIL_USERNAME'), 'SenderReplyName');
+        $mail->addReplyTo(config('emails.username'), 'No Reply');
 
         // if(isset($_FILES['emailAttachments'])) {
         //     for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {
@@ -206,9 +214,96 @@ function send_email($request){
     }
     
 }
+function isValidWebLink($link) {
+    // Define a regular expression pattern to match web links
+    $pattern = '/^(http|https|ftp|ftps):\/\/.+/i';
+    
+    // Check if the link matches the pattern
+    if (preg_match($pattern, $link)) {
+        return true; // Link is valid
+    } else {
+        return false; // Link is not valid
+    }
+}
 
 
+function getFileMimeType($file_path)
+{
+    if (!file_exists($file_path)) {
+        return "File not found";
+    }
+
+    $finfo     = finfo_open(FILEINFO_MIME_TYPE); // Open fileinfo extension
+    $mime_type = finfo_file($finfo, $file_path); // Get MIME type
+    finfo_close($finfo); // Close fileinfo extension
+
+    return $mime_type;
+}
+
+function get_file_type($file_path=null,$pub_url=null){
 
 
+   $mime_type = getFileMimeType($file_path);
+
+   if($mime_type){
+        $mime_type = str_replace('application/','',$mime_type);
+        $mime_type = str_replace('images/','',$mime_type);
+    }
+
+   //sdd($mime_type);
+  
+    $mime_type = ($mime_type)?$mime_type: $pub_url;
+
+    $type = PublicationType::where('mime_types','like','%'.strtolower($mime_type).'%')->first();
+    
+    if(!$type)
+        $type = PublicationType::where('name','like','%other%')->first();
+ 
+    return $type;
+}
+
+function html_to_text($html) {
+    // Remove HTML tags
+    $text = strip_tags($html);
+    
+    // Decode HTML entities
+    $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    
+    // Convert special characters to plain text
+    $text = htmlspecialchars_decode($text, ENT_QUOTES | ENT_HTML5);
+    
+    // Convert multiple spaces into single spaces
+    $text = preg_replace('/\s+/', ' ', $text);
+    
+    // Trim leading and trailing spaces
+    $text = trim($text);
+    
+    return $text;
+}
+
+function clear_cache(){
+  Cache::flush();
+}
+
+function user_profile_photo(){
+
+
+    if (!empty(current_user()->photo)):
+        $image_link = asset('public/storage/uploads/users/' . current_user()->photo);
+    else:
+        $image_link = asset('assets/images/user.jpg');
+    endif;
+
+    return $image_link;		 
+}
+
+function get_publication_state($approved,$rejected){
+    if($rejected)
+        return 'Rejected';
+    if($approved)
+        return 'Active';
+    if(!$approved && ! $rejected)
+        return "Pending Approval";
+}
 
 ?>

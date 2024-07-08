@@ -29,7 +29,8 @@
 
                             
 
-                            <div class="d-block mb-2 mt-3">
+                            <?php /*
+							<div class="d-block mb-2 mt-3">
                                 <span class="text-muted">Tags:</span>
 
 	  							@php
@@ -40,7 +41,7 @@
                                     <a href="{{ url('records/search') }}?tag={{$tag->tag_text}}" class="px-3 py-1 medium bg-{{$colors[mt_rand(0,2)]}} text-white rounded">{{$tag->tag_text}}</a>
                                 @endforeach
 
-                            </div>
+                            </div> */ ?>
 
                             <div class="quotes-slider px-3 col-lg-8">
 								

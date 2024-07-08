@@ -7,7 +7,6 @@
 
   ?>
 
-
 <!-- PAGE-HEADER -->
 <div class="page-header">
     <h1 class="page-title">Users</h1>
@@ -34,24 +33,16 @@
                 </div>
             </div>
 
-      
-
-                        <form action="{{ route('permissions.filerusers') }}" method="POST">
+                        <form action="{{ route('permissions.filerusers') }}" method="GET">
                             @csrf
                             <div class="row bg-white pb-3">
                                 
 
-                                <div class="form-group col-md-3">
-                                    <label>{{ __('general.name') }}</label>
-                                    <input type="text" name="name"  value="{{$search->name}}" class="form-control" placeholder="Search by Name">
+                                <div class="form-group col-md-12">
+                                    <label>Search</label>
+                                    <input type="text" name="term"  value="{{@$search->term}}" class="form-control" placeholder="Search by Name,Email,Phone Number etc">
                                 </div>
 
-                                <div class="form-group col-md-3">
-                                    <label>{{ __('general.email') }}</label>
-                                    <input type="tel" name="email"  value="{{$search->phone}}" class="form-control" placeholder="Search by Phone">
-                                </div>
-
-                           
                                 <div class="col-md-3 mt-4">
                                     <button type="submit" class="btn btn-dark"><i class="icon-filter4"></i> 
                                     {{ __('general.search') }} {{ __('general.users') }}</button>
@@ -81,7 +72,7 @@
                                   $userRole = get_role($user->id);
 
                                   $statuses = array(
-                                  "0"=>"Blocked",
+                                  "0"=>"InActive",
                                   "2"=>"Restricted",
                                   "3"=>"Reset",
                                   "1"=>"Active");
@@ -91,11 +82,10 @@
                                 <tr>
                                     <td>{{ $user->name }}</td>
                                     <td>{{ $user->email }}</td>
-                                    <td>{{ $user->mobile ?? '' }}</td>
-                                    <td><b class="badge badge-dark">{{--  $statuses[$user->status] --}}</b></td>
-                                    <td>{{ ($userRole)?(strtoupper((@$userRole->name)?$userRole->name:'NO ROLE')):'' }}</td>
+                                    <td>{{ $user->phone_number ?? '' }}</td>
+                                    <td><b class="badge badge-dark">{{ $statuses[$user->status] }}</b></td>
+                                    <td>{{ ($userRole)?(strtoupper((@$userRole->name)?$userRole->name:'N/A')):'' }}</td>
                                     <td class="text-center">
-
                                              @include('admin.permissions.partials.user_row_dropdown')
                                              @include('admin.permissions.partials.user_edit_form_modal')
                                              @include('admin.permissions.partials.reset_modal')

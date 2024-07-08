@@ -17,7 +17,7 @@ class DashboardsController extends Controller
     
     public function index(Request $request){
 
-        $data['dashboards'] = $this->dashBoardsRepo->member_states($request);
+        $data['dashboards'] = $this->dashBoardsRepo->get($request);
         return view('countries.index',$data);
     }
 }

@@ -9,6 +9,11 @@
 			 $i++;
 			@endphp
 
+			@php
+				$likes = count($row->favourited)
+			@endphp
+			
+
 	     <div class="card col-lg-12 single-border mb-2" data-aos="{{($i>2)?'zoom-in':''}}" data-aos-delay="100">
           <div class="card-body text-left">
           	<div class="row">
@@ -37,10 +42,12 @@
 		
 				<span class="muted medium ml-2 theme-cl"><br>
 				<i class="lni lni-briefcase mr-1"></i>Theme: {!!$row->theme->description!!}</span>
-					<span class="muted medium ml-2 theme-cl"><br>
+				<span class="muted medium ml-1 theme-cl"><br>
 				<i class="lni lni-archive mr-1"></i>Sub Theme: {!!$row->sub_theme->description!!}</span>
-				
-				<span class="muted medium ml-2 text-muted mt-1 "><br>
+				@if($likes>0)
+				<span ><i class="lni lni-heart mr-1"></i> {{$likes }} Like{{($likes>0)?'s':''}}  </span>
+				@endif
+				<span class="muted medium ml-1 text-muted mt-1 "><br>
 				<i class="lni lni-empty-file mr-1"></i>Category: {{@$row->category->category_name}}</span>
 				
 				<span class="text-muted medium d-block mt-1">
@@ -67,8 +74,12 @@
 
 		<div class="row justify-content-center py-5">
 			<i class="fa fa-info-circle fa-2x text-muted"></i>
-			
 			<h4 class="text-muted">No matching records found</h4>
+		</div>
+
+		
+		<div class="row justify-content-center">
+			<a  href="{{ url('publications/request-content')}}" class="btn btn-dark mt-2">Request Content</a>
 		</div>
  
 	@endif

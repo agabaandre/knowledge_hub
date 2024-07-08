@@ -1,5 +1,5 @@
-<div id="user{{$user->id}}0" class="modal fade" tabindex="-1">
-                    <div class="modal-dialog modal-sm">
+<div id="user{{$user->id}}0" class="modal fade">
+                    <div class="modal-dialog modal-md">
                         <div class="modal-content">
                          <form action="{{ route('permissions.userrole') }}" class="feeFormuser{{$user->id}}" method="POST">
                             <div class="modal-header">
@@ -9,7 +9,7 @@
                                          <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
 
-                            <div class="modal-body">
+                            <div class="modal-body text-left">
                                 
                                 <div class="form-group ">
                                         @csrf
@@ -27,6 +27,7 @@
                                         </select>
                                     </div>
 
+                                    @if(states_enabled())
                                     <div class="form-group ">
                                         <label class="text-bold">
                                             <i class="icon-collaboration mr-2"></i>
@@ -39,8 +40,29 @@
                                             @endforeach
                                         </select>
                                     </div>
+                                    @endif
+
+                                    <div class="row">
+                                    @if(states_enabled())
+                                    <div class="form-group col-md-6  col-sm-6">
+                                        <label class="text-bold">
+                                            <i class="icon-collaboration mr-2"></i>
+                                            Member State
+                                        </label>
+                                        @include('partials.countries.dropdown',['selected'=>@$user->country_id])
+                                    </div>
+                                    @endif
 
                                     <input name="user_id" value="{{$user->id}}" type="hidden">
+
+                                    <div class="form-group col-md-6">
+                                            <label class="text-bold">
+                                                <i class="icon-collaboration mr-2"></i>
+                                                Author Account
+                                            </label>
+                                            @include('partials.authors.dropdown',['allfield'=>'None','selected'=>$user->author_id])
+                                    </div>
+                                    </div>
 
 
                             </div>

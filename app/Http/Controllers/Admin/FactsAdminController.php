@@ -23,7 +23,6 @@ class FactsAdminController extends Controller
         return view('admin.facts.index',$data);
     }
 
-  
     public function store(Request $request){
 
         $request->validate([
@@ -37,13 +36,13 @@ class FactsAdminController extends Controller
         if($saved):
             $data = ['message'=>'Fact saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         if($request->ajax()){
             return response($data,200);
         }
-        
+
         return back()->with($data);
     }
 
@@ -53,5 +52,5 @@ class FactsAdminController extends Controller
     }
 
 
-  
+
 }

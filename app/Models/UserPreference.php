@@ -8,4 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class UserPreference extends Model
 {
     use HasFactory;
+
+    public function subtheme(){
+        return $this->belongsTo(SubThemeticArea::class,"subtheme_id","id");
+    }
 }

@@ -32,7 +32,7 @@
                             <div class="article_body_wrap">
                                 <h2 class="post-title">{!! $record->title !!}</h2>
                                 <h6 class="text-muted"><i class="fa fa-map-pin"></i> {{$record->country->name}}</h6>
-                                <h5> {{ $record->sub_category->category->category_name }}</h5>
+                                <h5> {{ @$record->sub_category->category->category_name }}</h5>
                                  
                                
                                 <p>{!! $record->description !!}</p>

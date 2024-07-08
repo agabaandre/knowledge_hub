@@ -24,5 +24,5 @@ class ThemesController extends Controller
         $data['subthemes'] = $this->themesRepo->get_subthemes($request);
         return view('themes.subthemes',$data);
     }
-    
+
 }

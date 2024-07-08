@@ -4,6 +4,10 @@
 
 <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet"/>
 
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
+    @include('partials.tour.css')
+@endif
+
 <style>
 
 .spotlight:after {
@@ -21,13 +25,17 @@
     @include('home.partials.featured')
     @include('home.partials.top_searches')
     @include('home.partials.top_authors')
-    @include('home.partials.subscription')
+    {{-- @include('home.partials.subscription') --}}
 
 @endsection
 
 @section('scripts')
 
 @include('common.select2')
+
+@if(!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
+    @include('partials.tour.js')
+@endif
 
 <script>
 var showing = false;

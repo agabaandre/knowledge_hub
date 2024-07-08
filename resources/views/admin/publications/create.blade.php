@@ -1,8 +1,28 @@
 <!--  Extra Large modal example -->
 @extends('admin.layouts.main')
 
+@section('styles')
+  <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
+  @include('account.partials.wizard_res')
+@endsection
+  
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">New Public Health Resource</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">New Public Health Resource</li>
+        </ol>
+    </div>
+</div>
 <div class="row">
+
+@php
+//dd($publication->accessgroups);
+@endphp
+
+
 
     <div class="card col-lg-12">
         <div class="card-header text-left">
@@ -28,132 +48,23 @@
                 </div>
                 <!-- end toast -->
             </div>
+            <div class="container">
+            @if(current_user()->author_id)
             <form action="{{ url('admin/publications/save') }}" id='publications' class='publications'>
                 @csrf
-                <input type="hidden" value="{{ form_edit('id',$publication,'id') }}" name="id" />
-            <div class="modal-body">
-               <div class="row">
+            <input type="hidden" value="{{ form_edit('id',$publication,'id') }}" name="id" />
 
-                    <div class="col-md-6">
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="description">Publication Title</label>
-                                <textarea placeholder="Title" rows="6" class="form-control summernote-sm" id="title" 
-                                name="title" 
-                                required>{{ form_edit('title',$publication,'title') }}</textarea>
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="description">Publication Description</label>
-                                <textarea id="publication_description" placeholder="Descripion" class="form-control summernote" name="description" style="min-height: 400px;">{{ form_edit('description',$publication,'description') }}</textarea>
-                            </div>
-                        </div>
-
-                    </div>
-                    <div class="col-md-6">
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Source</label>
-                                @include('partials.authors.dropdown',['field'=>'author','required'=>'required', 'selected'=>form_edit('author',$publication,'author_id')])
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Sub Theme</label>
-                                @include('partials.publications.subtheme_dropdown',['field'=>'sub_theme','required'=>'required','selected'=>form_edit('sub_theme',$publication,'sub_thematic_area_id')])
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <!-- Section Label -->
-                            <label class="form-label mb-3" for="publication">Publication Document Type</label>
-                            <div class="mb-3">
-                                <label class="form-check-inline">
-                                    <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
-                                </label>
-                                <label class="form-check-inline">
-                                    <input type="radio" name="upload_type" value="link" class="form-check-input">External Link
-                                </label>
-
-                                <div id="file-input">
-                                    <!-- <label class="form-label" for="publication">Publication Doc</label> -->
-                                    <input placeholder="Attach publication document" type="file" name="files" class="form-control" multiple>
-                                </div>
-
-                                <div id="link-input" style="display:none;">
-                                    <!-- <label class="form-label" for="publication">Publication URL Link</label> -->
-                                    <input placeholder="Add publication link" type="text" name="link" class="form-control">
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">File Type</label>
-                                @include('partials.publications.filetype_dropdown',['field'=>'file_type','required'=>'required','selected'=>form_edit('file_type',$publication,'file_type_id')])
-                            </div>
-                        </div>
-
-                        <div class="col-md-6">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">File Category</label>
-                                @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
-                                'selected'=>(@$row->publication_catgory_id)?$row->publication_catgory_id:''])
-                            </div>
-                        </div>
-                     
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Search Tags</label>
-                                @include('partials.tags.dropdown',['field'=>'tags[]','selected'=>form_edit('tags',$publication,'tag_ids')])
-                            </div>
-                        </div>
-
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Geographical Coverage</label>
-                                @include('partials.publications.area_dropdown',['field'=>'geo_area_id','required'=>'required','selected'=>form_edit('geo_area_id',$publication,'geographical_coverage_id')])
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Cover Image</label>
-                                <div class="custom-file">
-                                    <input type="file" class="form-control" name="cover" id="">
-
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-12">
-                            <div class="mb-3">
-                                <label class="form-label" for="publication">Status</label>
-                                <select class="form-control select2" name="is_active" required>
-                                    <option value="" selected disabled>Choose</option>
-                                    <option value="Active" {{ (form_edit('is_active',$publication,'is_active')=='Active')?'selected':''}}>Active</option>
-                                    <option value="In-Active" {{ (form_edit('is_active',$publication,'is_active')=='In-Active')?'selected':''}}>Inactive</option>
-
-                                </select>
-                            </div>
-                        </div>
-
-                        <!-- <div  class="col-md-4"> -->
-                        <!-- </div> -->
-                    </div>
-
-                </div>
-            </div>
-            <div class="modal-footer">
-
-                <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-primary" type="submit">Save Record</button>
-            </div>
+            @include('account.wizard',['row'=>$publication])
 
             </form>
+            @else
+
+            <div class="alert alert-danger">
+                <p>No Author Account is associated to the logged in account.</p>
+            </div>
+
+            @endif
+            </div>
 
         </div><!-- /.modal-content -->
     </div><!-- /.modal-dialog -->
@@ -163,7 +74,12 @@
 
 @section('scripts')
 
+    @include('common.select2')
+    @include('account.partials.create_js')
+    @include('account.partials.wizard_js')
+
 <script>
+
     $('input[name="upload_type"]').on('change', function() {
         if ($(this).val() == 'upload') {
             $('#file-input').show();

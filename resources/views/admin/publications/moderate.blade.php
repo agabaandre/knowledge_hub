@@ -1,12 +1,21 @@
 @extends('admin.layouts.main')
 @section('content')
+<div class="page-header">
+    <h1 class="page-title">Moderate Comments</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Moderate Comments</li>
+        </ol>
+    </div>
+</div>
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <div class="card-title">
-                        <h5>Publication Comments Moderation</h5>
+                        
                          <hr>
                     </div>
                     <div class="card-tools text-right">
@@ -19,7 +28,7 @@
 
 
                             <!-- if no publications -->
-                            @if(count($publications)==0)
+                            @if(count($publications) == 0)
                                 <div class="card text-center" style="margin: 0 auto;">
                                     <div class="card-body">
                                         <i class="fas fa-exclamation-triangle fa-5x greyed-out-icon mb-3" style="color: #BCBCBC"></i>

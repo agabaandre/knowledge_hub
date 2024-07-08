@@ -9,11 +9,16 @@ class FactsRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $facts = Fact::paginate($rows_count);
+        $facts = Fact::query();
 
-        return $facts;
+        if($request->term) {
+            $facts->where('fact_title', 'like', '%'. $request->term. '%');
+            $facts->orWhere('fact_summary', 'like', '%'. $request->term. '%');
+        }
+
+        return $facts->paginate($rows_count);
     }
-    
+
     public function save(Request $request){
 
         $fact = ($request->id)?Fact::find($request->id):new Fact();
