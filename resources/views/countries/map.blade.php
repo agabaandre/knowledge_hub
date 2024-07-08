@@ -9,25 +9,26 @@
         <g id="admin0" > 
           @foreach($countries as $country)
         @if($country->svg_path)
-        <path class="st0 our-member"
-        title="{{$country->name}}" 
-        id="{{$country->id}}"
-        onmouseleave="$('.popover').hide();"  
-        data-info='<div class="row g-0">
-          <div class="col-md-4 px-0">
-            <img width="100px" src="{{ asset('assets/img/flags/' . @$country->flag) }}" class="img-fluid rounded-start" alt="{{$country->name}}">
-          </div>
-          <div class="col-md-8">
-            <div class="card-body">
-            <h5 class="card-title">{{$country->name}}, {{$country->region->region_name}}</h5>
-            <p class="card-text">{{$country->resources}} Resources Published, <a class="btn btn-sm btn-dark text-white" href="{{ url('countries/details')}}?state={{$country->id}}">View Resources</a></p>
-            </div>
-          </div>
-          </div>'
-        d="{{$country->svg_path}}">
-        <desc id="desc-{{$country->id}}">{{$country->name}}</desc>
-        </path>
-    @endif
+      <path class="st0 our-member"
+      title="{{$country->name}}" 
+      id="{{$country->id}}"
+      onmouseleave="$('.popover').hide();" 
+       onclick="window.location.href='{{ url('countries/details')}}?state={{$country->id}}'" 
+      data-info='<div class="row g-0">
+      <div class="col-md-4 px-0">
+      <img width="100px" src="{{ asset('assets/img/flags/' . @$country->flag) }}" class="img-fluid rounded-start" alt="{{$country->name}}">
+      </div>
+      <div class="col-md-8">
+      <div class="card-body">
+      <h5 class="card-title">{{$country->name}}, {{$country->region->region_name}}</h5>
+      <p class="card-text">{{$country->resources}} Resources Published</p> <small class="text-dark fw-bold">Click for details</small>
+      </div>
+      </div>
+      </div>'
+      d="{{$country->svg_path}}">
+      <desc id="desc-{{$country->id}}">{{$country->name}}</desc>
+      </path>
+      @endif
       @endforeach
         </g>
       
