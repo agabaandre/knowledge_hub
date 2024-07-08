@@ -1,13 +1,14 @@
 	
 .spotlight {
   position: relative;
-  background-color: #28B661;
+  background-color: var(--theme-secondary);
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: column;
   padding: 120px 50px!important;
   padding-top: 70px!important;
+  background-blend-mode: overlay;
 }
 
 .spotlight:after {

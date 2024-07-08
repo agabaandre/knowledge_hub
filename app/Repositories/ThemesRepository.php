@@ -58,6 +58,7 @@ class ThemesRepository{
     }
 
     public function save_subtheme(Request $request){
+
         $theme = new SubThemeticArea();
         $theme->description = $request->name;
         $theme->icon = $request->icon;

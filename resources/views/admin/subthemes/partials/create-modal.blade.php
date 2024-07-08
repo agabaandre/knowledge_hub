@@ -16,8 +16,8 @@
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Thematic Area</label>
-              <input type="text" placeholder="Thematic Area" class="form-control" id="name" name="name" required>
+              <label class="form-label" for="name">Sub Thematic Area</label>
+              <input type="text" placeholder="Sub Thematic Area" class="form-control" id="name" name="name" required>
             </div>
           </div>
           <div class="col-md-12">
