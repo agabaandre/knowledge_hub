@@ -13,29 +13,29 @@
         <!-- row -->
         <div class="row">
 
-            <div class="col-lg-8  states-map">
+            <div class="col-lg-8 col-md-8 col-xs-12 states-map">
                 @include('countries.map')
             </div>
-            <div class="col-lg-4">
+            <div class="col-lg-4 col-md-4 col-xs-12">
                 <div class="row align-items-center justify-content-center states-tiles">
 
                     <div id="accordion">
                         @foreach($regions as $region)
                         @php
 
-                        $region_countries = array_filter(
-                        $countries->toArray(),
-                        function ($cnt) use ($region) {
-                        return $cnt['region_id'] == $region->id;
-                        }
-                        );
+    $region_countries = array_filter(
+        $countries->toArray(),
+        function ($cnt) use ($region) {
+            return $cnt['region_id'] == $region->id;
+        }
+    );
 
-                        $resources = array_column($region_countries, 'resources');
-                        $regionalResources = array_sum($resources);
+    $resources = array_column($region_countries, 'resources');
+    $regionalResources = array_sum($resources);
 
                         @endphp
                         <div class="row justify-content-center">
-                            <div class="card col-lg-12">
+                            <div class="card  mb-1" style="min-width:500px;">
                                 <div class="card-header bg-white link" id="heading{{$region->id}}">
                                     <h5 class="mb-0">
                                         <a href="#" data-toggle="collapse" data-target="#collapse{{$region->id}}"
@@ -55,7 +55,7 @@
                                             @foreach($region_countries as $country)
 
                                             @php
-                                            $country = (Object) $country;
+        $country = (Object) $country;
                                             @endphp
 
                                             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12 "
