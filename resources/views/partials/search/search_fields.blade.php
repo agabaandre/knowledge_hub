@@ -7,7 +7,7 @@
         </div>
 
         <div class="col-md-4">
-            <label class="text-bold"><small>Country</small></label>
+            <label class="text-bold"><small>Member State</small></label>
             @include('partials.countries.dropdown', ['class' => 'country select2', 'selected' => @$search->country_id, 'allfield' => 'All'])
         </div>
 
