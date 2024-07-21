@@ -38,6 +38,7 @@ use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
+use App\Http\Controllers\AIController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -64,7 +65,7 @@ use App\Http\Controllers\ToolsController;
 
 Auth::routes(['verify' => true]);
 
-Route::get('/test', [TestController::class, 'index'])->name('test');
+Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
@@ -460,3 +461,10 @@ Route::group(["prefix" => "dashboards"], function () {
     Route::get("/kpi",  [GraphController::class, 'kpi_comparison']);
     Route::get("/kpi_comparison_data",  [GraphController::class, 'kpi_comparison_data']);
 });
+
+Route::group(["prefix" => "ai"], function () {
+
+    Route::get("/summarise",  [AIController::class, 'summarise']);
+    Route::get("/compare",  [GraphController::class, 'compare']);
+});
+

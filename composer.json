@@ -19,6 +19,7 @@
         "predis/predis": "^2.2",
         "spatie/laravel-ignition": "^1.6",
         "spatie/laravel-permission": "^5.10",
+        "spatie/pdf-to-text": "^1.52",
         "tymon/jwt-auth": "*"
     },
     "require-dev": {

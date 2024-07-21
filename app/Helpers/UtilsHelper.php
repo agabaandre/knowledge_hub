@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use PHPMailer\PHPMailer\PHPMailer;  
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Cache;
+use Spatie\PdfToText\Pdf;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -305,5 +306,16 @@ function get_publication_state($approved,$rejected){
     if(!$approved && ! $rejected)
         return "Pending Approval";
 }
+
+
+function pdfToText($pdf_url){
+
+
+    $pdf = new Pdf($pdf_url); // specify the path if not in your PATH environment variable
+    $text = $pdf->text();
+    return $text;
+
+}
+
 
 ?>

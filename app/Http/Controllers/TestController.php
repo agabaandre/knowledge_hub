@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Jobs\SendMailJob;
 use App\Models\ApiClient;
+use App\Models\Publication;
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
+use App\Services\AIModel;
 
 class TestController extends Controller
 {
@@ -28,6 +30,19 @@ class TestController extends Controller
             // $credentials =['api_key'=>$client->api_key,'api_secret'=>base64_encode($client->api_secret)];
 
             // return response(json_encode($credentials));
+    }
+
+    public function chat(AIModel $aiModel){
+  
+        $pub = Publication::find(24);
+        $pub2 = Publication::find(23);
+
+        $response = $aiModel->summarize($pub->description);
+        dd($response->choices[0]->message->content);
+
+        //$response = $aiModel->compare($pub->description,$pub2->description);
+        //dd($response->choices[0]->message->content);
+
     }
 
   

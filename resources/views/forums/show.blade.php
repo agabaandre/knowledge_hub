@@ -65,6 +65,9 @@
 </div>
                     
 </section>
+
+@include('common.ai-summary')
+
 @endsection
 
 @section('scripts')

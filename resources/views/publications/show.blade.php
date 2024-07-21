@@ -10,6 +10,7 @@
 		endif;
 	@endphp
 
+
     <!-- ======================= Publication Info ======================== -->
 	<div class="bg-light rounded py-5" style="background-image: url({{ asset('frontend/img/dots.png')}}); background-repeat:repeat-x; background-size:contain;">
 		<div class="container">
@@ -42,6 +43,12 @@
 									<span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i class="lni lni-heart mr-1"></i> {{ $likes }} User{{ ($likes>1)?"s":"" }} liked this</span>
 									@endif
 								</div>
+
+								<div class="jbl_info01 mt-3" >
+									<a  onclick="summarise({{ $publication->id }})"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="min-width:100%; color:white;">
+									  <i class="fa fa-robot"></i> Summarise this for me</a>
+								</div>
+	  
 							</div>
 						</div>
 						
@@ -67,6 +74,8 @@
 								<i class="fa fa-file"></i> Submit a Summary</a>
 								</div>
 							  @endauth
+
+							 
 							</div>
 						</div>
 					</div>
@@ -257,7 +266,6 @@
 								@endforeach
 							</ul>
 						@endif
-
 						
 				        @endif
 
@@ -301,5 +309,7 @@
 			</div>
 		</div>
 	</section>
+
+	@include('common.ai-summary')
 
     @endsection

@@ -2,6 +2,9 @@
 
 namespace App\Providers;
 
+use App;
+use App\Services\AIModel;
+use App\Services\ChatGPTService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
@@ -19,6 +22,10 @@ class AppServiceProvider extends ServiceProvider
            // $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             //$this->app->register(TelescopeServiceProvider::class);
         }
+
+        App::singleton(AIModel::class, function ($app) {
+            return new ChatGPTService();
+        });
     }
 
     /**
@@ -30,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
     {
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
+
+       
+        
         
     }
 }

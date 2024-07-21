@@ -1,7 +1,6 @@
 <?php
 
 use App\Jobs\AuditTrailJob;
-use App\Models\AuditTrail;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Role;

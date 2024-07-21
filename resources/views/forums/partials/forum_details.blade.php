@@ -13,6 +13,10 @@
                     <li><i class="lni lni-alarm-clock mr-1"></i> {{ time_ago($forum->created_at) }}</li>
                     <li><a href="#"><span class="icons"><i class="ti-comment-alt"></i> </span>{{ count($forum->comments) }} Comments</a></li>
                 </ul>
+                <div class="col-lg-6 col-md-6 col-sm-12" >
+                    <a  onclick="summarise({{ $forum->id }},1)"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="min-width:100%; color:white;">
+                      <i class="fa fa-robot"></i> Summarise this for me</a>
+                </div>
             </div>
 
                 <p>{!! $forum->forum_description !!}</p>
