@@ -44,8 +44,8 @@
 									@endif
 								</div>
 
-								<div class="jbl_info01 mt-3" >
-									<a  onclick="summarise({{ $publication->id }})"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="min-width:100%; color:white;">
+								<div class="jbl_info01 mt-3 col-sm-12 col-lg-4" >
+									<a  onclick="summarise({{ $publication->id }})"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="color:white;">
 									  <i class="fa fa-robot"></i> Summarise this for me</a>
 								</div>
 	  
