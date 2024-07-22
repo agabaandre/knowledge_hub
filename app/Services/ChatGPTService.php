@@ -5,8 +5,7 @@ class ChatGPTService implements AIModel{
 
     function prompt($question=null){
 
-    $api_key = config("OPEN_API_KEY");
-    $endpoint = 'https://api.openai.com/v1/chat/completions';
+    $api_key = config("OPEN_API_KEY");$endpoint = 'https://api.openai.com/v1/chat/completions';
 
     $headers = [
         'Content-Type: application/json',
