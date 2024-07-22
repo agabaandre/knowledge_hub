@@ -28,7 +28,11 @@ class AIController extends Controller
         endif;
 
         $response = $this->aiModel->summarize($prompt);
-        return ['content'=>$response->choices[0]->message->content];
+
+        if(isset($response->choices))
+            return ['content'=>$response->choices[0]->message->content];
+
+        return ['content'=>"<div class='alert alert-danger'><p>Failure: ".$response->error->message.'</p></div>'];
     }
 
 

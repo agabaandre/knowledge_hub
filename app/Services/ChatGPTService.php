@@ -1,11 +1,13 @@
 <?php
 namespace App\Services;
 
+use Illuminate\Support\Facades\Log;
+
 class ChatGPTService implements AIModel{
 
     function prompt($question=null){
 
-    $api_key  = env("OPEN_API_KEY");
+    $api_key  = config("ai.open_api_key");
     $endpoint = 'https://api.openai.com/v1/chat/completions';
 
     $headers = [
@@ -74,6 +76,8 @@ class ChatGPTService implements AIModel{
     
         // Close cURL session
         curl_close($ch);
+
+        Log::info("====RESPONSE::====/n ".$response);
     
         return json_decode($response);
     }
