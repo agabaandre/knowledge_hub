@@ -13,7 +13,6 @@ class ChatGPTService implements AIModel{
         "Authorization: Bearer $api_key"
     ];
 
-   
     $prompt =  [
         ["role"=> "user", "content"=>"
         You are to act as a high accuracy content development and reveiw expert, providing summarization, comparison and enrichment of content given to you. Make sure you use only factual data to guide and engage. 
