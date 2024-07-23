@@ -182,7 +182,8 @@ return [
         App\Providers\HelperServiceProvider::class,
         App\Providers\ViewComposerServiceProvider::class,
 
-        Mckenziearts\Notify\LaravelNotifyServiceProvider::class
+        Mckenziearts\Notify\LaravelNotifyServiceProvider::class,
+        Maatwebsite\Excel\ExcelServiceProvider::class,
 
     ],
 
@@ -240,9 +241,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Debugbar' => Barryvdh\Debugbar\Facades\Debugbar::class,
         'ReCaptcha' => Biscolab\ReCaptcha\Facades\ReCaptcha::class,
-
         'Redis' => Illuminate\Support\Facades\Redis::class,
-
+        'Excel' => Maatwebsite\Excel\Facades\Excel::class,
     ],
 
 ];

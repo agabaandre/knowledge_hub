@@ -33,6 +33,8 @@ class TestController extends Controller
     }
 
     public function chat(AIModel $aiModel){
+
+        dd(pdfToText("http://library.health.go.ug/sites/default/files/resources/Selected%20Practice%20recommendation%20for%20the%20preventions%20of%20Contraceptive%20use.pdf"));
   
         $pub = Publication::find(24);
         $pub2 = Publication::find(23);

@@ -128,5 +128,18 @@ class ResourcesController extends Controller
         return $this->publicationsRepo->reject_comment($request->id);
     }
 
+    public function import(Request $request){
+
+        $saved = $this->publicationsRepo->import($request);
+
+        if($saved):
+            $data = ['message'=>'Resources imported successfully','status'=>'success','data'=>$saved];
+        else:
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+        endif;
+
+        return back()->with($data);
+        
+    }
   
 }

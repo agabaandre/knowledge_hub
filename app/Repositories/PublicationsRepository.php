@@ -23,6 +23,8 @@ use App\Models\User;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Imports\PublicationImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class PublicationsRepository extends SharedRepo{
 
@@ -30,7 +32,7 @@ class PublicationsRepository extends SharedRepo{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+        $pubs = Publication::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
             ->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits):
@@ -606,8 +608,22 @@ public function save_content_request(Request $request){
    $record->updated_at= Carbon::now();
 
    $record->save();
-
    return $record;
+}
+
+public function import(Request $request){
+
+    if($request->hasFile('file')):
+
+        Excel::import( new PublicationImport($request->sub_theme), request()->file('file'));
+        return true;
+
+    else:
+
+        dd("No file");
+
+    endif;
+
 }
 
 

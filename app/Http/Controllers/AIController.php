@@ -21,10 +21,15 @@ class AIController extends Controller
   
         if(intval($request->type) !== 1):
             $resource = Publication::find($request->resource_id);
-            $prompt = "title: $resource->title,  body: $resource->description  ,comments: ".json_encode($resource->comments->toArray());
+            $prompt = "title: $resource->title,  
+            body: $resource->description  ,
+            attached_content: ". truncate(pdfToText($resource->publication),10000).", 
+            comments: ".json_encode($resource->comments->toArray());
         else:
             $resource = Forum::find($request->resource_id);
-            $prompt = "forum title: $resource->forum_title, forum content: $resource->forum_description , forum comments: ".json_encode($resource->comments->toArray());
+            $prompt = "forum title: $resource->forum_title,
+             forum content: $resource->forum_description ,  
+             forum comments: ".json_encode($resource->comments->toArray());
         endif;
 
         $response = $this->aiModel->summarize($prompt);

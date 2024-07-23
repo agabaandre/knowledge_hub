@@ -27,6 +27,11 @@
     <div class="card col-lg-12">
         <div class="card-header text-left">
             <h4 class="card-title float-left">{{ $title ?? '' }}</h4>
+             @if(current_user()->author_id)
+                <a href="#import-modal" data-toggle="modal" class="btn btn-dark"><i class="fa fa-upload"></i> Import Resources</a>
+                @include('admin.publications.partials.import-modal',['action'=>url('admin/publications/import')])
+             @endif
+             
              <hr>
         </div>
 
@@ -50,6 +55,7 @@
             </div>
             <div class="container">
             @if(current_user()->author_id)
+            
             <form action="{{ url('admin/publications/save') }}" id='publications' class='publications'>
                 @csrf
             <input type="hidden" value="{{ form_edit('id',$publication,'id') }}" name="id" />

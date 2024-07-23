@@ -10,7 +10,8 @@ class Publication extends Model
     use HasFactory;
 
     protected $table = "publication";
-    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments','tag_ids'];
+    protected $guarded =[];
+    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments','tag_ids','image_url'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -61,7 +62,6 @@ class Publication extends Model
     public function getValueAttribute(){
         return substr($this->title,0,100);
     }
-
 
     public function comments(){
         return $this->hasMany(PublicationComment::class);
@@ -145,6 +145,12 @@ class Publication extends Model
 
        return  $this->belongsTo(Country::class,"geographical_coverage_id","id");
     }
+
+    public function getImageUrlAttribute(){
+        return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
+    }
+
+    
 
 
 }

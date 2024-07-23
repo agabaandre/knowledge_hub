@@ -188,6 +188,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/summaries", [ResourcesController::class, 'summaries']);
         Route::get("/summary", [ResourcesController::class, 'summary']);
         Route::post("/summary_approval", [ResourcesController::class, 'summary_approval']);
+        Route::post("/import", [ResourcesController::class, 'import']);
     });
 
     //geo areas

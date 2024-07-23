@@ -22,7 +22,7 @@
 					<div class="jbd-01 d-flex align-items-center justify-content-between">
 						<div class="jbd-flex d-flex align-items-center justify-content-start">
 							<div class="jbd-01-thumb">
-								<img src="{{ asset('uploads/publications/'.$publication->cover)}}" class="img-fluid" width="100" alt="" />
+								<img src="{{$publication->image_url}}" class="img-fluid" width="100" alt="" />
 							</div>
 							<div class="jbd-01-caption pl-3">
 								<div class="tbd-title">
@@ -103,7 +103,7 @@
 								@if($publication->is_video)
 									<iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
 								@else
-									<img src="{{ $image_link }}" class="rounded" width="500px"/>
+									<img src="{{ $publication->image_url }}" class="rounded" width="500px"/>
 								@endif
 								<br>
 								<h5 class="ft-medium fs-md">Description</h5>

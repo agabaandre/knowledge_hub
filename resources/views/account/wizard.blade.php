@@ -1,7 +1,7 @@
 
 @php
       if(@$row && @$row->cover):
-          $image_link = storage_link('uploads/publications/'.$row->cover);
+          $image_link = $row->image_url;
       else:
           $image_link = asset('assets/images/placeholder.jpg');
       endif;

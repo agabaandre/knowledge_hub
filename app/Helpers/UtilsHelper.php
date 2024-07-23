@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\URL;
 use PHPMailer\PHPMailer\PHPMailer;  
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Cache;
-use Spatie\PdfToText\Pdf;
+use Smalot\PdfParser\Parser;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -310,10 +310,20 @@ function get_publication_state($approved,$rejected){
 
 function pdfToText($pdf_url){
 
+if(strpos($pdf_url,'.pdf')== false)
+ return '';
 
-    $pdf = new Pdf($pdf_url); // specify the path if not in your PATH environment variable
-    $text = $pdf->text();
-    return $text;
+// Create a new instance of the PDF parser
+$parser = new Parser();
+
+// Parse the PDF file
+$pdf = $parser->parseFile($pdf_url);
+
+// Extract text from the PDF
+$text = $pdf->getText();
+
+// Output the extracted text
+return htmlspecialchars($text);
 
 }
 
