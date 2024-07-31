@@ -50,6 +50,7 @@
                                 @include('common.lang')
                             </div>
                         </div>
+                        <input type="hidden" name="id" value="{{$user->id}}" />
                     </div>
                     <div class="form-group ">
                         <div class="row">
