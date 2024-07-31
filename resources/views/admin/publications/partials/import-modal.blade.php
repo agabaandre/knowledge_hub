@@ -14,6 +14,7 @@
 
                 <div class="row">
 
+                    <?php /*
                     <div class="col-md-6">
                         <div class="mb-3">
                             <label class="form-label" for="publication">Thematic Area</label>
@@ -28,6 +29,7 @@
                             'selected'=>(@$row->sub_thematic_area_id)?$row->sub_thematic_area_id:''])
                         </div>
                    </div>
+                   */?>
 
                    <div class="col-md-12">
 

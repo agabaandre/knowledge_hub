@@ -102,8 +102,12 @@ class UsersRepository {
         $user->email      = $request->email;
         $user->langauge = $request->langauge;
         $user->name  = $request->first_name." ".$request->last_name;
+       
         if($request->phone_number)
         $user->phone_number      = $request->phone_number;
+
+        if($request->level_id)
+        $user->access_level_id = $request->level_id;
 
         if($request->preferences){
 

@@ -60,6 +60,7 @@
                                     <th>{{ __('general.email') }}</th>
                                     <th>{{ __('general.phone') }}</th>
                                     <th>{{ __('general.status') }}</th>
+                                    <th>{{ __('Country') }}</th>
                                     <th>{{ __('auth.role') }}</th>
                                     <th></th>
                                 </tr>
@@ -84,6 +85,7 @@
                                     <td>{{ $user->email }}</td>
                                     <td>{{ $user->phone_number ?? '' }}</td>
                                     <td><b class="badge badge-dark">{{ $statuses[$user->status] }}</b></td>
+                                    <td>{{ $user->country_name }}</td>
                                     <td>{{ ($userRole)?(strtoupper((@$userRole->name)?$userRole->name:'N/A')):'' }}</td>
                                     <td class="text-center">
                                              @include('admin.permissions.partials.user_row_dropdown')

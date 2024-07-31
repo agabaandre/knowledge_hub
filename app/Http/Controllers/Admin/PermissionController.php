@@ -52,11 +52,15 @@ class PermissionController extends Controller
        
       
         $users = DB::table('users')
+                ->leftJoin('country', 'users.country_id', '=', 'country.id')
+                ->select('users.*', 'country.name as country_name')
                 ->when($phone, function ($query, $phone) {
                     return $query->where('users.mobile','like',$phone.'%');
                 })
                 ->when($name, function ($query, $name) {
-                    return $query->where('users.name','like', $name.'%');
+                    return $query->where('users.name','like', $name.'%')
+                    ->orWhere('users.email','like', $name.'%')
+                    ->where('users.mobile','like',$name.'%');
                 })
                 ->when($country_id, function ($query, $country_id) {
                     return $query->where('users.country_id',$country_id);
@@ -345,6 +349,7 @@ class PermissionController extends Controller
 
         $data['user']        = User::find($request->user) ?? current_user();
         $data['preferences'] = [];
+        $data['access_groups'] = AccessLevel::all();
 
         foreach(current_user()->preferences as $pref){
             $data['preferences'][] = $pref->subtheme_id;

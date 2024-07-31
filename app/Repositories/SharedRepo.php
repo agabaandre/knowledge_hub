@@ -22,6 +22,8 @@ class SharedRepo{
             $table = ($use_query_builder)?$query->from : $query->getModel()->getTable();
             $use_user_id = false;
 
+            //ssdd($table);
+
             $country_col ="country_id";
 
             if($table =="author"):
@@ -33,6 +35,9 @@ class SharedRepo{
                $use_country_id = true; //directly use country id
              elseif($table =="country"):
                 $country_col ="id";
+             elseif($table =="publication"):
+                $use_country_id = true;
+                $country_col ="geographical_coverage_id";
              endif;
 
            
@@ -40,7 +45,7 @@ class SharedRepo{
              // get for own country
             
                 if($use_country_id && states_enabled()):
-                    $query->where($country_col,$user->country_id);
+                    $query->whereIn($country_col,$user->country_id);
                 elseif($use_user_id):
                     $authors = $this->get_country_users($user->country_id);
                     $query->whereIn($col,$authors);
@@ -53,7 +58,8 @@ class SharedRepo{
     
              
                 if($use_country_id):
-                    $query->where($country_col,$user->country_id);
+                    $rcc_countries = $this->get_rcc_countries();
+                    $query->whereIn($country_col,$rcc_countries);
                 elseif($use_user_id):
                     $authors = $this->get_country_users($user->country_id);
                     $query->whereIn($col,$authors);
@@ -75,9 +81,9 @@ class SharedRepo{
     
 
     public function get_country_authors($id,$is_region=false){
-
+        $user = current_user();
         if( is_array($is_region) && states_enabled()):
-            $countries = Country::where('region_id',$id->region_id)->get()->pluck('id');
+            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
             return User::whereIn('country_id',$countries)->get()->pluck('author_id');
         else:
             return User::where('country_id',$id)->get()->pluck('author_id');
@@ -85,12 +91,25 @@ class SharedRepo{
     }
 
     private function get_country_users($id,$is_region=false){
-
+        $user = current_user();
         if( is_array($is_region) && states_enabled()):
-            $countries = Country::where('region_id',$id->region_id)->get()->pluck('id');
+            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
             return User::whereIn('country_id',$countries)->get()->pluck('id');
         else:
             return User::where('country_id',$id)->get()->pluck('id');
+        endif;
+    }
+    
+
+    private function get_rcc_countries(){
+
+        $user = current_user();
+
+        if(states_enabled()):
+            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
+            return $countries;
+        else:
+            return Country::where('id',$user->country_id)->get()->pluck('id');
         endif;
     }
     

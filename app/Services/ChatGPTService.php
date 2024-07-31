@@ -25,7 +25,7 @@ class ChatGPTService implements AIModel{
 
     $prompt[] = ["role"=>"user","content"=>$question];
 
-    Log::info("PROMPT: ".json_encode($question));
+    //Log::info("PROMPT: ".json_encode($question));
     
     $payload = [
         'messages'=> $prompt,

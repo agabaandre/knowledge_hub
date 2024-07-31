@@ -2,7 +2,6 @@
     <div class="col-md-5 col-lg-5 col-xl-5 col-xs-12 col-md-pull-2">
         
         <div class="card">
-            current_user()->langauge
             <div class="card-header pb-0 border-bottom">
                 <div class="item-user pro-user">
                     <h4 class="pro-user-username tx-15 pt-2 mt-1 mb-4">
@@ -152,6 +151,26 @@
                             </div>
                         </div>
                     </div>
+                    @can('manage_rccs')
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Access Level</label>
+                            </div>
+                            <div class="col-md-9">
+                                <select class="form-control js-example-basic-single select2" name="level_id" id="level_id" required >
+                                    @foreach ($access_groups as $group)
+                                        <option {{ ($user->access_level_id == $group->id)?'selected':''}} value="{{$group->id}}">
+                                            {{$group->level_name}}
+                                        </option>
+                                    @endforeach
+                                </select>
+									
+                            </div>
+                        </div>
+                    </div>
+                    @endcan
+                    
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">
@@ -180,10 +199,10 @@
                         </div>
                     </div>
             </div>
+
             <div class="card-footer text-right">
                 <button type="submit" class="btn btn-success waves-effect waves-light">Update Profile</button>
             </div>
-            
 
             </form>
         </div>

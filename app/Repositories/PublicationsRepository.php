@@ -615,7 +615,7 @@ public function import(Request $request){
 
     if($request->hasFile('file')):
 
-        Excel::import( new PublicationImport($request->sub_theme), request()->file('file'));
+        Excel::import( new PublicationImport(), request()->file('file'));
         return true;
 
     else:

@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App;
+use App\Repositories\SharedRepo;
 use App\Services\AIModel;
 use App\Services\ChatGPTService;
 use Illuminate\Pagination\Paginator;
@@ -25,6 +26,10 @@ class AppServiceProvider extends ServiceProvider
 
         App::singleton(AIModel::class, function ($app) {
             return new ChatGPTService();
+        });
+
+        $this->app->bind(SharedRepo::class, function ($app) {
+            return new SharedRepo();
         });
     }
 
