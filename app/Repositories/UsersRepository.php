@@ -18,7 +18,8 @@ class UsersRepository {
 
     public function save(Request $request){
 
-        $user = new User();
+        $user = ($request->id)?User::find($request->id):new User();
+        
         $user->name          = $request->firstname." ".$request->lastname;
         $user->first_name    = $request->firstname;
         $user->last_name      = $request->lastname;
@@ -95,7 +96,7 @@ class UsersRepository {
 
     public function update_profile(Request $request){
         
-        $user = User::find(current_user()->id);
+        $user = User::find($request->id);
 
         $user->first_name = $request->first_name;
         $user->last_name  = $request->last_name;
@@ -126,7 +127,7 @@ class UsersRepository {
 
         $user->update();
 
-        return $user->update();
+        return $user;
     }
 
     public function update_password(Request $request){
