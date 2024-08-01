@@ -82,6 +82,7 @@ class PublicationImport implements ToModel,WithHeadingRow
             'geographical_coverage_id' => current_user()->country_id,
             'file_type_id' => $file_type_id,
             'cover_is_exteranl' => 1,
+            'is_approved'=>1
         ]);
     }
 
