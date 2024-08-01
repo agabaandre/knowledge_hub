@@ -45,7 +45,7 @@ class PermissionController extends Controller
         $data['roles']  = Role::all();
         $data['levels'] = AccessLevel::all();
 
-        $name        = $request->term;
+        $name        = urldecode($request->term);
         $country_id  = $request->country_id;
         $phone       = $request->mobile;
         $count       = (!empty($request->count))?$request->count:20;
