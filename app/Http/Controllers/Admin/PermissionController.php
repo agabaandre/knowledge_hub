@@ -40,40 +40,39 @@ class PermissionController extends Controller
     /*
         Renders a list of all users
     */
-    public function users(Request $request){
-
-        $data['roles']  = Role::all();
+    public function users(Request $request)
+    {
+        $data['roles'] = Role::all();
         $data['levels'] = AccessLevel::all();
 
-        $name        = urldecode($request->term);
-        $country_id  = $request->country_id;
-        $phone       = $request->mobile;
-        $count       = (!empty($request->count))?$request->count:20;
-       
-      
+        $name = urldecode($request->term);
+        $country_id = $request->country_id;
+        $phone = $request->mobile;
+        $count = (!empty($request->count)) ? $request->count : 20;
+
         $users = DB::table('users')
-                ->leftJoin('country', 'users.country_id', '=', 'country.id')
-                ->select('users.*', 'country.name as country_name')
-                ->when($phone, function ($query, $phone) {
-                    return $query->where('users.mobile','like',$phone.'%');
-                })
-                ->when($name, function ($query, $name) {
-                    return $query->where('users.name','like', $name.'%')
-                    ->orWhere('users.email','like', $name.'%')
-                    ->where('users.phone_number','like',$name.'%');
-                })
-                ->when($country_id, function ($query, $country_id) {
-                    return $query->where('users.country_id',$country_id);
-                })
-                ->when(true,function($query){ //apply access filter
+            ->leftJoin('country', 'users.country_id', '=', 'country.id')
+            ->select('users.*', 'country.name as country_name')
+            ->when($phone, function ($query, $phone) {
+                return $query->where('users.mobile', 'like', $phone . '%');
+            })
+            ->when($name, function ($query, $name) {
+                return $query->where(function ($query) use ($name) {
+                    $query->where('users.name', 'like', $name . '%')
+                        ->orWhere('users.email', 'like', $name . '%')
+                        ->orWhere('users.phone_number', 'like', $name . '%');
+                });
+            })
+            ->when($country_id, function ($query, $country_id) {
+                return $query->where('users.country_id', $country_id);
+            })
+            ->when(true, function ($query) {
+                return $this->sharedRepo->access_filter($query, true, true);
+            })
+            ->orderBy('users.name', 'desc')
+            ->paginate($count);
 
-                    return $this->sharedRepo->access_filter($query,true,true);
-               
-                })
-                ->orderBy('users.id','desc')
-                ->paginate($count);
-
-        $users->appends($request->all())->links();
+        $users->appends($request->all());
 
         $data['users']  = $users;
 
