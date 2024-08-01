@@ -60,7 +60,7 @@ class PermissionController extends Controller
                 ->when($name, function ($query, $name) {
                     return $query->where('users.name','like', $name.'%')
                     ->orWhere('users.email','like', $name.'%')
-                    ->where('users.mobile','like',$name.'%');
+                    ->where('users.phone_number','like',$name.'%');
                 })
                 ->when($country_id, function ($query, $country_id) {
                     return $query->where('users.country_id',$country_id);
