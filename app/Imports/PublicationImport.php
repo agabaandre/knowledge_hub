@@ -44,7 +44,7 @@ class PublicationImport implements ToModel,WithHeadingRow
         'citation_link' => $row[10],
         'associated_authors' => $row[11],
         'sub_thematic_area_id' => $sub_theme_id,
-        'is_active' => 'InActive',
+        'is_active' => 'Active',
         'publication_catgory_id' => $pub_cat_id,
         'author_id' => current_user()->author_id,
         'geographical_coverage_id' => $member_state_id,
