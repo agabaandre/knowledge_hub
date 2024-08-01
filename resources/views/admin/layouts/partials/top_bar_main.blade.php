@@ -117,7 +117,7 @@
 				<a  class=""><img class="rounded-circle notranslate" src="{{user_profile_photo()}}" style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "><span>{{ ' '.ucwords(@current_user()->name) ?? '' }}</span></a>
 				<div class="dropdown-menu animated fadeInUp">
 					
-					<a class="dropdown-item" href="{{ route('home') }}"><i class="bx bx-link"></i> View Khub Website</a>
+					<a class="dropdown-item" href="{{ route('home') }}" target="_blank"><i class="bx bx-link"></i> View Khub Website</a>
 					<a class="dropdown-item" href="{{ url('permissions/profile') }}"><i class="bx bx-user-circle"></i> My Profile</a>
 					<a class="dropdown-item" href="{{ url('logout') }}"><i class="bx bx-log-out-circle"></i> Log Out</a>
 				</div>
