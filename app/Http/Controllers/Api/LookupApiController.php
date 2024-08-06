@@ -46,6 +46,53 @@ class LookupApiController extends ApiController
             ];
         }
 
+      /**
+        * @OA\Get(
+        * path="/api/lookup/themes",
+        * operationId="List Themes",
+        * tags={"List  File Types"},
+        * summary="List  File Types",
+        * description="Returns a list of Themes",
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function themes()
+        {
+            $file_types = $this->publicationsRepo->get_types();
+            return [
+                "status" => 200,
+                "data" => $file_types
+            ];
+        }
+
+      /**
+        * @OA\Get(
+        * path="/api/lookup/sub_themes",
+        * operationId="List Sub Themes",
+        * tags={"List Sub Themes"},
+        * summary="List Sub Themes",
+        * description="Returns a list of Sub Themes",
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+    
+        public function sub_themes()
+        {
+            $file_types = $this->publicationsRepo->get_types();
+            return [
+                "status" => 200,
+                "data" => $file_types
+            ];
+        }
+
     
 
 }
