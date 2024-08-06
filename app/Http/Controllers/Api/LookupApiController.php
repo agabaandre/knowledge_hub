@@ -10,7 +10,6 @@ use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
-use Illuminate\Http\Request;
 
 class LookupApiController extends ApiController
 {
