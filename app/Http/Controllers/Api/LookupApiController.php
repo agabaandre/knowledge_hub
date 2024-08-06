@@ -7,19 +7,22 @@ use Illuminate\Http\Request;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
+use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
+use Illuminate\Http\Request;
 
 class LookupApiController extends ApiController
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo){
+    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,ThemesRepository $themesRepo){
 
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
+        $this->themesRepo       = $themesRepo;
     }
 
 
@@ -60,12 +63,12 @@ class LookupApiController extends ApiController
         *       )
         * )
         */
-        public function themes()
+        public function themes(Request $request)
         {
-            $file_types = $this->publicationsRepo->get_types();
+            $themes = $this->themesRepo->get($request);
             return [
                 "status" => 200,
-                "data" => $file_types
+                "data" => $themes
             ];
         }
 
@@ -84,12 +87,12 @@ class LookupApiController extends ApiController
         * )
         */
     
-        public function sub_themes()
+        public function sub_themes(Request $request)
         {
-            $file_types = $this->publicationsRepo->get_types();
+            $sub_themes =  $this->themesRepo->get_subthemes($request);
             return [
                 "status" => 200,
-                "data" => $file_types
+                "data" => $sub_themes
             ];
         }
 
