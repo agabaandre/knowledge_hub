@@ -12,6 +12,10 @@
         {
             "url": "https://khub.africacdc.org/",
             "description": "Production server"
+        },
+        {
+            "url": "https://khub.africacdc.org/demo/",
+            "description": "Demo server"
         }
     ],
     "paths": {
