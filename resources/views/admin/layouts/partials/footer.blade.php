@@ -68,7 +68,7 @@
 <script src="{{  asset('assets/js/chart.flot.sampledata.js') }}"></script> -->
 
 <!-- Right-sidebar js -->
-<script src="{{  asset('assets/plugins/sidebar/sidebar.js') }}"></script>
+<!-- <script src="{{  asset('assets/plugins/sidebar/sidebar.js') }}"></script> -->
 <script src="{{  asset('assets/plugins/sidebar/sidebar-custom.js') }}"></script>
 
 <!-- Custom js -->
