@@ -60,7 +60,7 @@
                  <div class="col-md-6">
                   <div class="mb-3">
                       <label class="form-label" for="publication">Member State</label>
-                      @include('partials.countries.dropdown',['field'=>'geo_area_id','required'=>'required','class'=>'select2 theme',
+                      @include('partials.countries.dropdown',['field'=>'geo_area_id','required'=>'required','class'=>'theme',
                       'selected'=>(@$row->geographical_coverage_id)?$row->geographical_coverage_id:(old('geo_area_id') ?? current_user()->country_id)])
                   </div>
        </div>
