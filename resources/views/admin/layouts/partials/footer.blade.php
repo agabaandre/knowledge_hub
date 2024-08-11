@@ -53,8 +53,8 @@
 <script src="{{  asset('assets/plugins/chart.js/Chart.bundle.min.js') }}"></script>
 
 <!-- Rating js-->
-<!-- <script src="{{  asset('assets/plugins/rating/jquery.rating-stars.js') }}"></script>
-<script src="{{  asset('assets/plugins/rating/jquery.barrating.js') }}"></script> -->
+<script src="{{  asset('assets/plugins/rating/jquery.rating-stars.js') }}"></script>
+<script src="{{  asset('assets/plugins/rating/jquery.barrating.js') }}"></script>
 
 <!-- Internal Echart Plugin -->
 <!-- <script src="{{  asset('assets/plugins/echart/echart.js') }}"></script> -->
