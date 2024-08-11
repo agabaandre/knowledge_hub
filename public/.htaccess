@@ -2,6 +2,10 @@
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
     </IfModule>
+    <IfModule mod_headers.c>
+      Header set Access-Control-Allow-Origin "*"
+    </IfModule>
+
 
     RewriteEngine On
 
