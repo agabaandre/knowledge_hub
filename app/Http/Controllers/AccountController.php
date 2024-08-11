@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
+use App\Models\AccessLevel;
 class AccountController extends Controller
 {
     private $publicationsRepo,$usersRepo;
@@ -20,6 +21,7 @@ class AccountController extends Controller
 
         $data['user'] = current_user();
         $data['preferences'] = [];
+        $data['access_groups'] = AccessLevel::all();
 
         foreach(current_user()->preferences as $pref){
             $data['preferences'][] = $pref->subtheme_id;

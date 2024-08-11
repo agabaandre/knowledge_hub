@@ -64,8 +64,8 @@ class ViewComposerServiceProvider extends ServiceProvider
         Facades\View::composer('*',DataCategoriesViewComposer::class);
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
 
-        View::composer(['partials/publications/*'],CommunitiesOfPracticeViewComposer::class);
-        View::composer(['partials/publications/*'],AccessGroupsViewComposer::class);
+        View::composer(['partials/publications/*','account/*',],CommunitiesOfPracticeViewComposer::class);
+        View::composer(['partials/publications/*','account/*',],AccessGroupsViewComposer::class);
         
     }
 }
