@@ -26,7 +26,12 @@ class ThemesRepository
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
-        $themes = SubThemeticArea::where('thematic_area_id', $request->id)->paginate($rows_count);
+        $qry = SubThemeticArea::orderBy('id','desc');
+
+      if($request->theme_id)
+       $qry= $qry->where('thematic_area_id', $request->theme_id);
+        
+       $themes = $qry->paginate($rows_count);
 
         return $themes;
     }

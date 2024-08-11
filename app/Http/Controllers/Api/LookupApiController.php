@@ -78,6 +78,15 @@ class LookupApiController extends ApiController
         * tags={"List Sub Themes"},
         * summary="List Sub Themes",
         * description="Returns a list of Sub Themes",
+        *  @OA\Parameter(
+        *      name="theme_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
         *      @OA\Response(
         *          response=200,
         *          description="Successful",

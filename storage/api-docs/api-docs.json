@@ -359,6 +359,17 @@
                 "summary": "List Sub Themes",
                 "description": "Returns a list of Sub Themes",
                 "operationId": "List Sub Themes",
+                "parameters": [
+                    {
+                        "name": "theme_id",
+                        "in": "query",
+                        "description": "Filter by Themeatic area id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -407,6 +418,42 @@
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "thematic_area_id",
+                        "in": "query",
+                        "description": "Filter by Themeatic area id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "sub_thematic_area_id",
+                        "in": "query",
+                        "description": "Filter by Sub Themeatic area id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "author",
+                        "in": "query",
+                        "description": "Filter by Author Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter Featured",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
                         }
                     }
                 ],

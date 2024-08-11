@@ -84,10 +84,6 @@ class PublicationsRepository extends SharedRepo{
             $pubs->whereDoesntHave("communities");
         }
 
-        if($request->is_featured)
-            $pubs->where('is_featured',1);
-
-       
         //search administrative unit authors
         if($request->admin_unit){
           
@@ -143,6 +139,9 @@ class PublicationsRepository extends SharedRepo{
             $pubs->where('sub_thematic_area_id',$subtheme);
          endif;
 
+         
+        if($request->is_featured)
+        $pubs->where('is_featured',1);
 
          //Access levels effect to query results
         $this->access_filter($pubs);

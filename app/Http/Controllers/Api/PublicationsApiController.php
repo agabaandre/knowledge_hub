@@ -39,6 +39,42 @@ class PublicationsApiController extends ApiController
         *           type="string"
         *      )
         *   ),
+        *  @OA\Parameter(
+        *      name="thematic_area_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="sub_thematic_area_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Sub Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="author",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Author Id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="is_featured",
+        *      in="query",
+        *      required=false,
+        *      description="Filter Featured",
+        *      @OA\Schema(
+        *           type="boolean"
+        *      )
+        *   ),
         *      @OA\Response(
         *          response=200,
         *          description="Successful",
