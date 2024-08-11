@@ -52,8 +52,8 @@ class LookupApiController extends ApiController
         * @OA\Get(
         * path="/api/lookup/themes",
         * operationId="List Themes",
-        * tags={"List  File Types"},
-        * summary="List  File Types",
+        * tags={"List Themes"},
+        * summary="List Themes",
         * description="Returns a list of Themes",
         *      @OA\Response(
         *          response=200,

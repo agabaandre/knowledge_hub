@@ -327,6 +327,46 @@
                 }
             }
         },
+        "/api/lookup/themes": {
+            "get": {
+                "tags": [
+                    "List Themes"
+                ],
+                "summary": "List Themes",
+                "description": "Returns a list of Themes",
+                "operationId": "List Themes",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/lookup/sub_themes": {
+            "get": {
+                "tags": [
+                    "List Sub Themes"
+                ],
+                "summary": "List Sub Themes",
+                "description": "Returns a list of Sub Themes",
+                "operationId": "List Sub Themes",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
