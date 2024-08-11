@@ -42,6 +42,8 @@ Route::apiResource("experts",ExpertsApiController::class);
 
 Route::group(["prefix" =>"lookup"],function(){
     Route::get('/filetypes', [LookupApiController::class,"file_types"]);
+    Route::get('/themes', [LookupApiController::class,"themes"]);
+    Route::get('/sub_themes', [LookupApiController::class,"sub_themes"]);
 });
 
 });

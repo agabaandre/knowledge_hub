@@ -7,19 +7,21 @@ use Illuminate\Http\Request;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
+use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
 
 class LookupApiController extends ApiController
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo){
+    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,ThemesRepository $themesRepo){
 
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
+        $this->themesRepo       = $themesRepo;
     }
 
 
@@ -43,6 +45,62 @@ class LookupApiController extends ApiController
             return [
                 "status" => 200,
                 "data" => $file_types
+            ];
+        }
+
+      /**
+        * @OA\Get(
+        * path="/api/lookup/themes",
+        * operationId="List Themes",
+        * tags={"List Themes"},
+        * summary="List Themes",
+        * description="Returns a list of Themes",
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function themes(Request $request)
+        {
+            $themes = $this->themesRepo->get($request);
+            return [
+                "status" => 200,
+                "data" => $themes
+            ];
+        }
+
+      /**
+        * @OA\Get(
+        * path="/api/lookup/sub_themes",
+        * operationId="List Sub Themes",
+        * tags={"List Sub Themes"},
+        * summary="List Sub Themes",
+        * description="Returns a list of Sub Themes",
+        *  @OA\Parameter(
+        *      name="theme_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+    
+        public function sub_themes(Request $request)
+        {
+            $sub_themes =  $this->themesRepo->get_subthemes($request);
+            return [
+                "status" => 200,
+                "data" => $sub_themes
             ];
         }
 
