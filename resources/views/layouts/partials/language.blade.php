@@ -1,7 +1,9 @@
  <div id="google_translate_element" style="display:none;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js" type="text/javascript"></script>
     @php
-      $lang = current_user()->language ??'en';
+$langauge = current_user()->language ?? 'en';
+
+dd($langauge);
 
   @endphp
     <script type="text/javascript">
@@ -21,7 +23,7 @@
   
   <script type="text/javascript">
      $(document).ready(function () {
-        doGTranslate('fr'); // Translate the page in the user langauge
+        doGTranslate('{{$langauge}}'); // Translate the page in the user langauge
       });
     function GTranslateGetCurrentLang() { var keyValue = document['cookie'].match('(^|;) ?googtrans=([^;]*)(;|$)'); return keyValue ? keyValue[2].split('/')[2] : null; }
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
