@@ -21,7 +21,7 @@
   
   <script type="text/javascript">
      $(document).ready(function () {
-        doGTranslate('{{$lang}}'); // Translate the page in the user langauge
+        doGTranslate('fr'); // Translate the page in the user langauge
       });
     function GTranslateGetCurrentLang() { var keyValue = document['cookie'].match('(^|;) ?googtrans=([^;]*)(;|$)'); return keyValue ? keyValue[2].split('/')[2] : null; }
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
