@@ -1,8 +1,8 @@
  <div id="google_translate_element" style="display:none;"></div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.6.2/js/bootstrap-select.min.js" type="text/javascript"></script>
     @php
-$lang = !empty(current_user()->language) ? current_user()->language : 'en';
-dd(current_user()->langauge);
+      $lang = current_user()->language ??'en';
+
   @endphp
     <script type="text/javascript">
     function googleTranslateElementInit() {
