@@ -127,6 +127,9 @@
             background-size:cover;
             background-position: center;
          }
+		 body{
+			top: 0px !important;
+		 }
 
 
 	</style>
