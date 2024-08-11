@@ -31,8 +31,8 @@
 <script src="{{  asset('assets/plugins/peity/jquery.peity.min.js') }}"></script>
 
 <!-- P-scroll js -->
-<script src="{{  asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
-<script src="{{  asset('assets/plugins/perfect-scrollbar/p-scroll.js') }}"></script>
+<!-- <script src="{{  asset('assets/plugins/perfect-scrollbar/perfect-scrollbar.min.js') }}"></script>
+<script src="{{  asset('assets/plugins/perfect-scrollbar/p-scroll.js') }}"></script> -->
 
 <script src="{{  asset('assets/plugins/parsleyjs/parsley.min.js') }}"></script>
 
