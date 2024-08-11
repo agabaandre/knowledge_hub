@@ -3,7 +3,7 @@
     @php
     $langauge = isset(current_user()->langauge) ? current_user()->langauge : 'en';
 
-    dd($langauge);
+    //dd($langauge);
 
     @endphp
     <script type="text/javascript">
