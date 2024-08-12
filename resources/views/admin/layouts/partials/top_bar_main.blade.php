@@ -62,9 +62,9 @@
 						</a>
 						@endforeach
 					</div>
-					<div class="text-center dropdown-footer">
-						<a href="{{ url('admin/forums/moderate') }}">View</a>
-					</div>
+					<a href="{{ url('admin/forums/moderate') }}"></a><div class="text-center dropdown-footer">
+						View
+					</div></a>
 				</div>
 			</div><!-- Main-header-message closed -->
 			<div class="dropdown  nav-item main-header-message ">
@@ -105,9 +105,9 @@
 						</a>
 						@endforeach
 					</div>
-					<div class="text-center dropdown-footer">
-						<a href="{{ url('admin/publications/moderate') }}">View</a>
-					</div>
+					<a href="{{ url('admin/publications/moderate') }}"></a><div class="text-center dropdown-footer">
+						View
+					</div></a>
 				</div>
 			</div><!-- Main-header-message closed -->
 			
