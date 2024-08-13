@@ -4,13 +4,22 @@
 		<nav class="horizontalMenu clearfix">
 			<ul class="horizontalMenu-list">
 				@can('view_dashboard')
-					<li aria-haspopup="true"><a href="{{ url('admin') }}" class="sub-icon"><i class=""></i>Main Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
+					<li aria-haspopup="true"><a href="{{ url('admin') }}" class="sub-icon"><i class=""></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i></a>
 					</li>
 				@endcan
 
 				@can('view_rcc_dashboard')
 					@if(states_enabled())
-					<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCC Dashboard<i class="fe fe-chevron-down horizontal-icon"></i></a>
+						@can('view_performance')
+							<li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i class=""></i>RCCs Dashboard<i
+										class="fe fe-chevron-down horizontal-icon"></i></a>
+								<ul class="sub-menu">
+									<li aria-haspopup="true"><a href="{{ url('admin/kpi') }}" class="slide-item">Add Indicator</a></li>
+									<li aria-haspopup="true"><a href="{{ url('admin/kpi/data') }}" class="slide-item">Inidicator Data</a></li>
+								</ul>
+							</li>
+						@endcan
+
 					@endif
 				@endcan
 
@@ -56,14 +65,28 @@
 					</ul>
 				</li>
 				@endcan
+					@can('view_forumns')
+						<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>LMS<i
+									class="fe fe-chevron-down horizontal-icon"></i></a>
+							<ul class="sub-menu">
+								<li aria-haspopup="true"><a href="{{ url('admin/courses') }}" class="slide-item">Courses</a></li>
+								<li aria-haspopup="true"><a href="{{ url('admin/courses/enrollment') }}" class="slide-item">Course Enrollements</a>
+								</li>
+							</ul>
+						</li>
+					@endcan
 
-				@can('view_performance')
-				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Indicators<i class="fe fe-chevron-down horizontal-icon"></i></a>
-					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('admin/kpi') }}" class="slide-item">Add Indicator</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/kpi/data') }}" class="slide-item">Inidicator Data</a></li>
-					</ul>
-				</li>
+			
+				@can('view_forumns')
+					<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>COPs<i
+								class="fe fe-chevron-down horizontal-icon"></i></a>
+						<ul class="sub-menu">
+
+							<li aria-haspopup="true"><a href="{{ url('admin/commsofpractice/moderate') }}" class="slide-item">Membership</a>
+							<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
+							</li>
+						</ul>
+					</li>
 				@endcan
 				
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i class="fe fe-chevron-down horizontal-icon"></i></a>
@@ -71,8 +94,7 @@
 						@can('view_file_types')
 						<li aria-haspopup="true"><a href="{{ url('admin/filetypes') }}">Resource and Asset Types</a></li>
 						@endcan
-
-						<li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of Practices</a></li>
+						
 						<li class=""><a href="{{ url('admin/tools') }}" class="">Tools</a></li>
 						
 						@can('view_sources')
