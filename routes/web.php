@@ -50,6 +50,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
 use App\Http\Controllers\ToolsController;
+use App\Http\Controllers\MoodleController;
 
 /*
 |--------------------------------------------------------------------------
@@ -469,3 +470,8 @@ Route::group(["prefix" => "ai"], function () {
     Route::get("/compare",  [GraphController::class, 'compare']);
 });
 
+Route::group(["prefix" => "courses"], function () {
+
+    Route::get("/categories",  [MoodleController::class, 'categories']);
+    Route::get("/",  [MoodleController::class, 'courses']);
+});

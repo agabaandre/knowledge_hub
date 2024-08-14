@@ -42,7 +42,7 @@ class PublicationsRepository extends SharedRepo{
         endif;
 
           //search by keyword
-          if($request->term){
+          if(empty(!$request->term)){
             
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
