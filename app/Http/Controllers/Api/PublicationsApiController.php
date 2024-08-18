@@ -9,6 +9,7 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
+use Log;
 
 class PublicationsApiController extends ApiController
 {
@@ -85,9 +86,13 @@ class PublicationsApiController extends ApiController
     public function index(Request $request)
     {
         $publications = $this->publicationsRepo->get($request);
+        $data = json_decode(json_encode($publications));
+
+        Log::info($data);
+
         return [
             "status" => 200,
-            "data" => json_decode(json_encode($publications))
+            "data" =>$data 
         ];
     }
 
