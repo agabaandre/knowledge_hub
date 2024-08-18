@@ -45,7 +45,7 @@
 															<h4 class="fs-md mb-0 ft-bold text-primary" style="color: var(--theme-color-primary)!important;">{{ truncate($row->fullname, 50) }}</h4>
 														</div>
 													</div>
-														<p>{!! truncate($row->summary,200) !!}</p>
+														<p>{!! truncate($row->summary,270) !!}</p>
 												</div>
 											</div>
 										</a>
