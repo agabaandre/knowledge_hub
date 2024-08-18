@@ -25,6 +25,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use App\Imports\PublicationImport;
 use Maatwebsite\Excel\Facades\Excel;
+use Log;
 
 class PublicationsRepository extends SharedRepo{
 
@@ -156,6 +157,9 @@ class PublicationsRepository extends SharedRepo{
 
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
+
+        
+        Log::info($results);
 
         return   ($return_array)?$results:$results->appends($request->all());
     }
