@@ -32,13 +32,13 @@
 <!-- ======================= Publication Info ======================== -->
 <div class="container middle">
 			
-						<div class="row justify-content-center">
+						<div class="row justify-content-center mt-3">
 									<!-- single review -->
 									@foreach ($courses as $row)
 										<a href="https://khub.africacdc.org/elearning/course/view.php?id={{$row->moodle_id}}" 
-											target="_blank" style="border: 1px solid; margin:10px;"
-											class="col-lg-6" data-aos="fade-in">
-											<div class="single_review px-2 card-content" >
+											target="_blank" 
+											class="col-lg-6 mt-2 mb-2" data-aos="fade-in">
+											<div class="single_review px-1 card-content" style="border: 1px solid;">
 												<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
 													<div class="rw-header d-flex justify-content-start">
 														<div class="pl-0">
