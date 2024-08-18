@@ -152,6 +152,24 @@
                 max-height: 100px!important;
                 border-radius: 50%;
          }
+
+         .theme-primary{
+            background: var(--theme-color-primary)!important;
+            color: #fff;
+            border-radius:3px;
+        }
+        .theme-secondary{
+            background: var(--theme-color-secondary)!important;
+            color:#FFF;
+            border-radius: 3px;
+        }
+        .text-primary {
+            color: var(--theme-color-primary)!important;
+        }
+
+        .text-secondary {
+            color: var(--theme-color-secondary)!important;
+        }
         </style>
 
 
