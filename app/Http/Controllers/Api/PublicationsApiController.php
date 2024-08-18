@@ -86,13 +86,12 @@ class PublicationsApiController extends ApiController
     public function index(Request $request)
     {
         $publications = $this->publicationsRepo->get($request);
-        $data = json_decode(json_encode($publications));
-
-        Log::info($data);
+       
+        Log::info($publications);
 
         return [
             "status" => 200,
-            "data" =>$data 
+            "data" =>$publications ?? [] 
         ];
     }
 
