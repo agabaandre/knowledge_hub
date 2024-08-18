@@ -85,6 +85,8 @@ class PublicationsApiController extends ApiController
         */
     public function index(Request $request)
     {
+        Log::info($request->all());
+        
         $publications = $this->publicationsRepo->get($request);
        
         Log::info($publications);
