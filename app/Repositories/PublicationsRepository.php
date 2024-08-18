@@ -154,14 +154,14 @@ class PublicationsRepository extends SharedRepo{
           $pubs->where('is_active','Active');
           $pubs->where('is_approved',1);
         }
-        
+
         Log::info($pubs->toSql());
         
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
         
-        Log::info($results);
+        Log::info(count($results));
 
         return   ($return_array)?$results:$results->appends($request->all());
     }
