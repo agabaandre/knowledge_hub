@@ -91,7 +91,7 @@ class PublicationsApiController extends ApiController
        
         Log::info($publications);
 
-        $publications = json_decode(json_encode($publications));
+        $publications = json_decode(json_encode($publications->toArray()));
 
         return [
             "status" => 200,
