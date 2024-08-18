@@ -9,6 +9,7 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\Country;
+use Illuminate\Http\JsonResponse;
 use Log;
 
 class PublicationsApiController extends ApiController
@@ -91,20 +92,18 @@ class PublicationsApiController extends ApiController
 
          // Sanitize the data if needed
         $sanitizedData = $publications->map(function($row) {
-            $userArray = $row->toArray();
-            // Convert each attribute to UTF-8 if necessary
-            return array_map(function($item) {
-                return mb_convert_encoding($item, 'UTF-8', 'auto');
-            }, $userArray);
+            return $row->toArray();
+           
         });
 
       
         Log::info($sanitizedData);
 
-        return [
+        return new JsonResponse([
             "status" => 200,
             "data" =>$sanitizedData ?? [] 
-        ];
+        ], 200, [], JSON_UNESCAPED_UNICODE);
+
     }
 
     /**
