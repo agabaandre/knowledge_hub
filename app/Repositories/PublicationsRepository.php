@@ -160,6 +160,18 @@ class PublicationsRepository extends SharedRepo{
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
 
+
+         // Start output buffering
+            ob_start();
+
+            // Dump the variable
+            var_dump($results->toArray());
+
+            // Get the contents of the buffer
+            $output = ob_get_clean();
+
+            // Log the output
+            Log::info('Eloquent result:', ['data' => $output]);
         
         Log::info(count($results));
 
