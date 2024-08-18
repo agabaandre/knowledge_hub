@@ -88,15 +88,23 @@ class PublicationsApiController extends ApiController
         Log::info($request->all());
 
         $publications = $this->publicationsRepo->get($request,true);
-       
-        return json_encode($publications);
 
-        // Log::info($publications);
+         // Sanitize the data if needed
+        $sanitizedData = $publications->map(function($row) {
+            $userArray = $row->toArray();
+            // Convert each attribute to UTF-8 if necessary
+            return array_map(function($item) {
+                return mb_convert_encoding($item, 'UTF-8', 'auto');
+            }, $userArray);
+        });
 
-        // return [
-        //     "status" => 200,
-        //     "data" =>$publications ?? [] 
-        // ];
+      
+        Log::info($sanitizedData);
+
+        return [
+            "status" => 200,
+            "data" =>$sanitizedData ?? [] 
+        ];
     }
 
     /**
