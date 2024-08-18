@@ -26,6 +26,7 @@ use Illuminate\Support\Carbon;
 use App\Imports\PublicationImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Log;
+use DB;
 
 class PublicationsRepository extends SharedRepo{
 
