@@ -92,10 +92,10 @@ class PublicationsApiController extends ApiController
         
         Log::info($publications);
 
-        return [
+        return json_encode([
             "status" => 200,
             "data" =>$publications ?? [] 
-        ];
+        ]);
     }
 
     /**
