@@ -24,13 +24,14 @@ use App\Http\Controllers\TestController;
 // Publications Routes
 ///,
 
+Route::post('login', [AuthApiController::class, 'login']);
+Route::post('register', [AuthApiController::class, 'register']);
 
-Route::group(["prefix" =>"auth"],function(){
-    Route::post('/get_token', [AuthApiController::class,"login"]);
-    Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
-});
 
-Route::group(['middleware' => 'api'],function(){
+Route::group(['middleware' => 'auth:api'],function(){
+
+Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
+Route::get('/logout', [AuthApiController::class,"logout"]);
 
 Route::apiResource("publications",PublicationsApiController::class);
 

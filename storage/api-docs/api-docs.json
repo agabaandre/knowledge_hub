@@ -19,23 +19,38 @@
         }
     ],
     "paths": {
-        "/api/auth/get_token": {
+        "/api/register": {
             "post": {
                 "tags": [
-                    "Authenticates Client and returns JWT token"
+                    "User Registration"
                 ],
-                "summary": "Authenticates Client and returns JWT token",
-                "description": "Authenticates Client and returns JWT token",
-                "operationId": "Authenticates Client and returns JWT token",
+                "summary": "User Registration",
+                "description": "User Registration",
+                "operationId": "User Registration",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "api_key": {
+                                    "first_name": {
                                         "type": "string"
                                     },
-                                    "api_secret": {
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "country_id": {
+                                        "type": "string"
+                                    },
+                                    "job": {
+                                        "type": "string"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string"
+                                    },
+                                    "password": {
                                         "type": "string"
                                     }
                                 },
@@ -55,18 +70,65 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
+                        "description": "Not found when you sent the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
                     },
                     "401": {
-                        "description": "Invalid Client DCredentials"
+                        "description": "Invalid User Credentials"
                     }
                 }
             }
         },
-        "/api/auth/refresh_token": {
+        "/api/login": {
+            "post": {
+                "tags": [
+                    "User Login"
+                ],
+                "summary": "User Login",
+                "description": "User Login",
+                "operationId": "User Login",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "username": {
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "Not found when you sent the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid User Credentials"
+                    }
+                }
+            }
+        },
+        "/api/refresh_token": {
             "post": {
                 "tags": [
                     "Refresh JWT token"
@@ -107,7 +169,47 @@
                     "401": {
                         "description": "Invalid Token"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/logout": {
+            "get": {
+                "tags": [
+                    "User Logout"
+                ],
+                "summary": "User Logout",
+                "description": "User Logout",
+                "operationId": "User Logout",
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Invalid Token"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/experts": {
@@ -203,7 +305,12 @@
                     "403": {
                         "description": "Forbidden"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/experts/{id}": {
@@ -328,7 +435,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/lookup/themes": {
@@ -348,7 +460,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/lookup/sub_themes": {
@@ -379,7 +496,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/members": {
@@ -581,20 +703,14 @@
     },
     "components": {
         "securitySchemes": {
-            "jwt": {
-                "type": "apiKey",
-                "description": "Enter API token authentication",
+            "bearer_token": {
+                "type": "http",
                 "scheme": "bearer",
-                "bearerFormat": "JWT"
+                "bearerFormat": "JWT",
+                "description": "Enter JWT token in format (Bearer <token>)",
+                "name": "Authorization",
+                "in": "header"
             }
         }
-    },
-    "security": [
-        {
-            "jwt": [
-                "read",
-                "write"
-            ]
-        }
-    ]
+    }
 }

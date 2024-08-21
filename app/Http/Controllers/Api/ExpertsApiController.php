@@ -49,6 +49,7 @@ class ExpertsApiController extends ApiController
     * path="/api/experts",
     *   tags={"Create Country Expert"},
     *   summary="Create Country Expert",
+    * security={{"bearer_token":{}}},
     *   operationId="CreateExpert",
     *   description="Allows users to submit country experts for amdin approval",
     *     @OA\RequestBody(

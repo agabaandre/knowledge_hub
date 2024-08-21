@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\AuthorsRepository;
-use App\Repositories\FaqsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;

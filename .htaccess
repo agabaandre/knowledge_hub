@@ -27,10 +27,8 @@
 
 </IfModule>
 
-RewriteCond %{HTTP_HOST} ^nyombis\.solvertechug\.com$ [OR]
-RewriteCond %{HTTP_HOST} ^www\.nyombis\.solvertechug\.com$
-RewriteCond %{REQUEST_URI} !^/\.well-known/cpanel-dcv/[0-9a-zA-Z_-]+$
-RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/(?:\ Ballot169)?
-RewriteCond %{REQUEST_URI} !^/\.well-known/pki-validation/[A-F0-9]{32}\.txt(?:\ Comodo\ DCV)?$
-RewriteRule ^/?$ "http\:\/\/nyombis\.solvertechug\.com" [R=301,L]
+
+#Handle Authorization Header
+RewriteCond %{HTTP:Authorization} .
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
