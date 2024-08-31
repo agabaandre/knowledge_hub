@@ -1,5 +1,5 @@
 	<!-- ============================ Footer Start ================================== -->
-	<footer class="light-footer skin-light-footer style-2">
+	<footer class="{{ settings()->footer_style }} skin-dark-footer style-3">
 		<div class="footer-middle">
 			<div class="container">
 				<div class="row">

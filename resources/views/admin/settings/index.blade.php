@@ -77,7 +77,7 @@
                 </div>
                 <div class="form-group">
                     <label>Timezone </label>
-                    @include('partials.general.timezones',['selected'=>$settings->timezone])
+                    @include('partials.general.timezones', ['selected' => $settings->timezone])
                 </div>
                 <div class="form-group">
                     <label>Google Analytics Scripts </label>
@@ -161,8 +161,24 @@
                      </div>
                 </div>
             </div>
+                <div class="row mt-3">
+                    <div class="form-group">
+                        <label>Footer Style</label>
+                        <select class="form-control" name="footer_style">
+                            <option value="light-footer" @if(settings()->footer_style == 'light-footer')
+                                selected
+                            @endif>Light</option>
+                            <option value="dark-footer" @if(settings()->footer_style == 'dark-footer')
+                                selected
+                            @endif>Dark</option>
+                        </select>
+                      
+                    
+                      
+                    </div>
+                </div>
 
-            
+            <?php //dd(settings());?>
 
             <div class="row mt-2 px-2">
                 <input type="submit" class="btn btn-dark" value="Save Changes">
