@@ -1,107 +1,123 @@
-	<!-- ============================ Footer Start ================================== -->
-	<footer class="{{ settings()->footer_style }} skin-dark-footer style-3">
-		<div class="footer-middle">
-			<div class="container">
-				<div class="row">
+<!-- ============================ Footer Start ================================== -->
+<footer class="{{ settings()->footer_style }} skin-dark-footer style-3">
+	<div class="footer-middle">
+		<div class="container">
+			<div class="row">
 
-					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-						<div class="footer_widget">
+				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+					<div class="footer_widget">
 						<h4 class="widget_title">Address</h4>
-							<img src="{{ settings()->logo }}" class="logo img-footer small mb-2" alt="" style="width:220px; margin-bottom:-25px;" >
-							<div class="address mt-2">
+						<img src="{{ settings()->logo }}" class="logo img-footer small mb-2" alt=""
+							style="width:220px; margin-bottom:-25px;">
+						<div class="address mt-2">
+							<a href="https://www.google.com/maps/search/?api=1&query={!! urlencode(settings()->address) !!}"
+								target="_blank">
 								{!! settings()->address !!}
-							</div>
-							<div class="address mt-3">
-								{!! settings()->phone !!}<br>	{!! settings()->email !!}
-							</div>
-							<div class="address mt-2">
+							</a>
+						</div>
+						<div class="address mt-3">
+							<a href="tel:{!! settings()->phone !!}">
+								{!! settings()->phone !!}
+							</a><br>
+							<a href="mailto:{!! settings()->email !!}">
+								{!! settings()->email !!}
+							</a>
+						</div>
 
-							</div>
+						<div class="address mt-2">
+
 						</div>
 					</div>
+				</div>
 
-					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-						<div class="footer_widget">
-							<h4 class="widget_title">Navigate</h4>
-							<ul class="footer-menu">
-							    <li><a href="{{ url('/') }}">Home</a></li>
-								@guest
-								<li><a href="{{ url('login') }}" >Login</a></li>
-								@else
+				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+					<div class="footer_widget">
+						<h4 class="widget_title">Navigate</h4>
+						<ul class="footer-menu">
+							<li><a href="{{ url('/') }}">Home</a></li>
+							@guest
+								<li><a href="{{ url('login') }}">Login</a></li>
+							@else
 								<li><a href="{{ url('account/publish') }}">Publish a resource</a></li>
-								@endguest
-								<li><a href="{{ url('forums') }}">Discussion Forums</a></li>
+							@endguest
+							<li><a href="{{ url('forums') }}">Discussion Forums</a></li>
 
-							</ul>
-						</div>
+						</ul>
 					</div>
-					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-						<div class="footer_widget">
-							<h4 class="widget_title">About This Portal</h4>
-							<ul class="footer-menu">
-								<li><a href="{{ url('faqs') }}">Frequently asked questions</a></li>
-								<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
-								<li><a href="{{ url('privacy') }}">Privacy Policy</a></li>
-							</ul>
-						</div>
+				</div>
+				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+					<div class="footer_widget">
+						<h4 class="widget_title">About This Portal</h4>
+						<ul class="footer-menu">
+							<li><a href="{{ url('faqs') }}">Frequently asked questions</a></li>
+							<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
+							<li><a href="{{ url('privacy') }}">Privacy Policy</a></li>
+						</ul>
 					</div>
-					<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-						<div class="footer_widget">
-							<h4 class="widget_title">Find us On </h4>
-							<ul class="footer-menu">
-								<li><a href="{{ settings()->facebook }}"><i class="fa-brands fa-facebook"></i>Facebook</a></li>
-								<li><a href="{{ settings()->twitter }}" target="_blank"><i class="fa-brands fa-x-twitter"></i> Twitter</a></li>
-								<li><a href="{{ settings()->linkedin }}"><i class="fa-brands fa-linkedin-in"></i>LinkedIn</a></li>
-								<li><a href="{{ settings()->academia }}"><i class="fa-solid fa-a"></i>Academia</a></li>
-								<li><a href="{{ settings()->researchgate }}"><i class="fa-brands fa-researchgate"></i>Research Gate</a></li>
-							</ul>
-						</div>
+				</div>
+				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+					<div class="footer_widget">
+						<h4 class="widget_title">Find us On </h4>
+						<ul class="footer-menu">
+							<li><a href="{{ settings()->facebook }}"><i class="fa-brands fa-facebook"></i>Facebook</a>
+							</li>
+							<li><a href="{{ settings()->twitter }}" target="_blank"><i
+										class="fa-brands fa-x-twitter"></i> Twitter</a></li>
+							<li><a href="{{ settings()->linkedin }}"><i
+										class="fa-brands fa-linkedin-in"></i>LinkedIn</a></li>
+							<li><a href="{{ settings()->academia }}"><i class="fa-solid fa-a"></i>Academia</a></li>
+							<li><a href="{{ settings()->researchgate }}"><i
+										class="fa-brands fa-researchgate"></i>Research Gate</a></li>
+						</ul>
 					</div>
 				</div>
 			</div>
 		</div>
+	</div>
 
-		<div class="footer-bottom br-top">
-			<div class="container">
-				<div class="row align-items-center">
-					<div class="col-lg-12 col-md-12 text-center">
-						<p class="mb-0">© <?php echo date('Y')?> Africa CDC.</p>
-					</div>
+	<div class="footer-bottom">
+		<div class="container">
+			<div class="row align-items-center">
+				<div class="col-lg-12 col-md-12 text-center">
+					<p class="mb-0">© <?php echo date('Y')?> Africa CDC.</p>
 				</div>
 			</div>
 		</div>
-</div>
+	</div>
+	</div>
 	<!-- closes langauge translator -->
-	</footer>
-	<!-- ============================ Footer End ================================== -->
+</footer>
+<!-- ============================ Footer End ================================== -->
 
-	<!-- Log In Modal -->
-	<div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginmodal" aria-hidden="true">
-		<div class="modal-dialog modal-xl login-pop-form" role="document">
-			<div class="modal-content" id="loginmodal">
-				<div class="modal-headers">
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span class="ti-close"></span>
-					</button>
+<!-- Log In Modal -->
+<div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginmodal" aria-hidden="true">
+	<div class="modal-dialog modal-xl login-pop-form" role="document">
+		<div class="modal-content" id="loginmodal">
+			<div class="modal-headers">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span class="ti-close"></span>
+				</button>
+			</div>
+
+			<div class="modal-body p-5">
+				<div class="text-center mb-4">
+					<h2 class="m-0 ft-regular">Login</h2>
 				</div>
 
-				<div class="modal-body p-5">
-					<div class="text-center mb-4">
-						<h2 class="m-0 ft-regular">Login</h2>
-					</div>
-
-					<form action="{{ route('login') }}" method="post">
-						@csrf
+				<form action="{{ route('login') }}" method="post">
+					@csrf
 
 					<input type="hidden" name="route" value="front" />
 					<div class="form-group">
 						<label>User Name</label>
-						<input type="email" name="email" class="form-control" placeholder="Username*" autocomplete="off">
+						<input type="email" name="email" class="form-control" placeholder="Username*"
+							autocomplete="off">
 					</div>
 
 					<div class="form-group">
 						<label>Password</label>
-						<input type="password" name="password" class="form-control" placeholder="Password*" autocomplete="off">
+						<input type="password" name="password" class="form-control" placeholder="Password*"
+							autocomplete="off">
 					</div>
 
 					<div class="form-group">
@@ -117,87 +133,89 @@
 					</div>
 
 					<div class="form-group">
-						<button type="submit" class="btn btn-md full-width theme-bg text-light fs-md ft-medium">Login</button>
+						<button type="submit"
+							class="btn btn-md full-width theme-bg text-light fs-md ft-medium">Login</button>
 					</div>
 
-                    </form>
-				</div>
+				</form>
 			</div>
 		</div>
 	</div>
-	<!-- End Modal -->
+</div>
+<!-- End Modal -->
 
-	<a id="back2Top" class="top-scroll" title="Back to top" href="#"><i class="ti-arrow-up"></i></a>
+<a id="back2Top" class="top-scroll" title="Back to top" href="#"><i class="ti-arrow-up"></i></a>
 
 
+</div>
+
+@if(!get_cookie('is_returning'))
+	<div class="cookie-consent">
+		<span>This site uses cookies to enhance user experience. see<a href="{{ url('privacy_policy/read') }}"
+				class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
+		<div class="mt-2 d-flex align-items-center justify-content-center g-2">
+			<button class="allow-button mr-1" allow="1">Allow cookies</button>
+			<button class="allow-button" allow="0">cancel</button>
+		</div>
 	</div>
+@endif
 
-	@if(!get_cookie('is_returning'))
-        <div class="cookie-consent">
-            <span>This site uses cookies to enhance user experience. see<a href="{{ url('privacy_policy/read') }}" class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
-            <div class="mt-2 d-flex align-items-center justify-content-center g-2">
-                <button class="allow-button mr-1" allow="1">Allow cookies</button>
-                <button class="allow-button" allow="0">cancel</button>
-            </div>
-        </div>
-	@endif
-   
-	<script src="{{ asset('frontend/js/popper.min.js')}}"></script>
-	<script src="{{ asset('frontend/js/bootstrap.min.js')}}"></script>
-	<script src="{{ asset('frontend/js/slick.js')}}"></script>
-	<script src="{{ asset('frontend/js/slider-bg.js')}}"></script>
-	<script src="{{ asset('frontend/js/smoothproducts.js')}}"></script>
-	<script src="{{ asset('frontend/js/snackbar.min.js')}}"></script>
-	<script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
-	<script src="{{ asset('frontend/js/custom.js')}}"></script>
-	<script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
+<script src="{{ asset('frontend/js/popper.min.js')}}"></script>
+<script src="{{ asset('frontend/js/bootstrap.min.js')}}"></script>
+<script src="{{ asset('frontend/js/slick.js')}}"></script>
+<script src="{{ asset('frontend/js/slider-bg.js')}}"></script>
+<script src="{{ asset('frontend/js/smoothproducts.js')}}"></script>
+<script src="{{ asset('frontend/js/snackbar.min.js')}}"></script>
+<script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
+<script src="{{ asset('frontend/js/custom.js')}}"></script>
+<script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
 
-	<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
-	<script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
+<script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
+<script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
 
-	@include('layouts.partials.language')
+@include('layouts.partials.language')
 
-	<script type="text/javascript">
+<script type="text/javascript">
 
-        AOS.init();
+	AOS.init();
 
-		$('.allow-button').click(function(){
+	$('.allow-button').click(function () {
 
-			var allow = $(this).attr('allow');
+		var allow = $(this).attr('allow');
 
-			if(parseInt(allow) === 1){
-				//cookie for 90days
-				var date = new Date();
-				date.setTime(date.getTime() + (90*24*60*60*1000));
-				expires = "; expires=" + date.toUTCString();
-				document.cookie = "is_returning" + "=" + "yes"  + expires + "; path=/";
-			}
+		if (parseInt(allow) === 1) {
+			//cookie for 90days
+			var date = new Date();
+			date.setTime(date.getTime() + (90 * 24 * 60 * 60 * 1000));
+			expires = "; expires=" + date.toUTCString();
+			document.cookie = "is_returning" + "=" + "yes" + expires + "; path=/";
+		}
 
-			$('.cookie-consent').hide();
-		});
+		$('.cookie-consent').hide();
+	});
 
 
-		$('.autocomplete').autocomplete({
-			source: "{{ url('records/autocomplete') }}",
-			minLength: 5,
-			select: function(event, ui) {
-				console.log(ui.item);
-				$('.term').val(ui.item.label);
-				$('.search-form').submit();
-			}
-		});
+	$('.autocomplete').autocomplete({
+		source: "{{ url('records/autocomplete') }}",
+		minLength: 5,
+		select: function (event, ui) {
+			console.log(ui.item);
+			$('.term').val(ui.item.label);
+			$('.search-form').submit();
+		}
+	});
 
-		$(document).ready(function() {
+	$(document).ready(function () {
 
-			setTimeout(function(){
+		setTimeout(function () {
 
-				$('.alert').fadeOut('slow')
-			},10000);
+			$('.alert').fadeOut('slow')
+		}, 10000);
 
-		});
+	});
 
-		//Quizz
-	</script>
+	//Quizz
+</script>
 
 
 
@@ -206,6 +224,6 @@
 
 
 
-	</body>
+</body>
 
-	</html>
+</html>
