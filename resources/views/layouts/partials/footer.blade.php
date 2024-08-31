@@ -1,93 +1,99 @@
 <!-- ============================ Footer Start ================================== -->
 <footer class="{{ settings()->footer_style }} skin-dark-footer style-3">
-	<div class="footer-middle">
+	<div class="footer-middle py-5">
 		<div class="container">
 			<div class="row">
 
-				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">Address</h4>
-						<img src="{{ settings()->logo }}" class="logo img-footer small mb-2" alt=""
-							style="width:220px; margin-bottom:-25px;">
+						@if(settings()->footer_style == 'dark-footer')
+							<img src="{{ settings()->logo }}" class="logo img-footer mb-3" alt="Logo"
+								style="width:220px; filter: brightness(0) invert(1);">
+						@else
+							<img src="{{ settings()->logo }}" class="logo img-footer mb-3" alt="Logo" style="width:220px;">
+						@endif
+
 						<div class="address mt-2">
 							<a href="https://www.google.com/maps/search/?api=1&query={!! urlencode(settings()->address) !!}"
-								target="_blank">
+								target="_blank" class="d-block">
 								{!! settings()->address !!}
 							</a>
 						</div>
 						<div class="address mt-3">
-							<a href="tel:{!! settings()->phone !!}">
+							<a href="tel:{!! settings()->phone !!}" class="d-block">
 								{!! settings()->phone !!}
-							</a><br>
-							<a href="mailto:{!! settings()->email !!}">
+							</a>
+							<a href="mailto:{!! settings()->email !!}" class="d-block">
 								{!! settings()->email !!}
 							</a>
 						</div>
-
-						<div class="address mt-2">
-
-						</div>
 					</div>
 				</div>
 
-				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">Navigate</h4>
-						<ul class="footer-menu">
-							<li><a href="{{ url('/') }}">Home</a></li>
+						<ul class="footer-menu list-unstyled">
+							<li><a href="{{ url('/') }}" class="text-decoration-none">Home</a></li>
 							@guest
-								<li><a href="{{ url('login') }}">Login</a></li>
+								<li><a href="{{ url('login') }}" class="text-decoration-none">Login</a></li>
 							@else
-								<li><a href="{{ url('account/publish') }}">Publish a resource</a></li>
+								<li><a href="{{ url('account/publish') }}" class="text-decoration-none">Publish a
+										resource</a></li>
 							@endguest
-							<li><a href="{{ url('forums') }}">Discussion Forums</a></li>
-
+							<li><a href="{{ url('forums') }}" class="text-decoration-none">Discussion Forums</a></li>
 						</ul>
 					</div>
 				</div>
-				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
+
+				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">About This Portal</h4>
-						<ul class="footer-menu">
-							<li><a href="{{ url('faqs') }}">Frequently asked questions</a></li>
-							<li><a href="https://africacdc.org" target="_blank">Africa CDC Website</a></li>
-							<li><a href="{{ url('privacy') }}">Privacy Policy</a></li>
-						</ul>
-					</div>
-				</div>
-				<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-					<div class="footer_widget">
-						<h4 class="widget_title">Find us On </h4>
-						<ul class="footer-menu">
-							<li><a href="{{ settings()->facebook }}"><i class="fa-brands fa-facebook"></i>Facebook</a>
+						<ul class="footer-menu list-unstyled">
+							<li><a href="{{ url('faqs') }}" class="text-decoration-none">Frequently asked questions</a>
 							</li>
-							<li><a href="{{ settings()->twitter }}" target="_blank"><i
-										class="fa-brands fa-x-twitter"></i> Twitter</a></li>
-							<li><a href="{{ settings()->linkedin }}"><i
-										class="fa-brands fa-linkedin-in"></i>LinkedIn</a></li>
-							<li><a href="{{ settings()->academia }}"><i class="fa-solid fa-a"></i>Academia</a></li>
-							<li><a href="{{ settings()->researchgate }}"><i
-										class="fa-brands fa-researchgate"></i>Research Gate</a></li>
+							<li><a href="https://africacdc.org" target="_blank" class="text-decoration-none">Africa CDC
+									Website</a></li>
+							<li><a href="{{ url('privacy') }}" class="text-decoration-none">Privacy Policy</a></li>
 						</ul>
 					</div>
 				</div>
+
+				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
+					<div class="footer_widget">
+						<h4 class="widget_title">Find us On</h4>
+						<ul class="footer-menu list-unstyled">
+							<li><a href="{{ settings()->facebook }}" target="_blank" class="text-decoration-none"><i
+										class="fa-brands fa-facebook"></i> Facebook</a></li>
+							<li><a href="{{ settings()->twitter }}" target="_blank" class="text-decoration-none"><i
+										class="fa-brands fa-x-twitter"></i> Twitter</a></li>
+							<li><a href="{{ settings()->linkedin }}" target="_blank" class="text-decoration-none"><i
+										class="fa-brands fa-linkedin-in"></i> LinkedIn</a></li>
+							<li><a href="{{ settings()->academia }}" target="_blank" class="text-decoration-none"><i
+										class="fa-solid fa-a"></i> Academia</a></li>
+							<li><a href="{{ settings()->researchgate }}" target="_blank" class="text-decoration-none"><i
+										class="fa-brands fa-researchgate"></i> ResearchGate</a></li>
+						</ul>
+					</div>
+				</div>
+
 			</div>
 		</div>
 	</div>
 
-	<div class="footer-bottom">
+	<div class="footer-bottom py-3">
 		<div class="container">
 			<div class="row align-items-center">
 				<div class="col-lg-12 col-md-12 text-center">
-					<p class="mb-0">© <?php echo date('Y')?> Africa CDC.</p>
+					<p class="mb-0">© {{ date('Y') }} Africa CDC. All rights reserved.</p>
 				</div>
 			</div>
 		</div>
 	</div>
-	</div>
-	<!-- closes langauge translator -->
 </footer>
 <!-- ============================ Footer End ================================== -->
+
 
 <!-- Log In Modal -->
 <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginmodal" aria-hidden="true">
