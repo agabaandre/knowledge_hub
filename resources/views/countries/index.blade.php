@@ -8,7 +8,7 @@
 @section('content')
 <!-- ======================= Countries ======================== -->
 <section class="space gray">
-    <div class="container">
+<div class="container">
 
         <!-- row -->
         <div class="row">
@@ -17,7 +17,6 @@
                 @include('countries.map')
             </div>
  <div class="col-lg-4 col-md-4 col-xs-12">
-    <div class="row">
         <div id="accordion">
             @foreach($regions as $region)
                                         @php
@@ -60,15 +59,15 @@
                                         </div>
             @endforeach
         </div>
-    </div>
+
 </div>
 
 
 
         </div>
-        <!-- /row -->
 
-    </div>
+
+</div>
 </section>
 <!-- ======================= Countries ======================== -->
 @endsection
