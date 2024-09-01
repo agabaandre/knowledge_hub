@@ -19,7 +19,7 @@
                 </div>
             </div>
 
-                <p>{!! $forum->forum_description !!}</p>
+                <p>{!! cleanHtmlContent($forum->forum_description) !!}</p>
         </div>
    
     
