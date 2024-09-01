@@ -167,7 +167,6 @@ return [
          */
         Spatie\Permission\PermissionServiceProvider::class,
         Barryvdh\Debugbar\ServiceProvider::class,
-        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
         Biscolab\ReCaptcha\ReCaptchaServiceProvider::class,
 
         /*

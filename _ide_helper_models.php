@@ -65,7 +65,7 @@ namespace App\Models{
 
 namespace App\Models{
 /**
- * App\Models\AdministrativeUnit
+ * App\Models\AdministrativeUnitTymon\JWTAuth
  *
  * @property int $id
  * @property string $name
@@ -145,7 +145,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder|ApiClient whereUpdatedAt($value)
  * @method static \Illuminate\Database\Eloquent\Builder|ApiClient whereUserId($value)
  */
-	class ApiClient extends \Eloquent implements \Illuminate\Contracts\Auth\Authenticatable, \Tymon\JWTAuth\Contracts\JWTSubject {}
+	//class ApiClient extends \Eloquent implements \Illuminate\Contracts\Auth\Authenticatable {}
 }
 
 namespace App\Models{

@@ -10,7 +10,7 @@
 </style>
 	<!--  Extra Large modal example -->
 <div class="modal" id="summarise-modal">
-    <div class="modal-dialog modal-fullscreen">
+    <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
           <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa fa-robot"></i> Content Summary <small>(AI Assisted)</small></h2>
@@ -19,12 +19,35 @@
             <span class="ft-lg" aria-hidden="true">&times;</span>
           </button>
         </div>
-        <div class="modal-body d-flex justify-content-center" style="max-height: 70vh; overflow-y: auto;">
+        <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+
+          @php
+            $user = current_user();
+          @endphp
+
+          <div class="row mb-10  d-flex justify-content-center">
+            <div class="form-group">
+              <label>Choose Summary Language</label>
+              <select class="form-control language">
+                <option {{ ('en' == $user->langauge) ? 'selected' : '' }}>English</option>
+                <option {{ ('ar' == $user->langauge) ? 'selected' : '' }}>Arabic</option>
+                <option {{ ('fr' == $user->langauge) ? 'selected' : '' }}>French</option>
+                <option {{ ('pt' == $user->langauge) ? 'selected' : '' }}>Portuguese</option>
+                <option {{ ('es' == $user->langauge) ? 'selected' : '' }}>Spanish</option>
+                <option {{ ('sw' == $user->langauge) ? 'selected' : '' }}>Swahili</option>
+              </select>
+            </div>
+          </div>
           
-          <div class="ai-content" id="coppable"></div>
-  
+          <div class="row  d-flex justify-content-center">
+            <div class="ai-content" id="coppable"></div>
+          </div>
+
         </div>
         <div class="modal-footer">
+          <button class="btn btn-success"  type="button" onclick="startAiSummary()">
+            <span aria-hidden="true"><i class="fa fa-magic"></i> Summarise Now</span>
+          </button>
           <button class="btn copy" style="display: none;" type="button" onclick="copyToClipboard()">
             <span aria-hidden="true"><i class="fa fa-copy"></i> Copy</span>
           </button>

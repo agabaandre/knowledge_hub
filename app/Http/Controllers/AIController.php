@@ -6,6 +6,7 @@ use App\Models\Forum;
 use App\Models\Publication;
 use Illuminate\Http\Request;
 use App\Services\AIModel;
+use Illuminate\Support\Facades\Log;
 
 class AIController extends Controller
 {
@@ -21,23 +22,25 @@ class AIController extends Controller
   
         if(intval($request->type) !== 1):
             $resource = Publication::find($request->resource_id);
-            $prompt = "title: $resource->title,  
+            $prompt = "summary language: $request->language,title: $resource->title,  
             body: $resource->description  ,
-            attached_content: ". truncate(pdfToText($resource->publication),10000).", 
+            attached_content: ". truncate(pdfToText($resource->publication),100000).", 
             comments: ".json_encode($resource->comments->toArray());
         else:
             $resource = Forum::find($request->resource_id);
-            $prompt = "forum title: $resource->forum_title,
+            $prompt = "summary language: $request->language,forum title: $resource->forum_title,
              forum content: $resource->forum_description ,  
              forum comments: ".json_encode($resource->comments->toArray());
         endif;
 
         $response = $this->aiModel->summarize($prompt);
 
+        Log::info("RESPONSE: ".json_encode($response));
+
         if(isset($response->choices))
             return ['content'=>$response->choices[0]->message->content];
 
-        return ['content'=>"<div class='alert alert-danger'><p>Failure: ".$response->error->message.'</p></div>'];
+        return ['content'=>"<div class='alert alert-danger'><p>Failure: ".$response->error->message ?? 'Error'.'</p></div>'];
     }
 
 

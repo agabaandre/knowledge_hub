@@ -49,7 +49,7 @@ class CustomEnsureAPISwaggerAccessIsValid
         }
         else{
             Log::debug("NO API user::");
-            return false;
+            return true;
         }
     }
 }

@@ -52,6 +52,11 @@
 									@endforeach
 			
 							</div>
+
+							<div class="row justify-content-center mt-2">
+								{{ $courses->links() }}
+							</div>
+
 					</div>
 
 </div>

@@ -7,6 +7,7 @@
 <meta name="description" content="{{ @settings()->site_description }}" />
 <meta name="keywords" content="{{ @settings()->seo_keywords }}">
 <meta name="author" content="{{@settings()->site_name }}" />
+<meta name="csrf-token" content="{{ csrf_token() }}">
 <!-- Title -->
 <title>{!!@settings()->title!!}</title>
 {!!@settings()->analytics_script!!}

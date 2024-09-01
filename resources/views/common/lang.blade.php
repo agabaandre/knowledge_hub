@@ -7,6 +7,4 @@
         </option>
         <option value="es" {{ ('es' == $user->langauge) ? 'selected' : '' }}>Spanish</option>
         <option value="sw" {{ ('sw' == $user->langauge) ? 'selected' : '' }}>Swahili</option>
-
-
 </select>
