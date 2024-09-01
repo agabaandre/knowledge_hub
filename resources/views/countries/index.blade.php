@@ -16,7 +16,6 @@
             <div class="col-lg-8 col-md-8 col-xs-12 states-map">
                 @include('countries.map')
             </div>
-            <a href="{{ url('countries/details')}}?state={{$country->id}}">
  <div class="col-lg-4 col-md-4 col-xs-12">
     <div class="row states-tiles">
         <div id="accordion">
