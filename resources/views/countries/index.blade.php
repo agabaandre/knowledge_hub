@@ -30,7 +30,7 @@
                             <div class="card mb-1">
                                 <div class="card-header bg-white" id="heading{{$region->id}}">
                                     <h5 class="mb-0">
-                                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{$region->id}}" aria-expanded="false" aria-controls="collapse{{$region->id}}">
+                                        <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{$region->id}}" aria-expanded="false" aria-controls="collapse{{$region->id}}" style="width:100% !important;">
                                             <i class="fas fa-chevron-down"></i> {{ $region->region_name }}, {{$regionalResources}} Resources
                                         </button>
                                     </h5>
