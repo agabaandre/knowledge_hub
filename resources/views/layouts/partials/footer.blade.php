@@ -44,6 +44,8 @@
 										resource</a></li>
 							@endguest
 							<li><a href="{{ url('forums') }}" class="text-decoration-none">Discussion Forums</a></li>
+							<li><a href="{{ url('courses') }}" class="text-decoration-none">Courses</a></li>
+							
 						</ul>
 					</div>
 				</div>
@@ -57,6 +59,7 @@
 							<li><a href="https://africacdc.org" target="_blank" class="text-decoration-none">Africa CDC
 									Website</a></li>
 							<li><a href="{{ url('privacy') }}" class="text-decoration-none">Privacy Policy</a></li>
+							<li><a href="{{ url('user_manual') }}" class="text-decoration-none">User Guide</a></li>
 						</ul>
 					</div>
 				</div>
@@ -64,20 +67,41 @@
 				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">Find us On</h4>
-						<ul class="footer-menu list-unstyled">
-							<li><a href="{{ settings()->facebook }}" target="_blank" class="text-decoration-none"><i
-										class="fa-brands fa-facebook"></i> Facebook</a></li>
-							<li><a href="{{ settings()->twitter }}" target="_blank" class="text-decoration-none"><i
-										class="fa-brands fa-x-twitter"></i> Twitter</a></li>
-							<li><a href="{{ settings()->linkedin }}" target="_blank" class="text-decoration-none"><i
-										class="fa-brands fa-linkedin-in"></i> LinkedIn</a></li>
-							<li><a href="{{ settings()->academia }}" target="_blank" class="text-decoration-none"><i
-										class="fa-solid fa-a"></i> Academia</a></li>
-							<li><a href="{{ settings()->researchgate }}" target="_blank" class="text-decoration-none"><i
-										class="fa-brands fa-researchgate"></i> ResearchGate</a></li>
+						<ul class="footer-menu list-inline">
+							<li class="list-inline-item">
+								<a href="{{ settings()->facebook }}" target="_blank" class="text-decoration-none"
+									data-toggle="tooltip" data-placement="top" title="Facebook">
+									<i class="fa-brands fa-facebook"></i>
+								</a>
+							</li>
+							<li class="list-inline-item">
+								<a href="{{ settings()->twitter }}" target="_blank" class="text-decoration-none"
+									data-toggle="tooltip" data-placement="top" title="Twitter">
+									<i class="fa-brands fa-x-twitter"></i>
+								</a>
+							</li>
+							<li class="list-inline-item">
+								<a href="{{ settings()->linkedin }}" target="_blank" class="text-decoration-none"
+									data-toggle="tooltip" data-placement="top" title="LinkedIn">
+									<i class="fa-brands fa-linkedin-in"></i>
+								</a>
+							</li>
+							<li class="list-inline-item">
+								<a href="{{ settings()->academia }}" target="_blank" class="text-decoration-none"
+									data-toggle="tooltip" data-placement="top" title="Academia">
+									<i class="fa-solid fa-a"></i>
+								</a>
+							</li>
+							<li class="list-inline-item">
+								<a href="{{ settings()->researchgate }}" target="_blank" class="text-decoration-none"
+									data-toggle="tooltip" data-placement="top" title="ResearchGate">
+									<i class="fa-brands fa-researchgate"></i>
+								</a>
+							</li>
 						</ul>
 					</div>
 				</div>
+				
 
 			</div>
 		</div>
@@ -94,7 +118,6 @@
 	</div>
 </footer>
 <!-- ============================ Footer End ================================== -->
-
 
 <!-- Log In Modal -->
 <div class="modal fade" id="login" tabindex="-1" role="dialog" aria-labelledby="loginmodal" aria-hidden="true">
@@ -153,16 +176,13 @@
 
 <a id="back2Top" class="top-scroll" title="Back to top" href="#"><i class="ti-arrow-up"></i></a>
 
-
-</div>
-
 @if(!get_cookie('is_returning'))
 	<div class="cookie-consent">
 		<span>This site uses cookies to enhance user experience. see<a href="{{ url('privacy_policy/read') }}"
-				class="ml-1 text-decoration-none text-success">Privacy policy</a> </span>
+				class="ml-1 text-decoration-none text-success">Privacy policy</a></span>
 		<div class="mt-2 d-flex align-items-center justify-content-center g-2">
 			<button class="allow-button mr-1" allow="1">Allow cookies</button>
-			<button class="allow-button" allow="0">cancel</button>
+			<button class="allow-button" allow="0">Cancel</button>
 		</div>
 	</div>
 @endif
@@ -176,7 +196,6 @@
 <script src="{{ asset('frontend/js/jQuery.style.switcher.js')}}"></script>
 <script src="{{ asset('frontend/js/custom.js')}}"></script>
 <script src="{{ asset('assets/plugins/select2/js/select2.min.js')}}"></script>
-
 <script src="{{ asset('frontend/js/jquery-ui.js') }}"></script>
 <script src="{{ asset('frontend/js/aos/dist/aos.js')}}"></script>
 
@@ -186,12 +205,12 @@
 
 	AOS.init();
 
-	$('.allow-button').click(function () {
+	$('[data-toggle="tooltip"]').tooltip();
 
+	$('.allow-button').click(function () {
 		var allow = $(this).attr('allow');
 
 		if (parseInt(allow) === 1) {
-			//cookie for 90days
 			var date = new Date();
 			date.setTime(date.getTime() + (90 * 24 * 60 * 60 * 1000));
 			expires = "; expires=" + date.toUTCString();
@@ -200,7 +219,6 @@
 
 		$('.cookie-consent').hide();
 	});
-
 
 	$('.autocomplete').autocomplete({
 		source: "{{ url('records/autocomplete') }}",
@@ -213,24 +231,8 @@
 	});
 
 	$(document).ready(function () {
-
 		setTimeout(function () {
-
 			$('.alert').fadeOut('slow')
 		}, 10000);
-
 	});
-
-	//Quizz
 </script>
-
-
-
-
-
-
-
-
-</body>
-
-</html>
