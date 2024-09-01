@@ -150,7 +150,6 @@
 						<li class=""><a href="{{ url('permissions/roles') }}" class="">Roles</a></li>
 						<li class=""><a href="{{ url('permissions') }}" class="">Permissions</a></li>
 						<li class=""><a href="{{ url('admin/logs/user') }}" class="">User Logs</a></li>
-						<li class=""><a href="{{ url('constants') }}" class="">Constants</a></li>
 						<li class=""><a href="{{ url('admin/logs/access') }}" class="">Site Access Logs</a></li>
 						<li class=""><a href="{{ url('admin/metrics') }}" class="">System Metrics</a></li>
 						@can('view_mailing_list')
