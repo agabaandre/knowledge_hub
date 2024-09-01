@@ -326,6 +326,42 @@ $text = $pdf->getText();
 return htmlspecialchars($text);
 
 }
+function cleanHtmlContent($htmlContent)
+{
+    // Use DOMDocument to parse and clean the HTML content
+    $dom = new \DOMDocument();
+
+    // Suppress errors due to invalid HTML
+    libxml_use_internal_errors(true);
+
+    // Load the HTML content
+    $dom->loadHTML(mb_convert_encoding($htmlContent, 'HTML-ENTITIES', 'UTF-8'));
+
+    // Get all the div elements
+    $divs = $dom->getElementsByTagName('div');
+
+    // Loop through each div
+    foreach ($divs as $div) {
+        // Check if the div has the style attribute you want to remove
+        if ($div->hasAttribute('style')) {
+            $style = $div->getAttribute('style');
+            if (strpos($style, 'position: absolute') !== false) {
+                // Remove the style attribute or modify it as needed
+                $div->removeAttribute('style');
+            }
+        }
+    }
+
+    // Save the cleaned HTML content
+    $cleanedHtmlContent = $dom->saveHTML();
+
+    // Return the cleaned content
+    return $cleanedHtmlContent;
+}
+
+
+// Now you can pass $cleanedContent to your view
+
 
 
 ?>

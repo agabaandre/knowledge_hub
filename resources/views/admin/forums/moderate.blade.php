@@ -134,9 +134,9 @@
                                 <p class="mb-1">{{ Str::limit($forum->forum_description, 100) }}</p>
                             </div>
                             <div class="description-full collapse" id="forumDescriptionFull{{ $forum->id }}">
-                                <p class="mb-1">{{ $forum->forum_description }}</p>
+                                <p class="mb-1">{{ cleanHtmlContent($forum->forum_description) }}</p>
                             </div>
-                            @if (str_word_count($forum->forum_description) > 20)
+                            @if (str_word_count(cleanHtmlContent($forum->forum_description)) > 20)
                             <a href="#" class="read-more" data-forum-id="{{ $forum->id }}">Read More</a>
                             @endif
                             <p class="my-2 text-secondary"><strong>Author: {{ $forum->user->name }}</strong></p>
