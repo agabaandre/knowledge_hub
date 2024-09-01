@@ -369,10 +369,6 @@ html body .db {
     white-space: nowrap;
 }
 
-.circle {
-    border-radius: 100%;
-}
-
 .theme-bg {
     background: var(--theme-color-primary) !important;
 }
@@ -386,8 +382,7 @@ html body .db {
 }
 
 .trans-bg {
-    background: rgba(255, 255, 255, 0.1);
-    !important;
+    background: rgba(255, 255, 255, 0.1)!important;
 }
 
 .theme-bg-light {

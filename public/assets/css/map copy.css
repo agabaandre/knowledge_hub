@@ -102,20 +102,18 @@
   .map-image {
     width: 100%;
   }
+  .country_img{
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
+  }
+  
   .country-click {
     font-size: 20px;
   }
   
   @media only screen and (max-width: 900px) {
-    .cats-wrap {
-        flex-direction: column; /* Stack elements vertically on small screens */
-        padding: 10px; /* Adds padding for better spacing */
-    }
-
-    .country-img {
-        margin:0 auto;
-    }
 
     .states-tiles{
       display: flex;
@@ -173,29 +171,4 @@
     border-radius: 4px;
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-/* Country image container */
-.country-img {
-   
-    background-size:contain;
-    background-repeat: no-repeat; /* Ensures the background image does not repeat */
-    width: 59px;
-    height: 45px; 
-    border: 1px solid #bae;
-    margin-left: 30px !important; 
-    /* Adds space between the flag and text */
-}
-
-/* Country Information Styling next to the flag */
-.country-info {
-    display: block;
   
-    margin-left: 30px !important; /* Added padding for separation */
-}
-
-.country-info h5 {
-    font-weight: bold; /* Make country name bold */
-}
-
-.country-info small {
-    color: #666; /* Lighter text for resource count */
-}

@@ -1,6 +1,7 @@
 <!-- ============================ Footer Start ================================== -->
-<footer class="{{ settings()->footer_style }} skin-dark-footer style-3">
-	<div class="footer-middle py-5">
+
+<footer class="{{ settings()->footer_style }} skin-dark-footer justify-content-center">
+	<div class="footer-middle py-0">
 		<div class="container">
 			<div class="row">
 
@@ -8,19 +9,19 @@
 					<div class="footer_widget">
 						<h4 class="widget_title">Address</h4>
 						@if(settings()->footer_style == 'dark-footer')
-							<img src="{{ settings()->logo }}" class="logo img-footer mb-3" alt="Logo"
+							<img src="{{ settings()->logo }}" class="logo img-footer mb-1" alt="Logo"
 								style="width:220px; filter: brightness(0) invert(1);">
 						@else
-							<img src="{{ settings()->logo }}" class="logo img-footer mb-3" alt="Logo" style="width:220px;">
+							<img src="{{ settings()->logo }}" class="logo img-footer mb-1" alt="Logo" style="width:220px;">
 						@endif
 
-						<div class="address mt-2">
+						<div class="address mt-0">
 							<a href="https://www.google.com/maps/search/?api=1&query={!! urlencode(settings()->address) !!}"
 								target="_blank" class="d-block">
 								{!! settings()->address !!}
 							</a>
 						</div>
-						<div class="address mt-3">
+						<div class="address mt-0">
 							<a href="tel:{!! settings()->phone !!}" class="d-block">
 								{!! settings()->phone !!}
 							</a>
@@ -82,7 +83,7 @@
 		</div>
 	</div>
 
-	<div class="footer-bottom py-3">
+	<div class="footer-bottom py-2">
 		<div class="container">
 			<div class="row align-items-center">
 				<div class="col-lg-12 col-md-12 text-center">
