@@ -16,50 +16,54 @@
             <div class="col-lg-8 col-md-8 col-xs-12 states-map">
                 @include('countries.map')
             </div>
- <div class="col-lg-4 col-md-4 col-xs-12">
+        
+<div class="col-lg-4 col-md-4 col-xs-12">
     <div class="row states-tiles">
         <div id="accordion">
             @foreach($regions as $region)
-                @php
-                    $region_countries = array_filter($countries->toArray(), function ($cnt) use ($region) {
-                        return $cnt['region_id'] == $region->id;
-                    });
-                    $resources = array_column($region_countries, 'resources');
-                    $regionalResources = array_sum($resources);
-                @endphp
-                <div class="card mb-1">
-                    <div class="card-header bg-white" id="heading{{$region->id}}">
-                        <h5 class="mb-0">
-                            <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapse{{$region->id}}" aria-expanded="false" aria-controls="collapse{{$region->id}}">
-                                <i class="fas fa-chevron-down"></i> {{ $region->region_name }}, {{$regionalResources}} Resources
-                            </button>
-                        </h5>
-                    </div>
-                    <div id="collapse{{$region->id}}" class="collapse" aria-labelledby="heading{{$region->id}}" data-parent="#accordion">
-                        <div class="card-body">
-                            <div class="row">
-                                @foreach($region_countries as $country)
-                                    @php
-                                        $country = (Object) $country;
-                                    @endphp
-                                    <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" data-aos="fade-in">
-                                        <div class="card">
-                                            <div class="card-body text-center">
-                                                <h5 class="card-title">{{ truncate($country->name, 30) }}</h5>
-                                                <p class="card-text"><small class="text-muted">{{$country->resources}} Resources</small></p>
-                                                <div class="country-img" style="background-image:url({{ asset('assets/img/flags/' . @$country->flag) }}); background-repeat: no-repeat; background-position: center; background-size: cover; width: 100px; height: 60px; margin: 10px auto;"></div>
-                                            </div>
+                            @php
+                $region_countries = array_filter($countries->toArray(), function ($cnt) use ($region) {
+                    return $cnt['region_id'] == $region->id;
+                });
+                $resources = array_column($region_countries, 'resources');
+                $regionalResources = array_sum($resources);
+                            @endphp
+                            <div class="card w-100 mb-1"> <!-- Ensure card stretches with w-100 -->
+                                <div class="card-header bg-white w-100" id="heading{{$region->id}}"> <!-- w-100 to stretch header -->
+                                    <h5 class="mb-0">
+                                        <button class="btn btn-link btn-block text-left collapsed" data-toggle="collapse" data-target="#collapse{{$region->id}}" aria-expanded="false" aria-controls="collapse{{$region->id}}" style="width: 100%;">
+                                            <i class="fas fa-chevron-down"></i> {{ $region->region_name }}, {{$regionalResources}} Resources
+                                        </button>
+                                    </h5>
+                                </div>
+                                <div id="collapse{{$region->id}}" class="collapse" aria-labelledby="heading{{$region->id}}" data-parent="#accordion">
+                                    <div class="card-body">
+                                        <div class="row">
+                                            @foreach($region_countries as $country)
+                                                                            @php
+                                                $country = (Object) $country;
+                                                                            @endphp
+                                                                            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12" data-aos="fade-in">
+                                                                            <a href="{{ url('countries/details')}}?state={{$country->id}}">
+                                                                                <div class="card">
+                                                                                    <div class="card-body text-center">
+                                                                                        <h5 class="card-title">{{ truncate($country->name, 30) }}</h5>
+                                                                                        <p class="card-text"><small class="text-muted">{{$country}} Resources</small></p>
+                                                                                        <div class="country-img" style="background-image:url({{ asset('assets/img/flags/' . @$country->flag) }}); background-repeat: no-repeat; background-position: center; background-size: cover; width: 100px; height: 60px; margin: 10px auto;"></div>
+                                                                                    </div>
+                                                                                </div>
+                                                                                </a>
+                                                                            </div>
+                                            @endforeach
                                         </div>
                                     </div>
-                                @endforeach
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
             @endforeach
         </div>
     </div>
 </div>
+
 
 
 
