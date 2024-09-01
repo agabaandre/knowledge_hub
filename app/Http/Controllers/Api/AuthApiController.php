@@ -75,9 +75,10 @@ class AuthApiController extends ApiController
 
         return $this->respondWithToken($token);
     }
+
     /**
     * @OA\Post(
-    * path="/api/login",
+    * path="/oauth/token",
     * operationId="User Login",
     * tags={"User Login"},
     * summary="User Login",
@@ -88,6 +89,10 @@ class AuthApiController extends ApiController
     *            @OA\Schema(
     *               @OA\Property(property="username", type="string"),
     *               @OA\Property(property="password", type="string"),
+    *               @OA\Property(property="refresh_token", type="string"),
+    *               @OA\Property(property="client_id", type="string"),
+    *               @OA\Property(property="client_secret", type="string"),
+    *               @OA\Property(property="grant_type", type="string"),
     *            )
     *        )
     *   ),
@@ -129,104 +134,6 @@ class AuthApiController extends ApiController
     }
 
 
- /**
-    * @OA\Post(
-    * path="/api/refresh_token",
-    * operationId="Refresh JWT token",
-    * tags={"Refresh JWT token"},
-    * security={{"bearer_token":{}}},
-    * summary="Refresh JWT token",
-    * description="Refresh JWT token",
-    *     @OA\RequestBody(
-    *         @OA\MediaType(
-    *            mediaType="application/json",
-    *            @OA\Schema(
-    *               @OA\Property(property="token", type="string")
-    *            )
-    *        )
-    *   ),
-    *   @OA\Response(
-    *      response=200,
-    *       description="Success",
-    *      @OA\MediaType(
-    *           mediaType="application/json",
-    *      )
-    *   ),
-    *   @OA\Response(
-    *      response=400,
-    *      description="Bad Request, when some required data is missing"
-    *   ),
-    *   @OA\Response(
-    *      response=404,
-    *      description="not found when you send the request to an invalid endpoint"
-    *   ),
-    *   @OA\Response(
-    *          response=403,
-    *          description="Forbidden"
-    *     ),
-    *   @OA\Response(
-    *          response=401,
-    *          description="Invalid Token"
-    *     )
-    * )
-    **/
-    
-    public function refresh()
-    {
-        return $this->respondWithToken(auth()->refresh());
-    }
-
-  
-
-     /**
-    * @OA\Get(
-    * path="/api/logout",
-    * operationId="User Logout",
-    * tags={"User Logout"},
-    * security={{"bearer_token":{}}},
-    * summary="User Logout",
-    * description="User Logout",
-    *   @OA\Response(
-    *      response=200,
-    *       description="Success",
-    *      @OA\MediaType(
-    *           mediaType="application/json",
-    *      )
-    *   ),
-    *   @OA\Response(
-    *      response=400,
-    *      description="Bad Request, when some required data is missing"
-    *   ),
-    *   @OA\Response(
-    *      response=404,
-    *      description="not found when you send the request to an invalid endpoint"
-    *   ),
-    *   @OA\Response(
-    *          response=403,
-    *          description="Forbidden"
-    *     ),
-    *   @OA\Response(
-    *          response=401,
-    *          description="Invalid Token"
-    *     )
-    * )
-    **/
-    public function logout()
-    {
-        auth()->logout();
-
-        return response()->json(['message' => 'Successfully logged out']);
-    }
-
-
-    protected function respondWithToken($token)
-    {
-        return response()->json([
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60
-        ]);
-    }
     
 
 }

@@ -17,6 +17,7 @@ class CustomEnsureAPISwaggerAccessIsValid
      * @param  \Closure(\Illuminate\Http\Request): (\Illuminate\Http\Response|\Illuminate\Http\RedirectResponse)  $next
      * @return \Illuminate\Http\Response|\Illuminate\Http\RedirectResponse
      */
+    /*
     public function handle($request, Closure $next)
     {
         Log::debug("Token::". json_encode($request->all()));
@@ -52,4 +53,5 @@ class CustomEnsureAPISwaggerAccessIsValid
             return true;
         }
     }
+        */
 }

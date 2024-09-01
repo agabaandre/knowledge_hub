@@ -81,7 +81,7 @@
                 }
             }
         },
-        "/api/login": {
+        "/oauth/token": {
             "post": {
                 "tags": [
                     "User Login"
@@ -98,6 +98,18 @@
                                         "type": "string"
                                     },
                                     "password": {
+                                        "type": "string"
+                                    },
+                                    "refresh_token": {
+                                        "type": "string"
+                                    },
+                                    "client_id": {
+                                        "type": "string"
+                                    },
+                                    "client_secret": {
+                                        "type": "string"
+                                    },
+                                    "grant_type": {
                                         "type": "string"
                                     }
                                 },
@@ -126,90 +138,6 @@
                         "description": "Invalid User Credentials"
                     }
                 }
-            }
-        },
-        "/api/refresh_token": {
-            "post": {
-                "tags": [
-                    "Refresh JWT token"
-                ],
-                "summary": "Refresh JWT token",
-                "description": "Refresh JWT token",
-                "operationId": "Refresh JWT token",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "token": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request, when some required data is missing"
-                    },
-                    "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "401": {
-                        "description": "Invalid Token"
-                    }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
-            }
-        },
-        "/api/logout": {
-            "get": {
-                "tags": [
-                    "User Logout"
-                ],
-                "summary": "User Logout",
-                "description": "User Logout",
-                "operationId": "User Logout",
-                "responses": {
-                    "200": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request, when some required data is missing"
-                    },
-                    "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    },
-                    "401": {
-                        "description": "Invalid Token"
-                    }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
             }
         },
         "/api/experts": {
