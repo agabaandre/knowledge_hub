@@ -175,14 +175,14 @@
 }
 /* Country image container */
 .country-img {
-   
-    background-size:contain;
-    background-repeat: no-repeat; /* Ensures the background image does not repeat */
-    width: 59px;
-    height: 45px; 
-    border: 1px solid #bae;
-    margin-left: 30px !important; 
-    /* Adds space between the flag and text */
+    display: block; /* Ensure it's block to respect margin auto */
+    width: 50px; /* Fixed width */
+    height: 30px; /* Fixed height */
+    margin: 10px auto;
+    border: solid 1px #bae; /* Centering the image horizontally */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 /* Country Information Styling next to the flag */
