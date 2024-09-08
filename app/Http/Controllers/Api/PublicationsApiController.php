@@ -28,8 +28,8 @@ class PublicationsApiController extends ApiController
         * path="/api/publications",
         * operationId="List Publications",
         * tags={"List Publications"},
+        *  security={{"bearer_token":{}}},
         * summary="List Publications",
-        * security={ {"sanctum": {} }},
         * description="Returns a list of all publications",
         *  @OA\Parameter(
         *      name="term",
@@ -105,6 +105,7 @@ class PublicationsApiController extends ApiController
     *   tags={"Create Publication"},
     *   summary="Create Publication",
     *   operationId="CreatePublication",
+    *   security={{"bearer_token":{}}},
     *   description="Allows users to submit publications for amdin approval",
     *     @OA\RequestBody(
     *         @OA\JsonContent(),
@@ -177,6 +178,7 @@ class PublicationsApiController extends ApiController
         * operationId="Retrieve Single Publication",
         * tags={"Retrieve Single Publication"},
         * summary="Retrieve Single Publication",
+        * security={{"bearer_token":{}}},
         * description="Retrieve Single Publication",
         * @OA\Parameter(
         *      name="id",
@@ -205,6 +207,57 @@ class PublicationsApiController extends ApiController
     }
 
 
+    /**
+    * @OA\Post(
+    ** path="/api/publications/{id}",
+    *   tags={"Update Publication"},
+    *   summary="Update Publication",
+    *   operationId="UpdatePublication",
+    *   security={{"bearer_token":{}}},
+    *   description="Allows users to update publications for amdin approval",
+    *     @OA\RequestBody(
+    *         @OA\JsonContent(),
+    *         @OA\MediaType(
+    *            mediaType="multipart/form-data",
+    *            @OA\Schema(
+    *               type="object",
+    *               required={"cover","file_type", "sub_theme", "description","user_id"},
+    *               @OA\Property(property="cover", type="file"),
+    *               @OA\Property(property="file_type", type="integer"),
+    *               @OA\Property(property="sub_theme", type="integer"),
+    *               @OA\Property(property="title", type="string"),
+    *               @OA\Property(property="description", type="string"),
+    *               @OA\Property(property="author", type="integer"),
+    *               @OA\Property(property="user_id", type="integer"),
+    *               @OA\Property(property="link", type="string")
+    *            ),
+    *        ),
+    *    ),
+     *   @OA\Response(
+     *      response=201,
+     *       description="Success",
+     *      @OA\MediaType(
+     *           mediaType="application/json",
+     *      )
+     *   ),
+     *   @OA\Response(
+     *      response=401,
+     *       description="Unauthenticated"
+     *   ),
+     *   @OA\Response(
+     *      response=400,
+     *      description="Bad Request, when some required data is missing"
+     *   ),
+     *   @OA\Response(
+     *      response=404,
+     *      description="not found when you send the request to an invalid endpoint"
+     *   ),
+     *   @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *     )
+     *)
+     **/
     public function update(Request $request, Publication $Publication)
     {
         $val_rules = [
