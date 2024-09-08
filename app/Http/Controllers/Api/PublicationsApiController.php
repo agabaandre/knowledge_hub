@@ -91,12 +91,14 @@ class PublicationsApiController extends ApiController
        
         Log::info($publications);
 
-        $publications = json_decode(json_encode($publications->toArray()));
+        $publications = $publications->toArray();
 
-        return [
+        $data = [
             "status" => 200,
             "data" =>$publications ?? [] 
         ];
+
+        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE); 
     }
 
     /**

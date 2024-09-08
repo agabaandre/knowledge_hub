@@ -38,7 +38,7 @@ class ChatGPTService implements AIModel{
     }
 
     
-    function summarize($resource){
+    function summarize($resource,$language=null){
 
         $question = "Summarise for me this: ". $resource;
         return $this->prompt($question);

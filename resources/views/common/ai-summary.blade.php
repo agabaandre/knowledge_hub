@@ -40,7 +40,7 @@
           </div>
           
           <div class="row  d-flex justify-content-center">
-            <div class="ai-content" id="coppable"></div>
+            <div class="ai-content" id="coppable" style="padding: 30px;"></div>
           </div>
 
         </div>

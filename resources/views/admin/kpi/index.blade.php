@@ -67,7 +67,7 @@
                         <td>{!! $row->SubjectArea->name !!}</td>
                         <td>
                             <a class="text-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
-                            <a class=" ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}" class="text-danger"> Preview</a>
+                            <a class=" ml-1" target="_blank" href="openEditModal('{{ $row->id }}')" class="text-danger"> Edit</a>
                         </td>
                     </tr>
                     @endforeach
