@@ -29,12 +29,12 @@
             <div class="form-group">
               <label>Choose Summary Language</label>
               <select class="form-control language">
-                <option {{ ('en' == $user->langauge) ? 'selected' : '' }}>English</option>
-                <option {{ ('ar' == $user->langauge) ? 'selected' : '' }}>Arabic</option>
-                <option {{ ('fr' == $user->langauge) ? 'selected' : '' }}>French</option>
-                <option {{ ('pt' == $user->langauge) ? 'selected' : '' }}>Portuguese</option>
-                <option {{ ('es' == $user->langauge) ? 'selected' : '' }}>Spanish</option>
-                <option {{ ('sw' == $user->langauge) ? 'selected' : '' }}>Swahili</option>
+                <option {{ ($user && 'en' == $user->langauge) ? 'selected' : '' }}>English</option>
+                <option {{ ($user && 'ar' == $user->langauge) ? 'selected' : '' }}>Arabic</option>
+                <option {{ ($user && 'fr' == $user->langauge) ? 'selected' : '' }}>French</option>
+                <option {{ ($user && 'pt' == $user->langauge) ? 'selected' : '' }}>Portuguese</option>
+                <option {{ ($user && 'es' == $user->langauge) ? 'selected' : '' }}>Spanish</option>
+                <option {{ ($user && 'sw' == $user->langauge) ? 'selected' : '' }}>Swahili</option>
               </select>
             </div>
           </div>
