@@ -165,7 +165,9 @@
         </div>
 
       </div>
-      <div class="modal-footer">
+
+      <!-- Action Buttons Moved Below the Form -->
+      <div class="modal-footer d-flex justify-content-center">
         <button class="btn btn-success" type="button" onclick="startAiSummary()">
           <i class="fa-solid fa-robot"></i> Process Request Now
         </button>
@@ -174,6 +176,7 @@
         </button>
         <button class="btn btn-danger" data-dismiss="modal" type="button">Close</button>
       </div>
+
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div>
