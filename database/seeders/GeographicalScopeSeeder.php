@@ -20,6 +20,7 @@ class GeographicalScopeSeeder extends Seeder
             ['name' => 'Southern Africa', 'description' => 'Southern region of Africa'],
             ['name' => 'Eastern Africa', 'description' => 'Eastern region of Africa'],
             ['name' => 'Central Africa', 'description' => 'Central region of Africa'],
+            ['name' => 'Nothern Africa', 'description' => 'Nothern region of Africa'],
             ['name' => 'Whole of Africa', 'description' => 'The entire continent of Africa'],
             ['name' => 'Global', 'description' => 'Worldwide or global scope']
         ]);
