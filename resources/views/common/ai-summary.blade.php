@@ -10,7 +10,7 @@
 </style>
 	<!--  Extra Large modal example -->
 <div class="modal" id="summarise-modal">
-    <div class="modal-dialog modal-md">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
           <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa-solid fa-microchip"></i>AI Processing(Summarizer)</small></h2>
@@ -39,7 +39,7 @@ $user = current_user();
             </div>
              <div class="form-group col-md-8">
               <label>Custom Prompt</label>
-              <textarea name="custom_prompt"  class="form-control">Make a 2 Pages Summary Comprehensive Summary</textarea>
+              <input type="text" name="prompt" placeholder="E.g 'Make a 1 Page Summary'" class="form-control">
               
             </div>
           </div>
