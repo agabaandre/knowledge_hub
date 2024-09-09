@@ -13,7 +13,7 @@
     <div class="modal-dialog modal-md">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa fa-robot"></i> Content Summary <small>(AI Assisted)</small></h2>
+          <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa-solid fa-microchip"></i>AI Processing(Summarizer)</small></h2>
           
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span class="ft-lg" aria-hidden="true">&times;</span>
@@ -22,12 +22,12 @@
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
 
           @php
-            $user = current_user();
+$user = current_user();
           @endphp
 
           <div class="row mb-10  d-flex justify-content-center">
-            <div class="form-group">
-              <label>Choose Summary Language</label>
+            <div class="form-group col-md-4">
+              <label>Language</label>
               <select class="form-control language">
                 <option {{ ($user && 'en' == $user->langauge) ? 'selected' : '' }}>English</option>
                 <option {{ ($user && 'ar' == $user->langauge) ? 'selected' : '' }}>Arabic</option>
@@ -36,6 +36,11 @@
                 <option {{ ($user && 'es' == $user->langauge) ? 'selected' : '' }}>Spanish</option>
                 <option {{ ($user && 'sw' == $user->langauge) ? 'selected' : '' }}>Swahili</option>
               </select>
+            </div>
+             <div class="form-group col-md-8">
+              <label>Custom Prompt</label>
+              <textarea name="custom_prompt"  class="form-control">Make a 2 Pages Summary Comprehensive Summary</textarea>
+              
             </div>
           </div>
           
@@ -46,7 +51,7 @@
         </div>
         <div class="modal-footer">
           <button class="btn btn-success"  type="button" onclick="startAiSummary()">
-            <span aria-hidden="true"><i class="fa fa-magic"></i> Summarise Now</span>
+            <span aria-hidden="true"><i class="fa-solid fa-robot"></i> Process Request Now</span>
           </button>
           <button class="btn copy" style="display: none;" type="button" onclick="copyToClipboard()">
             <span aria-hidden="true"><i class="fa fa-copy"></i> Copy</span>
