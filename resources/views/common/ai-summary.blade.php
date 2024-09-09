@@ -44,15 +44,7 @@ $user = current_user();
             </div>
              
           </div>
-          <div class="modal-footer row">
-            <button class="btn btn-success" type="button" onclick="startAiSummary()">
-              <span aria-hidden="true"><i class="fa-solid fa-robot"></i> Process Request Now</span>
-            </button>
-            <button class="btn copy" style="display: none;" type="button" onclick="copyToClipboard()">
-              <span aria-hidden="true"><i class="fa fa-copy"></i> Copy</span>
-            </button>
-            <button class="btn btn-danger" data-dismiss="modal" type="button">Close</button>
-          </div>
+          
           
           <div class="row  d-flex justify-content-center">
             
