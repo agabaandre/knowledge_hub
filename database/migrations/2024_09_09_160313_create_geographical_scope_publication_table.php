@@ -20,7 +20,7 @@ class CreateGeographicalScopePublicationTable extends Migration
 
     
             // Index to improve performance on queries
-            $table->unique(['publication_id', 'geographical_scope_id']); // Ensure uniqueness of the pair
+            $table->unique(['publication_id', 'geographical_scope_id'], 'geo_scope_pub_pub_id_geo_scope_id_unique');// Ensure uniqueness of the pair
             $table->timestamps();
         });
     }
