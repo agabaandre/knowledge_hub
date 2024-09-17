@@ -21,6 +21,7 @@ use App\View\Composers\SubThemesViewComposer;
 use App\View\Composers\TagsViewComposer;
 use App\View\Composers\ThemesViewComposer;
 use App\View\Composers\CommunitiesOfPracticeViewComposer;
+use App\View\Composers\OccupationsViewComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades;
@@ -66,6 +67,7 @@ class ViewComposerServiceProvider extends ServiceProvider
 
         View::composer(['partials/publications/*','account/*',],CommunitiesOfPracticeViewComposer::class);
         View::composer(['partials/publications/*','account/*',],AccessGroupsViewComposer::class);
+        View::composer(['partials/jobs/*'],OccupationsViewComposer::class);
         
     }
 }

@@ -4,11 +4,12 @@ namespace App\Repositories;
 use App\Models\Country;
 use App\Models\Expert;
 use App\Models\ExpertType;
+use App\Models\JobTitle;
 use Illuminate\Http\Request;
 
 class ExpertsRepository extends SharedRepo{
 
-    public function get(Request $request){
+    public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
         $query    = Expert::orderBy('id','desc');
@@ -32,7 +33,7 @@ class ExpertsRepository extends SharedRepo{
        
         $this->access_filter($query);
 
-        $results = $query->paginate($rows_count);
+        $results = ($return_array)?$query->get():$query->paginate($rows_count);
         return $results;
     }
 
@@ -123,6 +124,16 @@ class ExpertsRepository extends SharedRepo{
 
         return ExpertType::find($id)->delete();
     }
+
+    public function get_jobs(Request $request){
+
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+       return cache()->remember( 'occupations',$minutes, function () {
+            return   JobTitle::all();
+        });
+    }
+
 
 
 }

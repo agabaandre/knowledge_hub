@@ -7,9 +7,9 @@ use Illuminate\Http\Request;
 
 class CommsOfPracticeRepository{
 
-    public function get(Request $request){
+    public function get(Request $request,$return_array=false){
 
-        return CommunityOfPractice::paginate(15);
+        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::paginate(15);
     }
     
     public function save(Request $request){

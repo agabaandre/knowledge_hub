@@ -9,19 +9,30 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
+use App\Models\CommunityOfPractice;
 use App\Models\Country;
+use App\Repositories\CommsOfPracticeRepository;
+use App\Repositories\ExpertsRepository;
+use App\Repositories\FileTypesRepository;
+use App\Repositories\TagsRepository;
 
 class LookupApiController extends ApiController
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo,$expertsRepo,$commsRepo,$tagsRepo,$fileTypesRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,ThemesRepository $themesRepo){
+    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,ThemesRepository $themesRepo
+    ,ExpertsRepository $expertsRepo, CommsOfPracticeRepository $commsRepo
+    ,TagsRepository $tagsRepo,FileTypesRepository $fileTypesRepo){
 
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
         $this->themesRepo       = $themesRepo;
+        $this->expertsRepo      = $expertsRepo;
+        $this->commsRepo        = $commsRepo;
+        $this->tagsRepo         = $tagsRepo;
+        $this->fileTypesRepo    = $fileTypesRepo;
     }
 
 
@@ -107,6 +118,109 @@ class LookupApiController extends ApiController
             ];
         }
 
+
+    
+    /**
+    * @OA\Get(
+    * path="/api/lookup/jobs",
+    * operationId="List Jobs",
+    * security={{"bearer_token":{}}},
+    * tags={"List Jobs"},
+    * summary="List Jobs",
+    * description="Returns a list of Jobs",
+    * @OA\Response(
+    *    response=200,
+    *    description="Successful",
+    *    @OA\JsonContent()
+    *  )
+    * )
+    */
+    
+    public function jobs(Request $request)
+    {
+        $sub_themes =  $this->expertsRepo->get_jobs($request,true);
+        return [
+            "status" => 200,
+            "data" => $sub_themes
+        ];
+    }
+
+      /**
+    * @OA\Get(
+    * path="/api/lookup/communities",
+    * operationId="List Communities",
+    * security={{"bearer_token":{}}},
+    * tags={"List Communities"},
+    * summary="List Communities",
+    * description="Returns a list of Communities",
+    * @OA\Response(
+    *    response=200,
+    *    description="Successful",
+    *    @OA\JsonContent()
+    *  )
+    * )
+    */
+    
+    public function communities(Request $request)
+    {
+        $comms =  $this->commsRepo->get($request,true);
+        return [
+            "status" => 200,
+            "data" => $comms
+        ];
+    }
+
+       /**
+    * @OA\Get(
+    * path="/api/lookup/preferences",
+    * operationId="List Preferences",
+    * security={{"bearer_token":{}}},
+    * tags={"List Preferences"},
+    * summary="List Preferences",
+    * description="Returns a list of Preferences",
+    * @OA\Response(
+    *    response=200,
+    *    description="Successful",
+    *    @OA\JsonContent()
+    *  )
+    * )
+    */
+    
+    public function preferences(Request $request)
+    {
+        $prefs =  $this->tagsRepo->get($request,true);
+        return [
+            "status" => 200,
+            "data" => $prefs
+        ];
+    }
+
+    
+    /**
+    * @OA\Get(
+    * path="/api/lookup/file-categories",
+    * operationId="List File Categories",
+    * security={{"bearer_token":{}}},
+    * tags={"List File Categories"},
+    * summary="List File Categories",
+    * description="Returns a list of File Categories",
+    * @OA\Response(
+    *    response=200,
+    *    description="Successful",
+    *    @OA\JsonContent()
+    *  )
+    * )
+    */
+    
+    public function file_categories(Request $request)
+    {
+        $categories =  $this->fileTypesRepo->get($request,true);
+        return [
+            "status" => 200,
+            "data" => $categories
+        ];
+    }
+    
     
 
 }

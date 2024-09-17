@@ -48,6 +48,7 @@ class ExpertsApiController extends ApiController
    /**  @OA\Post(
     * path="/api/experts",
     *   tags={"Create Country Expert"},
+    * security={{"bearer_token":{}}},
     *   summary="Create Country Expert",
     * security={{"bearer_token":{}}},
     *   operationId="CreateExpert",
@@ -112,6 +113,7 @@ class ExpertsApiController extends ApiController
     /** @OA\Post(
     * path="/api/experts/{id}",
     *   tags={"Update Country Expert"},
+    * security={{"bearer_token":{}}},
     *   summary="Update Country Expert",
     *   operationId="UpdateExpert",
     *   description="Allows users to update Country Expert Record",
@@ -179,6 +181,7 @@ class ExpertsApiController extends ApiController
 *   path="/api/experts/{id}",
 *   operationId="DeleteSingleExpertRecord",
 *   tags={"Delete Expert"},
+* security={{"bearer_token":{}}},
 *   summary="Delete Single Expert Record",
 *   description="Deletes a single expert record based on the ID.",
 *   @OA\Parameter(
@@ -209,4 +212,5 @@ class ExpertsApiController extends ApiController
             "data"   => ($this->expertsRepo->delete($id))?"Successfully deleted":"Operation Failed"
         ];
     }
+
 }
