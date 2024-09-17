@@ -361,6 +361,39 @@ function cleanHtmlContent($htmlContent)
 
 
 // Now you can pass $cleanedContent to your view
+if (!function_exists('extract_first_page_as_image')) {
+    /**
+     * Extract the first page of a PDF as an image
+     *
+     * @param string $pdfPath Path to the uploaded PDF or PDF URL
+     * @param string $outputPath Output path for the image
+     * @return string Image path or URL
+     * @throws Exception if extraction fails
+     */
+    function extract_first_page_as_image(string $pdfPath, string $outputPath): string
+    {
+        try {
+            // Create an instance of the PDF to Image converter
+            $pdf = new Pdf($pdfPath);
+            
+            // Set the page to be converted (Page 1)
+            $pageNumber = 1;
+
+            // Specify the image format (e.g., jpeg, png)
+            $imageFormat = 'png';
+
+            // Generate the image from the first page
+            $imagePath = $outputPath . '/' . basename($pdfPath, '.pdf') . '_page1.' . $imageFormat;
+            $pdf->setPage($pageNumber)->saveImage($imagePath);
+
+            // Return the generated image path
+            return $imagePath;
+        } catch (Exception $e) {
+            throw new Exception("Failed to extract the first page as an image: " . $e->getMessage());
+        }
+    }
+}
+
 
 
 

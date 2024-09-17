@@ -3,11 +3,11 @@
 @section('content')
 
 	@php
-		if($publication->cover):
-			$image_link = storage_link('uploads/publications/'.$publication->cover);
-		else:
-			$image_link = storage_link('uploads/publications/cover.jpg');
-		endif;
+if ($publication->cover):
+	$image_link = storage_link('uploads/publications/' . $publication->cover);
+else:
+	$image_link = storage_link('uploads/publications/cover.jpg');
+endif;
 	@endphp
 
 
@@ -35,18 +35,18 @@
 									<span>{!! $publication->theme->description !!}</span>
 								</div>
 								<div class="jbl_info01">
-									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ (!$publication->is_version)?$publication->sub_theme->description:'Version '.$publication->version_no }}</span>
-									@if(count($publication->favourited)>0)
+									<span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ (!$publication->is_version) ? $publication->sub_theme->description : 'Version ' . $publication->version_no }}</span>
+									@if(count($publication->favourited) > 0)
 									@php
-									 $likes = count($publication->favourited)
+	$likes = count($publication->favourited)
 									@endphp
-									<span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i class="lni lni-heart mr-1"></i> {{ $likes }} User{{ ($likes>1)?"s":"" }} liked this</span>
+									<span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i class="lni lni-heart mr-1"></i> {{ $likes }} User{{ ($likes > 1) ? "s" : "" }} liked this</span>
 									@endif
 								</div>
 
 								<div class="jbl_info01 mt-3 col-sm-12 col-lg-4" >
 									<a  onclick="summarise({{ $publication->id }})"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="color:white;">
-									  <i class="fa fa-robot"></i> Summarise this for me</a>
+									<i class="fa-solid fa-microchip"></i>AI Processing(Summarizer)</a>
 								</div>
 	  
 							</div>
@@ -92,7 +92,7 @@
 
 			   @php
 
-			    $col =(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)?"7":"12";
+$col = (count($publication->summaries) > 0 || $publication->has_attachments || $publication->parent_id > 0) ? "7" : "12";
 			   
 				@endphp
 
@@ -148,7 +148,7 @@
 									<div class="details ft-medium">
 										<div class="btn btn-outline-dark mt-2"> 
                                          @php
-                                            $row = $publication;
+$row = $publication;
                                          @endphp  
 									     @include('common.favourites_btn')
 										</div>
@@ -168,7 +168,7 @@
 						<div class="jbd-02 pt-4 pr-3 container">
 							<h5 class="text-bold text-success">Share this</h5>
 							<div class="row justify-content-center">
-								{{ share_buttons( url('records/resource')."?id=".$publication->id) }}
+								{{ share_buttons(url('records/resource') . "?id=" . $publication->id) }}
 							</div>
 						</div>
 					</div>
@@ -183,7 +183,7 @@
 									<ul>
 
 										@foreach ($publication->comments as $comment)
-										  @if($comment->status =='approved')
+										  @if($comment->status == 'approved')
 											<li class="article_comments_wrap">
 
 												<article>
@@ -218,20 +218,20 @@
 
 				<!-- Sidebar -->
 
-				@if(count($publication->summaries)>0 || $publication->has_attachments || $publication->parent_id>0)
+				@if(count($publication->summaries) > 0 || $publication->has_attachments || $publication->parent_id > 0)
 				
 				<div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 
 				                 @if ($publication->has_attachments)
 										@php
-										$count = 1;
+		$count = 1;
 										@endphp
 										<h5>Attachments</h5>
 										<ul class="list-group mb-3">
 										@foreach($publication->attachments as $pub_file)
-										<li class="list-group-item"><a href="{{ storage_link('uploads/publications/') }}{{$pub_file->file}}" target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i> {{$pub_file->description ?? 'View Attachment '.$count }}</a></li>
+										<li class="list-group-item"><a href="{{ storage_link('uploads/publications/') }}{{$pub_file->file}}" target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i> {{$pub_file->description ?? 'View Attachment ' . $count }}</a></li>
 										@php
-											$count++;
+			$count++;
 										@endphp
 										
 										@endforeach
@@ -239,28 +239,28 @@
 										</ul>
 									@endif
 
-				@if(count($publication->summaries)>0 || count($publication->versioning)>0 || $publication->parent_id>0)
+				@if(count($publication->summaries) > 0 || count($publication->versioning) > 0 || $publication->parent_id > 0)
 					<div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
 					
 					
-					   @if(count($publication->versioning)>0)
+					   @if(count($publication->versioning) > 0)
 							<h4 class="ft-medium fs-md mb-3">Resource Versions</h4>
 							<ul class="list-group mb-3">
 								@foreach($publication->versioning as $version)
 									<li><h5 class="text-muted"><a href="{{ url('records/resource') }}?id={{$version->id}}">Version {{$version->version_no}}</a></h5></li>
 								@endforeach
 							</ul>
-						@elseif($publication->parent_id>0)
+						@elseif($publication->parent_id > 0)
 							<h5 class=" mb-3"><a class=" col-lg-12 text-center btn btn-sm btn-outline-success rounded" href="{{ url('records/resource') }}?id={{$publication->parent_id}}"><i class="fa fa-link"></i> Original Version</a></h5>
 						@endif
 
-						@if(count($publication->summaries)>0)
+						@if(count($publication->summaries) > 0)
 							<h6 class="ft-medium fs-sm mb-3">Summaries and Abstracts</h6>
 							<ul class="list-group mb-3">
 								@foreach($publication->summaries as $summary)
-								 @if($comment->is_approved ==1)
+								 @if($comment->is_approved == 1)
 									<li>
-										<h6 class="text-muted"><a href="{{ url('records/shortened') }}?id={{$summary->id}}">{{ truncate($summary->title,100) }} by {{$summary->author->name}}</a></h6>
+										<h6 class="text-muted"><a href="{{ url('records/shortened') }}?id={{$summary->id}}">{{ truncate($summary->title, 100) }} by {{$summary->author->name}}</a></h6>
 								    </li>
 								@endif
 								@endforeach

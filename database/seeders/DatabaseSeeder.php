@@ -14,5 +14,11 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
          \App\Models\User::factory(3)->create();
+        $this->call(GeographicalScopeSeeder::class);
+        $this->call(IscoClassificationSeeder::class);
+        $this->call(JobTitleSeeder::class);
+        $this->call(SubscribeSeeder::class);
+        $this->call(AccessLevelsSeeder::class);
+
     }
 }

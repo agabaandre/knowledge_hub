@@ -32,6 +32,7 @@ let lang = $('.language').val();
             resource_id: resourceId,
             type: isForum,
             language:lang
+    
         })
         })
         .then(response => {
