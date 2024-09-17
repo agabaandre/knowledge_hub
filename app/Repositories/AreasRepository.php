@@ -54,15 +54,33 @@ class AreasRepository{
     }
 
     public function save(Request $request) {
+        
         $id = $request->input('area_id');
         $name = $request->input('area_name');
 
         $area = GeoCoverage::findOrNew($id);
         $area->name = $name;
+        $area->iso_code = $request->iso_code;
+
+        if($request->hasFile('flag')):
+            //upload photo
+            $file        = $request->file( 'flag');
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+            $file->move(public_path().'assets/img/flags/',$file_path);
+            $area->flag  = $file_path;
+        endif;
+
         $area->save();
 
         return $area ?? null;
     }
+
+    public function delete($id){
+        return GeoCoverage::find($id)->delete();
+    }
+
 
 
 }

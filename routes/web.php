@@ -340,6 +340,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "commsofpractice"], function () {
 
         Route::any("/", [CommsOfPracticeController::class, 'index']);
+        Route::any("/moderate", [CommsOfPracticeController::class, 'moderate']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
     });
