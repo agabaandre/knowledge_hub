@@ -311,7 +311,12 @@
                     "403": {
                         "description": "Forbidden"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             },
             "delete": {
                 "tags": [
@@ -343,7 +348,12 @@
                     "404": {
                         "description": "Not Found"
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/lookup/filetypes": {
@@ -432,6 +442,106 @@
                 ]
             }
         },
+        "/api/lookup/jobs": {
+            "get": {
+                "tags": [
+                    "List Jobs"
+                ],
+                "summary": "List Jobs",
+                "description": "Returns a list of Jobs",
+                "operationId": "List Jobs",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/lookup/communities": {
+            "get": {
+                "tags": [
+                    "List Communities"
+                ],
+                "summary": "List Communities",
+                "description": "Returns a list of Communities",
+                "operationId": "List Communities",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/lookup/preferences": {
+            "get": {
+                "tags": [
+                    "List Preferences"
+                ],
+                "summary": "List Preferences",
+                "description": "Returns a list of Preferences",
+                "operationId": "List Preferences",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/lookup/file-categories": {
+            "get": {
+                "tags": [
+                    "List File Categories"
+                ],
+                "summary": "List File Categories",
+                "description": "Returns a list of File Categories",
+                "operationId": "List File Categories",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
@@ -449,7 +559,12 @@
                             }
                         }
                     }
-                }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/publications": {

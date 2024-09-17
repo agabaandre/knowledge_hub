@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 
 class FileTypesRepository{
 
-    public function get(Request $request){
+    public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:24;
         $areas = PublicationType::orderBy('id','desc');
@@ -14,7 +14,7 @@ class FileTypesRepository{
         if($request->term)
             $areas->where('name','like','%'.$request->term.'%');
 
-        $result = $areas->paginate($rows_count);
+        $result = ($return_array)?$areas->get():$areas->paginate($rows_count);
 
         return $result;
     }

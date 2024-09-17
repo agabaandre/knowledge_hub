@@ -95,10 +95,10 @@ class PublicationsApiController extends ApiController
 
         $data = [
             "status" => 200,
-            "data" =>$publications ?? [] 
+            "data" =>$publications ?? []
         ];
-
-        return response()->json($data, 200, [], JSON_UNESCAPED_UNICODE); 
+        
+        return  response()->json($data, 200); 
     }
 
     /**

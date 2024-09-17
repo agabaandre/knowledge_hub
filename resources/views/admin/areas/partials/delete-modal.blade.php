@@ -34,7 +34,7 @@
                 .then(res => {
                     console.log(res)
                     $('#delete-modal').modal('hide');
-                     window.location.reload();
+                         window.location.reload();
                 })
         }
 

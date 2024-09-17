@@ -37,15 +37,16 @@ class PublicationsRepository extends SharedRepo{
         $request['rows'] = 20;
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs = Publication::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
-            ->orderBy('id','desc')->where('is_version',0);
+        $pubs = Publication
+        //::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
+            ::orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits):
             $pubs->orderBy('visits','desc');
         else:
             $pubs->orderBy('id','desc');
         endif;
-
+        
           //search by keyword
           if(empty(!$request->term)){
             
@@ -111,12 +112,12 @@ class PublicationsRepository extends SharedRepo{
          $pubs->where('geographical_coverage_id',$request->area);
 
          //search by tag
-         if($request->tag){
+        //  if($request->tag){
 
-            $tag = Tag::where('tag_text',$request->tag)->first();
-            $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
-            $pubs->whereIn('id',$tags->toArray());
-        }
+        //     $tag = Tag::where('tag_text',$request->tag)->first();
+        //     $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
+        //     $pubs->whereIn('id',$tags->toArray());
+        // }
 
         //search by rcc
         if($request->rcc && states_enabled()){
@@ -156,13 +157,14 @@ class PublicationsRepository extends SharedRepo{
           $pubs->where('is_approved',1);
         }
 
+
         Log::info($pubs->toSql());
 
         $results = ($return_array)?$pubs->get():$pubs->paginate($rows_count);
         
         Log::info(count($results));
 
-        return   ($return_array)?$results:$results->appends($request->all());
+        return  ($return_array)?$results:$results->appends($request->all());
     }
 
     public function with_pending_comments($request){

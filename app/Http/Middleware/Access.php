@@ -27,6 +27,7 @@ class Access
         unset($logData['logo']);
         unset($logData['favicon']);
         unset($logData['spotlight_banner']);
+        unset($logData['flag']);
 
          AccessLogJob::dispatch($ip,$logData);
 

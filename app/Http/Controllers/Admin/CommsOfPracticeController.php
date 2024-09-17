@@ -87,5 +87,11 @@ class CommsOfPracticeController extends Controller
         return $this->commsOfPracticeRepository->delete($request->id);
     }
 
+    public function moderate(Request $request){
+
+        $data['communities'] = $this->commsOfPracticeRepository->get($request);
+        return view('admin.commsofpractice.moderate', $data);
+    }
+
   
 }
