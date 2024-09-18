@@ -18,19 +18,9 @@ class CreateGeographicalScopePublicationTable extends Migration
             $table->unsignedBigInteger('publication_id'); // Foreign key to publications table
             $table->unsignedBigInteger('geographical_scope_id'); // Foreign key to geographical_scope table
 
-            // Foreign key constraints
-            $table->foreign('publication_id')
-                ->references('id')
-                ->on('publications')
-                ->onDelete('cascade');
-
-            $table->foreign('geographical_scope_id')
-                ->references('id')
-                ->on('geographical_scope')
-                ->onDelete('cascade');
-
+    
             // Index to improve performance on queries
-            $table->unique(['publication_id', 'geographical_scope_id']); // Ensure uniqueness of the pair
+            $table->unique(['publication_id', 'geographical_scope_id'], 'geo_scope_pub_pub_id_geo_scope_id_unique');// Ensure uniqueness of the pair
             $table->timestamps();
         });
     }
