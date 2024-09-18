@@ -55,12 +55,12 @@ class Publication extends Model
     }
 
     public function getLabelAttribute(){
-        return substr($this->title,0,100);
+        return substr(cleanUTF8($this->title),0,100);
     }
 
 
     public function getValueAttribute(){
-        return substr($this->title,0,100);
+        return substr(cleanUTF8($this->title),0,100);
     }
 
     public function comments(){
@@ -150,6 +150,21 @@ class Publication extends Model
         return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
     }
 
+    public function getPublicationAttribute($value)
+    {
+        return cleanUTF8($value);
+    }
+
+    // Ensure the content is UTF-8 encoded
+    public function getDescriptionAttribute($value)
+    {
+        return  cleanUTF8($value);
+    }
+
+    public function getTitleAttribute($value)
+    {
+        return cleanUTF8($value);
+    }
     
 
 

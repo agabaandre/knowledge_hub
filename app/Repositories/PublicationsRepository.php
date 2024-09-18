@@ -37,9 +37,8 @@ class PublicationsRepository extends SharedRepo{
         $request['rows'] = 20;
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $pubs = Publication
-        //::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
-            ::orderBy('id','desc')->where('is_version',0);
+        $pubs = Publication::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
+            ->orderBy('id','desc')->where('is_version',0);
 
         if($request->order_by_visits):
             $pubs->orderBy('visits','desc');
@@ -48,7 +47,7 @@ class PublicationsRepository extends SharedRepo{
         endif;
         
           //search by keyword
-          if(empty(!$request->term)){
+          if(strlen($request->term)>2){
             
             $pubs->where('title','like',$request->term.'%');
             $pubs->orWhere('publication','like',$request->term.'%');
@@ -156,7 +155,6 @@ class PublicationsRepository extends SharedRepo{
           $pubs->where('is_active','Active');
           $pubs->where('is_approved',1);
         }
-
 
         Log::info($pubs->toSql());
 

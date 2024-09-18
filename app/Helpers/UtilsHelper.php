@@ -394,6 +394,15 @@ if (!function_exists('extract_first_page_as_image')) {
     }
 }
 
+function cleanUTF8($value){
+
+    $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
+    $value = preg_replace('/[^\x20-\x7E\xA0-\xFF]/', '', $value);
+    $value = filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+
+    return $value;
+}
+
 
 
 

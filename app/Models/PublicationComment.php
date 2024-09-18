@@ -13,4 +13,9 @@ class PublicationComment extends Model
     public function user(){
         return $this->belongsTo(User::class,"user_id","id");
     }
+
+    public function getCommentAttribute($value)
+    {
+           return cleanUTF8($value);
+    }
 }

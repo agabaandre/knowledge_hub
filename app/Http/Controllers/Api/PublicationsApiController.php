@@ -87,18 +87,26 @@ class PublicationsApiController extends ApiController
     {
         Log::info($request->all());
 
+        if(!$request->term)
+        $request['term']='the';
+
         $publications = $this->publicationsRepo->get($request,true);
        
-        Log::info($publications);
-
         $publications = $publications->toArray();
 
         $data = [
             "status" => 200,
             "data" =>$publications ?? []
         ];
-        
-        return  response()->json($data, 200); 
+
+      
+        // Check for encoding errors
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            // Handle the error, maybe log it or throw an exception
+            throw new \Exception('Error encoding JSON: ' . json_last_error_msg());
+        }
+
+       return  response()->json($data, 200); 
     }
 
     /**
