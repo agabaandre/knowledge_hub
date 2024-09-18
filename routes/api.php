@@ -39,6 +39,10 @@ Route::group(["prefix" =>"members"],function(){
 
 Route::apiResource("experts",ExpertsApiController::class);
 
+
+});
+
+
 Route::group(["prefix" =>"lookup"],function(){
     Route::get('/filetypes', [LookupApiController::class,"file_types"]);
     Route::get('/themes', [LookupApiController::class,"themes"]);
@@ -48,9 +52,6 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/communities', [LookupApiController::class,"communities"]);
     Route::get('/file-categories', [LookupApiController::class,"file_categories"]);
 });
-
-});
-
 
 Route::get('/log',function(){
 

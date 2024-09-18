@@ -40,7 +40,6 @@ class LookupApiController extends ApiController
         * @OA\Get(
         * path="/api/lookup/filetypes",
         * operationId="List Publications File Types",
-        * security={{"bearer_token":{}}},
         * tags={"List  File Types"},
         * summary="List  File Types",
         * description="Returns a list of all file types",
@@ -64,7 +63,6 @@ class LookupApiController extends ApiController
         * @OA\Get(
         * path="/api/lookup/themes",
         * operationId="List Themes",
-        * security={{"bearer_token":{}}},
         * tags={"List Themes"},
         * summary="List Themes",
         * description="Returns a list of Themes",
@@ -88,7 +86,6 @@ class LookupApiController extends ApiController
         * @OA\Get(
         * path="/api/lookup/sub_themes",
         * operationId="List Sub Themes",
-        * security={{"bearer_token":{}}},
         * tags={"List Sub Themes"},
         * summary="List Sub Themes",
         * description="Returns a list of Sub Themes",
@@ -124,7 +121,6 @@ class LookupApiController extends ApiController
     * @OA\Get(
     * path="/api/lookup/jobs",
     * operationId="List Jobs",
-    * security={{"bearer_token":{}}},
     * tags={"List Jobs"},
     * summary="List Jobs",
     * description="Returns a list of Jobs",
@@ -149,7 +145,6 @@ class LookupApiController extends ApiController
     * @OA\Get(
     * path="/api/lookup/communities",
     * operationId="List Communities",
-    * security={{"bearer_token":{}}},
     * tags={"List Communities"},
     * summary="List Communities",
     * description="Returns a list of Communities",
@@ -174,7 +169,6 @@ class LookupApiController extends ApiController
     * @OA\Get(
     * path="/api/lookup/preferences",
     * operationId="List Preferences",
-    * security={{"bearer_token":{}}},
     * tags={"List Preferences"},
     * summary="List Preferences",
     * description="Returns a list of Preferences",
@@ -200,7 +194,6 @@ class LookupApiController extends ApiController
     * @OA\Get(
     * path="/api/lookup/file-categories",
     * operationId="List File Categories",
-    * security={{"bearer_token":{}}},
     * tags={"List File Categories"},
     * summary="List File Categories",
     * description="Returns a list of File Categories",
