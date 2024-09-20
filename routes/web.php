@@ -51,6 +51,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\CoursesController;
+use App\Http\Controllers\Admin\AdminCoursesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -393,6 +394,12 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "tools"], function () {
 
         Route::any("/", [ToolsAdminController::class, 'index']);
+    });
+
+    //accessgroup
+    Route::group(["prefix" => "courses"], function () {
+
+        Route::get("/", [AdminCoursesController::class, 'index']);
     });
 });
 
