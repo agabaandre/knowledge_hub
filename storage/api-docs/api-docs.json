@@ -29,13 +29,13 @@
                 "operationId": "User Registration",
                 "requestBody": {
                     "content": {
-                        "application/json": {
+                        "multipart/form-data": {
                             "schema": {
                                 "properties": {
-                                    "first_name": {
+                                    "firstname": {
                                         "type": "string"
                                     },
-                                    "last_name": {
+                                    "lastname": {
                                         "type": "string"
                                     },
                                     "country_id": {
@@ -44,7 +44,7 @@
                                     "job": {
                                         "type": "string"
                                     },
-                                    "phone_number": {
+                                    "phone": {
                                         "type": "string"
                                     },
                                     "email": {
@@ -52,6 +52,26 @@
                                     },
                                     "password": {
                                         "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    },
+                                    "preferences": {
+                                        "description": "Array of PReference Ids",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "photo": {
+                                        "description": "Photo file to upload",
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"

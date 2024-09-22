@@ -63,6 +63,10 @@ class User extends Authenticatable
         return ($this->country)?GeoCoverage::where('name','like','%'.$this->country->name.'%')->first():null;
      }
 
+     public function getPhotottribute(){
+        return user_profile_photo($this->photo);
+     }
+
      public function access_level(){
         return $this->belongsTo(AccessLevel::class,"access_level_id","id");
      }

@@ -23,15 +23,26 @@ class AuthApiController extends ApiController
     * description="User Registration",
     * @OA\RequestBody(
     *         @OA\MediaType(
-    *            mediaType="application/json",
+    *            mediaType="multipart/form-data",
     *            @OA\Schema(
-    *               @OA\Property(property="first_name", type="string"),
-    *               @OA\Property(property="last_name", type="string"),
-    *               @OA\Property(property="country_id", type="string"),
+    *               @OA\Property(property="firstname", type="string"),
+    *               @OA\Property(property="lastname", type="string"),
+    *               @OA\Property(property="country_id", type="integer"),
     *               @OA\Property(property="job", type="string"),
-    *               @OA\Property(property="phone_number", type="string"),
+    *               @OA\Property(property="phone", type="string"),
     *               @OA\Property(property="email", type="string"),
     *               @OA\Property(property="password", type="string"),
+      *               @OA\Property(property="password_confirmation", type="string"),
+    *               @OA\Property(property="preferences", type="array",
+    *                  @OA\Items(type="integer"),
+    *                     description="Array of PReference Ids",
+    *                     example={1, 2, 3}),
+    *               @OA\Property(
+    *                     property="photo",
+    *                     type="string",
+    *                     format="binary",
+    *                     description="Photo file to upload"
+    *                )
     *            )
     *        )
     *   ),
@@ -63,17 +74,22 @@ class AuthApiController extends ApiController
     public function register(Request $request)
     {
         $this->validate($request, [
-            'first_name' => 'required|string|max:255',
-            'last_name' => 'required|string|max:255',
+            'firstname' => 'required|string|max:255',
+            'lastname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:6|confirmed',
-            'phone_number' => 'required|string|min:10',
+            'phone' => 'required|string|min:10',
+            'job' => 'required|string|min:4',
+            'country_id' => 'required|integer'
         ]);
 
-        $user   = $this->usersRepo->update_profile($request);
-        $token = auth()->login($user);
+        $user   = $this->usersRepo->save($request);
+        $user->photo = user_profile_photo($user->photo);
+        $user->verification_token = null;
+        unset($user->password);
+        unset($user->area);
 
-        return $this->respondWithToken($token);
+        return   response()->json(["status"=>200,"data"=>$user]);
     }
 
     /**
@@ -124,13 +140,15 @@ class AuthApiController extends ApiController
     
     public function login(Request $request)
     {
+        
+        
         $credentials = $request->only('email', 'password');
 
         if (! $token = auth()->attempt($credentials)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        return $this->respondWithToken($token);
+        return response()->json(["status"=>200,"data"=>"Users Passport Instead"]);
     }
 
 

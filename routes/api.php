@@ -25,10 +25,11 @@ use App\Http\Controllers\TestController;
 ///,
 
 
-Route::group(['middleware' => 'auth:api'],function(){
-
 Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
+
+Route::group(['middleware' => 'auth:api'],function(){
+
 Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
 Route::get('/logout', [AuthApiController::class,"logout"]);
 Route::apiResource("publications",PublicationsApiController::class);

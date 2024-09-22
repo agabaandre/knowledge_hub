@@ -35,7 +35,7 @@ class UsersRepository {
         if($request->subscribe)
         $user->is_subscribed     = ($request->subscribe=="on")?true:false;
 
-        if($request->hasFile('photo')):
+        if($request->hasFile( 'photo')):
             //upload photo
             $file        = $request->file('photo');
             $file_name   = md5_file($file->getRealPath());
@@ -46,6 +46,7 @@ class UsersRepository {
         endif;
 
         $user->save();
+        $user = User::find($user->id);
 
         $this->send_email($request, $token);
 
@@ -56,7 +57,7 @@ class UsersRepository {
 
     public function send_email($request, $token){
 
-        $mail['body'] = 'Account confirmation';
+        $mail['subject'] = 'Account confirmation';
         $mail['email'] = $request->email;
         $mail['body'] = view('emails.email_verification', ['token' => $token])->render();
 

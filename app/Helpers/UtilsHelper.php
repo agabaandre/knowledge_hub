@@ -286,11 +286,12 @@ function clear_cache(){
   Cache::flush();
 }
 
-function user_profile_photo(){
+function user_profile_photo($photo=null){
 
 
-    if (!empty(current_user()->photo)):
-        $image_link = asset('storage/uploads/users/' . current_user()->photo);
+    if (!empty(@current_user()->photo) || $photo):
+        $user_photo = ($photo)?$photo:current_user()->photo;
+        $image_link = asset('storage/uploads/users/' . $user_photo);
     else:
         $image_link = asset('assets/images/user.jpg');
     endif;
