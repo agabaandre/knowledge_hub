@@ -19,7 +19,7 @@ class AdminCoursesController extends Controller
     public function index(Request $request){
 
         $data['courses'] = $this->coursesRepository->get($request);
-        $data['categories'] = [];
+        $data['categories'] = $this->coursesRepository->categories();
         $data['search']    = (Object) $request->all();
         return view('admin.courses.index',$data);
     }

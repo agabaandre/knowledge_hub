@@ -12,40 +12,38 @@
 				<div class="card">
 					<div class="card-header">
 						<h4 class="card-title">Courses</h4>
-						<div class="col-md-12 text-right mb-2">
-							<a href="#create-modal" data-toggle="modal" class="btn btn-success float-right"><i class="fa fa-plus"></i> Add New</a>
-						</div>
+						
 						
 						<form method="GET" class="container-fluid">
 							<div class="row">
-								<div class="col-md-3">
+								<div class="col-md-4">
 									<div class="form-group">
 										<label for="country">Category</label>
 										<select class="form-control" id="category" name="category">
-											<option value="">Select Category</option>
+											<option value="">All</option>
 											@foreach($categories as $category)
-												<option value="{{ $category->id }}">{{ $category->name }}</option>
+												<option value="{{ $category->id }}" {{ ($search->category ?? null && $search->category ?? null == $category->id)?"selected":""}}>{{ $category->name }}</option>
 											@endforeach
 										</select>
 									</div>
 								</div>
-							</div>
 
-							<div class="row">
-								<div class="col-md-12 text-right">
+								<div class="col-md-4">
+									<div class="form-group">
+										<label for="country">Search</label>
+										<input class="form-control" id="term" name="term" value="{{$search->term ?? ''}}">
+									</div>
+								</div>
+
+								<div class="col-md-3 mt-4 text-right">
 									<!-- Export Button -->
-								<button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-								<button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
-								
-								@auth
-                                    @if(count($courses) > 0)
-                                        <a href="?export=1" class="btn btn-sm btn-success ml-2"><i class="fa fa-file-excel"></i>&nbsp; Export to Excel</a>
-                                    @endif
-                                @endauth
-
+								<button type="submit" id="filterButton" class="btn btn-primary">Filter Data</button>
+								<button type="button" id="reset" class="btn btn-secondary">Reset</button>
+							
 								</div>
 							</div>
 
+							
 							
 						</form>
 

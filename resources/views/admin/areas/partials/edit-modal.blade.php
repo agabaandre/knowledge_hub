@@ -43,7 +43,7 @@
 
                     <div class="form-group mt-3">
                         <label class="form-label">Map SVG</label>
-                        <textarea  name="map" rows="4" class="form-control" id="map"></textarea>
+                        <textarea  name="map" rows="4" class="form-control" name="map" id="map"></textarea>
                         @error('map')
                             <span class="invalid-feedback" role="alert">
                                 <strong>{{ $message }}</strong>
