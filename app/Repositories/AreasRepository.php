@@ -70,7 +70,7 @@ class AreasRepository{
             $file_name   = md5_file($file->getRealPath());
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
-            $file->move(public_path().'assets/img/flags/',$file_path);
+            $file->move(public_path('assets/img/flags/'),$file_path);
             $area->flag  = $file_path;
         endif;
 
