@@ -29,7 +29,7 @@ class MembersApiController extends ApiController
         */
         public function member_states()
         {
-            $countries = Country::where('national','national')->get();
+            $countries = Country::where('national','national')->get()->toArray() ?? [];
             return [
                 "status" => 200,
                 "data" => $countries

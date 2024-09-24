@@ -40,7 +40,7 @@ class ExpertsApiController extends ApiController
     public function index(Request $request)
     {
         $request['rows'] = $request->page_size;
-        $data = $this->expertsRepo->get($request);
+        $data = $this->expertsRepo->get($request)->toArray() ?? [];
         $data['page_size'] = intval($request->rows);
         $data['status'] = 200;
 
