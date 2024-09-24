@@ -37,6 +37,7 @@ class ForumsApiController extends ApiController
         *       )
         * )
         */
+        
     public function index(Request $request)
     {
 
