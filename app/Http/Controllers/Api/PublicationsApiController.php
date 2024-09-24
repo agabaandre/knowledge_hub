@@ -66,6 +66,15 @@ class PublicationsApiController extends ApiController
         *      @OA\Schema(
         *           type="integer"
         *      )
+        *   ), 
+        *  @OA\Parameter(
+        *      name="page_size",
+        *      in="query",
+        *      required=false,
+        *      description="Page Size",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
         *   ),
         *  @OA\Parameter(
         *      name="is_featured",
@@ -74,14 +83,6 @@ class PublicationsApiController extends ApiController
         *      description="Filter Featured",
         *      @OA\Schema(
         *           type="boolean"
-        *      )
-        *  @OA\Parameter(
-        *      name="page_size",
-        *      in="query",
-        *      required=false,
-        *      description="Page Size",
-        *      @OA\Schema(
-        *           type="integer"
         *      )
         *   ),
         *      @OA\Response(
@@ -98,7 +99,7 @@ class PublicationsApiController extends ApiController
         if(!$request->term)
         $request['term']='the';
 
-        $request['rows']= $request->page_size;
+        $request['rows']= $request->page_size ?? 20;
 
         $publications = $this->publicationsRepo->get($request,true);
        

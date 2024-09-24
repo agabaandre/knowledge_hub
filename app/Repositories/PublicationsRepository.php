@@ -33,10 +33,8 @@ class PublicationsRepository extends SharedRepo{
 
     public function get(Request $request,$return_array=false){
 
-        if(count($request->all()))
-        $request['rows'] = 20;
-
         $rows_count = ($request->rows)?$request->rows:20;
+
         $pubs = Publication::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
             ->orderBy('id','desc')->where('is_version',0);
 
@@ -74,8 +72,6 @@ class PublicationsRepository extends SharedRepo{
            
             //forums for user communities
             $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
-
-           
 
             $pubs->where(function($query) use($commPubs) {
                 $query->whereIn('id',$commPubs)

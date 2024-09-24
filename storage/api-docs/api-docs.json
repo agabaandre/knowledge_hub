@@ -39,7 +39,7 @@
                                         "type": "string"
                                     },
                                     "country_id": {
-                                        "type": "string"
+                                        "type": "integer"
                                     },
                                     "job": {
                                         "type": "string"
@@ -592,6 +592,15 @@
                         "name": "author",
                         "in": "query",
                         "description": "Filter by Author Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Page Size",
                         "required": false,
                         "schema": {
                             "type": "integer"
