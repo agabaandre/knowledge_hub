@@ -24,6 +24,11 @@
                     <input type="text" class="form-control" maxlength="2" minlength="2" name="iso_code" id="iso_code" required>
                 </div>
 
+                <div class="form-group">
+                    <label for="name">ISO 3 Code</label>
+                    <input type="text" class="form-control" maxlength="3" minlength="3" name="iso3_code" id="iso3_code" required>
+                </div>
+
                 <div class="form-group ">
                             <label class="form-label">Flag</label>
                             <input type="file" name="flag"/>
@@ -32,9 +37,19 @@
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
-                    </div>
+                </div>
                        
                     <img src="" width="60px" id="flag" style="display: none;">
+
+                    <div class="form-group mt-3">
+                        <label class="form-label">Map SVG</label>
+                        <textarea  name="map" rows="4" class="form-control" id="map"></textarea>
+                        @error('map')
+                            <span class="invalid-feedback" role="alert">
+                                <strong>{{ $message }}</strong>
+                            </span>
+                        @enderror
+                    </div>
                 </div>
 
                 <div class="modal-footer">
@@ -55,11 +70,17 @@
             var area_id   = button.data('id');
             var area_name = button.data('name');
             var iso_code  = button.data('iso_code');
+            var iso3_code = button.data('iso3_code');
             var flag      = button.data('flag');
+            var map      = button.data('map');
+
+            console.log('data',iso3_code)
 
             $('#area_id').val(area_id);
             $('#area_name').val(area_name);
             $('#iso_code').val(iso_code);
+            $('#iso3_code').val(iso3_code);
+            $('#map').text(map);
             $('#flag').attr('src',flag).show();
         });
     </script>

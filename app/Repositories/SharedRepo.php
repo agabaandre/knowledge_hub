@@ -43,9 +43,11 @@ class SharedRepo{
            
             if($level->level_name     == "Viewer" || $level->level_name == "Country"):
              // get for own country
+
+             if($user):
             
                 if($use_country_id && states_enabled()):
-                    $query->whereIn($country_col,$user->country_id);
+                    $query->where($country_col,$user->country_id);
                 elseif($use_user_id):
                     $authors = $this->get_country_users($user->country_id);
                     $query->whereIn($col,$authors);
@@ -53,6 +55,7 @@ class SharedRepo{
                     $authors = $this->get_country_authors($user->country_id);
                     $query->whereIn($col,$authors);
                 endif;
+            endif;
              
             elseif($level->level_name == "RCC" && states_enabled()):
     

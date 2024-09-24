@@ -59,8 +59,10 @@ class AreasRepository{
         $name = $request->input('area_name');
 
         $area = GeoCoverage::findOrNew($id);
-        $area->name = $name;
-        $area->iso_code = $request->iso_code;
+        $area->name      = $name;
+        $area->iso_code  = $request->iso_code;
+        $area->iso3_code = $request->iso3_code;
+        $area->svg_path  = $request->map;
 
         if($request->hasFile('flag')):
             //upload photo

@@ -52,6 +52,7 @@
 						<th></th>
 						<th>Area Name</th>
 						<th>ISO Code</th>
+						<th>ISO 3 Code</th>
 						<th>Actions</th>
 					</tr>
 				</thead>
@@ -66,12 +67,15 @@
 							<td><img src="{{asset('assets/img/flags/' . @$row->flag)}}" width="30px"></td>
 							<td>{{ $row->name }}</td>
 							<td>{{ $row->iso_code }}</td>
+							<td>{{ $row->iso3_code }}</td>
 							<td>
                                 <a href="#edit-area-modal" data-toggle="modal" 
 									data-id="{{ $row->id }}" 
 									data-name="{{ $row->name }}" 
 									data-flag="{{asset('assets/img/flags/' . @$row->flag)}}"
-									dat-iso_code="{{ $row->iso_code }}" class="btn btn-sm btn-success ml-1">Edit</a>
+									data-iso_code="{{ $row->iso_code }}"
+									data-iso3_code="{{ $row->iso3_code }}"
+									data-map="{{ $row->svg_path }}" class="btn btn-sm btn-success ml-1">Edit</a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>

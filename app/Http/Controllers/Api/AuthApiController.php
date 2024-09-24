@@ -84,8 +84,12 @@ class AuthApiController extends ApiController
         ]);
 
         $user   = $this->usersRepo->save($request);
+        $client = \Laravel\Passport\Client::where('password_client', 1)->first();
+        $token  = $user->createToken( 'KhubApp', ['*'], $client->id)->accessToken;
+
         $user->photo = user_profile_photo($user->photo);
         $user->verification_token = null;
+        $user->token = $token;
         unset($user->password);
         unset($user->area);
 
