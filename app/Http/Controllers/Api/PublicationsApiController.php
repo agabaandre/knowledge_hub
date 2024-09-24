@@ -75,6 +75,14 @@ class PublicationsApiController extends ApiController
         *      @OA\Schema(
         *           type="boolean"
         *      )
+        *  @OA\Parameter(
+        *      name="page_size",
+        *      in="query",
+        *      required=false,
+        *      description="Page Size",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
         *   ),
         *      @OA\Response(
         *          response=200,
@@ -90,10 +98,13 @@ class PublicationsApiController extends ApiController
         if(!$request->term)
         $request['term']='the';
 
+        $request['rows']= $request->page_size;
+
         $publications = $this->publicationsRepo->get($request,true);
        
         $data = $publications->toArray() ?? [];
         $data['status'] = 200;
+        $data['page_size'] = $data['per_page'];
         unset($data['links']);
         unset($data['last_page_url']);
         unset($data['next_page_url']);
