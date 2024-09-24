@@ -92,14 +92,15 @@ class PublicationsApiController extends ApiController
 
         $publications = $this->publicationsRepo->get($request,true);
        
-        $publications = $publications->toArray();
+        $data = $publications->toArray() ?? [];
+        $data['status'] = 200;
+        unset($data['links']);
+        unset($data['last_page_url']);
+        unset($data['next_page_url']);
+        unset($data['path']);
+        unset($data['first_page_url']);
+        unset($data['prev_page_url']);
 
-        $data = [
-            "status" => 200,
-            "data" =>$publications ?? []
-        ];
-
-      
         // Check for encoding errors
         if (json_last_error() !== JSON_ERROR_NONE) {
             // Handle the error, maybe log it or throw an exception
