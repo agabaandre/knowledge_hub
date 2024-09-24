@@ -39,10 +39,12 @@ class ExpertsApiController extends ApiController
         */
     public function index(Request $request)
     {
-        return  [
-            "status" => 200,
-            "data"   => $this->expertsRepo->get($request)
-        ];
+        $request['rows'] = $request->page_size;
+        $data = $this->expertsRepo->get($request);
+        $data['page_size'] = intval($request->rows);
+        $data['status'] = 200;
+
+        return response()->json($data,200);
     }
 
    /**  @OA\Post(
@@ -181,7 +183,6 @@ class ExpertsApiController extends ApiController
 *   path="/api/experts/{id}",
 *   operationId="DeleteSingleExpertRecord",
 *   tags={"Delete Expert"},
-* security={{"bearer_token":{}}},
 *   summary="Delete Single Expert Record",
 *   description="Deletes a single expert record based on the ID.",
 *   @OA\Parameter(

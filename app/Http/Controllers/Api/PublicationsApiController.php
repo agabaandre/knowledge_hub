@@ -28,7 +28,6 @@ class PublicationsApiController extends ApiController
         * path="/api/publications",
         * operationId="List Publications",
         * tags={"List Publications"},
-        *  security={{"bearer_token":{}}},
         * summary="List Publications",
         * description="Returns a list of all publications",
         *  @OA\Parameter(
@@ -131,7 +130,6 @@ class PublicationsApiController extends ApiController
     *   security={{"bearer_token":{}}},
     *   description="Allows users to submit publications for amdin approval",
     *     @OA\RequestBody(
-    *         @OA\JsonContent(),
     *         @OA\MediaType(
     *            mediaType="multipart/form-data",
     *            @OA\Schema(
@@ -195,13 +193,76 @@ class PublicationsApiController extends ApiController
     }
 
 
+    
+    /**
+    * @OA\Post(
+    ** path="/api/publications/comment",
+    *   tags={"Create Publication Comment"},
+    *   summary="Create Publication Comment",
+    *   operationId="Comment Publication Comment",
+    *   security={{"bearer_token":{}}},
+    *   description="Allows users to submit publication comment for amdin approval",
+    *     @OA\RequestBody(
+    *         @OA\MediaType(
+    *            mediaType="application/json",
+    *            @OA\Schema(
+    *               type="object",
+    *               required={"publication_id","comment"},
+    *               @OA\Property(property="publication_id", type="integer"),
+    *               @OA\Property(property="comment", type="string")
+    *            ),
+    *        ),
+    *    ),
+     *   @OA\Response(
+     *      response=201,
+     *       description="Success",
+     *      @OA\MediaType(
+     *           mediaType="application/json",
+     *      )
+     *   ),
+     *   @OA\Response(
+     *      response=401,
+     *       description="Unauthenticated"
+     *   ),
+     *   @OA\Response(
+     *      response=400,
+     *      description="Bad Request, when some required data is missing"
+     *   ),
+     *   @OA\Response(
+     *      response=404,
+     *      description="not found when you send the request to an invalid endpoint"
+     *   ),
+     *   @OA\Response(
+     *          response=403,
+     *          description="Forbidden"
+     *     )
+     *)
+     **/
+    public function comment(Request $request)
+    {
+
+        $val_rules = [
+            'publication_id'=>'required',
+            'comment'=>'required'
+        ];
+
+        $request->validate($val_rules);
+
+        $publication = $this->publicationsRepo->save_comment($request);
+
+        return [
+            "status" => 200,
+            "data" => $publication,
+            "msg" => "Publication saved successfully"
+        ];
+    }
+
     /**
         * @OA\Get(
         * path="/api/publications/{id}",
         * operationId="Retrieve Single Publication",
         * tags={"Retrieve Single Publication"},
         * summary="Retrieve Single Publication",
-        * security={{"bearer_token":{}}},
         * description="Retrieve Single Publication",
         * @OA\Parameter(
         *      name="id",

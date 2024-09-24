@@ -368,12 +368,179 @@
                     "404": {
                         "description": "Not Found"
                     }
+                }
+            }
+        },
+        "/api/forums": {
+            "get": {
+                "tags": [
+                    "List Forums"
+                ],
+                "summary": "List Forums",
+                "description": "Returns a list of all Forums",
+                "operationId": "List Forums",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "Search term for search for specific records",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Create Forum Discussion"
+                ],
+                "summary": "Create Forum",
+                "description": "Allows users to submit Forum Discussion",
+                "operationId": "CreateForum",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "image": {
+                                        "description": "Photo file to upload",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you sent the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
                 },
                 "security": [
                     {
                         "bearer_token": []
                     }
                 ]
+            }
+        },
+        "/api/forums/comment": {
+            "post": {
+                "tags": [
+                    "Create Forum Discussion Comment"
+                ],
+                "summary": "Create Forum Comment",
+                "description": "Allows users to submit Forum Discussion Comment",
+                "operationId": "CreateForumCOmment",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "id": {
+                                        "type": "integer"
+                                    },
+                                    "comment": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you sent the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/forums/{id}": {
+            "delete": {
+                "tags": [
+                    "Delete Forum"
+                ],
+                "summary": "Delete Forum",
+                "description": "Deletes a single forum record based on the ID.",
+                "operationId": "Delete Forum",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Froum ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
             }
         },
         "/api/lookup/filetypes": {
@@ -544,12 +711,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
+                }
             }
         },
         "/api/publications": {
@@ -625,12 +787,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
+                }
             },
             "post": {
                 "tags": [
@@ -678,9 +835,62 @@
                                 },
                                 "type": "object"
                             }
-                        },
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {}
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "not found when you send the request to an invalid endpoint"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/publications/comment": {
+            "post": {
+                "tags": [
+                    "Create Publication Comment"
+                ],
+                "summary": "Create Publication Comment",
+                "description": "Allows users to submit publication comment for amdin approval",
+                "operationId": "Comment Publication Comment",
+                "requestBody": {
+                    "content": {
                         "application/json": {
-                            "schema": {}
+                            "schema": {
+                                "required": [
+                                    "publication_id",
+                                    "comment"
+                                ],
+                                "properties": {
+                                    "publication_id": {
+                                        "type": "integer"
+                                    },
+                                    "comment": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
                         }
                     }
                 },
@@ -739,12 +949,7 @@
                             }
                         }
                     }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
+                }
             },
             "post": {
                 "tags": [

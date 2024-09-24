@@ -2,12 +2,11 @@
 
 use App\Http\Controllers\Api\AuthApiController;
 use App\Http\Controllers\Api\ExpertsApiController;
+use App\Http\Controllers\Api\ForumsApiController;
 use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
-use App\Http\Controllers\ExpertsController;
 use App\Http\Controllers\TestController;
 
 /*
@@ -29,20 +28,30 @@ Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
 
 Route::group(['middleware' => 'auth:api'],function(){
-
-Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
-Route::get('/logout', [AuthApiController::class,"logout"]);
-Route::apiResource("publications",PublicationsApiController::class);
+    Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
+    Route::get('/logout', [AuthApiController::class,"logout"]);
+ });
 
 Route::group(["prefix" =>"members"],function(){
     Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
-Route::apiResource("experts",ExpertsApiController::class);
+Route::get("publications",[PublicationsApiController::class,"index"]);
+Route::get("publications/{id}",[PublicationsApiController::class,"show"]);
 
-
+Route::group(['middleware' => 'auth:api'],function(){
+    Route::post("publications",[PublicationsApiController::class,"store"]);
+    Route::get("publications/comment",[PublicationsApiController::class,"comment"]);
 });
 
+Route::get("forums",[ForumsApiController::class,"index"]);
+Route::get("forums/{id}",[ForumsApiController::class,"show"]);
+Route::group(['middleware' => 'auth:api'],function(){
+    Route::post("forums",[ForumsApiController::class,"store"]);
+    Route::get("forums/comment",[ForumsApiController::class,"comment"]);
+});
+
+Route::get("experts",[ExpertsApiController::class,'index']);
 
 Route::group(["prefix" =>"lookup"],function(){
     Route::get('/filetypes', [LookupApiController::class,"file_types"]);

@@ -34,4 +34,8 @@ class Forum extends Model
             'community_of_practice_id' // Local key on ForumCommunityOfPractice table that relates to UserAccessGroup.
         );
     }
+
+    public function getForumImageAttribute($image){
+        return storage_link('uploads/forums/'.$image);
+    }
 }

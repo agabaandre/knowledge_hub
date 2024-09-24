@@ -18,7 +18,6 @@ class MembersApiController extends ApiController
         * path="/api/members",
         * operationId="List Member States",
         * tags={"List  Member States"},
-        * security={{"bearer_token":{}}},
         * summary="List  Member States",
         * description="Returns a list of all member statess",
         *      @OA\Response(

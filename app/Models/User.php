@@ -76,5 +76,9 @@ class User extends Authenticatable
         return $this->getKey();
     }
 
+    public function getPhotoAttribute($photo){
+        return storage_link('uploads/users/'.$photo);
+    }
+
 
 }
