@@ -55,7 +55,7 @@
 						<div class="jb-list-01-title">
 								<a href="{{url('categories/data/detail')}}?id={{$record->id}}">
 									<h5 class="ft-medium mb-1">{{ $record->title }}</h5>
-									<p>{{ @$record->category->category_name }}</p>
+									<p>{{ @$record->data_category->category_name }}</p>
 									<hr>
 
 									<p>{!! truncate($record->description,182) !!}</p>

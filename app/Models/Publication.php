@@ -21,6 +21,10 @@ class Publication extends Model
         return $this->belongsTo(PublicationCategory::class,"publication_catgory_id","id");
     }
 
+    public function data_category(){
+        return $this->belongsTo(DataCategory::class, "data_category_id","id");
+    }
+
     public function attachments(){
         return $this->hasMany(PublicationAttachment::class);
     }

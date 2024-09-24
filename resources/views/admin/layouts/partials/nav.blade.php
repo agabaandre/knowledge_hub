@@ -28,23 +28,20 @@
 				@can('view_publications')
 				<li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i class="fe fe-chevron-down horizontal-icon"></i></a>
 					<ul class="sub-menu">
-						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item"> New PH Resource</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage PH Resources</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}" class="slide-item">Publish a Resource</a></li>
+						<li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage Resources</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}" class="slide-item">Resource Sumaries & Abstracts</a></li>
 						<li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}" class="slide-item">Moderate Comments</a></li>
 						@can('manage_experts')
 						<li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
 						@endcan
 						
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Categories Data</a></li>
-						<li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Publish Category Data </a></li>
+						{{-- <li aria-haspopup="true"><a href="{{ url('admin/datarecords') }}" class="slide-item">Categories Data</a></li> --}}
+						{{-- <li aria-haspopup="true"><a href="{{ url('admin/datarecords/create') }}" class="slide-item">Publish Category Data </a></li> --}}
 						@can('manage_facts')
 						<li aria-haspopup="true"><a href="{{ url('admin/facts') }}">Facts</a></li>
 						@endcan
-						@can('view_tags')
-						<li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Search Tags</a></li>
-				 	@endcan
-
+					
 					@can('view_quotes')
 						 	<li aria-haspopu="true"><a href="{{ url('admin/quotes') }}">Quotes</a></li>
 					@endcan
@@ -70,7 +67,6 @@
 									class="fe fe-chevron-down horizontal-icon"></i></a>
 							<ul class="sub-menu">
 								<li aria-haspopup="true"><a href="{{ url('admin/courses') }}" class="slide-item">Courses</a></li>
-								<li aria-haspopup="true"><a href="{{ url('admin/courses/enrollment') }}" class="slide-item">Course Enrollements</a>
 								</li>
 							</ul>
 						</li>

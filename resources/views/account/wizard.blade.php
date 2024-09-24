@@ -16,7 +16,7 @@
         </li>
         <li>
             <a class="nav-link" href="#step-2"> <strong>Step 2</strong>
-                <br>Resource categorization</a>
+                <br>Resource Categorization</a>
         </li>
         <li>
             <a class="nav-link" href="#step-3"> <strong>Step 3</strong>
@@ -34,6 +34,7 @@
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
            <div class="row">
 
+            
                <div class="col-md-12 mt-3 ml-3">
                         <label class="form-check-inline px-2">
                               <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
@@ -41,6 +42,10 @@
                         <label class="form-check-inline px-2">
                               <input type="radio" name="upload_type" value="link" class="form-check-input">External Link
                         </label>
+
+                        <label class="form-check-inline px-2">
+                          <input type="checkbox" name="is_embedded" value="1" class="form-check-input">Embedded On Page
+                    </label>
                 </div>
 
                 <div class="col-md-12 mt-3">
@@ -56,6 +61,14 @@
                             required="">
                         </div>
                  </div>
+
+                 <div class="col-md-6">
+                  <div class="form-group">
+                    <label>Resource Type</label>
+                    @include('partials.datarecords.categories_dropdown',['field'=>'data_category_id','required'=>'required','exclude_special'=>true])
+                  </div>
+                </div>
+  
 
                  <div class="col-md-6">
                   <div class="mb-3">
@@ -74,7 +87,7 @@
            
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label" for="publication">File Category</label>
+                        <label class="form-label" for="publication">Resource Category</label>
                         @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
                         'selected'=>(@$row->publication_catgory_id)?$row->publication_catgory_id:old('category_id')])
                     </div>

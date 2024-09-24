@@ -231,6 +231,8 @@ class PublicationsRepository extends SharedRepo{
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
             $request['category_id']= $parent->publication_catgory_id;
+            $request['data_category_id'] = $parent->data_category_id;
+            
         else:
            
             $pub->sub_thematic_area_id      = $request->sub_theme;
@@ -253,10 +255,16 @@ class PublicationsRepository extends SharedRepo{
         $pub->publication_catgory_id  = $request->category_id;
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
+        $pub->data_category_id     = $request->data_category_id;
+        $pub->is_embedded          = $request->is_embedded;
 
-        $pub->is_active   = 'In-Active';
-        $pub->is_approved = 0;
-        $pub->is_rejected = 0;
+        if(!is_admin()){
+
+            $pub->is_active   = 'In-Active';
+            $pub->is_approved = 0;
+            $pub->is_rejected = 0;
+            
+        }
 
         //save cover
         if($request->hasFile('cover')):
