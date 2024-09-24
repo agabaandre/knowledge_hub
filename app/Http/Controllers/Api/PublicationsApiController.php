@@ -105,7 +105,7 @@ class PublicationsApiController extends ApiController
        
         $data = $publications->toArray() ?? [];
         $data['status'] = 200;
-        $data['page_size'] = $data['per_page'];
+        $data['page_size'] = intval($data['per_page']);
         unset($data['links']);
         unset($data['last_page_url']);
         unset($data['next_page_url']);
