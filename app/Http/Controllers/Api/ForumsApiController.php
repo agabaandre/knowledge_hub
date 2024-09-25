@@ -30,6 +30,24 @@ class ForumsApiController extends ApiController
         *           type="string"
         *      )
         *   ),
+         *  @OA\Parameter(
+        *      name="page",
+        *      in="query",
+        *      required=false,
+        *      description="Page",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+         *  @OA\Parameter(
+        *      name="page_size",
+        *      in="query",
+        *      required=false,
+        *      description="Page Size",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
         *      @OA\Response(
         *          response=200,
         *          description="Successful",

@@ -76,6 +76,15 @@ class PublicationsApiController extends ApiController
         *      )
         *   ),
         *  @OA\Parameter(
+        *      name="page",
+        *      in="query",
+        *      required=false,
+        *      description="Page",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
         *      name="is_featured",
         *      in="query",
         *      required=false,
