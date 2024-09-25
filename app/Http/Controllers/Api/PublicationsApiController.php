@@ -151,6 +151,7 @@ class PublicationsApiController extends ApiController
     *               @OA\Property(property="description", type="string"),
     *               @OA\Property(property="author", type="integer"),
     *               @OA\Property(property="user_id", type="integer"),
+    *               @OA\Property(property="publication_catgory_id", type="integer"),
     *               @OA\Property(property="link", type="string")
     *            ),
     *        ),

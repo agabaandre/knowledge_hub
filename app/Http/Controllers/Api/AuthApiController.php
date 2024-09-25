@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
+use Auth;
 
 class AuthApiController extends ApiController
 {
@@ -98,7 +99,7 @@ class AuthApiController extends ApiController
 
     /**
     * @OA\Post(
-    * path="/oauth/token",
+    * path="/api/login",
     * operationId="User Login",
     * tags={"User Login"},
     * summary="User Login",
@@ -108,11 +109,7 @@ class AuthApiController extends ApiController
     *            mediaType="application/json",
     *            @OA\Schema(
     *               @OA\Property(property="username", type="string"),
-    *               @OA\Property(property="password", type="string"),
-    *               @OA\Property(property="refresh_token", type="string"),
-    *               @OA\Property(property="client_id", type="string"),
-    *               @OA\Property(property="client_secret", type="string"),
-    *               @OA\Property(property="grant_type", type="string"),
+    *               @OA\Property(property="password", type="string")
     *            )
     *        )
     *   ),
@@ -146,13 +143,42 @@ class AuthApiController extends ApiController
     {
         
         
-        $credentials = $request->only('email', 'password');
+        // $credentials = $request->only('email', 'password');
 
-        if (! $token = auth()->attempt($credentials)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+        // if (! $token = auth()->attempt($credentials)) {
+        //     return response()->json(['error' => 'Unauthorized'], 401);
+        // }
+
+        // return response()->json(["status"=>200,"data"=>"Users Passport Instead"]);
+
+        // Validate the request
+        $request->validate([
+            'username' => 'required',
+            'password' => 'required|string',
+        ]);
+
+        // Attempt to authenticate the user
+        if (!Auth::attempt(['email'=>$request->username,"password"=>$request->password])) {
+            return response()->json([
+                'message' => 'Invalid login details'
+            ], 401);
         }
 
-        return response()->json(["status"=>200,"data"=>"Users Passport Instead"]);
+        // Get the authenticated user
+        $user = Auth::user();
+
+        // Generate access token using Passport
+        $tokenResult = $user->createToken('Personal Access Token');
+        $token = $tokenResult->accessToken;
+        $tokenExpiration = $tokenResult->token->expires_at;
+
+        // Return token and user object
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_at' => $tokenExpiration,
+            'user' => $user
+        ]);
     }
 
 

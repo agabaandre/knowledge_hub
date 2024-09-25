@@ -101,7 +101,7 @@
                 }
             }
         },
-        "/oauth/token": {
+        "/api/login": {
             "post": {
                 "tags": [
                     "User Login"
@@ -118,18 +118,6 @@
                                         "type": "string"
                                     },
                                     "password": {
-                                        "type": "string"
-                                    },
-                                    "refresh_token": {
-                                        "type": "string"
-                                    },
-                                    "client_id": {
-                                        "type": "string"
-                                    },
-                                    "client_secret": {
-                                        "type": "string"
-                                    },
-                                    "grant_type": {
                                         "type": "string"
                                     }
                                 },
@@ -854,6 +842,9 @@
                                         "type": "integer"
                                     },
                                     "user_id": {
+                                        "type": "integer"
+                                    },
+                                    "publication_catgory_id": {
                                         "type": "integer"
                                     },
                                     "link": {
