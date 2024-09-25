@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Jobs\SendMailJob;
 use App\Models\CommunityOfPracticeMembers;
+use App\Models\CustomAttachment;
 use App\Models\Faq;
 use App\Models\Forum;
 use App\Models\ForumComment;
@@ -94,6 +95,11 @@ class ForumsRepository extends SharedRepo{
             }
             
         }
+
+        if($request->hasFile('attachments') && $forum->id ?? null):
+            $files           = $request->file('attachments');  
+            $this->save_attachments($files,$forum->id,'forums');
+        endif;
         
         @$this->join_forum($forum);
 
@@ -108,6 +114,11 @@ class ForumsRepository extends SharedRepo{
         $comment->forum_id = $request->id;
         $comment->comment = $request->comment;
         $comment->save();
+
+        if($request->hasFile('attachments') && $comment->id ?? null):
+            $files           = $request->file('attachments');  
+            $this->save_attachments($files,$comment->id,'forum_comments');
+        endif;
 
         return $comment;
     }
@@ -186,6 +197,38 @@ class ForumsRepository extends SharedRepo{
 
         $joining->save();
 
+    }
+
+    private function save_attachments($files,$record_id,$model){
+
+        $upfiles   = (!is_array($files))?[$files]:$files;
+        $file_path = null;
+        
+        foreach ($upfiles as $file) {
+
+            $description = $file->getClientOriginalName();
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $model.'/'.$file_name.'.'.$extension;
+           
+            $file->move(storage_path('/app/public/uploads/'.$file_path));
+
+        //insert if to be in different table
+        if($record_id):
+
+            $attachment   =  [
+            "model"=>$model,
+            "path"=> $file_path,
+            "record_id"=>$record_id
+           ];
+       
+         CustomAttachment::insert($attachment);
+
+        endif;
+
+       }
+
+       return $file_path;
     }
 
 

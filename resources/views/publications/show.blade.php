@@ -46,7 +46,7 @@ endif;
 
 								<div class="jbl_info01 mt-3 col-sm-12 col-lg-4" >
 									<a  onclick="summarise({{ $publication->id }})"  class="btn btn-md btn-success rounded fs-sm ft-medium" style="color:white;">
-									<i class="fa-solid fa-microchip"></i>AI Processing(Summarizer)</a>
+									<i class="fa-solid fa-microchip"></i> AI Processing(Summarizer)</a>
 								</div>
 	  
 							</div>

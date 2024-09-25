@@ -67,6 +67,7 @@
 </section>
 
 @include('common.ai-summary')
+@include('common.attachment_js')
 
 @endsection
 

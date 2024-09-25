@@ -285,7 +285,7 @@ class PublicationsRepository extends SharedRepo{
             $attachment_path = $this->save_attachments($files,$id);
         endif;
 
-        $attachment_path = ($attachment_path)?storage_path().'/app/public/uploads/publications/'.$attachment_path:null;
+        $attachment_path = ($attachment_path)?storage_path('/app/public/uploads/publications/'.$attachment_path):null;
         $file_type = get_file_type($attachment_path,$request->link);
 
         //$file_type = $this->find_type($request->file_type);
@@ -297,11 +297,6 @@ class PublicationsRepository extends SharedRepo{
         $pub->file_type_id =$file_type->id; //$request->file_type;
         $pub->update();
       
-        //save tags
-        // if($request->tags && $saved):
-        //     $this->save_tags($request->tags,$id);
-        // endif;
-
         //attach communitites
         if(@$request->communities && $saved):
             $this->attach_to_community($request->communities,$id);
@@ -311,6 +306,17 @@ class PublicationsRepository extends SharedRepo{
          if(@$request->accessgroups && $saved):
             $this->attach_to_access_group($request->accessgroups,$id);
         endif;
+        
+
+        if(!is_admin()){
+
+            $alert = array(
+                'title' => "Resource  $pub->title has been". ($request->id)?' Edited':' Submitted fpr approval',
+                'body'=>"Your attention is required to review is called upon",
+                'email'=>"adminemail@gmail.com" // put right admin here
+            );
+            SendMailJob::dispatch( $alert);
+        }
 
         return $pub;
     }

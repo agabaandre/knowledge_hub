@@ -102,6 +102,16 @@
                                         <textarea name="comment" class="form-control summernote" cols="30" rows="6" placeholder="Type your comment...."></textarea>
                                     </div>
                                 </div>
+
+                                <div class="col-lg-12">
+                                    <label class="form-label" for="attachments">Attachments</label>
+                                    <div class="custom-file">
+                                        <input  type="file" class="custom-file-input" name="attachments" id="attachments">
+                                        <label class="custom-file-label" for="validatedCustomFile">Choose file.s..</label>
+                                        <div class="preview py-2"></div>
+                                    </div>
+                                </div>
+                                
                                 <div class="col-lg-12 col-md-12 col-sm-12">
                                     <div class="form-group float-right">
                                         <button type="submit" class="btn theme-bg text-white">Submit Now</button>

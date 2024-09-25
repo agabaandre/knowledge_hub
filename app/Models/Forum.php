@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DB;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,6 +11,7 @@ class Forum extends Model
     use HasFactory;
 
     public $timestamps = false;
+    protected $appends = ['attachments'];
 
     public function comments(){
         return $this->hasMany(ForumComment::class);
@@ -37,5 +39,14 @@ class Forum extends Model
 
     public function getForumImageAttribute($image){
         return storage_link('uploads/forums/'.$image);
+    }
+
+    public function getAttachmentsAttribute(){
+
+        DB::enableQueryLog();
+
+        return CustomAttachment::where('model','forums')->where('record_id',$this->id)->get();
+
+        dd(DB::getQueryLog());
     }
 }

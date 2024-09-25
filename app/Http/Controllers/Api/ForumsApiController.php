@@ -64,6 +64,12 @@ class ForumsApiController extends ApiController
         $data['status']  =200;
         $data['page_size']=$request->rows;
         unset($data['links']);
+        unset($data['links']);
+        unset($data['last_page_url']);
+        unset($data['next_page_url']);
+        unset($data['path']);
+        unset($data['first_page_url']);
+        unset($data['prev_page_url']);
 
         return  response()->json($data,200);
     }

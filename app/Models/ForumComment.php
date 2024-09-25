@@ -9,7 +9,7 @@ class ForumComment extends Model
 {
     use HasFactory;
 
-    protected $appends =['comment_replies'];
+    protected $appends =['comment_replies','attachments'];
     public $timestamps = false;
 
     public function getCommentRepliesAttribute(){
@@ -18,5 +18,10 @@ class ForumComment extends Model
 
     public function user(){
         return $this->belongsTo(User::class,"created_by","id");
+    }
+
+    public function getAttachmentsAttribute(){
+
+        return CustomAttachment::where('model', 'forum_comments')->where('record_id',$this->id)->get();
     }
 }

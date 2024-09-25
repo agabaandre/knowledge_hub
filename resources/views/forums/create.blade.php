@@ -48,7 +48,7 @@
                    
                         <div class="col-md-12" >
                             <div class="mb-3">
-                                <label class="form-label" for="publication">Cover Image</label>
+                                <label class="form-label" for="image">Cover Image</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input" name="image" id="image">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file...</label>
@@ -57,15 +57,17 @@
                             </div>
                         </div>
 
-                        
-
-                        <div class="col-md-12 justify-content-center video" style="display: none;">
-                             <label class="form-label" for="publication">Video</label>
-                            <div class="mb-3">
-                                <iframe width="450" height="260"class="vid" src="">
-                                </iframe>
+                        <div class="col-lg-12">
+                            <label class="form-label" for="attachments">Attachments</label>
+                            <div class="custom-file">
+                                <input  type="file" class="custom-file-input" name="attachments" id="attachments">
+                                <label class="custom-file-label" for="validatedCustomFile">Choose file.s..</label>
+                                <div class="preview py-2"></div>
                             </div>
                         </div>
+      
+                        </div>
+
                     
 
                 </div>

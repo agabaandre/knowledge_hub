@@ -21,6 +21,7 @@ class Access
 
         unset($logData['cover']);
         unset($logData['files']);
+        unset($logData['attachments']);
         unset($logData['file']);
         unset($logData['image']);
         unset($logData['photo']);

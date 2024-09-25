@@ -29,7 +29,7 @@
 
                     <div class="form-group ">
                         <div class="row">
-                                <label class="form-label">Flag</label>
+                                <label class="form-label">Flag (640 × 480 px)</label>
                                 <input type="file" name="flag"/>
                                 @error('flag')
                                     <span class="invalid-feedback" role="alert">

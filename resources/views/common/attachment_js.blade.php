@@ -52,7 +52,7 @@ function deleteFile(index)  {
 
                 if(my_file.indexOf('image/png')>-1 || my_file.indexOf('image/jpeg')>-1){
                 
-                    htmlToAppend = $($.parseHTML('<span class="text-danger preview_'+newIndex+' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile('+newIndex+')">Remove</span> <h6 class="preview_'+newIndex+'">'+fileName+'</h6><img width="300px" class="mt-2 rounded preview_'+newIndex+'">')).attr('src',my_file);
+                    htmlToAppend = $($.parseHTML('<span class="text-danger preview_'+newIndex+' style="max-height:30px!important; margin-top:50px; cursor:pointer;" onclick="deleteFile('+newIndex+')">Remove</span> <h6 class="preview_'+newIndex+'">'+fileName+'</h6><img style="max-height:200px; max-width:230px" class="mt-2 rounded preview_'+newIndex+'">')).attr('src',my_file);
                     
                     $(placeToInsertImagePreview).removeAttr('style');
                     $(placeToInsertImagePreview).html(htmlToAppend);
