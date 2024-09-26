@@ -4,7 +4,7 @@
    
     @foreach ($countries as $country)
         <option 
-        {{ ((!$multiple && @$selected ?? null == $country->id) || ( is_array($selected) && in_array($country->id, $selected)))?'selected':'' }} value="{{$country->id}}">
+        {{ (((!@$multiple && @$selected ?? null) == $country->id) || ( is_array($selected) && in_array($country->id, $selected)))?'selected':'' }} value="{{$country->id}}">
             {{$country->name}}
         </option>
     @endforeach

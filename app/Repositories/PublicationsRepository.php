@@ -589,7 +589,10 @@ private function applyFilters($query, $request) {
             $q->where('file_type_id', $value ?: $request->file_type_id);
         },
         'area' => function ($q, $value) {
-            $q->where('geographical_coverage_id', $value);
+            $q->where('geographical_coverage_id', $value)
+            ->orWhereHas('countries', function($subQuery) use ($value) {
+                $subQuery->where('country.id', $value);
+            });
         },
         'rcc' => function ($q, $value) {
             if (states_enabled()) {
@@ -597,7 +600,7 @@ private function applyFilters($query, $request) {
                 $q->where(function($query) use ($country_ids) {
                     $query->whereIn('geographical_coverage_id', $country_ids)
                           ->orWhereHas('countries', function($subQuery) use ($country_ids) {
-                              $subQuery->whereIn('countries.id', $country_ids);
+                              $subQuery->whereIn('country.id', $country_ids);
                           });
                 });
             }
@@ -605,7 +608,7 @@ private function applyFilters($query, $request) {
         'country_id' => function ($q, $value) {
             $q->where('geographical_coverage_id', $value)
             ->orWhereHas('countries', function($subQuery) use ($value) {
-                $subQuery->where('countries.id', $value);
+                $subQuery->where('country.id', $value);
             });
         },
         'thematic_area_id' => function ($q, $value) {
