@@ -62,21 +62,30 @@
                         </div>
                  </div>
 
-                 <div class="col-md-6">
+                 <div class="col-md-4">
                   <div class="form-group">
                     <label>Resource Type</label>
-                    @include('partials.datarecords.categories_dropdown',['field'=>'data_category_id','required'=>'required','exclude_special'=>true])
+                    @include('partials.datarecords.categories_dropdown',['field'=>'data_category_id','required'=>'required','exclude_special'=>true,
+                    'selected'=>(@$row->data_category_id)?$row->data_category_id:(old('data_category_id') ?? '')])
+                  </div>
+                </div>
+
+                <div class="col-md-4">
+                  <div class="mb-3">
+                      <label class="form-label" for="publication">RCC</label>
+                      @include('partials.regions.dropdown',['field'=>'rcc','class'=>'rcc',
+                      'selected'=>(@$row->country->region_id)?$row->country->region_id:(old('rcc') ?? '')])
                   </div>
                 </div>
   
 
-                 <div class="col-md-6">
+                 <div class="col-md-4">
                   <div class="mb-3">
-                      <label class="form-label" for="publication">Member State</label>
-                      @include('partials.countries.dropdown',['field'=>'geo_area_id','required'=>'required','class'=>'theme',
-                      'selected'=>(@$row->geographical_coverage_id)?$row->geographical_coverage_id:(old('geo_area_id') ?? current_user()->country_id)])
+                      <label class="form-label" for="publication">Member States</label>
+                      @include('partials.countries.dropdown',['field'=>'countries[]','required'=>'required','class'=>'country select2',
+                      'selected'=>(@$row->countries->pluck('id')->toArray())?$row->countries->pluck('id')->toArray():(old('geo_area_id') ?? current_user()->country_id),"multiple"=>"multiple"])
                   </div>
-       </div>
+                </div>
       </div>
       </div>
 
@@ -215,6 +224,8 @@
 
     <br>
 </div>
+
+@include('partials.search.fields_js')
 
 <script type="text/javascript">
 

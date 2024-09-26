@@ -31,134 +31,65 @@ use DB;
 class PublicationsRepository extends SharedRepo{
 
 
-    public function get(Request $request,$return_array=false){
+    public function get(Request $request, $return_array = false) {
+        $rows_count = $request->rows ?? 20;
 
-        $rows_count = ($request->rows)?$request->rows:20;
+        $pubs = Publication::with(['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'])
+            ->where('is_version', 0);
 
-        $pubs = Publication::with(['file_type','author','sub_theme','category','country','comments','versioning','parent'])
-            ->orderBy('id','desc')->where('is_version',0);
+        // Order by
+        $pubs->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc');
 
-        if($request->order_by_visits):
-            $pubs->orderBy('visits','desc');
-        else:
-            $pubs->orderBy('id','desc');
-        endif;
-        
-          //search by keyword
-          if(strlen($request->term)>2){
-            
-            $pubs->where('title','like',$request->term.'%');
-            $pubs->orWhere('publication','like',$request->term.'%');
-            
-            $authors     = Author::where('name','like',$request->term.'%')->get()->pluck('id');
-            $tags        = Tag::where('tag_text','like',$request->term.'%')->get()->pluck('id');
-            $pub_tag_ids = PublicationTag::whereIn('tag_id',$tags)->get()->pluck('publication_id');
+        // Search by keyword
+        if (strlen($request->term) > 2) {
+            $pubs->where(function ($query) use ($request) {
+                $query->where('title', 'like', $request->term . '%')
+                    ->orWhere('publication', 'like', $request->term . '%');
 
-            if(states_enabled()):
-                $coverage    = GeoCoverage::where('name','like','%'.$request->term.'%')->get()->pluck('id');
-                $pubs->orWhereIn('geographical_coverage_id',$coverage);
-            endif;
+                $authors = Author::where('name', 'like', $request->term . '%')->pluck('id');
+                $tags = Tag::where('tag_text', 'like', $request->term . '%')->pluck('id');
+                $pub_tag_ids = PublicationTag::whereIn('tag_id', $tags)->pluck('publication_id');
 
-            $pubs->orWhereIn('id',$pub_tag_ids);
-            $pubs->orWhereIn('author_id',$authors);
-        }
-        
-        if(current_user() && current_user()->id){
+                $query->orWhereIn('author_id', $authors)
+                    ->orWhereIn('id', $pub_tag_ids);
 
-            //Protect Resources from non target audiences if targte audience was defined
-
-            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
-            ->pluck("community_of_practice_id");
-           
-            //forums for user communities
-            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('publication_id');
-
-            $pubs->where(function($query) use($commPubs) {
-                $query->whereIn('id',$commPubs)
-                ->orWhereDoesntHave("communities")
-                ->orWhere('user_id',current_user()->id);
+                if (states_enabled()) {
+                    $coverage = GeoCoverage::where('name', 'like', '%' . $request->term . '%')->pluck('id');
+                    $query->orWhereIn('geographical_coverage_id', $coverage);
+                }
             });
+        }
 
-        }else
-        {
-            //only those without targets
+        // User-specific filters
+        if (current_user() && current_user()->id) {
+            $communities = CommunityOfPracticeMembers::where("user_id", current_user()->id)
+                ->pluck("community_of_practice_id");
+            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id", $communities)->pluck('publication_id');
+
+            $pubs->where(function ($query) use ($commPubs) {
+                $query->whereIn('id', $commPubs)
+                    ->orWhereDoesntHave("communities")
+                    ->orWhere('user_id', current_user()->id);
+            });
+        } else {
             $pubs->whereDoesntHave("communities");
         }
 
-        //search administrative unit authors
-        if($request->admin_unit){
-          
-            $authors     = User::where('administrative_unit_id',$request->admin_unit)->get()->pluck('author_id');
-            $pubs->whereIn('author_id',$authors);
-        }
+        // Apply other filters
+        $this->applyFilters($pubs, $request);
 
-        //search by author
-        if($request->author)
-         $pubs->where('author_id','=',$request->author);
-
-         //search by file type
-         if($request->file_type || $request->file_type_id):
-            $file_type = ($request->file_type)?$request->file_type:$request->file_type_id;
-            $pubs->where('file_type_id',$file_type);
-         endif;
-
-        //search by country
-         if($request->area)
-         $pubs->where('geographical_coverage_id',$request->area);
-
-         //search by tag
-        //  if($request->tag){
-
-        //     $tag = Tag::where('tag_text',$request->tag)->first();
-        //     $tags = PublicationTag::where('tag_id',$tag->id)->get()->pluck('publication_id');
-        //     $pubs->whereIn('id',$tags->toArray());
-        // }
-
-        //search by rcc
-        if($request->rcc && states_enabled()){
-
-            $rcc = Region::where('id',$request->rcc)->first();
-            $country_ids = Country::where('region_id',$rcc->id)->get()->pluck('id');
-            $pubs->whereIn('geographical_coverage_id',$country_ids);
-        }
-
-         //search by country
-        if($request->country_id)
-        $pubs->where('geographical_coverage_id',$request->country_id);
-
-         //search by theme
-        if($request->thematic_area_id){
-
-            $subthems = SubThemeticArea::where('thematic_area_id',$request->thematic_area_id)->get()->pluck('id');
-            $pubs->whereIn('sub_thematic_area_id',$subthems);
-
-        }
-
-         //search by subtheme
-        if($request->subtheme || $request->sub_thematic_area_id):
-            $subtheme = ($request->subtheme)?$request->subtheme:$request->sub_thematic_area_id;
-            $pubs->where('sub_thematic_area_id',$subtheme);
-         endif;
-
-         
-        if($request->is_featured)
-        $pubs->where('is_featured',1);
-
-         //Access levels effect to query results
+        // Access levels effect to query results
         $this->access_filter($pubs);
-        
-        if(!$request->is_admin){
-          $pubs->where('is_active','Active');
-          $pubs->where('is_approved',1);
-        }
 
-        Log::info($pubs->toSql());
+        if (!$request->is_admin) {
+            $pubs->where('is_active', 'Active')->where('is_approved', 1);
+        }
 
         $results = $pubs->paginate($rows_count);
         
         Log::info(count($results));
 
-        return  ($return_array)?$results:$results->appends($request->all());
+        return $return_array ? $results : $results->appends($request->all());
     }
 
     public function with_pending_comments($request){
@@ -233,11 +164,12 @@ class PublicationsRepository extends SharedRepo{
            
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
-            if(!$request->geo_area_id):
+            if(!$request->countries):
                 $geo_id = ($user->country_id)?$user->area->id:1;
                 $pub->geographical_coverage_id = $geo_id;
             else:
-                $pub->geographical_coverage_id  = $request->geo_area_id;
+                $pub->geographical_coverage_id  = $request->countries[0];
+                $pub->countries()->attach($request->countries);
             endif;
             
             $pub->title                     = $request->title;
@@ -252,7 +184,7 @@ class PublicationsRepository extends SharedRepo{
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
         $pub->data_category_id     = $request->data_category_id;
-        $pub->is_embedded          = $request->is_embedded;
+        $pub->is_embedded          = $request->is_embedded ?? false;
 
         if(!is_admin()){
 
@@ -641,6 +573,58 @@ public function import(Request $request){
 
     endif;
 
+}
+
+// New method to apply filters
+private function applyFilters($query, $request) {
+    $filters = [
+        'admin_unit' => function ($q, $value) {
+            $authors = User::where('administrative_unit_id', $value)->pluck('author_id');
+            $q->whereIn('author_id', $authors);
+        },
+        'author' => function ($q, $value) {
+            $q->where('author_id', $value);
+        },
+        'file_type' => function ($q, $value) {
+            $q->where('file_type_id', $value ?: $request->file_type_id);
+        },
+        'area' => function ($q, $value) {
+            $q->where('geographical_coverage_id', $value);
+        },
+        'rcc' => function ($q, $value) {
+            if (states_enabled()) {
+                $country_ids = Country::where('region_id', $value)->pluck('id');
+                $q->where(function($query) use ($country_ids) {
+                    $query->whereIn('geographical_coverage_id', $country_ids)
+                          ->orWhereHas('countries', function($subQuery) use ($country_ids) {
+                              $subQuery->whereIn('countries.id', $country_ids);
+                          });
+                });
+            }
+        },
+        'country_id' => function ($q, $value) {
+            $q->where('geographical_coverage_id', $value)
+            ->orWhereHas('countries', function($subQuery) use ($value) {
+                $subQuery->where('countries.id', $value);
+            });
+        },
+        'thematic_area_id' => function ($q, $value) {
+            $subthems = SubThemeticArea::where('thematic_area_id', $value)->pluck('id');
+            $q->whereIn('sub_thematic_area_id', $subthems);
+        },
+        'subtheme' => function ($q, $value) {
+            $q->where('sub_thematic_area_id', $value ?: $request->sub_thematic_area_id);
+        },
+        'is_featured' => function ($q, $value) {
+            $q->where('is_featured', 1);
+        },
+    ];
+
+    foreach ($filters as $key => $callback) {
+        if ($request->filled($key)) {
+            $callback($query, $request->$key);
+        }
+    }
 }
 
 

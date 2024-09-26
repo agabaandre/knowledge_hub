@@ -169,7 +169,11 @@ class Publication extends Model
     {
         return cleanUTF8($value);
     }
-    
+
+    public function countries()
+    {
+        return $this->belongsToMany(Country::class, 'publication_countries', 'publication_id', 'country_id');
+    }
 
 
 }

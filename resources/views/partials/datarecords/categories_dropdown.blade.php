@@ -1,5 +1,5 @@
 
-<select class="form-control select2 text-left form-select data_category" name="{{ $field ?? 'data_category_id' }}" {{ $required ?? '' }}>
+<select class="form-control text-left form-select data_category" name="{{ $field ?? 'data_category_id' }}" {{ $required ?? '' }}>
     <option disabled selected>Select</option>
     @foreach ($data_categories as $category)
 
