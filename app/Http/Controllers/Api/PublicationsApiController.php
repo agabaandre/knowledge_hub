@@ -152,7 +152,8 @@ class PublicationsApiController extends ApiController
     *               @OA\Property(property="author", type="integer", nullable=true),
     *               @OA\Property(property="user_id", type="integer", nullable=true),
     *               @OA\Property(property="publication_category_id", type="integer"),
-    *               @OA\Property(property="link", type="string",nullable=true)
+    *               @OA\Property(property="link", type="string",nullable=true),
+    *               @OA\Property(property="communities", type="array",nullable=true),
     *            ),
     *        ),
     *    ),
