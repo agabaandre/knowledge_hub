@@ -29,10 +29,18 @@ if(!function_exists('current_user')){
 if(!function_exists('settings')){
 	 function settings()
 	 {
-		$settings = DB::table("setting")->first();
-		$settings->logo = asset('storage/uploads/config/'.$settings->logo);
-		$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
-		$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+		
+		$minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+
+        $settings  = cache()->remember('settings',$minutes, function () {
+            
+			$settings = DB::table("setting")->first();
+			$settings->logo = asset('storage/uploads/config/'.$settings->logo);
+			$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
+			$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+
+			return $settings;
+        });
 
 		return $settings;
 	 }

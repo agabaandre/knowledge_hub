@@ -8,7 +8,7 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Api\ApiController;
-use App\Models\Country;
+use Illuminate\Support\Str;
 use Log;
 
 class PublicationsApiController extends ApiController
@@ -148,11 +148,11 @@ class PublicationsApiController extends ApiController
     *               @OA\Property(property="file_type", type="integer"),
     *               @OA\Property(property="sub_theme", type="integer"),
     *               @OA\Property(property="title", type="string"),
-    *               @OA\Property(property="description", type="string"),
-    *               @OA\Property(property="author", type="integer"),
-    *               @OA\Property(property="user_id", type="integer"),
+    *               @OA\Property(property="description", type="string",),
+    *               @OA\Property(property="author", type="integer", nullable=true),
+    *               @OA\Property(property="user_id", type="integer", nullable=true),
     *               @OA\Property(property="publication_category_id", type="integer"),
-    *               @OA\Property(property="link", type="string")
+    *               @OA\Property(property="link", type="string",nullable=true)
     *            ),
     *        ),
     *    ),
@@ -193,6 +193,7 @@ class PublicationsApiController extends ApiController
 
         $request->validate($val_rules);
 
+        $request['description'] = Str::markdown($request->description);
         $publication = $this->publicationsRepo->save($request);
 
         return [
