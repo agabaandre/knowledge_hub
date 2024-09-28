@@ -3,7 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
-class CreateKpiViewIfNotExists extends Migration
+class CreateKpiData extends Migration
 {
     /**
      * Run the migrations.
@@ -12,9 +12,8 @@ class CreateKpiViewIfNotExists extends Migration
      */
     public function up()
     {
-        // Check if the view exists before creating it
         DB::statement("
-            CREATE OR REPLACE VIEW kpi_data AS
+            CREATE VIEW kpi_data AS
             SELECT 
                 `k`.`id` AS `kpi_id`,
                 SUM(`d`.`value`) AS `kpi_value`,
@@ -46,7 +45,6 @@ class CreateKpiViewIfNotExists extends Migration
      */
     public function down()
     {
-        // Drop the view if it exists
         DB::statement("DROP VIEW IF EXISTS kpi_data");
     }
 }
