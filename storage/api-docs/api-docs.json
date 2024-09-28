@@ -839,16 +839,19 @@
                                         "type": "string"
                                     },
                                     "author": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "nullable": true
                                     },
                                     "user_id": {
-                                        "type": "integer"
+                                        "type": "integer",
+                                        "nullable": true
                                     },
-                                    "publication_catgory_id": {
+                                    "publication_category_id": {
                                         "type": "integer"
                                     },
                                     "link": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
