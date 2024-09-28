@@ -1,8 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
-use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateKpiDataView extends Migration
 {
@@ -13,9 +12,9 @@ class CreateKpiDataView extends Migration
      */
     public function up()
     {
-        Schema::create('kpi_data_view', function (Blueprint $table) {
-            DB::statement("
-            CREATE OR REPLACE VIEW kpi_view AS
+        // Create the view using a raw SQL statement
+        DB::statement("
+            CREATE VIEW kpi_data_view AS
             SELECT 
                 `k`.`id` AS `kpi_id`,
                 SUM(`d`.`value`) AS `kpi_value`,
@@ -26,8 +25,8 @@ class CreateKpiDataView extends Migration
                 `k`.`subject_area` AS `subject_area_id`,
                 `k`.`description` AS `description`,
                 `k`.`frequency` AS `frequency`,
-                `c`.`name` AS `name`,
-                `c`.`color` AS `color`,
+                `c`.`name` AS `country_name`,
+                `c`.`color` AS `country_color`,
                 `c`.`id` AS `country_id`
             FROM 
                 `knowledge_hub`.`data` `d`
@@ -38,7 +37,6 @@ class CreateKpiDataView extends Migration
             GROUP BY 
                 `d`.`kpi_id`, `d`.`period`
         ");
-        });
     }
 
     /**
@@ -48,6 +46,7 @@ class CreateKpiDataView extends Migration
      */
     public function down()
     {
-        DB::statement("DROP VIEW IF EXISTS kpi_data");
+        // Drop the view if it exists
+        DB::statement("DROP VIEW IF EXISTS kpi_data_view");
     }
 }
