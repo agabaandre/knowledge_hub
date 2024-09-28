@@ -13,7 +13,7 @@ class CreateKpiData extends Migration
     public function up()
     {
         DB::statement("
-            CREATE VIEW kpi_data AS
+            CREATE OR REPLACE VIEW kpi_view AS
             SELECT 
                 `k`.`id` AS `kpi_id`,
                 SUM(`d`.`value`) AS `kpi_value`,
