@@ -214,6 +214,28 @@ class LookupApiController extends ApiController
         ];
     }
     
+     /**
+        * @OA\Get(
+        * path="/api/lookup/authors",
+        * operationId="List Authors",
+        * tags={"List Authors"},
+        * summary="List Authors",
+        * description="Returns a list of Authors",
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function authors(Request $request)
+        {
+            $authors = $this->authorsRepo->get($request);
+            return [
+                "status" => 200,
+                "data" => $authors
+            ];
+        }
     
 
 }
