@@ -17,6 +17,7 @@ class Kernel extends ConsoleKernel
     {
         
         $schedule->command('moodle:fetch-courses')->hourly();
+        $schedule->command('telescope:prune --hours=4')->daily();
         
     }
 
