@@ -6,6 +6,7 @@ use App\Models\Author;
 use App\Models\Kpi;
 use App\Models\KpiData;
 use App\Models\KpiDataRecord;
+use App\Models\SubjectArea;
 use Illuminate\Http\Request;
 
 class IndicatorsRepository
@@ -83,7 +84,7 @@ class IndicatorsRepository
     public function get_subject_areas()
     {
 
-        $subject_areas = Author::all();
+        $subject_areas = SubjectArea::all();
         return $subject_areas;
     }
 

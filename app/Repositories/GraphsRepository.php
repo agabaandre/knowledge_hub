@@ -98,7 +98,7 @@ class GraphsRepository extends SharedRepo{
 	{
 		$use_filters = (isset($filter['region_id']) && $filter['region_id']>0)?true:false;
 
-       $data_countries = array_column($this->exec_query('SELECT country_id from kpi_data GROUP BY country_id '),'country_id');
+       $data_countries = array_column($this->exec_query('SELECT country_id from kpi_data_view GROUP BY country_id '),'country_id');
 
         $countries = DB::table('country')
                 ->where('national','National')
@@ -140,7 +140,7 @@ class GraphsRepository extends SharedRepo{
 
 	public function get_periods_years()
 	{
-        $data = $this->exec_query("SELECT period_year FROM kpi_data GROUP BY period_year");
+        $data = $this->exec_query("SELECT period_year FROM kpi_data_view GROUP BY period_year");
 		return array_column($data, 'period_year');
 	}
 
@@ -264,7 +264,7 @@ class GraphsRepository extends SharedRepo{
 		if(count($kpi_ids) == 0)
 			return [];
 
-        $query = DB::table('kpi_data')
+        $query = DB::table('kpi_data_view')
          ->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
              return $query->whereIn('kpi_id',$kpi_ids->toArray());
          });
@@ -298,7 +298,7 @@ class GraphsRepository extends SharedRepo{
 			}
 		}
 
-		$latest_periods = DB::table('kpi_data')->select(DB::raw('max(period) as period'))
+		$latest_periods = DB::table('kpi_data_view')->select(DB::raw('max(period) as period'))
 		->groupBy(['kpi_id','country_id'])
 		->pluck('period');
 
@@ -323,13 +323,13 @@ class GraphsRepository extends SharedRepo{
 		$data    = [];
 		$count   = 0;
 
-		$latest_periods = DB::table('kpi_data')->select(DB::raw('max(period) as period'))
+		$latest_periods = DB::table('kpi_data_view')->select(DB::raw('max(period) as period'))
 		->groupBy(['kpi_id','country_id'])
 		->pluck('period');
 
 		foreach ($this->get_kpis($filter) as $kpi) :
 
-            $row = $this->exec_query("SELECT kpi_name,kpi_value,kpi_id FROM kpi_data where kpi_id='$kpi->id' and period in $latest_periods")[0];
+            $row = $this->exec_query("SELECT kpi_name,kpi_value,kpi_id FROM kpi_data_view where kpi_id='$kpi->id' and period in $latest_periods")[0];
             
 			$data[$count]['name']   = $kpi->name;
 			$data[$count]['data'][] = intval($row->kpi_value);

@@ -18,9 +18,19 @@
                     <label>Member State</label>
                     <select class="form-control select2 countries" name="country_id" onchange="$('.filter_form').submit();">
                         <option value="">All</option>
-                        <?php foreach($countries as $country): ?>
-                        <option value="<?php echo $country->id; ?>"  <?php echo (isset($filter['country_id']) && $filter['country_id'] == $country->id) ? "selected" : ""; ?>>
+                        <?php 
+                        foreach($countries as $country):
+                        $is_selected = (isset($filter['country_id']) && $filter['country_id'] == $country->id);
+                        $is_in_rcc   = ($filter && ($filter['region_id'] == $country->region_id));
+                        
+                        if(($filter && $filter['region_id']) && !$is_in_rcc)
+                        continue;
+
+                        ?>
+
+                        <option value="<?php echo $country->id; ?>"  <?php echo ($is_selected) ? "selected" : ""; ?>>
                         <?php echo $country->name; ?></option>
+                     
                         <?php endforeach; ?>
                     </select>
                 </div>
