@@ -83,7 +83,7 @@
                   <div class="mb-3">
                       <label class="form-label" for="publication">Member States</label>
                       @include('partials.countries.dropdown',['field'=>'countries[]','required'=>'required','class'=>'country select2',
-                      'selected'=>(@$row->countries->pluck('id')->toArray())?$row->countries->pluck('id')->toArray():(old('geo_area_id') ?? current_user()->country_id),"multiple"=>"multiple"])
+                      'selected'=>($row->countries ?? false && @$row->countries->pluck('id')->toArray())?$row->countries->pluck('id')->toArray():(old('geo_area_id') ?? current_user()->country_id),"multiple"=>"multiple"])
                   </div>
                 </div>
       </div>

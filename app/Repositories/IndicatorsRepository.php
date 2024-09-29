@@ -63,9 +63,14 @@ class IndicatorsRepository
         return $data;
     }
 
-    public function get_kpi_data()
+    public function get_kpi_data(Request $request = null)
     {
-        $data = KpiData::paginate(15);
+        $data = KpiData::orderBy('id','desc');
+
+        if($request && $request->country_id)
+        $data->where('country_id',intval($request->country_id));
+
+        $data = $data->paginate(15);
         return $data;
     }
 
