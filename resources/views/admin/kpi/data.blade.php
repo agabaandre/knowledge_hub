@@ -13,19 +13,21 @@
         </div>
         <!-- Card Header With Form Filters -->
         <div class="card-header">
-            <form class="container-fluid">
-                <div class="row">
-
-                    <div class="col-md-12 text-right py-4">
-                        <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add Indicator Data</a>
-                    </div>
-
+     
+        <form class="row mb-2" method="GET" id="kpi_form">
+                <div class="col-md-8">
+                        <label class="form-label" for="country_id">Member State</label>
+                        @include('partials.countries.dropdown',['onclick'=>'onchange=$("#kpi_form").submit()','selected'=>@$search->country_id])
                 </div>
+                <div class="col-md-4">
+                    <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right mt-4"><i class="fa fa-plus"></i> Add Indicator Data</a>
+                </div>
+        </form>
 
-            </form>
         </div>
         <div class="card-body text-left">
 
+          
             <!-- Data Table for KPI data -->
             <div class="table-responsive">
                 <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
@@ -42,7 +44,7 @@
                     @foreach($kpi_data as $data)
                         <tr>
                             <th>{{$data->kpi->name}}</th>
-                            <th>{{($data->country)?$data->country->country_name:'N/A'}}</th>
+                            <th>{{$data->country_name ?? 'N/A'}}</th>
                             <th>{{$data->period}}</th>
                             <th>{{$data->kpi_value}}</th>
                         </tr>

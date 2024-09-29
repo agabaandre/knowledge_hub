@@ -61,6 +61,7 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/preferences', [LookupApiController::class,"preferences"]);
     Route::get('/communities', [LookupApiController::class,"communities"]);
     Route::get('/file-categories', [LookupApiController::class,"file_categories"]);
+    Route::get('/authors', [LookupApiController::class,"authors"]);
 });
 
 Route::get('/log',function(){

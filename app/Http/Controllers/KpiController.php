@@ -43,11 +43,11 @@ class KpiController extends Controller
 
     public function data(Request $request)
     {
-        $subject_areas = $this->indicatorsRepo->get_subject_areas();
-
+        $data['search'] = (object) $request->all();
         $data['kpis']      = $this->indicatorsRepo->get_kpis();
         $data['countries'] = Country::where('national','National')->get();
-        $data['kpi_data']  = $this->indicatorsRepo->get_kpi_data();
+        $data['kpi_data']  = $this->indicatorsRepo->get_kpi_data($request);
+
         return view('admin.kpi.data', $data);
     }
 
