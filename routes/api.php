@@ -41,7 +41,7 @@ Route::get("publications/{id}",[PublicationsApiController::class,"show"]);
 
 Route::group(['middleware' => 'auth:api'],function(){
     Route::post("publications",[PublicationsApiController::class,"store"]);
-    Route::get("publications/comment",[PublicationsApiController::class,"comment"]);
+    Route::post("publications/comment",[PublicationsApiController::class,"comment"]);
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
