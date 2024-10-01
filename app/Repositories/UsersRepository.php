@@ -48,6 +48,9 @@ class UsersRepository {
         $user->save();
         $user = User::find($user->id);
 
+        if(!$user->author_id)
+        $user->author()->create(['name'=>$user->name ]);
+
         $this->send_email($request, $token);
 
         @$this->save_preferences($user->id,$request->preferences);

@@ -59,6 +59,10 @@ class User extends Authenticatable
         return $this->belongsTo(Country::class);
      }
 
+     public function author(){
+        return $this->hasOne(Author::class);
+     }
+
      public function getAreaAttribute(){
         return ($this->country)?GeoCoverage::where('name','like','%'.$this->country->name.'%')->first():null;
      }
