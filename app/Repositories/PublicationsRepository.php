@@ -145,6 +145,8 @@ class PublicationsRepository extends SharedRepo{
 
     public function save(Request $request){
 
+        Log::info("Request:: ". json_encode($request->all()));
+
         $pub  = ($request->id)? Publication::find($request->id):new Publication();
         $user = ($request->user_id)?User::find($request->user_id):@current_user();
   
@@ -191,7 +193,6 @@ class PublicationsRepository extends SharedRepo{
             $pub->is_active   = 'In-Active';
             $pub->is_approved = 0;
             $pub->is_rejected = 0;
-            
         }
 
         //save cover
@@ -297,13 +298,22 @@ class PublicationsRepository extends SharedRepo{
 
     public function attach_to_community($comunities,$publication_id){
 
+        try{
+            
+        if(is_array($comunities))
+        $comunities = json_decode($comunities);
+
         for($i=0;$i<count($comunities);$i++){
 
-             $pub_tag = new PublicationCommunityOfPractice();
-             $pub_tag->community_of_practice_id= $comunities[$i];
-             $pub_tag->publication_id = $publication_id;
-             $pub_tag->save();
+             $pub_comment = new PublicationCommunityOfPractice();
+             $pub_comment->community_of_practice_id= $comunities[$i];
+             $pub_comment->publication_id = $publication_id;
+             $pub_comment->save();
         }
+    }
+    catch(\Exception $exception){
+            Log::error("Error occured". $exception->getMessage());
+    }
 
     }
 
