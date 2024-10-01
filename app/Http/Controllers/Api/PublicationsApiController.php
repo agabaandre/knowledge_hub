@@ -196,7 +196,7 @@ class PublicationsApiController extends ApiController
 
         $request->validate($val_rules);
         $publication = $this->publicationsRepo->save($request);
-
+      
         return [
             "status" => 200,
             "data" => $publication,

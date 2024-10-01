@@ -161,7 +161,7 @@ class PublicationsRepository extends SharedRepo{
             $request['data_category_id'] = $parent->data_category_id;
             
         else:
-           
+            $request['category_id'] = $request->publication_category_id;
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
             if(!$request->countries):
