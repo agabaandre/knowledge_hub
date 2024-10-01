@@ -153,7 +153,9 @@ class PublicationsApiController extends ApiController
     *               @OA\Property(property="user_id", type="integer", nullable=true),
     *               @OA\Property(property="publication_category_id", type="integer"),
     *               @OA\Property(property="link", type="string",nullable=true),
-    *               @OA\Property(property="communities", type="array",nullable=true),
+    *               @OA\Property(property="communities", type="array",nullable=true, @OA\Items(type="integer"),
+    *                     description="Array of PReference Ids",
+    *                     example={1}),
     *            ),
     *        ),
     *    ),
@@ -193,8 +195,6 @@ class PublicationsApiController extends ApiController
         ];
 
         $request->validate($val_rules);
-
-        $request['description'] = Str::markdown($request->description);
         $publication = $this->publicationsRepo->save($request);
 
         return [
