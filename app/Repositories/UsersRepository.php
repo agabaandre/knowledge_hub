@@ -49,7 +49,7 @@ class UsersRepository {
         $user = User::find($user->id);
 
         if(!$user->author_id)
-        $user->author()->create(['name'=>$user->name ]);
+        $user->author()->create(['name'=>$user->name]);
 
         $this->send_email($request, $token);
 

@@ -60,7 +60,7 @@ class User extends Authenticatable
      }
 
      public function author(){
-        return $this->hasOne(Author::class);
+        return $this->belongsTo(Author::class);
      }
 
      public function getAreaAttribute(){
