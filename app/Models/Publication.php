@@ -154,6 +154,10 @@ class Publication extends Model
         return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
     }
 
+    public function getCoverAttribute(){
+        return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
+    }
+
     public function getPublicationAttribute($value)
     {
         return cleanUTF8($value);
