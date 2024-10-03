@@ -130,6 +130,105 @@ class PublicationsApiController extends ApiController
        return  response()->json($data, 200); 
     }
 
+     /**
+        * @OA\Get(
+        * path="/api/publications/published",
+        * operationId="List Own Publications",
+        * tags={"List Own Publications"},
+        * summary="List Own Publications",
+        * description="Returns a list of own publications",
+        *  @OA\Parameter(
+        *      name="term",
+        *      in="query",
+        *      required=false,
+        *      description="Search term for search fro specific records",
+        *      @OA\Schema(
+        *           type="string"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="thematic_area_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="sub_thematic_area_id",
+        *      in="query",
+        *      required=false,
+        *      description="Filter by Sub Themeatic area id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="page_size",
+        *      in="query",
+        *      required=false,
+        *      description="Page Size",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="page",
+        *      in="query",
+        *      required=false,
+        *      description="Page",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *  @OA\Parameter(
+        *      name="is_featured",
+        *      in="query",
+        *      required=false,
+        *      description="Filter Featured",
+        *      @OA\Schema(
+        *           type="boolean"
+        *      )
+        *   ),
+        *      @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function my_publications(Request $request)
+        {
+            Log::info($request->all());
+    
+            if(!$request->term)
+            $request['term']='a';
+    
+            $request['rows']= $request->page_size ?? 20;
+            $request['author_id'] = current_user()->author_id;
+    
+            $publications = $this->publicationsRepo->get($request,true);
+           
+            $data = $publications->toArray() ?? [];
+            $data['status'] = 200;
+            $data['page_size'] = intval($data['per_page']);
+            unset($data['links']);
+            unset($data['last_page_url']);
+            unset($data['next_page_url']);
+            unset($data['path']);
+            unset($data['first_page_url']);
+            unset($data['prev_page_url']);
+    
+            // Check for encoding errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // Handle the error, maybe log it or throw an exception
+                throw new \Exception('Error encoding JSON: ' . json_last_error_msg());
+            }
+    
+           return  response()->json($data, 200); 
+    }
+
     /**
     * @OA\Post(
     ** path="/api/publications",

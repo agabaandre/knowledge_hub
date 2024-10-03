@@ -37,6 +37,7 @@ Route::group(["prefix" =>"members"],function(){
 });
 
 Route::get("publications",[PublicationsApiController::class,"index"]);
+Route::get("publications/published",[PublicationsApiController::class,"my_publications"]);
 Route::get("publications/{id}",[PublicationsApiController::class,"show"]);
 
 Route::group(['middleware' => 'auth:api'],function(){
