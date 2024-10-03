@@ -1,4 +1,4 @@
-<?
+<?php
 namespace App\Http\Middleware;
 
 use Closure;
@@ -39,3 +39,4 @@ class AuthenticateWithPassportToken
         return $next($request);
     }
 }
+

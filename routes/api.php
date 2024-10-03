@@ -36,7 +36,8 @@ Route::group(["prefix" =>"members"],function(){
     Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
-Route::get("publications",[PublicationsApiController::class,"index"]);
+
+Route::get("publications",[PublicationsApiController::class,"index"])->middleware('auth.passport');;
 Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where('id', '[0-9]+');;
 
 Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){

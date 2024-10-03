@@ -17,7 +17,7 @@ class Author extends Model
     }
 
     public function getLogoAttribute($value){
-        return asset('storage/uploads/publications/cover.jpg');
+        return asset('storage/uploads/publications/avatar.jpg');
     }
 
 }
