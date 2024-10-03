@@ -80,13 +80,16 @@ class PublicationsRepository extends SharedRepo{
         // Apply other filters
         $this->applyFilters($pubs, $request);
 
-        // Access levels effect to query results
-        $this->access_filter($pubs);
 
         if (!$request->is_admin) {
 
             $pubs->where('is_active', 'Active')
                  ->where('is_approved', 1);
+        }else{
+ 
+            // Access levels effect to query results
+            $this->access_filter($pubs);
+
         }
 
         $results = $pubs->paginate($rows_count);

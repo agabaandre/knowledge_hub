@@ -225,7 +225,7 @@ class PublicationsApiController extends ApiController
             $request['term']='a';
     
             $request['rows']= $request->page_size ?? 20;
-            //$request['author_id'] = auth()->user()->author_id;
+            $request['author_id'] = auth()->user()->author_id;
             $request['user_id'] = auth()->user()->id;
     
             $publications = $this->publicationsRepo->get($request,true);
