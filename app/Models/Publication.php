@@ -80,8 +80,6 @@ class Publication extends Model
     }
 
     public function getIsFavouriteAttribute(){
-        return auth()->user();
-        
         if(!auth()->user())
         return false;
         
