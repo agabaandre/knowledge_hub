@@ -166,7 +166,7 @@ class Publication extends Model
     // Ensure the content is UTF-8 encoded
     public function getDescriptionAttribute($value)
     {
-        return  cleanUTF8($value);
+        return  $value;
     }
 
     public function getTitleAttribute($value)
