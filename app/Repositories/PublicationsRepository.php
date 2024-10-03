@@ -43,10 +43,10 @@ class PublicationsRepository extends SharedRepo{
         // Search by keyword
         if (strlen($request->term) > 2) {
             $pubs->where(function ($query) use ($request) {
-                $query->where('title', 'like', $request->term . '%')
-                    ->orWhere('publication', 'like', $request->term . '%');
+                $query->where('title', 'like', '%'.$request->term . '%')
+                    ->orWhere('publication', 'like', '%'.$request->term . '%');
 
-                $authors = Author::where('name', 'like', $request->term . '%')->pluck('id');
+                $authors = Author::where('name', 'like', '%'.$request->term . '%')->pluck('id');
                 $tags = Tag::where('tag_text', 'like', $request->term . '%')->pluck('id');
                 $pub_tag_ids = PublicationTag::whereIn('tag_id', $tags)->pluck('publication_id');
 
