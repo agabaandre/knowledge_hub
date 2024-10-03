@@ -60,8 +60,10 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
+        /*
         // User-specific filters
         if (auth()->user() && auth()->user()->id) {
+
             $communities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
                 ->pluck("community_of_practice_id");
             $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id", $communities)->pluck('publication_id');
@@ -71,9 +73,11 @@ class PublicationsRepository extends SharedRepo{
                     ->orWhereDoesntHave("communities")
                     ->orWhere('user_id', auth()->user()->id);
             });
+            
         } else {
             $pubs->whereDoesntHave("communities");
         }
+        */
 
         // Apply other filters
         $this->applyFilters($pubs, $request);
