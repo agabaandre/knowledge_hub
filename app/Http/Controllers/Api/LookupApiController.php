@@ -34,7 +34,7 @@ class LookupApiController extends ApiController
         $this->commsRepo        = $commsRepo;
         $this->tagsRepo         = $tagsRepo;
         $this->fileTypesRepo    = $fileTypesRepo;
-        $this->$commonsRepos    = $commonsRepos;
+        $this->commonsRepos    = $commonsRepos;
     }
 
 
