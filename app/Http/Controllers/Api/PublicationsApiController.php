@@ -94,10 +94,10 @@ class PublicationsApiController extends ApiController
         *      )
         *   ),  
         *  @OA\Parameter(
-        *      name="is_featured",
+        *      name="order_by_visits",
         *      in="query",
         *      required=false,
-        *      description="Filter Featured",
+        *      description="Order by Visits",
         *      @OA\Schema(
         *           type="boolean"
         *      )
