@@ -316,7 +316,7 @@ class PublicationsApiController extends ApiController
         {
            
            $this->publicationsRepo->add_favourite($request->id);
-            $data['message'] = "Added o avouritessuccessfully";
+            $data['message'] = "Added to favourites successfully";
 
            return  response()->json($data, 200); 
        }
