@@ -37,12 +37,12 @@ Route::group(["prefix" =>"members"],function(){
 });
 
 Route::get("publications",[PublicationsApiController::class,"index"]);
-Route::get("publications/published",[PublicationsApiController::class,"my_publications"]);
-Route::get("publications/{id}",[PublicationsApiController::class,"show"]);
+Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where('id', '[0-9]+');;
 
-Route::group(['middleware' => 'auth:api'],function(){
-    Route::post("publications",[PublicationsApiController::class,"store"]);
-    Route::post("publications/comment",[PublicationsApiController::class,"comment"]);
+Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
+    Route::post("/",[PublicationsApiController::class,"store"]);
+    Route::get("/published",[PublicationsApiController::class,"my_publications"]);
+    Route::post("/comment",[PublicationsApiController::class,"comment"]);
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);

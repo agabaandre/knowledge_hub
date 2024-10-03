@@ -135,6 +135,7 @@ class PublicationsApiController extends ApiController
         * path="/api/publications/published",
         * operationId="List Own Publications",
         * tags={"List Own Publications"},
+        *   security={{"bearer_token":{}}},
         * summary="List Own Publications",
         * description="Returns a list of own publications",
         *  @OA\Parameter(
@@ -206,7 +207,7 @@ class PublicationsApiController extends ApiController
             $request['term']='a';
     
             $request['rows']= $request->page_size ?? 20;
-            $request['author_id'] = current_user()->author_id;
+            $request['author_id'] = auth()->user()->author_id;
     
             $publications = $this->publicationsRepo->get($request,true);
            

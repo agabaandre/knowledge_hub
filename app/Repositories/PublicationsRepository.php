@@ -148,7 +148,7 @@ class PublicationsRepository extends SharedRepo{
         Log::info("Request:: ". json_encode($request->all()));
 
         $pub  = ($request->id)? Publication::find($request->id):new Publication();
-        $user = ($request->user_id)?User::find($request->user_id):@current_user();
+        $user = ($request->user_id)?User::find($request->user_id):auth()->user();
   
         if($request->original_id):
 
@@ -300,7 +300,7 @@ class PublicationsRepository extends SharedRepo{
 
         try{
             
-        if(is_array($comunities))
+        if(!is_array($comunities))
         $comunities = json_decode($comunities);
 
         for($i=0;$i<count($comunities);$i++){

@@ -700,6 +700,26 @@
                 }
             }
         },
+        "/api/lookup/authors": {
+            "get": {
+                "tags": [
+                    "List Authors"
+                ],
+                "summary": "List Authors",
+                "description": "Returns a list of Authors",
+                "operationId": "List Authors",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
@@ -852,6 +872,17 @@
                                     "link": {
                                         "type": "string",
                                         "nullable": true
+                                    },
+                                    "communities": {
+                                        "description": "Array of PReference Ids",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1
+                                        ],
+                                        "nullable": true
                                     }
                                 },
                                 "type": "object"
@@ -877,6 +908,87 @@
                     },
                     "403": {
                         "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/publications/published": {
+            "get": {
+                "tags": [
+                    "List Own Publications"
+                ],
+                "summary": "List Own Publications",
+                "description": "Returns a list of own publications",
+                "operationId": "List Own Publications",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "Search term for search fro specific records",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "thematic_area_id",
+                        "in": "query",
+                        "description": "Filter by Themeatic area id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "sub_thematic_area_id",
+                        "in": "query",
+                        "description": "Filter by Sub Themeatic area id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Page Size",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "Page",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "is_featured",
+                        "in": "query",
+                        "description": "Filter Featured",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
                     }
                 },
                 "security": [
