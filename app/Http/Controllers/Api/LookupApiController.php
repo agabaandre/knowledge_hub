@@ -40,11 +40,11 @@ class LookupApiController extends ApiController
 
     /**
         * @OA\Get(
-        * path="/api/lookup/filetypes",
-        * operationId="List Publications File Types",
-        * tags={"List  File Types"},
-        * summary="List  File Types",
-        * description="Returns a list of all file types",
+        * path="/api/lookup/resource-types",
+        * operationId="List Publications Resource Types",
+        * tags={"List  Resource Types"},
+        * summary="List  Resourse Types",
+        * description="Returns a list of all Resource types",
         *      @OA\Response(
         *          response=200,
         *          description="Successful",
@@ -52,9 +52,9 @@ class LookupApiController extends ApiController
         *       )
         * )
         */
-        public function file_types()
+        public function resource_types()
         {
-            $file_types = $this->publicationsRepo->get_types();
+            $file_types = $this->commonsRepos->resource_types();
             return [
                 "status" => 200,
                 "data" => $file_types

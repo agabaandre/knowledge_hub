@@ -58,7 +58,7 @@ Route::group(['middleware' => 'auth:api'],function(){
 Route::get("experts",[ExpertsApiController::class,'index']);
 
 Route::group(["prefix" =>"lookup"],function(){
-    Route::get('/filetypes', [LookupApiController::class,"file_types"]);
+    Route::get('/resource-types', [LookupApiController::class,"resource_types"]);
     Route::get('/themes', [LookupApiController::class,"themes"]);
     Route::get('/sub_themes', [LookupApiController::class,"sub_themes"]);
     Route::get('/jobs', [LookupApiController::class,"jobs"]);
