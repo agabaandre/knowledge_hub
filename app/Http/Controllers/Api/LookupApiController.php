@@ -11,6 +11,7 @@ use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\CommunityOfPractice;
 use App\Models\Country;
+use App\Repositories\CommonsRepository;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Repositories\ExpertsRepository;
 use App\Repositories\FileTypesRepository;
@@ -18,11 +19,11 @@ use App\Repositories\TagsRepository;
 
 class LookupApiController extends ApiController
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo,$expertsRepo,$commsRepo,$tagsRepo,$fileTypesRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$themesRepo,$expertsRepo,$commsRepo,$tagsRepo,$fileTypesRepo,$commonsRepos;
 
     public function __construct(PublicationsRepository $publicationsRepo, 
     AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo,ThemesRepository $themesRepo
-    ,ExpertsRepository $expertsRepo, CommsOfPracticeRepository $commsRepo
+    ,ExpertsRepository $expertsRepo, CommsOfPracticeRepository $commsRepo,CommonsRepository $commonsRepos
     ,TagsRepository $tagsRepo,FileTypesRepository $fileTypesRepo){
 
         $this->publicationsRepo = $publicationsRepo;
@@ -33,6 +34,7 @@ class LookupApiController extends ApiController
         $this->commsRepo        = $commsRepo;
         $this->tagsRepo         = $tagsRepo;
         $this->fileTypesRepo    = $fileTypesRepo;
+        $this->$commonsRepos    = $commonsRepos;
     }
 
 
@@ -213,6 +215,31 @@ class LookupApiController extends ApiController
             "data" => $categories
         ];
     }
+
+       /**
+    * @OA\Get(
+    * path="/api/lookup/resource-categories",
+    * operationId="List Resource Categories",
+    * tags={"List Resource Categories"},
+    * summary="List Resource Categories",
+    * description="Returns a Resource of File Categories",
+    * @OA\Response(
+    *    response=200,
+    *    description="Successful",
+    *    @OA\JsonContent()
+    *  )
+    * )
+    */
+    
+    public function resource_categories(Request $request)
+    {
+        $categories =  $this->commonsRepos->publication_categories();
+        return [
+            "status" => 200,
+            "data" => $categories
+        ];
+    }
+    
     
      /**
         * @OA\Get(
