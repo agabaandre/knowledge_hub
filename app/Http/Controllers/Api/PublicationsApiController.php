@@ -226,6 +226,7 @@ class PublicationsApiController extends ApiController
     
             $request['rows']= $request->page_size ?? 20;
             $request['author_id'] = auth()->user()->author_id;
+            $request['user_id'] = auth()->user()->id;
     
             $publications = $this->publicationsRepo->get($request,true);
            
@@ -247,6 +248,78 @@ class PublicationsApiController extends ApiController
     
            return  response()->json($data, 200); 
     }
+
+     /**
+        * @OA\Get(
+        * path="/api/publications/favourites",
+        * operationId="List Favourite Publications",
+        * tags={"Favourite Publications"},
+        *   security={{"bearer_token":{}}},
+        * summary="Favourite Publications",
+        * description="Favourite publications",
+        *     @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function favourites(Request $request)
+        {
+           
+            $publications = $this->publicationsRepo->favourites($request);
+           
+            $data = $publications->toArray() ?? [];
+            $data['status'] = 200;
+            $data['page_size'] = intval($data['per_page']);
+            unset($data['links']);
+            unset($data['last_page_url']);
+            unset($data['next_page_url']);
+            unset($data['path']);
+            unset($data['first_page_url']);
+            unset($data['prev_page_url']);
+    
+            // Check for encoding errors
+            if (json_last_error() !== JSON_ERROR_NONE) {
+                // Handle the error, maybe log it or throw an exception
+                throw new \Exception('Error encoding JSON: ' . json_last_error_msg());
+            }
+    
+           return  response()->json($data, 200); 
+    }
+
+       /**
+        * @OA\Get(
+        * path="/api/publications/add_favourite",
+        * operationId="Add Favourite Publications",
+        * tags={"Add Favourite Publications"},
+        *   security={{"bearer_token":{}}},
+        * summary="Add Favourite Publications",
+        * description="Add Favourite publications",
+        *  @OA\Parameter(
+        *      name="id",
+        *      in="query",
+        *      required=true,
+        *      description="Publication Id",
+        *      @OA\Schema(
+        *           type="integer"
+        *      )
+        *   ),
+        *     @OA\Response(
+        *          response=200,
+        *          description="Successful",
+        *          @OA\JsonContent()
+        *       )
+        * )
+        */
+        public function add_favourite(Request $request)
+        {
+           
+           $this->publicationsRepo->add_favourite($request->id);
+            $data['message'] = "Added o avouritessuccessfully";
+
+           return  response()->json($data, 200); 
+       }
 
     /**
     * @OA\Post(

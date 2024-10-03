@@ -11,7 +11,7 @@ class SharedRepo{
 
     public function access_filter($query,$use_country_id=false,$use_query_builder=false){
 
-        $user = @current_user();
+        $user = @auth()->user();
 
         if($user && $user->access_level){
     

@@ -61,15 +61,15 @@ class PublicationsRepository extends SharedRepo{
         }
 
         // User-specific filters
-        if (current_user() && current_user()->id) {
-            $communities = CommunityOfPracticeMembers::where("user_id", current_user()->id)
+        if (auth()->user() && auth()->user()->id) {
+            $communities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
                 ->pluck("community_of_practice_id");
             $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id", $communities)->pluck('publication_id');
 
             $pubs->where(function ($query) use ($commPubs) {
                 $query->whereIn('id', $commPubs)
                     ->orWhereDoesntHave("communities")
-                    ->orWhere('user_id', current_user()->id);
+                    ->orWhere('user_id', auth()->user()->id);
             });
         } else {
             $pubs->whereDoesntHave("communities");
@@ -82,7 +82,9 @@ class PublicationsRepository extends SharedRepo{
         $this->access_filter($pubs);
 
         if (!$request->is_admin) {
-            $pubs->where('is_active', 'Active')->where('is_approved', 1);
+
+            $pubs->where('is_active', 'Active')
+                 ->where('is_approved', 1);
         }
 
         $results = $pubs->paginate($rows_count);
@@ -120,7 +122,7 @@ class PublicationsRepository extends SharedRepo{
     public function favourites(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $user_id    =  current_user()->id;
+        $user_id    =  auth()->user()->id;
         
         $favs = Favourite::where('user_id',$user_id)
         ->get()
@@ -352,7 +354,7 @@ class PublicationsRepository extends SharedRepo{
     public function add_favourite($pub_id){
 
          $fav = new Favourite();
-         $fav->user_id = current_user()->id;
+         $fav->user_id = auth()->user()->id;
          $fav->publication_id = $pub_id;
          $fav->save();
     }
@@ -633,6 +635,10 @@ private function applyFilters($query, $request) {
         'is_featured' => function ($q, $value) {
             $q->where('is_featured', $value);
         },
+        'user_id' => function ($q, $value) {
+            $q->where('user_id', $value);
+        },
+
     ];
 
     foreach ($filters as $key => $callback) {

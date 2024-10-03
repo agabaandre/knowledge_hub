@@ -813,9 +813,9 @@
                         }
                     },
                     {
-                        "name": "is_featured",
+                        "name": "order_by_visits",
                         "in": "query",
-                        "description": "Filter Featured",
+                        "description": "Order by Visits",
                         "required": false,
                         "schema": {
                             "type": "boolean"
