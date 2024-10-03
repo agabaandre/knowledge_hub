@@ -158,7 +158,7 @@ class AuthApiController extends ApiController
         ]);
 
         // Attempt to authenticate the user
-        if (!Auth::attempt(['email'=>$request->username,"password"=>$request->password,'is_verified'=>1])) {
+        if (!Auth::attempt(['email'=>$request->username,"password"=>$request->password])) {
             return response()->json([
                 'message' => 'Invalid login details'
             ], 401);
