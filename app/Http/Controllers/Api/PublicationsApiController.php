@@ -92,6 +92,15 @@ class PublicationsApiController extends ApiController
         *      @OA\Schema(
         *           type="boolean"
         *      )
+        *   ),  
+        *  @OA\Parameter(
+        *      name="is_featured",
+        *      in="query",
+        *      required=false,
+        *      description="Filter Featured",
+        *      @OA\Schema(
+        *           type="boolean"
+        *      )
         *   ),
         *      @OA\Response(
         *          response=200,

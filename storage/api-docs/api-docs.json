@@ -979,6 +979,15 @@
                         "schema": {
                             "type": "boolean"
                         }
+                    },
+                    {
+                        "name": "order_by_visits",
+                        "in": "query",
+                        "description": "Order by visits",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
                     }
                 ],
                 "responses": {
