@@ -303,13 +303,15 @@ class PublicationsRepository extends SharedRepo{
         if(!is_array($comunities))
         $comunities = json_decode($comunities);
 
-        for($i=0;$i<count($comunities);$i++){
+        if(is_array($comunities)):
+            for($i=0;$i<count($comunities);$i++){
 
-             $pub_comment = new PublicationCommunityOfPractice();
-             $pub_comment->community_of_practice_id= $comunities[$i];
-             $pub_comment->publication_id = $publication_id;
-             $pub_comment->save();
-        }
+                $pub_comment = new PublicationCommunityOfPractice();
+                $pub_comment->community_of_practice_id= $comunities[$i];
+                $pub_comment->publication_id = $publication_id;
+                $pub_comment->save();
+            }
+       endif;
     }
     catch(\Exception $exception){
             Log::error("Error occured". $exception->getMessage());
