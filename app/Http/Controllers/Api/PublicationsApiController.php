@@ -105,7 +105,7 @@ class PublicationsApiController extends ApiController
         Log::info($request->all());
 
         if(!$request->term)
-        $request['term']='the';
+        $request['term']='a';
 
         $request['rows']= $request->page_size ?? 20;
 

@@ -629,7 +629,7 @@ private function applyFilters($query, $request) {
             $q->where('sub_thematic_area_id', $value ?: $request->sub_thematic_area_id);
         },
         'is_featured' => function ($q, $value) {
-            $q->where('is_featured', 1);
+            $q->where('is_featured', $value);
         },
     ];
 
