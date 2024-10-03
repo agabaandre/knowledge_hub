@@ -33,11 +33,7 @@
 										<div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
 											   <div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:100%;">
 													@php
-														if( is_valid_image(storage_link('uploads/publications/'.$row->cover))):
-															$image_link = storage_link('uploads/publications/'.$row->cover);
-														else:
-															$image_link = storage_link('uploads/publications/cover.jpg');
-														endif;
+														$image_link = $row->cover;
 													@endphp
 
 												<div class="cats-box-caption">

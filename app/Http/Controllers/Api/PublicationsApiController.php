@@ -191,8 +191,17 @@ class PublicationsApiController extends ApiController
         *      @OA\Schema(
         *           type="boolean"
         *      )
+        *   ), 
+        *  @OA\Parameter(
+        *      name="order_by_visits",
+        *      in="query",
+        *      required=false,
+        *      description="Order by visits",
+        *      @OA\Schema(
+        *           type="boolean"
+        *      )
         *   ),
-        *      @OA\Response(
+        *     @OA\Response(
         *          response=200,
         *          description="Successful",
         *          @OA\JsonContent()
