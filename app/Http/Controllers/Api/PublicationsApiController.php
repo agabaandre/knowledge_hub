@@ -382,7 +382,7 @@ class PublicationsApiController extends ApiController
 
         $val_rules = [
             'cover'=>'required',
-            'file_type'=>'required',
+            //'file_type'=>'required',
             'sub_theme'=>'required',
             'description'=>'required'
         ];
