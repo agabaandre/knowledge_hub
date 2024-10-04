@@ -44,13 +44,17 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ["names","area"];
+    protected $appends = ["names","area","settings"];
     
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
     }
 
+    public function getSettingsAttribute(){
+        return settings();
+    }
+    
     public function preferences(){
        return $this->hasMany(UserPreference::class);
     }

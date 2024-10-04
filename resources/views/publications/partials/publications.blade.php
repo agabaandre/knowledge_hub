@@ -27,7 +27,7 @@
 			    </h5>
 				<p class="text-nothern p-0">
 				<a href="{{ url('records/resource')}}?id={{$row->id}}">
-					{!! nl2br(truncate($row->description,180)) !!}
+					{!! $row->description !!}
 				</a>
 				</p>
 				<a href="{{$row->publication}}" class="text-blue" target="_blank"><small>{{truncate($row->publication,100)}}</small></a>
