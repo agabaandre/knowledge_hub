@@ -21,8 +21,6 @@ use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 */
 
 // Publications Routes
-///,
-
 
 Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
@@ -52,7 +50,7 @@ Route::get("forums",[ForumsApiController::class,"index"]);
 Route::get("forums/{id}",[ForumsApiController::class,"show"]);
 Route::group(['middleware' => 'auth:api'],function(){
     Route::post("forums",[ForumsApiController::class,"store"]);
-    Route::get("forums/comment",[ForumsApiController::class,"comment"]);
+    Route::post("forums/comment",[ForumsApiController::class,"comment"]);
 });
 
 Route::get("experts",[ExpertsApiController::class,'index']);
@@ -109,5 +107,4 @@ Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
     Route::post('/compare', [AIApiController::class, 'compare']);
 });
 
-Route::get('/test',[TestController::class,"index"]);
 
