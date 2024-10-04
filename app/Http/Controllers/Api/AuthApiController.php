@@ -16,62 +16,63 @@ class AuthApiController extends ApiController
         $this->usersRepo       = $usersRepo;
     }
     /**
-    * @OA\Post(
-    * path="/api/register",
-    * operationId="User Registration",
-    * tags={"User Registration"},
-    * summary="User Registration",
-    * description="User Registration",
-    * @OA\RequestBody(
-    *         @OA\MediaType(
-    *            mediaType="multipart/form-data",
-    *            @OA\Schema(
-    *               @OA\Property(property="firstname", type="string"),
-    *               @OA\Property(property="lastname", type="string"),
-    *               @OA\Property(property="country_id", type="integer"),
-    *               @OA\Property(property="job", type="string"),
-    *               @OA\Property(property="phone", type="string"),
-    *               @OA\Property(property="email", type="string"),
-    *               @OA\Property(property="password", type="string"),
-      *               @OA\Property(property="password_confirmation", type="string"),
-    *               @OA\Property(property="preferences", type="array",
-    *                  @OA\Items(type="integer"),
-    *                     description="Array of PReference Ids",
-    *                     example={1, 2, 3}),
-    *               @OA\Property(
-    *                     property="photo",
-    *                     type="string",
-    *                     format="binary",
-    *                     description="Photo file to upload"
-    *                )
-    *            )
-    *        )
-    *   ),
-    *   @OA\Response(
-    *      response=200,
-    *       description="Success",
-    *      @OA\MediaType(
-    *           mediaType="application/json",
-    *      )
-    *   ),
-    *   @OA\Response(
-    *      response=400,
-    *      description="Bad Request, when some required data is missing"
-    *   ),
-    *   @OA\Response(
-    *      response=404,
-    *      description="Not found when you sent the request to an invalid endpoint"
-    *   ),
-    *   @OA\Response(
-    *          response=403,
-    *          description="Forbidden"
-    *     ),
-    *   @OA\Response(
-    *          response=401,
-    *          description="Invalid User Credentials"
-    *     )
-    * )
-    **/
+     * @OA\Post(
+     *     path="/api/register",
+     *     operationId="UserRegistration",
+     *     tags={"Authentication"},
+     *     summary="User Registration",
+     *     description="Register a new user",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="firstname", type="string"),
+     *                 @OA\Property(property="lastname", type="string"),
+     *                 @OA\Property(property="country_id", type="integer"),
+     *                 @OA\Property(property="job", type="string"),
+     *                 @OA\Property(property="phone", type="string"),
+     *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="password", type="string"),
+     *                 @OA\Property(property="password_confirmation", type="string"),
+     *                 @OA\Property(property="preferences", type="array",
+     *                     @OA\Items(type="integer"),
+     *                     description="Array of Preference Ids",
+     *                     example={1, 2, 3}
+     *                 ),
+     *                 @OA\Property(
+     *                     property="photo",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Photo file to upload"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\MediaType(
+     *             mediaType="application/json"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request, when some required data is missing"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found when you sent the request to an invalid endpoint"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Invalid User Credentials"
+     *     )
+     * )
+     */
     public function register(Request $request)
     {
         $this->validate($request, [
@@ -98,81 +99,64 @@ class AuthApiController extends ApiController
     }
 
     /**
-    * @OA\Post(
-    * path="/api/login",
-    * operationId="User Login",
-    * tags={"User Login"},
-    * summary="User Login",
-    * description="User Login",
-    * @OA\RequestBody(
-    *         @OA\MediaType(
-    *            mediaType="application/json",
-    *            @OA\Schema(
-    *               @OA\Property(property="username", type="string"),
-    *               @OA\Property(property="password", type="string")
-    *            )
-    *        )
-    *   ),
-    *   @OA\Response(
-    *      response=200,
-    *       description="Success",
-    *      @OA\MediaType(
-    *           mediaType="application/json",
-    *      )
-    *   ),
-    *   @OA\Response(
-    *      response=400,
-    *      description="Bad Request, when some required data is missing"
-    *   ),
-    *   @OA\Response(
-    *      response=404,
-    *      description="Not found when you sent the request to an invalid endpoint"
-    *   ),
-    *   @OA\Response(
-    *          response=403,
-    *          description="Forbidden"
-    *     ),
-    *   @OA\Response(
-    *          response=401,
-    *          description="Invalid User Credentials"
-    *     )
-    * )
-    **/
-    
+     * @OA\Post(
+     *     path="/api/login",
+     *     operationId="UserLogin",
+     *     tags={"Authentication"},
+     *     summary="User Login",
+     *     description="Authenticate a user and return a token",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 @OA\Property(property="username", type="string"),
+     *                 @OA\Property(property="password", type="string")
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\MediaType(
+     *             mediaType="application/json"
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request, when some required data is missing"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Not found when you sent the request to an invalid endpoint"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Invalid User Credentials"
+     *     )
+     * )
+     */
     public function login(Request $request)
     {
-        
-        
-        // $credentials = $request->only('email', 'password');
-
-        // if (! $token = auth()->attempt($credentials)) {
-        //     return response()->json(['error' => 'Unauthorized'], 401);
-        // }
-
-        // return response()->json(["status"=>200,"data"=>"Users Passport Instead"]);
-
-        // Validate the request
         $request->validate([
             'username' => 'required',
             'password' => 'required|string',
         ]);
 
-        // Attempt to authenticate the user
-        if (!Auth::attempt(['email'=>$request->username,"password"=>$request->password])) {
+        if (!Auth::attempt(['email' => $request->username, "password" => $request->password])) {
             return response()->json([
                 'message' => 'Invalid login details'
             ], 401);
         }
 
-        // Get the authenticated user
         $user = Auth::user();
-
-        // Generate access token using Passport
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->accessToken;
         $tokenExpiration = $tokenResult->token->expires_at;
 
-        // Return token and user object
         return response()->json([
             'token' => $token,
             'token_type' => 'Bearer',
@@ -180,8 +164,4 @@ class AuthApiController extends ApiController
             'user' => $user
         ]);
     }
-
-
-    
-
 }
