@@ -104,7 +104,7 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
 
 });
 
-Route::group(['prefix' => 'ai'], function () {
+Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
     Route::post('/summarise', [AIApiController::class, 'summarise']);
     Route::post('/compare', [AIApiController::class, 'compare']);
 });

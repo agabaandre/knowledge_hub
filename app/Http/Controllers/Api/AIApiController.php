@@ -21,6 +21,7 @@ class AIApiController extends Controller
      * operationId="Summarise Content",
      * tags={"AI Operations"},
      * summary="Summarise Content",
+     * security={{"bearer_token":{}}},
      * description="Summarises the content of a publication or forum",
      * @OA\RequestBody(
      *    required=true,
@@ -50,6 +51,7 @@ class AIApiController extends Controller
      * operationId="Compare Content",
      * tags={"AI Operations"},
      * summary="Compare Content",
+     * security={{"bearer_token":{}}},
      * description="Compares the content of two publications",
      * @OA\RequestBody(
      *    required=true,
