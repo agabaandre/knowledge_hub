@@ -60,7 +60,16 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
-        /*
+
+        // Apply other filters
+        $this->applyFilters($pubs, $request);
+
+
+        if (!$request->is_admin) {
+
+            $pubs->where('is_active', 'Active')
+                 ->where('is_approved', 1);
+
         // User-specific filters
         if (auth()->user() && auth()->user()->id) {
 
@@ -78,16 +87,6 @@ class PublicationsRepository extends SharedRepo{
             $pubs->whereDoesntHave("communities");
         }
 
-        */
-
-        // Apply other filters
-        $this->applyFilters($pubs, $request);
-
-
-        if (!$request->is_admin) {
-
-            $pubs->where('is_active', 'Active')
-                 ->where('is_approved', 1);
         }else{
  
             // Access levels effect to query results
