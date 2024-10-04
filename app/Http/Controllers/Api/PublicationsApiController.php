@@ -225,7 +225,6 @@ class PublicationsApiController extends ApiController
             $request['term']='a';
     
             $request['rows']= $request->page_size ?? 20;
-            $request['author_id'] = auth()->user()->author_id;
             $request['user_id'] = auth()->user()->id;
     
             $publications = $this->publicationsRepo->my_publications($request);
@@ -380,6 +379,8 @@ class PublicationsApiController extends ApiController
 
         Log::info("Request".json_encode($request->all()));
 
+        $user = auth()->user();
+
         $val_rules = [
             'cover'=>'required',
             //'file_type'=>'required',
@@ -388,12 +389,15 @@ class PublicationsApiController extends ApiController
         ];
 
         $request->validate($val_rules);
-        $publication = $this->publicationsRepo->save($request);
+        $result= null;
+       
+        if($user->is_verified)
+            $result = $this->publicationsRepo->save($request);
       
         return [
-            "status" => 200,
-            "data" => $publication,
-            "msg" => "Publication saved successfully"
+            "status" => ($user->is_verified)?200:400,
+            "data" => $result,
+            "msg" =>  ($user->is_verified)?"Publication saved successfully":"User not verified"
         ];
     }
 

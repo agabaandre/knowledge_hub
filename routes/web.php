@@ -340,10 +340,11 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //commsofpractice
     Route::group(["prefix" => "commsofpractice"], function () {
 
-        Route::any("/", [CommsOfPracticeController::class, 'index']);
+        Route::any("/", [CommsOfPracticeController::class, 'getAllWithMembership']);
         Route::any("/moderate", [CommsOfPracticeController::class, 'moderate']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
+        Route::get('/commsofpractice/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
     });
 
     //AdminUnits
@@ -482,3 +483,4 @@ Route::group(["prefix" => "ai"], function () {
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
 });
+

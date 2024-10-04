@@ -105,5 +105,10 @@ class CommsOfPracticeController extends Controller
         return view('admin.commsofpractice.all_with_membership', compact('communities'));
     }
 
-  
+    public function show($id)
+    {
+        $community = $this->commsOfPracticeRepository->find($id);
+        $members = $community->members; // Retrieve users but refer to them as members
+        return view('admin.commsofpractice.details', compact('community', 'members'));
+    }
 }

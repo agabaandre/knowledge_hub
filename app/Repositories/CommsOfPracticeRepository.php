@@ -42,7 +42,7 @@ class CommsOfPracticeRepository{
 
     public function getAllWithMembership()
     {
-        return CommunityOfPracticeMembers::with('user','community')->get();
+        return CommunityOfPractice::with('members')->get();
     }
 
 }
