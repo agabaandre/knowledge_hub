@@ -22,7 +22,7 @@
                      </h5>
                      <p class="text-nothern p-0">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
-                             {!! str_limit($row->description, 300) !!}
+                             {!! truncate($row->description, 300) !!}
                          </a>
                      </p>
                      <a href="{{ $row->publication }}" class="text-blue"
