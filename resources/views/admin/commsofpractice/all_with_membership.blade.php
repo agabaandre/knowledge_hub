@@ -74,6 +74,7 @@
                 <div class="modal-body">
                     <form id="addCommunityForm">
                         @csrf
+                        <!-- Hidden input for community ID -->
                         <input type="hidden" id="community_id" name="id">
                         <div class="form-group">
                             <label for="community_name">Community Name</label>
@@ -105,13 +106,13 @@
             $('#addCommunityButton').on('click', function() {
                 $('#addCommunityModalLabel').text('Add Community of Practice');
                 $('#addCommunityForm')[0].reset();
-                $('#community_id').val('');
+                $('#community_id').val(''); // Clear the ID field for new entries
             });
 
             // Populate the form when editing a community
             $('.editCommunityButton').on('click', function() {
                 $('#addCommunityModalLabel').text('Edit Community of Practice');
-                $('#community_id').val($(this).data('id'));
+                $('#community_id').val($(this).data('id')); // Set the ID for editing
                 $('#community_name').val($(this).data('name'));
                 $('#description').val($(this).data('description'));
                 $('#is_active').val($(this).data('active'));
