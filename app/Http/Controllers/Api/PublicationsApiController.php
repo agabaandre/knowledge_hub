@@ -378,6 +378,8 @@ class PublicationsApiController extends ApiController
     public function store(Request $request)
     {
 
+        Log::info("Request".json_encode($request->all()));
+
         $val_rules = [
             'cover'=>'required',
             'file_type'=>'required',
