@@ -60,6 +60,7 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
+        /*
         // User-specific filters
         if (auth()->user() && auth()->user()->id) {
 
@@ -76,6 +77,8 @@ class PublicationsRepository extends SharedRepo{
         } else {
             $pubs->whereDoesntHave("communities");
         }
+
+        */
 
         // Apply other filters
         $this->applyFilters($pubs, $request);
