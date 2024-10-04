@@ -228,7 +228,7 @@ class PublicationsApiController extends ApiController
             $request['author_id'] = auth()->user()->author_id;
             $request['user_id'] = auth()->user()->id;
     
-            $publications = $this->publicationsRepo->get($request,true);
+            $publications = $this->publicationsRepo->my_publications($request);
            
             $data = $publications->toArray() ?? [];
             $data['status'] = 200;
