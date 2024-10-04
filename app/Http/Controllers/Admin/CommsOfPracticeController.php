@@ -33,8 +33,6 @@ class CommsOfPracticeController extends Controller
         $col["name"]     = "community_name"; 
         $col["width"]    = "30"; 
         $col["editable"] = true;
-       // $col["edittype"]   = "file"; // render as file
-        //$col["upload_dir"] = storage_path()."/app/public/uploads"; // upload here
         $cols[] = $col;
 
         $col = array();
@@ -84,13 +82,27 @@ class CommsOfPracticeController extends Controller
 
     public function destroy(Request $request){
 
-        return $this->commsOfPracticeRepository->delete($request->id);
+        $deleted  = $this->commsOfPracticeRepository->delete($request->id);
+
+        if($deleted):
+            $data = ['alert-success'=>'Comunity deleted successfully','status'=>'success','data'=>$deleted];
+        else:
+            $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$deleted];   
+        endif;
+
+        return response($data,200);
     }
 
     public function moderate(Request $request){
 
         $data['communities'] = $this->commsOfPracticeRepository->get($request);
         return view('admin.commsofpractice.moderate', $data);
+    }
+
+    public function getAllWithMembership(Request $request)
+    {
+        $communities = $this->commsOfPracticeRepository->getAllWithMembership();
+        return view('admin.commsofpractice.all_with_membership', compact('communities'));
     }
 
   

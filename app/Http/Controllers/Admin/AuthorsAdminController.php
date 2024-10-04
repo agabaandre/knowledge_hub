@@ -55,7 +55,15 @@ class AuthorsAdminController extends Controller
 
     public function destroy(Request $request){
 
-        return $this->authorsRepo->delete($request->id);
+        $deleted = $this->authorsRepo->delete($request->id);
+
+        if($deleted):
+            $data = ['alert-success'=>'Author deleted successfully','status'=>'success','data'=>$deleted];
+        else:
+            $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$deleted];   
+        endif;
+
+        return response($data,200);
     }
 
   

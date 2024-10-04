@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use App\Models\CommunityOfPractice;
+use App\Models\CommunityOfPracticeMembers;
 use Illuminate\Http\Request;
 
 class CommsOfPracticeRepository{
@@ -33,7 +34,15 @@ class CommsOfPracticeRepository{
 
    function delete($id)
     {
-        return CommunityOfPractice::find($id)->delete();
+        
+        $deleted = CommunityOfPractice::find($id)->delete();
+        clear_cache();
+        return $deleted;
+    }
+
+    public function getAllWithMembership()
+    {
+        return CommunityOfPracticeMembers::with('user','community')->get();
     }
 
 }

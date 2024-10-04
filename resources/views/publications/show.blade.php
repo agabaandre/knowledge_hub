@@ -144,7 +144,7 @@ $col = (count($publication->summaries) > 0 || $publication->has_attachments || $
 									<div class="details ft-medium">
 										<div class="btn btn-outline-dark mt-2"> 
                                          @php
-$row = $publication;
+											$row = $publication;
                                          @endphp  
 									     @include('common.favourites_btn')
 										</div>

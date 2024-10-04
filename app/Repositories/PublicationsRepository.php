@@ -95,7 +95,7 @@ class PublicationsRepository extends SharedRepo{
         $results = $pubs->paginate($rows_count);
         
         Log::info(count($results));
-        Log::info($results);
+        //Log::info($results);
 
         return $return_array ? $results : $results->appends($request->all());
     }

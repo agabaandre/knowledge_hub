@@ -53,13 +53,13 @@ class ChatPDFService implements AIModel{
     }
 
     
-    function summarize($resource,$language=null){
+    function summarize($resource,$language=null,$additional_prompt=null){
 
-        $prompt = "Translate summary to: $language, here the comments users have submitted about it: ".json_encode($resource->comments->toArray());
+        $prompt = ($additional_prompt)?$additional_prompt:"Translate summary to: $language, here the comments users have submitted about it: ".json_encode($resource->comments->toArray());
         return $this->prompt($resource->publication,$prompt);
     }
 
-    function compare($resource,$other_resource){
+    function compare($resource,$other_resource,$additional_prompt=null){
 
         $question = "Summarise a comparison of : ". $resource ." and ".$other_resource;
         return $this->prompt($question);

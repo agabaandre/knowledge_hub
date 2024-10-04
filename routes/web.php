@@ -475,7 +475,7 @@ Route::group(["prefix" => "dashboards"], function () {
 Route::group(["prefix" => "ai"], function () {
 
     Route::post("/summarise",  [AIController::class, 'summarise']);
-    Route::post("/compare",  [GraphController::class, 'compare']);
+    Route::post("/compare",  [AIController::class, 'compare']);
     
 });
 

@@ -38,14 +38,14 @@ class ChatGPTService implements AIModel{
     }
 
     
-    function summarize($resource,$language=null){
+    function summarize($resource,$language=null,$additional_prompt=null){
 
         $question = "Summarise for me this: ". $resource;
         return $this->prompt($question);
 
     }
 
-    function compare($resource,$other_resource){
+    function compare($resource,$other_resource,$additional_prompt=null){
 
         $question = "Summarise a comparison of : ". $resource ." and ".$other_resource;
         return $this->prompt($question);

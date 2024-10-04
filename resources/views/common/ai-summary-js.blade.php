@@ -18,10 +18,11 @@ $('.copy').hide();
 $('.ai-content').html(`<h3 style='width:100%; text-align:center;'>Analyzing, please wait...<br><center><img src="{{asset("assets/images/loader.gif")}}"></center></h3>`);
     
 const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-let lang = $('.language').val();
+let lang   = $('.language').val();
+let prompt = $('#prompt').val();
 
+console.log('Prompt',prompt);
 
- //fetch(`{{url('ai/summarise')}}?resource_id=${resourceId}&type=${isForum}`)
         fetch(`{{url('ai/summarise')}}`, {
         method: 'POST',
         headers: {
@@ -31,8 +32,8 @@ let lang = $('.language').val();
         body: JSON.stringify({
             resource_id: resourceId,
             type: isForum,
-            language:lang
-    
+            language: lang,
+            prompt: prompt
         })
         })
         .then(response => {
@@ -62,7 +63,9 @@ let lang = $('.language').val();
 }
 
 function typeText(element, text, speed) {
+    
     let index = 0;
+
     function type() {
         if (index < text.length) {
             element.append(text.charAt(index));
@@ -70,12 +73,14 @@ function typeText(element, text, speed) {
             setTimeout(type, speed);
         }
     }
+
     type();
 }
 
 function typeHtml(element, html, speed) {
 let container = $('<div>').html(html).contents(); // Create a container for the HTML content
 let index = 0;
+
 function type() {
     if (index < container.length) {
         let node = container[index];
@@ -91,7 +96,9 @@ function type() {
         setTimeout(type, speed);
     }
 }
+
 type();
+
 }
 
 function copyToClipboard() {
