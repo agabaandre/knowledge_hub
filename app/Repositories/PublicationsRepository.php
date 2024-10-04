@@ -119,10 +119,10 @@ class PublicationsRepository extends SharedRepo{
     public function my_publications(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $author_id  = current_user()->author_id;
+        $user_id  = auth()->user()->id;
 
         $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
-        $pubs->where('author_id',$author_id);
+        $pubs->where('user_id',$user_id);
         $result = $pubs->paginate($rows_count);
 
         return $result;
