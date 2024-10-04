@@ -28,7 +28,7 @@ class AIApiController extends Controller
      *       required={"resource_id", "type", "language"},
      *       @OA\Property(property="resource_id", type="integer", example=1),
      *       @OA\Property(property="type", type="integer", example=1, description="1 for forum, 2 for publication"),
-     *       @OA\Property(property="language", type="string", example="en")
+     *       @OA\Property(property="language", type="string", example="en"),
      *       @OA\Property(property="prompt", type="string", example="Keep it short and concise")
      *    ),
      * ),
@@ -56,8 +56,8 @@ class AIApiController extends Controller
      *    @OA\JsonContent(
      *       required={"resource_id", "other_resource_id"},
      *       @OA\Property(property="resource_id", type="integer", example=1),
-     *       @OA\Property(property="other_resource_id", type="integer", example=2)
-     * @OA\Property(property="prompt", type="string", example="Keep it short and concise")
+     *       @OA\Property(property="other_resource_id", type="integer", example=2),
+     *       @OA\Property(property="prompt", type="string", example="Keep it short and concise")
      *    ),
      * ),
      * @OA\Response(
