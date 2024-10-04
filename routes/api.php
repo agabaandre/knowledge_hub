@@ -7,7 +7,7 @@ use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 
 /*
 |--------------------------------------------------------------------------
@@ -102,6 +102,11 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
         echo "Accept-Language header not set.";
     }
 
+});
+
+Route::group(['prefix' => 'ai'], function () {
+    Route::post('/summarise', [AIApiController::class, 'summarise']);
+    Route::post('/compare', [AIApiController::class, 'compare']);
 });
 
 Route::get('/test',[TestController::class,"index"]);
