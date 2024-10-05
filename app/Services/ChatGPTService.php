@@ -25,8 +25,6 @@ class ChatGPTService implements AIModel{
 
     $prompt[] = ["role"=>"user","content"=>$question];
 
-    //Log::info("PROMPT: ".json_encode($question));
-    
     $payload = [
         'messages'=> $prompt,
         'model'=>"gpt-3.5-turbo",
@@ -41,6 +39,10 @@ class ChatGPTService implements AIModel{
     function summarize($resource,$language=null,$additional_prompt=null){
 
         $question = "Summarise for me this: ". $resource;
+        
+        if($additional_prompt)
+            $question .= " ".$additional_prompt;
+       
         return $this->prompt($question);
 
     }
@@ -48,6 +50,8 @@ class ChatGPTService implements AIModel{
     function compare($resource,$other_resource,$additional_prompt=null){
 
         $question = "Compare the following two for me : ". $resource ." and ".$other_resource;
+        if($additional_prompt)
+            $question .= " ".$additional_prompt;
         return $this->prompt($question);
 
     }
