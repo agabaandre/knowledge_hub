@@ -43,6 +43,8 @@ class ChatGPTService implements AIModel{
         if($additional_prompt)
             $question .= " Pay attention to this: ".$additional_prompt;
        
+        $question .= "Don't forget to translate to ".$language." if provided ";
+
         return $this->prompt($question);
 
     }

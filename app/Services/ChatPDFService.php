@@ -56,6 +56,7 @@ class ChatPDFService implements AIModel{
     function summarize($resource,$language=null,$additional_prompt=null){
 
         $prompt = ($additional_prompt)?$additional_prompt:"Translate summary to: $language, here the comments users have submitted about it: ".json_encode($resource->comments->toArray());
+        $prompt .= "Don't forget to translate to ".$language." if provided ";
         return $this->prompt($resource->publication,$prompt);
     }
 
