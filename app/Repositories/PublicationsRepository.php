@@ -60,38 +60,33 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
-
         // Apply other filters
         $this->applyFilters($pubs, $request);
 
 
-        if (!$request->is_admin) {
+        if (!is_admin()) {
 
             $pubs->where('is_active', 'Active')
                  ->where('is_approved', 1);
 
-        // User-specific filters
-        if (auth()->user() && auth()->user()->id) {
-
-            $communities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
-                ->pluck("community_of_practice_id");
-            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id", $communities)->pluck('publication_id');
-
-            $pubs->where(function ($query) use ($commPubs) {
-                $query->whereIn('id', $commPubs)
+            if (auth()->check()) {
+                $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->id())
+                    ->pluck("community_of_practice_id");
+                
+                $pubs->where(function ($query) use ($userCommunities) {
+                    $query->whereHas('communities', function ($q) use ($userCommunities) {
+                        $q->whereIn('community_of_practice_id', $userCommunities);
+                    })
                     ->orWhereDoesntHave("communities")
-                    ->orWhere('user_id', auth()->user()->id);
-            });
-            
-        } else {
-            $pubs->whereDoesntHave("communities");
-        }
-
-        }else{
- 
+                    ->orWhere('user_id', auth()->id());
+                });
+            } else {
+                $pubs->whereDoesntHave("communities");
+            }
+        } 
+        else {
             // Access levels effect to query results
             $this->access_filter($pubs);
-
         }
 
         $results = $pubs->paginate($rows_count);
