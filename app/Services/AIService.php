@@ -19,6 +19,10 @@ class AIService
     {
         if (intval($type) !== 1) {
             $resource = Publication::find($resourceId);
+            
+            if (!$resource) {
+                return $this->formatResponse(['error' => 'Publication not found']);
+            }
 
             if (strpos($resource->publication, '.pdf') > -1) {
                 $this->aiModel = app('chatpdf');
@@ -33,6 +37,11 @@ class AIService
             }
         } else {
             $resource = Forum::find($resourceId);
+            
+            if (!$resource) {
+                return $this->formatResponse(['error' => 'Forum not found']);
+            }
+
             $prompt = "summary language: $language, forum title: $resource->forum_title,
              forum content: $resource->forum_description,  
              forum comments: " . json_encode($resource->comments->toArray());
