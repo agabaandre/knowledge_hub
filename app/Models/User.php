@@ -88,5 +88,9 @@ class User extends Authenticatable
         return storage_link('uploads/users/'.$photo);
     }
 
+    public function communities(){
+        return $this->hasManyThrough(CommunityOfPractice::class,CommunityOfPracticeMembers::class,"user_id","id","id","community_of_practice_id");
+    }
+
 
 }
