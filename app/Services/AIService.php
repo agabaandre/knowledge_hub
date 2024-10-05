@@ -58,16 +58,22 @@ class AIService
         $resource = Publication::find($resourceId);
         $resource2 = Publication::find($otherResourceId);
 
+          
+        if (!$resource || !$resource2)
+        return $this->formatResponse((Object)['message' => 'Publication not found']);
+
+
         if (strpos($resource->publication, '.pdf') > -1 && strpos($resource2->publication, '.pdf') > -1) {
             $this->aiModel = app('chatpdf');
             $response = $this->aiModel->compare($resource, $resource2);
         } else {
-            $prompt = "First One: title: $resource->title,  
+          
+            $prompt = " title: $resource->title,  
             body: $resource->description,
             attached_content: " . truncate(pdfToText($resource->publication), 100000) . ", 
             comments: " . json_encode($resource->comments->toArray());
 
-            $prompt2 = "Second One: title: $resource2->title,  
+            $prompt2 = "title: $resource2->title,  
             body: $resource2->description,
             attached_content: " . truncate(pdfToText($resource2->publication), 100000) . ", 
             comments: " . json_encode($resource2->comments->toArray());

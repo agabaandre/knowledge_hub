@@ -61,7 +61,7 @@ class ChatPDFService implements AIModel{
 
     function compare($resource,$other_resource,$additional_prompt=null){
 
-        $question = "Summarise a comparison of : ". $resource ." and ".$other_resource;
+        $question = "Compare the following two for me: ". $resource ." and ".$other_resource;
         return $this->prompt($question);
 
     }
