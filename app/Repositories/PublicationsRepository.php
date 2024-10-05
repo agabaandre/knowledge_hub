@@ -66,6 +66,8 @@ class PublicationsRepository extends SharedRepo{
 
         if (!is_admin()) {
 
+
+            $pubs->where('is_admin_only_access',0);
             $pubs->where('is_active', 'Active')
                  ->where('is_approved', 1);
 
@@ -164,11 +166,10 @@ class PublicationsRepository extends SharedRepo{
             $pub->title                    = $parent->title;
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
-            $request['category_id']= $parent->publication_catgory_id;
-            $request['data_category_id'] = $parent->data_category_id;
+            $request['category_id']= $parent->data_category_id;
+            $request['data_category_id'] = $parent->publication_catgory_id;
             
         else:
-            $request['category_id'] = $request->publication_category_id;
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
             if(!$request->countries):
@@ -176,7 +177,6 @@ class PublicationsRepository extends SharedRepo{
                 $pub->geographical_coverage_id = $geo_id;
             else:
                 $pub->geographical_coverage_id  = $request->countries[0];
-                $pub->countries()->attach($request->countries);
             endif;
             
             $pub->title                     = $request->title;
@@ -187,11 +187,14 @@ class PublicationsRepository extends SharedRepo{
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
-        $pub->publication_catgory_id  = $request->category_id;
+        $pub->publication_catgory_id  = $request->data_category_id;
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
-        $pub->data_category_id     = $request->data_category_id;
+        $pub->data_category_id     = $request->category_id;
         $pub->is_embedded          = $request->is_embedded ?? false;
+        $pub->is_default_in_category = $request->is_default ?? false;
+        $pub->is_admin_only_access = $request->admin_only ?? false;
+
 
         if(!is_admin()){
 
@@ -244,8 +247,11 @@ class PublicationsRepository extends SharedRepo{
          if(@$request->accessgroups && $saved):
             $this->attach_to_access_group($request->accessgroups,$id);
         endif;
-        
 
+        if($saved && $request->countries):
+            $pub->countries()->attach($request->countries);
+        endif;
+        
         if(!is_admin()){
 
             $alert = array(

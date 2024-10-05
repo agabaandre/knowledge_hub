@@ -8,4 +8,5 @@ use Illuminate\Database\Eloquent\Model;
 class PublicationCategory extends Model
 {
     use HasFactory;
+
 }

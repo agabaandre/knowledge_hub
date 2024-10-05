@@ -15,7 +15,7 @@ class CommsOfPracticeRepository{
     
     public function save(Request $request){
 
-        $access_grp = new CommunityOfPractice();
+        $access_grp = ($request->id)?CommunityOfPractice::find($request->id):new CommunityOfPractice();
 
         $access_grp->community_name = $request->community_name;
         $access_grp->description = $request->description;

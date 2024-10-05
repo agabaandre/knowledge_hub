@@ -17,7 +17,7 @@ class AIService
 
     public function summarise($resourceId, $type, $language)
     {
-        if (intval($type) !== 1) {
+        if (intval($type) !== 1) { //1 is for forums
             $resource = Publication::find($resourceId);
             
             if (!$resource) {
@@ -100,6 +100,8 @@ class AIService
             return ['content' => $response->choices[0]->message->content];
         }
 
-        return ['content' => "<div class='alert alert-danger'><p>Failure: " . $response->error->message ?? 'Error' . '</p></div>'];
+        $error = (is_object($response->error))?$response->error->message : $response->error;
+
+        return ['content' => "<div class='alert alert-danger'><p>Failure: " .$error  ?? ' Error' . '</p></div>'];
     }
 }
