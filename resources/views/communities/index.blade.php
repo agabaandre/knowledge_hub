@@ -2,6 +2,10 @@
 
 @section('styles')
     <style>
+        .theme-text {
+            color: {{ settings()->primary_color }};
+        }
+
         .community-card {
             border: none;
             border-radius: 8px;
@@ -10,6 +14,7 @@
             background-color: #fff;
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s;
+            text-align: center;
         }
 
         .community-card:hover {
@@ -24,14 +29,27 @@
         .community-card p {
             margin: 0;
             color: #555;
+            text-align: left;
         }
 
         .join-btn,
-        .leave-btn {
-            width: 100%;
+        .leave-btn,
+        .forum-btn,
+        .publication-btn {
             font-size: 16px;
             padding: 10px;
-            margin-top: 10px;
+            border: 1px solid {{ settings()->primary_color }};
+            color: {{ settings()->primary_color }};
+            background-color: transparent;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .join-btn:hover,
+        .leave-btn:hover,
+        .forum-btn:hover,
+        .publication-btn:hover {
+            background-color: {{ settings()->primary_color }};
+            color: #fff;
         }
 
         .page-title {
@@ -40,6 +58,48 @@
             font-weight: bold;
             text-align: center;
             color: #333;
+        }
+
+        .community-stats {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .community-stats p {
+            position: relative;
+            padding: 0 10px;
+            font-size: 12px;
+            text-align: center;
+        }
+
+        .community-stats p:nth-child(2)::before,
+        .community-stats p:nth-child(2)::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            height: 100%;
+            border-left: 1px dotted #ccc;
+            border-right: 1px dotted #ccc;
+        }
+
+        .community-stats p:nth-child(2)::before {
+            left: 0;
+        }
+
+        .community-stats p:nth-child(2)::after {
+            right: 0;
+        }
+
+        .community-stats i {
+            margin-right: 5px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
         }
     </style>
 @endsection
@@ -52,25 +112,41 @@
         </div>
         <div class="row">
             @foreach ($communities as $community)
-                <div class="col-md-4">
+                <div class="col-md-12 col-sm-12 col-lg-4">
                     <div class="community-card">
                         <h4>{{ $community->community_name }}</h4>
                         <p>{!! $community->description ?? '<br>' !!}</p>
-                        <p><i class="fa fa-users"></i> {{ count($community->approvedMembers) }} Members</p>
+                        <div class="community-stats">
+                            <p><i class="fa fa-users theme-text"></i> {{ count($community->approvedMembers) }} Members</p>
+                            <p><i class="fa fa-comments theme-text"></i> {{ $community->communityForums->count() }} Forums
+                            </p>
+                            <p><i class="fa fa-book theme-text"></i> {{ $community->communityPublications->count() }}
+                                Resources</p>
+                        </div>
                         @if (Auth::check())
-                            @if (!collect($community->approvedMembers)->pluck('user_id')->contains(Auth::id()))
-                                <button class="btn btn-sm btn-success rounded join-btn"
-                                    data-community-id="{{ $community->id }}">
+                            @if (
+                                !collect($community->approvedMembers)->pluck('user_id')->contains(Auth::id()) &&
+                                    !collect($community->pendingMembers)->pluck('user_id')->contains(Auth::id()))
+                                <button class="mt-2 btn btn-sm join-btn col-lg-12" data-community-id="{{ $community->id }}">
                                     Join Community
                                 </button>
                             @else
-                                <button class="btn btn-sm btn-danger rounded leave-btn"
-                                    data-community-id="{{ $community->id }}">
-                                    Leave Community
-                                </button>
+                                <div class="btn-group" role="group" aria-label="Community Actions">
+                                    <a href="{{ url('/records') }}?community_id={{ $community->id }}"
+                                        class="btn btn-sm publication-btn">
+                                        Publications
+                                    </a>
+                                    <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
+                                        class="btn btn-sm forum-btn">
+                                        Forums
+                                    </a>
+                                    <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}">
+                                        Leave Community
+                                    </button>
+                                </div>
                             @endif
                         @else
-                            <a href="{{ route('login') }}" class="btn btn-sm btn-success rounded join-btn">
+                            <a href="{{ route('login') }}" class="mt-2 btn btn-sm join-btn">
                                 Login to Join
                             </a>
                         @endif

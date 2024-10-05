@@ -46,4 +46,15 @@ class CommunityOfPractice extends Model
     {
         return $this->membership()->where('is_approved', 2);
     }
+
+    public function communityPublications()
+    {
+        return $this->hasMany(PublicationCommunityOfPractice::class, 'community_of_practice_id');
+    }
+
+    // Define the relationship with community forums
+    public function communityForums()
+    {
+        return $this->hasMany(ForumCommunityOfPractice::class, 'community_of_practice_id');
+    }
 }

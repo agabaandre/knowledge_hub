@@ -32,16 +32,23 @@ class ForumsRepository extends SharedRepo{
         if(current_user() && current_user()->id){
 
             //Protect Forums from non target audiences if targte audience was defined
+            
+            if(!$request->community_id):
 
-            $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
-            ->pluck("community_of_practice_id");
-           
-            //forums for user communities
-            $commForums = ForumCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('forum_id');
+                $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
+                ->pluck("community_of_practice_id");
+            
+                //forums for user communities
+                $commForums = ForumCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('forum_id');
 
-            $forums->whereIn('id',$commForums)
-            ->orWhere('created_by',current_user()->id)
-            ->orWhereDoesntHave("communities");
+                $forums->whereIn('id',$commForums)
+                ->orWhere('created_by',current_user()->id)
+                ->orWhereDoesntHave("communities");
+            else:
+                $forums->whereHas("communities",function($query) use($request){
+                    $query->where("community_of_practice_id",$request->community_id);
+                });
+            endif;
 
         }else
         {

@@ -10,7 +10,7 @@ class CommsOfPracticeRepository{
 
     public function get(Request $request,$return_array=false){
 
-        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::with(['membership','approvedMembers','pendingMembers','rejectedMembers'])->paginate(15);
+        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::with(['membership','approvedMembers','pendingMembers','rejectedMembers','communityForums','communityPublications'])->paginate(15);
     }
     
     public function save(Request $request){

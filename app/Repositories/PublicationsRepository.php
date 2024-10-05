@@ -74,6 +74,7 @@ class PublicationsRepository extends SharedRepo{
             
             if (auth()->user()) {
                 
+                if(!$request->community_id):
                 $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
                     ->where("is_approved", 1)
                     ->pluck("community_of_practice_id");
@@ -92,6 +93,12 @@ class PublicationsRepository extends SharedRepo{
                 else:
                     $pubs->whereDoesntHave("communities");
                 endif;
+            else:
+                $pubs->whereHas("communities",function($query) use($request){
+                    $query->where("community_of_practice_id",$request->community_id);
+                });
+            endif;
+            
             } 
             else {
                 $pubs->whereDoesntHave("communities");
