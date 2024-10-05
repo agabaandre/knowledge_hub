@@ -42,7 +42,7 @@ class AIApiController extends Controller
      */
     public function summarise(Request $request)
     {
-        return $this->aiService->summarise($request->resource_id, $request->type, $request->language);
+        return $this->aiService->summarise($request->resource_id, $request->type, $request->language,$request->prompt);
     }
 
     /**
@@ -71,6 +71,6 @@ class AIApiController extends Controller
      */
     public function compare(Request $request)
     {
-        return $this->aiService->compare($request->resource_id, $request->other_resource_id);
+        return $this->aiService->compare($request->resource_id, $request->other_resource_id,$request->prompt);
     }
 }

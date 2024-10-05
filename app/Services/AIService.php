@@ -15,7 +15,7 @@ class AIService
         $this->aiModel = app('chatgpt');
     }
 
-    public function summarise($resourceId, $type, $language)
+    public function summarise($resourceId, $type, $language,$additional_prompt=null)
     {
         if (intval($type) !== 1) { //1 is for forums
             $resource = Publication::find($resourceId);
@@ -33,7 +33,7 @@ class AIService
                 attached_content: " . truncate(pdfToText($resource->publication), 100000) . ", 
                 comments: " . json_encode($resource->comments->toArray());
 
-                $response = $this->aiModel->summarize($prompt);
+                $response = $this->aiModel->summarize($prompt,$additional_prompt);
             }
         } else {
             $resource = Forum::find($resourceId);
@@ -45,7 +45,7 @@ class AIService
             $prompt = "summary language: $language, forum title: $resource->forum_title,
              forum content: $resource->forum_description,  
              forum comments: " . json_encode($resource->comments->toArray());
-            $response = $this->aiModel->summarize($prompt);
+            $response = $this->aiModel->summarize($prompt,$additional_prompt);
         }
 
         Log::info("RESPONSE: " . json_encode($response));
@@ -53,7 +53,7 @@ class AIService
         return $this->formatResponse($response);
     }
 
-    public function compare($resourceId, $otherResourceId)
+    public function compare($resourceId, $otherResourceId,$additional_prompt=null)
     {
         $resource = Publication::find($resourceId);
         $resource2 = Publication::find($otherResourceId);
@@ -65,7 +65,7 @@ class AIService
 
         if (strpos($resource->publication, '.pdf') > -1 && strpos($resource2->publication, '.pdf') > -1) {
             $this->aiModel = app('chatpdf');
-            $response = $this->aiModel->compare($resource, $resource2);
+            $response = $this->aiModel->compare($resource, $resource2,$additional_prompt);
         } else {
           
             $prompt = " title: $resource->title,  
@@ -78,7 +78,7 @@ class AIService
             attached_content: " . truncate(pdfToText($resource2->publication), 100000) . ", 
             comments: " . json_encode($resource2->comments->toArray());
 
-            $response = $this->aiModel->compare($prompt, $prompt2);
+            $response = $this->aiModel->compare($prompt, $prompt2,$additional_prompt);
         }
 
         Log::info("RESPONSE: " . json_encode($response));

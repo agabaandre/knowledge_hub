@@ -41,7 +41,7 @@ class ChatGPTService implements AIModel{
         $question = "Summarise for me this: ". $resource;
         
         if($additional_prompt)
-            $question .= " ".$additional_prompt;
+            $question .= " Pay attention to this: ".$additional_prompt;
        
         return $this->prompt($question);
 
@@ -51,7 +51,7 @@ class ChatGPTService implements AIModel{
 
         $question = "Compare the following two for me : ". $resource ." and ".$other_resource;
         if($additional_prompt)
-            $question .= " ".$additional_prompt;
+            $question .= " Pay attention to this: ".$additional_prompt;
         return $this->prompt($question);
 
     }
