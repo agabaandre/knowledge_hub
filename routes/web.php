@@ -345,6 +345,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
         Route::get('/commsofpractice/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
+        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction']);
     });
 
     //AdminUnits

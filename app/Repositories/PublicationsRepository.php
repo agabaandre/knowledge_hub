@@ -71,20 +71,33 @@ class PublicationsRepository extends SharedRepo{
             $pubs->where('is_active', 'Active')
                  ->where('is_approved', 1);
 
-            if (auth()->check()) {
-                $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->id())
-                    ->pluck("community_of_practice_id");
+            
+            if (auth()->user()) {
                 
-                $pubs->where(function ($query) use ($userCommunities) {
-                    $query->whereHas('communities', function ($q) use ($userCommunities) {
-                        $q->whereIn('community_of_practice_id', $userCommunities);
-                    })
-                    ->orWhereDoesntHave("communities")
-                    ->orWhere('user_id', auth()->id());
-                });
-            } else {
+                $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
+                    ->where("is_approved", 1)
+                    ->pluck("community_of_practice_id");
+
+               
+                if(count($userCommunities) > 0):
+                    $pubs->where(function ($query) use ($userCommunities) {
+
+                        $query->whereHas('communities', 
+                            function ($q) use ($userCommunities) {
+                            $q->whereIn('community_of_practice_id', $userCommunities);
+                        })
+                        ->orWhereDoesntHave("communities")
+                        ->orWhere('user_id', auth()->user()->id);
+                    });
+                else:
+                    $pubs->whereDoesntHave("communities");
+                endif;
+            } 
+            else {
                 $pubs->whereDoesntHave("communities");
             }
+
+            
         } 
         else {
             // Access levels effect to query results

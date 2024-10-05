@@ -45,4 +45,18 @@ class CommsOfPracticeRepository{
         return CommunityOfPractice::with('members')->get();
     }
 
+    public function updateMemberStatus($memberId, $action) {
+        $member = CommunityOfPracticeMembers::find($memberId);
+
+        if ($action === 'approve') {
+            $member->is_approved = 1;
+        } elseif ($action === 'reject') {
+            $member->is_approved = 0;
+        }
+
+        $member->save();
+
+        return $member;
+    }
+
 }

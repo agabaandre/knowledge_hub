@@ -57,7 +57,10 @@ function get_role($userId){
 
 
 function is_admin(){
-	$role = get_role(current_user()->id);
+	if(!auth()->user())
+		return false;
+
+	$role = get_role(auth()->user()->id);
 	return ($role)?((strpos(strtolower($role->name),'admin') >-1)?true:false):false;
 }
 

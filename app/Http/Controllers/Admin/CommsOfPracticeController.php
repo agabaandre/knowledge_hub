@@ -111,4 +111,11 @@ class CommsOfPracticeController extends Controller
         $members = $community->members; // Retrieve users but refer to them as members
         return view('admin.commsofpractice.details', compact('community', 'members'));
     }
+
+    public function memberAction(Request $request) {
+        
+        $member = $this->commsOfPracticeRepository->updateMemberStatus($request->member_id, $request->action);
+
+        return response()->json(['status' => 'success', 'message' => 'Member status updated successfully.']);
+    }
 }
