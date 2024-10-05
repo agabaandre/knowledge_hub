@@ -128,6 +128,7 @@ class ForumsApiController extends ApiController
      *             mediaType="application/json",
      *             @OA\Schema(
      *                 @OA\Property(property="id", type="integer"),
+     *                 @OA\Property(property="id", type="integer"),
      *                 @OA\Property(property="comment", type="string")
      *             )
      *         )

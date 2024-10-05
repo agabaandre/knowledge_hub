@@ -112,7 +112,8 @@ class ForumsRepository extends SharedRepo{
 
         $comment->created_by = current_user()->id;
         $comment->forum_id = $request->id;
-        $comment->comment = $request->comment;
+        $comment->comment  = $request->comment;
+        $comment->parent_id = $request->parent_id ?? null;
         $comment->save();
 
         if($request->hasFile('attachments') && $comment->id ?? null):
