@@ -43,6 +43,13 @@ class ForumsApiController extends ApiController
      *         description="Page Size",
      *         @OA\Schema(type="integer")
      *     ),
+     *   @OA\Parameter(
+     *         name="community_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by Community Id",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful",

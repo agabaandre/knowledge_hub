@@ -88,6 +88,13 @@ class PublicationsApiController extends ApiController
      *         description="Order by Visits",
      *         @OA\Schema(type="boolean")
      *     ),
+     *  @OA\Parameter(
+     *         name="community_id",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by Community Id",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful",
