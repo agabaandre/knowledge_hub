@@ -93,16 +93,8 @@
 
 
             @can('view_forumns')
-                <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>COPs<i
-                            class="fe fe-chevron-down horizontal-icon"></i></a>
-                    <ul class="sub-menu">
-
-                        <li aria-haspopup="true"><a href="{{ url('admin/commsofpractice/moderate') }}"
-                                class="slide-item">Membership</a>
-                        <li class=""><a href="{{ url('admin/commsofpractice') }}" class="">Communities of
-                                Practices</a></li>
-                </li>
-                </ul>
+                <li aria-haspopup="true"><a href="{{ url('admin/commsofpractice') }}" class="sub-icon"><i
+                            class=""></i>COPs</a>
                 </li>
             @endcan
 

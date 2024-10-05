@@ -108,12 +108,19 @@ class CommsOfPracticeController extends Controller
     public function show($id)
     {
         $community = $this->commsOfPracticeRepository->find($id);
-        $members = $community->members; // Retrieve users but refer to them as members
-        return view('admin.commsofpractice.details', compact('community', 'members'));
+
+        $membership = $community->membership;
+        // Use relationships to count members
+        $totalMembers = $community->membership()->count();
+        $approvedCount = $community->approvedMembers()->count();
+        $pendingCount = $community->pendingMembers()->count();
+        $rejectedCount = $community->rejectedMembers()->count();
+
+        return view('admin.commsofpractice.details', compact('community', 'totalMembers', 'approvedCount', 'pendingCount', 'rejectedCount','membership'));
     }
 
     public function memberAction(Request $request) {
-        
+
         $member = $this->commsOfPracticeRepository->updateMemberStatus($request->member_id, $request->action);
 
         return response()->json(['status' => 'success', 'message' => 'Member status updated successfully.']);

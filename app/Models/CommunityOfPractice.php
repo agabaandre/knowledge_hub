@@ -11,7 +11,12 @@ class CommunityOfPractice extends Model
 
     public function members()
     {
-        return $this->belongsToMany(User::class, 'community_of_practice_members', 'community_of_practice_id', 'user_id');
+        return $this->hasMany(User::class, 'community_of_practice_members', 'community_of_practice_id', 'user_id');
+    }
+
+    public function membership()
+    {
+        return $this->hasMany(CommunityOfPracticeMembers::class, 'community_of_practice_id');
     }
 
     public function user()
@@ -24,5 +29,21 @@ class CommunityOfPractice extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
-    
+    // Define a scope for approved members
+    public function approvedMembers()
+    {
+        return $this->membership()->where('is_approved', 1);
+    }
+
+    // Define a scope for pending members
+    public function pendingMembers()
+    {
+        return $this->membership()->where('is_approved', 0);
+    }
+
+    // Define a scope for rejected members
+    public function rejectedMembers()
+    {
+        return $this->membership()->where('is_approved', 2);
+    }
 }

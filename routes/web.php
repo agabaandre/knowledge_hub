@@ -52,6 +52,7 @@ use App\Http\Controllers\CountriesController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\Admin\AdminCoursesController;
+use App\Http\Controllers\CommunitiesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -345,7 +346,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
         Route::get('/commsofpractice/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
-        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction']);
+        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction'); // Ensure this line is present
     });
 
     //AdminUnits
@@ -485,3 +486,8 @@ Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
 });
 
+Route::group(["prefix" => "communities"], function () {
+    Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
+    Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
+    Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
+});

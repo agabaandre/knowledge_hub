@@ -10,7 +10,7 @@ class CommsOfPracticeRepository{
 
     public function get(Request $request,$return_array=false){
 
-        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::paginate(15);
+        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::with(['membership','approvedMembers','pendingMembers','rejectedMembers'])->paginate(15);
     }
     
     public function save(Request $request){
@@ -39,24 +39,53 @@ class CommsOfPracticeRepository{
         clear_cache();
         return $deleted;
     }
-
+    
     public function getAllWithMembership()
     {
-        return CommunityOfPractice::with('members')->get();
+        return CommunityOfPractice::with([
+            'membership',
+            'approvedMembers',
+            'pendingMembers',
+            'rejectedMembers'
+        ])->get();
     }
 
     public function updateMemberStatus($memberId, $action) {
+       
         $member = CommunityOfPracticeMembers::find($memberId);
 
+        
         if ($action === 'approve') {
             $member->is_approved = 1;
         } elseif ($action === 'reject') {
-            $member->is_approved = 0;
+            $member->is_approved = 2; // Set to 2 for rejected
         }
 
         $member->save();
 
         return $member;
+    }
+
+    public function addMember($communityId, $userId) {
+       
+        CommunityOfPracticeMembers::create([
+            'community_of_practice_id' => $communityId,
+            'user_id' => $userId,
+            'is_approved' => 0,
+        ]);
+
+        return true; // or any relevant response
+    }
+
+    public function removeMember($communityId, $userId) {
+        $member = CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
+                                            ->where('user_id', $userId)
+                                            ->first();
+        if ($member) {
+            $member->delete();
+            return true;
+        }
+        return false;
     }
 
 }
