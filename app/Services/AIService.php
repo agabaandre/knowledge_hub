@@ -21,7 +21,7 @@ class AIService
             $resource = Publication::find($resourceId);
             
             if (!$resource) {
-                return $this->formatResponse(['error' => 'Publication not found']);
+                return $this->formatResponse((Object)['message' => 'Publication not found']);
             }
 
             if (strpos($resource->publication, '.pdf') > -1) {
@@ -39,7 +39,7 @@ class AIService
             $resource = Forum::find($resourceId);
             
             if (!$resource) {
-                return $this->formatResponse(['error' => 'Forum not found']);
+                return $this->formatResponse((Object) ['message' => 'Forum not found']);
             }
 
             $prompt = "summary language: $language, forum title: $resource->forum_title,
