@@ -26,7 +26,7 @@ class AIService
 
             if (strpos($resource->publication, '.pdf') > -1) {
                 $this->aiModel = app('chatpdf');
-                $response = $this->aiModel->summarize($resource, $language);
+                $response = $this->aiModel->summarize($resource, $language, $additional_prompt);
             } else {
                 $prompt = "Use summary language: $language, title: $resource->title,  
                 body: $resource->description,
