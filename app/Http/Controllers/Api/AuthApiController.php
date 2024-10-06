@@ -202,7 +202,7 @@ class AuthApiController extends ApiController
     }
 
     /**
-     * @OA\Post(
+     * @OA\Get(
      *     path="/api/refresh",
      *     summary="Refresh access token",
      *     tags={"Authentication"},

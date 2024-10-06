@@ -27,7 +27,7 @@ Route::post('register', [AuthApiController::class, 'register']);
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
 
 Route::group(['middleware' => 'auth:api'],function(){
-    Route::post('/refresh', [AuthApiController::class, 'refresh']);
+    Route::get('/refresh', [AuthApiController::class, 'refresh']);
     Route::put('/profile', [AuthApiController::class, 'updateProfile']);
     Route::post('/change-password', [AuthApiController::class, 'changePassword']);
  });
