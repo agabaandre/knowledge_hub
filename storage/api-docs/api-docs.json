@@ -19,14 +19,126 @@
         }
     ],
     "paths": {
+        "/api/ai/summarise": {
+            "post": {
+                "tags": [
+                    "AI Operations"
+                ],
+                "summary": "Summarise Content",
+                "description": "Summarises the content of a publication or forum",
+                "operationId": "Summarise Content",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "resource_id",
+                                    "type",
+                                    "language"
+                                ],
+                                "properties": {
+                                    "resource_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "type": {
+                                        "description": "1 for forum, 2 for publication",
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "language": {
+                                        "type": "string",
+                                        "example": "en"
+                                    },
+                                    "prompt": {
+                                        "type": "string",
+                                        "example": "Keep it short and concise"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/ai/compare": {
+            "post": {
+                "tags": [
+                    "AI Operations"
+                ],
+                "summary": "Compare Content",
+                "description": "Compares the content of two publications",
+                "operationId": "Compare Content",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "resource_id",
+                                    "other_resource_id"
+                                ],
+                                "properties": {
+                                    "resource_id": {
+                                        "type": "integer",
+                                        "example": 1
+                                    },
+                                    "other_resource_id": {
+                                        "type": "integer",
+                                        "example": 2
+                                    },
+                                    "prompt": {
+                                        "type": "string",
+                                        "example": "Keep it short and concise"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
         "/api/register": {
             "post": {
                 "tags": [
-                    "User Registration"
+                    "Authentication"
                 ],
                 "summary": "User Registration",
-                "description": "User Registration",
-                "operationId": "User Registration",
+                "description": "Register a new user",
+                "operationId": "UserRegistration",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
@@ -57,7 +169,7 @@
                                         "type": "string"
                                     },
                                     "preferences": {
-                                        "description": "Array of PReference Ids",
+                                        "description": "Array of Preference Ids",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
@@ -104,11 +216,11 @@
         "/api/login": {
             "post": {
                 "tags": [
-                    "User Login"
+                    "Authentication"
                 ],
                 "summary": "User Login",
-                "description": "User Login",
-                "operationId": "User Login",
+                "description": "Authenticate a user and return a token",
+                "operationId": "UserLogin",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -148,19 +260,173 @@
                 }
             }
         },
+        "/api/forgot-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Send password reset link",
+                "operationId": "3b7caa534edf762797d8d45779cd8c85",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "email"
+                                ],
+                                "properties": {
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password reset link sent"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                }
+            }
+        },
+        "/api/refresh": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Refresh access token",
+                "operationId": "d56b44b93261f97d6dc4821fc3e60b50",
+                "responses": {
+                    "200": {
+                        "description": "Token refreshed successfully"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/profile": {
+            "put": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Update user profile",
+                "operationId": "f7d9ce7bd9135d365f646348db83d885",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "password": {
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Profile updated successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
+        "/api/change-password": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Change user password",
+                "operationId": "2cfba03de1e344baf8a59c9a95a59fc4",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "password",
+                                    "password_confirmation"
+                                ],
+                                "properties": {
+                                    "password": {
+                                        "description": "New password",
+                                        "type": "string"
+                                    },
+                                    "password_confirmation": {
+                                        "description": "Password confirmation",
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Password changed successfully"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearerAuth": []
+                    }
+                ]
+            }
+        },
         "/api/experts": {
             "get": {
                 "tags": [
-                    "List Country Experts"
+                    "Experts"
                 ],
                 "summary": "List Country Experts",
                 "description": "Returns a list of all Country Experts",
-                "operationId": "List Country Experts",
+                "operationId": "ListCountryExperts",
                 "parameters": [
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term for search for specific records",
+                        "description": "Search term for specific records",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -185,10 +451,10 @@
             },
             "post": {
                 "tags": [
-                    "Create Country Expert"
+                    "Experts"
                 ],
                 "summary": "Create Country Expert",
-                "description": "Allows users to submit country experts for amdin approval",
+                "description": "Allows users to submit country experts for admin approval",
                 "operationId": "CreateExpert",
                 "requestBody": {
                     "content": {
@@ -236,7 +502,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you sent the request to an invalid endpoint"
+                        "description": "Not found when you sent the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -250,9 +516,41 @@
             }
         },
         "/api/experts/{id}": {
+            "get": {
+                "tags": [
+                    "Experts"
+                ],
+                "summary": "Show Expert",
+                "description": "Retrieve a single expert record based on the ID.",
+                "operationId": "ShowExpert",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Expert ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
             "post": {
                 "tags": [
-                    "Update Country Expert"
+                    "Experts"
                 ],
                 "summary": "Update Country Expert",
                 "description": "Allows users to update Country Expert Record",
@@ -314,7 +612,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you sent the request to an invalid endpoint"
+                        "description": "Not found when you sent the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -328,11 +626,11 @@
             },
             "delete": {
                 "tags": [
-                    "Delete Expert"
+                    "Experts"
                 ],
-                "summary": "Delete Single Expert Record",
+                "summary": "Delete Expert",
                 "description": "Deletes a single expert record based on the ID.",
-                "operationId": "DeleteSingleExpertRecord",
+                "operationId": "DeleteExpert",
                 "parameters": [
                     {
                         "name": "id",
@@ -362,16 +660,16 @@
         "/api/forums": {
             "get": {
                 "tags": [
-                    "List Forums"
+                    "Forums"
                 ],
                 "summary": "List Forums",
                 "description": "Returns a list of all Forums",
-                "operationId": "List Forums",
+                "operationId": "ListForums",
                 "parameters": [
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term for search for specific records",
+                        "description": "Search term for specific records",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -394,6 +692,15 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "community_id",
+                        "in": "query",
+                        "description": "Filter by Community Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -409,7 +716,7 @@
             },
             "post": {
                 "tags": [
-                    "Create Forum Discussion"
+                    "Forums"
                 ],
                 "summary": "Create Forum",
                 "description": "Allows users to submit Forum Discussion",
@@ -450,7 +757,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you sent the request to an invalid endpoint"
+                        "description": "Not found when you send the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -466,17 +773,20 @@
         "/api/forums/comment": {
             "post": {
                 "tags": [
-                    "Create Forum Discussion Comment"
+                    "Forums"
                 ],
                 "summary": "Create Forum Comment",
                 "description": "Allows users to submit Forum Discussion Comment",
-                "operationId": "CreateForumCOmment",
+                "operationId": "CreateForumComment",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
                                 "properties": {
                                     "id": {
+                                        "type": "integer"
+                                    },
+                                    "parent_id": {
                                         "type": "integer"
                                     },
                                     "comment": {
@@ -502,7 +812,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you sent the request to an invalid endpoint"
+                        "description": "Not found when you send the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -516,18 +826,50 @@
             }
         },
         "/api/forums/{id}": {
-            "delete": {
+            "get": {
                 "tags": [
-                    "Delete Forum"
+                    "Forums"
                 ],
-                "summary": "Delete Forum",
-                "description": "Deletes a single forum record based on the ID.",
-                "operationId": "Delete Forum",
+                "summary": "Show Forum",
+                "description": "Retrieve a single forum record based on the ID.",
+                "operationId": "ShowForum",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Froum ID",
+                        "description": "Forum ID",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found"
+                    }
+                }
+            },
+            "delete": {
+                "tags": [
+                    "Forums"
+                ],
+                "summary": "Delete Forum",
+                "description": "Deletes a single forum record based on the ID.",
+                "operationId": "DeleteForum",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Forum ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -549,14 +891,14 @@
                 }
             }
         },
-        "/api/lookup/filetypes": {
+        "/api/lookup/resource-types": {
             "get": {
                 "tags": [
-                    "List  File Types"
+                    "Lookup"
                 ],
-                "summary": "List  File Types",
-                "description": "Returns a list of all file types",
-                "operationId": "List Publications File Types",
+                "summary": "List Resource Types",
+                "description": "Returns a list of all Resource types",
+                "operationId": "ListResourceTypes",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -572,11 +914,11 @@
         "/api/lookup/themes": {
             "get": {
                 "tags": [
-                    "List Themes"
+                    "Lookup"
                 ],
                 "summary": "List Themes",
                 "description": "Returns a list of Themes",
-                "operationId": "List Themes",
+                "operationId": "ListThemes",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -592,16 +934,16 @@
         "/api/lookup/sub_themes": {
             "get": {
                 "tags": [
-                    "List Sub Themes"
+                    "Lookup"
                 ],
                 "summary": "List Sub Themes",
                 "description": "Returns a list of Sub Themes",
-                "operationId": "List Sub Themes",
+                "operationId": "ListSubThemes",
                 "parameters": [
                     {
                         "name": "theme_id",
                         "in": "query",
-                        "description": "Filter by Themeatic area id",
+                        "description": "Filter by Thematic area id",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -623,11 +965,11 @@
         "/api/lookup/jobs": {
             "get": {
                 "tags": [
-                    "List Jobs"
+                    "Lookup"
                 ],
                 "summary": "List Jobs",
                 "description": "Returns a list of Jobs",
-                "operationId": "List Jobs",
+                "operationId": "ListJobs",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -643,11 +985,11 @@
         "/api/lookup/communities": {
             "get": {
                 "tags": [
-                    "List Communities"
+                    "Lookup"
                 ],
                 "summary": "List Communities",
                 "description": "Returns a list of Communities",
-                "operationId": "List Communities",
+                "operationId": "ListCommunities",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -663,11 +1005,11 @@
         "/api/lookup/preferences": {
             "get": {
                 "tags": [
-                    "List Preferences"
+                    "Lookup"
                 ],
                 "summary": "List Preferences",
                 "description": "Returns a list of Preferences",
-                "operationId": "List Preferences",
+                "operationId": "ListPreferences",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -683,11 +1025,31 @@
         "/api/lookup/file-categories": {
             "get": {
                 "tags": [
-                    "List File Categories"
+                    "Lookup"
                 ],
                 "summary": "List File Categories",
                 "description": "Returns a list of File Categories",
-                "operationId": "List File Categories",
+                "operationId": "ListFileCategories",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/lookup/resource-categories": {
+            "get": {
+                "tags": [
+                    "Lookup"
+                ],
+                "summary": "List Resource Categories",
+                "description": "Returns a list of Resource Categories",
+                "operationId": "ListResourceCategories",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -703,11 +1065,11 @@
         "/api/lookup/authors": {
             "get": {
                 "tags": [
-                    "List Authors"
+                    "Lookup"
                 ],
                 "summary": "List Authors",
                 "description": "Returns a list of Authors",
-                "operationId": "List Authors",
+                "operationId": "ListAuthors",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -723,11 +1085,11 @@
         "/api/members": {
             "get": {
                 "tags": [
-                    "List  Member States"
+                    "Members"
                 ],
-                "summary": "List  Member States",
-                "description": "Returns a list of all member statess",
-                "operationId": "List Member States",
+                "summary": "List Member States",
+                "description": "Returns a list of all member states",
+                "operationId": "ListMemberStates",
                 "responses": {
                     "200": {
                         "description": "Successful",
@@ -743,16 +1105,16 @@
         "/api/publications": {
             "get": {
                 "tags": [
-                    "List Publications"
+                    "Publications"
                 ],
                 "summary": "List Publications",
                 "description": "Returns a list of all publications",
-                "operationId": "List Publications",
+                "operationId": "ListPublications",
                 "parameters": [
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term for search fro specific records",
+                        "description": "Search term for specific records",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -761,7 +1123,7 @@
                     {
                         "name": "thematic_area_id",
                         "in": "query",
-                        "description": "Filter by Themeatic area id",
+                        "description": "Filter by Thematic area id",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -770,7 +1132,7 @@
                     {
                         "name": "sub_thematic_area_id",
                         "in": "query",
-                        "description": "Filter by Sub Themeatic area id",
+                        "description": "Filter by Sub Thematic area id",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -820,6 +1182,15 @@
                         "schema": {
                             "type": "boolean"
                         }
+                    },
+                    {
+                        "name": "community_id",
+                        "in": "query",
+                        "description": "Filter by Community Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -835,10 +1206,10 @@
             },
             "post": {
                 "tags": [
-                    "Create Publication"
+                    "Publications"
                 ],
                 "summary": "Create Publication",
-                "description": "Allows users to submit publications for amdin approval",
+                "description": "Allows users to submit publications for admin approval",
                 "operationId": "CreatePublication",
                 "requestBody": {
                     "content": {
@@ -846,7 +1217,7 @@
                             "schema": {
                                 "required": [
                                     "cover",
-                                    "file_type",
+                                    "data_category_id",
                                     "sub_theme",
                                     "description",
                                     "user_id"
@@ -855,7 +1226,7 @@
                                     "cover": {
                                         "type": "file"
                                     },
-                                    "file_type": {
+                                    "data_category_id": {
                                         "type": "integer"
                                     },
                                     "sub_theme": {
@@ -883,7 +1254,14 @@
                                         "nullable": true
                                     },
                                     "communities": {
-                                        "description": "Array of PReference Ids",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "nullable": true
+                                    },
+                                    "preferences": {
+                                        "description": "Array of Preference Ids",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
@@ -913,7 +1291,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
+                        "description": "Not found when you send the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -929,16 +1307,16 @@
         "/api/publications/published": {
             "get": {
                 "tags": [
-                    "List Own Publications"
+                    "Publications"
                 ],
                 "summary": "List Own Publications",
                 "description": "Returns a list of own publications",
-                "operationId": "List Own Publications",
+                "operationId": "ListOwnPublications",
                 "parameters": [
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term for search fro specific records",
+                        "description": "Search term for specific records",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -947,7 +1325,7 @@
                     {
                         "name": "thematic_area_id",
                         "in": "query",
-                        "description": "Filter by Themeatic area id",
+                        "description": "Filter by Thematic area id",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -956,7 +1334,7 @@
                     {
                         "name": "sub_thematic_area_id",
                         "in": "query",
-                        "description": "Filter by Sub Themeatic area id",
+                        "description": "Filter by Sub Thematic area id",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -1016,14 +1394,75 @@
                 ]
             }
         },
+        "/api/publications/favourites": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Favourite Publications",
+                "description": "Favourite publications",
+                "operationId": "ListFavouritePublications",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/publications/add_favourite": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Add Favourite Publications",
+                "description": "Add Favourite publications",
+                "operationId": "AddFavouritePublications",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Publication Id",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
         "/api/publications/comment": {
             "post": {
                 "tags": [
-                    "Create Publication Comment"
+                    "Publications"
                 ],
                 "summary": "Create Publication Comment",
-                "description": "Allows users to submit publication comment for amdin approval",
-                "operationId": "Comment Publication Comment",
+                "description": "Allows users to submit publication comment for admin approval",
+                "operationId": "CreatePublicationComment",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -1059,7 +1498,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
+                        "description": "Not found when you send the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"
@@ -1075,11 +1514,11 @@
         "/api/publications/{id}": {
             "get": {
                 "tags": [
-                    "Retrieve Single Publication"
+                    "Publications"
                 ],
                 "summary": "Retrieve Single Publication",
                 "description": "Retrieve Single Publication",
-                "operationId": "Retrieve Single Publication",
+                "operationId": "RetrieveSinglePublication",
                 "parameters": [
                     {
                         "name": "id",
@@ -1104,10 +1543,10 @@
             },
             "post": {
                 "tags": [
-                    "Update Publication"
+                    "Publications"
                 ],
                 "summary": "Update Publication",
-                "description": "Allows users to update publications for amdin approval",
+                "description": "Allows users to update publications for admin approval",
                 "operationId": "UpdatePublication",
                 "requestBody": {
                     "content": {
@@ -1168,7 +1607,7 @@
                         "description": "Bad Request, when some required data is missing"
                     },
                     "404": {
-                        "description": "not found when you send the request to an invalid endpoint"
+                        "description": "Not found when you send the request to an invalid endpoint"
                     },
                     "403": {
                         "description": "Forbidden"

@@ -197,8 +197,8 @@ class AuthApiController extends ApiController
         );
 
         return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => 'Password reset link sent to your email'], 200)
-            : response()->json(['message' => 'Unable to send reset link'], 400);
+            ? response()->json(['message' => 'Password reset link sent to your email','status'=>200], 200)
+            : response()->json(['message' => 'Unable to send reset link','status'=>400], 400);
     }
 
     /**
@@ -230,7 +230,7 @@ class AuthApiController extends ApiController
             'token' => $token,
             'token_type' => 'Bearer',
             'expires_at' => $tokenExpiration,
-        ]);
+        ], 200);
     }
 
     /**
@@ -289,6 +289,7 @@ class AuthApiController extends ApiController
         $user = $this->usersRepo->save($request);
 
         return response()->json([
+            'status'=>200,
             'message' => 'Profile updated successfully',
             'user' => $user
         ]);
@@ -333,6 +334,7 @@ class AuthApiController extends ApiController
         $user->save();
 
         return response()->json([
+            'status'=>200,
             'message' => 'Password changed successfully',
         ]);
     }
