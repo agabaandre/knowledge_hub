@@ -111,4 +111,13 @@ Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
     Route::post('/compare', [AIApiController::class, 'compare']);
 });
 
-Route::apiResource('events', EventsApiController::class);
+Route::prefix('events')->group(function () {
+    Route::get('/', [EventsApiController::class, 'index'])->name('events.index');
+    Route::get('/{id}', [EventsApiController::class, 'show'])->name('events.show');
+});
+
+Route::group(['prefix' => 'events','middleware' => 'auth:api'], function () {
+    Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
+    Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
+    Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
+});
