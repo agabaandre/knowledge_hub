@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Publication;
+use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
@@ -524,5 +525,70 @@ class PublicationsApiController extends ApiController
             "data" => $publication,
             "msg" => "Publication deleted successfully"
         ];
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/publications/content-request",
+     *     tags={"Publications"},
+     *     summary="Create Content Request",
+     *     operationId="CreateContentRequest",
+     *     security={{"bearer_token":{}}},
+     *     description="Allows users to submit a content request",
+     *     @OA\RequestBody(
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 type="object",
+     *                 required={"title", "description", "country_id"},
+     *                 @OA\Property(property="title", type="string"),
+     *                 @OA\Property(property="description", type="string"),
+     *                 @OA\Property(property="country_id", type="integer"),
+     *                 @OA\Property(property="email", type="string", nullable=true)
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Content request created successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request, when some required data is missing"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     )
+     * )
+     */
+    public function save_content_request(Request $request)
+    {
+        $val_rules = [
+            'title' => 'required|string',
+            'description' => 'required|string',
+            'country_id' => 'required|integer',
+            'email' => 'nullable|email'
+        ];
+
+        $request->validate($val_rules);
+
+        $contentRequest = new ContentRequest();
+        $contentRequest->subject = $request->title;
+        $contentRequest->description = $request->description;
+        $contentRequest->country_id = $request->country_id;
+        $contentRequest->email = $request->email;
+        $contentRequest->save();
+
+        return response()->json([
+            "status" => 201,
+            "data" => $contentRequest,
+            "msg" => "Content request created successfully"
+        ], 201);
     }
 }

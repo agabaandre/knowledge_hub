@@ -46,6 +46,7 @@ Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::post("/comment",[PublicationsApiController::class,"comment"]);
     Route::get("/favourites",[PublicationsApiController::class,"favourites"]);
     Route::get("/add_favourite",[PublicationsApiController::class,"add_favourite"]);
+    Route::post("/content_request",[PublicationsApiController::class,"content_request"]);
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
