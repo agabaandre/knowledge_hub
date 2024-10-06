@@ -16,7 +16,7 @@
 
 @section('content')
     @php
-        $theme = 'theme1.';
+        $theme = ''; //'theme1.';
     @endphp
 
     @include('home.partials.' . $theme . 'spotlight')
