@@ -221,29 +221,25 @@ class AuthApiController extends ApiController
     {
         $user = $request->user();
 
-        // Check if the current token is expired
-        $currentToken = $user->token();
-        if ($currentToken->expires_at->isPast()) {
-            // If the token is expired, issue a new token
-            $user->tokens()->delete(); // Delete all existing tokens
+        if($user){
 
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->accessToken;
-            $tokenExpiration = $tokenResult->token->expires_at;
+        $user->load("communities");
+        $tokenResult = $user->createToken('Personal Access Token');
+        $token = $tokenResult->accessToken;
+        $tokenExpiration = $tokenResult->token->expires_at;
 
-            return response()->json([
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => $tokenExpiration,
-            ], 200);
-        }
-
-        // If the token is not expired, return the current token details
         return response()->json([
-            'token' => $currentToken->id,
+            'token' => $token,
             'token_type' => 'Bearer',
-            'expires_at' => $currentToken->expires_at,
-        ], 200);
+            'expires_at' => $tokenExpiration,
+            'user' => $user
+        ]);
+
+        }else{
+            return response()->json([
+                'message' => 'Unauthenticated, no existing token found. Login to get a new token'
+            ], 401);
+        }
     }
 
     /**

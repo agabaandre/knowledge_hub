@@ -296,12 +296,12 @@
             }
         },
         "/api/refresh": {
-            "post": {
+            "get": {
                 "tags": [
                     "Authentication"
                 ],
                 "summary": "Refresh access token",
-                "operationId": "d56b44b93261f97d6dc4821fc3e60b50",
+                "operationId": "4a0c435346a910a8407071eaf3941708",
                 "responses": {
                     "200": {
                         "description": "Token refreshed successfully"
@@ -312,7 +312,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer_token": []
                     }
                 ]
             }
@@ -329,7 +329,10 @@
                         "application/json": {
                             "schema": {
                                 "properties": {
-                                    "name": {
+                                    "firstname": {
+                                        "type": "string"
+                                    },
+                                    "lastname": {
                                         "type": "string"
                                     },
                                     "email": {
@@ -341,6 +344,25 @@
                                     },
                                     "password_confirmation": {
                                         "type": "string"
+                                    },
+                                    "phone": {
+                                        "type": "string"
+                                    },
+                                    "job": {
+                                        "type": "string"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    },
+                                    "preferences": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "photo": {
+                                        "type": "string",
+                                        "format": "binary"
                                     }
                                 },
                                 "type": "object"
@@ -361,7 +383,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer_token": []
                     }
                 ]
             }
@@ -409,7 +431,7 @@
                 },
                 "security": [
                     {
-                        "bearerAuth": []
+                        "bearer_token": []
                     }
                 ]
             }
