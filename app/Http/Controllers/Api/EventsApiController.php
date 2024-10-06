@@ -25,7 +25,7 @@ class EventsApiController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Event"))
+     *         @OA\JsonContent())
      *     )
      * ) 
      */
@@ -43,12 +43,12 @@ class EventsApiController extends Controller
      *     description="Returns event data",
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
      *         response=201,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *         @OA\JsonContent()
      *     )
      * )
      */
@@ -87,7 +87,7 @@ class EventsApiController extends Controller
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
      *         response=404,
@@ -121,12 +121,12 @@ class EventsApiController extends Controller
      *     ),
      *     @OA\RequestBody(
      *         required=true,
-     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
-     *         @OA\JsonContent(ref="#/components/schemas/Event")
+     *         @OA\JsonContent()
      *     ),
      *     @OA\Response(
      *         response=404,
