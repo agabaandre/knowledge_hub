@@ -25,9 +25,10 @@ use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+Route::get('/refresh', [AuthApiController::class, 'refresh']);
+
 
 Route::group(['middleware' => 'auth:api'],function(){
-    Route::get('/refresh', [AuthApiController::class, 'refresh']);
     Route::put('/profile', [AuthApiController::class, 'updateProfile']);
     Route::post('/change-password', [AuthApiController::class, 'changePassword']);
  });

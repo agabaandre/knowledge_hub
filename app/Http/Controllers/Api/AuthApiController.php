@@ -220,16 +220,29 @@ class AuthApiController extends ApiController
     public function refresh(Request $request)
     {
         $user = $request->user();
-        $user->tokens()->delete();
-        
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->accessToken;
-        $tokenExpiration = $tokenResult->token->expires_at;
 
+        // Check if the current token is expired
+        $currentToken = $user->token();
+        if ($currentToken->expires_at->isPast()) {
+            // If the token is expired, issue a new token
+            $user->tokens()->delete(); // Delete all existing tokens
+
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+            $tokenExpiration = $tokenResult->token->expires_at;
+
+            return response()->json([
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $tokenExpiration,
+            ], 200);
+        }
+
+        // If the token is not expired, return the current token details
         return response()->json([
-            'token' => $token,
+            'token' => $currentToken->id,
             'token_type' => 'Bearer',
-            'expires_at' => $tokenExpiration,
+            'expires_at' => $currentToken->expires_at,
         ], 200);
     }
 

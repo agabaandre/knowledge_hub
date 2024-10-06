@@ -18,55 +18,46 @@
                     $likes = count($row->favourited);
                 @endphp
 
-                <div class="col-md-6 mb-4" data-aos="zoom-in">
-                    <div class="card border-0 shadow-sm" style="border-radius: 10px; background-color: #ecf0f1;">
-                        <div class="card-body d-flex flex-column">
-                            <h4 class="card-title fs-md mb-2 ft-medium text-truncate" style="color: #2980b9;">
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}"
-                                    title="{!! $row->title !!}">
+                <div class="col-12 col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-duration="800"
+                    data-aos-once="true">
+                    <!-- Start Feature One -->
+                    <div class="bg-white shadow-lg rounded-4 overflow-hidden">
+                        <div class="p-4">
+                            <a href="#"
+                                class="font-size-3 d-block mb-1 text-gray">{{ truncate($row->author->name, 40) }}</a>
+                            <h2 class="mt-n1">
+                                <a class="font-size-2 text-black-2  mb-3 d-block"
+                                    href="{{ url('records/resource') }}?id={{ $row->id }}">
                                     {!! truncate($row->title, 40) !!}
                                 </a>
-                            </h4>
-                            <p class="card-text text-muted small mb-2">
-                                <i class="fa fa-bank mr-1"></i>Source: {{ truncate($row->author->name, 40) }}
+                            </h2>
+                            {!! truncate($row->description, 100) ?? '' !!}
+                            <ul class="list-unstyled mb-3 card-tag-list bg-light py-3 rounded-3">
+                                <li class="d-inline-block">
+                                    <a href="" class="text-warning font-size-3 rounded-3 px-3 py-1">
+                                        <i class="fa fa-briefcase mr-2 font-weight-bold"></i>
+                                        {{ $row->sub_theme->description ?? 'N/A' }}
+                                    </a>
+                                </li>
+                                <li class="d-inline-block">
+                                    <a href="" class=" text-success font-size-3 rounded-3 px-3 py-1">
+                                        <i class="fa fa-dollar-sign mr-2 font-weight-bold"></i>
+                                        {{ @$row->category->category_name }}
+                                    </a>
+                                </li>
+                            </ul>
+                            <p class="mb-4 font-size-4 text-gray">
+                                Last updated: {{ time_ago($row->updated_at) }}
+                                <br>{{ $row->visits }} Views
+                                <br>{{ count($row->comments) }} Comments
                             </p>
-                            <p class="card-text text-muted small mb-2">
-                                <i class="lni lni-briefcase mr-1"></i>Theme: {!! truncate($row->theme->description ?? '', 40) !!}
-                            </p>
-                            <p class="card-text text-muted small mb-2">
-                                <i class="lni lni-archive mr-1"></i>Sub Theme: {!! $row->sub_theme->description ?? '' !!}
-                            </p>
-                            <p class="card-text text-muted small mb-2">
-                                <i class="lni lni-empty-file mr-1"></i>Category: {{ @$row->category->category_name }}
-                            </p>
-                            @if ($likes > 0)
-                                <p class="card-text text-muted small mb-2">
-                                    <i class="lni lni-heart theme-text mr-1"></i> {{ $likes }}
-                                    Like{{ $likes > 1 ? 's' : '' }}
-                                </p>
-                            @endif
-                            <div>
-                                <p class="card-text text-muted small mb-2">
-                                    <i class="lni lni-calendar mr-1"></i>Last updated: {{ time_ago($row->updated_at) }}
-                                </p>
-                                <p class="card-text text-muted small mb-2">
-                                    <i class="fa fa-eye mr-1"></i>{{ $row->visits }} Views
-                                </p>
-                                <p class="card-text text-muted small mb-2">
-                                    <i class="fa fa-comments"></i> {{ count($row->comments) }} Comments
-                                </p>
-                                @auth
-                                    <div class="btn btn-outline-dark btn-sm mt-2 favbtn">
-                                        @include ('common.favourites_btn')
-                                    </div>
-                                @endauth
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}"
-                                    class="btn btn-sm theme-bg text-white ft-medium apply-btn fs-sm rounded mt-3">Browse
-                                    Resource</a>
+                            <div class="card-btn-group">
+                                <a class="btn btn-primary text-uppercase btn-medium rounded-3 col-lg-12"
+                                    href="{{ url('records/resource') }}?id={{ $row->id }}">Browse Resource</a>
                             </div>
                         </div>
-                        @include('home.partials.comments')
                     </div>
+                    <!-- End Feature One -->
                 </div>
             @endforeach
         </div>
