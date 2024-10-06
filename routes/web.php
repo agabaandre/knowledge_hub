@@ -52,6 +52,9 @@ use App\Http\Controllers\CountriesController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\Admin\AdminCoursesController;
+use App\Http\Controllers\CommunitiesController;
+use App\Http\Controllers\Admin\DashboardsController;
+use App\Http\Controllers\Admin\AdminEventsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -170,10 +173,22 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
-
+    Route::get('/dashboards', [DashboardsController::class, 'details'])->name('admin.dashboard.details');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+
+    Route::get("/events", [AdminEventsController::class, 'index'])->name('admin.events');
+
+    Route::prefix('events')->name('admin.events.')->group(function () {
+        Route::get('/', [AdminEventsController::class, 'index'])->name('index');
+        Route::get('/create', [AdminEventsController::class, 'create'])->name('create');
+        Route::post('/save', [AdminEventsController::class, 'store'])->name('store');
+        Route::get('/{id}', [AdminEventsController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [AdminEventsController::class, 'edit'])->name('edit');
+        Route::put('/{id}/save', [AdminEventsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminEventsController::class, 'destroy'])->name('destroy');
+    });
 
     Route::group(["prefix" => "publications"], function () {
 
@@ -340,10 +355,12 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //commsofpractice
     Route::group(["prefix" => "commsofpractice"], function () {
 
-        Route::any("/", [CommsOfPracticeController::class, 'index']);
+        Route::any("/", [CommsOfPracticeController::class, 'getAllWithMembership']);
         Route::any("/moderate", [CommsOfPracticeController::class, 'moderate']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
+        Route::get('/commsofpractice/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
+        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction'); // Ensure this line is present
     });
 
     //AdminUnits
@@ -475,10 +492,16 @@ Route::group(["prefix" => "dashboards"], function () {
 Route::group(["prefix" => "ai"], function () {
 
     Route::post("/summarise",  [AIController::class, 'summarise']);
-    Route::post("/compare",  [GraphController::class, 'compare']);
+    Route::post("/compare",  [AIController::class, 'compare']);
     
 });
 
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
+});
+
+Route::group(["prefix" => "communities"], function () {
+    Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
+    Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
+    Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
 });

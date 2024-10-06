@@ -7,7 +7,8 @@ use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
+use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
 
 /*
 |--------------------------------------------------------------------------
@@ -21,40 +22,45 @@ use App\Http\Controllers\TestController;
 */
 
 // Publications Routes
-///,
-
 
 Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
+Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+Route::get('/refresh', [AuthApiController::class, 'refresh']);
+
 
 Route::group(['middleware' => 'auth:api'],function(){
-    Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
-    Route::get('/logout', [AuthApiController::class,"logout"]);
+    Route::put('/profile', [AuthApiController::class, 'updateProfile']);
+    Route::post('/change-password', [AuthApiController::class, 'changePassword']);
  });
 
 Route::group(["prefix" =>"members"],function(){
     Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
-Route::get("publications",[PublicationsApiController::class,"index"]);
-Route::get("publications/{id}",[PublicationsApiController::class,"show"]);
+Route::get("publications",[PublicationsApiController::class,"index"])->middleware('auth.passport');;
+Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where('id', '[0-9]+');;
 
-Route::group(['middleware' => 'auth:api'],function(){
-    Route::post("publications",[PublicationsApiController::class,"store"]);
-    Route::get("publications/comment",[PublicationsApiController::class,"comment"]);
+Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
+    Route::post("/",[PublicationsApiController::class,"store"]);
+    Route::get("/published",[PublicationsApiController::class,"my_publications"]);
+    Route::post("/comment",[PublicationsApiController::class,"comment"]);
+    Route::get("/favourites",[PublicationsApiController::class,"favourites"]);
+    Route::get("/add_favourite",[PublicationsApiController::class,"add_favourite"]);
+    Route::post("/content-request",[PublicationsApiController::class,"content_request"]);
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
 Route::get("forums/{id}",[ForumsApiController::class,"show"]);
 Route::group(['middleware' => 'auth:api'],function(){
     Route::post("forums",[ForumsApiController::class,"store"]);
-    Route::get("forums/comment",[ForumsApiController::class,"comment"]);
+    Route::post("forums/comment",[ForumsApiController::class,"comment"]);
 });
 
 Route::get("experts",[ExpertsApiController::class,'index']);
 
 Route::group(["prefix" =>"lookup"],function(){
-    Route::get('/filetypes', [LookupApiController::class,"file_types"]);
+    Route::get('/resource-types', [LookupApiController::class,"resource_types"]);
     Route::get('/themes', [LookupApiController::class,"themes"]);
     Route::get('/sub_themes', [LookupApiController::class,"sub_themes"]);
     Route::get('/jobs', [LookupApiController::class,"jobs"]);
@@ -62,6 +68,7 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/communities', [LookupApiController::class,"communities"]);
     Route::get('/file-categories', [LookupApiController::class,"file_categories"]);
     Route::get('/authors', [LookupApiController::class,"authors"]);
+    Route::get('/resource-categories', [LookupApiController::class,"resource_categories"]);
 });
 
 Route::get('/log',function(){
@@ -99,5 +106,18 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
 
 });
 
-Route::get('/test',[TestController::class,"index"]);
+Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
+    Route::post('/summarise', [AIApiController::class, 'summarise']);
+    Route::post('/compare', [AIApiController::class, 'compare']);
+});
 
+Route::prefix('events')->group(function () {
+    Route::get('/', [EventsApiController::class, 'index'])->name('events.index');
+    Route::get('/{id}', [EventsApiController::class, 'show'])->name('events.show');
+});
+
+Route::group(['prefix' => 'events','middleware' => 'auth:api'], function () {
+    Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
+    Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
+    Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
+});

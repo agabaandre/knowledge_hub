@@ -13,7 +13,7 @@
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa-solid fa-microchip"></i>AI Processing(Summarizer)</small></h2>
+          <h2 class="modal-title" id="myExtraLargeModalLabel"><i class="fa-solid fa-microchip"></i>AI Processing (Summarizer)</small></h2>
           
           <button type="button" class="close" data-dismiss="modal" aria-label="Close">
             <span class="ft-lg" aria-hidden="true">&times;</span>
@@ -22,7 +22,7 @@
         <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
 
           @php
-$user = current_user();
+            $user = current_user();
           @endphp
 
           <div class="row mb-10  d-flex justify-content-center">
@@ -39,7 +39,7 @@ $user = current_user();
             </div>
              <div class="form-group col-md-8">
               <label>Custom Prompt</label>
-              <input type="text" name="prompt" placeholder="E.g 'Make a 1 Page Summary'" class="form-control">
+              <input type="text" name="prompt" id="prompt" placeholder="E.g 'Make a 1 Page Summary'" class="form-control">
               
             </div>
              

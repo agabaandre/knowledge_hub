@@ -44,19 +44,27 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
     ];
 
-    protected $appends = ["names","area"];
+    protected $appends = ["names","area","settings"];
     
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
     }
 
+    public function getSettingsAttribute(){
+        return settings();
+    }
+    
     public function preferences(){
        return $this->hasMany(UserPreference::class);
     }
 
     public function country(){
         return $this->belongsTo(Country::class);
+     }
+
+     public function author(){
+        return $this->belongsTo(Author::class);
      }
 
      public function getAreaAttribute(){
@@ -78,6 +86,10 @@ class User extends Authenticatable
 
     public function getPhotoAttribute($photo){
         return storage_link('uploads/users/'.$photo);
+    }
+
+    public function communities(){
+        return $this->hasManyThrough(CommunityOfPractice::class,CommunityOfPracticeMembers::class,"user_id","id","id","community_of_practice_id");
     }
 
 

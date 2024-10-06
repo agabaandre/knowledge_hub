@@ -20,34 +20,23 @@ class AuthController extends Controller
 
     public function register(Request $request){
 
+
         $request->validate([
             'firstname'=> ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'g-recaptcha-response'=>'required|captcha'
+        ],[
+            'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
+            'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
         ]);
-
-        $validator = Validator::make(request()->all(), ['g-recaptcha-response' => 'recaptcha']);
-        
-        $errors ="";
-        // check if validator fails
-        if($validator->fails()) {
-
-            $errors = $validator->errors();
-
-            $data['alert_class']="danger";
-            $data['alert']  ="We are unable able to prove you are human";
-
-        }
-        else{
 
         $saved = $this->usersRepo->save($request);
         
         $message = ($saved)?'Resgistration successful,Check Email to activate':'Request failed try again';
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['alert']       = $message;
-
-        }
 
         return back()->with($data);
     }

@@ -16,10 +16,10 @@ class MembersApiController extends ApiController
     /**
         * @OA\Get(
         * path="/api/members",
-        * operationId="List Member States",
-        * tags={"List  Member States"},
-        * summary="List  Member States",
-        * description="Returns a list of all member statess",
+        * operationId="ListMemberStates",
+        * tags={"Members"},
+        * summary="List Member States",
+        * description="Returns a list of all member states",
         *      @OA\Response(
         *          response=200,
         *          description="Successful",

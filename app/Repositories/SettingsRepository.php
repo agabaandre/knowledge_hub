@@ -57,6 +57,8 @@ class SettingsRepository{
 
         $settings->save();
 
+        clear_cache();
+
         return $settings;
     }
 

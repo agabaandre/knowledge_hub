@@ -10,5 +10,6 @@ class Setting extends Model
     use HasFactory;
 
     protected $table="setting";
+    protected $hidden =["default_password"];
     public $timestamps =false;
 }

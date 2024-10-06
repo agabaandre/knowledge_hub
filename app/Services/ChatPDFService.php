@@ -20,11 +20,13 @@ class ChatPDFService implements AIModel{
         $prompt =  [
             [
             "role"=> "user", 
-            "content"=>"Provide an accurate, thorough and comprehensive summarization without being very brief and not mentioning specific sections in the document but you can still use bullets and headings as contained in the document.It is good to start with what the document covers as an overview, then give a detailed summary and add on whatever you find important, not forgetting any key definitions and case studes/ survey results/data/stats/ conclucions or numbers if avaialble.Be sure to touch all major sections, basing main headings. Always return responses in raw html format in a div, ignore html,head and body tags, use nice styling especially using  lists but followed by paragraph explanations,headings and paragraphs, don't use any h1 and h2 tags. Use teal color for headings and bold words.For short content given for summarising, always respond saying there's not enough content to be summarised,remember to make your summaries rich enough, to atleast enough depending on  what you are given but don't make it too small or too big. and avoid using background colors"
+            "content"=>"Provide an accurate, thorough and comprehensive summarization (or comparison if requested) without being very brief and not mentioning specific sections in the document but you can still use bullets and headings as contained in the document.It is good to start with what the document covers as an overview, then give a detailed summary and add on whatever you find important, not forgetting any key definitions and case studes/ survey results/data/stats/ conclucions or numbers if avaialble.Be sure to touch all major sections, basing main headings. Always return responses in raw html format in a div,
+             ignore html,head and body tags, use nice styling especially using  lists but followed by paragraph explanations,headings and paragraphs, don't use any h1 and h2 tags. Use teal color for headings and bold words.For short content given for summarising, always respond saying there's not enough content to be summarised,remember to make your summaries rich enough, to atleast enough depending on  what you are given but don't make it too small or too big. and avoid using background colors"
             ]
         ];
 
-        if($additional_prompt)
+        $additional_prompt .= " Make sure you translate to  if requested ";
+
         $prompt[] = ["role"=>"user","content"=>$additional_prompt];
 
         $payload = [
@@ -53,15 +55,16 @@ class ChatPDFService implements AIModel{
     }
 
     
-    function summarize($resource,$language=null){
+    function summarize($resource,$language=null,$additional_prompt=null){
 
-        $prompt = "Translate summary to: $language, here the comments users have submitted about it: ".json_encode($resource->comments->toArray());
+        $prompt  = ($additional_prompt)?$additional_prompt:"Translate summary to: $language, here the comments users have submitted about it: ".json_encode($resource->comments->toArray());
+        $prompt .= " Don't forget to translate to ".$language." if provided ";
         return $this->prompt($resource->publication,$prompt);
     }
 
-    function compare($resource,$other_resource){
+    function compare($resource,$other_resource,$additional_prompt=null){
 
-        $question = "Summarise a comparison of : ". $resource ." and ".$other_resource;
+        $question = "Compare the following two for me: ". $resource ." and ".$other_resource;
         return $this->prompt($question);
 
     }

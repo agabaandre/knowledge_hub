@@ -43,10 +43,10 @@ class PublicationsRepository extends SharedRepo{
         // Search by keyword
         if (strlen($request->term) > 2) {
             $pubs->where(function ($query) use ($request) {
-                $query->where('title', 'like', $request->term . '%')
-                    ->orWhere('publication', 'like', $request->term . '%');
+                $query->where('title', 'like', '%'.$request->term . '%')
+                    ->orWhere('publication', 'like', '%'.$request->term . '%');
 
-                $authors = Author::where('name', 'like', $request->term . '%')->pluck('id');
+                $authors = Author::where('name', 'like', '%'.$request->term . '%')->pluck('id');
                 $tags = Tag::where('tag_text', 'like', $request->term . '%')->pluck('id');
                 $pub_tag_ids = PublicationTag::whereIn('tag_id', $tags)->pluck('publication_id');
 
@@ -60,34 +60,61 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
-        // User-specific filters
-        if (current_user() && current_user()->id) {
-            $communities = CommunityOfPracticeMembers::where("user_id", current_user()->id)
-                ->pluck("community_of_practice_id");
-            $commPubs = PublicationCommunityOfPractice::whereIn("community_of_practice_id", $communities)->pluck('publication_id');
-
-            $pubs->where(function ($query) use ($commPubs) {
-                $query->whereIn('id', $commPubs)
-                    ->orWhereDoesntHave("communities")
-                    ->orWhere('user_id', current_user()->id);
-            });
-        } else {
-            $pubs->whereDoesntHave("communities");
-        }
-
         // Apply other filters
         $this->applyFilters($pubs, $request);
 
-        // Access levels effect to query results
-        $this->access_filter($pubs);
 
-        if (!$request->is_admin) {
-            $pubs->where('is_active', 'Active')->where('is_approved', 1);
+        if (!is_admin()) {
+
+
+            $pubs->where('is_admin_only_access',0);
+            $pubs->where('is_active', 'Active')
+                 ->where('is_approved', 1);
+
+            
+            if (auth()->user()) {
+                
+                if(!$request->community_id):
+                $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
+                    ->where("is_approved", 1)
+                    ->pluck("community_of_practice_id");
+
+               
+                if(count($userCommunities) > 0):
+                    $pubs->where(function ($query) use ($userCommunities) {
+
+                        $query->whereHas('communities', 
+                            function ($q) use ($userCommunities) {
+                            $q->whereIn('community_of_practice_id', $userCommunities);
+                        })
+                        ->orWhereDoesntHave("communities")
+                        ->orWhere('user_id', auth()->user()->id);
+                    });
+                else:
+                    $pubs->whereDoesntHave("communities");
+                endif;
+            else:
+                $pubs->whereHas("communities",function($query) use($request){
+                    $query->where("community_of_practice_id",$request->community_id);
+                });
+            endif;
+            
+            } 
+            else {
+                $pubs->whereDoesntHave("communities");
+            }
+
+            
+        } 
+        else {
+            // Access levels effect to query results
+            $this->access_filter($pubs);
         }
 
         $results = $pubs->paginate($rows_count);
         
         Log::info(count($results));
+        //Log::info($results);
 
         return $return_array ? $results : $results->appends($request->all());
     }
@@ -108,10 +135,10 @@ class PublicationsRepository extends SharedRepo{
     public function my_publications(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $author_id  = current_user()->author_id;
+        $user_id  = auth()->user()->id;
 
         $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
-        $pubs->where('author_id',$author_id);
+        $pubs->where('user_id',$user_id);
         $result = $pubs->paginate($rows_count);
 
         return $result;
@@ -120,7 +147,7 @@ class PublicationsRepository extends SharedRepo{
     public function favourites(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $user_id    =  current_user()->id;
+        $user_id    =  auth()->user()->id;
         
         $favs = Favourite::where('user_id',$user_id)
         ->get()
@@ -145,8 +172,10 @@ class PublicationsRepository extends SharedRepo{
 
     public function save(Request $request){
 
+        Log::info("Request:: ". json_encode($request->all()));
+
         $pub  = ($request->id)? Publication::find($request->id):new Publication();
-        $user = ($request->user_id)?User::find($request->user_id):@current_user();
+        $user = ($request->user_id)?User::find($request->user_id):auth()->user();
   
         if($request->original_id):
 
@@ -157,11 +186,10 @@ class PublicationsRepository extends SharedRepo{
             $pub->title                    = $parent->title;
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
-            $request['category_id']= $parent->publication_catgory_id;
-            $request['data_category_id'] = $parent->data_category_id;
+            $request['category_id']= $parent->data_category_id;
+            $request['data_category_id'] = $parent->publication_catgory_id;
             
         else:
-           
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
             if(!$request->countries):
@@ -169,7 +197,6 @@ class PublicationsRepository extends SharedRepo{
                 $pub->geographical_coverage_id = $geo_id;
             else:
                 $pub->geographical_coverage_id  = $request->countries[0];
-                $pub->countries()->attach($request->countries);
             endif;
             
             $pub->title                     = $request->title;
@@ -180,18 +207,20 @@ class PublicationsRepository extends SharedRepo{
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
-        $pub->publication_catgory_id  = $request->category_id;
+        $pub->publication_catgory_id  = $request->data_category_id;
         $pub->associated_authors   = $request->associated_authors;
         $pub->visits               = ($request->id)?$pub->visits:0;
-        $pub->data_category_id     = $request->data_category_id;
+        $pub->data_category_id     = $request->category_id;
         $pub->is_embedded          = $request->is_embedded ?? false;
+        $pub->is_default_in_category = $request->is_default ?? false;
+        $pub->is_admin_only_access = $request->admin_only ?? false;
+
 
         if(!is_admin()){
 
             $pub->is_active   = 'In-Active';
             $pub->is_approved = 0;
             $pub->is_rejected = 0;
-            
         }
 
         //save cover
@@ -238,8 +267,11 @@ class PublicationsRepository extends SharedRepo{
          if(@$request->accessgroups && $saved):
             $this->attach_to_access_group($request->accessgroups,$id);
         endif;
-        
 
+        if($saved && $request->countries):
+            $pub->countries()->attach($request->countries);
+        endif;
+        
         if(!is_admin()){
 
             $alert = array(
@@ -297,13 +329,24 @@ class PublicationsRepository extends SharedRepo{
 
     public function attach_to_community($comunities,$publication_id){
 
-        for($i=0;$i<count($comunities);$i++){
+        try{
+            
+        if(!is_array($comunities))
+        $comunities = json_decode($comunities);
 
-             $pub_tag = new PublicationCommunityOfPractice();
-             $pub_tag->community_of_practice_id= $comunities[$i];
-             $pub_tag->publication_id = $publication_id;
-             $pub_tag->save();
-        }
+        if(is_array($comunities)):
+            for($i=0;$i<count($comunities);$i++){
+
+                $pub_comment = new PublicationCommunityOfPractice();
+                $pub_comment->community_of_practice_id= $comunities[$i];
+                $pub_comment->publication_id = $publication_id;
+                $pub_comment->save();
+            }
+       endif;
+    }
+    catch(\Exception $exception){
+            Log::error("Error occured". $exception->getMessage());
+    }
 
     }
 
@@ -340,7 +383,7 @@ class PublicationsRepository extends SharedRepo{
     public function add_favourite($pub_id){
 
          $fav = new Favourite();
-         $fav->user_id = current_user()->id;
+         $fav->user_id = auth()->user()->id;
          $fav->publication_id = $pub_id;
          $fav->save();
     }
@@ -619,8 +662,15 @@ private function applyFilters($query, $request) {
             $q->where('sub_thematic_area_id', $value ?: $request->sub_thematic_area_id);
         },
         'is_featured' => function ($q, $value) {
-            $q->where('is_featured', 1);
+            $q->where('is_featured', $value);
         },
+        'user_id' => function ($q, $value) {
+            $q->where('user_id', $value);
+        },
+        'category' => function ($q, $value) {
+            $q->where('data_category_id', $value);
+        }
+
     ];
 
     foreach ($filters as $key => $callback) {

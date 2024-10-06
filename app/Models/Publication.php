@@ -80,10 +80,10 @@ class Publication extends Model
     }
 
     public function getIsFavouriteAttribute(){
-        if(!current_user())
+        if(!auth()->user())
         return false;
         
-        $fav = Favourite::where('user_id',current_user()->id)->where('publication_id',$this->id)->first();
+        $fav = Favourite::where('user_id',auth()->user()->id)->where('publication_id',$this->id)->first();
         return ($fav)?true:false;
     }
 
@@ -154,6 +154,10 @@ class Publication extends Model
         return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
     }
 
+    public function getCoverAttribute($value){
+        return ($this->cover_is_exteranl)?$value:storage_link('uploads/publications/'.$value);
+    }
+
     public function getPublicationAttribute($value)
     {
         return cleanUTF8($value);
@@ -162,7 +166,7 @@ class Publication extends Model
     // Ensure the content is UTF-8 encoded
     public function getDescriptionAttribute($value)
     {
-        return  cleanUTF8($value);
+        return  $value;
     }
 
     public function getTitleAttribute($value)

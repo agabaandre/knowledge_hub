@@ -131,11 +131,17 @@
 
 								<div class="row">
 									<div class="form-group col-md-12">
-									    {!! htmlFormSnippet() !!}
+									    {!! NoCaptcha::display() !!}
 									</div>
 								</div>
 
 								<div class="form-group">
+									
+									@error('g-recaptcha-response')
+											<span class="invalid-feedback" role="alert">
+												<strong>{{ $message }}</strong>
+											</span>
+                                    @enderror
 									<p>By registering your details, you agree with our Terms & Conditions, and Privacy and Cookie Policy.</p>
 								</div>
 								
@@ -167,5 +173,6 @@
 @section('scripts')
 
 	@include('common.select2')
+	{!! NoCaptcha::renderJs() !!}
 
 @endsection

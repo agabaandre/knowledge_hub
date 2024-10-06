@@ -20,11 +20,14 @@ class PublicationsController extends Controller
     }
 
     public function show(Request $request){
-
         $data['publication'] = $this->publicationsRepo->find($request->id);
 
         if(!$data['publication'])
-         abort(404);
+            abort(404);
+        
+        $request->merge(['thematic_area_id' => $data['publication']->thematic_area_id]);
+        // Get related publications with the same thematic_area_id
+        $data['related_publications'] = $this->publicationsRepo->get($request);
       
         return view('publications.show',$data);
     }
