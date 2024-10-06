@@ -26,8 +26,10 @@ Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);
 
 Route::group(['middleware' => 'auth:api'],function(){
-    Route::post('/refresh_token', [AuthApiController::class,"refresh"]);
-    Route::get('/logout', [AuthApiController::class,"logout"]);
+    Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
+    Route::post('/refresh', [AuthApiController::class, 'refresh']);
+    Route::put('/profile', [AuthApiController::class, 'updateProfile']);
+    Route::post('/change-password', [AuthApiController::class, 'changePassword']);
  });
 
 Route::group(["prefix" =>"members"],function(){

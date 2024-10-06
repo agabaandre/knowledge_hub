@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
 use Auth;
+use Hash;
+use Password;
 
 class AuthApiController extends ApiController
 {
@@ -163,6 +165,175 @@ class AuthApiController extends ApiController
             'token_type' => 'Bearer',
             'expires_at' => $tokenExpiration,
             'user' => $user
+        ]);
+    }
+    /**
+     * @OA\Post(
+     *     path="/api/forgot-password",
+     *     summary="Send password reset link",
+     *     tags={"Authentication"},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"email"},
+     *             @OA\Property(property="email", type="string", format="email")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password reset link sent"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     )
+     * )
+     */
+    public function forgotPassword(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::sendResetLink(
+            $request->only('email')
+        );
+
+        return $status === Password::RESET_LINK_SENT
+            ? response()->json(['message' => 'Password reset link sent to your email'], 200)
+            : response()->json(['message' => 'Unable to send reset link'], 400);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/refresh",
+     *     summary="Refresh access token",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Token refreshed successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function refresh(Request $request)
+    {
+        $user = $request->user();
+        $user->tokens()->delete();
+        
+        $tokenResult = $user->createToken('Personal Access Token');
+        $token = $tokenResult->accessToken;
+        $tokenExpiration = $tokenResult->token->expires_at;
+
+        return response()->json([
+            'token' => $token,
+            'token_type' => 'Bearer',
+            'expires_at' => $tokenExpiration,
+        ]);
+    }
+
+    /**
+     * @OA\Put(
+     *     path="/api/profile",
+     *     summary="Update user profile",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="email", type="string", format="email"),
+     *             @OA\Property(property="password", type="string"),
+     *             @OA\Property(property="password_confirmation", type="string")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Profile updated successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function updateProfile(Request $request)
+    {
+       $user = auth()->user();
+       
+        $validatedData = $request->validate([
+            'firstname' => 'sometimes|string|max:255',
+            'lastname' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'sometimes|string|min:6|confirmed',
+            'phone' => 'sometimes|string|min:10',
+            'job' => 'sometimes|string|min:4',
+            'country_id' => 'sometimes|integer',
+            'preferences' => 'sometimes|array',
+            'preferences.*' => 'integer',
+            'photo' => 'sometimes|file|image|max:1024', // Assuming photo is an image file
+        ]);
+
+        if (isset($validatedData['password'])) {
+            $validatedData['password'] = Hash::make($validatedData['password']);
+        }
+
+        if ($request->hasFile('photo')) {
+            $validatedData['photo'] = $request->file('photo')->store('profile_photos', 'public');
+        }
+
+        $user = $this->usersRepo->save($request);
+
+        return response()->json([
+            'message' => 'Profile updated successfully',
+            'user' => $user
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/change-password",
+     *     summary="Change user password",
+     *     tags={"Authentication"},
+     *     security={{"bearerAuth":{}}},
+     *     @OA\RequestBody(
+     *         @OA\JsonContent(
+     *             required={"password", "password_confirmation"},
+     *             @OA\Property(property="password", type="string", description="New password"),
+     *             @OA\Property(property="password_confirmation", type="string", description="Password confirmation")
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Password changed successfully"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function changePassword(Request $request)
+    {
+        $user = $request->user();
+
+        $validatedData = $request->validate([
+            'password' => 'required|string|min:6|confirmed',
+        ]);
+
+        $user->password = Hash::make($validatedData['password']);
+        $user->save();
+
+        return response()->json([
+            'message' => 'Password changed successfully',
         ]);
     }
 }
