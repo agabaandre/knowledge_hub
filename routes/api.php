@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
 use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
+use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
 
 /*
 |--------------------------------------------------------------------------
@@ -46,7 +47,7 @@ Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::post("/comment",[PublicationsApiController::class,"comment"]);
     Route::get("/favourites",[PublicationsApiController::class,"favourites"]);
     Route::get("/add_favourite",[PublicationsApiController::class,"add_favourite"]);
-    Route::post("/content_request",[PublicationsApiController::class,"content_request"]);
+    Route::post("/content-request",[PublicationsApiController::class,"content_request"]);
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
@@ -110,4 +111,4 @@ Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
     Route::post('/compare', [AIApiController::class, 'compare']);
 });
 
-
+Route::apiResource('events', EventsApiController::class);

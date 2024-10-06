@@ -54,6 +54,7 @@ use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\Admin\AdminCoursesController;
 use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
+use App\Http\Controllers\Admin\AdminEventsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -176,6 +177,18 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+
+    Route::get("/events", [AdminEventsController::class, 'index'])->name('admin.events');
+
+    Route::prefix('events')->name('admin.events.')->group(function () {
+        Route::get('/', [AdminEventsController::class, 'index'])->name('index');
+        Route::get('/create', [AdminEventsController::class, 'create'])->name('create');
+        Route::post('/save', [AdminEventsController::class, 'store'])->name('store');
+        Route::get('/{id}', [AdminEventsController::class, 'show'])->name('show');
+        Route::get('/{id}/edit', [AdminEventsController::class, 'edit'])->name('edit');
+        Route::put('/{id}/save', [AdminEventsController::class, 'update'])->name('update');
+        Route::delete('/{id}', [AdminEventsController::class, 'destroy'])->name('destroy');
+    });
 
     Route::group(["prefix" => "publications"], function () {
 
