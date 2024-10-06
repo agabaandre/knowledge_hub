@@ -27,6 +27,7 @@ class EventsApiController extends Controller
      *         description="Successful operation",
      *         @OA\JsonContent(type="array", @OA\Items(ref="#/components/schemas/Event"))
      *     )
+     * ) 
      */
     public function index()
     {
