@@ -98,6 +98,10 @@
                 </li>
             @endcan
 
+            <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="sub-icon"><i
+                        class=""></i>Events</a>
+            </li>
+
             <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i
                         class="fe fe-chevron-down horizontal-icon"></i></a>
                 <ul class="sub-menu">
