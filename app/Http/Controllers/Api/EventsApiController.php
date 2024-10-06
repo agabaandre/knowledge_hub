@@ -31,7 +31,11 @@ class EventsApiController extends Controller
      */
     public function index()
     {
-        return response()->json($this->eventsRepo->getAll(), 200);
+        return response()->json([
+            "status" => 200,
+            "message" => "Events retrieved successfully",
+            "data" => $this->eventsRepo->getAll()
+        ], 200);
     }
 
     /**
@@ -68,7 +72,11 @@ class EventsApiController extends Controller
 
         $event = $this->eventsRepo->create($request->all());
 
-        return response()->json($event, 201);
+        return response()->json([
+            "status" => 201,
+            "message" => "Event created successfully",
+            "data" => $event
+        ], 201);
     }
 
     /**
@@ -100,10 +108,18 @@ class EventsApiController extends Controller
         $event = $this->eventsRepo->find($id);
 
         if (!$event) {
-            return response()->json(['message' => 'Event not found'], 404);
+            return response()->json([
+                "status" => 404,
+                "message" => "Event not found",
+                "data" => null
+            ], 404);
         }
 
-        return response()->json($event, 200);
+        return response()->json([
+            "status" => 200,
+            "message" => "Event retrieved successfully",
+            "data" => $event
+        ], 200);
     }
 
     /**
@@ -139,7 +155,11 @@ class EventsApiController extends Controller
         $event = $this->eventsRepo->find($id);
 
         if (!$event) {
-            return response()->json(['message' => 'Event not found'], 404);
+            return response()->json([
+                "status" => 404,
+                "message" => "Event not found",
+                "data" => null
+            ], 404);
         }
 
         $request->validate([
@@ -156,7 +176,11 @@ class EventsApiController extends Controller
 
         $this->eventsRepo->update($event, $request->all());
 
-        return response()->json($event, 200);
+        return response()->json([
+            "status" => 200,
+            "message" => "Event updated successfully",
+            "data" => $event
+        ], 200);
     }
 
     /**
@@ -187,11 +211,19 @@ class EventsApiController extends Controller
         $event = $this->eventsRepo->find($id);
 
         if (!$event) {
-            return response()->json(['message' => 'Event not found'], 404);
+            return response()->json([
+                "status" => 404,
+                "message" => "Event not found",
+                "data" => null
+            ], 404);
         }
 
         $this->eventsRepo->delete($event);
 
-        return response()->json(null, 204);
+        return response()->json([
+            "status" => 204,
+            "message" => "Event deleted successfully",
+            "data" => null
+        ], 204);
     }
 }
