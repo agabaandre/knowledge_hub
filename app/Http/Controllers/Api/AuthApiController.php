@@ -206,7 +206,7 @@ class AuthApiController extends ApiController
      *     path="/api/refresh",
      *     summary="Refresh access token",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"bearer_token":{}}},
      *     @OA\Response(
      *         response=200,
      *         description="Token refreshed successfully"
@@ -238,13 +238,21 @@ class AuthApiController extends ApiController
      *     path="/api/profile",
      *     summary="Update user profile",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"bearer_token":{}}},
      *     @OA\RequestBody(
      *         @OA\JsonContent(
-     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="firstname", type="string"),
+     *             @OA\Property(property="lastname", type="string"),
      *             @OA\Property(property="email", type="string", format="email"),
      *             @OA\Property(property="password", type="string"),
-     *             @OA\Property(property="password_confirmation", type="string")
+     *             @OA\Property(property="password_confirmation", type="string"),
+     *             @OA\Property(property="phone", type="string"),
+     *             @OA\Property(property="job", type="string"),
+     *             @OA\Property(property="country_id", type="integer"),
+     *             @OA\Property(property="preferences", type="array",
+     *                 @OA\Items(type="integer")
+     *             ),
+     *             @OA\Property(property="photo", type="string", format="binary")
      *         )
      *     ),
      *     @OA\Response(
@@ -300,7 +308,7 @@ class AuthApiController extends ApiController
      *     path="/api/change-password",
      *     summary="Change user password",
      *     tags={"Authentication"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"bearer_token":{}}},
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             required={"password", "password_confirmation"},
