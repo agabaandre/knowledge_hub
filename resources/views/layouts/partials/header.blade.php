@@ -73,20 +73,29 @@
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
                             @foreach ($data_categories as $category)
-                                @if (strlen($category->required_permission) > 0)
+                                @if ($category->is_special)
                                     @auth
-                                        @can($category->required_permission)
-                                            <li>
-                                                <a
-                                                    href="{{ url($category->url_path) }}?slug={{ $category->slug }}">{{ $category->category_name }}</a>
-                                            </li>
-                                        @endcan
+                                        <li>
+                                            <a
+                                                href="{{ url($category->url_path) }}?slug={{ $category->slug }}">{{ $category->category_name }}</a>
+                                        </li>
                                     @endauth
                                 @else
-                                    <li>
-                                        <a
-                                            href="{{ url($category->url_path) }}?slug={{ $category->slug }}">{{ $category->category_name }}</a>
-                                    </li>
+                                    @if (strlen($category->required_permission) > 0)
+                                        @auth
+                                            @can($category->required_permission)
+                                                <li>
+                                                    <a
+                                                        href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a>
+                                                </li>
+                                            @endcan
+                                        @endauth
+                                    @else
+                                        <li>
+                                            <a
+                                                href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a>
+                                        </li>
+                                    @endif
                                 @endif
                             @endforeach
 

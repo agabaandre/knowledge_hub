@@ -10,7 +10,7 @@
                         <ul class="sub-menu">
                             @foreach ($dashboards as $dashboard)
                                 <li aria-haspopup="true">
-                                    <a href="{{ url($dashboard->publication) }}"
+                                    <a href="{{ !$dashboard->is_embedded ? url('/admin/dashboards') . '?resource=' . $dashboard->id : url($dashboard->publication) }}"
                                         class="slide-item">{{ $dashboard->title }}</a>
                                 </li>
                             @endforeach

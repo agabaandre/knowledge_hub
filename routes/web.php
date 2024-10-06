@@ -53,6 +53,7 @@ use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\Admin\AdminCoursesController;
 use App\Http\Controllers\CommunitiesController;
+use App\Http\Controllers\Admin\DashboardsController;
 
 /*
 |--------------------------------------------------------------------------
@@ -171,7 +172,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
-
+    Route::get('/dashboards', [DashboardsController::class, 'details'])->name('admin.dashboard.details');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
