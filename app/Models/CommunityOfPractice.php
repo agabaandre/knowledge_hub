@@ -9,6 +9,13 @@ class CommunityOfPractice extends Model
 {
     use HasFactory;
 
+    // Specify the attributes to append
+    protected $appends = [
+        'publications_count',
+        'forums_count',
+        'members_count'
+    ];
+
     public function members()
     {
         return $this->hasMany(User::class, 'community_of_practice_members', 'community_of_practice_id', 'user_id');
@@ -70,9 +77,9 @@ class CommunityOfPractice extends Model
         return $this->communityForums()->count();
     }
 
-    // Accessor to get the count of members
+    // Accessor to get the count of approved members
     public function getMembersCountAttribute()
     {
-        return $this->members()->count();
+        return $this->approvedMembers()->count();
     }
 }
