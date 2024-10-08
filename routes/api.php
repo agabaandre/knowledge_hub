@@ -107,6 +107,7 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
 
 });
 
+
 Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
     Route::post('/summarise', [AIApiController::class, 'summarise']);
     Route::post('/compare', [AIApiController::class, 'compare']);
@@ -115,12 +116,13 @@ Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
 Route::prefix('events')->group(function () {
     Route::get('/', [EventsApiController::class, 'index'])->name('events.index');
     Route::get('/{id}', [EventsApiController::class, 'show'])->name('events.show');
+
+Route::group(['middleware' => 'auth:api'], function () {
+    Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
+    //Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
+    //Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
 });
 
-Route::group(['prefix' => 'events','middleware' => 'auth:api'], function () {
-    Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
-    Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
-    Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
 });
 
 Route::prefix('communities')->group(function () {
@@ -129,9 +131,9 @@ Route::prefix('communities')->group(function () {
     
     Route::group(['middleware' => 'auth:api'], function () { 
         Route::get('/{id}', [CommunitiesApiController::class, 'show'])->name('communities.show');
-        Route::post('/', [CommunitiesApiController::class, 'store'])->name('communities.store');
-        Route::put('/{id}', [CommunitiesApiController::class, 'update'])->name('communities.update');
-        Route::delete('/{id}', [CommunitiesApiController::class, 'destroy'])->name('communities.destroy');
+        //Route::post('/', [CommunitiesApiController::class, 'store'])->name('communities.store');
+        //Route::put('/{id}', [CommunitiesApiController::class, 'update'])->name('communities.update');
+        //Route::delete('/{id}', [CommunitiesApiController::class, 'destroy'])->name('communities.destroy');
         Route::post('/{communityId}/members', [CommunitiesApiController::class, 'addMember'])->name('communities.addMember');
         Route::delete('/{communityId}/members/{userId}', [CommunitiesApiController::class, 'removeMember'])->name('communities.removeMember');
     });

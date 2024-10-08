@@ -58,8 +58,10 @@ class CommunitiesApiController extends Controller
      */
     public function index()
     {
+        $request = request();
+        $request['rows'] = $request->page_size ?? 15;
 
-        $communities = $this->commsRepo->get(request());
+        $communities = $this->commsRepo->get($request);
         $data = $communities->toArray() ?? [];
         $data['status'] = 200;
         $data['message'] = "Communities retrieved successfully";

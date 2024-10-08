@@ -15,7 +15,7 @@ class CommsOfPracticeRepository{
             $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
         }
 
-        return $return_array ? $query->get() : $query->paginate(15);
+        return $return_array ? $query->get() : $query->paginate($request->rows ?? 15);
     }
     
     public function save(Request $request){
