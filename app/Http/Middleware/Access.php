@@ -30,7 +30,9 @@ class Access
         unset($logData['spotlight_banner']);
         unset($logData['flag']);
 
-         AccessLogJob::dispatch($ip,$logData);
+        AccessLogJob::dispatch($ip,$logData);
+
+        updateUSerPushToken($request);
 
         return $next($request);
     }

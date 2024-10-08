@@ -8,6 +8,8 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Cache;
 use Smalot\PdfParser\Parser;
+use App\Notifications\SendPushNotification;
+use App\Models\User;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -405,6 +407,42 @@ function cleanUTF8($value){
 }
 
 
+ function sendPushNotification($title,$message,$fcmTokens){
+    try{
+        if(empty($fcmTokens) || !is_array($message))
+            return;
 
+        if(!is_array($fcmTokens))
+        $tokens = [$fcmTokens];
+ 
+        \Log::info('Push Sending ',$message);
+        Notification::send(null,new SendPushNotification($title,$message,$tokens));
+ 
+      }catch(Exception $ex){
+           \Log::error('Push Error ',$ex->getMessage());
+     }
+  }
+
+  function updateUSerPushToken($request){
+
+    $auth_user = auth()->user();
+    
+    if($auth_user && $request->header('x-fcm-token')){
+
+        $existing_token = cache()->get('fcm_token_'.$auth_user->id);
+        $header_token = $request->header('x-fcm-token');
+      
+        //update if tokens are different
+        if(!$existing_token || $existing_token !== $header_token){
+
+        $user = User::find($auth_user->id);
+        $user->fcm_token = $header_token;
+        $user->save();
+
+        cache()->put('fcm_token_'.$auth_user->id,$header_token);
+    
+      }
+    }
+  }
 
 ?>
