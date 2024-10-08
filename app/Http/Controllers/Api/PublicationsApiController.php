@@ -572,7 +572,7 @@ class PublicationsApiController extends ApiController
         $val_rules = [
             'title' => 'required|string',
             'description' => 'required|string',
-            'country_id' => 'required|integer',
+            'country_id' => 'nullable|integer',
             'email' => 'nullable|email'
         ];
 
