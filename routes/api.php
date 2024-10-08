@@ -127,7 +127,7 @@ Route::prefix('communities')->group(function () {
     
     Route::get('/', [CommunitiesApiController::class, 'index'])->name('communities.index');
     
-    Route::group([,'middleware' => 'auth:api'], function () { 
+    Route::group(['middleware' => 'auth:api'], function () { 
         Route::get('/{id}', [CommunitiesApiController::class, 'show'])->name('communities.show');
         Route::post('/', [CommunitiesApiController::class, 'store'])->name('communities.store');
         Route::put('/{id}', [CommunitiesApiController::class, 'update'])->name('communities.update');
@@ -135,5 +135,5 @@ Route::prefix('communities')->group(function () {
         Route::post('/{communityId}/members', [CommunitiesApiController::class, 'addMember'])->name('communities.addMember');
         Route::delete('/{communityId}/members/{userId}', [CommunitiesApiController::class, 'removeMember'])->name('communities.removeMember');
     });
-    
+
 });
