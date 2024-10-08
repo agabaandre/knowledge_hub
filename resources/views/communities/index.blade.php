@@ -124,9 +124,13 @@
                                 Resources</p>
                         </div>
                         @if (Auth::check())
-                            @if (!$community->user_joined)
+                            @if (!$community->user_joined && !$community->user_pending_approval)
                                 <button class="mt-2 btn btn-sm join-btn col-lg-12" data-community-id="{{ $community->id }}">
                                     Join Community
+                                </button>
+                            @elseif ($community->user_pending_approval)
+                                <button class="mt-2 btn btn-sm btn-warning col-lg-12">
+                                    Request Pending Approval
                                 </button>
                             @else
                                 <div class="btn-group" role="group" aria-label="Community Actions">
