@@ -592,7 +592,7 @@ public function save_content_request(Request $request){
    $record = new ContentRequest();
    $record->subject     = $request->title;
    $record->description = $request->description;
-   $record->country_id  = $request->country_id;
+   $record->country_id  = (auth()->user())?auth()->user()->country_id:$request->country_id;
 
    if($request->email)
    $record->email = $request->email;
