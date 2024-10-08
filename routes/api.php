@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
 use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
+use App\Http\Controllers\Api\CommunitiesApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -120,4 +121,19 @@ Route::group(['prefix' => 'events','middleware' => 'auth:api'], function () {
     Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
     Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
     Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
+});
+
+Route::prefix('communities')->group(function () {
+    
+    Route::get('/', [CommunitiesApiController::class, 'index'])->name('communities.index');
+    
+    Route::group([,'middleware' => 'auth:api'], function () { 
+        Route::get('/{id}', [CommunitiesApiController::class, 'show'])->name('communities.show');
+        Route::post('/', [CommunitiesApiController::class, 'store'])->name('communities.store');
+        Route::put('/{id}', [CommunitiesApiController::class, 'update'])->name('communities.update');
+        Route::delete('/{id}', [CommunitiesApiController::class, 'destroy'])->name('communities.destroy');
+        Route::post('/{communityId}/members', [CommunitiesApiController::class, 'addMember'])->name('communities.addMember');
+        Route::delete('/{communityId}/members/{userId}', [CommunitiesApiController::class, 'removeMember'])->name('communities.removeMember');
+    });
+    
 });
