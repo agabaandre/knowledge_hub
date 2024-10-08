@@ -13,7 +13,8 @@ class CommunityOfPractice extends Model
     protected $appends = [
         'publications_count',
         'forums_count',
-        'members_count'
+        'members_count',
+        'user_joined'
     ];
 
     public function members()
@@ -82,4 +83,13 @@ class CommunityOfPractice extends Model
     {
         return $this->approvedMembers()->count();
     }
+
+    public function getUserJoinedAttribute(){
+        if(!auth()->user())
+        return false;
+        
+        $isInMCommunity = CommunityOfPracticeMembers::where('user_id',auth()->user()->id)->where('community_of_practice_id',$this->id)->first();
+        return ($isInMCommunity)?true:false;
+    }
+
 }
