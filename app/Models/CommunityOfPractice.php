@@ -14,7 +14,8 @@ class CommunityOfPractice extends Model
         'publications_count',
         'forums_count',
         'members_count',
-        'user_joined'
+        'user_joined',
+        'user_pending_approval'
     ];
 
     public function members()
@@ -92,6 +93,21 @@ class CommunityOfPractice extends Model
 
         $isInMCommunity = CommunityOfPracticeMembers::where('user_id', auth()->id())
             ->where('community_of_practice_id', $this->id)
+            ->where('is_approved', 1)
+            ->exists();
+
+        return $isInMCommunity;
+    }
+
+    public function getUserPendingApprovalAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        $isInMCommunity = CommunityOfPracticeMembers::where('user_id', auth()->id())
+            ->where('community_of_practice_id', $this->id)
+            ->where('is_approved', 0)
             ->exists();
 
         return $isInMCommunity;
