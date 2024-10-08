@@ -57,4 +57,22 @@ class CommunityOfPractice extends Model
     {
         return $this->hasMany(ForumCommunityOfPractice::class, 'community_of_practice_id');
     }
+
+    // Accessor to get the count of publications
+    public function getPublicationsCountAttribute()
+    {
+        return $this->communityPublications()->count();
+    }
+
+    // Accessor to get the count of forums
+    public function getForumsCountAttribute()
+    {
+        return $this->communityForums()->count();
+    }
+
+    // Accessor to get the count of members
+    public function getMembersCountAttribute()
+    {
+        return $this->members()->count();
+    }
 }

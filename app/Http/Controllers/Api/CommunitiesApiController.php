@@ -47,7 +47,7 @@ class CommunitiesApiController extends Controller
         return response()->json([
             "status" => 200,
             "message" => "Communities retrieved successfully",
-            "data" => $this->commsRepo->getAllWithMembership()
+            "data" => $this->commsRepo->get(request())
         ], 200);
     }
 
@@ -117,7 +117,7 @@ class CommunitiesApiController extends Controller
      */
     public function show($id)
     {
-        $community = $this->commsRepo->find($id);
+        $community = $this->commsRepo->find($id,true);
 
         if (!$community) {
             return response()->json([

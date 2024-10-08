@@ -1,16 +1,21 @@
 <?php
 namespace App\Repositories;
 
-use App\Models\Setting;
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
 use Illuminate\Http\Request;
 
 class CommsOfPracticeRepository{
 
-    public function get(Request $request,$return_array=false){
+    public function get(Request $request, $return_array = false)
+    {
+        $query = CommunityOfPractice::query();
 
-        return ($return_array)?CommunityOfPractice::all():CommunityOfPractice::with(['membership','approvedMembers','pendingMembers','rejectedMembers','communityForums','communityPublications'])->paginate(15);
+        if ($request->input('withRelated', false)) {
+            $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+        }
+
+        return $return_array ? $query->get() : $query->paginate(15);
     }
     
     public function save(Request $request){
@@ -27,9 +32,15 @@ class CommsOfPracticeRepository{
         return $access_grp;
     }
 
-    public function find($id){
+    public function find($id, $withRelated = false)
+    {
+        $query = CommunityOfPractice::where('id', $id);
 
-        return CommunityOfPractice::find($id);
+        if ($withRelated) {
+            $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+        }
+
+        return $query->first();
     }
 
    function delete($id)
@@ -86,6 +97,16 @@ class CommsOfPracticeRepository{
             return true;
         }
         return false;
+    }
+
+    public function getPaginatedForums($communityId, $perPage = 10)
+    {
+        return CommunityOfPractice::find($communityId)->communityForums()->paginate($perPage);
+    }
+
+    public function getPaginatedPublications($communityId, $perPage = 10)
+    {
+        return CommunityOfPractice::find($communityId)->communityPublications()->paginate($perPage);
     }
 
 }
