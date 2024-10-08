@@ -117,16 +117,14 @@
                         <h4>{{ $community->community_name }}</h4>
                         <p>{!! $community->description ?? '<br>' !!}</p>
                         <div class="community-stats">
-                            <p><i class="fa fa-users theme-text"></i> {{ count($community->approvedMembers) }} Members</p>
-                            <p><i class="fa fa-comments theme-text"></i> {{ $community->communityForums->count() }} Forums
+                            <p><i class="fa fa-users theme-text"></i> {{ $community->members_count }} Members</p>
+                            <p><i class="fa fa-comments theme-text"></i> {{ $community->forums_count }} Forums
                             </p>
-                            <p><i class="fa fa-book theme-text"></i> {{ $community->communityPublications->count() }}
+                            <p><i class="fa fa-book theme-text"></i> {{ $community->publications_count }}
                                 Resources</p>
                         </div>
                         @if (Auth::check())
-                            @if (
-                                !collect($community->approvedMembers)->pluck('user_id')->contains(Auth::id()) &&
-                                    !collect($community->pendingMembers)->pluck('user_id')->contains(Auth::id()))
+                            @if (!$community->user_joined)
                                 <button class="mt-2 btn btn-sm join-btn col-lg-12" data-community-id="{{ $community->id }}">
                                     Join Community
                                 </button>
