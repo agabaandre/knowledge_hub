@@ -28,6 +28,20 @@ class CommunitiesApiController extends Controller
      *     tags={"Communities"},
      *     summary="Get list of communities",
      *     description="Returns list of communities",
+     *     @OA\Parameter(
+     *         name="term",
+     *         in="query",
+     *         required=false,
+     *         description="Search term for specific records",
+     *          @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="page_size",
+     *         in="query",
+     *         required=false,
+     *         description="Number of records per page",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful operation",
@@ -44,11 +58,15 @@ class CommunitiesApiController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            "status" => 200,
-            "message" => "Communities retrieved successfully",
-            "data" => $this->commsRepo->get(request())
-        ], 200);
+
+        $communities = $this->commsRepo->get(request());
+        $data = $communities->toArray() ?? [];
+        $data['status'] = 200;
+        $data['message'] = "Communities retrieved successfully";
+        $data['page_size'] = intval($data['per_page']);
+        unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);
+
+        return response()->json($data, 200);
     }
 
     /**
