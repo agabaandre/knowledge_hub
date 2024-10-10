@@ -5,7 +5,7 @@ namespace App\Notifications;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Notification;
-use Kutia\Larafirebase\Messages\FirebaseMessage;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 class SendPushNotification extends Notification implements ShouldQueue
 {
@@ -44,17 +44,26 @@ class SendPushNotification extends Notification implements ShouldQueue
      * Send the notification via Firebase.
      *
      * @param mixed $notifiable
-     * @return \Kutia\Larafirebase\Messages\FirebaseMessage
      */
     public function toFirebase($notifiable)
     {
-        $firebaseMessage = (new FirebaseMessage)
-            ->withTitle($this->title)
-            ->withBody($this->message)
-            ->withPriority('high')
-            ->asNotification($this->fcmTokens);
+        $messaging = app('firebase.messaging');
+        $count = 0;
+            
+        foreach($this->fcmTokens as $deviceToken):
+        
+            $fcm_message = CloudMessage::withTarget('token', $deviceToken);
 
-        return $firebaseMessage; // Ensure the correct type is returned
+            if($count > 0)
+                $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
+          
+            $fcm_message->withNotification(['title' => $this->title, 'body' => $this->message]);
+
+            $messaging->send($fcm_message);
+
+            $count ++;
+
+        endforeach;
     }
     
 }

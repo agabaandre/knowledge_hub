@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Cache;
 use Smalot\PdfParser\Parser;
 use App\Notifications\SendPushNotification;
 use App\Models\User;
+use Kreait\Firebase\Messaging\CloudMessage;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -409,17 +410,39 @@ function cleanUTF8($value){
 
  function sendPushNotification($title,$message,$fcmTokens){
     try{
-        if(empty($fcmTokens) || !is_array($message))
+        if(empty($fcmTokens) || empty($message))
             return;
 
         if(!is_array($fcmTokens))
         $tokens = [$fcmTokens];
  
-        \Log::info('Push Sending ',$message);
-        Notification::send(null,new SendPushNotification($title,$message,$tokens));
+        \Log::info('Push Sending '.$message);
+       // Notification::send(null,new SendPushNotification($title,$message,$tokens));
+
+       $messaging = app('firebase.messaging');
+        $count = 0;
+
+        \Log::info("Message send: ".count($tokens));
+            
+        foreach($tokens as $deviceToken):
+        
+            $fcm_message = CloudMessage::withTarget('token', $deviceToken);
+
+            if($count > 0)
+                $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
+          
+            $fcm_message->withNotification(['title' => $title, 'body' => $message]);
+
+            $sent = $messaging->send($fcm_message);
+
+            \Log::info("Message send: ".$sent);
+
+            $count ++;
+
+        endforeach;
  
       }catch(Exception $ex){
-           \Log::error('Push Error ',$ex->getMessage());
+           \Log::error('Push Error '.$ex->getMessage());
      }
   }
 

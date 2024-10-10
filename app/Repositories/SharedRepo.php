@@ -22,8 +22,6 @@ class SharedRepo{
             $table = ($use_query_builder)?$query->from : $query->getModel()->getTable();
             $use_user_id = false;
 
-            //ssdd($table);
-
             $country_col ="country_id";
 
             if($table =="author"):
