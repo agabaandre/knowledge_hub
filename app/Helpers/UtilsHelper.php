@@ -421,7 +421,7 @@ function cleanUTF8($value){
        $messaging = app('firebase.messaging');
         $count = 0;
 
-        \Log::info("Message send: ".count($tokens));
+        \Log::info("Message sending: ".count($tokens));
             
         foreach($tokens as $deviceToken):
         
@@ -434,7 +434,7 @@ function cleanUTF8($value){
 
             $sent = $messaging->send($fcm_message);
 
-            \Log::info("Message send: ".$sent);
+            \Log::info("Message sent: ".json_encode($sent));
 
             $count ++;
 
