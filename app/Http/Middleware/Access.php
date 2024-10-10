@@ -32,8 +32,8 @@ class Access
 
         AccessLogJob::dispatch($ip,$logData);
         $headers = $request->headers->all();
-        
-        \Log::info('Request Headers:', json_encode($headers));
+
+        \Log::info('Request Headers:'.json_encode($headers));
         updateUSerPushToken($request);
 
         return $next($request);
