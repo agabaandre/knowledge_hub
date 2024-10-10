@@ -417,8 +417,7 @@ function cleanUTF8($value){
         $tokens = [$fcmTokens];
  
         \Log::info('Push Sending '.$message);
-       // Notification::send(null,new SendPushNotification($title,$message,$tokens));
-
+     
        $messaging = app('firebase.messaging');
         $count = 0;
 
@@ -442,7 +441,8 @@ function cleanUTF8($value){
         endforeach;
  
       }catch(Exception $ex){
-           \Log::error('Push Error '.$ex->getMessage());
+           
+        \Log::error('Push Error '.$ex->getMessage());
      }
   }
 
@@ -466,6 +466,10 @@ function cleanUTF8($value){
     
       }
     }
+  }
+
+  function site_theme(){
+    return "theme1.";
   }
 
 ?>

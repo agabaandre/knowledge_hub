@@ -13,7 +13,7 @@
     display:none;
 }
 
-.button {
+.quiz-button {
     border:none;
     border-radius:5px;
     width: 60px;
@@ -27,7 +27,7 @@
     margin: 0 2px 0 2px;
 }
 
-.button.active {
+.quiz-button.active {
     background-color: #0ab05d;
     color: #525252;
 }
@@ -37,7 +37,7 @@
     float:right;
 }
 
-.button a {
+.quiz-button a {
     text-decoration: none;
     color: black;
     padding:20px auto;

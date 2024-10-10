@@ -1,24 +1,30 @@
 @extends('layouts.app')
 
-@section('styles')
-    <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet" />
+@php
+    $theme = site_theme();
+@endphp
 
-    @if (!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
-        @include('partials.tour.css')
-    @endif
+
+@section('styles')
+
+  
+    <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet" />
 
     <style>
         .spotlight:after {
             max-height: 20% !important;
         }
     </style>
+
+    @if (!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
+        @include('partials.tour.css')
+    @endif
+
+    
 @endsection
 
 @section('content')
-    @php
-        $theme = ''; //'theme1.';
-    @endphp
-
+ 
     @include('home.partials.' . $theme . 'spotlight')
     @include('home.partials.' . $theme . 'top_categories')
     @include('home.partials.' . $theme . 'featured')
