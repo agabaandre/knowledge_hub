@@ -508,6 +508,6 @@ Route::group(["prefix" => "communities"], function () {
 
 Route::get("/tests",function(){
 
-   return  sendPushNotification("Title","Hello","74784478");
+   return  sendPushNotification("Title","Hello","fZK5MTioQwe2paWcyB3GGX:APA91bGvrjIvnxTaIbQ3OOBvpB_7GhbS4jUdIFQC3ZcpAMOqhL0kU_fP7pnlXo2tBpeu0VZI8AXcD-vMurO6E5ZsWDlo0jwT-8KxRu4DVrskVphTmzyPFMbdeagxIAtBHQ3AuJJ9Xa5D");
 
 });
