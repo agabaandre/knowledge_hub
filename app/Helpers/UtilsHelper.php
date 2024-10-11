@@ -469,7 +469,7 @@ function cleanUTF8($value){
   }
 
   function site_theme(){
-    return "theme1.";
+    return settings()->site_theme;
   }
 
 ?>

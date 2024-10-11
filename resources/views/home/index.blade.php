@@ -6,9 +6,9 @@
 
 
 @section('styles')
-
-  
-    <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet" />
+    @if (empty($theme))
+        <link href="{{ asset('frontend/css/home.css') }}" rel="stylesheet" />
+    @endif
 
     <style>
         .spotlight:after {
@@ -19,12 +19,9 @@
     @if (!get_cookie('CDC_Tour_Finished') || !env('SITE_LIVE'))
         @include('partials.tour.css')
     @endif
-
-    
 @endsection
 
 @section('content')
- 
     @include('home.partials.' . $theme . 'spotlight')
     @include('home.partials.' . $theme . 'top_categories')
     @include('home.partials.' . $theme . 'featured')

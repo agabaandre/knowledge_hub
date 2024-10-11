@@ -1,31 +1,31 @@
 /* ------------------------------------------------------------------- */
-/* #2a41e8 (42,65,232)
+/* var(--theme-color-primary) (42,65,232)
 ---------------------------------------------------------------------- */
 .numbered.color ol > li::before {
-     border:1px solid #2a41e8;
-     color:#2a41e8;
+     border:1px solid var(--theme-color-primary);
+     color:var(--theme-color-primary);
 }
  .numbered.color.filled ol > li::before {
-     border:1px solid #2a41e8;
-     background-color:#2a41e8;
+     border:1px solid var(--theme-color-primary);
+     background-color:var(--theme-color-primary);
 }
  .radio input[type="radio"]:checked + label .radio-label {
-     background-color:#2a41e8;
-     border-color:#2a41e8;
+     background-color:var(--theme-color-primary);
+     border-color:var(--theme-color-primary);
 }
  .checkbox input:checked + label span.checkbox-icon {
-     background-color:#2a41e8;
-     border-color:#2a41e8;
+     background-color:var(--theme-color-primary);
+     border-color:var(--theme-color-primary);
 }
  .slider-handle {
-     border:2px solid #2a41e8;
+     border:2px solid var(--theme-color-primary);
 }
  .infoBox-close:hover {
      color:#fff;
-     background-color:#2a41e8;
+     background-color:var(--theme-color-primary);
 }
  .message-bubble.me .message-text:before {
-     border-left:6px solid #2a41e8;
+     border-left:6px solid var(--theme-color-primary);
 }
  a,
  .header-widget .log-in-button:hover i,
@@ -81,7 +81,7 @@
  .help-icon,
  .header-widget .log-in-button:hover,
  .header-widget .log-in-button:hover i {
-     color:#2a41e8;
+     color:var(--theme-color-primary);
 }
 #backtotop a,
  .header-notifications-trigger span,
@@ -148,7 +148,7 @@
  .messages-inbox ul li:before,
  .message-by h5 i,
  .message-bubble.me .message-text {
-     background-color:#2a41e8;
+     background-color:var(--theme-color-primary);
 }
  .transparent-header #navigation > ul li:hover ul li:hover a:after,
  .transparent-header #navigation > ul li:hover a:after,
@@ -165,18 +165,18 @@
  .slick-prev:hover,
  .slick-next:hover,
  .bootstrap-select.btn-group .bs-actionsbox div button:hover {
-     background:#2a41e8;
+     background:var(--theme-color-primary);
 }
  .uploadButton .uploadButton-button,
  .pricing-plan .button {
-     color:#2a41e8;
-     border:1px solid #2a41e8;
+     color:var(--theme-color-primary);
+     border:1px solid var(--theme-color-primary);
 }
  .payment-tab-trigger > input:checked ~ label::before,
  .dashboard-nav ul li.active-submenu,
  .dashboard-nav ul li.active,
  .dashboard-nav ul li:hover {
-     border-color:#2a41e8;
+     border-color:var(--theme-color-primary);
 }
 
  #navigation ul ul.dropdown-nav ul.dropdown-nav li:hover a:after,
@@ -356,7 +356,7 @@
 
  #navigation ul ul.dropdown-nav ul.dropdown-nav li:hover a:after,
  #navigation ul ul.dropdown-nav li:hover a:after {
-     background-color:#2a41e8;
+     background-color:var(--theme-color-primary);
  }
 
 .leaflet-container a.leaflet-popup-close-button:hover,
@@ -365,10 +365,10 @@
 .marker-cluster-small div,
 .marker-cluster-medium div,
 .marker-cluster-large div {
-    background-color: #2a41e8;
+    background-color: var(--theme-color-primary);
 }
 
 .marker-cluster div:before {
-    border-color: #2a41e8;
-    box-shadow: inset 0 0 0 4px #2a41e8;
+    border-color: var(--theme-color-primary);
+    box-shadow: inset 0 0 0 4px var(--theme-color-primary);
 }

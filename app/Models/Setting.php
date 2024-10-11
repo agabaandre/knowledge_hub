@@ -12,4 +12,9 @@ class Setting extends Model
     protected $table="setting";
     protected $hidden =["default_password"];
     public $timestamps =false;
+
+    public function getLogoAttribute($photo){
+        return storage_link('uploads/config/'.$photo);
+    }
+
 }

@@ -32,6 +32,7 @@ class SettingsRepository{
         $settings->icon_font_color = $request->icon_font_color;
         $settings->banner_text = $request->banner_text;
         $settings->footer_style = $request->footer_style;
+        $settings->site_theme   = $request->site_theme;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):
