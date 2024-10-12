@@ -31,11 +31,11 @@ class PushNotificationsApiController extends Controller
      */
     public function index()
     {
-        return response()->json([
-            "status" => 200,
-            "message" => "Push notifications retrieved successfully",
-            "data" => $this->pushNotificationsRepo->getAll()
-        ], 200);
+        $data["status"]  = 200;
+        $data["message"] = "Push notifications retrieved successfully";
+        $data["data"]    = $this->pushNotificationsRepo->getAll()->toArray();
+
+        return response()->json($data, 200);
     }
 
     /**
@@ -246,19 +246,20 @@ class PushNotificationsApiController extends Controller
     {
         $userId = auth()->user()->id;
         $notifications = $this->pushNotificationsRepo->getByUser($userId);
-
+       
+        $data["status"]  = 200;
+        $data["message"] = "Push notifications retrieved successfully";
+        $data["data"]    = $notifications->toArray();
+        
         if ($notifications->isEmpty()) {
-            return response()->json([
-                "status" => 404,
-                "message" => "No notifications found for this user",
-                "data" => null
-            ], 404);
+
+            $data["status"]  = 404;
+            $data["message"] = "No notifications found for this user";
+            $data["data"]    = $notifications->toArray();
+            
+            return response()->json($data, 404);
         }
 
-        return response()->json([
-            "status" => 200,
-            "message" => "Notifications retrieved successfully",
-            "data" => $notifications
-        ], 200);
+        return response()->json($data, 200);
     }
 }
