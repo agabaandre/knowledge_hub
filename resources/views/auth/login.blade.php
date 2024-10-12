@@ -57,6 +57,8 @@
 								<a href="{{ route('password.request') }}">Forgot Password</a>
 
 							</div>
+
+							
 						
 						</div>
 					</div>
@@ -70,6 +72,7 @@
 						<h4 class="text-center"><a href="{{ route('register') }}" class="">Register</a></h4>
 					</div>
 				</form>
+				
 			</div>
 
 
