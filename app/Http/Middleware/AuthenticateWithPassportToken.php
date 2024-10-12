@@ -15,6 +15,12 @@ class AuthenticateWithPassportToken
      */
     public function handle(Request $request, Closure $next)
     {
+        $headers = $request->headers->all();
+
+        \Log::info('Request Headers:'.json_encode($headers));
+        updateUSerPushToken($request);
+
+        
         // Get the token from the Authorization header (Bearer token)
         $token = $request->bearerToken();
 

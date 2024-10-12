@@ -70,7 +70,7 @@ use App\Http\Controllers\Admin\AdminEventsController;
 
 Auth::routes(['verify' => true]);
 
-Route::get('/test', [TestController::class, 'chat'])->name('test');
+//Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 
@@ -504,4 +504,10 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
+});
+
+Route::get("/tests",function(){
+
+   return  sendPushNotification("Title","Hello","fZK5MTioQwe2paWcyB3GGX:APA91bGvrjIvnxTaIbQ3OOBvpB_7GhbS4jUdIFQC3ZcpAMOqhL0kU_fP7pnlXo2tBpeu0VZI8AXcD-vMurO6E5ZsWDlo0jwT-8KxRu4DVrskVphTmzyPFMbdeagxIAtBHQ3AuJJ9Xa5D");
+
 });

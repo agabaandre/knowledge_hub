@@ -8,6 +8,11 @@ use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Cache;
 use Smalot\PdfParser\Parser;
+use App\Notifications\SendPushNotification;
+use App\Models\User;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\MessageTarget;
+use App\Notifications\AccountActivated;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -405,6 +410,72 @@ function cleanUTF8($value){
 }
 
 
+ function sendPushNotification($title,$message,$fcmTokens,$isTopic=false){
 
+    try{
+        if(empty($fcmTokens) || empty($message))
+            return;
+
+        $tokens = $fcmTokens;
+
+        if(!is_array($fcmTokens))
+        $tokens = [$fcmTokens];
+ 
+        \Log::info('Push Sending '.$message);
+     
+       $messaging = app('firebase.messaging');
+        $count = 0;
+
+        \Log::info("Message sending: ".count($tokens));
+            
+        foreach($tokens as $deviceToken):
+        
+           $fcm_message = CloudMessage::withTarget(($isTopic)?"topic":"token", ($isTopic)?"GENERAL":$deviceToken);
+           
+          if($count > 0)
+           $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
+            
+           $fcm_message  =  $fcm_message->withNotification(['title' => $title, 'body' => $message]);;
+           
+           $sent = $messaging->send($fcm_message);
+
+            \Log::info("Message sent: ".json_encode($sent));
+
+            $count ++;
+
+        endforeach;
+ 
+      }catch(Exception $ex){
+           
+        \Log::error('Push Error '.$ex->getMessage());
+     }
+     
+  }
+
+  function updateUSerPushToken($request,$user=null){
+
+    $auth_user = ($user)?$user:auth()->user();
+    
+    if($auth_user && $request->header('x-fcm-token')){
+
+        $existing_token = cache()->get('fcm_token_'.$auth_user->id);
+        $header_token = $request->header('x-fcm-token');
+      
+        //update if tokens are different
+        if(!$existing_token || $existing_token !== $header_token){
+
+        $user = User::find($auth_user->id);
+        $user->fcm_token = $header_token;
+        $user->save();
+
+        cache()->put('fcm_token_'.$auth_user->id,$header_token);
+    
+      }
+    }
+  }
+
+  function site_theme(){
+    return settings()->site_theme;
+  }
 
 ?>

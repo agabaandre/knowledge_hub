@@ -9,57 +9,57 @@
         </div>
         <div class="row" id="top_searches">
 
-            @php
-                $i = 0;
-            @endphp
-            @foreach ($recent as $row)
-                @php
-                    $i++;
-                    $likes = count($row->favourited);
-                @endphp
+            <div class="listings-container margin-top-35">
 
-                <div class="col-12 col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-duration="800"
-                    data-aos-once="true">
-                    <!-- Start Feature One -->
-                    <div class="bg-white shadow-lg rounded-4 overflow-hidden">
-                        <div class="p-4">
-                            <a href="#"
-                                class="font-size-3 d-block mb-1 text-gray">{{ truncate($row->author->name, 40) }}</a>
-                            <h2 class="mt-n1">
-                                <a class="font-size-2 text-black-2  mb-3 d-block"
-                                    href="{{ url('records/resource') }}?id={{ $row->id }}">
-                                    {!! truncate($row->title, 40) !!}
-                                </a>
-                            </h2>
-                            {!! truncate($row->description, 100) ?? '' !!}
-                            <ul class="list-unstyled mb-3 card-tag-list bg-light py-3 rounded-3">
-                                <li class="d-inline-block">
-                                    <a href="" class="text-warning font-size-3 rounded-3 px-3 py-1">
-                                        <i class="fa fa-briefcase mr-2 font-weight-bold"></i>
-                                        {{ $row->sub_theme->description ?? 'N/A' }}
-                                    </a>
-                                </li>
-                                <li class="d-inline-block">
-                                    <a href="" class=" text-success font-size-3 rounded-3 px-3 py-1">
-                                        <i class="fa fa-dollar-sign mr-2 font-weight-bold"></i>
-                                        {{ @$row->category->category_name }}
-                                    </a>
-                                </li>
-                            </ul>
-                            <p class="mb-4 font-size-4 text-gray">
-                                Last updated: {{ time_ago($row->updated_at) }}
-                                <br>{{ $row->visits }} Views
-                                <br>{{ count($row->comments) }} Comments
-                            </p>
-                            <div class="card-btn-group">
-                                <a class="btn btn-primary text-uppercase btn-medium rounded-3 col-lg-12"
-                                    href="{{ url('records/resource') }}?id={{ $row->id }}">Browse Resource</a>
+                @php
+                    $i = 0;
+                @endphp
+                @foreach ($recent as $row)
+                    @php
+                        $i++;
+                        $likes = count($row->favourited);
+                    @endphp
+
+
+                    <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="task-listing">
+
+                        <!-- Job Listing Details -->
+                        <div class="task-listing-details">
+
+                            <!-- Details -->
+                            <div class="task-listing-description">
+                                <h3 class="task-listing-title">{!! truncate($row->title, 100) !!}</h3>
+                                <ul class="task-icons">
+                                    <li><i class="icon-material-outline-location-on"></i>{{ $row->author->name }}</li>
+                                    <li><i class="icon-material-outline-access-time"></i>Last updated:
+                                        {{ time_ago($row->updated_at) }}</li>
+                                </ul>
+                                <p class="task-listing-text">{!! truncate($row->description ?? 'N/A', 200) !!}</p>
+                                <div class="task-tags">
+                                    <span>{{ @$row->category->category_name }}</span>
+                                    <span>{{ $row->visits }} Views </span>
+                                    <span>{{ count($row->comments) }} Comments</span>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="task-listing-bid">
+                            <div class="task-listing-bid-inner">
+                                <div class="task-offers">
+                                    <strong>{{ $row->theme->description }}</strong>
+                                    <span class="text-sm">{{ $row->sub_theme->description }}</span>
+                                </div>
+                                <span class="button button-sliding-icon ripple-effect"
+                                    onclick="window.location.href={{ url('records/resource') }}?id={{ $row->id }}">
+                                    Browse Resource
+                                </span>
                             </div>
                         </div>
-                    </div>
-                    <!-- End Feature One -->
-                </div>
-            @endforeach
+                    </a>
+                @endforeach
+
+            </div>
         </div>
         <div class="row justify-content-center mt-4">
             <div class="col-12 text-center">

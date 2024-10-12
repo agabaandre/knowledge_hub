@@ -112,10 +112,8 @@ class PublicationsRepository extends SharedRepo{
         }
 
         $results = $pubs->paginate($rows_count);
-        
         Log::info(count($results));
-        //Log::info($results);
-
+       
         return $return_array ? $results : $results->appends($request->all());
     }
 
@@ -208,12 +206,12 @@ class PublicationsRepository extends SharedRepo{
         $pub->publication          = $request->link;
         $pub->description          = $request->description;
         $pub->publication_catgory_id  = $request->data_category_id;
-        $pub->associated_authors   = $request->associated_authors;
-        $pub->visits               = ($request->id)?$pub->visits:0;
-        $pub->data_category_id     = $request->category_id;
-        $pub->is_embedded          = $request->is_embedded ?? false;
+        $pub->associated_authors     = $request->associated_authors;
+        $pub->visits                 = ($request->id)?$pub->visits:0;
+        $pub->data_category_id       = $request->category_id;
+        $pub->is_embedded            = $request->is_embedded ?? false;
         $pub->is_default_in_category = $request->is_default ?? false;
-        $pub->is_admin_only_access = $request->admin_only ?? false;
+        $pub->is_admin_only_access   = $request->admin_only ?? false;
 
 
         if(!is_admin()){
@@ -229,7 +227,7 @@ class PublicationsRepository extends SharedRepo{
             $file           = $request->file('cover');
             $cover_filepath = $this->save_attachments($file);
             $pub->cover     = $cover_filepath;
-            $filepath = $cover_filepath;
+            $filepath       = $cover_filepath;
         else:
             if(!$request->id)
              $pub->cover     =  "cover.jpg";
@@ -248,8 +246,6 @@ class PublicationsRepository extends SharedRepo{
 
         $attachment_path = ($attachment_path)?storage_path('/app/public/uploads/publications/'.$attachment_path):null;
         $file_type = get_file_type($attachment_path,$request->link);
-
-        //$file_type = $this->find_type($request->file_type);
 
         //check if it's video type
         if(strpos(strtolower($file_type->name),'video')>-1)
@@ -475,12 +471,16 @@ class PublicationsRepository extends SharedRepo{
 
 public function change_approval_status(Request $request){
 
-    $publication = Publication::find($request->id);
+   
+    $publication = ($request->is_summary)?PublicationSummary::find($request->id):Publication::find($request->id);
+    
     
     if($request->approved){
 
      $publication->is_approved= 1;
      $publication->is_rejected= 0;
+
+     if(!$request->is_summary)
      $publication->is_active= 'Active';
 
      $msg = 'We are happy to inform you that your publication has been approved';
@@ -491,7 +491,10 @@ public function change_approval_status(Request $request){
 
      $publication->is_rejected= 1;
      $publication->is_approved= 0;
+
+     if(!$request->is_summary)
      $publication->is_active= 'In-Active';
+
      $action = "Rejected";
 
      $msg = 'We are sorry to inform you that your publication has been rejected';
@@ -592,7 +595,7 @@ public function save_content_request(Request $request){
    $record = new ContentRequest();
    $record->subject     = $request->title;
    $record->description = $request->description;
-   $record->country_id  = $request->country_id;
+   $record->country_id  = (auth()->user())?auth()->user()->country_id:$request->country_id;
 
    if($request->email)
    $record->email = $request->email;

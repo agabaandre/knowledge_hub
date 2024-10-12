@@ -9,6 +9,15 @@ class CommunityOfPractice extends Model
 {
     use HasFactory;
 
+    // Specify the attributes to append
+    protected $appends = [
+        'publications_count',
+        'forums_count',
+        'members_count',
+        'user_joined',
+        'user_pending_approval'
+    ];
+
     public function members()
     {
         return $this->hasMany(User::class, 'community_of_practice_members', 'community_of_practice_id', 'user_id');
@@ -57,4 +66,51 @@ class CommunityOfPractice extends Model
     {
         return $this->hasMany(ForumCommunityOfPractice::class, 'community_of_practice_id');
     }
+
+    // Accessor to get the count of publications
+    public function getPublicationsCountAttribute()
+    {
+        return $this->communityPublications()->count();
+    }
+
+    // Accessor to get the count of forums
+    public function getForumsCountAttribute()
+    {
+        return $this->communityForums()->count();
+    }
+
+    // Accessor to get the count of approved members
+    public function getMembersCountAttribute()
+    {
+        return $this->approvedMembers()->count();
+    }
+
+    public function getUserJoinedAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        $isInMCommunity = CommunityOfPracticeMembers::where('user_id', auth()->id())
+            ->where('community_of_practice_id', $this->id)
+            ->where('is_approved', 1)
+            ->exists();
+
+        return $isInMCommunity;
+    }
+
+    public function getUserPendingApprovalAttribute()
+    {
+        if (!auth()->check()) {
+            return false;
+        }
+
+        $isInMCommunity = CommunityOfPracticeMembers::where('user_id', auth()->id())
+            ->where('community_of_practice_id', $this->id)
+            ->where('is_approved', 0)
+            ->exists();
+
+        return $isInMCommunity;
+    }
+
 }

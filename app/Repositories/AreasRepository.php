@@ -63,6 +63,8 @@ class AreasRepository{
         $area->iso_code  = $request->iso_code;
         $area->iso3_code = $request->iso3_code;
         $area->svg_path  = $request->map;
+        $area->base_url  = $request->base_url;
+        $area->is_app_supported = ($request->app_supported)?$request->app_supported:false;
 
         if($request->hasFile('flag')):
             //upload photo

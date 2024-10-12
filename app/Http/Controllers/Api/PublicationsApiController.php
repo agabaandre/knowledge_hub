@@ -567,23 +567,18 @@ class PublicationsApiController extends ApiController
      *     )
      * )
      */
-    public function save_content_request(Request $request)
+    public function content_request(Request $request)
     {
         $val_rules = [
             'title' => 'required|string',
             'description' => 'required|string',
-            'country_id' => 'required|integer',
+            'country_id' => 'nullable|integer',
             'email' => 'nullable|email'
         ];
 
         $request->validate($val_rules);
 
-        $contentRequest = new ContentRequest();
-        $contentRequest->subject = $request->title;
-        $contentRequest->description = $request->description;
-        $contentRequest->country_id = $request->country_id;
-        $contentRequest->email = $request->email;
-        $contentRequest->save();
+        $contentRequest = $this->publicationsRepo->save_content_request($request);
 
         return response()->json([
             "status" => 201,
