@@ -222,7 +222,7 @@ class PushNotificationsApiController extends Controller
      *     path="/api/push-notifications/user",
      *     operationId="getPushNotificationsByUser",
      *     tags={"PushNotifications"},
-     *     security={{"bearerAuth":{}}},
+     *     security={{"bearer_token":{}}},
      *     summary="Get push notifications by user",
      *     description="Returns list of push notifications for a specific user",
      *     @OA\Parameter(
