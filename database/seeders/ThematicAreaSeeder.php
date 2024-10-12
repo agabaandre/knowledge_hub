@@ -100,7 +100,7 @@ class ThematicAreaSeeder extends Seeder
                 'display_index' => 7
             ],
             [
-                'id' => 11,
+                'id' => 12,
                 'description' => 'Health Policy and Governance',
                 'icon' => 'fa-gavel',
                 'created_at' => Carbon::parse('2024-10-13 02:10'),
