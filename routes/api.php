@@ -10,6 +10,7 @@ use App\Http\Controllers\Api\PublicationsApiController;
 use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
 use App\Http\Controllers\Api\CommunitiesApiController;
+use App\Http\Controllers\Api\PushNotificationsApiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -139,3 +140,6 @@ Route::prefix('communities')->group(function () {
     });
 
 });
+
+Route::apiResource('push-notifications', PushNotificationsApiController::class)->middleware('auth:api');
+Route::get('push-notifications/user', [PushNotificationsApiController::class, 'getByUser'])->middleware('auth:api');
