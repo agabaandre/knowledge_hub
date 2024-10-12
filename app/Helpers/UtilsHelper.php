@@ -452,7 +452,7 @@ function cleanUTF8($value){
      
   }
 
-  function updateUSerPushToken($request,$user){
+  function updateUSerPushToken($request,$user=null){
 
     $auth_user = ($user)?$user:auth()->user();
     
