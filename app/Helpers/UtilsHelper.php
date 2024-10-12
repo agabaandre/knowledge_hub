@@ -413,6 +413,8 @@ function cleanUTF8($value){
         if(empty($fcmTokens) || empty($message))
             return;
 
+        $tokens = $fcmTokens;
+
         if(!is_array($fcmTokens))
         $tokens = [$fcmTokens];
  
