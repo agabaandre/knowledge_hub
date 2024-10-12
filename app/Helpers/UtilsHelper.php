@@ -410,12 +410,8 @@ function cleanUTF8($value){
 }
 
 
- function sendPushNotification($title,$message,$fcmTokens){
+ function sendPushNotification($title,$message,$fcmTokens,$isTopic=false){
 
-    $user = User::find(auth()->user()->id);
-    $user->notify(new AccountActivated());
-
-    /*
     try{
         if(empty($fcmTokens) || empty($message))
             return;
@@ -434,15 +430,14 @@ function cleanUTF8($value){
             
         foreach($tokens as $deviceToken):
         
-            $fcm_message = CloudMessage::withTarget(MessageTarget::TOPIC, "GENERAL");
-            
+           $fcm_message = CloudMessage::withTarget(($isTopic)?"topic":"token", ($isTopic)?"GENERAL":$deviceToken);
            
           if($count > 0)
-                $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
+           $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
             
-            $fcm_message->withNotification(['title' => $title, 'body' => $message]);
-
-            $sent = $messaging->send($fcm_message);
+           $fcm_message  =  $fcm_message->withNotification(['title' => $title, 'body' => $message]);;
+           
+           $sent = $messaging->send($fcm_message);
 
             \Log::info("Message sent: ".json_encode($sent));
 
@@ -454,7 +449,7 @@ function cleanUTF8($value){
            
         \Log::error('Push Error '.$ex->getMessage());
      }
-     */
+     
   }
 
   function updateUSerPushToken($request){
