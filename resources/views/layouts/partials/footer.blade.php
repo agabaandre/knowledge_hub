@@ -59,7 +59,7 @@
 							<li><a href="https://africacdc.org" target="_blank" class="text-decoration-none">Africa CDC
 									Website</a></li>
 							<li><a href="{{ url('privacy') }}" class="text-decoration-none">Privacy Policy</a></li>
-							<li><a href="{{ url('user_manual') }}" class="text-decoration-none">User Guide</a></li>
+							<li><a href="https://github.com/Africa-cdc-Khub/knowledge_hub/wiki#user-guide" class="text-decoration-none">User Guide</a></li>
 						</ul>
 					</div>
 				</div>
