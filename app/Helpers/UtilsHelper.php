@@ -452,9 +452,9 @@ function cleanUTF8($value){
      
   }
 
-  function updateUSerPushToken($request){
+  function updateUSerPushToken($request,$user){
 
-    $auth_user = auth()->user();
+    $auth_user = ($user)?$user:auth()->user();
     
     if($auth_user && $request->header('x-fcm-token')){
 

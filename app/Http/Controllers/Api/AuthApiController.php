@@ -160,6 +160,7 @@ class AuthApiController extends ApiController
         $token = $tokenResult->accessToken;
         $tokenExpiration = $tokenResult->token->expires_at;
 
+        updateUserPushToken($request,$user);
         sendPushNotification( "Happy to see you again", "Welcome back ".$user->firstname, [$user->fcm_token]);
 
 
