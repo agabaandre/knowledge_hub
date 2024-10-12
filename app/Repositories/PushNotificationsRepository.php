@@ -8,7 +8,7 @@ class PushNotificationsRepository
 {
     public function getAll()
     {
-        $notifications = PushNotification::orderBy('created_at','desc')->get();
+        $notifications = PushNotification::orderBy('created_at','desc');
         $notifications = $notifications->whereNull('user_id');
         
        if(auth()->user()){
