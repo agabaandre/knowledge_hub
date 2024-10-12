@@ -11,6 +11,8 @@ use Smalot\PdfParser\Parser;
 use App\Notifications\SendPushNotification;
 use App\Models\User;
 use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\MessageTarget;
+use App\Notifications\AccountActivated;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -409,6 +411,11 @@ function cleanUTF8($value){
 
 
  function sendPushNotification($title,$message,$fcmTokens){
+
+    $user = User::find(auth()->user()->id);
+    $user->notify(new AccountActivated());
+
+    /*
     try{
         if(empty($fcmTokens) || empty($message))
             return;
@@ -427,11 +434,12 @@ function cleanUTF8($value){
             
         foreach($tokens as $deviceToken):
         
-            $fcm_message = CloudMessage::withTarget('token', $deviceToken);
-
-            if($count > 0)
+            $fcm_message = CloudMessage::withTarget(MessageTarget::TOPIC, "GENERAL");
+            
+           
+          if($count > 0)
                 $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
-          
+            
             $fcm_message->withNotification(['title' => $title, 'body' => $message]);
 
             $sent = $messaging->send($fcm_message);
@@ -446,6 +454,7 @@ function cleanUTF8($value){
            
         \Log::error('Push Error '.$ex->getMessage());
      }
+     */
   }
 
   function updateUSerPushToken($request){
