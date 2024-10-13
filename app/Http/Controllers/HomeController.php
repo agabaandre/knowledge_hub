@@ -29,7 +29,7 @@ class HomeController extends Controller
     public function index(Request $request){
 
         
-        $request['rows']      = 10;
+        $request['rows']      = 20;
 
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['recent']       = $data['publications']; //$this->publicationsRepo->get($request);
