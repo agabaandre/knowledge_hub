@@ -4,6 +4,8 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Laravel\Passport\Token;
+
 class AuthenticateWithPassportToken
 {
     /**
@@ -20,21 +22,19 @@ class AuthenticateWithPassportToken
         \Log::info('Request Headers:'.json_encode($headers));
         updateUSerPushToken($request);
 
-        
         // Get the token from the Authorization header (Bearer token)
         $token = $request->bearerToken();
 
         if ($token) {
-            
-            $decodedPayload = $this->decodeJWT($token);
-
             // Get the user ID from the 'sub' field in the payload
-            $userId = $decodedPayload['sub'];
-            $user = User::find($userId);
-            auth()->setUser($user);
-            // Attach the user to the request
-            $request->merge(['user' => $user]);
-        }
+            $user = $this->getUserFromToken($token);
+           
+            if ($user && $this->isTokenValid($user, $token)) {
+                auth()->setUser($user);
+                // Attach the user to the request
+                $request->merge(['user' => $user]);
+            } 
+        } 
 
         return $next($request);
     }
@@ -58,5 +58,20 @@ class AuthenticateWithPassportToken
         // Convert the decoded payload into an associative array
         return json_decode($decodedPayload, true);
     }
-}
 
+    private function isTokenValid(User $user, $token)
+    {
+        // Check if the token exists and is valid for the user
+        return Token::where('id', $token)
+                    ->where('user_id', $user->id)
+                    ->where('revoked', false)
+                    ->exists();
+    }
+
+    private function getUserFromToken($token)
+    {
+        $decodedPayload = $this->decodeJWT($token);
+        $userId = $decodedPayload['sub'];
+        return User::find($userId);
+    }
+}

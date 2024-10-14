@@ -225,25 +225,23 @@ class AuthApiController extends ApiController
     {
         $user = $request->user();
 
-        if($user){
+        if ($user && $user->token()) {
+            $user->load("communities");
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->accessToken;
+            $tokenExpiration = $tokenResult->token->expires_at;
 
-        $user->load("communities");
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->accessToken;
-        $tokenExpiration = $tokenResult->token->expires_at;
+            return response()->json([
+                'token' => $token,
+                'token_type' => 'Bearer',
+                'expires_at' => $tokenExpiration,
+                'user' => $user
+            ]);
+        }
 
         return response()->json([
-            'token' => $token,
-            'token_type' => 'Bearer',
-            'expires_at' => $tokenExpiration,
-            'user' => $user
-        ]);
-
-        }else{
-            return response()->json([
-                'message' => 'Unauthenticated, no existing token found. Login to get a new token'
-            ], 401);
-        }
+            'message' => 'Unauthenticated, no existing token found. Login to get a new token'
+        ], 401);
     }
 
     /**
