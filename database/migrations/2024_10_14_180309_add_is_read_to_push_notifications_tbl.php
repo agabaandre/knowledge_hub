@@ -13,7 +13,7 @@ class AddIsReadToPushNotificationsTbl extends Migration
      */
     public function up()
     {
-        Schema::table('push_notifications_tbl', function (Blueprint $table) {
+        Schema::table('push_notifications', function (Blueprint $table) {
             
             $table->boolean('is_read')->default(0);
         });
