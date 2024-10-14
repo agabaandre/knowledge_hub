@@ -47,7 +47,7 @@ class AuthenticateWithPassportToken
                 $request->merge(['user' => $tokenRecord->user]);
             }
         }
-         
+
         return $next($request);
     }
 
@@ -71,19 +71,4 @@ class AuthenticateWithPassportToken
         return json_decode($decodedPayload, true);
     }
 
-    private function isTokenValid(User $user, $token)
-    {
-        // Check if the token exists and is valid for the user
-        return Token::where('id', $token)
-                    ->where('user_id', $user->id)
-                    ->where('revoked', false)
-                    ->exists();
-    }
-
-    private function getUserFromToken($token)
-    {
-        $decodedPayload = $this->decodeJWT($token);
-        $userId = $decodedPayload['sub'];
-        return User::find($userId);
-    }
 }

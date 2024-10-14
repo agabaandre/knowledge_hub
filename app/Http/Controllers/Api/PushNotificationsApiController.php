@@ -264,6 +264,7 @@ class PushNotificationsApiController extends Controller
      *     path="/api/push-notifications/mark-as-read",
      *     operationId="markNotificationsAsRead",
      *     tags={"PushNotifications"},
+     *     security={{"bearer_token":{}}},
      *     summary="Mark notifications as read",
      *     description="Marks specified notifications as read",
      *     @OA\RequestBody(
@@ -313,6 +314,7 @@ class PushNotificationsApiController extends Controller
      *     path="/api/push-notifications/unread-count",
      *     operationId="getUnreadNotificationsCount",
      *     tags={"PushNotifications"},
+     *     security={{"bearer_token":{}}},
      *     summary="Get count of unread notifications",
      *     description="Returns the count of unread notifications for the authenticated user",
      *     @OA\Response(
