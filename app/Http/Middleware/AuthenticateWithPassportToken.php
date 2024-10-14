@@ -4,10 +4,18 @@ namespace App\Http\Middleware;
 use Closure;
 use Illuminate\Http\Request;
 use App\Models\User;
+use Laravel\Passport\TokenRepository;
 use Laravel\Passport\Token;
 
 class AuthenticateWithPassportToken
 {
+    protected $tokenRepository;
+
+    public function __construct(TokenRepository $tokenRepository)
+    {
+        $this->tokenRepository = $tokenRepository;
+    }
+
     /**
      * Handle an incoming request.
      *
@@ -25,16 +33,24 @@ class AuthenticateWithPassportToken
         // Get the token from the Authorization header (Bearer token)
         $token = $request->bearerToken();
 
-        if ($token) {
-            // Get the user ID from the 'sub' field in the payload
-            $user = $this->getUserFromToken($token);
-           
-            if ($user && $this->isTokenValid($user, $token)) {
-                auth()->setUser($user);
-                // Attach the user to the request
-                $request->merge(['user' => $user]);
-            } 
-        } 
+        if ($token && !auth()->user()) {
+            
+            $decodedPayload = $this->decodeJWT($token);
+            $userId = $decodedPayload['sub'];
+
+            $tokenId = $decodedPayload['jti']; // Assuming 'jti' is the token ID
+            \Log::info('Token ID: '.$tokenId);
+            $tokenRecord = $this->tokenRepository->find($tokenId);
+
+            if ($tokenRecord && !$tokenRecord->revoked && $tokenRecord->user_id == $userId) {
+                auth()->setUser($tokenRecord->user);
+                $request->merge(['user' => $tokenRecord->user]);
+            } else {
+                return response()->json(['message' => 'Invalid or expired token'], 401);
+            }
+        } else {
+            return response()->json(['message' => 'Token not provided'], 401);
+        }
 
         return $next($request);
     }

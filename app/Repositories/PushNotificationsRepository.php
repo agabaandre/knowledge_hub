@@ -40,7 +40,7 @@ class PushNotificationsRepository
 
     public function getByUser($userId)
     {
-        return PushNotification::where('user_id', $userId)->get();
+        return PushNotification::where('user_id', $userId)->paginate(15);
     }
 
     public function markAsRead($userId,$ids)

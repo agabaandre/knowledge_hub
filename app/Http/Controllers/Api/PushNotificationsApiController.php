@@ -239,7 +239,7 @@ class PushNotificationsApiController extends Controller
      */
     public function getByUser()
     {
-        $userId = auth()->user()->id;
+        $userId = auth()->user()->id ?? 0;
         $notifications = $this->pushNotificationsRepo->getByUser($userId);
        
         
