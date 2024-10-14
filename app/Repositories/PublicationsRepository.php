@@ -290,15 +290,14 @@ class PublicationsRepository extends SharedRepo{
             'comments','parent',
             'summaries','versioning'])->find($id);
 
-        $viewed = get_cookie("Viewed".$pub->id,'yes');
+        $cookie_name = "Viewed".$pub->id.(auth()->user()->id ?? '');
+        $viewed      = get_cookie($cookie_name);
 
         if(!$viewed):
             $pub->visits = $pub->visits + 1;
             $pub->update();
             set_cookie("Viewed".$pub->id,'yes');
         endif;
-
-       // dd($pub->tag_ids);
 
         return $pub;
     }
