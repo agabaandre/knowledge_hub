@@ -1,6 +1,34 @@
 <!-- Header Container
 ================================================== -->
-<header id="header-container" class="fullwidth">
+<header id="header-container" class="fullwidth bg-white">
+
+    <div id="langauge-container">
+        <div class="p-3">
+            <div class="container" style="min-width: 90%;">
+                <div class="row align-items-center">
+                    <div class="col-lg-2 col-md-2 d-none d-md-block">
+                        <div><a class="nav-brand" href="{{ url('/') }}">
+                                <img src="{{ settings()->logo }}" class="logo" alt=""
+                                    style="height:85px; margin-bottom:-16px;">
+                            </a>
+                        </div>
+                        <div class="mt-1 text-secondary">
+                            <!-- slogan -->
+                        </div>
+                    </div>
+                    <div class="col-lg-5 col-md-5 text-center ">
+                        <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">
+                            {{ settings()->site_name }}</h3>
+                        <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">
+                            {{ settings()->slogan }}</h6>
+                    </div>
+                    <div class="col-lg-5 col-md-5 text-end d-none d-md-block justify-content-end">
+                        @include('layouts.partials.langselect')
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- Header -->
     <div id="header">
@@ -9,10 +37,6 @@
             <!-- Left Side Content -->
             <div class="left-side">
 
-                <!-- Logo -->
-                <div id="logo">
-                    <a href="{{ url('/') }}"><img src="{{ settings()->logo ?? 'Logo' }}" alt=""></a>
-                </div>
 
                 <!-- Main Navigation -->
                 <nav id="navigation">

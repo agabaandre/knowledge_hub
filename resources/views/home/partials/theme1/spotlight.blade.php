@@ -21,7 +21,7 @@
                     <!-- Search Field -->
                     <div class="intro-search-field">
                         <div class="input-with-icon">
-                            <input id="autocomplete-input" type="text" placeholder="Type Keyword to search">
+                            <input id="autocomplete-input" type="search" placeholder="Type Keyword to search">
                             <i class="icon-material-outline-search"></i>
                         </div>
                     </div>

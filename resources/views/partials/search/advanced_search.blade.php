@@ -16,8 +16,8 @@
     <a data-toggle="collapse" href="#collapseExample" role="button" id="advanced_search"
         aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-lg-12"
         style="color:var(--banner-text-color) !important; font-size:14px;">
-        <span class="filter text-dark text-bold"> Advance your Search With Filters</span> <i
-            class="fa fa-angle-down text-dark"></i>
+        <span class="filter  text-bold" style="color:var(--banner-text-color) !important;"> Advance your Search With
+            Filters</span> <i class="fa fa-angle-down" style="color:var(--banner-text-color) !important;"></i>
     </a>
 
     <div class="col-lg-12 {{ $advanced_filter ? '' : 'collapse' }}" id="collapseExample">

@@ -119,6 +119,27 @@
 /* ---------------------------------- */
 /* Forms Reset & Styles
 ------------------------------------- */
+
+input[type="search"]{
+	height: 48px;
+	line-height: 48px;
+	padding: 0 20px;
+	outline: none;
+	font-size: 16px;
+	color: #808080;
+	margin: 0 0 16px 0;
+	max-width: 100%;
+	width: 100%;
+	box-sizing: border-box;
+	display: block;
+	background-color: #fff;
+	font-weight: 500;
+	opacity: 1;
+	border-radius: 4px;
+	border: none;
+	box-shadow: 0 1px 4px 0px rgba(0, 0, 0, 0.12);
+}
+/*
 input,
 input[type="text"],
 input[type="password"],
@@ -177,7 +198,6 @@ input:-webkit-autofill {
     -webkit-text-fill-color: #808080 !important;
 }
 
-/* With Border */
 input.with-border,
 input[type="text"].with-border,
 input[type="password"].with-border,
@@ -213,8 +233,6 @@ input[type="radio"] {
 	box-shadow: none;
 }
 
-
-/* Input Placeholder Color */
 ::placeholder {
 	color: #808080;
 	opacity: 1;
@@ -250,6 +268,7 @@ fieldset {
 	padding: 0;
 	border: none;
 }
+*/
 
 button {
 	border: none;
@@ -295,7 +314,7 @@ img { max-width: 100%; }
 	position: relative;
 	z-index: 999;
 	padding: 0;
-	box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.12);
+	/*box-shadow: 0 0 18px 0 rgba(0, 0, 0, 0.12);*/
 	font-size: 16px;
 	height: 82px;
 	background-color: #fff;
@@ -1019,8 +1038,8 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 #navigation ul ul.dropdown-nav li:hover a:after,
 #navigation ul li:hover a:after {
 	color: #66676b;
-	background: rgba(102,103,107,0.13);
-	opacity: 0.8;
+	/*background: rgba(102,103,107,0.13);*/
+	opacity: 0.9;
 }
 
 #navigation ul ul.dropdown-nav ul.dropdown-nav li a:after {
@@ -1045,7 +1064,7 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	left: auto;
 	right: 20px;
 	top: 6px;
-	background-color: rgba(255,255,255,0.1);
+	/*background-color: rgba(255,255,255,0.1);*/
 	color: #bbb;
 	opacity: 1;
 }
@@ -1414,7 +1433,7 @@ body .transparent-header #navigation > ul ul li a { color: #aaa; }
 
 .transparent-header #navigation > ul li:hover ul a:after,
 .transparent-header #navigation > ul ul li a:after {
-    background-color: rgba(255,255,255,0.1);
+    /*background-color: rgba(255,255,255,0.1);*/
     color: #bbb;
 }
 
@@ -6491,7 +6510,7 @@ table.basic-table { margin-bottom: 0; }
 	height: 30px;
 	width: 30px;
 	line-height: 30px;
-	background-color: rgba(255,255,255,0.1);
+	/*background-color: rgba(255,255,255,0.1);*/
 	border-radius: 4px;
 	text-align: center;
 	position: relative;
