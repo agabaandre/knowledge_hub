@@ -142,5 +142,14 @@ Route::prefix('communities')->group(function () {
 
 });
 
-Route::get('push-notifications', [PushNotificationsApiController::class, 'index']);
-Route::get('push-notifications/user', [PushNotificationsApiController::class, 'getByUser'])->middleware('auth:api');
+
+Route::prefix('push-notifications')->group(function() {
+    
+    Route::get('/', [PushNotificationsApiController::class, 'index']);
+    
+    Route::group(['middleware' => 'auth:api'], function() {
+        Route::post('/mark-as-read', [PushNotificationsApiController::class, 'markAsRead']);
+        Route::get('/unread-count', [PushNotificationsApiController::class, 'getUnreadCount']);
+        Route::get('/user', [PushNotificationsApiController::class, 'getByUser'])->middleware('auth:api');
+    });
+});
