@@ -290,7 +290,17 @@ class PushNotificationsApiController extends Controller
             'ids.*' => 'integer|exists:push_notifications,id',
         ]);
 
-        $this->pushNotificationsRepo->markAsRead($request->ids);
+        $userId = auth()->user()->id ?? 0;
+       
+        if($userId == 0){
+            return response()->json([
+                "status" => 401,
+                "message" => "Unauthenticated",
+                "count" => 0
+            ], 401);
+        }
+
+        $this->pushNotificationsRepo->markAsRead($userId,$request->ids);
 
         return response()->json([
             "status" => 200,
@@ -324,7 +334,7 @@ class PushNotificationsApiController extends Controller
                 "count" => 0
             ], 401);
         }
-        
+
         $count = $this->pushNotificationsRepo->getUnreadCount($userId);
 
         return response()->json([

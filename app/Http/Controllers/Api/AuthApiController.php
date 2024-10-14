@@ -361,7 +361,7 @@ class AuthApiController extends ApiController
     }
 
     /**
-     * @OA\Post(
+     * @OA\Get(
      *     path="/api/logout",
      *     operationId="UserLogout",
      *     tags={"Authentication"},
