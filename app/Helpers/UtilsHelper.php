@@ -14,6 +14,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
+use App\Jobs\PushNotificationJob;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -411,62 +412,25 @@ function cleanUTF8($value){
 }
 
 
- function sendPushNotification($title,$message,$fcmTokens,$isTopic=false){
-
+ function sendPushNotification($title, $message, $fcmTokens, $isTopic = false)
+{
     try {
         if (empty($fcmTokens) || empty($message)) {
             \Log::warning('Push notification skipped: Missing tokens or message.');
             return false; // Indicate failure or no action taken
         }
 
-        $tokens = is_array($fcmTokens) ? $fcmTokens : [$fcmTokens];
-
-        \Log::info('Push Sending ' . $message);
-        $messaging = app('firebase.messaging');
-        $count = 0;
-
-        \Log::info("Message sending: " . count($tokens));
-
-        foreach ($tokens as $deviceToken) {
-            $fcm_message = CloudMessage::withTarget($isTopic ? "topic" : "token", $isTopic ? "GENERAL" : $deviceToken);
-
-            if ($count > 0) {
-                $fcm_message = $fcm_message->withChangedTarget('token', $deviceToken);
-            }
-
-            $fcm_message = $fcm_message->withNotification(['title' => $title, 'body' => $message]);
-
-            try {
-                $sent = $messaging->send($fcm_message);
-
-                $notification = PushNotification::create([
-                    'title' => $title,
-                    'message' => $message,
-                    'is_topic' => $isTopic,
-                    'user_id'  
-                     => ($isTopic)?null: User::where('fcm_token',$deviceToken)->first()->id
-                ]);
-
-            
-                $notification->save();
-
-                \Log::info("Message sent: " . json_encode($sent));
-            } catch (Exception $sendEx) {
-                \Log::error('Error sending message to token ' . $deviceToken . ': ' . $sendEx->getMessage());
-                continue; // Continue with the next token
-            }
-
-            $count++;
-        }
+        // Dispatch the job
+        PushNotificationJob::dispatch($title, $message, $fcmTokens, $isTopic);
 
         return true; // Indicate success
     } catch (Exception $ex) {
         \Log::error('Push Error: ' . $ex->getMessage());
         return false; // Indicate failure
     }
-  }
+}
 
-  function updateUSerPushToken($request,$user=null){
+function updateUSerPushToken($request,$user=null){
 
     $auth_user = ($user)?$user:auth()->user();
     
