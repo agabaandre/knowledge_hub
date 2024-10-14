@@ -1,9 +1,9 @@
-<section class="middle gray" style="background-color: #2c3e50;">
+<section class="middle gray" style="background-color: #f5f8fb;">
     <div class="container py-5">
         <div class="row justify-content-center" data-aos="fade-in">
             <div class="col-12">
                 <div class="sec_title position-relative text-center mb-5">
-                    <h2 class="ft-bold" style="color: #ecf0f1;">Top Searches</h2>
+                    <h2 class="ft-bold">Top Searches</h2>
                 </div>
             </div>
         </div>
@@ -22,8 +22,9 @@
 
 
                     <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="task-listing">
-
-                        <!-- Job Listing Details -->
+                        <div class="task-listing-bid d-none d-sm-block"
+                            style="background-image: url('{{ $row->cover }}'); background-size: cover;">
+                        </div>
                         <div class="task-listing-details">
 
                             <!-- Details -->
@@ -45,12 +46,12 @@
                         </div>
 
                         <div class="task-listing-bid">
-                            <div class="task-listing-bid-inner">
-                                <div class="task-offers">
+                            <div class="task-listing-bid-inner row">
+                                <div class="task-offers d-none d-sm-block">
                                     <strong>{{ $row->theme->description }}</strong>
                                     <span class="text-sm">{{ $row->sub_theme->description }}</span>
                                 </div>
-                                <span class="button button-sliding-icon ripple-effect"
+                                <span style="min-width:100%;" class="button button-sliding-icon ripple-effect"
                                     onclick="window.location.href={{ url('records/resource') }}?id={{ $row->id }}">
                                     Browse Resource
                                 </span>

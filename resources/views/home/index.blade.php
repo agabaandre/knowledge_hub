@@ -23,8 +23,12 @@
 
 @section('content')
     @include('home.partials.' . $theme . 'spotlight')
-    @include('home.partials.' . $theme . 'top_categories')
-    @include('home.partials.' . $theme . 'featured')
+
+    @if (empty($theme))
+        @include('home.partials.' . $theme . 'top_categories')
+        @include('home.partials.' . $theme . 'featured')
+    @endif
+
     @include('home.partials.' . $theme . 'top_searches')
     @include('home.partials.top_authors')
 @endsection
