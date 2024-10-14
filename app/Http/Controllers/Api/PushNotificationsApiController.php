@@ -258,4 +258,79 @@ class PushNotificationsApiController extends Controller
 
         return response()->json($data, 200);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/push-notifications/mark-as-read",
+     *     operationId="markNotificationsAsRead",
+     *     tags={"PushNotifications"},
+     *     summary="Mark notifications as read",
+     *     description="Marks specified notifications as read",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             @OA\Property(property="ids", type="array", @OA\Items(type="integer"))
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Notifications marked as read successfully",
+     *         @OA\JsonContent()
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request"
+     *     )
+     * )
+     */
+    public function markAsRead(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required',
+            'ids.*' => 'integer|exists:push_notifications,id',
+        ]);
+
+        $this->pushNotificationsRepo->markAsRead($request->ids);
+
+        return response()->json([
+            "status" => 200,
+            "message" => "Notifications marked as read successfully"
+        ], 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/push-notifications/unread-count",
+     *     operationId="getUnreadNotificationsCount",
+     *     tags={"PushNotifications"},
+     *     summary="Get count of unread notifications",
+     *     description="Returns the count of unread notifications for the authenticated user",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful operation",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function getUnreadCount()
+    {
+
+        $userId = auth()->user()->id ?? 0;
+       
+        if($userId == 0){
+            return response()->json([
+                "status" => 401,
+                "message" => "Unauthenticated",
+                "count" => 0
+            ], 401);
+        }
+        
+        $count = $this->pushNotificationsRepo->getUnreadCount($userId);
+
+        return response()->json([
+            "status" => 200,
+            "message" => "Unread notifications count retrieved successfully",
+            "count" => $count
+        ], 200);
+    }
 }

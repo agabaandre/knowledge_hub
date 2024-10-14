@@ -359,4 +359,40 @@ class AuthApiController extends ApiController
             'message' => 'Password changed successfully',
         ]);
     }
+
+    /**
+     * @OA\Post(
+     *     path="/api/logout",
+     *     operationId="UserLogout",
+     *     tags={"Authentication"},
+     *     summary="User Logout",
+     *     description="Logs out the user and revokes the token",
+     *     security={{"bearer_token":{}}},
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successfully logged out"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthenticated"
+     *     )
+     * )
+     */
+    public function logout(Request $request)
+    {
+        $user = $request->user();
+
+        if ($user) {
+            $this->usersRepo->logout($user);
+
+            return response()->json([
+                'status' => 200,
+                'message' => 'Successfully logged out',
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Unauthenticated',
+        ], 401);
+    }
 }

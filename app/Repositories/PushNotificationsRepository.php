@@ -42,4 +42,15 @@ class PushNotificationsRepository
     {
         return PushNotification::where('user_id', $userId)->get();
     }
+
+    public function markAsRead($ids)
+    {
+        $ids = (is_array($ids)) ? $ids : json_decode($ids);
+        PushNotification::whereIn('id', $ids)->update(['is_read' => 1]);
+    }
+
+    public function getUnreadCount($userId)
+    {
+        return PushNotification::where('user_id', $userId)->where('is_read', 0)->count();
+    }
 }

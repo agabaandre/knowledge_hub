@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Mail;
+use Laravel\Passport\Token;
 
 class UsersRepository {
 
@@ -142,6 +143,20 @@ class UsersRepository {
         $user->is_changed = 1;
 
         return $user->update();
+    }
+
+    public function logout(User $user)
+    {
+        // Revoke all tokens for the user
+        $user->tokens->each(function ($token) {
+            $token->revoke();
+        });
+
+        // Clear the FCM token
+        $user->fcm_token = null;
+        $user->save();
+
+        return true;
     }
 
   
