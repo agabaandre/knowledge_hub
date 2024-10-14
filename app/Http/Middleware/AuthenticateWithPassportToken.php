@@ -34,7 +34,7 @@ class AuthenticateWithPassportToken
         $token = $request->bearerToken();
 
         if ($token && !auth()->user()) {
-            
+
             $decodedPayload = $this->decodeJWT($token);
             $userId = $decodedPayload['sub'];
 
@@ -45,13 +45,9 @@ class AuthenticateWithPassportToken
             if ($tokenRecord && !$tokenRecord->revoked && $tokenRecord->user_id == $userId) {
                 auth()->setUser($tokenRecord->user);
                 $request->merge(['user' => $tokenRecord->user]);
-            } else {
-                return response()->json(['message' => 'Invalid or expired token'], 401);
             }
-        } else {
-            return response()->json(['message' => 'Token not provided'], 401);
         }
-
+         
         return $next($request);
     }
 
