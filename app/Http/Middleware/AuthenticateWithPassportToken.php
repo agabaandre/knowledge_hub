@@ -33,7 +33,7 @@ class AuthenticateWithPassportToken
         // Get the token from the Authorization header (Bearer token)
         $token = $request->bearerToken();
 
-        if ($token && !auth()->user()) {
+        if (!empty($token) && !auth()->user()) {
 
             $decodedPayload = $this->decodeJWT($token);
             $userId = $decodedPayload['sub'];

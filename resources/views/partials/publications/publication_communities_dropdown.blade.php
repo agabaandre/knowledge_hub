@@ -2,7 +2,8 @@
     id="communities" {{ $required ?? '' }} multiple placeholder="Choose">
     <option {{ @$allfield ? '' : 'disabled' }} value="">{{ $allfield ?? 'Choose One or More' }}</option>>
     @foreach ($communities as $comm)
-        <option value="{{ $comm->id }}" {{ in_array($comm->id, @$selected->pluck('id')->toArray()) ? 'selected' : '' }}>
+        <option value="{{ $comm->id }}"
+            {{ in_array($comm->id, is_array(@$selected) ? $selected : @$selected->pluck('id')->toArray()) ? 'selected' : '' }}>
             {{ $comm->community_name }}
         </option>
     @endforeach
