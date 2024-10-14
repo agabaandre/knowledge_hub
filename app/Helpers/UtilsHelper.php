@@ -202,7 +202,8 @@ function send_email($request){
 
         $mail->isHTML(true);                // Set email content format to HTML
 
-        $mail->Subject = $request->subject;
+       
+        $mail->Subject = $request->subject ?? 'Knowledge Resource Center Email';
         $mail->Body    = $request->body;
 
         // $mail->AltBody = plain text version of email body;

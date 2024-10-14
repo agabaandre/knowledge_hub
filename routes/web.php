@@ -55,6 +55,7 @@ use App\Http\Controllers\Admin\AdminCoursesController;
 use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
+use App\Models\User;
 
 /*
 |--------------------------------------------------------------------------
@@ -508,6 +509,7 @@ Route::group(["prefix" => "communities"], function () {
 
 Route::get("/tests",function(){
 
-   return  sendPushNotification("Title","Hello","fZK5MTioQwe2paWcyB3GGX:APA91bGvrjIvnxTaIbQ3OOBvpB_7GhbS4jUdIFQC3ZcpAMOqhL0kU_fP7pnlXo2tBpeu0VZI8AXcD-vMurO6E5ZsWDlo0jwT-8KxRu4DVrskVphTmzyPFMbdeagxIAtBHQ3AuJJ9Xa5D");
+    $tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+   return  sendPushNotification("Title","Hello",$tokens);
 
 });
