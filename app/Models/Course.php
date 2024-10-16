@@ -22,6 +22,6 @@ class Course extends Model
     }
 
     public function getCoverImageAttribute($value){
-        return asset('storage/uploads/users/avatar.jpg');
+        return asset('storage/uploads/publications/cover.jpg');
     }
 }
