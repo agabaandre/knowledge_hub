@@ -39,19 +39,3 @@
 </li>
 </ul>
 </div>
-
-
-     <!-- <div class="menu-language-menu-container">
-    
-          <select class="form-control" data-width="140" onchange="doGTranslate(this.value);">
-            <option data-content='<span class="flag-icon flag-icon-us"></span> English' value="en">English</option>
-            <option data-content='<span class="flag-icon flag-icon-fr"></span> Français' value="fr">Français
-            </option>
-            <option data-content='<span class="flag-icon flag-icon-ar"></span> العربية' value="ar">العربية</option>
-            <option data-content='<span class="flag-icon flag-icon-es"></span> Español' value="es">Español</option>
-            <option data-content='<span class="flag-icon flag-icon-pt"></span> Português' value="pt">Português
-            </option>
-            <option data-content='<span class="flag-icon flag-icon-ke"></span> Kiswahili' value="sw">Kiswahili
-            </option>
-          </select>
-    </div> -->

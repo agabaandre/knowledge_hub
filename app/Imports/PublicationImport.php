@@ -18,31 +18,34 @@ class PublicationImport implements ToModel,WithHeadingRow
     $row = array_values($row);
 
     // Trim the sub-thematic description from the Excel row
-    $subt = trim($row[8]);
+    $title = $row[0];
+    $link = $row[1];
+    $description = !empty($row[4]) ? $row[4] : ' ';
+    $cover = $row[5];
     $cat = trim($row[7]);
-
+    $subt = trim($row[8]);
     $country = trim($row[9]);
-
+    $citation_link = $row[10];
+    $associated_authors = $row[11];
     $sub_theme_id = $this->get_subtheme($subt);
     $pub_cat_id = $this->get_category($cat);
     $member_state_id = $this->get_memberstate($country);
 
     // Get the file type using a helper
-    $file_type = get_file_type(null, $row[10]);
+    $file_type = get_file_type(null, $link);
     $file_type_id = $file_type ? $file_type->id : null;
 
-    // Ensure description has a default value if empty
-    $description = !empty($row[4]) ? $row[4] : ' ';
+
 
     // Define how to create a model from the Excel row data
     // if cover is null implement the cover from the db
     return new Publication([
-        'title' => $row[0],
-        'publication' => $row[1],
-        'cover' => $row[5],
+        'title' => $title,
+        'publication' => $link,
+        'cover' => $cover,
         'description' => $description,
-        'citation_link' => $row[10],
-        'associated_authors' => $row[11],
+        'citation_link' => $citation_link,
+        'associated_authors' => $associated_authors,
         'sub_thematic_area_id' => $sub_theme_id,
         'is_active' => 'Active',
         'publication_catgory_id' => $pub_cat_id,
