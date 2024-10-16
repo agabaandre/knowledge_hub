@@ -20,4 +20,8 @@ class Course extends Model
     public function category(){
         return $this->belongsTo(CourseCategory::class,'course_id','moodle_id');
     }
+
+    public function getCoverImageAttribute($value){
+        return asset('storage/uploads/users/'.($value)?$value:'avatar.jpg');
+    }
 }
