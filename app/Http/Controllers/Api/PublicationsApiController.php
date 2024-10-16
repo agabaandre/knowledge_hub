@@ -96,6 +96,13 @@ class PublicationsApiController extends ApiController
      *         description="Filter by Community Id",
      *         @OA\Schema(type="integer")
      *     ),
+     * *  @OA\Parameter(
+     *         name="category",
+     *         in="query",
+     *         required=false,
+     *         description="Filter by Category Id",
+     *         @OA\Schema(type="integer")
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Successful",

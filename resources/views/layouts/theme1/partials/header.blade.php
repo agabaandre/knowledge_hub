@@ -93,25 +93,99 @@
                         <li><a href="{{ url('courses') }}">Courses</a></li>
                         <li><a href="{{ url('communities') }}">Communities</a></li>
                         <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
+                        @if (!auth()->check())
+                            <li><a href="{{ url('/login') }}">Login</a></li>
+                        @endauth
 
-                    </ul>
+                </ul>
 
-                    <ul class="nav-menu nav-menu-social align-to-right">
-
-                        @include('partials.account.authlinks')
-
-                    </ul>
-                </nav>
-                <div class="clearfix"></div>
-                <!-- Main Navigation / End -->
-
-            </div>
-            <!-- Left Side Content / End -->
-
+            </nav>
+            <div class="clearfix"></div>
+            <!-- Main Navigation / End -->
 
         </div>
+        <!-- Left Side Content / End -->
+
+        <!-- Right Side Content / End -->
+
+        <div class="right-side">
+
+            @if (auth()->check())
+                <!-- User Menu -->
+                <div class="header-widget">
+
+                    <!-- Messages -->
+                    <div class="header-notifications user-menu">
+                        <div class="header-notifications-trigger">
+                            <a href="#">
+                                <div class="user-avatar status-online">
+                                    <img src="{{ current_user()->photo }}" alt="">
+                                </div>
+                            </a>
+                        </div>
+
+                        <!-- Dropdown -->
+                        <div class="header-notifications-dropdown">
+
+                            <!-- User Status -->
+                            <div class="user-status">
+
+                                <!-- User Name / Avatar -->
+                                <div class="user-details">
+                                    <div class="user-avatar status-online"><img src="{{ current_user()->photo }}"
+                                            alt=""></div>
+                                    <div class="user-name">
+                                        {{ ' ' . ucwords(current_user()->name) }}
+                                    </div>
+                                    <div class="user-role">
+                                        {{ current_user()->role }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <ul class="user-menu-small-nav">
+                                <li><a href="{{ route('admin.index') }}"><i
+                                            class="icon-material-outline-dashboard"></i>
+                                        Admin Panel</a></li>
+                                <li><a href="{{ route('account.profile') }}"><i
+                                            class="icon-material-outline-settings"></i>
+                                        My Profile</a></li>
+                                <li><a href="{{ route('account.publications') }}"><i
+                                            class="icon-material-outline-assignment"></i>
+                                        Our Publications</a></li>
+                                <li><a href="{{ route('account.favourites') }}"><i
+                                            class="icon-material-outline-favorite-border"></i>
+                                        My Favourites</a></li>
+                                <li><a href="{{ route('account.publish') }}"><i
+                                            class="icon-material-outline-add-circle-outline"></i>
+                                        Publish a resource</a></li>
+                                <li><a href="{{ route('logout') }}"><i
+                                            class="icon-material-outline-power-settings-new"></i> Logout</a></li>
+                            </ul>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- User Menu / End -->
+            @endif
+
+            <!-- Mobile Navigation Button -->
+            <span class="mmenu-trigger">
+                <button class="hamburger hamburger--collapse" type="button">
+                    <span class="hamburger-box">
+                        <span class="hamburger-inner"></span>
+                    </span>
+                </button>
+            </span>
+
+        </div>
+
+        <!-- Right Side Content / End -->
+
+
     </div>
-    <!-- Header / End -->
+</div>
+<!-- Header / End -->
 </header>
-<div class="clearfix"></div>
 <!-- Header Container / End -->
