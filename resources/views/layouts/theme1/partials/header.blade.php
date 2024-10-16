@@ -12,9 +12,6 @@
                                     style="height:85px; margin-bottom:-16px;">
                             </a>
                         </div>
-                        <div class="mt-1 text-secondary">
-                            <!-- slogan -->
-                        </div>
                     </div>
                     <div class="col-lg-6 col-md-6 text-center ">
                         <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">
@@ -98,10 +95,7 @@
                         @endauth
 
                 </ul>
-
             </nav>
-            <div class="clearfix"></div>
-            <!-- Main Navigation / End -->
 
         </div>
         <!-- Left Side Content / End -->
