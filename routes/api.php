@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
 use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
 use App\Http\Controllers\Api\CommunitiesApiController;
 use App\Http\Controllers\Api\PushNotificationsApiController;
-
+use App\Http\Controllers\Api\CoursesApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -152,4 +152,12 @@ Route::prefix('push-notifications')->group(function() {
         Route::get('/unread-count', [PushNotificationsApiController::class, 'getUnreadCount']);
         Route::get('/user', [PushNotificationsApiController::class, 'getByUser'])->middleware('auth:api');
     });
+});
+
+Route::prefix('courses')->group(function () {
+    Route::get('/', [CoursesApiController::class, 'index']);
+  //  Route::post('courses', [CoursesApiController::class, 'store']);
+    Route::get('/{id}', [CoursesApiController::class, 'show']);
+ //   Route::put('courses/{id}', [CoursesApiController::class, 'update']);
+ //   Route::delete('courses/{id}', [CoursesApiController::class, 'destroy']);
 });
