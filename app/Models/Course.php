@@ -9,6 +9,12 @@ class Course extends Model
 {
     use HasFactory;
     protected $guarded=[];
+    public $appends = ['course_link'];
+
+    public function getCourseLinkAttribute()
+    {
+        return env('MOODLE_URL') . "/elearning/course/view.php?id=" . $this->moodle_id;
+    }
 
 
     public function category(){
