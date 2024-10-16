@@ -14,4 +14,7 @@
 
     <!-- Wrapper -->
     <div id="wrapper">
-        <div class="clearfix" style="height: 82px; width: 100%;"></div>
+
+        @if (!@$is_home)
+            <div class="clearfix" style="height: 82px; width: 100%;"></div>
+        @endif
