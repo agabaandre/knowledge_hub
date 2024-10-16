@@ -35,7 +35,13 @@ class CoursesApiController extends ApiController
     public function index(Request $request)
     {
         $courses = $this->coursesRepository->get($request);
-        return response()->json($courses);
+        $data = $courses->toArray() ?? [];
+        $data['status'] = 200;
+        $data['message'] = "Courses retrieved successfully";
+        $data['page_size'] = intval($data['per_page']);
+        unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);
+
+    return response()->json($data, 200);
     }
 
     /**
@@ -97,7 +103,12 @@ class CoursesApiController extends ApiController
     public function show($id)
     {
         $course = Course::findOrFail($id);
-        return response()->json($course);
+
+        $data['status'] = 200;
+        $data['message'] = "Courses retrieved successfully";
+        $data['data'] = $course;
+
+        return response()->json($data);
     }
 
     /**
