@@ -12,7 +12,7 @@
          <div class="card-body text-left">
              <div class="row"></a>
                  <div class="col-md-2"
-                     style=" background-image:url({{ $row->image_url }}); background-size:cover; background-position:center;">
+                     style=" background-image:url({{ $row->cover }}); background-size:cover; background-position:center;">
 
                  </div>
                  <div class="col-md-10">
