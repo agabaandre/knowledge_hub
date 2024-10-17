@@ -20,15 +20,16 @@ class PublicationImport implements ToModel,WithHeadingRow
     // Trim the sub-thematic description from the Excel row
     $title = $row[0];
     $link = $row[1];
-    $description = !empty($row[4]) ? $row[4] : ' ';
-    $cover = $row[5];
-    $cat = trim($row[7]);
-    $subt = trim($row[8]);
-    $country = trim($row[9]);
-    $citation_link = $row[10];
-    $associated_authors = $row[11];
-    $sub_theme_id = $this->get_subtheme($subt);
-    $pub_cat_id = $this->get_category($cat);
+    $description = !empty($row[2]) ? $row[2] : ' ';
+    $cover = $row[3];
+    $data_category = $row[4]; //resource_type /information
+    $data_sub_category = trim($row[5]); //information sub-cat
+    $subtheme = trim($row[6]);
+    $country = trim($row[7]);
+    $citation_link = $row[8];
+    $associated_authors = $row[9];
+    $sub_theme_id = $this->get_subtheme($subtheme);
+    $pub_cat_id = $this->get_category($data_sub_category);
     $member_state_id = $this->get_memberstate($country);
 
     // Get the file type using a helper
@@ -40,12 +41,12 @@ class PublicationImport implements ToModel,WithHeadingRow
     // Define how to create a model from the Excel row data
     // if cover is null implement the cover from the db
     return new Publication([
-        'title' => $title,
+        'title' => fix_text_encoding($title),
         'publication' => $link,
         'cover' => $cover,
-        'description' => $description,
+        'description' => fix_text_encoding($description),
         'citation_link' => $citation_link,
-        'associated_authors' => $associated_authors,
+        'associated_authors' => fix_text_encoding($associated_authors),
         'sub_thematic_area_id' => $sub_theme_id,
         'is_active' => 'Active',
         'publication_catgory_id' => $pub_cat_id,
@@ -73,4 +74,5 @@ public function get_subtheme($subt){
         $country = $query->first();
         return $country ? $country->id : null;
     }
+    
 }

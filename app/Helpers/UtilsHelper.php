@@ -457,4 +457,13 @@ function updateUSerPushToken($request,$user=null){
     return settings()->site_theme;
   }
 
+function fix_text_encoding($text) {
+    // Convert the text from a problematic encoding (ISO-8859-1) to UTF-8
+    $fixed_text = mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
+    
+    return $fixed_text;
+}
+
+
+
 ?>
