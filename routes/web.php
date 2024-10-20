@@ -509,7 +509,9 @@ Route::group(["prefix" => "communities"], function () {
 
 Route::get("/tests",function(){
 
-    $tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
-   return  sendPushNotification("Title","Hello",$tokens);
+    //$tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
+   //return  sendPushNotification("Title","Hello",$tokens);
+
+   extract_pdf_as_image("https://www.guineasalud.org/archivos/Protocolos/0567FolletoPlanEstrategicoSNIS_0303.pdf","storage/app/public/publications/");
 
 });

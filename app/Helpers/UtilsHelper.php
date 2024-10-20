@@ -464,6 +464,53 @@ function fix_text_encoding($text) {
     return $fixed_text;
 }
 
+if (!function_exists('extract_pdf_as_image')) {
+    /**
+     * Extract the first page of a PDF from a URL and save it as a JPG image
+     *
+     * @param string $pdfUrl URL of the PDF
+     * @param string $outputPath Directory to save the JPG image
+     * @return string Path to the saved JPG image
+     * @throws Exception if extraction fails
+     */
+    function extract_pdf_as_image(string $pdfUrl, string $outputPath): string
+    {
+        try {
+            // Download the PDF from the URL
+            $pdfContent = file_get_contents($pdfUrl);
+            if ($pdfContent === false) {
+                throw new Exception("Failed to download PDF from URL: $pdfUrl");
+            }
 
+            // Create a temporary file to store the PDF
+            $tempPdfPath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
+            file_put_contents($tempPdfPath, $pdfContent);
+
+            // Create an Imagick object
+            $imagick = new Imagick();
+
+            // Read the PDF file
+            $imagick->readImage($tempPdfPath . '[0]'); // [0] to read the first page
+
+            // Set the image format to JPG
+            $imagick->setImageFormat('jpg');
+
+            // Define the output image path
+            $imagePath = $outputPath . '/' . basename($tempPdfPath, '.pdf') . '_page1.jpg';
+
+            // Save the image
+            $imagick->writeImage($imagePath);
+
+            // Clean up
+            $imagick->clear();
+            $imagick->destroy();
+            unlink($tempPdfPath);
+
+            return $imagePath;
+        } catch (Exception $e) {
+            throw new Exception("Failed to extract the first page as a JPG: " . $e->getMessage());
+        }
+    }
+}
 
 ?>
