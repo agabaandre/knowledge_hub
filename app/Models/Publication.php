@@ -11,7 +11,9 @@ class Publication extends Model
 
     protected $table = "publication";
     protected $guarded =[];
-    protected $appends = ['theme','label','value','is_favourite','approved_comments','pending_comments','has_attachments','tag_ids','image_url'];
+    protected $appends = ['theme','label','value','is_favourite','approved_comments',
+    'pending_comments','has_attachments','tag_ids','image_url',
+    'publication_countries','publication_regions'];
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -177,6 +179,14 @@ class Publication extends Model
     public function countries()
     {
         return $this->belongsToMany(Country::class, 'publication_countries', 'publication_id', 'country_id');
+    }
+
+    public function getPublicationCountriesAttribute(){
+        return $this->countries()->pluck('name')->implode(', ');
+    }
+
+    public function getPublicationRegionsAttribute(){
+        return Region::whereIn('id',$this->countries()->pluck('region_id')->toArray())->pluck('region_name')->implode(', ');
     }
 
 
