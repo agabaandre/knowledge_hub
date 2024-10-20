@@ -22,11 +22,11 @@
 
 										<div class="rw-header d-flex justify-content-start">
 											<div class="jbd-01-thumb px-2" style="text-align:center; margin-bottom: 15px;">
-												<img src="{{$row->image_url}}" class="img-fluid" style="height: 150px; object-fit: cover;"
+												<img src="{{$row->image_url}}" class="img-fluid" style="max-height: 150px; object-fit: cover;"
 													alt="Cover image of {{$row->title}} by {{$row->author ? $row->author->name : 'Unknown Author'}}" />
 											</div>
 											<div class="rv-110-caption pl-0">
-												<h4 class="fs-md mb-0 ft-medium">{{ truncate(cleanUTF8($row->title), 40) }}</h4>
+												<h4 class="fs-md mb-0 ft-medium">{{ truncate(cleanUTF8($row->title, 40) }}</h4>
 												<p class="p-0 m-0">Source: <i class="fa fa-bank mr-1"></i>{{truncate(@$row->author->name, 30)}}</p>
 											</div>
 										</div>
