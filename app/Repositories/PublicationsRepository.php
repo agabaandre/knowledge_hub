@@ -661,7 +661,7 @@ private function applyFilters($query, $request) {
             $q->whereIn('sub_thematic_area_id', $subthems);
         },
         'subtheme' => function ($q, $value) {
-            $q->where('sub_thematic_area_id', $value ?: $request->sub_thematic_area_id);
+            $q->where('sub_thematic_area_id', $value);
         },
         'is_featured' => function ($q, $value) {
             $q->where('is_featured', $value);

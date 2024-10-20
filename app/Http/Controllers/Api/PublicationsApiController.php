@@ -119,6 +119,7 @@ class PublicationsApiController extends ApiController
         }
 
         $request['rows'] = $request->page_size ?? 20;
+        $request['subtheme'] = $request->sub_thematic_area_id;
 
         $publications = $this->publicationsRepo->get($request, true);
 
