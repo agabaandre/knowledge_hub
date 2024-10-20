@@ -477,6 +477,7 @@ public function change_approval_status(Request $request){
     if($request->approved){
 
      $publication->is_approved= 1;
+     $publication->is_admin_only_access = 1;
      $publication->is_rejected= 0;
 
      if(!$request->is_summary)
@@ -490,6 +491,7 @@ public function change_approval_status(Request $request){
 
      $publication->is_rejected= 1;
      $publication->is_approved= 0;
+     $publication->is_admin_only_access = 1;
 
      if(!$request->is_summary)
      $publication->is_active= 'In-Active';
@@ -622,6 +624,7 @@ public function import(Request $request){
 
 // New method to apply filters
 private function applyFilters($query, $request) {
+
     $filters = [
         'admin_unit' => function ($q, $value) {
             $authors = User::where('administrative_unit_id', $value)->pluck('author_id');
@@ -676,6 +679,7 @@ private function applyFilters($query, $request) {
     ];
 
     foreach ($filters as $key => $callback) {
+        
         if ($request->filled($key)) {
             $callback($query, $request->$key);
         }

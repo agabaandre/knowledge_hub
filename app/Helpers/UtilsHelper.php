@@ -475,6 +475,7 @@ if (!function_exists('extract_pdf_as_image')) {
      */
     function extract_pdf_as_image(string $pdfUrl, string $outputPath): string
     {
+        
         try {
             // Download the PDF from the URL
             $pdfContent = file_get_contents($pdfUrl);
@@ -484,10 +485,16 @@ if (!function_exists('extract_pdf_as_image')) {
 
             // Create a temporary file in Laravel's storage
             $tempPdfPath = 'uploads/publications/cover_' . uniqid() . '.pdf';
-            Storage::disk('local')->put($tempPdfPath, $pdfContent);
+            file_put_contents(Storage::path($tempPdfPath), $pdfContent);
+            //Storage::disk('local')->put($tempPdfPath, $pdfContent);
 
             // Create an Imagick object
             $imagick = new Imagick();
+
+            Log::info('PDF Path: ' . Storage::path($tempPdfPath));
+            if (!file_exists(Storage::path($tempPdfPath))) {
+                throw new Exception("File does not exist at path: " . Storage::path($tempPdfPath));
+            }
 
             // Read the PDF file
             $imagick->readImage(Storage::path($tempPdfPath) . '[0]'); // [0] to read the first page
@@ -512,6 +519,7 @@ if (!function_exists('extract_pdf_as_image')) {
         } catch (Exception $e) {
             throw new Exception("Failed to extract the first page as a JPG: " . $e->getMessage());
         }
+        
     }
 }
 

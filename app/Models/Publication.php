@@ -153,7 +153,7 @@ class Publication extends Model
     }
 
     public function getImageUrlAttribute(){
-        return ($this->cover_is_exteranl)?$this->cover:storage_link('uploads/publications/'.$this->cover);
+        return $this->cover;
     }
 
     public function getCoverAttribute($value){
