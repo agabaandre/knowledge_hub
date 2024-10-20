@@ -15,7 +15,6 @@ use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
 use App\Jobs\PushNotificationJob;
-use Imagick;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
