@@ -484,7 +484,7 @@ if (!function_exists('extract_pdf_as_image')) {
             }
 
             // Create a temporary file in Laravel's storage
-            $tempPdfPath = 'publications/' . uniqid() . '.pdf';
+            $tempPdfPath = 'uploads/publications/' . uniqid() . '.pdf';
             Storage::disk('local')->put($tempPdfPath, $pdfContent);
 
             // Create an Imagick object
