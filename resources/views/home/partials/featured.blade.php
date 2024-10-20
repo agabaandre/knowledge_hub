@@ -18,7 +18,7 @@
 							<a href="{{url('records/resource')}}?id={{$row->id}}">
 
 								<div class="single_review px-2" data-aos="fade-in" >
-									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4" style="min-height:310px;">
+									<div class="reviews_wrap position-relative bg-white rounded py-4 px-4" style="min-height:320px;">
 
 										<div class="rw-header d-flex justify-content-start">
 											<div class="jbd-01-thumb px-2" style="text-align:center; margin-bottom: 15px;">
