@@ -15,6 +15,7 @@ use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
 use App\Jobs\PushNotificationJob;
+use Imagick;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -482,15 +483,15 @@ if (!function_exists('extract_pdf_as_image')) {
                 throw new Exception("Failed to download PDF from URL: $pdfUrl");
             }
 
-            // Create a temporary file to store the PDF
-            $tempPdfPath = tempnam(sys_get_temp_dir(), 'pdf_') . '.pdf';
-            file_put_contents($tempPdfPath, $pdfContent);
+            // Create a temporary file in Laravel's storage
+            $tempPdfPath = 'temp/' . uniqid() . '.pdf';
+            Storage::disk('local')->put($tempPdfPath, $pdfContent);
 
             // Create an Imagick object
             $imagick = new Imagick();
 
             // Read the PDF file
-            $imagick->readImage($tempPdfPath . '[0]'); // [0] to read the first page
+            $imagick->readImage(Storage::path($tempPdfPath) . '[0]'); // [0] to read the first page
 
             // Set the image format to JPG
             $imagick->setImageFormat('jpg');
@@ -504,7 +505,9 @@ if (!function_exists('extract_pdf_as_image')) {
             // Clean up
             $imagick->clear();
             $imagick->destroy();
-            unlink($tempPdfPath);
+
+            // Delete the temporary PDF file
+            Storage::disk('local')->delete($tempPdfPath);
 
             return $imagePath;
         } catch (Exception $e) {
