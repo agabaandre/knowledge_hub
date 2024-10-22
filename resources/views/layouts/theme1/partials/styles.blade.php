@@ -6,7 +6,7 @@
     @include('layouts.partials.header_resources')
 
     <link rel="stylesheet" href="{{ asset('theme1/css/style.css') }}">
-    <link rel="stylesheet" href="{{ asset('theme1/css/colors/blue.css') }}">
+    <link rel="stylesheet" href="{{ asset('theme1/css/colors/theme1-colors.css') }}">
 
 </head>
 

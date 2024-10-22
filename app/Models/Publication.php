@@ -148,7 +148,6 @@ class Publication extends Model
 
     public function country()
     {
-
        return  $this->belongsTo(Country::class,"geographical_coverage_id","id");
     }
 

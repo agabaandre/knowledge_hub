@@ -16,11 +16,11 @@
 
                  </div>
                  <div class="col-md-10">
-                     <h5>
+                     <h5 class="text-bold text-lg">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
                              {!! truncate($row->title, 500) !!}</a>
                      </h5>
-                     <p class="text-nothern p-0">
+                     <p class="text-nothern p-0 pt-2">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
                              {!! truncate($row->description, 300) !!}
                          </a>

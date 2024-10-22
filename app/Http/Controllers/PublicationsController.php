@@ -46,6 +46,10 @@ class PublicationsController extends Controller
 
     public function search(Request $request){
 
+        
+        $request['thematic_area_id'] = $request->theme ?? $request->thematic_area_id;
+        $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
+
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
 

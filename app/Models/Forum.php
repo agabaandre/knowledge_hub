@@ -46,7 +46,5 @@ class Forum extends Model
         DB::enableQueryLog();
 
         return CustomAttachment::where('model','forums')->where('record_id',$this->id)->get();
-
-        dd(DB::getQueryLog());
     }
 }

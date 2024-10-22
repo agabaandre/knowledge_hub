@@ -8,7 +8,7 @@
         <div class="container">
             <div class="row">
 
-                <div class="col-lg-8">
+                <div class="col-lg-12">
                     <div class="row">
                         <h4 class="ml-3">Search Results</h4>
                     </div>
@@ -19,14 +19,18 @@
                         {{ isset($_GET['tag']) ? ' Tag: ' . $_GET['tag'] : '' }}
                     </div>
 
+                    @if (count($sub_themes) > 0)
+                        @include('publications.partials.subthemes')
+                    @endif
+
                     @include('publications.partials.publications')
 
                 </div>
 
-                <div class="col-lg-4">
+                {{-- <div class="col-lg-4">
                     @include('publications.partials.facts')
                     <br />
-                </div>
+                </div> --}}
             </div>
         </div>
     @endsection
