@@ -1,5 +1,25 @@
-# /storage/uploads/.htaccess or /uploads/.htaccess
+# /storage/.htaccess or /uploads/.htaccess
+
+# Disable the execution of PHP files
 <FilesMatch "\.(php|phar|phtml|php3|php4|php5|php7|php8)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable the execution of JavaScript files
+<FilesMatch "\.(js|mjs|jsx|json)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable the execution of HTML files
+<FilesMatch "\.(html|htm|shtml|xhtml)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Disable the execution of shell scripts and other potentially dangerous formats
+<FilesMatch "\.(sh|bash|bat|exe|cmd|pl|cgi|py|rb)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
