@@ -155,6 +155,17 @@ class AuthApiController extends ApiController
         }
 
         $user = Auth::user();
+
+        if(!$user->is_verified){
+
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'User is not verified',
+            ], 401);
+            
+        }
+
         $user->load("communities");
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->accessToken;
