@@ -12,14 +12,4 @@
     Deny from all
 </FilesMatch>
 
-# Disable the execution of HTML files
-<FilesMatch "\.(html|htm|shtml|xhtml)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
 
-# Disable the execution of shell scripts and other potentially dangerous formats
-<FilesMatch "\.(sh|bash|bat|exe|cmd|pl|cgi|py|rb)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
