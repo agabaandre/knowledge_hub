@@ -7,6 +7,7 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class LoginController extends Controller
 {
@@ -40,22 +41,15 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-    // public function authenticate(Request $request)
-    // {
-       
-    //     $credentials = $request->only('username', 'password');
-    //     $remember = $request('remember');
-       
-    //     if (Auth::attempt($credentials,$remember)) {
-
-    //         dd('Logged in');
-    //         // Authentication passed...
-    //         //redirect
-    //         return redirect()->intended('home');
-    //     }else{
-
-    //         dd('not Logged in');
-
-    //     }
-    // }
+    protected function validateLogin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|string|email',
+            'password' => 'required|string',
+            'g-recaptcha-response' => 'required|captcha'
+        ], [
+            'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
+            'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
+        ]);
+    }
 }
