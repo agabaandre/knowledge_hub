@@ -145,7 +145,12 @@
 
                         <div class="row">
                             <div class="form-group col-md-12">
-                                {!! NoCaptcha::display() !!}
+                                {!! htmlFormSnippet() !!}
+                                @error('g-recaptcha-response')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
                             </div>
                         </div>
 

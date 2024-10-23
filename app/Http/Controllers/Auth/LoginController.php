@@ -45,8 +45,7 @@ class LoginController extends Controller
 
     protected function validateLogin(Request $request)
     {
-        dd($request->all());
-
+        
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
