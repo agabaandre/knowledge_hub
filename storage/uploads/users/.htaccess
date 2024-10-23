@@ -1,13 +1,5 @@
-# /storage/.htaccess or /uploads/.htaccess
-
-# Disable the execution of PHP files
+# /storage/uploads/.htaccess or /uploads/.htaccess
 <FilesMatch "\.(php|phar|phtml|php3|php4|php5|php7|php8)$">
-    Order allow,deny
-    Deny from all
-</FilesMatch>
-
-# Disable the execution of JavaScript files
-<FilesMatch "\.(js|mjs|jsx|json)$">
     Order allow,deny
     Deny from all
 </FilesMatch>
