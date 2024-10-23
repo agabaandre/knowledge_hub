@@ -367,8 +367,13 @@ class PublicationsRepository extends SharedRepo{
         return SubjectArea::without('kpis')->get();
     }
 
-    public function get_subthemes(){
-        return SubThemeticArea::all();
+    public function get_subthemes($request=null){
+        $qry = SubThemeticArea::orderBy('description','asc');
+        
+        if($request && $request->thematic_area_id)
+        $qry->where('thematic_area_id',$request->thematic_area_id);
+
+        return $qry->get();
     }
 
     public function get_subtheme($id){
@@ -477,7 +482,6 @@ public function change_approval_status(Request $request){
     if($request->approved){
 
      $publication->is_approved= 1;
-     $publication->is_admin_only_access = 1;
      $publication->is_rejected= 0;
 
      if(!$request->is_summary)
@@ -491,7 +495,6 @@ public function change_approval_status(Request $request){
 
      $publication->is_rejected= 1;
      $publication->is_approved= 0;
-     $publication->is_admin_only_access = 1;
 
      if(!$request->is_summary)
      $publication->is_active= 'In-Active';

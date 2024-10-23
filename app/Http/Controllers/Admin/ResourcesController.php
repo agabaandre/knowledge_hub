@@ -139,7 +139,11 @@ class ResourcesController extends Controller
         endif;
 
         return back()->with($data);
-        
+
+    }
+
+    public function import_template(Request $request){
+        return response()->download(public_path('import-template.xlsx'));
     }
   
 }

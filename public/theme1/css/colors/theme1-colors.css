@@ -27,7 +27,7 @@
  .message-bubble.me .message-text:before {
      border-left:6px solid var(--theme-color-primary);
 }
- a,
+
  .header-widget .log-in-button:hover i,
  .notification-text span.color,
  .header-notifications-content .notification-text span.color,
@@ -86,8 +86,8 @@
 #backtotop a,
  .header-notifications-trigger span,
  a.header-notifications-button,
- #navigation ul ul.dropdown-nav ul.dropdown-nav li:hover a:after,
- #navigation ul ul.dropdown-nav li:hover a:after,
+ #navigation ul ul.dropdown-nav ul.dropdown-nav li:hover,
+ #navigation ul ul.dropdown-nav li:hover,
  .mm-menu em.mm-counter,
  .language-switcher.bootstrap-select.btn-group.open button,
  .language-switcher.bootstrap-select.btn-group button:hover,

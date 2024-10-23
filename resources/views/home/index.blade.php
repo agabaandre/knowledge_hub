@@ -30,7 +30,7 @@
     @endif
 
     @include('home.partials.' . $theme . 'top_searches')
-    @include('home.partials.top_authors')
+    @include('home.partials.' . $theme . 'top_authors')
 @endsection
 
 @section('scripts')

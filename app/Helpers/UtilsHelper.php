@@ -521,6 +521,15 @@ if (!function_exists('extract_pdf_as_image')) {
         }
         
     }
+
+    function is_image($path){
+            return strpos($path,'.jpg') || strpos($path,'.png') 
+            || strpos($path,'.jpeg') 
+            || strpos($path,'.gif')
+             || strpos($path,'.bmp') 
+             || strpos($path,'.tiff') 
+             || strpos($path,'.ico');
+    }
 }
 
 ?>

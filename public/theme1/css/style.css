@@ -990,7 +990,7 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	position: absolute;
 	left: 0;
 	top: -10px;
-	background: rgba(255,255,255,0);
+	/*background: rgba(255,255,255,0);*/
 	width: 100%;
 	height: 10px;
 }
@@ -1024,7 +1024,7 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	width: 17px;
 	height: 17px;
 	background-color: #f0f0f0;
-	color: #a8a8a8;
+	color: #323030;
 	display: inline-block;
 	border-radius: 3px;
 	margin-left: 7px;
@@ -1037,14 +1037,14 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 #navigation ul ul.dropdown-nav ul.dropdown-nav li:hover a:after,
 #navigation ul ul.dropdown-nav li:hover a:after,
 #navigation ul li:hover a:after {
-	color: #66676b;
+	color: #1e1e1f;
 	/*background: rgba(102,103,107,0.13);*/
 	opacity: 0.9;
 }
 
 #navigation ul ul.dropdown-nav ul.dropdown-nav li a:after {
 	background-color: #f0f0f0;
-	color: #a8a8a8;
+	color: #242424;
 	opacity: 1;
 }
 
@@ -1065,15 +1065,15 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	right: 20px;
 	top: 6px;
 	/*background-color: rgba(255,255,255,0.1);*/
-	color: #bbb;
+	color: #1f1f1f;
 	opacity: 1;
 }
 
 /* Current Indicator */
-#navigation ul li a.current { color: #66676b; }
+#navigation ul li a.current { color: #1d1d1d; }
 #navigation ul li a.current:after {
-	color: #66676b;
-	background: rgba(102,103,107,0.13);
+	color: #0c0c0c;
+	background-color: white;
 	opacity: 0.8;
 }
 
@@ -1081,8 +1081,8 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 #navigation ul ul li a:only-child:after { content: ''; display: none; }
 
 #navigation ul ul li:hover a:after {
-	opacity: 1;
-	transform: translateX(0);
+	/*opacity: 1;
+	transform: translateX(0);*/
 }
 
 #navigation ul li {
@@ -1093,7 +1093,7 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 
 #navigation ul li a,
 #navigation ul ul li a {
-	color: #666;
+	color: #1e1d1d;
 	cursor: pointer; 
 }
 
@@ -1103,14 +1103,13 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	border-right: 4px;
 }
 
-#navigation ul li:hover a { color: #66676b; }
+#navigation ul li:hover a { color: #212121; }
 
 
 /* Dropdown Styles
 ------------------------------------- */
 #navigation ul ul {
-	background-color: #303030;
-	box-shadow: 0px 2px 12px 0px rgba(0,0,0,0.12);
+	background-color: white;
 	border-radius: 4px;
 }
 
@@ -1128,17 +1127,7 @@ ul.user-menu-small-nav li a:hover i { color: #66676b; }
 	padding: 4px 15px 4px 15px !important;
 }
 
-#navigation ul ul:after {
-	content: "";
-	position: absolute;
-	left: 25px;
-	top: -5px;
-	width: 0; 
-	height: 0; 
-	border-left: 5px solid transparent;
-	border-right: 5px solid transparent;
-	border-bottom: 5px solid #303030;
-}
+
 
 body #navigation ul ul {
 	padding: 14px 0;
@@ -1148,20 +1137,7 @@ body #navigation ul ul {
 
 body #navigation ul ul ul { margin-top: 0; }
 
-#navigation ul ul:before {
-	 content: ".";
-	 position: absolute;
-	 width: 100%;
-	 height: 12px;
-	 top: -12px;
-	 opacity: 0;
-	 opacity: 0;
-}
 
-#navigation ul ul ul:before {
-    width: calc(100% + 15px);
-    left: -15px;
-}
 
 #navigation ul ul li { width: 208px; }
 
@@ -1201,7 +1177,7 @@ body #navigation ul ul ul { margin-top: 0; }
 #navigation ul ul.dropdown-nav ul.dropdown-nav li a,
 #navigation ul ul.dropdown-nav li a {
 	transition: 0.3s;
-	color: #aaa;
+	color: #242323;
 }
 
 #navigation ul ul.dropdown-nav ul.dropdown-nav ul.dropdown-nav li:hover a,
@@ -1229,7 +1205,7 @@ body #navigation ul ul ul { margin-top: 0; }
   box-sizing: border-box;
   font-size: 14px;
   margin-top: -10px;
-  background-color: #303030;
+  background-color: white;
   width: 200px;
   z-index: 99;
   transform: translate3d(-42%,36px,0);
@@ -1419,7 +1395,7 @@ body .transparent-header #navigation > ul ul li a { color: #aaa; }
 
 .transparent-header #navigation > ul li a:after {
 	background-color: rgba(255,255,255,0.15);
-	color: rgba(255,255,255,0.8);
+	color: rgba(40, 39, 39, 0.8);
 	opacity: 1;
 	transition: 0.3s;
 }
@@ -1433,8 +1409,8 @@ body .transparent-header #navigation > ul ul li a { color: #aaa; }
 
 .transparent-header #navigation > ul li:hover ul a:after,
 .transparent-header #navigation > ul ul li a:after {
-    /*background-color: rgba(255,255,255,0.1);*/
-    color: #bbb;
+    background-color: white;
+    color: #201f1f;
 }
 
 /* ---------------------------------- */
@@ -1921,7 +1897,8 @@ html.mm-blocking #mm-blocker {
 }
 
 .mm-menu.mm-offcanvas.mm-opened {
-    display: block
+    display: block;
+	min-height: 100vh;
 }
 
 .mm-menu.mm-offcanvas.mm-no-csstransforms.mm-opened {
