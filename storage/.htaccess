@@ -1,9 +1,0 @@
-# /storage/.htaccess
-Order Allow,Deny
-Deny from all
-
-<Files *>
-    Order Allow,Deny
-    Deny from all
-</Files>
-
