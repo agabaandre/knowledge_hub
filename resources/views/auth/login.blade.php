@@ -37,7 +37,7 @@
 
                         <div class="form-group">
                             <div class="py-3">
-                                {!! NoCaptcha::display() !!}
+                                {!! htmlFormSnippet() !!}
                                 @error('g-recaptcha-response')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -73,8 +73,4 @@
             </div>
         </div>
     </section>
-@endsection
-
-@section('scripts')
-    {!! NoCaptcha::renderJs() !!}
 @endsection
