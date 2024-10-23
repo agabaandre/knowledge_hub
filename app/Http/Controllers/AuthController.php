@@ -57,13 +57,10 @@ class AuthController extends Controller
                 $user->save();
 
                 $this->authorsRepo->save($user->name);
-                
                 $message = "Your e-mail is verified. You can now login.";
 
             } else {
-
-                $message = "Your e-mail is already verified. You can now login.";
-
+                $message = "Your e-mail is already verified. You can continuee to login.";
             }
         }
   

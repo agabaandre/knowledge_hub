@@ -512,7 +512,9 @@ Route::get("/tests",function(){
 
     //$tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
    //return  sendPushNotification("Title","Hello",$tokens);
+   //extract_pdf_as_image("https://www.shobhituniversity.ac.in/pdf/econtent/C-Programming-Rajesh-Pandey.pdf","storage/app/public/publications/");
 
-   extract_pdf_as_image("https://www.shobhituniversity.ac.in/pdf/econtent/C-Programming-Rajesh-Pandey.pdf","storage/app/public/publications/");
+   //$req = (Object) ["email"=>"example@gmail.com","subject"=>"Test","body"=>"Hello"];
+   //dd(send_email($req));
 
 });
