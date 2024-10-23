@@ -39,7 +39,7 @@ class SendMailJob implements ShouldQueue
 
         $user = User::where('email',$request->email)->first();
         
-        if($user->fcm_token){
+        if($user && $user->fcm_token){
             sendPushNotification($request->subject,html_to_text($request->body),$user->fcm_token);
         }
     }

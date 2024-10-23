@@ -56,6 +56,7 @@ use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
 use App\Models\User;
+use App\Jobs\SendMailJob;
 
 /*
 |--------------------------------------------------------------------------
@@ -514,7 +515,7 @@ Route::get("/tests",function(){
    //return  sendPushNotification("Title","Hello",$tokens);
    //extract_pdf_as_image("https://www.shobhituniversity.ac.in/pdf/econtent/C-Programming-Rajesh-Pandey.pdf","storage/app/public/publications/");
 
-   //$req = (Object) ["email"=>"example@gmail.com","subject"=>"Test","body"=>"Hello"];
-   //dd(send_email($req));
+   //$req = ["email"=>"agabaandre@gmail.com","subject"=>"Test","body"=>"Hello"];
+   //SendMailJob::dispatch($req);
 
 });
