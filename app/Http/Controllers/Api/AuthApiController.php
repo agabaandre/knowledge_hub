@@ -257,7 +257,7 @@ class AuthApiController extends ApiController
     }
 
     /**
- * @OA\Post(
+ * @OA\Get(
  *     path="/api/profile",
  *     operationId="UserProfile",
  *     tags={"User"},
