@@ -71,6 +71,17 @@
                 @endcan
 
                 @can('view_forumns')
+                    <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Messaging<i
+                                class="fe fe-envelope horizontal-icon"></i></a>
+                        <ul class="sub-menu">
+                            <li aria-haspopup="true"><a href="{{ url('admin/messaging') }}" class="slide-item">Send App
+                                    Push Notifications</a></li>
+
+                        </ul>
+                    </li>
+                @endcan
+
+                @can('view_forumns')
                     <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Forums<i
                                 class="fe fe-chevron-down horizontal-icon"></i></a>
                         <ul class="sub-menu">

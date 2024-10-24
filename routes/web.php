@@ -424,7 +424,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
 // Admin Messaging routes
-Route::prefix('messaging')->name('admin.messaging.')->middleware(['auth', 'admin'])->group(function () {
+Route::prefix('messaging')->name('admin.messaging.')->middleware(['auth'])->group(function () {
     Route::get('/', [MessagingController::class, 'index'])->name('index');
     Route::post('/send', [MessagingController::class, 'sendMessage'])->name('send');
 });

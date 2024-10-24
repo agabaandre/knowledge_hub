@@ -49,9 +49,9 @@ class LoginController extends Controller
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
-            'g-recaptcha-response' => 'required' //|captcha
+           // 'g-recaptcha-response' => 'required' //|captcha
         ], [
-            'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
+           // 'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
             //'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
         ]);
     }

@@ -12,7 +12,7 @@ class CommsOfPracticeRepository{
         $query = CommunityOfPractice::query();
 
         if ($request->input('withRelated', false)) {
-            $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
         }
 
         return $return_array ? $query->get() : $query->paginate($request->rows ?? 15);
@@ -109,8 +109,47 @@ class CommsOfPracticeRepository{
         return CommunityOfPractice::find($communityId)->communityPublications()->paginate($perPage);
     }
 
-    public function sendMessage(Request $request){
+    public function sendMessage(Request $request)
+    {
+        $communityIds = $request->input('community_ids', []);
+        $memberIds = $request->input('member_ids', []);
+        $message = $request->input('message');
+        $title = $request->input('title');
 
-        \Log::info($request->all());
+        $message = str_replace('{name}', 'Member', $message);
+
+        foreach ($communityIds as $communityId) {
+            $community = CommunityOfPractice::with('approvedMembers.user')->find($communityId);
+
+            if (!$community) {
+                continue; // Skip if community not found
+            }
+
+            $members = $community->approvedMembers;
+            $fcmTokens = [];
+
+            if (empty($memberIds)) {
+                // Collect FCM tokens for all approved members if no specific members are selected
+                foreach ($members as $member) {
+                    if ($member->user->fcm_token) { // Assuming 'fcm_token' is the field name
+                        $fcmTokens[] = $member->user->fcm_token;
+                    }
+                }
+            } else {
+                // Collect FCM tokens for specific members
+                foreach ($members as $member) {
+                    if (in_array($member->user_id, $memberIds) && $member->user->fcm_token) {
+                        $fcmTokens[] = $member->user->fcm_token;
+                    }
+                }
+            }
+
+            // Call the helper function to send the push notification
+            if (!empty($fcmTokens)) {
+                sendPushNotification($title, $message, $fcmTokens);
+            }
+        }
+
+        return true; // Indicate success
     }
 }
