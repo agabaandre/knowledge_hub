@@ -55,6 +55,7 @@ use App\Http\Controllers\Admin\AdminCoursesController;
 use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
+use App\Http\Controllers\Admin\MessagingController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
 
@@ -421,6 +422,12 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [AdminCoursesController::class, 'index']);
     });
+
+// Admin Messaging routes
+Route::prefix('messaging')->name('admin.messaging.')->middleware(['auth', 'admin'])->group(function () {
+    Route::get('/', [MessagingController::class, 'index'])->name('index');
+    Route::post('/send', [MessagingController::class, 'sendMessage'])->name('send');
+});
 });
 
 /////

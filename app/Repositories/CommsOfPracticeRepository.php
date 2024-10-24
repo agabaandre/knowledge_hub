@@ -109,4 +109,8 @@ class CommsOfPracticeRepository{
         return CommunityOfPractice::find($communityId)->communityPublications()->paginate($perPage);
     }
 
+    public function sendMessage(Request $request){
+
+        \Log::info($request->all());
+    }
 }
