@@ -8,7 +8,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-
+use App\Models\User;
 class SendMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
@@ -36,5 +36,11 @@ class SendMailJob implements ShouldQueue
 
         $request = (Object) $this->data;
         send_email($request);
+
+        $user = User::where('email',$request->email)->first();
+        
+        if($user && $user->fcm_token){
+            sendPushNotification($request->subject,html_to_text($request->body),$user->fcm_token);
+        }
     }
 }

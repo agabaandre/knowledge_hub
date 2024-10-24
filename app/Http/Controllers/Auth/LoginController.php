@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use App\Models\User;
+use Illuminate\Validation\ValidationException;
 
 class LoginController extends Controller
 {
@@ -43,13 +45,41 @@ class LoginController extends Controller
 
     protected function validateLogin(Request $request)
     {
+        
         $request->validate([
             'email' => 'required|string|email',
             'password' => 'required|string',
-            'g-recaptcha-response' => 'required|captcha'
+            'g-recaptcha-response' => 'required' //|captcha
         ], [
             'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
-            'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
+            //'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
+        ]);
+    }
+
+    protected function attemptLogin(Request $request)
+    {
+        $credentials = $this->credentials($request);
+        // Add custom check for 'is_verified' column
+        $credentials['is_verified'] = 1;
+
+        return Auth::attempt($credentials, $request->filled('remember'));
+    }
+
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        $credentials = $this->credentials($request);
+
+        // Check if the user exists and is not verified
+        $user = User::where('email', $credentials['email'])->first();
+        if ($user && !$user->is_verified) {
+            throw ValidationException::withMessages([
+                'email' => 'User is not verified',
+            ]);
+        }
+
+        // Default failed login response
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
         ]);
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Country;
 use App\Models\GeoCoverage;
 use App\Models\User;
 use App\Models\UserPreference;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
@@ -93,6 +94,7 @@ class UsersRepository {
         if($user):
         $user->is_verified = 1;
         $user->verification_token = 0;
+        $user->email_verified_at  = Carbon::now();
         return $user->update();
         else:
             return null;

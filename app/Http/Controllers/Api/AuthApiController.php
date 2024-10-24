@@ -155,6 +155,17 @@ class AuthApiController extends ApiController
         }
 
         $user = Auth::user();
+
+        if(!$user->is_verified){
+
+            Auth::logout();
+
+            return response()->json([
+                'message' => 'User is not verified',
+            ], 401);
+
+        }
+
         $user->load("communities");
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->accessToken;
@@ -199,7 +210,7 @@ class AuthApiController extends ApiController
         $status = Password::sendResetLink(
             $request->only('email')
         );
-
+ 
         return $status === Password::RESET_LINK_SENT
             ? response()->json(['message' => 'Password reset link sent to your email','status'=>200], 200)
             : response()->json(['message' => 'Unable to send reset link','status'=>400], 400);

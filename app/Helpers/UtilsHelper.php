@@ -184,14 +184,15 @@ function send_email($request){
         $mail->Username   = config('emails.username');   //  sender username
         $mail->Password   = config('emails.password');       // sender password
         $mail->SMTPSecure = config('emails.smtp_secure');                  // encryption - ssl/tls
-        $mail->Port       = config('emails.port');                          // port - 587/465
+        $mail->Port       = config('emails.port');  
+        $mail->FromName = config('emails.sender');                // port - 587/465
 
-        $mail->setFrom(config('emails.username'), config('emails.sender'));
+        $mail->setFrom(config('emails.username'), config('emails.sender'),true);
         $mail->addAddress($request->email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);
 
-        $mail->addReplyTo(config('emails.username'), 'No Reply');
+        $mail->addReplyTo(config('emails.username'), config('emails.sender'));
 
         // if(isset($_FILES['emailAttachments'])) {
         //     for ($i=0; $i < count($_FILES['emailAttachments']['tmp_name']); $i++) {

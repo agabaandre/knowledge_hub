@@ -56,6 +56,7 @@ use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
 use App\Models\User;
+use App\Jobs\SendMailJob;
 
 /*
 |--------------------------------------------------------------------------
@@ -512,7 +513,9 @@ Route::get("/tests",function(){
 
     //$tokens = User::whereNotNull('fcm_token')->pluck('fcm_token')->toArray();
    //return  sendPushNotification("Title","Hello",$tokens);
+   //extract_pdf_as_image("https://www.shobhituniversity.ac.in/pdf/econtent/C-Programming-Rajesh-Pandey.pdf","storage/app/public/publications/");
 
-   extract_pdf_as_image("https://www.shobhituniversity.ac.in/pdf/econtent/C-Programming-Rajesh-Pandey.pdf","storage/app/public/publications/");
+   //$req = ["email"=>"agabaandre@gmail.com","subject"=>"Test","body"=>"Hello"];
+   //SendMailJob::dispatch($req);
 
 });
