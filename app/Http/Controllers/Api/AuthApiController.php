@@ -264,20 +264,13 @@ class AuthApiController extends ApiController
  *     security={{"bearer_token":{}}},
  *     summary="Get User Profile",
  *     description="Retrieve a user's profile by ID",
- *     @OA\RequestBody(
- *         required=true,
- *         @OA\MediaType(
- *             mediaType="application/json",
- *             @OA\Schema(
- *                 @OA\Property(
- *                     property="id",
- *                     type="integer",
- *                     description="User ID",
- *                     example=1
- *                 )
- *             )
- *         )
- *     ),
+  *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         required=true,
+     *         description="User Id",
+     *         @OA\Schema(type="integer")
+     *     ),
  *     @OA\Response(
  *         response=200,
  *         description="Success",
