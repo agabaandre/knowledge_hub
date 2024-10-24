@@ -71,6 +71,8 @@ class UsersRepository {
 
     public function save_preferences($user_id,$preferences){
 
+        $preferences = is_array($preferences) ? $preferences : (json_decode($preferences) ?? []);
+
         foreach($preferences as $key=>$value){
 
             $pref = new UserPreference();
