@@ -167,6 +167,7 @@ class AuthApiController extends ApiController
         }
 
         $user->load("communities");
+        $user->load("preferences");
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->accessToken;
         $tokenExpiration = $tokenResult->token->expires_at;
