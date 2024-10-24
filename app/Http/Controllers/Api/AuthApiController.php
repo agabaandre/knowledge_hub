@@ -288,7 +288,6 @@ class AuthApiController extends ApiController
  *                 @OA\Property(property="name", type="string", example="John Doe"),
  *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
  *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg")
- *                 // Add other user properties as needed
  *             )
  *         )
  *     ),
