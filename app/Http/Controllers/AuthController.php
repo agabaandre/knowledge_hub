@@ -26,10 +26,10 @@ class AuthController extends Controller
             'lastname' => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'g-recaptcha-response'=>'required|captcha'
+            'g-recaptcha-response'=>'required' //|captcha
         ],[
             'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
-            'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
+            //'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
         ]);
 
         $saved = $this->usersRepo->save($request);
