@@ -20,6 +20,8 @@ class UsersRepository {
 
     public function save(Request $request){
 
+        \Log::info($request->all());
+
         $user = ($request->id)?User::find($request->id):new User();
         
         $user->name          = $request->firstname." ".$request->lastname;
