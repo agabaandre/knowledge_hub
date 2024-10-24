@@ -55,10 +55,6 @@ class User extends Authenticatable
         return settings();
     }
     
-    public function preferences()
-    {
-        return $this->hasMany(UserPreference::class);
-    }
 
     public function country(){
         return $this->belongsTo(Country::class);
@@ -101,6 +97,18 @@ class User extends Authenticatable
     public function routeNotificationForFcm()
     {
         return $this->fcm_token;
+    }
+
+    public function preferences()
+    {
+        return $this->hasManyThrough(
+            SubThemeticArea::class,
+            UserPreference::class,
+            'user_id', // Foreign key on UserPreference table
+            'id', // Foreign key on SubThemeticArea table
+            'id', // Local key on User table
+            'subtheme_id' // Local key on UserPreference table
+        );
     }
 
 }
