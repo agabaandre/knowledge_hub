@@ -55,8 +55,9 @@ class User extends Authenticatable
         return settings();
     }
     
-    public function preferences(){
-       return $this->hasMany(UserPreference::class);
+    public function preferences()
+    {
+        return $this->hasMany(UserPreference::class);
     }
 
     public function country(){
