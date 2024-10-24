@@ -257,66 +257,66 @@ class AuthApiController extends ApiController
     }
 
     /**
-     * @OA\Post(
-     *     path="/api/profile",
-     *     operationId="UserProfile",
-     *     tags={"User"},
-     *     security={{"bearer_token":{}}},
-     *     summary="Get User Profile",
-     *     description="Retrieve a user's profile by ID",
-     *     @OA\RequestBody(
-     *         required=true,
-     *         @OA\MediaType(
-     *             mediaType="application/json",
-     *             @OA\Schema(
-     *                 @OA\Property(
-     *                     property="id",
-     *                     type="integer",
-     *                     description="User ID",
-     *                     example=1
-     *                 )
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success",
-     *         @OA\JsonContent(
-     *             @OA\Property(property="status", type="integer", example=200),
-     *             @OA\Property(property="data", type="object",
-     *                 @OA\Property(property="id", type="integer", example=1),
-     *                 @OA\Property(property="name", type="string", example="John Doe"),
-     *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
-     *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg"),
-     *                 // Add other user properties as needed
-     *             )
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request, when some required data is missing"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="User not found"
-     *     ),
-     *     @OA\Response(
-     *         response=403,
-     *         description="Forbidden"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthorized"
-     *     )
-     * )
-     */
+ * @OA\Post(
+ *     path="/api/profile",
+ *     operationId="UserProfile",
+ *     tags={"User"},
+ *     security={{"bearer_token":{}}},
+ *     summary="Get User Profile",
+ *     description="Retrieve a user's profile by ID",
+ *     @OA\RequestBody(
+ *         required=true,
+ *         @OA\MediaType(
+ *             mediaType="application/json",
+ *             @OA\Schema(
+ *                 @OA\Property(
+ *                     property="id",
+ *                     type="integer",
+ *                     description="User ID",
+ *                     example=1
+ *                 )
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=200,
+ *         description="Success",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="integer", example=200),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="name", type="string", example="John Doe"),
+ *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+ *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg")
+ *                 // Add other user properties as needed
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request, when some required data is missing"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="User not found"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden"
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized"
+ *     )
+ * )
+ */
     public function profile(Request $request)
     {
         $request->validate([
             'id' => 'required|integer|exists:users,id',
         ]);
 
-        $user = $this->usersRepo->find($request->id);
+        $user = $this->usersRepo->profile($request);
 
         if (!$user) {
             return response()->json(['status' => 404, 'message' => 'User not found'], 404);
@@ -325,8 +325,6 @@ class AuthApiController extends ApiController
         // Optionally, load related data
         $user->load('preferences', 'country', 'author', 'access_level');
 
-        // Prepare the user data for response
-        $user->photo = user_profile_photo($user->photo);
         unset($user->password);
         unset($user->remember_token);
 

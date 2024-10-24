@@ -161,6 +161,10 @@ class UsersRepository {
         return true;
     }
 
+    public function profile(Request $request){
+        return User::find($request->id);
+    }
+
   
 
 
