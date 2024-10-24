@@ -167,6 +167,7 @@ class AuthApiController extends ApiController
         }
 
         $user->load("communities");
+        $user->load("preferences");
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->accessToken;
         $tokenExpiration = $tokenResult->token->expires_at;
@@ -256,74 +257,72 @@ class AuthApiController extends ApiController
     }
 
     /**
-     * @OA\Put(
-     *     path="/api/profile",
-     *     summary="Update user profile",
-     *     tags={"Authentication"},
-     *     security={{"bearer_token":{}}},
-     *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             @OA\Property(property="firstname", type="string"),
-     *             @OA\Property(property="lastname", type="string"),
-     *             @OA\Property(property="email", type="string", format="email"),
-     *             @OA\Property(property="password", type="string"),
-     *             @OA\Property(property="password_confirmation", type="string"),
-     *             @OA\Property(property="phone", type="string"),
-     *             @OA\Property(property="job", type="string"),
-     *             @OA\Property(property="country_id", type="integer"),
-     *             @OA\Property(property="preferences", type="array",
-     *                 @OA\Items(type="integer")
-     *             ),
-     *             @OA\Property(property="photo", type="string", format="binary")
-     *         )
+ * @OA\Get(
+ *     path="/api/profile",
+ *     operationId="UserProfile",
+ *     tags={"User"},
+ *     security={{"bearer_token":{}}},
+ *     summary="Get User Profile",
+ *     description="Retrieve a user's profile by ID",
+  *     @OA\Parameter(
+     *         name="id",
+     *         in="query",
+     *         required=true,
+     *         description="User Id",
+     *         @OA\Schema(type="integer")
      *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Profile updated successfully"
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Validation error"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Unauthenticated"
-     *     )
-     * )
-     */
-    public function updateProfile(Request $request)
+ *     @OA\Response(
+ *         response=200,
+ *         description="Success",
+ *         @OA\JsonContent(
+ *             @OA\Property(property="status", type="integer", example=200),
+ *             @OA\Property(property="data", type="object",
+ *                 @OA\Property(property="id", type="integer", example=1),
+ *                 @OA\Property(property="name", type="string", example="John Doe"),
+ *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+ *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg")
+ *             )
+ *         )
+ *     ),
+ *     @OA\Response(
+ *         response=400,
+ *         description="Bad Request, when some required data is missing"
+ *     ),
+ *     @OA\Response(
+ *         response=404,
+ *         description="User not found"
+ *     ),
+ *     @OA\Response(
+ *         response=403,
+ *         description="Forbidden"
+ *     ),
+ *     @OA\Response(
+ *         response=401,
+ *         description="Unauthorized"
+ *     )
+ * )
+ */
+    public function profile(Request $request)
     {
-       $user = auth()->user();
-       
-        $validatedData = $request->validate([
-            'firstname' => 'sometimes|string|max:255',
-            'lastname' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'sometimes|string|min:6|confirmed',
-            'phone' => 'sometimes|string|min:10',
-            'job' => 'sometimes|string|min:4',
-            'country_id' => 'sometimes|integer',
-            'preferences' => 'sometimes|array',
-            'preferences.*' => 'integer',
-            'photo' => 'sometimes|file|image|max:1024', // Assuming photo is an image file
+        $request->validate([
+            'id' => 'required|integer|exists:users,id',
         ]);
 
-        if (isset($validatedData['password'])) {
-            $validatedData['password'] = Hash::make($validatedData['password']);
+        $user = $this->usersRepo->profile($request);
+
+        if (!$user) {
+            return response()->json(['status' => 404, 'message' => 'User not found'], 404);
         }
 
-        if ($request->hasFile('photo')) {
-            $validatedData['photo'] = $request->file('photo')->store('profile_photos', 'public');
-        }
+        // Optionally, load related data
+        $user->load('preferences', 'country', 'author', 'access_level');
 
-        $user = $this->usersRepo->save($request);
+        unset($user->password);
+        unset($user->remember_token);
 
-        return response()->json([
-            'status'=>200,
-            'message' => 'Profile updated successfully',
-            'user' => $user
-        ]);
+        return response()->json(['status' => 200, 'data' => $user]);
     }
+    
 
     /**
      * @OA\Post(
@@ -403,5 +402,87 @@ class AuthApiController extends ApiController
         return response()->json([
             'message' => 'Unauthenticated',
         ], 401);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/profile/update",
+     *     operationId="UserProfileUpdate",
+     *     tags={"User"},
+     *     summary="Update User Profile",
+     *     security={{"bearer_token":{}}},
+     *     description="Update an existing user's profile",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\MediaType(
+     *             mediaType="multipart/form-data",
+     *             @OA\Schema(
+     *                 @OA\Property(property="id", type="integer", description="User ID", example=1),
+     *                 @OA\Property(property="firstname", type="string"),
+     *                 @OA\Property(property="lastname", type="string"),
+     *                 @OA\Property(property="country_id", type="integer"),
+     *                 @OA\Property(property="job", type="string"),
+     *                 @OA\Property(property="phone", type="string"),
+     *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="preferences", type="array",
+     *                     @OA\Items(type="integer"),
+     *                     description="Array of Preference Ids",
+     *                     example={1, 2, 3}
+     *                 ),
+     *                 @OA\Property(
+     *                     property="photo",
+     *                     type="string",
+     *                     format="binary",
+     *                     description="Photo file to upload"
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(property="data", type="object",
+     *                 @OA\Property(property="id", type="integer", example=1),
+     *                 @OA\Property(property="name", type="string", example="John Doe"),
+     *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
+     *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg"),
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Bad Request, when some required data is missing"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
+    public function updateProfile(Request $request)
+    {
+        $this->validate($request, [
+            'firstname' => 'sometimes|string|max:255',
+            'lastname' => 'sometimes|string|max:255',
+            'email' => 'sometimes|string|email|max:255|unique:users',
+            'password' => 'sometimes|string|min:6|confirmed',
+            'phone' => 'sometimes|string|min:10',
+            'job' => 'sometimes|string|min:4',
+            'country_id' => 'sometimes|integer',
+            'photo' => 'sometimes|file|image|max:2048',
+            'id' => 'required|integer|exists:users,id',
+        ]);
+
+       return $this->register($request);
     }
 }

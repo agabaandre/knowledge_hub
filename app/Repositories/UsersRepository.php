@@ -20,6 +20,8 @@ class UsersRepository {
 
     public function save(Request $request){
 
+        \Log::info($request->all());
+
         $user = ($request->id)?User::find($request->id):new User();
         
         $user->name          = $request->firstname." ".$request->lastname;
@@ -70,6 +72,8 @@ class UsersRepository {
     }
 
     public function save_preferences($user_id,$preferences){
+
+        $preferences = is_array($preferences) ? $preferences : (json_decode($preferences) ?? []);
 
         foreach($preferences as $key=>$value){
 
@@ -159,6 +163,10 @@ class UsersRepository {
         $user->save();
 
         return true;
+    }
+
+    public function profile(Request $request){
+        return User::find($request->id);
     }
 
   
