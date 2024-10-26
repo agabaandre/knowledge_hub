@@ -183,7 +183,7 @@ class LookupApiController extends ApiController
      */
     public function preferences(Request $request)
     {
-        $prefs = $this->tagsRepo->get($request, true);
+        $prefs = $this->themesRepo->get_subthemes($request,true);
         return [
             "status" => 200,
             "data" => $prefs

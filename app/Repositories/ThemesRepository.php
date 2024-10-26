@@ -22,7 +22,7 @@ class ThemesRepository
         return $result;
     }
 
-    public function get_subthemes(Request $request)
+    public function get_subthemes(Request $request,$return_array=false)
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
@@ -33,7 +33,7 @@ class ThemesRepository
         
        $themes = $qry->paginate($rows_count);
 
-        return $themes;
+        return ($return_array)?$qry->get():$themes;
     }
 
     public function get_all_subthemes(Request $request)
