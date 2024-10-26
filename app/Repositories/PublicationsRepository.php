@@ -31,7 +31,7 @@ use DB;
 class PublicationsRepository extends SharedRepo{
 
 
-    public function get(Request $request, $return_array = false) {
+    public function get(Request $request, $return_array = false,$featured=false) {
         $rows_count = $request->rows ?? 20;
 
         $pubs = Publication::with(['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'])
@@ -110,6 +110,21 @@ class PublicationsRepository extends SharedRepo{
             // Access levels effect to query results
             $this->access_filter($pubs);
         }
+
+        if($featured && current_user()):
+
+            $user = User::find(current_user()->id);
+            $subthemes = $user->preferences()->pluck('subtheme_id');
+            
+            if(count($subthemes) > 0):
+            $pubs->whereHas('sub_theme',function($q) use($subthemes){
+                $q->whereIn('id',$subthemes);
+                });
+            endif;
+            
+        endif;
+
+
 
         $results = $pubs->paginate($rows_count);
         //Log::info(count($results));
