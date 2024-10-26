@@ -131,7 +131,7 @@ class UsersRepository {
         $user->access_level_id = $request->level_id;
 
         \Log::info("preferences::");
-        \Log::info($request->preferences);
+        \Log::info($request->all());
 
         if($request->preferences){
 
