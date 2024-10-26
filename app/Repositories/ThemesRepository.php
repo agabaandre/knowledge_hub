@@ -31,9 +31,12 @@ class ThemesRepository
       if($request->theme_id)
        $qry= $qry->where('thematic_area_id', $request->theme_id);
         
-       $themes = $qry->paginate($rows_count);
+       
+       if($return_array)
+        return $qry->get();
 
-        return ($return_array)?$qry->get():$themes;
+       $themes = $qry->paginate($rows_count);
+        return $themes;
     }
 
     public function get_all_subthemes(Request $request)
