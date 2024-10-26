@@ -474,7 +474,7 @@ class AuthApiController extends ApiController
         $this->validate($request, [
             'firstname' => 'sometimes|string|max:255',
             'lastname' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|exists:users,id',
+            'email' => 'sometimes|string|email|max:255|exists:users,email',
             'password' => 'sometimes|string|min:6|confirmed',
             'phone' => 'sometimes|string|min:10',
             'job' => 'sometimes|string|min:4',
