@@ -109,11 +109,20 @@ class UsersRepository {
         
         $user = User::find($request->id);
 
-        $user->first_name = $request->first_name;
-        $user->last_name  = $request->last_name;
+        if($request->firstname)
+        $user->first_name = $request->firstname;
+
+        if($request->lastname)
+        $user->last_name  = $request->lastname;
+
+        if($request->email)
         $user->email      = $request->email;
+
+        if($request->langauge)
         $user->langauge = $request->langauge;
-        $user->name  = $request->first_name." ".$request->last_name;
+
+        if($request->firstname && $request->lastname)
+        $user->name  = $request->firstname." ".$request->lastname;
        
         if($request->phone_number)
         $user->phone_number      = $request->phone_number;
