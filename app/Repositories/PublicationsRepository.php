@@ -264,8 +264,8 @@ class PublicationsRepository extends SharedRepo{
             $this->attach_to_access_group($request->accessgroups,$id);
         endif;
 
-        if($saved && $request->countries):
-            $pub->countries()->attach($request->countries);
+        if($saved):
+            $this->attach_countries($pub,$request);
         endif;
         
         if(!is_admin()){
@@ -279,6 +279,30 @@ class PublicationsRepository extends SharedRepo{
         }
 
         return $pub;
+    }
+
+    public function attach_countries($publication,$request){
+        
+        $rccs = $request->rccs;
+        $countries = $request->countries;
+        $countryIds = [];
+        $regionIds  = [];
+
+        if (strtolower($countries) === 'all')
+            $countryIds = Country::pluck('id')->toArray();
+        
+        if($rccs == 'all')
+            $regionIds = Region::pluck('id')->toArray();
+        else
+            $regionIds = Region::whereIn('id', $rccs)->pluck('id')->toArray();
+
+        if (!empty($regionIds))
+            $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+        else
+            $countryIds = $countries;
+        
+        if(count($countryIds) > 0)
+            $publication->countries()->attach($countryIds);
     }
 
     public function find($id){

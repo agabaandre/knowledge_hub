@@ -74,7 +74,8 @@ class AuthController extends Controller
             'first_name'=>'required',
             'last_name'=>'required',
             'email'=>'required',
-            'preferences'=>'required'
+            'preferences'=>'required',
+            'id'=>'required'
         ];
 
         $request->validate($val_rules);

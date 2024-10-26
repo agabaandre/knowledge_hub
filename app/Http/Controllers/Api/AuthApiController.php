@@ -483,6 +483,14 @@ class AuthApiController extends ApiController
             'id' => 'required|integer|exists:users,id',
         ]);
 
-       return $this->register($request);
+        $saved   = $this->usersRepo->update_profile($request);
+
+        $message = ($saved)?'Profile update successfully':'Request failed try again';
+
+        $data['message']     = $message;
+        $data['status']      = ($saved)?200:400;
+        $data['data']        = $saved;
+
+        return response()->json($data);
     }
 }

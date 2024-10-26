@@ -34,7 +34,11 @@
             <div class="row">
 
 
-                <div class="col-md-12 mt-3 ml-3">
+                <div class="col-lg-12">
+                    <h3>Choose resource categorization</h3>
+                </div>
+
+                <div class="col-md-12 mt-3 ml-3 mb-3">
                     <label class="form-check-inline px-2">
                         <input type="radio" name="upload_type" value="upload" checked class="form-check-input">
                         Attachment
@@ -60,23 +64,9 @@
                     @endif
                 </div>
 
-                <div class="col-md-12 mt-3">
-
-                    <input type="hidden" name="id" id="id" class="newform"
-                        value="{{ @$row->id ?? old('id') }}">
-
-
-                    <h3>What is the title of the resource you what to publish?</h3>
-
-                    <div class="mb-3">
-                        <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
-                            value="{{ @$row->title ?? old('title') }}" required="">
-                    </div>
-                </div>
-
                 <div class="col-md-4">
                     <div class="form-group">
-                        <label>Resource Type</label>
+                        <label>Category</label>
                         @include('partials.datarecords.categories_dropdown', [
                             'field' => 'data_category_id',
                             'required' => 'required',
@@ -92,9 +82,11 @@
                     <div class="mb-3">
                         <label class="form-label" for="publication">RCC</label>
                         @include('partials.regions.dropdown', [
-                            'field' => 'rcc',
-                            'class' => 'rcc',
-                            'selected' => @$row->country->region_id ? $row->country->region_id : old('rcc') ?? '',
+                            'field' => 'rccs[]',
+                            'class' => 'rcc select2',
+                            'selected' => @$row->country->region_id ? $row->country->region_id : old('rccs') ?? '',
+                            'multiple' => 'multiple',
+                            'allfield' => 'All',
                         ])
                     </div>
                 </div>
@@ -116,16 +108,13 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
-            <br>
-            <h3>Choose resource categorization</h3>
+
             <div class="row">
 
                 <div class="col-md-4">
                     <div class="mb-3">
-                        <label class="form-label" for="publication">Resource Category</label>
+                        <label class="form-label" for="publication">Sub Category</label>
                         @include('partials.publications.filecategory_dropdown', [
                             'field' => 'category_id',
                             'selected' => @$row->publication_catgory_id
@@ -156,12 +145,32 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 url_wrapper">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">Publication URL Link</label>
-                        <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                            name="link" value="{{ @$row->publication ?? old('publication') }}">
-                    </div>
+            </div>
+
+        </div>
+
+        <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
+            <br>
+            <div class="col-md-12 mt-3">
+
+                <input type="hidden" name="id" id="id" class="newform"
+                    value="{{ @$row->id ?? old('id') }}">
+
+
+                <h3>What is the title of the resource you what to publish?</h3>
+
+                <div class="mb-3">
+                    <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
+                        value="{{ @$row->title ?? old('title') }}" required="">
+                </div>
+            </div>
+
+
+            <div class="col-md-12 url_wrapper">
+                <div class="mb-3">
+                    <label class="form-label" for="publication">Publication URL Link</label>
+                    <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                        name="link" value="{{ @$row->publication ?? old('publication') }}">
                 </div>
             </div>
         </div>

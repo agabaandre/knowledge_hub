@@ -123,7 +123,7 @@ class UsersRepository {
 
         if($request->preferences){
 
-            $this->save_preferences(current_user()->id,$request->preferences);
+            $this->save_preferences($user->id,$request->preferences);
         }
 
         if($request->hasFile('photo')):

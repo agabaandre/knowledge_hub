@@ -313,7 +313,9 @@ class PublicationsApiController extends ApiController
      *                 @OA\Property(property="link", type="string", nullable=true),
      *                 @OA\Property(property="communities", type="array", nullable=true, @OA\Items(type="integer")),
      *                 @OA\Property(property="preferences", type="array", nullable=true, @OA\Items(type="integer"), description="Array of Preference Ids", example={1})
-     *             )
+     *                 @OA\Property(property="rccs", type="array", nullable=true, @OA\Items(type="integer"), description="Array of Region Ids", example={1}),
+     *                 @OA\Property(property="countries", type="array", nullable=true, @OA\Items(type="integer"), description="Array of Country Ids", example={1})
+     *             )    
      *         )
      *     ),
      *     @OA\Response(
