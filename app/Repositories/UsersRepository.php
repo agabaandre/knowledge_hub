@@ -20,7 +20,7 @@ class UsersRepository {
 
     public function save(Request $request){
 
-        \Log::info($request->all());
+        //\Log::info($request->all());
 
         $user = ($request->id)?User::find($request->id):new User();
         
@@ -137,8 +137,8 @@ class UsersRepository {
 
             $user->preferences()->delete();
             $preferences = is_array($request->preferences) ? $request->preferences : (json_decode($request->preferences) ?? []);
-            $user->preferences()->createMany($preferences);
-           // $this->save_preferences($request->id,$request->preferences);
+            //$user->preferences()->attach($preferences);
+            $this->save_preferences($request->id,$request->preferences);
         }
 
         if($request->hasFile('photo')):
