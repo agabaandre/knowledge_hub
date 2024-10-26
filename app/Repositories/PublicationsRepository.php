@@ -283,8 +283,8 @@ class PublicationsRepository extends SharedRepo{
 
     public function attach_countries($publication,$request){
         
-        $rccs = $request->rccs;
-        $countries = $request->countries;
+        $rccs = (is_array($request->rccs))?$request->rccs:json_decode($request->rccs);
+        $countries = (is_array($request->countries))?$request->countries:json_decode($request->countries);
         $countryIds = [];
         $regionIds  = [];
 

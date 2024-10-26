@@ -75,11 +75,11 @@ class UsersRepository {
 
         $preferences = is_array($preferences) ? $preferences : (json_decode($preferences) ?? []);
 
-        foreach($preferences as $key=>$value){
+        foreach($preferences as $subtheme_id){
 
             $pref = new UserPreference();
             $pref->user_id = $user_id;
-            $pref->subtheme_id  = $value;
+            $pref->subtheme_id  = $subtheme_id;
             $pref->save();
 
         }
@@ -130,9 +130,15 @@ class UsersRepository {
         if($request->level_id)
         $user->access_level_id = $request->level_id;
 
+        \Log::info("preferences::");
+        \Log::info($request->preferences);
+
         if($request->preferences){
 
-            $this->save_preferences($user->id,$request->preferences);
+            $user->preferences()->delete();
+            $preferences = is_array($request->preferences) ? $request->preferences : (json_decode($request->preferences) ?? []);
+            $user->preferences()->createMany($preferences);
+           // $this->save_preferences($request->id,$request->preferences);
         }
 
         if($request->hasFile('photo')):
