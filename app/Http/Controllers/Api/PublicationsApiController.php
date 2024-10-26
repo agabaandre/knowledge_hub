@@ -121,7 +121,8 @@ class PublicationsApiController extends ApiController
         $request['rows'] = $request->page_size ?? 20;
         $request['subtheme'] = $request->sub_thematic_area_id;
 
-        $publications = $this->publicationsRepo->get($request, true,true);
+        $get_featured = $request->is_featured ?? false;
+        $publications = $this->publicationsRepo->get($request, true,$get_featured);
 
         $data = $publications->toArray() ?? [];
         $data['status'] = 200;

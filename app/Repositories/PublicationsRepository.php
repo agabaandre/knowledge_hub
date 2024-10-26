@@ -60,57 +60,7 @@ class PublicationsRepository extends SharedRepo{
             });
         }
 
-        // Apply other filters
-        $this->applyFilters($pubs, $request);
-
-
-        if (!is_admin()) {
-
-
-            $pubs->where('is_admin_only_access',0);
-            $pubs->where('is_active', 'Active')
-                 ->where('is_approved', 1);
-
-            
-            if (auth()->user()) {
-                
-                if(!$request->community_id):
-                $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
-                    ->where("is_approved", 1)
-                    ->pluck("community_of_practice_id");
-
-               
-                if(count($userCommunities) > 0):
-                    $pubs->where(function ($query) use ($userCommunities) {
-
-                        $query->whereHas('communities', 
-                            function ($q) use ($userCommunities) {
-                            $q->whereIn('community_of_practice_id', $userCommunities);
-                        })
-                        ->orWhereDoesntHave("communities")
-                        ->orWhere('user_id', auth()->user()->id);
-                    });
-                else:
-                    $pubs->whereDoesntHave("communities");
-                endif;
-            else:
-                $pubs->whereHas("communities",function($query) use($request){
-                    $query->where("community_of_practice_id",$request->community_id);
-                });
-            endif;
-            
-            } 
-            else {
-                $pubs->whereDoesntHave("communities");
-            }
-
-            
-        } 
-        else {
-            // Access levels effect to query results
-            $this->access_filter($pubs);
-        }
-
+        
         if($featured && current_user()):
 
             $user = User::find(current_user()->id);
@@ -120,11 +70,67 @@ class PublicationsRepository extends SharedRepo{
             $pubs->whereHas('sub_theme',function($q) use($subthemes){
                 $q->whereIn('id',$subthemes);
                 });
+            else:
+                $pubs->where('is_featured',1);
             endif;
-            
+
+        elseif($featured && !current_user()):
+                $pubs->where('is_featured',1);
         endif;
 
 
+        if(!$featured): 
+            // Apply other filters
+            $this->applyFilters($pubs, $request);
+        endif;
+
+
+            if (!is_admin()) {
+
+
+                $pubs->where('is_admin_only_access',0);
+                $pubs->where('is_active', 'Active')
+                    ->where('is_approved', 1);
+
+                
+                if (auth()->user()) {
+                    
+                    if(!$request->community_id):
+                    $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
+                        ->where("is_approved", 1)
+                        ->pluck("community_of_practice_id");
+
+                
+                    if(count($userCommunities) > 0):
+                        $pubs->where(function ($query) use ($userCommunities) {
+
+                            $query->whereHas('communities', 
+                                function ($q) use ($userCommunities) {
+                                $q->whereIn('community_of_practice_id', $userCommunities);
+                            })
+                            ->orWhereDoesntHave("communities")
+                            ->orWhere('user_id', auth()->user()->id);
+                        });
+                    else:
+                        $pubs->whereDoesntHave("communities");
+                    endif;
+                else:
+                    $pubs->whereHas("communities",function($query) use($request){
+                        $query->where("community_of_practice_id",$request->community_id);
+                    });
+                endif;
+                
+                } 
+                else {
+                    $pubs->whereDoesntHave("communities");
+                }
+
+                
+            } 
+            else {
+                // Access levels effect to query results
+                $this->access_filter($pubs);
+            }
 
         $results = $pubs->paginate($rows_count);
         //Log::info(count($results));
@@ -707,9 +713,6 @@ private function applyFilters($query, $request) {
         },
         'subtheme' => function ($q, $value) {
             $q->where('sub_thematic_area_id', $value);
-        },
-        'is_featured' => function ($q, $value) {
-            $q->where('is_featured', $value);
         },
         'user_id' => function ($q, $value) {
             $q->where('user_id', $value);
