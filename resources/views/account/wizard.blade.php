@@ -72,8 +72,8 @@
                             'field' => 'data_category_id',
                             'required' => 'required',
                             'exclude_special' => true,
-                            'selected' => @$row->data_category_id
-                                ? $row->data_category_id
+                            'selected' => @$row->publication_catgory_id
+                                ? $row->publication_catgory_id
                                 : old('data_category_id') ?? '',
                         ])
                     </div>
@@ -118,9 +118,7 @@
                         <label class="form-label" for="publication">Sub Category</label>
                         @include('partials.publications.filecategory_dropdown', [
                             'field' => 'category_id',
-                            'selected' => @$row->publication_catgory_id
-                                ? $row->publication_catgory_id
-                                : old('category_id'),
+                            'selected' => @$row->data_category_id ? $row->data_category_id : old('category_id'),
                         ])
                     </div>
                 </div>
