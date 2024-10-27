@@ -48,18 +48,19 @@
                     </label>
 
                     <label class="form-check-inline px-2">
-                        <input type="checkbox" name="is_embedded" value="1" class="form-check-input">Embedded On
-                        Page
+                        <input type="checkbox" name="is_embedded" value="1" class="form-check-input"
+                            {{ @$row->is_embedded ? ' checked' : '' }}>
+                        Embedded On Page
                     </label>
 
                     @if (is_admin())
                         <label class="form-check-inline px-2">
                             <input type="checkbox" name="is_default" value="1" class="form-check-input"
-                                {{ @$row->is_default_in_category ? 'checked' : '' }}> Default in Category
+                                {{ @$row->is_default_in_category ? ' checked' : '' }}> Default in Category
                         </label>
                         <label class="form-check-inline px-2">
                             <input type="checkbox" name="admin_only" value="1" class="form-check-input"
-                                {{ @$row->is_admin_only_access ? 'checked' : '' }}> Admin Only Access
+                                {{ @$row->is_admin_only_access ? ' checked' : '' }}> Admin Only Access
                         </label>
                     @endif
                 </div>

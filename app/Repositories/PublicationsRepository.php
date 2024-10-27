@@ -718,7 +718,7 @@ private function applyFilters($query, $request) {
             $q->where('user_id', $value);
         },
         'category' => function ($q, $value) {
-            $q->where('data_category_id', $value);
+            $q->where('publication_catgory_id', $value);
         }
 
     ];
