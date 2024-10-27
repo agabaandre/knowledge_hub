@@ -95,17 +95,22 @@ class PublicationImport implements ToModel, WithHeadingRow
             return Country::pluck('id')->toArray();
         }
 
-        $countryNames = array_map('trim', explode(',', $country));
-        $countryIds = Country::whereIn('name', $countryNames)->pluck('id')->toArray();
+        // Split the input string into an array of names
+        $names = array_map('trim', explode(',', $country));
+
+        // Attempt to match country names first
+        $countryIds = Country::whereIn('name', $names)->pluck('id')->toArray();
 
         if (!empty($countryIds)) {
             return $countryIds;
         }
 
-        // If no countries matched, check for region
-        $region = Region::where(DB::raw('TRIM(region_name)'), 'LIKE', "%$country%")->first();
-        if ($region) {
-            return $region->countries()->pluck('id')->toArray();
+        // If no countries matched, attempt to match region names
+        $regionIds = Region::whereIn(DB::raw('TRIM(region_name)'), $names)->pluck('id')->toArray();
+
+        if (!empty($regionIds)) {
+            // Get all country IDs for the matched regions
+            return Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
         }
 
         return [];

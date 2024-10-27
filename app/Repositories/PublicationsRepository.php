@@ -309,10 +309,10 @@ class PublicationsRepository extends SharedRepo{
         $countryIds = [];
         $regionIds  = [];
 
-        if (strtolower($countries) === 'all')
+        if (strtolower($countries[0]) === 'all')
             $countryIds = Country::pluck('id')->toArray();
         
-        if($rccs == 'all')
+        if($rccs[0] == 'all')
             $regionIds = Region::pluck('id')->toArray();
         else
             $regionIds = Region::whereIn('id', $rccs)->pluck('id')->toArray();

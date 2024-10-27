@@ -1,7 +1,7 @@
 <select class="form-control {{ $class ?? 'select2' }} text-left form-select" name="{{ $field ?? 'rcc' }}"
     id="{{ $field ?? 'rcc' }}" {{ $required ?? '' }} {{ $multiple ?? '' }}>
 
-    <option {{ @$allfield ? '' : 'disabled' }} {{ @$selected ? '' : 'selected' }} value="all">
+    <option {{ @$allfield ? '' : 'disabled' }} {{ @$selected == 'all' ? 'selected' : '' }} value="all">
         {{ $allfield ?? 'Select' }}</option>
 
 
