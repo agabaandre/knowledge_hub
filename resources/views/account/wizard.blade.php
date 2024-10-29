@@ -4,6 +4,7 @@
     else:
         $image_link = asset('assets/images/placeholder.jpg');
     endif;
+
 @endphp
 
 <!-- SmartWizard html -->
@@ -65,7 +66,7 @@
                     @endif
                 </div>
 
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="form-group">
                         <label>Category</label>
                         @include('partials.datarecords.categories_dropdown', [
@@ -79,41 +80,7 @@
                     </div>
                 </div>
 
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">RCC</label>
-                        @include('partials.regions.dropdown', [
-                            'field' => 'rccs[]',
-                            'class' => 'rcc select2',
-                            'selected' => @$row->country->region_id ? $row->country->region_id : old('rccs') ?? '',
-                            'multiple' => 'multiple',
-                            'allfield' => 'All',
-                        ])
-                    </div>
-                </div>
-
-
-                <div class="col-md-4">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">Member States</label>
-                        @include('partials.countries.dropdown', [
-                            'field' => 'countries[]',
-                            'required' => 'required',
-                            'class' => 'country select2',
-                            'selected' =>
-                                $row->countries ?? false && @$row->countries->pluck('id')->toArray()
-                                    ? $row->countries->pluck('id')->toArray()
-                                    : old('geo_area_id') ?? current_user()->country_id,
-                            'multiple' => 'multiple',
-                        ])
-                    </div>
-                </div>
-            </div>
-
-
-            <div class="row">
-
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label" for="publication">Sub Category</label>
                         @include('partials.publications.filecategory_dropdown', [
@@ -122,18 +89,23 @@
                         ])
                     </div>
                 </div>
+            </div>
 
-                <div class="col-md-4">
+            <div class="row">
+
+                <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label" for="publication">Thematic Area</label>
                         @include('partials.publications.theme_dropdown', [
                             'field' => 'theme',
                             'class' => 'select2 theme',
-                            'selected' => @$row->sub_thematic_area_id ? $row->sub_thematic_area_id : old('theme'),
+                            'selected' => @$row->sub_theme->thematic_area_id
+                                ? $row->sub_theme->thematic_area_id
+                                : old('theme'),
                         ])
                     </div>
                 </div>
-                <div class="col-md-4">
+                <div class="col-md-6">
                     <div class="mb-3">
                         <label class="form-label" for="publication">Sub Theme</label>
                         @include('partials.publications.subtheme_dropdown', [
@@ -144,6 +116,41 @@
                     </div>
                 </div>
 
+            </div>
+
+            <div class="row">
+
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">RCC</label>
+                        @include('partials.regions.dropdown', [
+                            'field' => 'rccs[]',
+                            'class' => 'rcc select2',
+                            'selected' => @$row->countries
+                                ? $row->countries->pluck('region_id')->toArray()
+                                : old('rccs') ?? null,
+                            'multiple' => 'multiple',
+                            'allfield' => 'All',
+                        ])
+                    </div>
+                </div>
+
+
+                <div class="col-md-7">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">Member States</label>
+                        @include('partials.countries.dropdown', [
+                            'field' => 'countries[]',
+                            'required' => 'required',
+                            'class' => 'country select2',
+                            'selected' =>
+                                $row->countries ?? false && @$row->countries->pluck('id')->toArray()
+                                    ? $row->countries->pluck('id')->toArray()
+                                    : old('countries') ?? null,
+                            'multiple' => 'multiple',
+                        ])
+                    </div>
+                </div>
             </div>
 
         </div>

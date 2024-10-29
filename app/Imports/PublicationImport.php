@@ -31,7 +31,7 @@ class PublicationImport implements ToModel, WithHeadingRow
 
         $sub_theme_id = $this->get_subtheme(trim($subtheme));
         $pub_cat_id = $this->get_category(trim($data_sub_category));
-        $member_state_ids = $this->get_memberstate(trim($country));
+        $member_state_ids = $this->get_memberstate($country);
         $data_category_id = $this->get_data_category_id(trim($data_category));
 
         // Get the file type using a helper
@@ -98,19 +98,20 @@ class PublicationImport implements ToModel, WithHeadingRow
         // Split the input string into an array of names
         $names = array_map('trim', explode(',', $country));
 
-        // Attempt to match country names first
-        $countryIds = Country::whereIn('name', $names)->pluck('id')->toArray();
-
-        if (!empty($countryIds)) {
-            return $countryIds;
-        }
-
         // If no countries matched, attempt to match region names
         $regionIds = Region::whereIn(DB::raw('TRIM(region_name)'), $names)->pluck('id')->toArray();
 
         if (!empty($regionIds)) {
             // Get all country IDs for the matched regions
             return Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+        }
+
+        
+        // Attempt to match country names first
+        $countryIds = Country::whereIn(DB::raw('TRIM(name)'), $names)->pluck('id')->toArray();
+
+        if (!empty($countryIds)) {
+            return $countryIds;
         }
 
         return [];

@@ -6,7 +6,9 @@
 
 
     @foreach ($regions as $rcc)
-        <option {{ @$selected == $rcc->id ? 'selected' : '' }} value="{{ $rcc->id }}">
+        <option
+            {{ @$selected == $rcc->id || (is_array(@$selected) && in_array($rcc->id, @$selected)) ? 'selected' : '' }}
+            value="{{ $rcc->id }}">
             {{ $rcc->region_name }}
         </option>
     @endforeach
