@@ -52,7 +52,7 @@
 
                                            <span class="muted medium ml-2 text-muted mt-1 "><br>
                                                <i class="lni lni-empty-file mr-1"></i>Category:
-                                               {{ @$row->category->category_name }}</span>
+                                               {{ @$row->data_category->category_name }}</span>
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>
                                                    {{ $likes }} Like{{ $likes > 0 ? 's' : '' }} </span>

@@ -38,7 +38,7 @@
                      @endif
                      <span class="muted medium ml-1 text-muted mt-1 "><br>
                          <i class="lni lni-empty-file mr-1"></i>Category:
-                         {{ @$row->category->category_name }}</span>
+                         {{ @$row->data_category->category_name }}</span>
 
                      <span class="text-muted medium d-block mt-1">
                          <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated:

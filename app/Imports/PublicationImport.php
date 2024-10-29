@@ -9,6 +9,7 @@ use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Illuminate\Support\Facades\DB;
 use App\Models\DataCategory;
+use App\Models\PublicationCategory;
 
 class PublicationImport implements ToModel, WithHeadingRow
 {
@@ -22,7 +23,7 @@ class PublicationImport implements ToModel, WithHeadingRow
         $description = !empty($row[2]) ? $row[2] : ' ';
         $cover = $row[3];
         $data_category = $row[4]; // resource_type /information
-        $data_sub_category = trim($row[5]); // information sub-cat
+        $data_sub_category = $row[5]; // information sub-cat
         $subtheme = trim($row[6]);
         $country = trim($row[7]);
         $citation_link = $row[8];
@@ -47,14 +48,14 @@ class PublicationImport implements ToModel, WithHeadingRow
             'associated_authors' => fix_text_encoding($associated_authors),
             'sub_thematic_area_id' => $sub_theme_id,
             'is_active' => 'Active',
-            'publication_catgory_id' => $pub_cat_id,
+            'publication_catgory_id' => $data_category_id,
             'author_id' => current_user()->author_id,
             'geographical_coverage_id' => current_user()->country_id, // Assuming this is a pivot table now
             'file_type_id' => $file_type_id,
             'cover_is_exteranl' => 1,
             'is_approved' => 1,
             'user_id' => current_user()->id,
-            'data_category_id' => $data_category_id,
+            'data_category_id' => $pub_cat_id,
         ]);
 
         // Save the publication to get its ID
@@ -82,7 +83,7 @@ class PublicationImport implements ToModel, WithHeadingRow
 
     public function get_category($cat)
     {
-        $query = DataCategory::where(DB::raw('TRIM(category_name)'), 'LIKE', "%$cat%");
+        $query = PublicationCategory::where(DB::raw('TRIM(category_name)'), 'LIKE', "%$cat%");
         $cat = $query->first();
         return $cat ? $cat->id : null;
     }

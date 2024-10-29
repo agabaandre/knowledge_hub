@@ -333,7 +333,8 @@ class PublicationsRepository extends SharedRepo{
             'attachments',
             'author','sub_theme',
             'comments','parent',
-            'summaries','versioning'])->find($id);
+            'summaries','versioning',
+            'sub_category','data_category'])->find($id);
 
         $cookie_name = "Viewed".$pub->id.(auth()->user()->id ?? '');
         $viewed      = get_cookie($cookie_name);
