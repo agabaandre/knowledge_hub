@@ -3,7 +3,6 @@ namespace App\Imports;
 
 use App\Models\Country;
 use App\Models\Publication;
-use App\Models\PublicationCategory;
 use App\Models\SubThemeticArea;
 use App\Models\Region;
 use Maatwebsite\Excel\Concerns\ToModel;
@@ -83,7 +82,7 @@ class PublicationImport implements ToModel, WithHeadingRow
 
     public function get_category($cat)
     {
-        $query = PublicationCategory::where(DB::raw('TRIM(category_name)'), 'LIKE', "%$cat%");
+        $query = DataCategory::where(DB::raw('TRIM(category_name)'), 'LIKE', "%$cat%");
         $cat = $query->first();
         return $cat ? $cat->id : null;
     }
