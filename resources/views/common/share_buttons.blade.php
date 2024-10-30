@@ -1,7 +1,7 @@
 <!-- Sharingbutton Facebook -->
 <a class="resp-sharing-button__link" href="https://facebook.com/sharer/sharer.php?u={{ $link}}" target="_blank" rel="noopener" aria-label="Share on Facebook">
   <div class="resp-sharing-button resp-sharing-button--facebook resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solidcircle">
-    <i class="fa-brands fa-facebook">
+    <i class="fa-brands fa-facebook"></i>
 </div></div>
 </a>
 
@@ -22,7 +22,7 @@
 <!-- Sharingbutton LinkedIn -->
 <a class="resp-sharing-button__link" href="https://www.linkedin.com/shareArticle?mini=true&amp;url={{ $link}}&amp;title={{ $subject}}}}summary={{ $subject}}}}source={{ $link}}" target="_blank" rel="noopener" aria-label="Share on LinkedIn">
   <div class="resp-sharing-button resp-sharing-button--linkedin resp-sharing-button--medium"><div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solidcircle">
-  <i class="fa-brands fa-linkedin">
+  <i class="fa-brands fa-linkedin"></i>
     </div></div>
 </a>
 
