@@ -19,7 +19,7 @@ $image_link = $publication->image_url;
                     <div class="jbd-01 d-flex align-items-center justify-content-between">
                         <div class="jbd-flex d-flex align-items-center justify-content-start">
                             <div class="jbd-01-thumb">
-                                <img src="{{ $publication->image_url }}" class="img-fluid" width="200" alt="" />
+                                <img src="{{ $publication->image_url }}" class="img-fluid" width="250" alt="" />
                             </div>
                             <div class="jbd-01-caption pl-3">
                                 <div class="tbd-title">
