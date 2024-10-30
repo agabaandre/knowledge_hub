@@ -181,9 +181,8 @@ $row = $publication;
                         </div>
 
                         <div class="jbd-02 pt-4 pr-3 container">
-                           
-                            <div class="row justify-content-center">
-                                <h5 class="text-bold text-success">Share this</h5>
+                            <h5 class="text-bold text-success">Share on:</h5>
+                            <div class="row">
                                 {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
                             </div>
                         </div>
