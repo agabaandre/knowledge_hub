@@ -11,7 +11,7 @@
 <!-- Sharingbutton Twitter -->
 <a class="resp-sharing-button__link" href="https://twitter.com/intent/tweet/?text={{ $subject}}}}url={{ $link}}"
   target="_blank" rel="noopener" aria-label="Share on X">
-  <div class="resp-sharing-button resp-sharing-button--black resp-sharing-button--medium">
+  <div class="resp-sharing-button resp-sharing-button--email resp-sharing-button--medium">
     <div aria-hidden="true" class="resp-sharing-button__icon resp-sharing-button__icon--solidcircle">
       <i class="fa-brands fa-x-twitter"></i>
     </div>
