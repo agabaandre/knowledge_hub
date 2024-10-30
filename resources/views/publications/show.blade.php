@@ -3,7 +3,7 @@
 @section('content')
 
     @php
-        $image_link = $publication->image_url;
+$image_link = $publication->image_url;
     @endphp
 
 
@@ -19,7 +19,7 @@
                     <div class="jbd-01 d-flex align-items-center justify-content-between">
                         <div class="jbd-flex d-flex align-items-center justify-content-start">
                             <div class="jbd-01-thumb">
-                                <img src="{{ $publication->image_url }}" class="img-fluid" width="100" alt="" />
+                                <img src="{{ $publication->image_url }}" class="img-fluid" width="200" alt="" />
                             </div>
                             <div class="jbd-01-caption pl-3">
                                 <div class="tbd-title">
@@ -36,7 +36,7 @@
                                         class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description : 'Version ' . $publication->version_no }}</span>
                                     @if (count($publication->favourited) > 0)
                                         @php
-                                            $likes = count($publication->favourited);
+    $likes = count($publication->favourited);
                                         @endphp
                                         <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i
                                                 class="lni lni-heart mr-1"></i> {{ $likes }}
@@ -99,12 +99,12 @@
 
                 @php
 
-                    $col =
-                        count($publication->summaries) > 0 ||
-                        $publication->has_attachments ||
-                        $publication->parent_id > 0
-                            ? '7'
-                            : '12';
+$col =
+    count($publication->summaries) > 0 ||
+    $publication->has_attachments ||
+    $publication->parent_id > 0
+    ? '7'
+    : '12';
 
                 @endphp
 
@@ -112,11 +112,10 @@
                     <div class="rounded mb-4">
                         <div class="jbd-01 pr-3">
                             <div class="jbd-details mb-4">
-                                @if ($publication->is_video)
-                                    <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
-                                @else
-                                    <img src="{{ $publication->image_url }}" class="rounded" width="500px" />
-                                @endif
+                            @if ($publication->is_video)
+                                <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
+                            @endif
+
                                 <br>
                                 <h5 class="ft-medium fs-md mt-2">Description</h5>
                                 <p>{!! $publication->description !!}</p>
@@ -164,7 +163,7 @@
                                     <div class="details ft-medium">
                                         <div class="btn btn-outline-dark mt-2">
                                             @php
-                                                $row = $publication;
+$row = $publication;
                                             @endphp
                                             @include('common.favourites_btn')
                                         </div>
@@ -243,7 +242,7 @@
 
                         @if ($publication->has_attachments)
                             @php
-                                $count = 1;
+        $count = 1;
                             @endphp
                             <h5>Attachments</h5>
                             <ul class="list-group mb-3">
@@ -253,7 +252,7 @@
                                             target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i>
                                             {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
                                     @php
-                                        $count++;
+            $count++;
                                     @endphp
                                 @endforeach
 
