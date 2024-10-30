@@ -460,9 +460,41 @@ function updateUSerPushToken($request,$user=null){
 
 function fix_text_encoding($text) {
     // Convert the text from a problematic encoding (ISO-8859-1) to UTF-8
-    $fixed_text = mb_convert_encoding($text, 'UTF-8', 'ISO-8859-1');
-    $fixed_text = str_replace("*","",$fixed_text);
-    return $fixed_text;
+        // Define replacements for a wide range of common misinterpreted characters
+        $replacements = [
+            'â€“' => '–',    // en dash
+            'â€”' => '—',    // em dash
+            'â€˜' => '‘',    // left single quotation mark
+            'â€™' => '’',    // right single quotation mark / apostrophe
+            'â€œ' => '“',    // left double quotation mark
+            'â€' => '”',    // right double quotation mark
+            'â€¢' => '•',    // bullet point
+            'Ã©' => 'é',     // e with acute accent
+            'Ã¨' => 'è',     // e with grave accent
+            'Ã€' => 'À',     // A with grave accent
+            'Ã¡' => 'á',     // a with acute accent
+            'Ã¢' => 'â',     // a with circumflex
+            'Ã£' => 'ã',     // a with tilde
+            'Ãª' => 'ê',     // e with circumflex
+            'Ã«' => 'ë',     // e with diaeresis
+            'Ã¯' => 'ï',     // i with diaeresis
+            'Ã´' => 'ô',     // o with circumflex
+            'Ã¶' => 'ö',     // o with diaeresis
+            'Ã¹' => 'ù',     // u with grave accent
+            'Ã»' => 'û',     // u with circumflex
+            'Ã¼' => 'ü',     // u with diaeresis
+            'Ã§' => 'ç',     // c with cedilla
+            'Ã‘' => 'Ñ',     // N with tilde
+            'Ã±' => 'ñ',     // n with tilde
+            'Â' => '',       // remove extra 'Â' characters often found before symbols
+            '**' => '',      // remove double asterisks
+        ];
+
+        // Replace each misinterpreted character in the text
+        return strtr($text, $replacements);
+    
+
+  
 }
 
 if (!function_exists('extract_pdf_as_image')) {
