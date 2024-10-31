@@ -28,7 +28,7 @@
   </div>
 </a>
 
-<!-- Sharingbutton LinkedIn -->
+<!-- Sharingbutton LinkedIn --->
 <a class="resp-sharing-button__link"
   href="https://www.linkedin.com/shareArticle?mini=true&amp;url={{ $link}}&amp;title={{ $subject}}}}summary={{ $subject}}}}source={{ $link}}"
   target="_blank" rel="noopener" aria-label="Share on LinkedIn">
