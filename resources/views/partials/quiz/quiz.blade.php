@@ -5,8 +5,8 @@
 			<div class="card bg-transparent border-white">
 				<div class="card-body text-white">
 					<h3 class="text-white">Would you love to test your knowledge about Africa's health data?</h3>
-					<h5 class="text-gray">If so, we are delighted to present this quiz!</h5>
-					<button class="answer-pill bg-default text-white" onclick="$('.questions-slide').slick('slickNext')">
+					<h5 class="text-black">If so, we are delighted to present this quiz!</h5>
+					<button class="answer-pill bg-default text-gray" onclick="$('.questions-slide').slick('slickNext')">
 					Start Quiz
 					</button>
 				</div>
