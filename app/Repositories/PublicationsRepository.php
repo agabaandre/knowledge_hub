@@ -35,6 +35,9 @@ class PublicationsRepository extends SharedRepo{
         $rows_count = $request->rows ?? 20;
 
         $pubs = Publication::with(['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'])
+            ->whereHas('sub_theme')
+            ->whereHas('category')
+            ->whereHas('sub_category')
             ->where('is_version', 0);
 
         // Order by
