@@ -336,7 +336,7 @@ class PublicationsRepository extends SharedRepo{
             'summaries','versioning',
             'sub_category','data_category'])->find($id);
 
-        $cookie_name = "Viewed".$pub->id.(auth()->user()->id ?? '');
+        $cookie_name = "Viewed".$pub->id.((auth()->user())?auth()->user()->id ?? '':'');
         $viewed      = get_cookie($cookie_name);
 
         if(!$viewed):
