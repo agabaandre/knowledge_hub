@@ -148,6 +148,7 @@ public function get(Request $request, $return_array = false, $featured = false)
     $pubs = Publication::with([
         'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
     ])
+    //->whereHas('sub_theme')
     ->where('is_version', 0)
     ->inRandomOrder()
     ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')

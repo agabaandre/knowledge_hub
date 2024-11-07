@@ -3,7 +3,7 @@
 @section('content')
 
     @php
-$image_link = $publication->image_url;
+        $image_link = $publication->image_url;
     @endphp
 
 
@@ -29,14 +29,14 @@ $image_link = $publication->image_url;
                                 </div>
                                 <div class="jbl_location mb-3">
 
-                                    <span>{!! $publication->theme->description !!}</span>
+                                    <span>{!! $publication->theme->description ?? '' !!}</span>
                                 </div>
                                 <div class="jbl_info01">
                                     <span
                                         class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description : 'Version ' . $publication->version_no }}</span>
                                     @if (count($publication->favourited) > 0)
                                         @php
-    $likes = count($publication->favourited);
+                                            $likes = count($publication->favourited);
                                         @endphp
                                         <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i
                                                 class="lni lni-heart mr-1"></i> {{ $likes }}
@@ -99,12 +99,12 @@ $image_link = $publication->image_url;
 
                 @php
 
-$col =
-    count($publication->summaries) > 0 ||
-    $publication->has_attachments ||
-    $publication->parent_id > 0
-    ? '7'
-    : '12';
+                    $col =
+                        count($publication->summaries) > 0 ||
+                        $publication->has_attachments ||
+                        $publication->parent_id > 0
+                            ? '7'
+                            : '12';
 
                 @endphp
 
@@ -112,9 +112,9 @@ $col =
                     <div class="rounded mb-4">
                         <div class="jbd-01 pr-3">
                             <div class="jbd-details mb-4">
-                            @if ($publication->is_video)
-                                <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
-                            @endif
+                                @if ($publication->is_video)
+                                    <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
+                                @endif
 
                                 <br>
                                 <h5 class="ft-medium fs-md mt-2">Description</h5>
@@ -150,7 +150,7 @@ $col =
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Theme</label>
-                                        <span class="text-dark">{!! $publication->theme->description !!}</span>
+                                        <span class="text-dark">{!! $publication->theme->description ?? '' !!}</span>
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Sub-Theme</label>
@@ -163,7 +163,7 @@ $col =
                                     <div class="details ft-medium">
                                         <div class="btn btn-outline-dark mt-2">
                                             @php
-$row = $publication;
+                                                $row = $publication;
                                             @endphp
                                             @include('common.favourites_btn')
                                         </div>
@@ -242,7 +242,7 @@ $row = $publication;
 
                         @if ($publication->has_attachments)
                             @php
-        $count = 1;
+                                $count = 1;
                             @endphp
                             <h5>Attachments</h5>
                             <ul class="list-group mb-3">
@@ -252,7 +252,7 @@ $row = $publication;
                                             target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i>
                                             {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
                                     @php
-            $count++;
+                                        $count++;
                                     @endphp
                                 @endforeach
 

@@ -42,7 +42,7 @@
                                 </div>
                                 <div class="jbl_location mb-3">
 
-                                    <span>{!! $publication->theme->description !!}</span>
+                                    <span>{!! $publication->theme->description ?? '' !!}</span>
                                 </div>
 
                                 @if (!empty($publication->publication))
@@ -155,7 +155,7 @@
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Theme</label>
-                                        <span class="text-dark">{!! $publication->theme->description !!}</span>
+                                        <span class="text-dark">{!! $publication->theme->description ?? '' !!}</span>
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Sub-Theme</label>
