@@ -33,7 +33,7 @@
                                 </div>
                                 <div class="jbl_info01">
                                     <span
-                                        class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description : 'Version ' . $publication->version_no }}</span>
+                                        class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
                                     @if (count($publication->favourited) > 0)
                                         @php
                                             $likes = count($publication->favourited);
@@ -154,7 +154,7 @@
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Sub-Theme</label>
-                                        <span class="text-dark">{!! nl2br($publication->sub_theme->description) !!}</span>
+                                        <span class="text-dark">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Associated Authors</label>
