@@ -374,21 +374,22 @@ public function get(Request $request, $return_array = false, $featured = false)
         $countryIds = [];
         $regionIds  = [];
 
-        if (strtolower($countries[0]) === 'all')
+        if ($rccs[0] == 'all' || (is_array($countries) && strtolower($countries[0]) === 'all')):
             $countryIds = Country::pluck('id')->toArray();
-        
-        if($rccs[0] == 'all')
-            $regionIds = Region::pluck('id')->toArray();
-        else
-            $regionIds = Region::whereIn('id', $rccs)->pluck('id')->toArray();
+        else:
+            if($rccs[0] == 'all')
+                $regionIds = Region::pluck('id')->toArray();
+            else
+                $regionIds = Region::whereIn('id', $rccs)->pluck('id')->toArray();
 
-        if (!empty($regionIds))
-            $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
-        else
-            $countryIds = $countries;
-        
-        if(count($countryIds) > 0)
-            $publication->countries()->attach($countryIds);
+            if (!empty($regionIds))
+                $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+            else
+                $countryIds = $countries;
+            
+            if(count($countryIds) > 0)
+                $publication->countries()->attach($countryIds);
+        endif;
     }
 
     public function find($id){
