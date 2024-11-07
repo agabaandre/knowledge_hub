@@ -12,14 +12,17 @@
         "darkaonline/l5-swagger": "^8.5",
         "doctrine/dbal": "^3.6",
         "guzzlehttp/guzzle": "^7.0.1",
+        "http-interop/http-factory-guzzle": "^1.2",
         "itstructure/laravel-grid-view": "~1.1.1",
         "kreait/laravel-firebase": "^4.2",
         "laravel-notification-channels/fcm": "^2.7",
         "laravel/framework": "^8.75",
         "laravel/passport": "^10.4",
+        "laravel/scout": "^9.8",
         "laravel/tinker": "^2.5",
         "maatwebsite/excel": "^3.1",
         "mckenziearts/laravel-notify": "^2.4",
+        "meilisearch/meilisearch-php": "^1.11",
         "phpmailer/phpmailer": "^6.8",
         "predis/predis": "^2.2",
         "setasign/fpdi": "^2.6",
@@ -73,7 +76,10 @@
     "config": {
         "optimize-autoloader": true,
         "preferred-install": "dist",
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "minimum-stability": "dev",
     "prefer-stable": true

@@ -106,6 +106,8 @@ class PublicationImport implements ToModel, WithHeadingRow
             return Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
         }
 
+
+
         
         // Attempt to match country names first
         $countryIds = Country::whereIn(DB::raw('TRIM(name)'), $names)->pluck('id')->toArray();

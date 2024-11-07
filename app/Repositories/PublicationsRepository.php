@@ -31,11 +31,13 @@ use DB;
 class PublicationsRepository extends SharedRepo{
 
 
+    /*
     public function get(Request $request, $return_array = false,$featured=false) {
         $rows_count = $request->rows ?? 20;
 
         $pubs = Publication::with(['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'])
-            ->where('is_version', 0);
+            ->where('is_version', 0)
+            ->inRandomOrder();
 
         // Order by
         $pubs->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc');
@@ -137,6 +139,68 @@ class PublicationsRepository extends SharedRepo{
        
         return $return_array ? $results : $results->appends($request->all());
     }
+    */
+
+public function get(Request $request, $return_array = false, $featured = false)
+{
+    $rows_count = $request->rows ?? 20;
+
+    $pubs = Publication::with([
+        'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
+    ])
+    ->where('is_version', 0)
+    ->inRandomOrder()
+    ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')
+    ->searchTerm($request->term);
+
+    if ($featured && current_user()) {
+
+        $user = User::find(current_user()->id);
+        $subthemes = $user->preferences()->pluck('subtheme_id');
+        $pubs->featured($subthemes);
+    } 
+    elseif ($featured) {
+        $pubs->where('is_featured', 1);
+    }
+
+    if (!$featured) {
+        $this->applyFilters($pubs, $request);
+    }
+
+    $pubs->when(!is_admin(), function ($query) use ($request) {
+        $query->where('is_admin_only_access', 0)
+            ->where('is_active', 'Active')
+            ->where('is_approved', 1);
+
+        if (auth()->user()) {
+            $userCommunities = CommunityOfPracticeMembers::where('user_id', auth()->user()->id)
+                ->where('is_approved', 1)
+                ->pluck('community_of_practice_id');
+
+            $query->when(!$request->community_id, function ($query) use ($userCommunities) {
+                $query->where(function ($q) use ($userCommunities) {
+                    $q->whereHas('communities', function ($q) use ($userCommunities) {
+                        $q->whereIn('community_of_practice_id', $userCommunities);
+                    })->orWhereDoesntHave('communities')
+                      ->orWhere('user_id', auth()->user()->id);
+                });
+            }, function ($query) use ($request) {
+                $query->whereHas('communities', function ($q) use ($request) {
+                    $q->where('community_of_practice_id', $request->community_id);
+                });
+            });
+        } else {
+            $query->whereDoesntHave('communities');
+        }
+    }, function ($query) {
+        $this->access_filter($query);
+    });
+
+    $results = $pubs->paginate($rows_count)->appends($request->all());
+
+    return $return_array ? $results : $results;
+}
+
 
     public function with_pending_comments($request){
         
@@ -683,7 +747,7 @@ private function applyFilters($query, $request) {
             $q->where('author_id', $value);
         },
         'file_type' => function ($q, $value) {
-            $q->where('file_type_id', $value ?: $request->file_type_id);
+            $q->where('file_type_id', $value);
         },
         'area' => function ($q, $value) {
             $q->where('geographical_coverage_id', $value)
@@ -692,7 +756,7 @@ private function applyFilters($query, $request) {
             });
         },
         'rcc' => function ($q, $value) {
-            if (states_enabled()) {
+            if (states_enabled() && $value !=='all') {
                 $country_ids = Country::where('region_id', $value)->pluck('id');
                 $q->where(function($query) use ($country_ids) {
                     $query->whereIn('geographical_coverage_id', $country_ids)

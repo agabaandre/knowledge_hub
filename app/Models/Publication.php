@@ -4,16 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
 
 class Publication extends Model
 {
     use HasFactory;
+    use Searchable;
+
 
     protected $table = "publication";
     protected $guarded =[];
     protected $appends = ['theme','label','value','is_favourite','approved_comments',
     'pending_comments','has_attachments','tag_ids','image_url',
     'publication_countries','publication_regions'];
+
+  
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'description' => $this->description,
+            'sub_thematic_area_id' => $this->sub_thematic_area_id,
+            'publication_catgory_id' => $this->publication_catgory_id,
+            'data_category_id' => $this->data_category_id
+        ];
+    }
 
     public function file_type(){
         return $this->belongsTo(PublicationType::class,"file_type_id","id");
@@ -192,6 +207,32 @@ class Publication extends Model
     public function getPublicationRegionsAttribute(){
         return Region::whereIn('id',$this->countries()->pluck('region_id')->toArray())->pluck('region_name')->implode(', ');
     }
+
+    public function scopeSearchTerm($query, $term)
+    {
+        if (strlen($term) > 2) {
+            $query->where('title', 'like', '%' . $term . '%')
+                ->orWhere('description', 'like', '%' . $term . '%')
+                ->orWhereIn('author_id', Author::where('name', 'like', '%' . $term . '%')->pluck('id'));
+
+            if (states_enabled()) {
+                $query->orWhereIn('geographical_coverage_id', GeoCoverage::where('name', 'like', '%' . $term . '%')->pluck('id'));
+            }
+        }
+    }
+
+    public function scopeFeatured($query, $subthemes)
+    {
+        if (count($subthemes) > 0) {
+            $query->whereHas('sub_theme', function ($q) use ($subthemes) {
+                $q->whereIn('id', $subthemes);
+            });
+        } else {
+            $query->where('is_featured', 1);
+        }
+    }
+
+
 
 
 }
