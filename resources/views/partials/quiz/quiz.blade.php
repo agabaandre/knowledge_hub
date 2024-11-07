@@ -1,27 +1,27 @@
 
 <div class="col-lg-12  py-3 px-4 rounded m-2 questions-slide" 
-		style="background-color:#03343b; background-image:url(<?php echo asset('frontend/img/landing-bg.png') ?>); background-repeat:repeat;">
+		style="background-color:#03343b; background:var(--theme-color-primary) !important; background-repeat:repeat;">
 
 			<div class="card bg-transparent border-white">
 				<div class="card-body text-white">
 					<h3 class="text-white">Would you love to test your knowledge about Africa's health data?</h3>
-					<h5 class="text-gray">If so, we are delighted to present this quiz!</h5>
-					<button class="answer-pill bg-success text-white" onclick="$('.questions-slide').slick('slickNext')">
+					<h5 class="text-white">If so, we are delighted to present this quiz!</h5>
+					<button class="answer-pill bg-default text-black" onclick="$('.questions-slide').slick('slickNext')">
 					Start Quiz
 					</button>
 				</div>
 			</div>
 
 		@php
-			$count = 0;
+$count = 0;
 		@endphp
 		@foreach($questions as $qn)
 		@php
-			$count++;
+	$count++;
 		@endphp
 		<!--quiz slide, only ones with answers-->
 	
-		@if(count($qn->answers)>0)
+		@if(count($qn->answers) > 0)
 		<div class="card bg-transparent border-white">
 			<div class="card-body text-white">
 			<h4 class="text-white">{{$count}}.{{$qn->question_text}}</h4>
@@ -32,10 +32,10 @@
 				@endforeach
 
 			</div>
-			@if($count>0)
+			@if($count > 0)
 			<div class="d-flex justify-content-end">
 			  
-			   @if($count>1)
+			   @if($count > 1)
 					<button class="slide-pill bg-dark text-white" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickPrev')">
 						Prev Question
 					</button>
@@ -72,11 +72,11 @@
 
 
 				let formData = new FormData();
-				formData.append('_token','<?php echo  csrf_token() ; ?>');
+				formData.append('_token','<?php echo csrf_token(); ?>');
 				formData.append('ans_id',answer_id);
 				formData.append('qn_id',question_id);
 
-				const token = '<?php echo  csrf_token() ; ?>'
+				const token = '<?php echo csrf_token(); ?>'
 
 				$.ajax({
 					method:'POST',
