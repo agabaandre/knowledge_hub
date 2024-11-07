@@ -39,7 +39,7 @@
                                          {{ $row->theme->description ?? '' }}
                                      </span>
                                      <span class="muted medium d-block theme-cl"><i class="lni lni-archive mr-1"></i>Sub
-                                         Theme: {{ $row->sub_theme->description }}</span>
+                                         Theme: {{ $row->sub_theme->description ?? '' }}</span>
                                      <span class="text-muted medium d-block "><i class="lni lni-calendar mr-1"></i>Last
                                          updated: {{ time_ago($row->updated_at) }} </span>
                                      <span class="text-muted d-block mt-1">
