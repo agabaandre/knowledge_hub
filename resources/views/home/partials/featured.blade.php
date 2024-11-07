@@ -35,7 +35,8 @@
                                          </div>
                                      </div>
                                      <span class="d-block theme-cl">
-                                         <i class="lni lni-briefcase mr-1"></i>Theme: {{ $row->theme->description }}
+                                         <i class="lni lni-briefcase mr-1"></i>Theme:
+                                         {{ $row->theme->description ?? '' }}
                                      </span>
                                      <span class="muted medium d-block theme-cl"><i class="lni lni-archive mr-1"></i>Sub
                                          Theme: {{ $row->sub_theme->description }}</span>
