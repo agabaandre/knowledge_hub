@@ -58,6 +58,8 @@ use App\Http\Controllers\Admin\AdminEventsController;
 use App\Http\Controllers\Admin\MessagingController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
+use Laravel\Socialite\Facades\Socialite;
+
 
 /*
 |--------------------------------------------------------------------------
@@ -514,6 +516,52 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
+});
+
+Route::get('auth/microsoft', function () {
+    return Socialite::driver('microsoft')->redirect();
+});
+
+Route::get('auth/microsoft/callback', function () {
+    $user = Socialite::driver('microsoft')->user();
+
+    LOg::info('Microsoft Response',["microsoft_user"=>$user]);
+
+    // Here you can handle the user data, e.g., create or update the user in your database
+    // $user->getId(), $user->getName(), $user->getEmail(), etc.
+
+    // Log the user in
+    //Auth::login($user);
+
+    return redirect()->to('/'); // Redirect to your desired location
+});
+
+Route::get('auth/google', function () {
+    return Socialite::driver('google')->redirect();
+});
+
+Route::get('auth/google/callback', function () {
+    $user = Socialite::driver('google')->user();
+
+    // Handle user data (e.g., create or update user in your database)
+    // Log the user in
+    Auth::login($user);
+
+    return redirect()->to('/home'); // Redirect to your desired location
+});
+
+Route::get('auth/linkedin', function () {
+    return Socialite::driver('linkedin')->redirect();
+});
+
+Route::get('auth/linkedin/callback', function () {
+    $user = Socialite::driver('linkedin')->user();
+
+    // Handle user data (e.g., create or update user in your database)
+    // Log the user in
+    Auth::login($user);
+
+    return redirect()->to('/home'); // Redirect to your desired location
 });
 
 Route::get("/tests",function(){

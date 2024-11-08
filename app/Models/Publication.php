@@ -16,7 +16,7 @@ class Publication extends Model
     protected $guarded =[];
     protected $appends = ['theme','label','value','is_favourite','approved_comments',
     'pending_comments','has_attachments','tag_ids','image_url',
-    'publication_countries','publication_regions'];
+    'publication_countries','publication_regions','country_ids','region_ids'];
 
   
     public function toSearchableArray()
@@ -204,8 +204,16 @@ class Publication extends Model
         return $this->countries()->pluck('name')->implode(', ');
     }
 
+    public function getCountryIdsAttribute(){
+        return $this->countries()->pluck('country_id')->toArray();
+    }
+
     public function getPublicationRegionsAttribute(){
         return Region::whereIn('id',$this->countries()->pluck('region_id')->toArray())->pluck('region_name')->implode(', ');
+    }
+
+    public function getRegionIdsAttribute(){
+        return Region::whereIn('id',$this->countries()->pluck('country_id')->toArray())->pluck('id')->toArray();
     }
 
     public function scopeSearchTerm($query, $term)

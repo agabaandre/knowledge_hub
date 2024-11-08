@@ -5,6 +5,8 @@
         $image_link = asset('assets/images/placeholder.jpg');
     endif;
 
+    // dd($row->country_ids);
+
 @endphp
 
 <!-- SmartWizard html -->
@@ -126,9 +128,7 @@
                         @include('partials.regions.dropdown', [
                             'field' => 'rccs[]',
                             'class' => 'rcc select2',
-                            'selected' => @$row->countries
-                                ? $row->countries->pluck('region_id')->toArray()
-                                : old('rccs') ?? null,
+                            'selected' => @$row->region_ids ?? null,
                             'multiple' => 'multiple',
                             'allfield' => 'All',
                         ])
@@ -143,10 +143,7 @@
                             'field' => 'countries[]',
                             'required' => 'required',
                             'class' => 'country select2',
-                            'selected' =>
-                                $row->countries ?? false && @$row->countries->pluck('id')->toArray()
-                                    ? $row->countries->pluck('id')->toArray()
-                                    : old('countries') ?? null,
+                            'selected' => $row->country_ids ?? null,
                             'multiple' => 'multiple',
                         ])
                     </div>

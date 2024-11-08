@@ -46,6 +46,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+
+        define('PHPGRID_LIBPATH', 'libs/phpgrid/');
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
 

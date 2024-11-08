@@ -22,6 +22,10 @@ class EventServiceProvider extends ServiceProvider
         'Illuminate\Database\Events\StatementExecuted' => [
             'App\Listeners\ClearCacheAfterInsert',
         ],
+        \SocialiteProviders\Manager\SocialiteWasCalled::class => [
+            // ... other providers
+            \SocialiteProviders\Microsoft\MicrosoftExtendSocialite::class.'@handle',
+        ],
     ];
 
     /**
