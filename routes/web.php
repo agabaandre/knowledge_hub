@@ -537,6 +537,8 @@ Route::get('auth/microsoft/callback', function () {
 });
 
 Route::get('auth/google', function () {
+    $state = session()->get('state');
+    \Log::info('Google OAuth State: ' . $state);
     return Socialite::driver('google')->redirect();
 });
 

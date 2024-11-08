@@ -153,7 +153,7 @@
                                     <div class="details ft-medium">
                                         <label class="text-muted">Sub Category</label>
                                         <span
-                                            class="text-dark">{{ $publication->sub_category->category_name ?? '' }}</span>
+                                            class="text-dark">{{ $publication->sub_category->category_name ?? ('' ?? '') }}</span>
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">Theme</label>
