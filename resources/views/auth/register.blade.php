@@ -183,6 +183,18 @@
                                     Account</button>
                             </div>
                         </div>
+
+                        <div class="row justify-content-center">
+                            <div class="btn-group" role="group" aria-label="Login with social media">
+                                <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
+                                        class="lni lni-microsoft"></i>
+                                    Join with Microsoft</a>
+                                <a href="{{ url('auth/google') }}" class="btn btn-outline-danger"><i
+                                        class="lni lni-google"></i>
+                                    Join with Google</a>
+                                {{-- <a href="{{ url('auth/linkedin') }}" class="btn btn-primary">Login with LinkedIn</a> --}}
+                            </div>
+                        </div>
                     </form>
                 </div>
 
