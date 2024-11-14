@@ -92,8 +92,8 @@ class UsersRepository {
 
         if($request->communities){
 
-            $user->communities()->delete();
-            @$this->save_communities($user->id,$request->communities);
+            //$user->communities()->delete();
+            //@$this->save_communities($user->id,$request->communities);
         }
         
         return $user;
