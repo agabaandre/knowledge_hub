@@ -126,7 +126,7 @@ class AuthController extends Controller
         // Convert the MicrosoftUser object to a standard object
         $user = json_decode(json_encode($socialUser));
 
-        if($this->usersRepo->find_by_email($user->user->mail,true)){
+        if($this->usersRepo->find_by_email($user->user->mail)){
 
             $data['alert_class'] = 'danger';
             $data['message']     = "User with this email exists and can login with username and password";
@@ -150,7 +150,7 @@ class AuthController extends Controller
          // Convert the GoogleUser object to a standard object
          $user = json_decode(json_encode($socialUser));
 
-         if($this->usersRepo->find_by_email($user->user->email,true)){
+         if($this->usersRepo->find_by_email($user->user->email)){
 
             $data['alert_class'] = 'danger';
             $data['message']     = "User with this email exists and can login with username and password";
