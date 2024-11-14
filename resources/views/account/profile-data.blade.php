@@ -63,7 +63,7 @@
                             </div>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" name="first_name" placeholder="First Name"
-                                    value="{{ $user->first_name }}">
+                                    value="{{ $user->first_name }}" {{ $user->is_social_login ? 'readonly' : '' }}>
                                 @error('first_name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -79,7 +79,7 @@
                             </div>
                             <div class="col-md-9">
                                 <input type="text" name="last_name" class="form-control" placeholder="Last Name"
-                                    value="{{ $user->last_name }}">
+                                    value="{{ $user->last_name }}" {{ $user->is_social_login ? 'readonly' : '' }}>
                                 @error('last_name')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
@@ -95,7 +95,8 @@
                             </div>
                             <div class="col-md-9">
                                 <input type="text" class="form-control" placeholder="Email"
-                                    value="{{ $user->email }}" name="email" required>
+                                    value="{{ $user->email }}" name="email" required
+                                    {{ $user->is_social_login ? 'readonly' : '' }}>
                                 @error('email')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
