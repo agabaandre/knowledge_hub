@@ -18,36 +18,45 @@ class UsersRepository {
 
     
 
-    public function save(Request $request){
-
-        //\Log::info($request->all());
+    public function save(Request $request,$is_social=false){
 
         $user = ($request->id)?User::find($request->id):new User();
         
         $user->name          = $request->firstname." ".$request->lastname;
         $user->first_name    = $request->firstname;
-        $user->last_name      = $request->lastname;
+        $user->last_name     = $request->lastname;
         $user->email         = $request->email;
         $user->country_id    = $request->country_id;
         $user->phone_number  = $request->phone;
         $user->job_title     = $request->job; 
-        $user->password      = Hash::make($request->password);
 
-        $token = Str::random(10);
-        $user->verification_token =$token; 
+        if(!$is_social){
+
+            $user->password      = Hash::make($request->password);
+            $token = Str::random(10);
+            $user->verification_token = $token;
+
+            if($request->hasFile( 'photo')):
+                //upload photo
+                $file        = $request->file('photo');
+                $file_name   = md5_file($file->getRealPath());
+                $extension   = $file->guessExtension();
+                $file_path   = $file_name.'.'.$extension;
+                $file->move(storage_path().'/app/public/uploads/users/',$file_path);
+                $user->photo  = $file_path;
+            endif;
+        }
+        else{
+
+            $user->is_social_login    = 1;
+            if($request->photo)
+                $user->photo = $request->photo;
+
+        }
 
         if($request->subscribe)
         $user->is_subscribed     = ($request->subscribe=="on")?true:false;
 
-        if($request->hasFile( 'photo')):
-            //upload photo
-            $file        = $request->file('photo');
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
-            $user->photo  = $file_path;
-        endif;
 
         $user->save();
         $user = User::find($user->id);
@@ -55,6 +64,7 @@ class UsersRepository {
         if(!$user->author_id)
         $user->author()->create(['name'=>$user->name]);
 
+        if(!$is_social)
         $this->send_email($request, $token);
 
         @$this->save_preferences($user->id,$request->preferences);

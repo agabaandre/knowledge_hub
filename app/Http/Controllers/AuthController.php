@@ -4,18 +4,21 @@ namespace App\Http\Controllers;
 
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
+use App\Services\SocialLoginService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
-    private $usersRepo, $authorsRepo;
+    private $usersRepo, $authorsRepo,$socialLoginService;
 
-    public function __construct( UsersRepository $usersRepo, AuthorsRepository $authorsRepo)
+    public function __construct( UsersRepository $usersRepo, AuthorsRepository $authorsRepo,SocialLoginService $socialLoginService)
     {
         $this->usersRepo       = $usersRepo;
         $this->authorsRepo     = $authorsRepo;
+        $this->socialLoginService = $socialLoginService;
     }
 
     public function register(Request $request){
@@ -114,6 +117,35 @@ class AuthController extends Controller
         $data['status']      = 200;
 
         return back()->with($data);
+    }
+
+    public function microsoftLogin(){
+
+        // Get the user from Microsoft
+        $socialUser = Socialite::driver('microsoft')->user();
+        // Convert the MicrosoftUser object to a standard object
+        $user = json_decode(json_encode($socialUser));
+
+        $user =$this->socialLoginService->microsoftCallback($user);
+
+        Auth::login($user);
+
+        return redirect('/account');
+   }
+
+
+    public function googleLogin(){
+
+         // Get the user from Google
+         $socialUser = Socialite::driver('google')->user();
+        
+         // Convert the GoogleUser object to a standard object
+         $user = json_decode(json_encode($socialUser));
+
+         $user =$this->socialLoginService->googleCallback($user);
+         Auth::login($user);
+         return redirect('/account');
+ 
     }
 
 }

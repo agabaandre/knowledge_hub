@@ -522,19 +522,7 @@ Route::get('auth/microsoft', function () {
     return Socialite::driver('microsoft')->redirect();
 });
 
-Route::get('auth/microsoft/callback', function () {
-    $user = Socialite::driver('microsoft')->user();
-
-    LOg::info('Microsoft Response',["microsoft_user"=>$user]);
-
-    // Here you can handle the user data, e.g., create or update the user in your database
-    // $user->getId(), $user->getName(), $user->getEmail(), etc.
-
-    // Log the user in
-    //Auth::login($user);
-
-    return redirect()->to('/'); // Redirect to your desired location
-});
+Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
 
 Route::get('auth/google', function () {
     $state = session()->get('state');
@@ -542,15 +530,7 @@ Route::get('auth/google', function () {
     return Socialite::driver('google')->redirect();
 });
 
-Route::get('auth/google/callback', function () {
-    $user = Socialite::driver('google')->user();
-
-    // Handle user data (e.g., create or update user in your database)
-    // Log the user in
-    Auth::login($user);
-
-    return redirect()->to('/home'); // Redirect to your desired location
-});
+Route::get('auth/google/callback', [AuthController::class,'googleLogin']);
 
 Route::get('auth/linkedin', function () {
     return Socialite::driver('linkedin')->redirect();
@@ -558,12 +538,7 @@ Route::get('auth/linkedin', function () {
 
 Route::get('auth/linkedin/callback', function () {
     $user = Socialite::driver('linkedin')->user();
-
-    // Handle user data (e.g., create or update user in your database)
-    // Log the user in
-    Auth::login($user);
-
-    return redirect()->to('/home'); // Redirect to your desired location
+// Redirect to your desired location
 });
 
 Route::get("/tests",function(){
