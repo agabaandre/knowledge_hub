@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Mail;
 use Laravel\Passport\Token;
+use App\Models\CommunityOfPracticeMembers;
 
 class UsersRepository {
 
@@ -83,7 +84,17 @@ class UsersRepository {
         if(!$is_social)
         $this->send_email($request, $token);
 
-        @$this->save_preferences($user->id,$request->preferences);
+        if($request->preferences){
+
+            $user->preferences()->delete();
+            @$this->save_preferences($user->id,$request->preferences);
+        }
+
+        if($request->communities){
+
+            $user->communities()->delete();
+            @$this->save_communities($user->id,$request->communities);
+        }
         
         return $user;
     }
@@ -107,6 +118,21 @@ class UsersRepository {
             $pref->user_id = $user_id;
             $pref->subtheme_id  = $subtheme_id;
             $pref->save();
+
+        }
+
+    }
+
+    public function save_communities($user_id,$communities){
+
+        $communities = is_array($communities) ? $communities : (json_decode($communities) ?? []);
+
+        foreach($communities as $community_id){
+
+            $comm = new CommunityOfPracticeMembers();
+            $comm->user_id = $user_id;
+            $comm->community_of_practice_id  = $community_id;
+            $comm->save();
 
         }
 
