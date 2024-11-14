@@ -185,7 +185,7 @@
                     @endcan
 
                     @if (!$user->country_id)
-                        <div class="form-group">
+                        <div class="form-group mb-2">
                             <div class="row">
                                 <div class="col-md-3">
                                     <label class="form-label">Country *</label>
