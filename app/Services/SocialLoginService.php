@@ -30,7 +30,8 @@ class SocialLoginService {
             'job' => $user->user->jobTitle ?? null, // Extracting job title if available
             'subscribe' => null, // Set this if you have a subscription option
             'photo' => null, // Handle photo upload if needed
-            'preferences' => null // Handle user preferences if needed
+            'preferences' => null,// Handle user preferences if needed
+            'social_provider'=>'microsoft'
         ]);
 
         // Call the save method in UsersRepository
@@ -55,7 +56,8 @@ class SocialLoginService {
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => null, // Google does not provide job title by default
             'photo' => $user->user->picture ?? null, // Extracting profile picture if available
-            'preferences' => null // Handle user preferences if needed
+            'preferences' => null, // Handle user preferences if needed
+            'social_provider'=>'google'
         ]);
 
         // Call the save method in UsersRepository

@@ -49,6 +49,7 @@ class UsersRepository {
         else{
 
             $user->is_social_login    = 1;
+            $user->social_provider    = $request->social_provider;
             if($request->photo)
                 $user->photo = $request->photo;
 
