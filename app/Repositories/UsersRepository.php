@@ -33,9 +33,9 @@ class UsersRepository {
 
         }
 
-        $user->country_id    = $request->country_id;
-        $user->phone_number  = $request->phone;
-        $user->job_title     = $request->job; 
+        $user->country_id    = ($request->country_id)?$request->country_id:$user->country_id;
+        $user->phone_number  = ($request->phone)?$request->phone:$user->phone;
+        $user->job_title     = ($request->job)?$request->job:$user->job; 
 
         if(!$is_social || ($user->id && !$user->is_social_login)){
 
