@@ -131,14 +131,18 @@ class AuthController extends Controller
             $data['alert_class'] = 'danger';
             $data['message']     = "User with this email exists and can login with username and password";
             $data['status']      = 200;
-            return redirect('/login');
+            return redirect('/login')->with($data);
         }
 
         $user =$this->socialLoginService->microsoftCallback($user);
 
         Auth::login($user);
 
-        return redirect('/account');
+        $data['alert_class'] = 'success';
+        $data['message']     = "Please complete yur profile";
+        $data['status']      = 200;
+
+        return redirect('/account')->with($data);
    }
 
 
@@ -155,12 +159,16 @@ class AuthController extends Controller
             $data['alert_class'] = 'danger';
             $data['message']     = "User with this email exists and can login with username and password";
             $data['status']      = 200;
-            return redirect('/login');
+            return redirect('/login')->with($data);
         }
 
          $user =$this->socialLoginService->googleCallback($user);
          Auth::login($user);
-         return redirect('/account');
+
+         $data['alert_class'] = 'success';
+         $data['message']     = "Please complete yur profile";
+         $data['status']      = 200;
+         return redirect('/account')->with($data);
  
     }
 
