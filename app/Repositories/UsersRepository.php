@@ -22,29 +22,25 @@ class UsersRepository {
 
         $user = ($request->id)?User::find($request->id):new User();
         
-        $user->name          = $request->firstname." ".$request->lastname;
-        $user->first_name    = $request->firstname;
-        $user->last_name     = $request->lastname;
-        $user->email         = $request->email;
+        //don't update these values for social signups account edits
+        if( (!$user->id || ($user->id && !$user->is_social_login))){
+
+            $user->name          = $request->firstname." ".$request->lastname;
+            $user->first_name    = $request->firstname;
+            $user->last_name     = $request->lastname;
+            $user->email         = $request->email;
+
+        }
+
         $user->country_id    = $request->country_id;
         $user->phone_number  = $request->phone;
         $user->job_title     = $request->job; 
 
-        if(!$is_social){
+        if(!$is_social || ($user->id && !$user->is_social_login)){
 
             $user->password      = Hash::make($request->password);
             $token = Str::random(10);
             $user->verification_token = $token;
-
-            if($request->hasFile( 'photo')):
-                //upload photo
-                $file        = $request->file('photo');
-                $file_name   = md5_file($file->getRealPath());
-                $extension   = $file->guessExtension();
-                $file_path   = $file_name.'.'.$extension;
-                $file->move(storage_path().'/app/public/uploads/users/',$file_path);
-                $user->photo  = $file_path;
-            endif;
         }
         else{
 
@@ -61,6 +57,16 @@ class UsersRepository {
                 $user->photo = $request->photo;
 
         }
+        
+        if($request->hasFile( 'photo')):
+            //upload photo
+            $file        = $request->file('photo');
+            $file_name   = md5_file($file->getRealPath());
+            $extension   = $file->guessExtension();
+            $file_path   = $file_name.'.'.$extension;
+            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
+            $user->photo  = $file_path;
+        endif;
 
         if($request->subscribe)
         $user->is_subscribed     = ($request->subscribe=="on")?true:false;
