@@ -150,6 +150,14 @@ class AuthController extends Controller
          // Convert the GoogleUser object to a standard object
          $user = json_decode(json_encode($socialUser));
 
+         if($this->usersRepo->find_by_email($user->user->email,true)){
+
+            $data['alert_class'] = 'danger';
+            $data['message']     = "User with this email exists and can login with username and password";
+            $data['status']      = 200;
+            return redirect('/login');
+        }
+
          $user =$this->socialLoginService->googleCallback($user);
          Auth::login($user);
          return redirect('/account');
