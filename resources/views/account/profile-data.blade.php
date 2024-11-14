@@ -207,7 +207,7 @@
                     @endif
 
                     <div class="form-group ">
-                        <div class="row">
+                        <div class="row mt-2">
                             <div class="col-md-3">
                                 <label class="form-label">Photo</label>
                             </div>
