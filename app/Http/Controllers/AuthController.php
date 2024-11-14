@@ -138,11 +138,17 @@ class AuthController extends Controller
 
         Auth::login($user);
 
-        $data['alert_class'] = 'success';
-        $data['message']     = "Please complete yur profile";
-        $data['status']      = 200;
+        if(!$user->country_id){
+            $data['alert_class'] = 'success';
+            $data['message']     = "Please complete yur profile";
+            $data['status']      = 200;
+            $redirect_to = "/account";
+         }else{
+            $redirect_to ="/";
+            $data = [];
+         }
 
-        return redirect('/account')->with($data);
+         return redirect($redirect_to)->with($data);
    }
 
 
@@ -165,10 +171,17 @@ class AuthController extends Controller
          $user =$this->socialLoginService->googleCallback($user);
          Auth::login($user);
 
-         $data['alert_class'] = 'success';
-         $data['message']     = "Please complete yur profile";
-         $data['status']      = 200;
-         return redirect('/account')->with($data);
+         if(!$user->country_id){
+            $data['alert_class'] = 'success';
+            $data['message']     = "Please complete yur profile";
+            $data['status']      = 200;
+            $redirect_to = "/account";
+         }else{
+            $redirect_to ="/";
+            $data = [];
+         }
+
+         return redirect($redirect_to)->with($data);
  
     }
 
