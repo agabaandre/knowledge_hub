@@ -45,11 +45,13 @@ class UsersRepository {
         else{
 
             //for login
-            $existing_user = $this->find_by_email($request->email,true);
-            if($existing_user)
-                return $existing_user;
+            if(!$user->id){
+                $existing_user = $this->find_by_email($request->email,true);
+                if($existing_user)
+                    return $existing_user;
+            }
 
-            //else, it's signup
+            //else, it's signup or account edit
              
             $user->is_social_login    = 1;
             $user->social_provider    = $request->social_provider;
