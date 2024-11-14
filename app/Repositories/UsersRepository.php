@@ -48,6 +48,13 @@ class UsersRepository {
         }
         else{
 
+            //for login
+            $existing_user = $this->find_by_email($request->email,true);
+            if($existing_user)
+                return $existing_user;
+
+            //else, it's signup
+             
             $user->is_social_login    = 1;
             $user->social_provider    = $request->social_provider;
             if($request->photo)
@@ -194,6 +201,21 @@ class UsersRepository {
     public function profile(Request $request){
         return User::find($request->id);
     }
+
+    public function find_by_email($email,$as_social=false){
+       
+        $qry = User::where('email',$email);
+        
+        if($as_social):
+            $qry->where('is_social_login',true);
+        else:
+            $qry->where('is_social_login',false);
+        endif;
+
+        $user = $qry->first();
+        return $user;
+    }
+
 
   
 

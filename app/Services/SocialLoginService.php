@@ -24,7 +24,7 @@ class SocialLoginService {
         $request->merge([
             'firstname' => $user->user->givenName, // Extracting first name
             'lastname' => $user->user->surname, // Extracting last name
-            'email' => $user->user->mail ?? $user->getEmail(), // Use mail if available, otherwise fallback to getEmail()
+            'email' => $user->user->mail ?? '', // Use mail if available, otherwise fallback to getEmail()
             'country_id' => null, // Set this if you have a way to determine the country
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => $user->user->jobTitle ?? null, // Extracting job title if available
