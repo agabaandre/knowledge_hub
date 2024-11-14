@@ -83,7 +83,7 @@ class AuthController extends Controller
 
         $request->validate($val_rules);
 
-        $saved   = $this->usersRepo->update_profile($request);
+        $saved   = $this->usersRepo->save($request);
 
         $message = ($saved)?'Profile update successfully':'Request failed try again';
 
