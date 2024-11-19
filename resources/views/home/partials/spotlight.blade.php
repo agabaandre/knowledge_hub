@@ -32,7 +32,7 @@
 
     <div class="col-lg-8 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
       <div class="row justify-content-center mb-2">
-      <h3 class="text-center" style="font-size:20px;">Click a health theme below to access associated publications</h3>
+      <h3 class="text-center" style="font-size:20px;">Click a health theme below to access associated content</h3>
       
       </div>
       @include('home.partials.theme_tabs') 
