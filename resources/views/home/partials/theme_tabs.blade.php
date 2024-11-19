@@ -2,7 +2,7 @@
 
     @foreach ($themes as $theme)
         <div class="col-xl-3 col-lg-3 col-md-6 col-sm-6 col-xs-6 item custom-row-item">
-            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important;">
+            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important; opacity:0.7;">
                 <a href="{{ url('records') }}?theme={{ $theme->id }}"
                     class="cats-box d-block rounded bg-white px-2 py-2">
                     <div
