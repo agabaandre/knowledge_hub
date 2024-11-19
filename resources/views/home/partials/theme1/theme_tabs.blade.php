@@ -1,7 +1,7 @@
 <div class="row justify-content-center custom-row categories" id="themes">
     @foreach ($themes as $theme)
-        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-xs-6 mb-4" style="opacity:0.7;">
-            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important;">
+        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-xs-6 mb-4">
+            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important; opacity:0.7;">
                 <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}"
                     class="cats-box d-block rounded shadow-sm bg-white px-3 py-3"
                     style="transition: transform 0.3s, box-shadow 0.3s;">
