@@ -16,6 +16,8 @@
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-12">
+               <!-- Canvas to display the PDF -->
+                <canvas id="pdfCanvas"></canvas>
                     <div class="jbd-01 d-flex align-items-center justify-content-between">
                         <div class="jbd-flex d-flex align-items-center justify-content-start">
                             <div class="jbd-01-thumb">
@@ -63,7 +65,7 @@
                                     <div class="row col-12 d-flex" style="float:right !importntant;">
                                         <a href="{{ $publication->publication }}" target="_blank"
                                             class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;"><i class="fa fa-eye"></i> Browse Resource</a>
+                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse Resource</a>
                                     </div>
                                 @endif
 
@@ -341,6 +343,8 @@
         </div>
         </div>
     </section>
+
+ 
 
     @include('common.ai-summary')
 
