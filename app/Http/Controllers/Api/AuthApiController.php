@@ -573,6 +573,9 @@ class AuthApiController extends ApiController
         if($savedUser){
 
             $user = $savedUser;
+            
+            AUth::login($user);
+
             $user->load("communities");
             $user->load("preferences");
             $tokenResult = $user->createToken('Personal Access Token');
