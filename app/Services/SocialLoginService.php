@@ -34,6 +34,10 @@ class SocialLoginService {
             'social_provider'=>'microsoft'
         ]);
 
+        if($request->photo):
+            $request->is_photo_external = 1;
+        endif;
+
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
 
@@ -59,6 +63,10 @@ class SocialLoginService {
             'preferences' => null, // Handle user preferences if needed
             'social_provider'=>'google'
         ]);
+
+        if($request->photo):
+            $request->is_photo_external = 1;
+        endif;
 
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login

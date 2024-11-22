@@ -163,7 +163,7 @@
                             </div>
                         </div>
                     </div>
-                    @can('manage_rccs')
+                    @can('alter_access_levels')
                         <div class="form-group ">
                             <div class="row">
                                 <div class="col-md-3">
