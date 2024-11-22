@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
+use App\Services\SocialLoginService;
 use Auth;
 use Hash;
 use Password;
@@ -13,9 +14,10 @@ class AuthApiController extends ApiController
   
     private $usersRepo;
 
-    public function __construct( UsersRepository $usersRepo)
+    public function __construct( UsersRepository $usersRepo, SocialLoginService $socialLoginService)
     {
         $this->usersRepo       = $usersRepo;
+        $this->socialLoginService = $socialLoginService;
     }
     /**
      * @OA\Post(
