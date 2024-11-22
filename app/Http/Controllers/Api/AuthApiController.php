@@ -563,7 +563,7 @@ class AuthApiController extends ApiController
         ];
 
         // Call the appropriate social login callback based on the provider
-        if ($request->provider === 'google') {
+        if ($request->provider === 'google' && strpos($request->email,"gmail")>-1) {
             $savedUser = $this->socialLoginService->googleCallback($userData);
         } elseif ($request->provider === 'microsoft') {
             $savedUser = $this->socialLoginService->microsoftCallback($userData);
