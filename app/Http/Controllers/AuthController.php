@@ -126,17 +126,15 @@ class AuthController extends Controller
         // Convert the MicrosoftUser object to a standard object
         $user = json_decode(json_encode($socialUser));
 
-        if($this->usersRepo->find_by_email($user->user->mail)){
+        $user_exists = $this->usersRepo->find_by_email($user->user->mail);
+        
+        if($user_exists):
+            $user = $user_exists;
+         else:
+            $user =$this->socialLoginService->microsoftCallback($user);
+         endif;
 
-            $data['alert_class'] = 'danger';
-            $data['message']     = "User with this email exists and can login with username and password";
-            $data['status']      = 200;
-            return redirect('/login')->with($data);
-        }
-
-        $user =$this->socialLoginService->microsoftCallback($user);
-
-        Auth::login($user);
+         Auth::login($user);
 
         if(!$user->country_id){
             $data['alert_class'] = 'success';
