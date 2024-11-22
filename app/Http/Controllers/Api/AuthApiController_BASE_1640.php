@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
-use App\Services\SocialLoginService;
 use Auth;
 use Hash;
 use Password;
@@ -12,12 +11,11 @@ use Password;
 class AuthApiController extends ApiController
 {
   
-    private $usersRepo,$socialLoginService;
+    private $usersRepo;
 
-    public function __construct( UsersRepository $usersRepo, SocialLoginService $socialLoginService)
+    public function __construct( UsersRepository $usersRepo)
     {
         $this->usersRepo       = $usersRepo;
-        $this->socialLoginService = $socialLoginService;
     }
     /**
      * @OA\Post(
@@ -496,106 +494,5 @@ class AuthApiController extends ApiController
         return response()->json($data);
     }
 
-    /**
-     * @OA\Post(
-     *     path="/api/social-login",
-     *     operationId="SocialLogin",
-     *     tags={"Authentication"},
-     *     summary="Social Login",
-     *     description="Authenticate a user via social login",
-     *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             required={"provider", "email", "name", "photoUrl", "providerId"},
-     *             @OA\Property(property="provider", type="string", example="google"),
-     *             @OA\Property(property="email", type="string"),
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="photoUrl", type="string"),
-     *             @OA\Property(property="providerId", type="string")
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Success",
-     *         @OA\MediaType(
-     *             mediaType="application/json"
-     *         )
-     *     ),
-     *     @OA\Response(
-     *         response=400,
-     *         description="Bad Request, when some required data is missing"
-     *     ),
-     *     @OA\Response(
-     *         response=401,
-     *         description="Invalid User Credentials"
-     *     )
-     * )
-     */
-    public function socialLogin(Request $request)
-    {
-        $request->validate([
-            'provider' => 'required|string',
-            'email' => 'required|string|email',
-            'name' => 'required|string',
-            'photoUrl' => 'string',
-            'providerId' => 'string',
-        ]);
-
-        // Split the name into first and last names
-        $nameParts = explode(' ', $request->name);
-        $firstName = array_shift($nameParts); // Get the first name
-        $lastName = implode(' ', $nameParts); // Join the rest as last name
-
-        // Prepare user data as an object with a 'user' property
-        $userData = (object) [
-            'user' => (object) [
-                'email' => $request->email,
-                'givenName' => $firstName, // Set first name
-                'surname' => $lastName, // Set last name
-                'given_name' => $firstName, // Set first name
-                'family_name' => $lastName, // Set last name
-                'mail' => $request->email, // Assuming email is used for mail
-                'email' => $request->email,
-                'jobTitle' => null, // Set to null or provide a value if available
-                'picture' => $request->photoUrl, // Assuming photoUrl maps to picture
-            ],
-            'providerId' => $request->providerId,
-            'social_provider' => $request->provider,
-        ];
-
-        // Call the appropriate social login callback based on the provider
-        if ($request->provider === 'google' && strpos($request->email,"gmail")>-1) {
-            $savedUser = $this->socialLoginService->googleCallback($userData);
-        } elseif ($request->provider === 'microsoft') {
-            $savedUser = $this->socialLoginService->microsoftCallback($userData);
-        } else {
-            return response()->json(['message' => 'Unsupported provider'], 400);
-        }
-
-        if($savedUser){
-
-            $user = $savedUser;
-            
-            AUth::login($user);
-
-            $user->load("communities");
-            $user->load("preferences");
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->accessToken;
-            $tokenExpiration = $tokenResult->token->expires_at;
-
-            updateUserPushToken($request,$user);
-            
-            return response()->json([
-                'token' => $token,
-                'token_type' => 'Bearer',
-                'expires_at' => $tokenExpiration,
-                'user' => $user
-            ]);
-
-        }
-
-        // Prepare the response similar to the login response
-        return response()->json(['message' => 'Unable to log you in'], 400);
-    }
     
 }

@@ -29,119 +29,8 @@ use Log;
 use DB;
 
 class PublicationsRepository extends SharedRepo{
-
-
-    /*
-    public function get(Request $request, $return_array = false,$featured=false) {
-        $rows_count = $request->rows ?? 20;
-
-        $pubs = Publication::with(['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'])
-            ->where('is_version', 0)
-            ->inRandomOrder();
-
-        // Order by
-        $pubs->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc');
-
-        // Search by keyword
-        if (strlen($request->term) > 2) {
-            $pubs->where(function ($query) use ($request) {
-                $query->where('title', 'like', '%'.$request->term . '%')
-                    ->orWhere('publication', 'like', '%'.$request->term . '%');
-
-                $authors = Author::where('name', 'like', '%'.$request->term . '%')->pluck('id');
-                $tags = Tag::where('tag_text', 'like', $request->term . '%')->pluck('id');
-                $pub_tag_ids = PublicationTag::whereIn('tag_id', $tags)->pluck('publication_id');
-
-                $query->orWhereIn('author_id', $authors)
-                    ->orWhereIn('id', $pub_tag_ids);
-
-                if (states_enabled()) {
-                    $coverage = GeoCoverage::where('name', 'like', '%' . $request->term . '%')->pluck('id');
-                    $query->orWhereIn('geographical_coverage_id', $coverage);
-                }
-            });
-        }
-
-        
-        if($featured && current_user()):
-
-            $user = User::find(current_user()->id);
-            $subthemes = $user->preferences()->pluck('subtheme_id');
-            
-            if(count($subthemes) > 0):
-            $pubs->whereHas('sub_theme',function($q) use($subthemes){
-                $q->whereIn('id',$subthemes);
-                });
-            else:
-                $pubs->where('is_featured',1);
-            endif;
-
-        elseif($featured && !current_user()):
-                $pubs->where('is_featured',1);
-        endif;
-
-
-        if(!$featured): 
-            // Apply other filters
-            $this->applyFilters($pubs, $request);
-        endif;
-
-
-            if (!is_admin()) {
-
-
-                $pubs->where('is_admin_only_access',0);
-                $pubs->where('is_active', 'Active')
-                    ->where('is_approved', 1);
-
-                
-                if (auth()->user()) {
-                    
-                    if(!$request->community_id):
-                    $userCommunities = CommunityOfPracticeMembers::where("user_id", auth()->user()->id)
-                        ->where("is_approved", 1)
-                        ->pluck("community_of_practice_id");
-
-                
-                    if(count($userCommunities) > 0):
-                        $pubs->where(function ($query) use ($userCommunities) {
-
-                            $query->whereHas('communities', 
-                                function ($q) use ($userCommunities) {
-                                $q->whereIn('community_of_practice_id', $userCommunities);
-                            })
-                            ->orWhereDoesntHave("communities")
-                            ->orWhere('user_id', auth()->user()->id);
-                        });
-                    else:
-                        $pubs->whereDoesntHave("communities");
-                    endif;
-                else:
-                    $pubs->whereHas("communities",function($query) use($request){
-                        $query->where("community_of_practice_id",$request->community_id);
-                    });
-                endif;
-                
-                } 
-                else {
-                    $pubs->whereDoesntHave("communities");
-                }
-
-                
-            } 
-            else {
-                // Access levels effect to query results
-                $this->access_filter($pubs);
-            }
-
-        $results = $pubs->paginate($rows_count);
-        //Log::info(count($results));
-       
-        return $return_array ? $results : $results->appends($request->all());
-    }
-    */
-
-public function get(Request $request, $return_array = false, $featured = false)
+    
+public function get(Request $request, $return_array = false, $featured = false,$pending=false)
 {
     $rows_count = $request->rows ?? 20;
 
@@ -194,8 +83,12 @@ public function get(Request $request, $return_array = false, $featured = false)
             $query->whereDoesntHave('communities');
         }
     }, function ($query) {
+        
         $this->access_filter($query);
     });
+
+    if($pending)
+    $query->where('is_approved',0);
 
     $results = $pubs->paginate($rows_count)->appends($request->all());
 
@@ -305,6 +198,9 @@ public function get(Request $request, $return_array = false, $featured = false)
             $pub->is_active   = 'In-Active';
             $pub->is_approved = 0;
             $pub->is_rejected = 0;
+
+            if($request->author)
+            $pub->geographical_coverage_id  = Author::find($request->author)->user->country_id;
         }
 
         //save cover
@@ -402,7 +298,7 @@ public function get(Request $request, $return_array = false, $featured = false)
             'summaries','versioning',
             'sub_category','data_category'])->find($id);
 
-        $cookie_name = "Viewed".$pub->id.((auth()->user())?auth()->user()->id ?? '':'');
+        $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
         $viewed      = get_cookie($cookie_name);
 
         if(!$viewed):

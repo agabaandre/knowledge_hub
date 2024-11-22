@@ -198,6 +198,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "publications"], function () {
 
         Route::get("/", [ResourcesController::class, 'index']);
+        Route::get("/pending", [ResourcesController::class, 'pending']);
         Route::get("/create", [ResourcesController::class, 'create']);
         Route::get("/edit", [ResourcesController::class, 'edit']);
         Route::get("/details", [ResourcesController::class, 'details']);

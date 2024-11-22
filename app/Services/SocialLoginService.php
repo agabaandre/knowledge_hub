@@ -29,7 +29,7 @@ class SocialLoginService {
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => $user->user->jobTitle ?? null, // Extracting job title if available
             'subscribe' => null, // Set this if you have a subscription option
-            'photo' => null, // Handle photo upload if needed
+            'photo' => $user->user->picture ?? null, // Handle photo upload if needed
             'preferences' => null,// Handle user preferences if needed
             'social_provider'=>'microsoft'
         ]);

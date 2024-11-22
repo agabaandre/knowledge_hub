@@ -42,7 +42,9 @@
                         <ul class="sub-menu">
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}"
                                     class="slide-item">Publish a Resource</a></li>
-                            <li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage
+                                <li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage
+                                        Resources</a></li>
+                            <li aria-haspopup="true"><a href="{{ url('admin/publications/pending') }}" class="slide-item">Pending
                                     Resources</a></li>
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}"
                                     class="slide-item">Resource Sumaries & Abstracts</a></li>
