@@ -6,6 +6,7 @@
         $image_link = $publication->image_url;
     @endphp
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.141/pdf.min.js"></script>
 
     <!-- ======================= Publication Info ======================== -->
     <div class="bg-light rounded py-5"
@@ -16,6 +17,8 @@
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-12">
+               <!-- Canvas to display the PDF -->
+                <canvas id="pdfCanvas"></canvas>
                     <div class="jbd-01 d-flex align-items-center justify-content-between">
                         <div class="jbd-flex d-flex align-items-center justify-content-start">
                             <div class="jbd-01-thumb">
@@ -63,7 +66,7 @@
                                     <div class="row col-12 d-flex" style="float:right !importntant;">
                                         <a href="{{ $publication->publication }}" target="_blank"
                                             class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;"><i class="fa fa-eye"></i> Browse Resource</a>
+                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse Resource</a>
                                     </div>
                                 @endif
 
@@ -341,6 +344,42 @@
         </div>
         </div>
     </section>
+
+    <script>
+        // Get the link element and canvas
+        const pdfLink = document.getElementById('pdfLink');
+        const canvas = document.getElementById('pdfCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set the PDF.js worker source
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.5.141/pdf.worker.min.js';
+
+        // Load and render the PDF when the link is clicked
+        pdfLink.addEventListener('click', function (event) {
+            event.preventDefault(); // Prevent default link behavior
+
+            const pdfUrl = pdfLink.href; // Get the PDF URL from the link
+
+            pdfjsLib.getDocument(pdfUrl).promise.then(pdf => {
+                // Render the first page of the PDF
+                pdf.getPage(1).then(page => {
+                    const viewport = page.getViewport({ scale: 1.5 }); // Adjust scale for zoom
+                    canvas.width = viewport.width;
+                    canvas.height = viewport.height;
+
+                    const renderContext = {
+                        canvasContext: ctx,
+                        viewport: viewport,
+                    };
+
+                    // Render the page on the canvas
+                    page.render(renderContext);
+                });
+            }).catch(error => {
+                console.error('Error loading PDF:', error);
+            });
+        });
+    </script>
 
     @include('common.ai-summary')
 
