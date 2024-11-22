@@ -30,6 +30,10 @@ Route::post('register', [AuthApiController::class, 'register']);
 Route::post('/forgot-password', [AuthApiController::class, 'forgotPassword']);
 Route::get('/refresh', [AuthApiController::class, 'refresh']);
 Route::post('/social-login', [AuthApiController::class, 'socialLogin']);
+<<<<<<< HEAD
+=======
+
+>>>>>>> 250954898fd9f028b524cf24ee57be4a896ab23f
 
 
 Route::group(['middleware' => 'auth:api'],function(){

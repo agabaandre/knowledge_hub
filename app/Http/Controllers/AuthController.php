@@ -174,7 +174,8 @@ class AuthController extends Controller
             $data['message']     = "Please complete your profile";
             $data['status']      = 200;
             $redirect_to = "/account";
-         }else{
+         }
+         else{
             $redirect_to ="/";
             $data = [];
          }

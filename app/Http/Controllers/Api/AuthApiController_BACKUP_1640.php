@@ -563,7 +563,11 @@ class AuthApiController extends ApiController
         ];
 
         // Call the appropriate social login callback based on the provider
+<<<<<<< HEAD
+        if ($request->provider === 'google') {
+=======
         if ($request->provider === 'google' && strpos($request->email,"gmail")>-1) {
+>>>>>>> 250954898fd9f028b524cf24ee57be4a896ab23f
             $savedUser = $this->socialLoginService->googleCallback($userData);
         } elseif ($request->provider === 'microsoft') {
             $savedUser = $this->socialLoginService->microsoftCallback($userData);
@@ -597,5 +601,9 @@ class AuthApiController extends ApiController
         // Prepare the response similar to the login response
         return response()->json(['message' => 'Unable to log you in'], 400);
     }
+<<<<<<< HEAD
+
+=======
     
+>>>>>>> 250954898fd9f028b524cf24ee57be4a896ab23f
 }
