@@ -16,6 +16,10 @@ class Author extends Model
         return $this->hasMany(Publication::class);
     }
 
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
+
     public function getLogoAttribute($value){
         return asset('storage/uploads/users/avatar.jpg');
     }

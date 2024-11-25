@@ -36,6 +36,7 @@ class UsersRepository {
         $user->country_id    = ($request->country_id)?$request->country_id:$user->country_id;
         $user->phone_number  = ($request->phone)?$request->phone:$user->phone;
         $user->job_title     = ($request->job)?$request->job:$user->job; 
+        $user->is_photo_external = ($request->is_photo_external)?$request->is_photo_external:$user->is_photo_external;
 
         if(!$is_social || ($user->id && !$user->is_social_login)){
 

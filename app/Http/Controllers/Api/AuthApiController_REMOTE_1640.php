@@ -12,7 +12,7 @@ use Password;
 class AuthApiController extends ApiController
 {
   
-    private $usersRepo,$socialLoginService;
+    private $usersRepo;
 
     public function __construct( UsersRepository $usersRepo, SocialLoginService $socialLoginService)
     {

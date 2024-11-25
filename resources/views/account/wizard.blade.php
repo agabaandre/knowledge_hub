@@ -150,6 +150,22 @@
                 </div>
             </div>
 
+            @if (is_admin())
+            <div class="row">
+
+                <div class="col-md-5">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">Author</label>
+                        @include('partials.authors.dropdown', [
+                            'field' => 'author',
+                            'selected' => @$row->author_id ?? null,
+                            'allfield' => 'Select Author',
+                        ])
+                    </div>
+                </div>
+            </div>
+            @endif
+
         </div>
 
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">

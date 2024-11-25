@@ -49,7 +49,7 @@
                             <div class="task-listing-bid-inner row">
                                 <div class="task-offers d-none d-sm-block">
                                     <strong>{{ $row->theme->description ?? '' }}</strong>
-                                    <span class="text-sm">{{ $row->sub_theme->description }}</span>
+                                    <span class="text-sm">{{ $row->sub_theme->description ?? '' }}</span>
                                 </div>
                                 <span style="min-width:100%;" class="button button-sliding-icon ripple-effect"
                                     onclick="window.location.href={{ url('records/resource') }}?id={{ $row->id }}">

@@ -27,6 +27,14 @@ class ResourcesController extends Controller
         return view('admin.publications.index',$data);
     }
 
+    
+    public function pending(Request $request){
+        $request['is_admin']  = 1;
+        $data['publications'] = $this->publicationsRepo->get($request,false, false,true);
+        $data['search']       = (Object) $request->all();
+        return view('admin.publications.pending',$data);
+    }
+
     public function create(Request $request){
 
         $data['publication'] = null;

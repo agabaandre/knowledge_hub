@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
 use App\Repositories\UsersRepository;
-use App\Services\SocialLoginService;
 use Auth;
 use Hash;
 use Password;
@@ -563,7 +562,7 @@ class AuthApiController extends ApiController
         ];
 
         // Call the appropriate social login callback based on the provider
-        if ($request->provider === 'google' && strpos($request->email,"gmail")>-1) {
+        if ($request->provider === 'google') {
             $savedUser = $this->socialLoginService->googleCallback($userData);
         } elseif ($request->provider === 'microsoft') {
             $savedUser = $this->socialLoginService->microsoftCallback($userData);
@@ -597,5 +596,5 @@ class AuthApiController extends ApiController
         // Prepare the response similar to the login response
         return response()->json(['message' => 'Unable to log you in'], 400);
     }
-    
+
 }

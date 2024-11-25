@@ -29,10 +29,14 @@ class SocialLoginService {
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => $user->user->jobTitle ?? null, // Extracting job title if available
             'subscribe' => null, // Set this if you have a subscription option
-            'photo' => null, // Handle photo upload if needed
+            'photo' => $user->user->picture ?? null, // Handle photo upload if needed
             'preferences' => null,// Handle user preferences if needed
             'social_provider'=>'microsoft'
         ]);
+
+        if($request->photo):
+            $request->is_photo_external = 1;
+        endif;
 
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
@@ -59,6 +63,10 @@ class SocialLoginService {
             'preferences' => null, // Handle user preferences if needed
             'social_provider'=>'google'
         ]);
+
+        if($request->photo):
+            $request->is_photo_external = 1;
+        endif;
 
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
