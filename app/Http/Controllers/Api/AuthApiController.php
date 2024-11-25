@@ -536,8 +536,8 @@ class AuthApiController extends ApiController
             'provider' => 'required|string',
             'email' => 'required|string|email',
             'name' => 'required|string',
-            'photoUrl' => 'string',
-            'providerId' => 'string',
+           // 'photoUrl' => 'string',
+            //'providerId' => 'string',
         ]);
 
         // Split the name into first and last names
