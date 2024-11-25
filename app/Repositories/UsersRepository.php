@@ -21,7 +21,8 @@ class UsersRepository {
 
     public function save(Request $request,$is_social=false){
 
-        $user = ($request->id)?User::find($request->id):new User();
+        $user = ($is_social)?User::where($request->email)->first():(($request->id)?User::find($request->id):new User());
+
         
         //don't update these values for social signups account edits
         if( (!$user->id || ($user->id && !$user->is_social_login))){
@@ -80,11 +81,13 @@ class UsersRepository {
         if($request->subscribe)
         $user->is_subscribed     = ($request->subscribe=="on")?true:false;
 
+        if($request->author_id)
+        $user->author_id= $request->author_id;
 
-        $user->save();
+        $user = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
-        if(!$user->author_id)
+        if(!$user->author_id && !$request->author_id)
         $user->author()->create(['name'=>$user->name]);
 
         if(!$is_social)
