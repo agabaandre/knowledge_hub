@@ -84,7 +84,7 @@ class UsersRepository {
         if($request->author_id)
         $user->author_id= $request->author_id;
 
-        $user = ($user->id)?$user->update():$user->save();
+        $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
         if(!$user->author_id && !$request->author_id)
