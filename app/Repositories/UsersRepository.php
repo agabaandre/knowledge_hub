@@ -56,8 +56,12 @@ class UsersRepository {
              
             $user->is_social_login    = 1;
             $user->social_provider    = $request->social_provider;
-            if($request->photo)
+            $user->is_photo_external  = false;
+
+            if($request->photo){
                 $user->photo = $request->photo;
+                $user->is_photo_external = true;
+            }
 
         }
         
@@ -69,6 +73,7 @@ class UsersRepository {
             $file_path   = $file_name.'.'.$extension;
             $file->move(storage_path().'/app/public/uploads/users/',$file_path);
             $user->photo  = $file_path;
+            $user->is_photo_external  = false;
         endif;
 
         if($request->subscribe)

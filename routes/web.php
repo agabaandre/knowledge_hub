@@ -432,13 +432,6 @@ Route::prefix('messaging')->name('admin.messaging.')->middleware(['auth'])->grou
 });
 });
 
-/////
-
-
-
-
-
-
 //permissions and access control
 Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], function () {
 
@@ -505,7 +498,7 @@ Route::group(["prefix" => "ai"], function () {
 
     Route::post("/summarise",  [AIController::class, 'summarise']);
     Route::post("/compare",  [AIController::class, 'compare']);
-    
+
 });
 
 Route::group(["prefix" => "courses"], function () {

@@ -12,7 +12,7 @@ class ResourcesController extends Controller
 {
     private $publicationsRepo,$authorsRepo,$quotesRepo;
 
-    public function __construct(PublicationsRepository $publicationsRepo, 
+    public function __construct(PublicationsRepository $publicationsRepo,
     AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo)
     {
         $this->publicationsRepo = $publicationsRepo;
@@ -36,33 +36,29 @@ class ResourcesController extends Controller
     public function edit(Request $request){
 
         $publication          =  $this->publicationsRepo->find($request->id);
-        $publication->tag_ids = array_column($publication->tags->toArray(),'tag_id');
-
+        //$publication->tag_ids = array_column($publication->tags->toArray(),'tag_id');
         $data['publication'] = $publication;
-
-      //  dd($publication);
-       
         return view('admin.publications.create',$data);
     }
 
     public function details(Request $request){
 
         $publication          =  $this->publicationsRepo->find($request->id);
-        $data['publication']  = $publication;       
+        $data['publication']  = $publication;
         return view('admin.publications.details',$data);
     }
 
 
     public function summaries(Request $request){
 
-        $data['summaries']        =  $this->publicationsRepo->get_summaries($request);    
+        $data['summaries']        =  $this->publicationsRepo->get_summaries($request);
         return view('admin.publications.summaries',$data);
     }
-    
+
     public function summary(Request $request){
 
         $summary          =  $this->publicationsRepo->find_summary($request);
-        $data['summary']  = $summary;       
+        $data['summary']  = $summary;
         return view('admin.publications.summary',$data);
     }
 
@@ -73,7 +69,7 @@ class ResourcesController extends Controller
         if($saved):
             $data = ['message'=>'Resource saved successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         if($request->ajax()){
@@ -89,7 +85,7 @@ class ResourcesController extends Controller
         if($saved):
             $data = ['message'=>'Resource updated successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         return back()->with($data);
@@ -102,7 +98,7 @@ class ResourcesController extends Controller
         if($saved):
             $data = ['message'=>'Resource updated successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         return back()->with($data);
@@ -135,15 +131,14 @@ class ResourcesController extends Controller
         if($saved):
             $data = ['message'=>'Resources imported successfully','status'=>'success','data'=>$saved];
         else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
+            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];
         endif;
 
         return back()->with($data);
-
     }
 
     public function import_template(Request $request){
         return response()->download(public_path('import-template.xlsx'));
     }
-  
+
 }
