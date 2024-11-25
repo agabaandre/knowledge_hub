@@ -21,7 +21,7 @@ class UsersRepository {
 
     public function save(Request $request,$is_social=false){
 
-        $user = ($is_social)?User::where($request->email)->first():(($request->id)?User::find($request->id):new User());
+        $user = ($is_social)?User::where('email',$request->email)->first():(($request->id)?User::find($request->id):new User());
 
         
         //don't update these values for social signups account edits
