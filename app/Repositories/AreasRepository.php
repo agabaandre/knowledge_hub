@@ -28,10 +28,25 @@ class AreasRepository{
         return Author::find($id);
     }
 
-    public function member_states(){
-        return Country::where('region_id','>',0)
-        ->withCount('publications as resources')
-        ->orderBy('name','asc')->get();
+    // public function member_states(){
+    //     return Country::where('region_id','>',0)
+    //     ->withCount('publications as resources')
+    //     ->orderBy('name','asc')->get();
+    // }
+
+    public function member_states() {
+        return Country::where('region_id', '>', 0)
+            ->select('countries.*') // Select all columns from countries
+            ->withCount(['publications as resources' => function($query) {
+                 // Check if geographical_coverage_id matches Country.id
+                $query->where('geographical_coverage_id', DB::raw('countries.id'))
+                      ->orWhereHas('countries', function($subQuery) {
+                         // Check if Country.id is in the publications' countries
+                          $subQuery->where('country.id', DB::raw('countries.id'));
+                      });
+            }])
+            ->orderBy('name', 'asc')
+            ->get();
     }
 
     public function member_state($id){
@@ -85,6 +100,13 @@ class AreasRepository{
         return GeoCoverage::find($id)->delete();
     }
 
-
+    public function member_states_count($value) {
+        return Country::where('region_id', '>', 0)
+            ->where('geographical_coverage_id', $value)
+            ->orWhereHas('countries', function($subQuery) use ($value) {
+                $subQuery->where('country.id', $value);
+            })
+            ->count();
+    }
 
 }

@@ -11,10 +11,6 @@ class Country extends Model
 
     protected $table ="country";
 
-    // public function area(){
-    //     return $this->belongsTo(GeoCoverage::class,"region_id","id");
-    // }
-
     public function region(){
         return $this->belongsTo(Region::class,"region_id","id");
     }
