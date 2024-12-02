@@ -111,9 +111,13 @@
                 </li>
             @endcan
 
-            <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="sub-icon"><i
-                        class=""></i>Events</a>
-            </li>
+            @can('view_events')
+                <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="sub-icon"><i class=""></i>Events</a></li>
+            @endcan
+
+            @can('view_content_requests')
+                <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="sub-icon"><i class=""></i>Content Requests</a></li>
+            @endcan
 
             <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i
                         class="fe fe-chevron-down horizontal-icon"></i></a>

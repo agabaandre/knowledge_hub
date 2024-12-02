@@ -59,6 +59,7 @@ use App\Http\Controllers\Admin\MessagingController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
+use App\Http\Controllers\Admin\ContentRequestAdminController;
 
 
 /*
@@ -544,4 +545,13 @@ Route::get("/tests",function(){
    //$req = ["email"=>"agabaandre@gmail.com","subject"=>"Test","body"=>"Hello"];
    //SendMailJob::dispatch($req);
 
+});
+
+Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-requests.', 'middleware' => ['auth', 'web']], function () {
+    Route::get('/', [ContentRequestAdminController::class, 'index'])->name('index');
+    Route::get('/create', [ContentRequestAdminController::class, 'create'])->name('create');
+    Route::post('/', [ContentRequestAdminController::class, 'store'])->name('store');
+    Route::get('/{id}/edit', [ContentRequestAdminController::class, 'edit'])->name('edit');
+    Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->name('update');
+    Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->name('destroy');
 });
