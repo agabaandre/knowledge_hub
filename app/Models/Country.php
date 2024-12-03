@@ -15,8 +15,9 @@ class Country extends Model
         return $this->belongsTo(Region::class,"region_id","id");
     }
 
-    public function publications(){
-        return $this->hasMany(Publication::class,"geographical_coverage_id","id");
+    public function publications()
+    {
+        return $this->belongsToMany(Publication::class, 'publication_countries', 'country_id', 'publication_id');
     }
     
 }

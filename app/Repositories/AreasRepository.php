@@ -37,15 +37,7 @@ class AreasRepository{
 
     public function member_states() {
         return Country::where('region_id', '>', 0)
-            ->select('country.*') // Select all columns from countries
-            ->withCount(['publications as resources' => function($query) {
-                 // Check if geographical_coverage_id matches Country.id
-                $query->where('geographical_coverage_id', DB::raw('country.id'))
-                      ->orWhereHas('countries', function($subQuery) {
-                         // Check if Country.id is in the publications' countries
-                          $subQuery->where('country_id', DB::raw('country.id'));
-                      });
-            }])
+            ->withCount('publications as resources') 
             ->orderBy('name', 'asc')
             ->get();
     }
