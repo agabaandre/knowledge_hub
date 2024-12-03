@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\ForumsRepository;
 use App\Repositories\QuizRepository;
+use App\Models\ContentRequest;
 
 class ForumsAdminController extends Controller
 {
