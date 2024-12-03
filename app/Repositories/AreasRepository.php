@@ -43,7 +43,7 @@ class AreasRepository{
                 $query->where('geographical_coverage_id', DB::raw('country.id'))
                       ->orWhereHas('countries', function($subQuery) {
                          // Check if Country.id is in the publications' countries
-                          $subQuery->where('country.id', DB::raw('country.id'));
+                          $subQuery->where('country_id', DB::raw('country.id'));
                       });
             }])
             ->orderBy('name', 'asc')
