@@ -33,6 +33,7 @@ class SettingsRepository{
         $settings->banner_text = $request->banner_text;
         $settings->footer_style = $request->footer_style;
         $settings->site_theme   = $request->site_theme;
+        $settings->content_disclaimer = $request->content_disclaimer;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):

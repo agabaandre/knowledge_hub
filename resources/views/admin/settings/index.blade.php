@@ -189,6 +189,11 @@
                     </div>
                 </div>
 
+                <div class="form-group">
+                    <label>Content Disclaimer</label>
+                    <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="">{{ $settings->content_disclaimer }}</textarea>
+                </div>
+
                 <?php //dd(settings());
                 ?>
 
