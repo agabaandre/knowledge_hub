@@ -88,7 +88,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
     });
 
     if($pending)
-    $query->where('is_approved',0);
+    $pubs->where('is_approved',0);
 
     $results = $pubs->paginate($rows_count)->appends($request->all());
 
