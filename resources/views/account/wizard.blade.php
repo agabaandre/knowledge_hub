@@ -65,6 +65,11 @@
                             <input type="checkbox" name="admin_only" value="1" class="form-check-input"
                                 {{ @$row->is_admin_only_access ? ' checked' : '' }}> Admin Only Access
                         </label>
+
+                        <label class="form-check-inline px-2">
+                            <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input"
+                                {{ @$row->show_disclaimer ? ' checked' : '' }}> Shows Disclaimer
+                        </label>
                     @endif
                 </div>
 
@@ -151,19 +156,19 @@
             </div>
 
             @if (is_admin())
-            <div class="row">
+                <div class="row">
 
-                <div class="col-md-5">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">Author</label>
-                        @include('partials.authors.dropdown', [
-                            'field' => 'author',
-                            'selected' => @$row->author_id ?? null,
-                            'allfield' => 'Select Author',
-                        ])
+                    <div class="col-md-5">
+                        <div class="mb-3">
+                            <label class="form-label" for="publication">Author</label>
+                            @include('partials.authors.dropdown', [
+                                'field' => 'author',
+                                'selected' => @$row->author_id ?? null,
+                                'allfield' => 'Select Author',
+                            ])
+                        </div>
                     </div>
                 </div>
-            </div>
             @endif
 
         </div>

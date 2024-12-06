@@ -191,6 +191,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->is_embedded            = $request->is_embedded ?? false;
         $pub->is_default_in_category = $request->is_default ?? false;
         $pub->is_admin_only_access   = $request->admin_only ?? false;
+        $pub->show_disclaimer        = $request->show_disclaimer ?? false;
 
 
         if(!is_admin()){
