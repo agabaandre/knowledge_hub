@@ -1,4 +1,25 @@
 @extends('layouts.app')
+@section('styles')
+    <style>
+        .responsive-iframe-container {
+            position: relative;
+            width: 100%;
+            padding-top: 56.25%;
+            /* 16:9 aspect ratio (height/width = 9/16 = 56.25%) */
+            overflow: hidden;
+        }
+
+        .responsive-iframe-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+            /* Optional */
+        }
+    </style>
+@endsection
 
 @section('content')
 
@@ -16,8 +37,8 @@
 
             <div class="row">
                 <div class="col-xl-12 col-lg-12 col-md-12 col-12">
-               <!-- Canvas to display the PDF -->
-                <canvas id="pdfCanvas"></canvas>
+                    <!-- Canvas to display the PDF -->
+                    <canvas id="pdfCanvas"></canvas>
                     <div class="jbd-01 d-flex align-items-center justify-content-between">
                         <div class="jbd-flex d-flex align-items-center justify-content-start">
                             <div class="jbd-01-thumb">
@@ -65,7 +86,8 @@
                                     <div class="row col-12 d-flex" style="float:right !importntant;">
                                         <a href="{{ $publication->publication }}" target="_blank"
                                             class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse Resource</a>
+                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse
+                                            Resource</a>
                                     </div>
                                 @endif
 
@@ -111,6 +133,12 @@
                 @endphp
 
                 <div class="col-xl-{{ $col }} col-lg-{{ $col }} col-md-{{ $col }} col-sm-12">
+                    @if ($publication->is_embedded)
+                        <div class="responsive-iframe-container">
+                            <iframe src="{{ $publication->publication }}" frameborder="0" allowfullscreen>
+                            </iframe>
+                        </div>
+                    @endif
                     <div class="rounded mb-4">
                         <div class="jbd-01 pr-3">
                             <div class="jbd-details mb-4">
@@ -250,9 +278,8 @@
                             <h5>Attachments</h5>
                             <ul class="list-group mb-3">
                                 @foreach ($publication->attachments as $pub_file)
-                                    <li class="list-group-item"><a
-                                            href="{{ $pub_file->file }}"
-                                            target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i>
+                                    <li class="list-group-item"><a href="{{ $pub_file->file }}" target="_blank"
+                                            class="fs-sm ft-medium"><i class="fa fa-download"></i>
                                             {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
                                     @php
                                         $count++;
@@ -344,7 +371,7 @@
         </div>
     </section>
 
- 
+
 
     @include('common.ai-summary')
 
