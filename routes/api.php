@@ -74,6 +74,7 @@ Route::group(["prefix" =>"lookup"],function(){
     Route::get('/file-categories', [LookupApiController::class,"file_categories"]);
     Route::get('/authors', [LookupApiController::class,"authors"]);
     Route::get('/resource-categories', [LookupApiController::class,"resource_categories"]);
+    Route::get('/settings', [LookupApiController::class,"settings"]);
 });
 
 Route::get('/log',function(){
