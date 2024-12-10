@@ -258,28 +258,6 @@ class LookupApiController extends ApiController
             "data" => $authors
         ];
     }
-     /**
-     * @OA\Get(
-     *     path="/api/lookup/resource-categories",
-     *     operationId="ListResourceCategories",
-     *     tags={"Lookup"},
-     *     summary="List Resource Categories",
-     *     description="Returns a list of Resource Categories",
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful",
-     *         @OA\JsonContent()
-     *     )
-     * )
-     */
-    public function resource_categories(Request $request)
-    {
-        $categories = $this->commonsRepos->publication_categories();
-        return [
-            "status" => 200,
-            "data" => $categories
-        ];
-    }
 
     /**
      * @OA\Get(
