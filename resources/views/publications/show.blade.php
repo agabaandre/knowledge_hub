@@ -319,7 +319,7 @@
                                                 <li>
                                                     <h6 class="text-muted"><a
                                                             href="{{ url('records/shortened') }}?id={{ $summary->id }}">{{ truncate($summary->title, 100) }}
-                                                            by {{ $summary->author->name }}</a></h6>
+                                                            by {{ $summary->author->name??"" }}</a></h6>
                                                 </li>
                                             @endif
                                         @endforeach
