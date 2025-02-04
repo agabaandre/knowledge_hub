@@ -156,7 +156,7 @@
                                 <div class="other-details">
                                     <div class="details ft-medium">
                                         <label class="text-muted">Source</label>
-                                        <span class="text-dark">{{ $publication->author->name }}</span>
+                                        <span class="text-dark">{{ $publication->author->name??"" }}</span>
                                     </div>
                                     <div class="details ft-medium">
                                         <label class="text-muted">No. of Visits</label>
