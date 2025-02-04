@@ -41,7 +41,7 @@
                                            <!-- <p class="text-nothern p-0"><a href="{{ url('records/resource') }}?id={{ $row->id }}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description, 60))) !!}</a></p> -->
                                            <span class="text-muted medium text-truncate">
                                                Source: <i
-                                                   class="fa fa-bank mr-1"></i>{{ truncate($row->author->name, 40) }}</span>
+                                                   class="fa fa-bank mr-1"></i>{{ truncate($row->author->name ?? '', 40) }}</span>
 
                                            <span class="muted medium ml-2 theme-cl"><br>
                                                <i class="lni lni-briefcase mr-1"></i>Theme:
