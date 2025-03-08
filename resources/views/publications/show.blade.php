@@ -88,8 +88,7 @@
 
                                     
                                 </div>
-                                
-                              @if (!empty($publication->publication))
+        @if (!empty($publication->publication))
     <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
         <a href="#" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
             style="width:180px !important;" id="pdfLink" data-toggle="modal" data-target="#pdfModal"
@@ -109,31 +108,44 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    <iframe id="pdfViewer" src="" width="100%" height="500px" style="border:none;"></iframe>
+                    <div id="pdfContainer" style="width: 100%; height: 500px; overflow: auto; text-align: center;">
+                        <iframe id="pdfViewer" src="" width="100%" height="100%" style="border: none; display: none;"></iframe>
+                        <p id="pdfError" style="display: none; color: red;">Unable to display the document. <a id="pdfDownload" href="#" target="_blank">Click here to download</a>.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- jQuery Script to Load PDF (Bootstrap 4.5 Compatible) -->
+    <!-- jQuery Script to Load PDF in Modal -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
             $('#pdfModal').on('show.bs.modal', function(event) {
-                var button = $(event.relatedTarget); // Button that triggered the modal
-                var pdfUrl = button.data('pdf'); // Extract URL from data attribute
-                
-                // Set the iframe source to the PDF URL
-                $('#pdfViewer').attr('src', pdfUrl);
+                var button = $(event.relatedTarget);
+                var pdfUrl = button.data('pdf');
+
+                // Try rendering the PDF inline
+                $('#pdfViewer').attr('src', pdfUrl).show();
+                $('#pdfError').hide();
+
+                // If the PDF fails to load, show error message with a direct download link
+                $('#pdfViewer').on('error', function() {
+                    $(this).hide();
+                    $('#pdfError').show();
+                    $('#pdfDownload').attr('href', pdfUrl);
+                });
             });
 
-            // Clear the iframe src when modal is closed
+            // Clear iframe src when modal is closed
             $('#pdfModal').on('hidden.bs.modal', function() {
-                $('#pdfViewer').attr('src', '');
+                $('#pdfViewer').attr('src', '').hide();
+                $('#pdfError').hide();
             });
         });
     </script>
 @endif
+
 
 
                             </div>
