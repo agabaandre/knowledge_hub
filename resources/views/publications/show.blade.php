@@ -69,7 +69,18 @@
                                     <a onclick="summarise({{ $publication->id }})"
                                         class="btn btn-md btn-success rounded fs-sm ft-medium" style="color:white;">
                                         <i class="fa-solid fa-microchip"></i> AI Processing(Summarizer)</a>
+
+                                    
                                 </div>
+                                
+                                @if (!empty($publication->publication))
+                                    <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
+                                        <a href="{{ $publication->publication }}" target="_blank"
+                                            class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
+                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse
+                                            Resource</a>
+                                    </div>
+                                @endif
 
                             </div>
                         </div>
@@ -80,14 +91,6 @@
                             <div class="jbl_button mb-2">
 
 
-                                @if (!empty($publication->publication))
-                                    <div class="row col-12 d-flex" style="float:right !importntant;">
-                                        <a href="{{ $publication->publication }}" target="_blank"
-                                            class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;" id="pdfLink"><i class="fa fa-eye"></i> Browse
-                                            Resource</a>
-                                    </div>
-                                @endif
 
                                 @auth
                                     <div class="row col-12 d-flex" style="float:right !importntant;">
