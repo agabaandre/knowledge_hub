@@ -66,7 +66,7 @@
                                             Likes
                                         </span>
                                     </div>
-                                    <div class="details ft-medium  d-flex">
+                                    <div class="details ft-medium  d-flex mb-2">
                                     <span class="text-light theme-bg rouded">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
                                     </div>
                                     @if (count($publication->favourited) > 0)
