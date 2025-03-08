@@ -89,32 +89,50 @@
                                     
                                 </div>
                                 
-                             @if (!empty($publication->publication))
-                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-                                    <a href="#" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                        style="width:180px !important;" id="pdfLink" onclick="openPdf('{{ $publication->publication }}')">
-                                        <i class="fa fa-eye"></i> Browse Resource
-                                    </a>
-                                </div>
-                            
-                                <!-- Modal to Display PDF -->
-                                <div id="pdfModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8);">
-                                    <div style="width:80%; height:90%; margin:auto; background:white; padding:10px;">
-                                        <button onclick="closePdf()" style="float:right;">Close</button>
-                                        <iframe id="pdfViewer" src="" width="100%" height="100%"></iframe>
-                                    </div>
-                                </div>
-                            
-                                <script>
-                                    function openPdf(url) {
-                                        document.getElementById('pdfViewer').src = url;
-                                        document.getElementById('pdfModal').style.display = 'block';
-                                    }
-                                    function closePdf() {
-                                        document.getElementById('pdfModal').style.display = 'none';
-                                    }
-                                </script>
-                            @endif
+                            @if (!empty($publication->publication))
+    <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
+        <a href="#" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
+            style="width:180px !important;" id="pdfLink" data-bs-toggle="modal" data-bs-target="#pdfModal"
+            data-pdf="{{ $publication->publication }}">
+            <i class="fa fa-eye"></i> Browse Resource
+        </a>
+    </div>
+
+    <!-- Bootstrap 5 Modal -->
+    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pdfModalLabel">Document Viewer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <iframe id="pdfViewer" src="" width="100%" height="500px" style="border:none;"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery Script to Load PDF -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#pdfModal').on('show.bs.modal', function(event) {
+                var button = $(event.relatedTarget); // Button that triggered the modal
+                var pdfUrl = button.data('pdf'); // Extract URL from data attribute
+                
+                // Set the iframe source to the PDF URL
+                $('#pdfViewer').attr('src', pdfUrl);
+            });
+
+            // Clear the iframe src when modal is closed
+            $('#pdfModal').on('hidden.bs.modal', function() {
+                $('#pdfViewer').attr('src', '');
+            });
+        });
+    </script>
+@endif
+
 
 
 
