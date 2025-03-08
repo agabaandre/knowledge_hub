@@ -53,6 +53,18 @@
                                     <span>{!! $publication->theme->description ?? '' !!}</span>
                                 </div>
                                 <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
+                                      <div class="details ft-medium">
+                                        <label class="text-muted">No. of Visits</label>
+                                        <span
+                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }}
+                                            Visits</span>
+                                    </div>
+                                    <div class="details ft-medium">
+                                        <label class="text-muted">Likes</label>
+                                        <span
+                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }}
+                                            Likes</span>
+                                    </div>
                                     <span
                                         class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
                                     @if (count($publication->favourited) > 0)
