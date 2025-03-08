@@ -89,22 +89,24 @@
                                     
                                 </div>
                                 
-                            @if (!empty($publication->publication))
+                              @if (!empty($publication->publication))
     <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
         <a href="#" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-            style="width:180px !important;" id="pdfLink" data-bs-toggle="modal" data-bs-target="#pdfModal"
+            style="width:180px !important;" id="pdfLink" data-toggle="modal" data-target="#pdfModal"
             data-pdf="{{ $publication->publication }}">
             <i class="fa fa-eye"></i> Browse Resource
         </a>
     </div>
 
-    <!-- Bootstrap 5 Modal -->
-    <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
+    <!-- Bootstrap 4.5 Modal -->
+    <div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="pdfModalLabel">Document Viewer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <iframe id="pdfViewer" src="" width="100%" height="500px" style="border:none;"></iframe>
@@ -113,7 +115,7 @@
         </div>
     </div>
 
-    <!-- jQuery Script to Load PDF -->
+    <!-- jQuery Script to Load PDF (Bootstrap 4.5 Compatible) -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -132,8 +134,6 @@
         });
     </script>
 @endif
-
-
 
 
                             </div>
