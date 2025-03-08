@@ -29,7 +29,7 @@
 
 
     <!-- ======================= Publication Info ======================== -->
-    <div class="bg-light rounded py-5"
+    <div class="bg-light rounded py-2"
         style="background-image: url({{ asset('frontend/img/dots.png') }}); background-repeat:repeat-x; background-size:contain;">
         <div class="container">
 
@@ -134,7 +134,7 @@
     <!-- ======================= Publication Info ======================== -->
 
     <!-- ============================ Publication Details Start ================================== -->
-    <section class="py-5">
+    <section class="py-2">
         <div class="container">
             <div class="row">
 
