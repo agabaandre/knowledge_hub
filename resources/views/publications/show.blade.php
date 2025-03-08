@@ -66,7 +66,7 @@
                                             Likes</span>
                                     </div>
                                     <div class="details ft-medium col-sm-12 col-lg-4">
-                                    <span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
+                                    <span class="px-2 py-1 text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
                                     </div>
                                     @if (count($publication->favourited) > 0)
                                         @php
