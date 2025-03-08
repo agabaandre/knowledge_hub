@@ -91,7 +91,8 @@
                                 
                                @if (!empty($publication->publication))
                                     <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-                                        <a href="{{ $publication->publication }}" target="_blank"
+   
+                                        <a href="https://docs.google.com/gview?embedded=true&url={{ $publication->publication }}" target="_blank"
                                             class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
                                             style="width:180px !important;" id="pdfLink">
                                             <i class="fa fa-eye"></i> Browse Resource
