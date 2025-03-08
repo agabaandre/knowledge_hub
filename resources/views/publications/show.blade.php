@@ -159,18 +159,7 @@
                                         <label class="text-muted">Source</label>
                                         <span class="text-dark">{{ $publication->author->name??"" }}</span>
                                     </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">No. of Visits</label>
-                                        <span
-                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }}
-                                            Visits</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Likes</label>
-                                        <span
-                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }}
-                                            Likes</span>
-                                    </div>
+                                  
                                     <div class="details ft-medium">
                                         <label class="text-muted">Category</label>
                                         <span class="text-dark">{{ @$publication->data_category->category_name }}</span>
