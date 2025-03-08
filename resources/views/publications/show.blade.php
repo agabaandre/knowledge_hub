@@ -59,7 +59,7 @@
                                         @php
                                             $likes = count($publication->favourited);
                                         @endphp
-                                        <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l d-flex"><i
+                                        <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i
                                                 class="lni lni-heart mr-1"></i> {{ $likes }}
                                             User{{ $likes > 1 ? 's' : '' }} liked this</span>
                                     @endif
