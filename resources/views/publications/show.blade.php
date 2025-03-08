@@ -88,63 +88,16 @@
 
                                     
                                 </div>
-        @if (!empty($publication->publication))
-    <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-        <a href="#" class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-            style="width:180px !important;" id="pdfLink" data-toggle="modal" data-target="#pdfModal"
-            data-pdf="{{ $publication->publication }}">
-            <i class="fa fa-eye"></i> Browse Resource
-        </a>
-    </div>
-
-    <!-- Bootstrap 4.5 Modal -->
-    <div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="pdfModalLabel">Document Viewer</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="pdfContainer" style="width: 100%; height: 500px; overflow: auto; text-align: center;">
-                        <iframe id="pdfViewer" src="" width="100%" height="100%" style="border: none; display: none;"></iframe>
-                        <p id="pdfError" style="display: none; color: red;">Unable to display the document. <a id="pdfDownload" href="#" target="_blank">Click here to download</a>.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- jQuery Script to Load PDF in Modal -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            $('#pdfModal').on('show.bs.modal', function(event) {
-                var button = $(event.relatedTarget);
-                var pdfUrl = button.data('pdf');
-
-                // Try rendering the PDF inline
-                $('#pdfViewer').attr('src', pdfUrl).show();
-                $('#pdfError').hide();
-
-                // If the PDF fails to load, show error message with a direct download link
-                $('#pdfViewer').on('error', function() {
-                    $(this).hide();
-                    $('#pdfError').show();
-                    $('#pdfDownload').attr('href', pdfUrl);
-                });
-            });
-
-            // Clear iframe src when modal is closed
-            $('#pdfModal').on('hidden.bs.modal', function() {
-                $('#pdfViewer').attr('src', '').hide();
-                $('#pdfError').hide();
-            });
-        });
-    </script>
-@endif
+                                @if (!empty($publication->publication))
+                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
+                           
+                                                                <a href="https://docs.google.com/gview?embedded=true&url={{ urlencode($publication->publication) }}" target="_blank"
+                                                                    class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
+                                                                    style="width:180px !important;" id="pdfLink">
+                                                                    <i class="fa fa-eye"></i> Browse Resource
+                                                                </a>
+                                </div>
+                                @endif
 
 
 
