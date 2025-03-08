@@ -65,15 +65,18 @@
                                             class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }}
                                             Likes</span>
                                     </div>
-                                    <span
-                                        class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
+                                    <div class="details ft-medium">
+                                    <span class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
+                                    </div>
                                     @if (count($publication->favourited) > 0)
                                         @php
                                             $likes = count($publication->favourited);
                                         @endphp
+                                       <div class="details ft-medium">
                                         <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i
                                                 class="lni lni-heart mr-1"></i> {{ $likes }}
                                             User{{ $likes > 1 ? 's' : '' }} liked this</span>
+                                       </div>
                                     @endif
                                 </div>
 
