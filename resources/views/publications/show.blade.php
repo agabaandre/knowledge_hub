@@ -52,7 +52,7 @@
 
                                     <span>{!! $publication->theme->description ?? '' !!}</span>
                                 </div>
-                                <div class="jbl_info01">
+                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
                                     <span
                                         class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
                                     @if (count($publication->favourited) > 0)
