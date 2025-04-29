@@ -91,11 +91,22 @@
                                 @if (!empty($publication->publication))
                                 <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
                            
-                                                                <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($publication->publication) }}" target="_blank"
+<!--                                                                 <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($publication->publication) }}" target="_blank"
                                                                     class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
                                                                     style="width:180px !important;" id="pdfLink">
                                                                     <i class="fa fa-eye"></i> Browse Resource
-                                                                </a>
+                                                                </a> -->
+
+                                    <!-- Trigger Button -->
+<button type="button"
+        class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
+        style="width:180px !important;"
+        data-bs-toggle="modal"
+        data-bs-target="#pdfModal"
+        onclick="setIframeSrc('{{ urlencode($publication->publication) }}')">
+    <i class="fa fa-eye"></i> Browse Resource
+</button>
+
                                 </div>
                                 @endif
 
@@ -379,6 +390,28 @@
         </div>
         </div>
     </section>
+
+   <!-- Modal -->
+<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pdfModalLabel">Document Preview</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body" style="height: 600px;">
+        <iframe id="pdfIframe" src="" width="100%" height="100%" frameborder="0"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function setIframeSrc(url) {
+    const baseViewer = 'https://view.officeapps.live.com/op/embed.aspx?src=';
+    document.getElementById('pdfIframe').src = baseViewer + url;
+}
+</script>
+
 
 
 
