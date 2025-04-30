@@ -107,6 +107,7 @@
     <i class="fa fa-eye"></i> Browse Resource
 </button>
 
+
                                 </div>
                                 @endif
 
@@ -391,7 +392,7 @@
         </div>
     </section>
 
-   <!-- Modal -->
+<!-- PDF Viewer Modal -->
 <div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
@@ -405,12 +406,14 @@
     </div>
   </div>
 </div>
-<script>
-function setIframeSrc(url) {
-    const baseViewer = 'https://view.officeapps.live.com/op/embed.aspx?src=';
-    document.getElementById('pdfIframe').src = baseViewer + url;
-}
+
+ <script>
+  function setIframeSrc(fileUrl) {
+    const officeViewer = 'https://view.officeapps.live.com/op/embed.aspx?src=';
+    document.getElementById('pdfIframe').src = officeViewer + fileUrl;
+  }
 </script>
+
 
 
 
