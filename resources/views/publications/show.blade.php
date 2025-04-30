@@ -103,7 +103,7 @@
         style="width:180px !important;"
         data-toggle="modal"
         data-target="#pdfModal"
-        onclick="setIframeSrc('{{ urlencode($publication->publication) }}')">
+        onclick="setIframeSrc('{{ $publication->publication }}')">
     <i class="fa fa-eye"></i> Browse Resource
 </button>
 
