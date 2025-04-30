@@ -414,7 +414,7 @@
  <script>
   function setIframeSrc(fileUrl) {
     const officeViewer = 'https://view.officeapps.live.com/op/embed.aspx?src=';
-    document.getElementById('pdfIframe').src = officeViewer + fileUrl;
+    document.getElementById('pdfIframe').src = fileUrl;
   }
 </script>
 
