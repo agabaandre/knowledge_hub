@@ -101,8 +101,8 @@
 <button type="button"
         class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
         style="width:180px !important;"
-        data-bs-toggle="modal"
-        data-bs-target="#pdfModal"
+        data-toggle="modal"
+        data-target="#pdfModal"
         onclick="setIframeSrc('{{ urlencode($publication->publication) }}')">
     <i class="fa fa-eye"></i> Browse Resource
 </button>
@@ -392,20 +392,24 @@
         </div>
     </section>
 
-<!-- PDF Viewer Modal -->
-<div class="modal fade" id="pdfModal" tabindex="-1" aria-labelledby="pdfModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="pdfModalLabel">Document Preview</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <div class="modal-body" style="height: 600px;">
-        <iframe id="pdfIframe" src="" width="100%" height="100%" frameborder="0"></iframe>
+      <div class="modal-body p-0">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe id="pdfIframe" class="embed-responsive-item" src="" allowfullscreen></iframe>
+        </div>
       </div>
     </div>
   </div>
 </div>
+
 
  <script>
   function setIframeSrc(fileUrl) {
