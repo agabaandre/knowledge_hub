@@ -403,20 +403,13 @@
       </div>
       <div class="modal-body p-0">
         <div class="embed-responsive embed-responsive-16by9">
-          <iframe id="pdfIframe" class="embed-responsive-item" src="" allowfullscreen></iframe>
+          <iframe id="pdfIframe" class="embed-responsive-item" src="/proxy-pdf?url={{ urlencode($publication->publication) }}" allowfullscreen></iframe>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-
- <script>
-  function setIframeSrc(fileUrl) {
-    const officeViewer = 'https://view.officeapps.live.com/op/embed.aspx?src=';
-    document.getElementById('pdfIframe').src = officeViewer+fileUrl;
-  }
-</script>
 
 
 
