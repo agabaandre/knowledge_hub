@@ -1,7 +1,299 @@
-<!-- ============================================================== -->
-<!-- Top header  -->
-<!-- ============================================================== -->
-<!-- Start Navigation -->
+<!-- Top header -->
+<style>
+
+/* Mega Menu Styling for mega Items */
+.menu-container{
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    padding-left: 3%;
+    padding-right: 3%;
+}
+.mega-menu {
+    position: absolute;
+    top: 70%;
+    left: 0;
+    width: 100%;
+    background-color: #fff;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    display: none;
+    z-index: 10000;
+    border-top: 3px solid #00a651;
+}
+
+.mega-menu-container {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 30px 20px;
+}
+
+.mega-menu-grid {
+    display: flex;
+}
+
+.mega-menu-sidebar {
+    width: 220px;
+    padding-right: 20px;
+    border-right: 1px solid #f0f0f0;
+}
+
+.mega-menu-sidebar ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.mega-menu-sidebar ul li {
+    margin-bottom: 10px;
+}
+
+.mega-menu-sidebar ul li a {
+    display: block;
+    padding: 8px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.mega-menu-sidebar ul li a:hover,
+.mega-menu-sidebar ul li a.active {
+    background-color: #f5f5f5;
+    color: #00a651;
+}
+
+.mega-menu-content {
+    flex: 1;
+    padding-left: 30px;
+}
+
+.mega-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 20px;
+}
+
+.mega-item {
+    background-color: #fff;
+    border-radius: 6px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.mega-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+}
+
+.mega-image {
+    height: 160px;
+    overflow: hidden;
+}
+
+.mega-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: all 0.5s ease;
+}
+
+.mega-item:hover .mega-image img {
+    transform: scale(1.05);
+}
+
+.mega-info {
+    padding: 15px;
+}
+
+.mega-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0 0 10px;
+    color: #00a651;
+    line-height: 1.4;
+}
+
+.mega-meta {
+    display: flex;
+    font-size: 12px;
+    color: #777;
+}
+
+.mega-date {
+    margin-right: 15px;
+}
+
+.mega-comments {
+    margin-right: 15px;
+}
+
+.mega-comments:before {
+    content: '💬 ';
+}
+
+.mega-views:before {
+    content: '👁️ ';
+}
+
+/* Show mega menu on hover */
+.has-mega-menu:hover .mega-menu {
+    display: block;
+    animation: fadeInDown 0.3s ease;
+}
+
+
+.nav-menu > li:hover .nav-dropdown {
+    display: block;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Social menu */
+.nav-menu-social {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    align-items: center;
+}
+
+.nav-menu-social li {
+    margin-left: 5px;
+}
+
+.nav-menu-social li a {
+    display: block;
+    padding: 20px 10px;
+    color: #333;
+    text-decoration: none;
+}
+
+.search-btn {
+    font-size: 18px;
+}
+
+/* Mobile styles */
+.nav-toggle {
+    display: none;
+    cursor: pointer;
+    font-size: 24px;
+}
+
+.mobile_nav {
+    display: none;
+}
+
+@media (max-width: 1200px) {
+    .mega-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/*
+@media (max-width: 992px) {
+    .nav-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+        padding: 15px 0;
+    }
+    
+    .nav-toggle {
+        display: block;
+    }
+    
+    .mobile_nav {
+        display: block;
+    }
+    
+    .nav-menus-wrapper {
+        position: fixed;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 60px);
+        background-color: #fff;
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 20px;
+        overflow-y: auto;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        z-index: 1000;
+    }
+    
+    .nav-menus-wrapper.active {
+        transform: translateX(0);
+    }
+    
+    .nav-menu {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .nav-dropdown {
+        position: static;
+        box-shadow: none;
+        width: 100%;
+        border-top: none;
+        padding-left: 20px;
+    }
+    
+    .mega-menu {
+        position: static;
+        box-shadow: none;
+        width: 100%;
+        border-top: none;
+    }
+    
+    .mega-menu-grid {
+        flex-direction: column;
+    }
+    
+    .mega-menu-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #f0f0f0;
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .mega-menu-content {
+        padding-left: 0;
+    }
+    
+    .mega-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .nav-menu-social {
+        margin-top: 20px;
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
+@media (max-width: 576px) {
+    .mega-grid {
+        grid-template-columns: 1fr;
+    }
+}*/
+</style>
+
+<!-- Top header -->
 <div id="langauge-container" style="margin-bottom:-4px">
     <div class="p-3 bg-light">
         <div class="container" style="min-width: 90%;">
@@ -29,18 +321,13 @@
         </div>
     </div>
 </div>
-</div>
 
-<div class="header">
-
-    <div class="container">
-
+<!-- Main Navigation -->
+<div class="header modern-header">
+    <div class="menu-container">
         <nav id="navigation" class="navigation navigation-landscape">
-
             <div class="nav-header">
-                <a class="nav-brand" href="{{ url('/') }}">
-
-                </a>
+                <a class="nav-brand" href="{{ url('/') }}"></a>
                 <div class="nav-toggle"></div>
                 <div class="mobile_nav">
                     <ul>
@@ -53,22 +340,17 @@
                                 <a href="{{ route('login') }}" class="theme-cl fs-lg">
                                     <i class="lni lni-user"></i>
                                 </a>
-
                             @endguest
                         </li>
-
                     </ul>
-
                 </div>
             </div>
+            
             <div class="nav-menus-wrapper" style="transition-property: none;">
-
-                <!-- Use CSS to replace link text with flag icons -->
-
                 <ul class="nav-menu">
-
-                    <li><a href="{{ url('/') }}">Home</a></li>
-                    <li class="categories "><a href="javascript:void(0);">Categories<span
+                    <li class="active"><a href="{{ url('/') }}">Home</a></li>
+                    
+                     <li class="categories "><a href="javascript:void(0);">Data Categories<span
                                 class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
@@ -102,36 +384,121 @@
 
                         </ul>
                     </li>
-                    @if (states_enabled())
-                    @endif
 
-                    <li><a href="{{ url('forums') }}">Forums</a></li>
+
                     @if (states_enabled())
                         <li><a href="{{ url('countries') }}">Member States</a></li>
                     @else
                         <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
                     @endif
-                    <li><a href="{{ url('faqs') }}">FAQs</a></li>
-                    <li><a href="{{ url('tools') }}">Tools</a></li>
+                    
+                    <li class="categories has-mega-menu">
+                        <a href="javascript:void(0);">Public Health Emergencies <span class="submenu-indicator"></span></a>
+                        <div class="mega-menu">
+                            <div class="mega-menu-container">
+                                <div class="mega-menu-grid">
+                                    <!-- Category filters on the left -->
+                                    <div class="mega-menu-sidebar">
+                                        <ul>
+                                            <li><a href="#">Mpox</a></li>
+                                            <li><a href="#">Marburg</a></li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <!-- mega posts grid -->
+                                    <div class="mega-menu-content">
+                                        <div class="mega-grid">
+
+                                            @for($i=1;$i<5;$i++)
+                                            <div class="mega-item">
+                                                <div class="mega-image">
+                                                    <img src="https://via.placeholder.com/300x200" alt="Digital health">
+                                                </div>
+                                                <div class="mega-info">
+                                                    <h3 class="mega-title">Digital health interventions in primary care...</h3>
+                                                    <div class="mega-meta">
+                                                        <span class="mega-date">Mar 13, 2025</span>
+                                                        <span class="mega-comments">0</span>
+                                                        <span class="mega-views">6</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            @endfor
+                                            
+                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                    
+                      <li class="categories">
+                        <a href="javascript:void(0);">Scientific Publications<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                             <li><a href="#">Registered Protocols</a></li>
+                            <li><a href="#">Scientific Articles</a></li>
+                        </ul>
+                    </li>
+
+                     <li class="categories">
+                        <a href="javascript:void(0);">Data & Analytics<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                             <li><a href="#">Surveillance Data</a></li>
+                            <li><a href="#">R&D Data</a></li>
+                            <li><a href="#">Surveys</a></li>
+                            <li><a href="#">Assessments</a></li>
+                        </ul>
+                    </li>
+
+
+                     <li class="categories">
+                        <a href="javascript:void(0);">Guidelines & Frameworks<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                             <li><a href="#">Africa CDC statute</a></li>
+                            <li><a href="#">AU declarartions</a></li>
+                            <li><a href="#">Statements</a></li>
+                            <li><a href="#">MS guidelines</a></li>
+                           <li><a href="{{ url('tools') }}">Tools</a></li>
+                        </ul>
+                    </li>
+
+               
+                    <li class="categories">
+                        <a href="javascript:void(0);">News<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                             <li><a href="{{ url('forums') }}">Forums</a></li>
+                            <li><a href="#">Press Releases</a></li>
+                            <li><a href="#">Events</a></li>
+                        </ul>
+                    </li>
+
+
+                    <li class="categories">
+                        <a href="javascript:void(0);">Self Help<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                            <li><a href="{{ url('faqs') }}">FAQs</a></li>
+                            <li><a href="{{ url('courses') }}">Courses</a></li>  
+                            <li><a href="{{ url('communities') }}">Communities</a></li>
+                            <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
+                        </ul>
+                    </li>
+
                     @include('partials.account.authlinks', ['class' => 'mobileonly'])
-
-                    <li><a href="{{ url('courses') }}">Courses</a></li>
-                    <li><a href="{{ url('communities') }}">Communities</a></li>
-                    <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
-
+                    
+                    
                 </ul>
 
                 <ul class="nav-menu nav-menu-social align-to-right">
-
                     @include('partials.account.authlinks')
-
+                    <li>
+                        <a href="#" class="search-btn">
+                            <i class="lni lni-search"></i>
+                        </a>
+                    </li>
                 </ul>
             </div>
         </nav>
     </div>
 </div>
-<!-- End Navigation -->
 <div class="clearfix"></div>
-<!-- ============================================================== -->
-<!-- Top header  -->
-<!-- ============================================================== -->

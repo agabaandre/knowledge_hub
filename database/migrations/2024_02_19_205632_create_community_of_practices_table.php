@@ -17,9 +17,9 @@ class CreateCommunityOfPracticesTable extends Migration
             $table->id();
             $table->string("community_name");
             $table->string('description',1000)->nullable();
-            $table->foreignId('created_by')
-                ->constrained('users','id')
-                ->onDelete('cascade');
+            $table->foreignId('created_by');
+               // ->constrained('users','id')
+               // ->onDelete('cascade');
             $table->boolean('is_active')->default(0);
             $table->timestamps();
         });
