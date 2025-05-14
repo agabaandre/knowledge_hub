@@ -3,11 +3,10 @@
 
 /* Mega Menu Styling for mega Items */
 .menu-container{
-    max-width: 800%;
+    min-width: 80%;
+    max-width: 80%;
     display: flex;
     justify-content: center;
-    padding-left: 3%;
-    padding-right: 3%;
 }
 .mega-menu {
     position: absolute;
@@ -343,7 +342,7 @@
 </div>
 
 <!-- Main Navigation -->
-<div class="header modern-header justify-content-center" >
+<div class="header modern-header justify-content-center" style="display: flex; justify-content: center;" >
     <div class="menu-container">
         <nav id="navigation" class="navigation navigation-landscape">
             <div class="nav-header">
