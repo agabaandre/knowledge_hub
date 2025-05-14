@@ -1,0 +1,47 @@
+<?php 
+
+use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Log;
+
+if (!function_exists('StreamRemotePdf')) {
+    /**
+     * Streams a remote PDF file to the browser.
+     *
+     * @param string $url The URL of the remote PDF.
+     * @param string $filename The desired filename for the PDF.
+     * @return \Illuminate\Http\Response
+     */
+    function StreamRemotePdf(string $url, string $filename = 'document.pdf'): Response
+    {
+        try {
+            // Validate the URL
+            if (!filter_var($url, FILTER_VALIDATE_URL)) {
+                abort(400, 'Invalid URL provided.');
+            }
+
+            // Fetch the remote PDF
+            $response = Http::withOptions([
+                'stream' => true,
+                'timeout' => 30,
+                'verify' => false, // Set to true in production
+            ])->get($url);
+
+            // Check if the response is successful
+            if (!$response->successful()) {
+                abort(404, 'Failed to fetch the PDF file.');
+            }
+
+            // Stream the response to the browser
+            return response()->stream(function () use ($response) {
+                echo $response->body();
+            }, 200, [
+                'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'inline; filename="' . $filename . '"',
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error streaming PDF: ' . $e->getMessage());
+            abort(500, 'An error occurred while streaming the PDF.');
+        }
+    }
+}

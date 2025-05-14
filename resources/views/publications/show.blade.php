@@ -91,11 +91,23 @@
                                 @if (!empty($publication->publication))
                                 <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
                            
-                                                                <a href="https://docs.google.com/gview?embedded=true&url={{ urlencode($publication->publication) }}" target="_blank"
+<!--                                                                 <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($publication->publication) }}" target="_blank"
                                                                     class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
                                                                     style="width:180px !important;" id="pdfLink">
                                                                     <i class="fa fa-eye"></i> Browse Resource
-                                                                </a>
+                                                                </a> -->
+
+                                    <!-- Trigger Button -->
+<button type="button"
+        class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
+        style="width:180px !important;"
+        data-toggle="modal"
+        data-target="#pdfModal"
+        onclick="setIframeSrc('{{ $publication->publication }}')">
+    <i class="fa fa-eye"></i> Browse Resource
+</button>
+
+
                                 </div>
                                 @endif
 
@@ -379,6 +391,27 @@
         </div>
         </div>
     </section>
+
+<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="pdfModalLabel">Document Preview</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body p-0">
+        <div class="embed-responsive embed-responsive-16by9">
+          <iframe id="pdfIframe" class="embed-responsive-item" src="/proxy-pdf?url={{ urlencode($publication->publication) }}" allowfullscreen></iframe>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
 
 
 
