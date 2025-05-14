@@ -149,6 +149,26 @@
     animation: fadeInDown 0.3s ease;
 }
 
+.has-mega-menu .submenu-indicator {
+    margin-left: 6px;
+    display: inline-block;
+    transition: all 0.3s;
+}
+
+
+.has-mega-menu .submenu-indicator:after {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-right: 2px solid #333;
+    border-bottom: 2px solid #333;
+    transform: rotate(45deg);
+    position: relative;
+    top: -10px!important;
+}
+
+
 @keyframes fadeInDown {
     from {
         opacity: 0;
