@@ -3,7 +3,7 @@
 
 /* Mega Menu Styling for mega Items */
 .menu-container{
-    max-width: 100%;
+    max-width: 800%;
     display: flex;
     justify-content: center;
     padding-left: 3%;
@@ -11,7 +11,7 @@
 }
 .mega-menu {
     position: absolute;
-    top: 70%;
+    top: 100%;
     left: 0;
     width: 100%;
     background-color: #fff;
@@ -323,7 +323,7 @@
 </div>
 
 <!-- Main Navigation -->
-<div class="header modern-header">
+<div class="header modern-header justify-content-center" >
     <div class="menu-container">
         <nav id="navigation" class="navigation navigation-landscape">
             <div class="nav-header">
@@ -433,7 +433,7 @@
                         </div>
                     </li>
                     
-                      <li class="categories">
+                     <!--  <li class="categories">
                         <a href="javascript:void(0);">Scientific Publications<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                              <li><a href="#">Registered Protocols</a></li>
@@ -449,7 +449,7 @@
                             <li><a href="#">Surveys</a></li>
                             <li><a href="#">Assessments</a></li>
                         </ul>
-                    </li>
+                    </li> -->
 
 
                      <li class="categories">
@@ -465,21 +465,26 @@
 
                
                     <li class="categories">
-                        <a href="javascript:void(0);">News<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">Discussions<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                              <li><a href="{{ url('forums') }}">Forums</a></li>
+                            <li><a href="{{ url('communities') }}">Communities</a></li>
                             <li><a href="#">Press Releases</a></li>
-                            <li><a href="#">Events</a></li>
                         </ul>
                     </li>
 
 
                     <li class="categories">
-                        <a href="javascript:void(0);">Self Help<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">Learning<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
-                            <li><a href="{{ url('faqs') }}">FAQs</a></li>
                             <li><a href="{{ url('courses') }}">Courses</a></li>  
-                            <li><a href="{{ url('communities') }}">Communities</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="categories">
+                        <a href="javascript:void(0);">Help<span class="submenu-indicator"></span></a>
+                        <ul class="nav-dropdown nav-submenu">
+                            <li><a href="{{ url('faqs') }}">FAQs</a></li> 
                             <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
                         </ul>
                     </li>
