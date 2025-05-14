@@ -22,7 +22,8 @@
 
 .mega-menu-container {
     width: 100%;
-    max-width: 1200px;
+    min-width: 100%;
+    max-width: 100%;
     margin: 0 auto;
     padding: 30px 20px;
 }
