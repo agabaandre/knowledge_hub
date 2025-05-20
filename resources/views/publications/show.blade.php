@@ -2,56 +2,64 @@
 
 @section('styles')
 <style>
-    .hero-section {
-        background-image: url('{{ asset('frontend/img/dots.png') }}');
-        background-repeat: repeat-x;
-        background-size: contain;
-        padding: 3rem 0;
-    }
-
-    .resource-card {
-        background: #fff;
-        padding: 2rem;
-        border-radius: 8px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
-    }
-
-    .meta-badge {
-        font-size: 0.85rem;
-        font-weight: 500;
-        padding: 0.35rem 0.75rem;
-        margin-right: 0.5rem;
-        border-radius: 20px;
-    }
-
-    .meta-badge.green {
-        background-color: #119A48;
-        color: white;
-    }
-
-    .meta-badge.dark {
-        background-color: #333;
-        color: white;
-    }
-
-    .resource-actions .btn {
-        width: 100%;
-        margin-bottom: 0.5rem;
+    body {
+        background: #f4f6f9;
     }
 
     .section-heading {
-        font-size: 1.2rem;
+        font-size: 1.25rem;
         font-weight: 600;
-        margin-top: 2rem;
+        color: #911C39; /* Primary Red */
         margin-bottom: 1rem;
-        color: #119A48;
+    }
+
+    .card-md {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .badge-au {
+        background-color: #119A48;
+        color: #fff;
+        font-size: 0.85rem;
+        border-radius: 50px;
+        padding: 0.35rem 0.75rem;
+        margin-right: 0.5rem;
+    }
+
+    .badge-secondary {
+        background-color: #7A7A7A;
+        color: #fff;
+    }
+
+    .btn-au {
+        background-color: #119A48;
+        color: #fff;
+    }
+
+    .btn-au:hover {
+        background-color: #0e7a3a;
+        color: #fff;
     }
 
     .comment-box {
-        background: #f9f9f9;
+        background: #f1f1f1;
+        border-radius: 0.5rem;
         padding: 1rem;
-        border-radius: 6px;
         margin-bottom: 1rem;
+    }
+
+    .metadata-list label {
+        font-weight: 500;
+        color: #5F5F5F;
+    }
+
+    .metadata-list span {
+        display: block;
+        margin-bottom: 0.75rem;
     }
 </style>
 @endsection
@@ -60,50 +68,50 @@
 
 @php $likes = count($publication->favourited); @endphp
 
-<!-- Hero Section -->
-<section class="hero-section">
+<!-- Header Section -->
+<section class="py-5" style="background: #fff;">
     <div class="container">
         <div class="row align-items-center">
 
-            <!-- Cover Image -->
-            <div class="col-md-3 text-center mb-4 mb-md-0">
-                <img src="{{ $publication->image_url }}" class="img-fluid shadow-sm rounded" alt="Resource cover">
+            <!-- Image -->
+            <div class="col-md-3 mb-3 text-center">
+                <img src="{{ $publication->image_url }}" class="img-fluid shadow rounded" alt="Cover Image">
             </div>
 
-            <!-- Main Metadata -->
+            <!-- Metadata -->
             <div class="col-md-6">
-                <h3 class="font-weight-bold mb-2">{!! $publication->title !!}</h3>
-                <p class="text-muted mb-3">{{ $publication->theme->description ?? '' }}</p>
+                <h3 class="font-weight-bold mb-2">{{ $publication->title }}</h3>
+                <p class="text-muted">{{ $publication->theme->description ?? '' }}</p>
 
-                <div class="d-flex flex-wrap align-items-center mb-3">
-                    <span class="meta-badge green">
+                <div class="d-flex flex-wrap mb-3">
+                    <span class="badge badge-au">
                         {{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}
                     </span>
-                    @if ($likes)
-                        <span class="meta-badge dark">
+                    @if($likes)
+                        <span class="badge badge-secondary">
                             <i class="lni lni-heart"></i> {{ $likes }} like{{ $likes > 1 ? 's' : '' }}
                         </span>
                     @endif
                 </div>
 
-                <button onclick="summarise({{ $publication->id }})" class="btn btn-success btn-sm">
+                <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
                 </button>
             </div>
 
-            <!-- CTA Buttons -->
-            <div class="col-md-3 resource-actions">
-                @if (!empty($publication->publication))
-                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success">
+            <!-- Actions -->
+            <div class="col-md-3 text-md-right mt-3 mt-md-0">
+                @if ($publication->publication)
+                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-block mb-2">
                         <i class="fa fa-eye"></i> Browse Resource
                     </a>
                 @endif
 
                 @auth
-                    <a href="{{ route('account.newversion') }}?id={{ $publication->id }}" class="btn btn-outline-danger">
+                    <a href="{{ route('account.newversion') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-block mb-2">
                         <i class="fa fa-plus"></i> Submit Version
                     </a>
-                    <a href="{{ route('account.summarize') }}?id={{ $publication->id }}" class="btn btn-outline-danger">
+                    <a href="{{ route('account.summarize') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-block">
                         <i class="fa fa-file"></i> Submit Summary
                     </a>
                 @endauth
@@ -112,15 +120,13 @@
     </div>
 </section>
 
-<!-- Main Content -->
-<section class="py-5">
+<!-- Main Content Section -->
+<section class="py-4">
     <div class="container">
         <div class="row">
-
             <!-- Left Column -->
             <div class="col-lg-8">
-                <div class="resource-card mb-4">
-
+                <div class="card-md">
                     @if ($publication->is_embedded)
                         <div class="responsive-iframe-container mb-4">
                             <iframe src="{{ $publication->publication }}" allowfullscreen></iframe>
@@ -135,16 +141,16 @@
                     <p>{!! $publication->description !!}</p>
 
                     <h5 class="section-heading">Resource Details</h5>
-                    <ul class="list-unstyled">
-                        <li><strong>Source:</strong> {{ $publication->author->name }}</li>
-                        <li><strong>No. of Visits:</strong> {{ $publication->visits }}</li>
-                        <li><strong>Likes:</strong> {{ $likes }}</li>
-                        <li><strong>Category:</strong> {{ @$publication->data_category->category_name }}</li>
-                        <li><strong>Sub Category:</strong> {{ $publication->sub_category->category_name ?? '' }}</li>
-                        <li><strong>Theme:</strong> {!! $publication->theme->description ?? '' !!}</li>
-                        <li><strong>Sub-Theme:</strong> {!! nl2br($publication->sub_theme->description ?? '') !!}</li>
-                        <li><strong>Associated Authors:</strong> {{ $publication->associated_authors ?? 'N/A' }}</li>
-                    </ul>
+                    <div class="metadata-list">
+                        <label>Source</label><span>{{ $publication->author->name }}</span>
+                        <label>Visits</label><span>{{ $publication->visits }}</span>
+                        <label>Likes</label><span>{{ $likes }}</span>
+                        <label>Category</label><span>{{ @$publication->data_category->category_name }}</span>
+                        <label>Sub Category</label><span>{{ $publication->sub_category->category_name ?? '' }}</span>
+                        <label>Theme</label><span>{!! $publication->theme->description ?? '' !!}</span>
+                        <label>Sub-Theme</label><span>{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
+                        <label>Associated Authors</label><span>{{ $publication->associated_authors ?? 'N/A' }}</span>
+                    </div>
 
                     @include('common.favourites_btn')
 
@@ -156,21 +162,18 @@
                 </div>
 
                 <!-- Comments -->
-                <div class="resource-card">
+                <div class="card-md">
                     <h5 class="section-heading">Comments ({{ count($publication->comments) }})</h5>
-
                     @foreach ($publication->comments as $comment)
                         @if ($comment->status === 'approved')
                             <div class="comment-box">
-                                <h6 class="mb-1">{{ $comment->user->name ?? 'Anonymous' }}
-                                    <small class="text-muted"> • {{ time_ago($comment->created_at) }}</small>
-                                </h6>
+                                <strong>{{ $comment->user->name ?? 'Anonymous' }}</strong>
+                                <small class="text-muted d-block">{{ time_ago($comment->created_at) }}</small>
                                 <p class="mb-0">{{ nl2br($comment->comment) }}</p>
                             </div>
                         @endif
                     @endforeach
 
-                    <!-- Comment Form -->
                     @auth
                         <form action="{{ url('records/comment') }}" method="post">
                             @csrf
@@ -178,9 +181,9 @@
                             <input type="hidden" name="user_id" value="{{ current_user()->user_id }}">
                             <div class="form-group">
                                 <label>Your comment</label>
-                                <textarea name="comment" class="form-control" required rows="3">{{ old('comment') }}</textarea>
+                                <textarea name="comment" class="form-control" rows="3" required>{{ old('comment') }}</textarea>
                             </div>
-                            <button type="submit" class="btn btn-success btn-sm">Submit Comment</button>
+                            <button type="submit" class="btn btn-au btn-sm">Submit Comment</button>
                         </form>
                     @else
                         <p class="text-muted">Login to comment.</p>
@@ -192,7 +195,7 @@
             <!-- Right Column -->
             <div class="col-lg-4">
                 @if ($publication->has_attachments)
-                    <div class="resource-card mb-4">
+                    <div class="card-md">
                         <h5 class="section-heading">Attachments</h5>
                         <ul class="list-group">
                             @foreach ($publication->attachments as $index => $pub_file)
@@ -206,8 +209,8 @@
                     </div>
                 @endif
 
-                @if (count($publication->versioning) || $publication->parent_id > 0)
-                    <div class="resource-card mb-4">
+                @if (count($publication->versioning) || $publication->parent_id)
+                    <div class="card-md">
                         <h5 class="section-heading">Versions</h5>
                         <ul class="list-group">
                             @foreach ($publication->versioning as $version)
@@ -217,7 +220,7 @@
                                     </a>
                                 </li>
                             @endforeach
-                            @if ($publication->parent_id > 0)
+                            @if ($publication->parent_id)
                                 <li class="list-group-item">
                                     <a href="{{ url('records/resource') }}?id={{ $publication->parent_id }}">
                                         <i class="fa fa-link"></i> Original Version
@@ -229,7 +232,7 @@
                 @endif
 
                 @if (count($publication->summaries))
-                    <div class="resource-card">
+                    <div class="card-md">
                         <h5 class="section-heading">Summaries & Abstracts</h5>
                         <ul class="list-group">
                             @foreach ($publication->summaries as $summary)
