@@ -9,7 +9,7 @@
     .section-heading {
         font-size: 1.25rem;
         font-weight: 600;
-        color: #911C39; /* Primary Red */
+        color: #911C39;
         margin-bottom: 1rem;
     }
 
@@ -30,11 +30,6 @@
         margin-right: 0.5rem;
     }
 
-    .badge-secondary {
-        background-color: #7A7A7A;
-        color: #fff;
-    }
-
     .btn-au {
         background-color: #119A48;
         color: #fff;
@@ -52,14 +47,16 @@
         margin-bottom: 1rem;
     }
 
-    .metadata-list label {
+    .meta-label {
         font-weight: 500;
         color: #5F5F5F;
+        font-size: 0.9rem;
     }
 
-    .metadata-list span {
+    .meta-value {
         display: block;
-        margin-bottom: 0.75rem;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
     }
 </style>
 @endsection
@@ -68,45 +65,36 @@
 
 @php $likes = count($publication->favourited); @endphp
 
-<!-- Header Section -->
+<!-- Header -->
 <section class="py-5" style="background: #fff;">
     <div class="container">
         <div class="row align-items-center">
-
-            <!-- Image -->
-            <div class="col-md-3 mb-3 text-center">
+            <div class="col-md-3 text-center mb-3">
                 <img src="{{ $publication->image_url }}" class="img-fluid shadow rounded" alt="Cover Image">
             </div>
-
-            <!-- Metadata -->
             <div class="col-md-6">
                 <h3 class="font-weight-bold mb-2">{{ $publication->title }}</h3>
                 <p class="text-muted">{{ $publication->theme->description ?? '' }}</p>
-
                 <div class="d-flex flex-wrap mb-3">
                     <span class="badge badge-au">
                         {{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}
                     </span>
                     @if($likes)
-                        <span class="badge badge-secondary">
+                        <span class="badge badge-dark">
                             <i class="lni lni-heart"></i> {{ $likes }} like{{ $likes > 1 ? 's' : '' }}
                         </span>
                     @endif
                 </div>
-
                 <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
                 </button>
             </div>
-
-            <!-- Actions -->
-            <div class="col-md-3 text-md-right mt-3 mt-md-0">
+            <div class="col-md-3 mt-3 mt-md-0">
                 @if ($publication->publication)
                     <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-block mb-2">
                         <i class="fa fa-eye"></i> Browse Resource
                     </a>
                 @endif
-
                 @auth
                     <a href="{{ route('account.newversion') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-block mb-2">
                         <i class="fa fa-plus"></i> Submit Version
@@ -120,12 +108,14 @@
     </div>
 </section>
 
-<!-- Main Content Section -->
+<!-- Main Content -->
 <section class="py-4">
     <div class="container">
         <div class="row">
-            <!-- Left Column -->
+
+            <!-- Left: Description, Media, Comments -->
             <div class="col-lg-8">
+
                 <div class="card-md">
                     @if ($publication->is_embedded)
                         <div class="responsive-iframe-container mb-4">
@@ -139,29 +129,18 @@
 
                     <h5 class="section-heading">Description</h5>
                     <p>{!! $publication->description !!}</p>
+                </div>
 
-                    <h5 class="section-heading">Resource Details</h5>
-                    <div class="metadata-list">
-                        <label>Source</label><span>{{ $publication->author->name }}</span>
-                        <label>Visits</label><span>{{ $publication->visits }}</span>
-                        <label>Likes</label><span>{{ $likes }}</span>
-                        <label>Category</label><span>{{ @$publication->data_category->category_name }}</span>
-                        <label>Sub Category</label><span>{{ $publication->sub_category->category_name ?? '' }}</span>
-                        <label>Theme</label><span>{!! $publication->theme->description ?? '' !!}</span>
-                        <label>Sub-Theme</label><span>{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
-                        <label>Associated Authors</label><span>{{ $publication->associated_authors ?? 'N/A' }}</span>
-                    </div>
-
-                    @include('common.favourites_btn')
-
+                <div class="card-md">
                     <h5 class="section-heading">Rating</h5>
                     @include('partials.general.rating')
+                </div>
 
+                <div class="card-md">
                     <h5 class="section-heading">Share This Resource</h5>
                     {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
                 </div>
 
-                <!-- Comments -->
                 <div class="card-md">
                     <h5 class="section-heading">Comments ({{ count($publication->comments) }})</h5>
                     @foreach ($publication->comments as $comment)
@@ -190,18 +169,50 @@
                         <a href="{{ url('/login') }}" class="btn btn-outline-primary btn-sm">Login</a>
                     @endauth
                 </div>
+
             </div>
 
-            <!-- Right Column -->
+            <!-- Right: Metadata, Attachments, Versions, Summaries -->
             <div class="col-lg-4">
+
+                <div class="card-md">
+                    <h5 class="section-heading">Resource Details</h5>
+                    <div>
+                        <label class="meta-label">Source</label>
+                        <span class="meta-value">{{ $publication->author->name }}</span>
+
+                        <label class="meta-label">Visits</label>
+                        <span class="meta-value">{{ $publication->visits }}</span>
+
+                        <label class="meta-label">Likes</label>
+                        <span class="meta-value">{{ $likes }}</span>
+
+                        <label class="meta-label">Category</label>
+                        <span class="meta-value">{{ @$publication->data_category->category_name }}</span>
+
+                        <label class="meta-label">Sub Category</label>
+                        <span class="meta-value">{{ $publication->sub_category->category_name ?? '' }}</span>
+
+                        <label class="meta-label">Theme</label>
+                        <span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
+
+                        <label class="meta-label">Sub-Theme</label>
+                        <span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
+
+                        <label class="meta-label">Associated Authors</label>
+                        <span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                    </div>
+                    @include('common.favourites_btn')
+                </div>
+
                 @if ($publication->has_attachments)
                     <div class="card-md">
                         <h5 class="section-heading">Attachments</h5>
                         <ul class="list-group">
-                            @foreach ($publication->attachments as $index => $pub_file)
+                            @foreach ($publication->attachments as $i => $file)
                                 <li class="list-group-item">
-                                    <a href="{{ $pub_file->file }}" target="_blank">
-                                        <i class="fa fa-download"></i> {{ $pub_file->description ?? 'Attachment ' . ($index + 1) }}
+                                    <a href="{{ $file->file }}" target="_blank">
+                                        <i class="fa fa-download"></i> {{ $file->description ?? 'Attachment ' . ($i + 1) }}
                                     </a>
                                 </li>
                             @endforeach
@@ -209,18 +220,16 @@
                     </div>
                 @endif
 
-                @if (count($publication->versioning) || $publication->parent_id)
+                @if (count($publication->versioning) || $publication->parent_id > 0)
                     <div class="card-md">
                         <h5 class="section-heading">Versions</h5>
                         <ul class="list-group">
                             @foreach ($publication->versioning as $version)
                                 <li class="list-group-item">
-                                    <a href="{{ url('records/resource') }}?id={{ $version->id }}">
-                                        Version {{ $version->version_no }}
-                                    </a>
+                                    <a href="{{ url('records/resource') }}?id={{ $version->id }}">Version {{ $version->version_no }}</a>
                                 </li>
                             @endforeach
-                            @if ($publication->parent_id)
+                            @if ($publication->parent_id > 0)
                                 <li class="list-group-item">
                                     <a href="{{ url('records/resource') }}?id={{ $publication->parent_id }}">
                                         <i class="fa fa-link"></i> Original Version
@@ -247,6 +256,7 @@
                         </ul>
                     </div>
                 @endif
+
             </div>
         </div>
     </div>
