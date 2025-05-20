@@ -5,14 +5,12 @@
     body {
         background: #f4f6f9;
     }
-
     .section-heading {
         font-size: 1.25rem;
         font-weight: 600;
         color: #911C39;
         margin-bottom: 1rem;
     }
-
     .card-md {
         background: #fff;
         border-radius: 0.75rem;
@@ -20,7 +18,6 @@
         padding: 1.5rem;
         margin-bottom: 2rem;
     }
-
     .badge-au {
         background-color: #119A48;
         color: #fff;
@@ -29,30 +26,25 @@
         padding: 0.35rem 0.75rem;
         margin-right: 0.5rem;
     }
-
     .btn-au {
         background-color: #119A48;
         color: #fff;
     }
-
     .btn-au:hover {
         background-color: #0e7a3a;
         color: #fff;
     }
-
     .comment-box {
         background: #f1f1f1;
         border-radius: 0.5rem;
         padding: 1rem;
         margin-bottom: 1rem;
     }
-
     .meta-label {
         font-weight: 500;
         color: #5F5F5F;
         font-size: 0.9rem;
     }
-
     .meta-value {
         display: block;
         margin-bottom: 1rem;
@@ -62,10 +54,7 @@
 @endsection
 
 @section('content')
-
 @php $likes = count($publication->favourited); @endphp
-
-<!-- Header -->
 <section class="py-5" style="background: #fff;">
     <div class="container">
         <div class="row align-items-center">
@@ -108,14 +97,11 @@
     </div>
 </section>
 
-<!-- Main Content -->
 <section class="py-4">
     <div class="container">
         <div class="row">
-
-            <!-- Left: Description, Media, Comments -->
+            <!-- Left -->
             <div class="col-lg-8">
-
                 <div class="card-md">
                     @if ($publication->is_embedded)
                         <div class="responsive-iframe-container mb-4">
@@ -126,19 +112,8 @@
                             <iframe width="100%" height="400" src="{{ $publication->publication }}"></iframe>
                         </div>
                     @endif
-
                     <h5 class="section-heading">Description</h5>
                     <p>{!! $publication->description !!}</p>
-                </div>
-
-                <div class="card-md">
-                    <h5 class="section-heading">Rating</h5>
-                    @include('partials.general.rating')
-                </div>
-
-                <div class="card-md">
-                    <h5 class="section-heading">Share This Resource</h5>
-                    {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
                 </div>
 
                 <div class="card-md">
@@ -152,7 +127,6 @@
                             </div>
                         @endif
                     @endforeach
-
                     @auth
                         <form action="{{ url('records/comment') }}" method="post">
                             @csrf
@@ -169,38 +143,21 @@
                         <a href="{{ url('/login') }}" class="btn btn-outline-primary btn-sm">Login</a>
                     @endauth
                 </div>
-
             </div>
 
-            <!-- Right: Metadata, Attachments, Versions, Summaries -->
+            <!-- Right -->
             <div class="col-lg-4">
-
                 <div class="card-md">
                     <h5 class="section-heading">Resource Details</h5>
                     <div>
-                        <label class="meta-label">Source</label>
-                        <span class="meta-value">{{ $publication->author->name }}</span>
-
-                        <label class="meta-label">Visits</label>
-                        <span class="meta-value">{{ $publication->visits }}</span>
-
-                        <label class="meta-label">Likes</label>
-                        <span class="meta-value">{{ $likes }}</span>
-
-                        <label class="meta-label">Category</label>
-                        <span class="meta-value">{{ @$publication->data_category->category_name }}</span>
-
-                        <label class="meta-label">Sub Category</label>
-                        <span class="meta-value">{{ $publication->sub_category->category_name ?? '' }}</span>
-
-                        <label class="meta-label">Theme</label>
-                        <span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
-
-                        <label class="meta-label">Sub-Theme</label>
-                        <span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
-
-                        <label class="meta-label">Associated Authors</label>
-                        <span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                        <label class="meta-label">Source</label><span class="meta-value">{{ $publication->author->name }}</span>
+                        <label class="meta-label">Visits</label><span class="meta-value">{{ $publication->visits }}</span>
+                        <label class="meta-label">Likes</label><span class="meta-value">{{ $likes }}</span>
+                        <label class="meta-label">Category</label><span class="meta-value">{{ @$publication->data_category->category_name }}</span>
+                        <label class="meta-label">Sub Category</label><span class="meta-value">{{ $publication->sub_category->category_name ?? '' }}</span>
+                        <label class="meta-label">Theme</label><span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
+                        <label class="meta-label">Sub-Theme</label><span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
+                        <label class="meta-label">Associated Authors</label><span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
                     </div>
                     @include('common.favourites_btn')
                 </div>
@@ -257,10 +214,18 @@
                     </div>
                 @endif
 
+                <div class="card-md">
+                    <h5 class="section-heading">Rate this Resource</h5>
+                    @include('partials.general.rating')
+                </div>
+
+                <div class="card-md">
+                    <h5 class="section-heading">Share This Resource</h5>
+                    {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
+                </div>
             </div>
         </div>
     </div>
 </section>
-
 @include('common.ai-summary')
 @endsection
