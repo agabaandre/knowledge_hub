@@ -44,7 +44,7 @@ class TagsController extends Controller
         $updated = $this->tagsRepo->update($request, $request->input('tag_id'));
 
         if($updated) {
-            $data = ['message'=>'File type saved successfully','status'=>'success','data'=>$updated];
+            $data = ['message'=>'Tag saved successfully','status'=>'success','data'=>$updated];
         }
 
         if($request->ajax()){

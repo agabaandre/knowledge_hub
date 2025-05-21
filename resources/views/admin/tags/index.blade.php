@@ -52,6 +52,7 @@
                     <thead>
                     <tr>
                         <th>Tag</th>
+                        <th>Health Emergency</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -64,8 +65,11 @@
                     @foreach($tags as $row)
                         <tr>
                             <td>{{ $row->tag_text }}</td>
+                            <td>{{ ($row->is_health_emergency) ? 'Yes':'No' }}</td>
                             <td>
-                                <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" class="btn btn-sm btn-primary ml-1">Edit</a>
+                                <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" 
+                                    is_health_emergency="{{$row->is_health_emergency }}" 
+                                    class="btn btn-sm btn-primary ml-1">Edit</a>
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
                                    onclick="openDeleteModal('{{ $row->id }}')">Delete</a>
                             </td>

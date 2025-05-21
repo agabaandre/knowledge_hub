@@ -16,6 +16,17 @@
                         <label for="tag_text">Tag</label>
                         <input type="text" class="form-control" id="tag_text" name="tag_text" value="">
                     </div>
+
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                          <label class="form-label" for="name">Health Emergency?</label>
+                          <select placeholder="Enter Tag" class="form-control newform" id="is_health_emergency" name="is_health_emergency" required>
+                            <option value="0">No</option>
+                            <option value="1">Yes</option>
+                          </select>
+                        </div>
+                      </div>
+
                     <input type="hidden" name="tag_id" id="tag_id" value="">
                 </div>
                 <div class="modal-footer">
@@ -35,6 +46,8 @@
             var button = $(event.relatedTarget);
             var tag_id = button.data('id');
             var tag_text = button.data('tag');
+             var is_emergency = button.data('is_health_emergency');
+             $('#is_health_emergency').val(is_emergency);
 
             $('#tag_id').val(tag_id);
             $('#tag_text').val(tag_text);

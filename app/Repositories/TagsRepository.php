@@ -41,6 +41,7 @@ class TagsRepository{
         }
 
         $tag->tag_text = $request->tag_text; // Assuming 'name' is the field name from your form
+        $tag->is_health_emergency = ($request->is_health_emergency) ?? true:false;
         $tag->save();
 
         return $tag;
