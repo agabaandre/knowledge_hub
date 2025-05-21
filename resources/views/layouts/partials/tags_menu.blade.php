@@ -26,8 +26,14 @@
                                     <!-- mega posts grid -->
                                     <div class="mega-menu-content">
                                         <div class="mega-grid">
+                                            @php
+                                              $count =0;
+                                            @endphp
+
+
 
                                             @foreach($health_emergencies as $pub)
+                                            @if($count<6)
                                             <a class="mega-item" href="{{ url('records/resource')}}?id={{$pub->id}}">
                                                 <div class="mega-image">
                                                     <img src="{{$pub->cover}}">
@@ -41,6 +47,8 @@
                                                     </div>
                                                 </div>
                                             </a>
+                                            @endif
+                                             @php $count ++; @endphp
                                             @endforeach
                                             
                                             
