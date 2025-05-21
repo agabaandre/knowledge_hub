@@ -36,7 +36,7 @@
                                                     <h3 class="mega-title">{{truncate($pub->title,125)}}</h3>
                                                     <div class="mega-meta">
 
-                                                        <span class="mega-date text-bold">{{$pub->theme->description}}</span>
+                                                        <span class="mega-date text-bold">{{$pub->theme->description ?? ''}}</span>
                                                         <span class="mega-date">{{ text_date($pub->created_at)}}</span>
                                                     </div>
                                                 </div>
