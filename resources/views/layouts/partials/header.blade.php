@@ -412,7 +412,7 @@
                         <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
                     @endif
                     
-                    <li class="categories {{(!empty($health_emergencies))?'has-mega-menu':''}}">
+                    <li class="categories {{(count($health_emergencies)>0)?'has-mega-menu':''}}">
                         <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
 
                         @include('layouts.partials.tags_menu')

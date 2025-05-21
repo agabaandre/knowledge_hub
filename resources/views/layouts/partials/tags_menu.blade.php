@@ -1,5 +1,5 @@
 
-@if(empty($health_emergencies))
+@if(count($health_emergencies)==0)
     <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
      @foreach($tags as $tag)
          @if($tag->is_health_emergency)
