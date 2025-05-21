@@ -79,7 +79,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     $q->where('community_of_practice_id', $request->community_id);
                 });
             });
-        } else {
+        } 
+        else {
             $query->whereDoesntHave('communities');
         }
     }, function ($query) {
@@ -683,6 +684,10 @@ private function applyFilters($query, $request) {
         },
         'category' => function ($q, $value) {
             $q->where('publication_catgory_id', $value);
+        },
+        'tag' => function ($q, $value) {
+            $taggedpubs = PublicationTag::where('id', $value)->pluck('publication_id');
+            $q->whereIn('id', $taggedpubs);
         }
 
     ];

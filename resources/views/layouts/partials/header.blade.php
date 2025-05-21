@@ -3,8 +3,8 @@
 
 /* Mega Menu Styling for mega Items */
 .menu-container{
-    min-width: 80%;
-    max-width: 80%;
+    min-width: 95%;
+    max-width: 95%;
     display: flex;
     justify-content: center;
 }
@@ -413,44 +413,10 @@
                     @endif
                     
                     <li class="categories has-mega-menu">
-                        <a href="javascript:void(0);">Public Health Emergencies <span class="submenu-indicator"></span></a>
-                        <div class="mega-menu">
-                            <div class="mega-menu-container">
-                                <div class="mega-menu-grid">
-                                    <!-- Category filters on the left -->
-                                    <div class="mega-menu-sidebar">
-                                        <ul>
-                                            <li><a href="#">Mpox</a></li>
-                                            <li><a href="#">Marburg</a></li>
-                                        </ul>
-                                    </div>
-                                    
-                                    <!-- mega posts grid -->
-                                    <div class="mega-menu-content">
-                                        <div class="mega-grid">
+                        <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
 
-                                            @for($i=1;$i<5;$i++)
-                                            <div class="mega-item">
-                                                <div class="mega-image">
-                                                    <img src="https://via.placeholder.com/300x200" alt="Digital health">
-                                                </div>
-                                                <div class="mega-info">
-                                                    <h3 class="mega-title">Digital health interventions in primary care...</h3>
-                                                    <div class="mega-meta">
-                                                        <span class="mega-date">Mar 13, 2025</span>
-                                                        <span class="mega-comments">0</span>
-                                                        <span class="mega-views">6</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            @endfor
-                                            
-                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        @include('layouts.partials.tags_menu')
+                        
                     </li>
                     
                      <!--  <li class="categories">
@@ -516,11 +482,6 @@
 
                 <ul class="nav-menu nav-menu-social align-to-right">
                     @include('partials.account.authlinks')
-                    <li>
-                        <a href="#" class="search-btn">
-                            <i class="lni lni-search"></i>
-                        </a>
-                    </li>
                 </ul>
             </div>
         </nav>
