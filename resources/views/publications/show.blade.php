@@ -1,420 +1,231 @@
 @extends('layouts.app')
-@section('styles')
-    <style>
-        .responsive-iframe-container {
-            position: relative;
-            width: 100%;
-            padding-top: 56.25%;
-            /* 16:9 aspect ratio (height/width = 9/16 = 56.25%) */
-            overflow: hidden;
-        }
 
-        .responsive-iframe-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border: none;
-            /* Optional */
-        }
-    </style>
+@section('styles')
+<style>
+    body {
+        background: #f4f6f9;
+    }
+    .section-heading {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #911C39;
+        margin-bottom: 1rem;
+    }
+    .card-md {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .badge-au {
+        background-color: #119A48;
+        color: #fff;
+        font-size: 0.85rem;
+        border-radius: 50px;
+        padding: 0.35rem 0.75rem;
+        margin-right: 0.5rem;
+    }
+    .btn-au {
+        background-color: #119A48;
+        color: #fff;
+    }
+    .btn-au:hover {
+        background-color: #0e7a3a;
+        color: #fff;
+    }
+    .comment-box {
+        background: #f1f1f1;
+        border-radius: 0.5rem;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    .meta-label {
+        font-weight: 500;
+        color: #5F5F5F;
+        font-size: 0.9rem;
+    }
+    .meta-value {
+        display: block;
+        margin-bottom: 1rem;
+        font-size: 0.95rem;
+    }
+</style>
 @endsection
 
 @section('content')
-
-    @php
-        $image_link = $publication->image_url;
-    @endphp
-
-
-    <!-- ======================= Publication Info ======================== -->
-    <div class="bg-light rounded py-2"
-        style="background-image: url({{ asset('frontend/img/dots.png') }}); background-repeat:repeat-x; background-size:contain;">
-        <div class="container">
-
-            @include('layouts.partials.alerts')
-
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-12">
-                    <div class="jbd-01 d-flex align-items-center justify-content-between">
-                        <div class="jbd-flex d-flex align-items-center justify-content-start">
-                            <div class="jbd-01-thumb">
-                                <img src="{{ $publication->image_url }}" class="img-fluid" width="250" alt="" />
-                            </div>
-                            <div class="jbd-01-caption pl-3">
-                                <div class="tbd-title">
-                                    <h4 class="mb-0 ft-medium fs-md">
-                                        {!! $publication->title !!}
-                                    </h4>
-                                </div>
-                                <div class="jbl_location mb-3">
-
-                                    <span>{!! $publication->theme->description ?? '' !!}</span>
-                                </div>
-                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-                                      <div class="details ft-medium">
-                                        <label class="text-muted">No. of Visits</label>
-                                        <span
-                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ $publication->visits }}
-                                            Visits</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Likes</label>
-                                        <span
-                                            class="px-2 py-1 ft-medium medium text-light theme-bg rounded mr-2">{{ count($publication->favourited) }}
-                                            Likes
-                                        </span>
-                                    </div>
-                                    <div class="details ft-medium  d-flex mb-2">
-                                    <span class="text-light theme-bg rouded">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}</span>
-                                    </div>
-                                    @if (count($publication->favourited) > 0)
-                                        @php
-                                            $likes = count($publication->favourited);
-                                        @endphp
-                                       <div class="details ft-medium">
-                                        <span class="px-2 py-1 ft-medium medium text-light bg-dark rounded mr-l"><i
-                                                class="lni lni-heart mr-1"></i> {{ $likes }}
-                                            User{{ $likes > 1 ? 's' : '' }} liked this</span>
-                                       </div>
-                                    @endif
-                                </div>
-
-                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-                                    <a onclick="summarise({{ $publication->id }})"
-                                        class="btn btn-md btn-success rounded fs-sm ft-medium" style="color:white;">
-                                        <i class="fa-solid fa-microchip"></i> AI Processing(Summarizer)</a>
-
-                                    
-                                </div>
-                                @if (!empty($publication->publication))
-                                <div class="jbl_info01 mt-3 col-sm-12 col-lg-4">
-                           
-<!--                                                                 <a href="https://view.officeapps.live.com/op/embed.aspx?src={{ urlencode($publication->publication) }}" target="_blank"
-                                                                    class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                                                    style="width:180px !important;" id="pdfLink">
-                                                                    <i class="fa fa-eye"></i> Browse Resource
-                                                                </a> -->
-
-                                    <!-- Trigger Button -->
-<button type="button"
-        class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-        style="width:180px !important;"
-        data-toggle="modal"
-        data-target="#pdfModal"
-        onclick="setIframeSrc('{{ $publication->publication }}')">
-    <i class="fa fa-eye"></i> Browse Resource
-</button>
-
-
-                                </div>
-                                @endif
-
-
-
-                            </div>
-                        </div>
-
-
-                        <div class="jbd-01-right text-right">
-
-                            <div class="jbl_button mb-2">
-
-
-
-                                @auth
-                                    <div class="row col-12 d-flex" style="float:right !importntant;">
-
-                                        <a href="{{ route('account.newversion') }}?id={{ $publication->id }}"
-                                            class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium mb-2"
-                                            style="width:180px !important;">
-                                            <i class="fa fa-plus"></i> Submit a Version</a>
-
-                                        <a href="{{ route('account.summarize') }}?id={{ $publication->id }}"
-                                            class="btn btn-sm btn-outline-danger rounded fs-sm ft-medium"
-                                            style="width:180px !important;">
-                                            <i class="fa fa-file"></i> Submit a Summary</a>
-                                    </div>
-                                @endauth
-
-
-                            </div>
-                        </div>
-                    </div>
+@php $likes = count($publication->favourited); @endphp
+<section class="py-5" style="background: #fff;">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-md-3 text-center mb-3">
+                <img src="{{ $publication->image_url }}" class="img-fluid shadow rounded" alt="Cover Image">
+            </div>
+            <div class="col-md-6">
+                <h3 class="font-weight-bold mb-2">{{ $publication->title }}</h3>
+                <p class="text-muted">{{ $publication->theme->description ?? '' }}</p>
+                <div class="d-flex flex-wrap mb-3">
+                    <span class="badge badge-au">
+                        {{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}
+                    </span>
+                    @if($likes)
+                        <span class="badge badge-dark">
+                            <i class="lni lni-heart"></i> {{ $likes }} like{{ $likes > 1 ? 's' : '' }}
+                        </span>
+                    @endif
                 </div>
+                <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
+                    <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
+                </button>
+            </div>
+            <div class="col-md-3 mt-3 mt-md-0">
+                @if ($publication->publication)
+                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-block mb-2">
+                        <i class="fa fa-eye"></i> Browse Resource
+                    </a>
+                @endif
+                @auth
+                    <a href="{{ route('account.newversion') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-block mb-2">
+                        <i class="fa fa-plus"></i> Submit Version
+                    </a>
+                    <a href="{{ route('account.summarize') }}?id={{ $publication->id }}" class="btn btn-outline-danger btn-block">
+                        <i class="fa fa-file"></i> Submit Summary
+                    </a>
+                @endauth
             </div>
         </div>
     </div>
-    <!-- ======================= Publication Info ======================== -->
+</section>
 
-    <!-- ============================ Publication Details Start ================================== -->
-    <section class="py-2">
-        <div class="container">
-            <div class="row">
-
-                @php
-
-                    $col =
-                        count($publication->summaries) > 0 ||
-                        $publication->has_attachments ||
-                        $publication->parent_id > 0
-                            ? '7'
-                            : '12';
-
-                @endphp
-
-                <div class="col-xl-{{ $col }} col-lg-{{ $col }} col-md-{{ $col }} col-sm-12">
+<section class="py-4">
+    <div class="container">
+        <div class="row">
+            <!-- Left -->
+            <div class="col-lg-8">
+                <div class="card-md">
                     @if ($publication->is_embedded)
-                        <div class="responsive-iframe-container">
-                            <iframe src="{{ $publication->publication }}" frameborder="0" allowfullscreen>
-                            </iframe>
+                        <div class="responsive-iframe-container mb-4">
+                            <iframe src="{{ $publication->publication }}" allowfullscreen></iframe>
+                        </div>
+                    @elseif ($publication->is_video)
+                        <div class="mb-4">
+                            <iframe width="100%" height="400" src="{{ $publication->publication }}"></iframe>
                         </div>
                     @endif
-                    <div class="rounded mb-4">
-                        <div class="jbd-01 pr-3">
-                            <div class="jbd-details mb-4">
-                                @if ($publication->is_video)
-                                    <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
-                                @endif
-
-                                <br>
-                                <h5 class="ft-medium fs-md mt-2">Description</h5>
-                                <p>{!! $publication->description !!}</p>
-                            </div>
-
-                            <div class="jbd-details mb-4">
-                                <h5 class="ft-medium fs-md text-success">Resource Details</h5>
-                                <div class="other-details">
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Source</label>
-                                        <span class="text-dark">{{ $publication->author->name??"" }}</span>
-                                    </div>
-                                  
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Category</label>
-                                        <span class="text-dark">{{ @$publication->data_category->category_name }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Sub Category</label>
-                                        <span
-                                            class="text-dark">{{ $publication->sub_category->category_name ?? '' }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Theme</label>
-                                        <span class="text-dark">{!! $publication->theme->description ?? '' !!}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Sub-Theme</label>
-                                        <span class="text-dark">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Associated Authors</label>
-                                        <span class="text-dark">{{ $publication->associated_authors ?? 'N/A' }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <div class="btn btn-outline-dark mt-2">
-                                            @php
-                                                $row = $publication;
-                                            @endphp
-                                            @include('common.favourites_btn')
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="row container">
-                            <div class="col-lg-12">
-                                <h5 class="text-bold text-success">Rating</h5>
-                                @include('partials.general.rating')
-                            </div>
-                        </div>
-
-                        <div class="jbd-02 pt-4 pr-3 container">
-                            <h5 class="text-bold text-success">Share on:</h5>
-                            <div class="row">
-                                {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Blog Comment -->
-                    <div class="article_detail_wrapss single_article_wrap format-standard">
-
-                        <div class="comment-area">
-                            <div class="all-comments">
-                                <h3 class="comments-title">{{ count($publication->comments) }} Comments</h3>
-                                <div class="comment-list">
-                                    <ul>
-
-                                        @foreach ($publication->comments as $comment)
-                                            @if ($comment->status == 'approved')
-                                                <li class="article_comments_wrap">
-
-                                                    <article>
-                                                        <div class="comment-details app-comment">
-                                                            <div class="comment-meta">
-                                                                <div class="comment-left-meta">
-                                                                    <h4 class="author-name">
-                                                                        {{ $comment->user ? $comment->user->name : 'Anonymous' }}
-                                                                    </h4>
-                                                                    <div class="comment-date">
-                                                                        {{ time_ago($comment->created_at) }}</div>
-                                                                </div>
-                                                            </div>
-                                                            <div class="comment-text">
-                                                                <p>{{ nl2br($comment->comment) }}</p>
-                                                            </div>
-
-                                                        </div>
-
-
-                                                    </article>
-
-                                                </li>
-                                            @endif
-                                        @endforeach
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-
-
+                    <h5 class="section-heading">Description</h5>
+                    <p>{!! $publication->description !!}</p>
                 </div>
 
-                <!-- Sidebar -->
-
-                @if (count($publication->summaries) > 0 || $publication->has_attachments || $publication->parent_id > 0)
-
-                    <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
-
-                        @if ($publication->has_attachments)
-                            @php
-                                $count = 1;
-                            @endphp
-                            <h5>Attachments</h5>
-                            <ul class="list-group mb-3">
-                                @foreach ($publication->attachments as $pub_file)
-                                    <li class="list-group-item"><a href="{{ $pub_file->file }}" target="_blank"
-                                            class="fs-sm ft-medium"><i class="fa fa-download"></i>
-                                            {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
-                                    @php
-                                        $count++;
-                                    @endphp
-                                @endforeach
-
-                            </ul>
+                <div class="card-md">
+                    <h5 class="section-heading">Comments ({{ count($publication->comments) }})</h5>
+                    @foreach ($publication->comments as $comment)
+                        @if ($comment->status === 'approved')
+                            <div class="comment-box">
+                                <strong>{{ $comment->user->name ?? 'Anonymous' }}</strong>
+                                <small class="text-muted d-block">{{ time_ago($comment->created_at) }}</small>
+                                <p class="mb-0">{{ nl2br($comment->comment) }}</p>
+                            </div>
                         @endif
-
-                        @if (count($publication->summaries) > 0 || count($publication->versioning) > 0 || $publication->parent_id > 0)
-                            <div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
-
-
-                                @if (count($publication->versioning) > 0)
-                                    <h4 class="ft-medium fs-md mb-3">Resource Versions</h4>
-                                    <ul class="list-group mb-3">
-                                        @foreach ($publication->versioning as $version)
-                                            <li>
-                                                <h5 class="text-muted"><a
-                                                        href="{{ url('records/resource') }}?id={{ $version->id }}">Version
-                                                        {{ $version->version_no }}</a></h5>
-                                            </li>
-                                        @endforeach
-                                    </ul>
-                                @elseif($publication->parent_id > 0)
-                                    <h5 class=" mb-3"><a
-                                            class=" col-lg-12 text-center btn btn-sm btn-outline-success rounded"
-                                            href="{{ url('records/resource') }}?id={{ $publication->parent_id }}"><i
-                                                class="fa fa-link"></i> Original Version</a></h5>
-                                @endif
-
-                                @if (count($publication->summaries) > 0)
-                                    <h6 class="ft-medium fs-sm mb-3">Summaries and Abstracts</h6>
-                                    <ul class="list-group mb-3">
-                                        @foreach ($publication->summaries as $summary)
-                                            @if ($comment->is_approved == 1)
-                                                <li>
-                                                    <h6 class="text-muted"><a
-                                                            href="{{ url('records/shortened') }}?id={{ $summary->id }}">{{ truncate($summary->title, 100) }}
-                                                            by {{ $summary->author->name??"" }}</a></h6>
-                                                </li>
-                                            @endif
-                                        @endforeach
-                                    </ul>
-                                @endif
-
-                        @endif
-
-                        @auth
-
-                            <h4 class="ft-medium fs-md mb-3">Got something to say about this resource?</h4>
-
-                            <form action="{{ url('records/comment') }}" method="post" class="_apply_form_form">
-                                @csrf
-                                <input type="hidden" name="publication_id" value="{{ $publication->id }}" />
-                                <input type="hidden" name="user_id" value="{{ @current_user()->user_id }}" />
-                                <div class="form-group">
-                                    <label class="text-success mb-1 ft-medium medium">Your comment</label>
-                                    <textarea name="comment" class="form-control" placeholder="Your comment" required>{{ old('comment') }}</textarea>
-
-
-                                    <div class="form-group mt-4">
-                                        <button type="submit"
-                                            class="btn btn-md rounded theme-bg text-light ft-medium fs-sm full-width">Submit
-                                            Comment</button>
-                                    </div>
-
-                            </form>
-                        @else
+                    @endforeach
+                    @auth
+                        <form action="{{ url('records/comment') }}" method="post">
+                            @csrf
+                            <input type="hidden" name="publication_id" value="{{ $publication->id }}">
+                            <input type="hidden" name="user_id" value="{{ current_user()->user_id }}">
                             <div class="form-group">
-                                <label class="text-success mb-1 ft-medium medium">Your comment</label>
-                                <textarea name="comment" class="form-control" placeholder="Login to comment" disabled required>{{ old('comment') }}</textarea>
+                                <label>Your comment</label>
+                                <textarea name="comment" class="form-control" rows="3" required>{{ old('comment') }}</textarea>
                             </div>
-
-                            <div class="form-group mt-4">
-                                <a href="{{ url('/login') }}"
-                                    class="btn btn-md rounded theme-bg text-light ft-medium fs-sm full-width">Login to
-                                    Comment</a>
-                            </div>
-
-                        @endauth
-
-                    </div>
+                            <button type="submit" class="btn btn-au btn-sm">Submit Comment</button>
+                        </form>
+                    @else
+                        <p class="text-muted">Login to comment.</p>
+                        <a href="{{ url('/login') }}" class="btn btn-outline-primary btn-sm">Login</a>
+                    @endauth
+                </div>
             </div>
 
-            @endif
+            <!-- Right -->
+            <div class="col-lg-4">
+                <div class="card-md">
+                    <h5 class="section-heading">Resource Details</h5>
+                    <div>
+                        <label class="meta-label">Source</label><span class="meta-value">{{ $publication->author->name }}</span>
+                        <label class="meta-label">Visits</label><span class="meta-value">{{ $publication->visits }}</span>
+                        <label class="meta-label">Likes</label><span class="meta-value">{{ $likes }}</span>
+                        <label class="meta-label">Category</label><span class="meta-value">{{ @$publication->data_category->category_name }}</span>
+                        <label class="meta-label">Sub Category</label><span class="meta-value">{{ $publication->sub_category->category_name ?? '' }}</span>
+                        <label class="meta-label">Theme</label><span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
+                        <label class="meta-label">Sub-Theme</label><span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
+                        <label class="meta-label">Associated Authors</label><span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                    </div>
+                    @include('common.favourites_btn')
+                </div>
 
-        </div>
-        </div>
-    </section>
+                @if ($publication->has_attachments)
+                    <div class="card-md">
+                        <h5 class="section-heading">Attachments</h5>
+                        <ul class="list-group">
+                            @foreach ($publication->attachments as $i => $file)
+                                <li class="list-group-item">
+                                    <a href="{{ $file->file }}" target="_blank">
+                                        <i class="fa fa-download"></i> {{ $file->description ?? 'Attachment ' . ($i + 1) }}
+                                    </a>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
 
-<div class="modal fade" id="pdfModal" tabindex="-1" role="dialog" aria-labelledby="pdfModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="pdfModalLabel">Document Preview</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body p-0">
-        <div class="embed-responsive embed-responsive-16by9">
-          <iframe id="pdfIframe" class="embed-responsive-item" src="/proxy-pdf?url={{ urlencode($publication->publication) }}" allowfullscreen></iframe>
+                @if (count($publication->versioning) || $publication->parent_id > 0)
+                    <div class="card-md">
+                        <h5 class="section-heading">Versions</h5>
+                        <ul class="list-group">
+                            @foreach ($publication->versioning as $version)
+                                <li class="list-group-item">
+                                    <a href="{{ url('records/resource') }}?id={{ $version->id }}">Version {{ $version->version_no }}</a>
+                                </li>
+                            @endforeach
+                            @if ($publication->parent_id > 0)
+                                <li class="list-group-item">
+                                    <a href="{{ url('records/resource') }}?id={{ $publication->parent_id }}">
+                                        <i class="fa fa-link"></i> Original Version
+                                    </a>
+                                </li>
+                            @endif
+                        </ul>
+                    </div>
+                @endif
+
+                @if (count($publication->summaries))
+                    <div class="card-md">
+                        <h5 class="section-heading">Summaries & Abstracts</h5>
+                        <ul class="list-group">
+                            @foreach ($publication->summaries as $summary)
+                                @if ($comment->is_approved == 1)
+                                    <li class="list-group-item">
+                                        <a href="{{ url('records/shortened') }}?id={{ $summary->id }}">
+                                            {{ truncate($summary->title, 100) }} by {{ $summary->author->name ?? '' }}
+                                        </a>
+                                    </li>
+                                @endif
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+
+                <div class="card-md">
+                    <h5 class="section-heading">Rate this Resource</h5>
+                    @include('partials.general.rating')
+                </div>
+
+                <div class="card-md">
+                    <h5 class="section-heading">Share This Resource</h5>
+                    {{ share_buttons(url('records/resource') . '?id=' . $publication->id) }}
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
-</div>
-
-
-
-
-
-
-    @include('common.ai-summary')
-
+</section>
+@include('common.ai-summary')
 @endsection

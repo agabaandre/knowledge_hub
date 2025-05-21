@@ -21,18 +21,18 @@
             <button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
             </div>
 	</form>
-
- 
-<div  class="row spot-row col-sm-12 d-flex align-items-center">
-     
-    <div class="col-lg-4 col-md-12 col-sm-12 px-3">
+     <div class="col-lg-12 col-md-12 col-sm-12 px-3">
         @include('home.partials.quotes')
        {{-- @include('home.partials.tags') --}}
     </div>
 
-    <div class="col-lg-8 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
+ 
+<div  class="row spot-row col-sm-12 d-flex align-items-center">
+     
+   
+
+    <div class="col-lg-12 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
       <div class="row justify-content-center mb-2">
-      <h3 class="text-center" style="font-size:20px;">Click a health theme below to access associated content</h3>
       
       </div>
       @include('home.partials.theme_tabs') 
