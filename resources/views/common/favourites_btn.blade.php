@@ -1,4 +1,4 @@
-           @auth
+        @auth
             @if(!$row->is_favourite)
             <span class="mr-1">
             <a href="{{ url('publications/add_favourite') }}?id={{ $row->id }}">
