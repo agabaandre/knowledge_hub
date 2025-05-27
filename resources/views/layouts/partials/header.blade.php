@@ -70,21 +70,24 @@
 }
 
 .mega-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(200px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 20px;
 }
 
+
 .mega-item {
-    width: 100%; /* ensures it fits the grid column */
-    min-width: 0; /* prevents content from overflowing */
-    overflow: hidden;
+    flex: 1 1 calc(25% - 20px); /* 4 items per row minus gap compensation */
+    box-sizing: border-box;
+    min-width: 200px; /* prevents items from getting too small */
     background-color: #fff;
     border-radius: 6px;
+    overflow: hidden;
     transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
 }
+
 .mega-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -226,6 +229,24 @@
 @media (max-width: 1200px) {
     .mega-grid {
         grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 1024px) {
+    .mega-item {
+        flex: 1 1 calc(33.333% - 20px);
+    }
+}
+
+@media (max-width: 768px) {
+    .mega-item {
+        flex: 1 1 calc(50% - 20px);
+    }
+}
+
+@media (max-width: 480px) {
+    .mega-item {
+        flex: 1 1 100%;
     }
 }
 
