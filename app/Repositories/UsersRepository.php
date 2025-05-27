@@ -87,8 +87,12 @@ class UsersRepository {
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
+        try{
         if(!$user->author_id && !$request->author_id)
         $user->author()->firstOrCreate(['name'=>$user->name]);
+        }catch(\Exception $ex){
+            //ignore
+        }
 
         if(!$is_social)
         $this->send_email($request, $token);
