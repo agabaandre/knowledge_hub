@@ -31,10 +31,14 @@
     <div class="mega-menu-grid">
 
       {{-- Sidebar --}}
+      
+      @php
+          $filteredTags = $tags->filter(fn($tag) => $tag->is_health_emergency)->values();
+        @endphp
+
       <div class="mega-menu-sidebar">
         <ul>
-          @foreach($tags as $tag)
-            @if($tag->is_health_emergency)
+          @foreach($filteredTags as $tag)
               <li 
                 data-tag-id="{{ $tag->id }}" 
                 class="{{ $loop->first ? 'active' : '' }}"
@@ -43,15 +47,14 @@
                   {{ $tag->tag_text }}
                 </a>
               </li>
-            @endif
           @endforeach
         </ul>
       </div>
 
       {{-- Content panels --}}
       <div class="mega-menu-content">
-        @foreach($tags as $tag)
-          @if($tag->is_health_emergency)
+        
+        @foreach($filteredTags as $tag)
             <div 
               class="row mega-grid-content {{ $loop->first ? 'active' : '' }}" 
               data-tag-id="{{ $tag->id }}" 
@@ -80,7 +83,6 @@
                 @php $count++; @endphp
               @endforeach
             </div>
-          @endif
         @endforeach
       </div>
 
