@@ -57,8 +57,12 @@
               data-tag-id="{{ $tag->id }}" 
               style="display: {{ $loop->first ? 'block' : 'none' }};"
             >
-              @php $count = 0; @endphp
-              @foreach($health_emergencies->where('tag_id', $tag->id) as $pub)
+              @php 
+
+              $count = 0; 
+
+              @endphp
+              @foreach( get_tag_ublications($tag) as $pub)
                 @if($count < 6)
                   <a class="mega-item" href="{{ url('records/resource') }}?id={{ $pub->id }}">
                     <div class="mega-image">
