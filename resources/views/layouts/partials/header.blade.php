@@ -71,7 +71,7 @@
 
 .mega-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, minmax(200px, 1fr));
     gap: 20px;
 }
 
@@ -116,7 +116,7 @@
     margin: 0 0 10px;
     color: #00a651;
     line-height: 1.4;
-    
+
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
