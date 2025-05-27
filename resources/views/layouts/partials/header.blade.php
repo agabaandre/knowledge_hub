@@ -71,17 +71,20 @@
 
 .mega-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
     gap: 20px;
 }
 
 .mega-item {
+    width: 100%; /* ensures it fits the grid column */
+    min-width: 0; /* prevents content from overflowing */
+    overflow: hidden;
     background-color: #fff;
     border-radius: 6px;
-    overflow: hidden;
     transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
 }
-
 .mega-item:hover {
     transform: translateY(-5px);
     box-shadow: 0 5px 15px rgba(0,0,0,0.1);
@@ -113,6 +116,11 @@
     margin: 0 0 10px;
     color: #00a651;
     line-height: 1.4;
+    
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .mega-meta {
