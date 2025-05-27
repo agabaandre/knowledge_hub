@@ -88,7 +88,7 @@ class UsersRepository {
         $user = User::find($user->id);
 
         if(!$user->author_id && !$request->author_id)
-        $user->author()->create(['name'=>$user->name]);
+        $user->author()->firstOrCreate(['name'=>$user->name]);
 
         if(!$is_social)
         $this->send_email($request, $token);
