@@ -53,7 +53,7 @@
         @foreach($tags as $tag)
           @if($tag->is_health_emergency)
             <div 
-              class="mega-grid-content {{ $loop->first ? 'active' : '' }}" 
+              class="row mega-grid-content {{ $loop->first ? 'active' : '' }}" 
               data-tag-id="{{ $tag->id }}" 
               style="display: {{ $loop->first ? 'block' : 'none' }};"
             >
@@ -64,7 +64,7 @@
               @endphp
               @foreach( get_tag_ublications($tag) as $pub)
                 @if($count < 6)
-                  <a class="mega-item" href="{{ url('records/resource') }}?id={{ $pub->id }}">
+                  <a class="mega-item col-lg-3" href="{{ url('records/resource') }}?id={{ $pub->id }}">
                     <div class="mega-image">
                       <img src="{{ $pub->cover }}">
                     </div>
