@@ -159,7 +159,7 @@
                         <label class="meta-label">Sub-Theme</label><span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
                         <label class="meta-label">Associated Authors</label><span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
                     </div>
-                    @include('common.favourites_btn')
+                    @include('common.favourites_btn',['row'=>$publication])
                 </div>
 
                 @if ($publication->has_attachments)

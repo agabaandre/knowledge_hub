@@ -23,6 +23,8 @@ class UsersRepository {
 
         $user = ($is_social)?User::where('email',$request->email)->first():(($request->id)?User::find($request->id):new User());
 
+        if(!$user)
+            $user =  new User();
         
         //don't update these values for social signups account edits
         if( (!$user->id || ($user->id && !$user->is_social_login))){
@@ -87,8 +89,12 @@ class UsersRepository {
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
+        try{
         if(!$user->author_id && !$request->author_id)
-        $user->author()->create(['name'=>$user->name]);
+        $user->author()->firstOrCreate(['name'=>$user->name]);
+        }catch(\Exception $ex){
+            //ignore
+        }
 
         if(!$is_social)
         $this->send_email($request, $token);
