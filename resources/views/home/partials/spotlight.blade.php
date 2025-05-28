@@ -21,10 +21,10 @@
             <button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
             </div>
 	</form>
-     <div class="col-lg-12 col-md-12 col-sm-12 px-3">
+     <!-- <div class="col-lg-12 col-md-12 col-sm-12 px-3">
         @include('home.partials.quotes')
        {{-- @include('home.partials.tags') --}}
-    </div>
+    </div> -->
 
  
 <div  class="row spot-row col-sm-12 d-flex align-items-center">
