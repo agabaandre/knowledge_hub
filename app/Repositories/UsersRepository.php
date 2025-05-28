@@ -23,6 +23,8 @@ class UsersRepository {
 
         $user = ($is_social)?User::where('email',$request->email)->first():(($request->id)?User::find($request->id):new User());
 
+        if(!$user)
+            $user =  new User();
         
         //don't update these values for social signups account edits
         if( (!$user->id || ($user->id && !$user->is_social_login))){
