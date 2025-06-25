@@ -35,20 +35,41 @@
 						<div class="row justify-content-center mt-3">
 									<!-- single review -->
 									@foreach ($courses as $row)
-										<a href="https://khub.africacdc.org/elearning/course/view.php?id={{$row->moodle_id}}" 
-											target="_blank" 
-											class="col-lg-6 mt-2 mb-2" data-aos="fade-in">
+										<div class="col-lg-6 mt-2 mb-2" data-aos="fade-in">
 											<div class="single_review px-1 card-content" style="border: 1px solid;">
 												<div class="reviews_wrap position-relative bg-white rounded py-4 px-4">
 													<div class="rw-header d-flex justify-content-start">
 														<div class="pl-0">
-															<h4 class="fs-md mb-0 ft-bold text-primary" style="color: var(--theme-color-primary)!important;">{{ truncate($row->fullname, 50) }}</h4>
+															<h4 class="fs-md mb-0 ft-bold text-primary" style="color: var(--theme-color-primary)!important;">
+																{{ truncate($row->fullname, 50) }}
+															</h4>
+															<div class="text-muted small mb-1">
+																<strong>Status:</strong> {{ $row->is_active ? 'Active' : 'Inactive' }}
+																@if($row->provider)
+																	| <strong>Provider:</strong> {{ $row->provider }}
+																@endif
+															</div>
 														</div>
 													</div>
-														<p>{!! truncate($row->summary,270) !!}</p>
+														<p>{!! truncate($row->summary, 200) !!}</p>
+														<div class="mt-2">
+															@if($row->is_moodle)
+																<a href="https://khub.africacdc.org/elearning/course/view.php?id={{$row->moodle_id}}" target="_blank" class="btn btn-primary btn-sm">
+																	View on Moodle
+																</a>
+															@elseif($row->content)
+																<a href="{{ url('courses/details/'.$row->id) }}" class="btn btn-primary btn-sm">
+																	Details
+																</a>
+															@else
+																<a href="{{ $row->course_url }}" target="_blank" class="btn btn-primary btn-sm">
+																	View Course
+																</a>
+															@endif
+														</div>
 												</div>
 											</div>
-										</a>
+										</div>
 									@endforeach
 			
 							</div>

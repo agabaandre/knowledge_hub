@@ -53,5 +53,8 @@ class CoursesRepository{
         return $imported;
     }
     
-
+    public function find($id)
+    {
+        return Course::find($id);
+    }
 }

@@ -19,4 +19,13 @@ class CoursesController extends Controller
         return view('courses.index',$data);
     }
 
+    public function showDetails($id)
+    {
+        $course = $this->courseRepo->find($id);
+        if (!$course) {
+            abort(404);
+        }
+        return view('courses.show', compact('course'));
+    }
+
 }

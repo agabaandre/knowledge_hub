@@ -429,6 +429,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [AdminCoursesController::class, 'index']);
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
+        Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
     });
 
 // Admin Messaging routes
@@ -509,6 +510,7 @@ Route::group(["prefix" => "ai"], function () {
 
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
+    Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
 });
 
 Route::group(["prefix" => "communities"], function () {
