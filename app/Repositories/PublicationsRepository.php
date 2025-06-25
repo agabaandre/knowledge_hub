@@ -11,6 +11,7 @@ use App\Models\PublicationAccessGroup;
 use App\Models\PublicationAttachment;
 use App\Models\PublicationComment;
 use App\Models\PublicationCommunityOfPractice;
+use App\Models\PublicationCountry;
 use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
@@ -760,7 +761,7 @@ public function getLightweight(Request $request, $return_array = false)
     if($request->filled('area')){
         // Optimized: Use a more efficient approach instead of whereHas
         $pubs->where(function($subQuery) use ($request) {
-            $country_pubs=   Country::where('id', $request->area)->pluck('publication_id');
+            $country_pubs=   PublicationCountry::where('country_id', $request->area)->pluck('publication_id');
             $subQuery->whereIn('id', $country_pubs);
         });
     }
