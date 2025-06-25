@@ -748,9 +748,6 @@ public function getLightweight(Request $request, $return_array = false)
             $pubs->where('geographical_coverage_id', $request->area)
             ->orWhereHas('countries', function($subQuery) use ($request) {
                 $subQuery->where('country.id', $request->area);
-            })
-            ->orWhereHas('author', function($subQuery) use ($request) {
-                $subQuery->where('country_id', $request->area);
             });
         }
 
