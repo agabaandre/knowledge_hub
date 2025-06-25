@@ -683,39 +683,24 @@ private function applyFilters($query, $request) {
         'area' => function ($q, $value) {
             // Optimized: Use a more efficient approach instead of whereHas
             $q->where(function($subQuery) use ($value) {
-                $subQuery->where('geographical_coverage_id', $value)
-                        ->orWhereExists(function($existsQuery) use ($value) {
-                            $existsQuery->select(DB::raw(1))
-                                       ->from('publication_countries')
-                                       ->whereColumn('publication_countries.publication_id', 'publication.id')
-                                       ->where('publication_countries.country_id', $value);
-                        });
+                $country_pubs=   PublicationCountry::where('country_id', $value)->pluck('publication_id');
+                $subQuery->whereIn('id', $country_pubs);    
             });
         },
         'rcc' => function ($q, $value) {
             if (states_enabled() && $value !=='all') {
                 $country_ids = Country::where('region_id', $value)->pluck('id');
                 $q->where(function($subQuery) use ($country_ids) {
-                    $subQuery->whereIn('geographical_coverage_id', $country_ids)
-                            ->orWhereExists(function($existsQuery) use ($country_ids) {
-                                $existsQuery->select(DB::raw(1))
-                                           ->from('publication_countries')
-                                           ->whereColumn('publication_countries.publication_id', 'publication.id')
-                                           ->whereIn('publication_countries.country_id', $country_ids);
-                            });
+                    $country_pubs=   PublicationCountry::whereIn('country_id', $country_ids)->pluck('publication_id');
+                    $subQuery->whereIn('id', $country_pubs);
                 });
             }
         },
         'country_id' => function ($q, $value) {
             // Optimized: Use a more efficient approach instead of whereHas
             $q->where(function($subQuery) use ($value) {
-                $subQuery->where('geographical_coverage_id', $value)
-                        ->orWhereExists(function($existsQuery) use ($value) {
-                            $existsQuery->select(DB::raw(1))
-                                       ->from('publication_countries')
-                                       ->whereColumn('publication_countries.publication_id', 'publication.id')
-                                       ->where('publication_countries.country_id', $value);
-                        });
+                $country_pubs=   PublicationCountry::where('country_id', $value)->pluck('publication_id');
+                $subQuery->whereIn('id', $country_pubs);
             });
         },
         'thematic_area_id' => function ($q, $value) {
