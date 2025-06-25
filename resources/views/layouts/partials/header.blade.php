@@ -293,6 +293,11 @@
                                 class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
+                            <li>
+                                <a
+                                    href="{{ url('/health-topics') }}">Health Topics</a>
+                            </li>
+
                             @foreach ($data_categories as $category)
                                 @if ($category->is_special)
                                     @auth
@@ -360,26 +365,6 @@
                        </ul>
                         
                     </li>
-                    
-                     <!--  <li class="categories">
-                        <a href="javascript:void(0);">Scientific Publications<span class="submenu-indicator"></span></a>
-                        <ul class="nav-dropdown nav-submenu">
-                             <li><a href="#">Registered Protocols</a></li>
-                            <li><a href="#">Scientific Articles</a></li>
-                        </ul>
-                    </li>
-
-                     <li class="categories">
-                        <a href="javascript:void(0);">Data & Analytics<span class="submenu-indicator"></span></a>
-                        <ul class="nav-dropdown nav-submenu">
-                             <li><a href="#">Surveillance Data</a></li>
-                            <li><a href="#">R&D Data</a></li>
-                            <li><a href="#">Surveys</a></li>
-                            <li><a href="#">Assessments</a></li>
-                        </ul>
-                    </li> -->
-
-
                      <li class="categories">
                         <a href="javascript:void(0);">Guidelines & Frameworks<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">

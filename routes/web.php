@@ -60,6 +60,7 @@ use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\Admin\ContentRequestAdminController;
+use App\Http\Controllers\HealthTopicsController;
 
 
 /*
@@ -146,6 +147,11 @@ Route::group(["prefix" => "publications"], function () {
     Route::get("/remove_favourite", [PublicationsController::class, 'remove_favourite']);
 });
 
+// Health Topics routes
+Route::group(["prefix" => "health-topics"], function () {
+    Route::get("/", [HealthTopicsController::class, 'index'])->name('health-topics.index');
+    Route::get("/{id}", [HealthTopicsController::class, 'show'])->name('health-topics.show');
+});
 
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
 
