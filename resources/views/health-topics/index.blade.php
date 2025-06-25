@@ -1,3 +1,4 @@
+@php $primary = settings()->primary_color ?? '#222'; @endphp
 @extends('layouts.app')
 
 @section('title', 'Health Topics')
@@ -34,7 +35,7 @@
                             @endif
                         </div>
                         <div class="ms-md-3 mt-2 mt-md-0">
-                            <span class="btn btn-dark btn-xs px-2 py-1" style="border-radius:1.2rem; font-size:0.8rem;">View <i class="fa fa-arrow-right ms-1" style="font-size:0.8em;"></i></span>
+                            <span class="btn view-btn-custom btn-xs px-2 py-1" style="border-radius:1.2rem; font-size:0.8rem; background: {{ $primary }}; color: #fff; border: none;">View <i class="fa fa-arrow-right ms-1" style="font-size:0.8em;"></i></span>
                         </div>
                     </div>
                 </a>
@@ -70,7 +71,7 @@
 }
 .topic-card-small:hover {
     box-shadow: 0 2px 12px 0 rgba(30,34,90,0.18);
-    border: 1.5px solid #222;
+    border: 1.5px solid {{ $primary }};
     transform: translateY(-1px) scale(1.01);
 }
 .topic-title {
@@ -87,6 +88,10 @@
     font-size: 0.8rem;
     line-height: 1.2;
     border-radius: 0.2rem;
+}
+.view-btn-custom:hover, .view-btn-custom:focus {
+    filter: brightness(0.92);
+    color: #fff;
 }
 .empty-state {
     padding: 1rem;

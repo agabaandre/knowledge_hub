@@ -1,3 +1,4 @@
+@php $primary = settings()->primary_color ?? '#222'; @endphp
 @extends('layouts.app')
 
 @section('title', $tag->tag_text . ' - Health Topics')
@@ -57,9 +58,7 @@
                         <i class="fa fa-file-alt fa-2x text-muted mb-2"></i>
                         <h5>No Publications Found</h5>
                         <p class="text-secondary">There are currently no publications tagged with "{{ $tag->tag_text }}".</p>
-                        <a href="{{ url('records') }}" class="btn btn-dark mt-2">
-                            Browse All Publications
-                        </a>
+                        <a href="{{ url('records') }}" class="btn browse-btn-custom mt-2" style="background: {{ $primary }}; color: #fff; border: none;">Browse All Publications</a>
                     </div>
                 </div>
             @endif
@@ -84,7 +83,7 @@
 }
 .pub-card:hover {
     box-shadow: 0 6px 24px 0 rgba(30,34,90,0.13);
-    border: 1.5px solid #222;
+    border: 1.5px solid {{ $primary }};
     transform: translateY(-2px) scale(1.01);
 }
 .pub-image-wrapper {
@@ -111,8 +110,12 @@
     transition: color 0.15s;
 }
 .pub-title-link:hover {
-    color: #007bff;
+    color: {{ $primary }};
     text-decoration: underline;
+}
+.browse-btn-custom:hover, .browse-btn-custom:focus {
+    filter: brightness(0.92);
+    color: #fff;
 }
 .pub-title {
     font-size: 1.08rem;
