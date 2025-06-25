@@ -738,18 +738,17 @@ public function getLightweight(Request $request, $return_array = false)
     $pubs = Publication::with([
             'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
         ])
-        ->withCount('comments')
         ->where('is_version', 0)
         ->where('is_admin_only_access', 0)
         ->where('is_active', 'Active')
         ->where('is_approved', 1);
 
-        if($request->filled('area')){
-            $pubs->where('geographical_coverage_id', $request->area)
-            ->orWhereHas('countries', function($subQuery) use ($request) {
-                $subQuery->where('country.id', $request->area);
-            });
-        }
+    if($request->filled('area')){
+        $pubs->where('geographical_coverage_id', $request->area)
+        ->orWhereHas('countries', function($subQuery) use ($request) {
+            $subQuery->where('country.id', $request->area);
+        });
+    }
 
     if ($request->order_by_visits) {
         $pubs->orderBy('visits', 'desc');
