@@ -760,13 +760,8 @@ public function getLightweight(Request $request, $return_array = false)
     if($request->filled('area')){
         // Optimized: Use a more efficient approach instead of whereHas
         $pubs->where(function($subQuery) use ($request) {
-            $subQuery->where('geographical_coverage_id', $request->area)
-                    ->orWhereExists(function($existsQuery) use ($request) {
-                        $existsQuery->select(DB::raw(1))
-                                   ->from('publication_countries')
-                                   ->whereColumn('publication_countries.publication_id', 'publication.id')
-                                   ->where('publication_countries.country_id', $request->area);
-                    });
+            $country_pubs=   Country::where('id', $request->area)->pluck('publication_id');
+            $subQuery->whereIn('id', $country_pubs);
         });
     }
 
