@@ -744,10 +744,10 @@ public function getLightweight(Request $request, $return_array = false)
         ->where('is_approved', 1);
 
     if($request->filled('area')){
-        $pubs->where('geographical_coverage_id', $request->area)
-        ->orWhereHas('countries', function($subQuery) use ($request) {
-            $subQuery->where('country.id', $request->area);
-        });
+        $pubs->where('geographical_coverage_id', $request->area);
+        // ->orWhereHas('countries', function($subQuery) use ($request) {
+        //     $subQuery->where('country.id', $request->area);
+        // });
     }
 
     if ($request->order_by_visits) {
