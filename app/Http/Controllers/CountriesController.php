@@ -43,7 +43,7 @@ class CountriesController extends Controller
 
         $data['country']        = $this->areasRepo->member_state($request->state);
         $request['area'] = $request['state'];
-		$data['publications']   = $this->publicationsRepo->get($request);
+		$data['publications']   = $this->publicationsRepo->getLightweight($request);
         $data['kpis'] = []; //$this->dashRepo->get_country_kpis(['country_id'=>$request->state]);
         
         return view('countries.details',$data);

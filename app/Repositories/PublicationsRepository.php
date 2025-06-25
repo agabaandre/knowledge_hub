@@ -43,8 +43,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
     ->searchTerm($request->term);
 
     if ($featured && current_user()) {
+        // Optimized: Cache user preferences
         $user = current_user();
-        $subthemes = $user->preferences()->pluck('subtheme_id');
+        $cacheKey = "user_preferences_{$user->id}";
+        $subthemes = cache()->remember($cacheKey, 3600, function() use ($user) {
+            return $user->preferences()->pluck('subtheme_id');
+        });
         $pubs->featured($subthemes);
     } 
     elseif ($featured) {
@@ -61,16 +65,24 @@ public function get(Request $request, $return_array = false, $featured = false,$
             ->where('is_approved', 1);
 
         if (auth()->user()) {
-            $userCommunities = CommunityOfPracticeMembers::where('user_id', auth()->user()->id)
-                ->where('is_approved', 1)
-                ->pluck('community_of_practice_id');
+            // Optimized: Cache user communities
+            $user = auth()->user();
+            $cacheKey = "user_communities_{$user->id}";
+            $userCommunities = cache()->remember($cacheKey, 1800, function() use ($user) {
+                return CommunityOfPracticeMembers::where('user_id', $user->id)
+                    ->where('is_approved', 1)
+                    ->pluck('community_of_practice_id');
+            });
 
-            $query->when(!$request->community_id, function ($query) use ($userCommunities) {
-                $query->where(function ($q) use ($userCommunities) {
-                    $q->whereHas('communities', function ($q) use ($userCommunities) {
-                        $q->whereIn('community_of_practice_id', $userCommunities);
-                    })->orWhereDoesntHave('communities')
-                      ->orWhere('user_id', auth()->user()->id);
+            $query->when(!$request->community_id, function ($query) use ($userCommunities, $user) {
+                $query->where(function ($q) use ($userCommunities, $user) {
+                    if ($userCommunities->count() > 0) {
+                        $q->whereHas('communities', function ($q) use ($userCommunities) {
+                            $q->whereIn('community_of_practice_id', $userCommunities);
+                        });
+                    }
+                    $q->orWhereDoesntHave('communities')
+                      ->orWhere('user_id', $user->id);
                 });
             }, function ($query) use ($request) {
                 $query->whereHas('communities', function ($q) use ($request) {
@@ -129,7 +141,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             ->whereHas('favourites', function($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })
-            ->orderBy('id','desc');
+            ->orderBy('id', 'desc');
 
         $result = $pubs->paginate($rows_count);
 
@@ -716,6 +728,45 @@ private function applyFilters($query, $request) {
             $callback($query, $request->$key);
         }
     }
+}
+
+// Lightweight method for simple queries
+public function getLightweight(Request $request, $return_array = false)
+{
+    $rows_count = $request->rows ?? 20;
+
+    $pubs = Publication::with([
+            'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
+        ])
+        ->withCount('comments')
+        ->where('is_version', 0)
+        ->where('is_admin_only_access', 0)
+        ->where('is_active', 'Active')
+        ->where('is_approved', 1);
+
+        if($request->filled('area')){
+            $pubs->where('geographical_coverage_id', $request->area)
+            ->orWhereHas('countries', function($subQuery) use ($request) {
+                $subQuery->where('country.id', $request->area);
+            })
+            ->orWhereHas('author', function($subQuery) use ($request) {
+                $subQuery->where('country_id', $request->area);
+            });
+        }
+
+    if ($request->order_by_visits) {
+        $pubs->orderBy('visits', 'desc');
+    } else {
+        $pubs->orderBy('id', 'desc');
+    }
+
+    if ($request->filled('term')) {
+        $pubs->searchTerm($request->term);
+    }
+
+    $results = $pubs->paginate($rows_count);
+    
+    return $return_array ? $results : $results;
 }
 
 
