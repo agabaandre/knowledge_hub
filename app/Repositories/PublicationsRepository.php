@@ -680,26 +680,41 @@ private function applyFilters($query, $request) {
             $q->where('file_type_id', $value);
         },
         'area' => function ($q, $value) {
-            $q->where('geographical_coverage_id', $value)
-            ->orWhereHas('countries', function($subQuery) use ($value) {
-                $subQuery->where('country.id', $value);
+            // Optimized: Use a more efficient approach instead of whereHas
+            $q->where(function($subQuery) use ($value) {
+                $subQuery->where('geographical_coverage_id', $value)
+                        ->orWhereExists(function($existsQuery) use ($value) {
+                            $existsQuery->select(DB::raw(1))
+                                       ->from('publication_countries')
+                                       ->whereColumn('publication_countries.publication_id', 'publication.id')
+                                       ->where('publication_countries.country_id', $value);
+                        });
             });
         },
         'rcc' => function ($q, $value) {
             if (states_enabled() && $value !=='all') {
                 $country_ids = Country::where('region_id', $value)->pluck('id');
-                $q->where(function($query) use ($country_ids) {
-                    $query->whereIn('geographical_coverage_id', $country_ids)
-                          ->orWhereHas('countries', function($subQuery) use ($country_ids) {
-                              $subQuery->whereIn('country.id', $country_ids);
-                          });
+                $q->where(function($subQuery) use ($country_ids) {
+                    $subQuery->whereIn('geographical_coverage_id', $country_ids)
+                            ->orWhereExists(function($existsQuery) use ($country_ids) {
+                                $existsQuery->select(DB::raw(1))
+                                           ->from('publication_countries')
+                                           ->whereColumn('publication_countries.publication_id', 'publication.id')
+                                           ->whereIn('publication_countries.country_id', $country_ids);
+                            });
                 });
             }
         },
         'country_id' => function ($q, $value) {
-            $q->where('geographical_coverage_id', $value)
-            ->orWhereHas('countries', function($subQuery) use ($value) {
-                $subQuery->where('country.id', $value);
+            // Optimized: Use a more efficient approach instead of whereHas
+            $q->where(function($subQuery) use ($value) {
+                $subQuery->where('geographical_coverage_id', $value)
+                        ->orWhereExists(function($existsQuery) use ($value) {
+                            $existsQuery->select(DB::raw(1))
+                                       ->from('publication_countries')
+                                       ->whereColumn('publication_countries.publication_id', 'publication.id')
+                                       ->where('publication_countries.country_id', $value);
+                        });
             });
         },
         'thematic_area_id' => function ($q, $value) {
@@ -723,7 +738,6 @@ private function applyFilters($query, $request) {
     ];
 
     foreach ($filters as $key => $callback) {
-        
         if ($request->filled($key)) {
             $callback($query, $request->$key);
         }
@@ -744,10 +758,16 @@ public function getLightweight(Request $request, $return_array = false)
         ->where('is_approved', 1);
 
     if($request->filled('area')){
-        $pubs->where('geographical_coverage_id', $request->area);
-        // ->orWhereHas('countries', function($subQuery) use ($request) {
-        //     $subQuery->where('country.id', $request->area);
-        // });
+        // Optimized: Use a more efficient approach instead of whereHas
+        $pubs->where(function($subQuery) use ($request) {
+            $subQuery->where('geographical_coverage_id', $request->area)
+                    ->orWhereExists(function($existsQuery) use ($request) {
+                        $existsQuery->select(DB::raw(1))
+                                   ->from('publication_countries')
+                                   ->whereColumn('publication_countries.publication_id', 'publication.id')
+                                   ->where('publication_countries.country_id', $request->area);
+                    });
+        });
     }
 
     if ($request->order_by_visits) {
