@@ -9,7 +9,7 @@
             <div class="col-12">
                 <h3 class="fw-bold" style="font-size:1.5rem;">Health Topics</h3>
                 <ol class="breadcrumb mb-0">
-                    <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-secondary">Home</a></li>
                     <li class="breadcrumb-item active">Health Topics</li>
                 </ol>
             </div>
@@ -18,7 +18,7 @@
 
     <div class="row mb-4">
         <div class="col-12">
-            <input type="text" id="topic-search" class="form-control form-control-lg shadow-sm" placeholder="Search health topics..." style="border-radius: 0.7rem; font-size:1.1rem;">
+            <input type="text" id="topic-search" class="form-control form-control-lg shadow-sm border-0" placeholder="Search health topics..." style="border-radius: 0.7rem; font-size:1.1rem;">
         </div>
     </div>
 
@@ -26,15 +26,15 @@
         @forelse($groupedTags->flatten() as $tag)
             <div class="col-12 col-md-6 mb-2 topic-card-col">
                 <a href="{{ route('health-topics.show', $tag->id) }}" class="topic-card-link">
-                    <div class="topic-card topic-card-small p-2 d-flex flex-column flex-md-row align-items-md-center justify-content-between h-100">
+                    <div class="topic-card topic-card-small p-2 d-flex flex-column flex-md-row align-items-md-center justify-content-between h-100 border-secondary">
                         <div class="topic-info">
-                            <div class="topic-title fw-bold mb-1" style="font-size:1rem; color:#1a2340;">{{ $tag->tag_text }}</div>
+                            <div class="topic-title fw-bold mb-1" style="font-size:1rem;">{{ $tag->tag_text }}</div>
                             @if($tag->overview)
-                                <div class="topic-desc text-muted" style="font-size:0.85rem; line-height:1.3;">{{ Str::limit(strip_tags($tag->overview), 60) }}</div>
+                                <div class="topic-desc text-secondary" style="font-size:0.85rem; line-height:1.3;">{{ Str::limit(strip_tags($tag->overview), 60) }}</div>
                             @endif
                         </div>
                         <div class="ms-md-3 mt-2 mt-md-0">
-                            <span class="btn btn-outline-primary btn-xs px-2 py-1" style="border-radius:1.2rem; font-size:0.8rem;">View <i class="fa fa-arrow-right ms-1" style="font-size:0.8em;"></i></span>
+                            <span class="btn btn-dark btn-xs px-2 py-1" style="border-radius:1.2rem; font-size:0.8rem;">View <i class="fa fa-arrow-right ms-1" style="font-size:0.8em;"></i></span>
                         </div>
                     </div>
                 </a>
@@ -58,10 +58,10 @@
     height: 100%;
 }
 .topic-card-small {
-    background: #f8fafd;
+    background: #fff;
     border-radius: 0.7rem;
     box-shadow: 0 1px 6px 0 rgba(30,34,90,0.03);
-    border: 1px solid #e6eaf3;
+    border: 1px solid #343a40;
     transition: box-shadow 0.15s, border 0.15s, transform 0.15s;
     cursor: pointer;
     height: 100%;
@@ -69,18 +69,16 @@
     max-height: 110px;
 }
 .topic-card-small:hover {
-    box-shadow: 0 2px 12px 0 rgba(30,34,90,0.08);
-    border: 1.5px solid #007bff;
+    box-shadow: 0 2px 12px 0 rgba(30,34,90,0.18);
+    border: 1.5px solid #222;
     transform: translateY(-1px) scale(1.01);
 }
 .topic-title {
     font-size: 1rem;
     font-weight: 600;
-    color: #1a2340;
     margin-bottom: 0.2rem;
 }
 .topic-desc {
-    color: #5a6270;
     font-size: 0.85rem;
     margin-bottom: 0;
 }

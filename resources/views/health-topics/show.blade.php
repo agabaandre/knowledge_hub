@@ -6,9 +6,9 @@
 <div class="container-fluid pt-5" style="max-width:900px;">
     <div class="row mb-4">
         <div class="col-12">
-            <h2 class="fw-bold mb-2" style="font-size:2rem; color:#1a2340;">{{ $tag->tag_text }}</h2>
+            <h2 class="fw-bold mb-2" style="font-size:2rem;">{{ $tag->tag_text }}</h2>
             @if($tag->overview)
-                <div class="mb-4" style="font-size:1.08rem; color:#444; line-height:1.7;">
+                <div class="mb-4 text-secondary" style="font-size:1.08rem; line-height:1.7;">
                     {!! $tag->overview !!}
                 </div>
             @endif
@@ -17,32 +17,29 @@
 
     <div class="row">
         <div class="col-12">
-            <h5 class="mb-3" style="color:#007bff; font-weight:600;">Related Publications</h5>
+            <h5 class="mb-3" style="font-weight:600;">Related Publications</h5>
             @if($publications->count() > 0)
                 <div class="publication-card-list">
                     @foreach($publications as $publication)
-                        @php
-                            $img = $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png');
-                        @endphp
-                        <div class="pub-card mb-3 p-3 shadow-sm bg-white rounded-4 d-flex flex-row align-items-center">
-                                <div class="pub-image-wrapper me-3 flex-shrink-0">
-                                    <img src="{{ $img }}" alt="{{ $publication->title }}" class="pub-image">
-                                </div>
+                        <div class="pub-card mb-3 p-3 shadow-sm bg-white rounded-4 d-flex flex-row align-items-center border-secondary">
+                            <div class="pub-image-wrapper me-3 flex-shrink-0">
+                                <img src="{{ $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png') }}" alt="{{ $publication->title }}" class="pub-image">
+                            </div>
                             <div class="flex-grow-1 d-flex flex-column flex-md-row align-items-md-center justify-content-between w-100">
                                 <div class="flex-grow-1">
-                                    <a href="{{ url('records/resource?id=' . $publication->id) }}" class="pub-title-link">
+                                    <a href="{{ url('records/resource?id=' . $publication->id) }}" class="pub-title-link text-dark">
                                         <span class="fw-semibold pub-title">{{ $publication->title }}</span>
                                     </a>
-                                    <div class="pub-desc text-muted mt-1" style="font-size:0.97rem;">
+                                    <div class="pub-desc text-secondary mt-1" style="font-size:0.97rem;">
                                         {{ Str::limit(strip_tags($publication->description), 120) }}
                                     </div>
                                 </div>
                                 <div class="pub-meta text-end text-md-start mt-2 mt-md-0 ms-md-3" style="min-width:160px;">
                                     @if($publication->author)
-                                        <div class="text-muted" style="font-size:0.93rem;"><i class="fa fa-user me-1"></i> {{ $publication->author->name }}</div>
+                                        <div class="text-secondary" style="font-size:0.93rem;"><i class="fa fa-user me-1"></i> {{ $publication->author->name }}</div>
                                     @endif
                                     @if($publication->created_at)
-                                        <div class="text-muted" style="font-size:0.93rem;"><i class="fa fa-calendar me-1"></i> {{ $publication->created_at->format('M Y') }}</div>
+                                        <div class="text-secondary" style="font-size:0.93rem;"><i class="fa fa-calendar me-1"></i> {{ $publication->created_at->format('M Y') }}</div>
                                     @endif
                                 </div>
                             </div>
@@ -59,8 +56,8 @@
                     <div class="empty-state">
                         <i class="fa fa-file-alt fa-2x text-muted mb-2"></i>
                         <h5>No Publications Found</h5>
-                        <p class="text-muted">There are currently no publications tagged with "{{ $tag->tag_text }}".</p>
-                        <a href="{{ url('records') }}" class="btn btn-primary mt-2">
+                        <p class="text-secondary">There are currently no publications tagged with "{{ $tag->tag_text }}".</p>
+                        <a href="{{ url('records') }}" class="btn btn-dark mt-2">
                             Browse All Publications
                         </a>
                     </div>
@@ -71,16 +68,6 @@
 </div>
 
 <style>
-.pub-title-link {
-    color: #1a2340;
-    font-size: 1.08rem;
-    text-decoration: none;
-    transition: color 0.15s;
-}
-.pub-title-link:hover {
-    color: #007bff;
-    text-decoration: underline;
-}
 .publication-card-list {
     display: flex;
     flex-direction: column;
@@ -90,14 +77,14 @@
     background: #fff;
     border-radius: 1.1rem;
     box-shadow: 0 2px 12px 0 rgba(30,34,90,0.07);
-    border: 1px solid #e6eaf3;
+    border: 1px solid #343a40;
     transition: box-shadow 0.18s, border 0.18s, transform 0.18s;
     cursor: pointer;
     min-height: 90px;
 }
 .pub-card:hover {
     box-shadow: 0 6px 24px 0 rgba(30,34,90,0.13);
-    border: 1.5px solid #007bff;
+    border: 1.5px solid #222;
     transform: translateY(-2px) scale(1.01);
 }
 .pub-image-wrapper {
@@ -117,17 +104,25 @@
     border-radius: 0.7rem;
     display: block;
 }
+.pub-title-link {
+    color: #212529;
+    font-size: 1.08rem;
+    text-decoration: none;
+    transition: color 0.15s;
+}
+.pub-title-link:hover {
+    color: #007bff;
+    text-decoration: underline;
+}
 .pub-title {
     font-size: 1.08rem;
     font-weight: 600;
 }
 .pub-desc {
-    color: #5a6270;
     font-size: 0.97rem;
 }
 .pub-meta {
     font-size: 0.93rem;
-    color: #888;
 }
 .empty-state {
     padding: 1rem;
