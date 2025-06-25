@@ -17,7 +17,7 @@ class Country extends Model
 
     public function publications()
     {
-        return $this->belongsToMany(Publication::class, 'publication_countries', 'country_id', 'publication_id');
+        return $this->hasMany(Publication::class, 'publication_countries', 'country_id', 'publication_id');
     }
     
 }
