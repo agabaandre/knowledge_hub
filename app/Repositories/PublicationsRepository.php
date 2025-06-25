@@ -37,15 +37,13 @@ public function get(Request $request, $return_array = false, $featured = false,$
     $pubs = Publication::with([
         'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
     ])
-    //->whereHas('sub_theme')
     ->where('is_version', 0)
     ->inRandomOrder()
     ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')
     ->searchTerm($request->term);
 
     if ($featured && current_user()) {
-
-        $user = User::find(current_user()->id);
+        $user = current_user();
         $subthemes = $user->preferences()->pluck('subtheme_id');
         $pubs->featured($subthemes);
     } 
@@ -84,12 +82,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $query->whereDoesntHave('communities');
         }
     }, function ($query) {
-        
         $this->access_filter($query);
     });
 
-    if($pending)
-    $pubs->where('is_approved',0);
+    if($pending) {
+        $pubs->where('is_approved', 0);
+    }
 
     $results = $pubs->paginate($rows_count)->appends($request->all());
 
@@ -127,13 +125,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $rows_count = ($request->rows)?$request->rows:20;
         $user_id    =  auth()->user()->id;
         
-        $favs = Favourite::where('user_id',$user_id)
-        ->get()
-        ->pluck('publication_id')
-        ->toArray();
-    
-        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
-        $pubs->whereIn('id',$favs);
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+            ->whereHas('favourites', function($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            })
+            ->orderBy('id','desc');
 
         $result = $pubs->paginate($rows_count);
 
@@ -322,14 +318,20 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     public function save_tags($tags,$publication_id){
 
-        for($i=0;$i<count($tags);$i++){
-
-             $pub_tag = new PublicationTag();
-             $pub_tag->tag_id = $tags[$i];
-             $pub_tag->publication_id = $publication_id;
-             $pub_tag->save();
+        // Optimized: Use bulk insert instead of individual inserts in a loop
+        $tagData = [];
+        foreach($tags as $tag_id) {
+            $tagData[] = [
+                'tag_id' => $tag_id,
+                'publication_id' => $publication_id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
         }
-
+        
+        if (!empty($tagData)) {
+            PublicationTag::insert($tagData);
+        }
     }
 
     public function attach_to_community($comunities,$publication_id){
@@ -340,12 +342,19 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $comunities = json_decode($comunities);
 
         if(is_array($comunities)):
-            for($i=0;$i<count($comunities);$i++){
-
-                $pub_comment = new PublicationCommunityOfPractice();
-                $pub_comment->community_of_practice_id= $comunities[$i];
-                $pub_comment->publication_id = $publication_id;
-                $pub_comment->save();
+            // Optimized: Use bulk insert instead of individual inserts in a loop
+            $communityData = [];
+            foreach($comunities as $community_id) {
+                $communityData[] = [
+                    'community_of_practice_id' => $community_id,
+                    'publication_id' => $publication_id,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+            
+            if (!empty($communityData)) {
+                PublicationCommunityOfPractice::insert($communityData);
             }
        endif;
     }
@@ -358,14 +367,20 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     public function attach_to_access_group($groups,$publication_id){
 
-        for($i=0;$i<count($groups);$i++){
-
-             $pub_tag = new PublicationAccessGroup();
-             $pub_tag->user_access_group_id= $groups[$i];
-             $pub_tag->publication_id = $publication_id;
-             $pub_tag->save();
+        // Optimized: Use bulk insert instead of individual inserts in a loop
+        $groupData = [];
+        foreach($groups as $group_id) {
+            $groupData[] = [
+                'user_access_group_id' => $group_id,
+                'publication_id' => $publication_id,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
         }
-
+        
+        if (!empty($groupData)) {
+            PublicationAccessGroup::insert($groupData);
+        }
     }
 
 
@@ -413,6 +428,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         $upfiles   = (!is_array($files))?[$files]:$files;
         $file_path = null;
+        $attachmentData = [];
         
         foreach ($upfiles as $file) {
 
@@ -423,20 +439,22 @@ public function get(Request $request, $return_array = false, $featured = false,$
            
             $file->move(storage_path().'/app/public/uploads/publications/',$file_path);
 
-        //insert if to be in different table
-        if($publication_id):
+            // Optimized: Collect attachment data for bulk insert
+            if($publication_id) {
+                $attachmentData[] = [
+                    "description" => $description,
+                    "file" => $file_path,
+                    "publication_id" => $publication_id,
+                    "created_at" => now(),
+                    "updated_at" => now()
+                ];
+            }
+        }
 
-            $kyc   =  [
-            "description"=>$description,
-            "file"=> $file_path,
-            "publication_id"=>$publication_id
-           ];
-       
-         PublicationAttachment::insert($kyc);
-
-        endif;
-
-       }
+        // Optimized: Use bulk insert instead of individual inserts
+        if (!empty($attachmentData)) {
+            PublicationAttachment::insert($attachmentData);
+        }
 
        return $file_path;
     }

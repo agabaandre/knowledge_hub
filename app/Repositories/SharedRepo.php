@@ -83,21 +83,23 @@ class SharedRepo{
 
     public function get_country_authors($id,$is_region=false){
         $user = current_user();
-        if( is_array($is_region) && states_enabled()):
-            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
-            return User::whereIn('country_id',$countries)->get()->pluck('author_id');
+        
+        if($is_region === true && states_enabled()):
+            $countries = Country::where('region_id',$user->country->region_id)->pluck('id');
+            return User::whereIn('country_id',$countries)->pluck('author_id');
         else:
-            return User::where('country_id',$id)->get()->pluck('author_id');
+            return User::where('country_id',$id)->pluck('author_id');
         endif;
     }
 
     private function get_country_users($id,$is_region=false){
         $user = current_user();
-        if( is_array($is_region) && states_enabled()):
-            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
-            return User::whereIn('country_id',$countries)->get()->pluck('id');
+        
+        if($is_region === true && states_enabled()):
+            $countries = Country::where('region_id',$user->country->region_id)->pluck('id');
+            return User::whereIn('country_id',$countries)->pluck('id');
         else:
-            return User::where('country_id',$id)->get()->pluck('id');
+            return User::where('country_id',$id)->pluck('id');
         endif;
     }
     
@@ -107,10 +109,9 @@ class SharedRepo{
         $user = current_user();
 
         if(states_enabled()):
-            $countries = Country::where('region_id',$user->country->region_id)->get()->pluck('id');
-            return $countries;
+            return Country::where('region_id',$user->country->region_id)->pluck('id');
         else:
-            return Country::where('id',$user->country_id)->get()->pluck('id');
+            return Country::where('id',$user->country_id)->pluck('id');
         endif;
     }
     
