@@ -32,9 +32,6 @@
 
       {{-- Sidebar --}}
       
-      @php
-          $filteredTags = $tags->filter(fn($tag) => $tag->is_health_emergency)->values();
-        @endphp
 
       <div class="mega-menu-sidebar">
         <ul>

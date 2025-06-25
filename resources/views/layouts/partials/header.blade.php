@@ -72,7 +72,7 @@
 .mega-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 20px;
+    gap: 10px;
 }
 
 .mega-item {
@@ -88,7 +88,7 @@
 }
 
 .mega-image {
-    height: 160px;
+    height: 150px;
     overflow: hidden;
 }
 
@@ -96,6 +96,7 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    object-position: center;
     transition: all 0.5s ease;
 }
 
@@ -220,97 +221,15 @@
         grid-template-columns: repeat(3, 1fr);
     }
 }
-
-/*
 @media (max-width: 992px) {
-    .nav-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 15px 0;
+    .has-mega-menu {
+        display: none !important;
     }
-    
-    .nav-toggle {
-        display: block;
-    }
-    
-    .mobile_nav {
-        display: block;
-    }
-    
-    .nav-menus-wrapper {
-        position: fixed;
-        top: 60px;
-        left: 0;
-        width: 100%;
-        height: calc(100vh - 60px);
-        background-color: #fff;
-        flex-direction: column;
-        align-items: flex-start;
-        padding: 20px;
-        overflow-y: auto;
-        transform: translateX(-100%);
-        transition: transform 0.3s ease;
-        z-index: 1000;
-    }
-    
-    .nav-menus-wrapper.active {
-        transform: translateX(0);
-    }
-    
-    .nav-menu {
-        flex-direction: column;
-        width: 100%;
-    }
-    
-    .nav-dropdown {
-        position: static;
-        box-shadow: none;
-        width: 100%;
-        border-top: none;
-        padding-left: 20px;
-    }
-    
-    .mega-menu {
-        position: static;
-        box-shadow: none;
-        width: 100%;
-        border-top: none;
-    }
-    
-    .mega-menu-grid {
-        flex-direction: column;
-    }
-    
-    .mega-menu-sidebar {
-        width: 100%;
-        border-right: none;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 15px;
-        margin-bottom: 15px;
-    }
-    
-    .mega-menu-content {
-        padding-left: 0;
-    }
-    
-    .mega-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .nav-menu-social {
-        margin-top: 20px;
-        width: 100%;
-        justify-content: flex-start;
+    .health_emergencies{
+        display: block !important;
     }
 }
 
-@media (max-width: 576px) {
-    .mega-grid {
-        grid-template-columns: 1fr;
-    }
-}*/
 </style>
 
 <!-- Top header -->
@@ -412,10 +331,33 @@
                         <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
                     @endif
                     
-                    <li class="categories {{(count($health_emergencies)>0)?'has-mega-menu':''}}">
+                    
+                        @php
+                        $filteredTags = $tags->filter(fn($tag) => $tag->is_health_emergency)->values();
+                        @endphp
+
+                    <li class="categories has-mega-menu">
                         <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
 
                         @include('layouts.partials.tags_menu')
+                        
+                    </li>
+
+                    <li class="categories health_emergencies" style="display: none;">
+                        <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
+
+                        <ul class="nav-dropdown nav-submenu">
+                            @foreach($filteredTags as $tag)
+                            <li 
+                              data-tag-id="{{ $tag->id }}" 
+                              class="{{ $loop->first ? 'active' : '' }}"
+                            >
+                              <a href="{{ url('records') }}?tag={{ $tag->id }}">
+                                {{ $tag->tag_text }}
+                              </a>
+                            </li>
+                            @endforeach
+                       </ul>
                         
                     </li>
                     

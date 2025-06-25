@@ -264,9 +264,9 @@ class GraphsRepository extends SharedRepo{
 		if(count($kpi_ids) == 0)
 			return [];
 
-        $query = DB::table('kpi_data_view')
+        $query = DB::table('kpi_data_view as kdv1')
          ->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
-             return $query->whereIn('kpi_id',$kpi_ids->toArray());
+             return $query->whereIn('kdv1.kpi_id',$kpi_ids->toArray());
          });
 
 		if(isset($filter['region_id'])){
@@ -277,7 +277,7 @@ class GraphsRepository extends SharedRepo{
 			return [];
 
 			$query->when(count($country_ids) > 0, function ($query) use($country_ids) {
-				return $query->whereIn('country_id', $country_ids->toArray());
+				return $query->whereIn('kdv1.country_id', $country_ids->toArray());
 			});
 		}
 
@@ -290,21 +290,30 @@ class GraphsRepository extends SharedRepo{
 
 					$is_intended = ($key == "kpi_id" || $key == "country_id")?true:false;
 
-                    $query->when($is_intended, function ($query, $kpi_ids) use($key,$value) {
-                        return $query->where($key, $value);
+                    $query->when($is_intended, function ($query) use($key,$value) {
+                        return $query->where("kdv1.$key", $value);
                     });
 
 				}
 			}
 		}
 
-		$latest_periods = DB::table('kpi_data_view')->select(DB::raw('max(period) as period'))
-		->groupBy(['kpi_id','country_id'])
-		->pluck('period');
+		// Use a more efficient approach with window function to get latest period data
+		$query->select([
+			'kdv1.kpi_name',
+			'kdv1.period',
+			'kdv1.kpi_value',
+			'kdv1.kpi_id',
+			'kdv1.country_id'
+		])
+		->whereRaw('kdv1.period = (
+			SELECT MAX(kdv2.period) 
+			FROM kpi_data_view kdv2 
+			WHERE kdv2.kpi_id = kdv1.kpi_id 
+			AND kdv2.country_id = kdv1.country_id
+		)');
 
-		$query->select(DB::raw('kpi_name,max(period) as period,kpi_value,kpi_id'));
-		$query->whereIn('period',$latest_periods);
-        $results = $query->groupBy(['kpi_id','country_id'])->get();
+        $results = $query->get();
        
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
 	}
@@ -323,16 +332,21 @@ class GraphsRepository extends SharedRepo{
 		$data    = [];
 		$count   = 0;
 
-		$latest_periods = DB::table('kpi_data_view')->select(DB::raw('max(period) as period'))
-		->groupBy(['kpi_id','country_id'])
-		->pluck('period');
-
 		foreach ($this->get_kpis($filter) as $kpi) :
 
-            $row = $this->exec_query("SELECT kpi_name,kpi_value,kpi_id FROM kpi_data_view where kpi_id='$kpi->id' and period in $latest_periods")[0];
+            // Use a more efficient query to get the latest period data for this KPI
+            $row = DB::table('kpi_data_view as kdv1')
+                ->select(['kdv1.kpi_name', 'kdv1.kpi_value', 'kdv1.kpi_id'])
+                ->where('kdv1.kpi_id', $kpi->id)
+                ->whereRaw('kdv1.period = (
+                    SELECT MAX(kdv2.period) 
+                    FROM kpi_data_view kdv2 
+                    WHERE kdv2.kpi_id = kdv1.kpi_id
+                )')
+                ->first();
             
 			$data[$count]['name']   = $kpi->name;
-			$data[$count]['data'][] = intval($row->kpi_value);
+			$data[$count]['data'][] = intval($row ? $row->kpi_value : 0);
 
 			$count++;
 
