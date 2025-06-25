@@ -88,23 +88,8 @@ class GraphController extends Controller
 
 	public function get_year_data($filter, $current_year)
 	{
-
-		$previous_year         = $current_year - 1;
-		$filter['period_year'] = $current_year;
-		
-		$results = $this->dashRepo->get_country_kpis($filter);
-
-		foreach ($results as $row) {
-
-			unset($filter['kpi_ids']);
-
-			$filter['kpi_id']      = $row->kpi_id;
-			$filter['period_year'] = $previous_year;
-
-			$prev_year             = $this->dashRepo->get_country_kpis($filter, true);
-			$row->previous_year    = (isset($prev_year->kpi_value)) ? $prev_year->kpi_value : 0;
-		}
-
+		// Use the optimized method that gets both current and previous year data in a single query
+		$results = $this->dashRepo->get_country_kpis_with_previous_year($filter, $current_year);
 		return $results;
 	}
 

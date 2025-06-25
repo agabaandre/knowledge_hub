@@ -98,50 +98,62 @@ class GraphsRepository extends SharedRepo{
 	{
 		$use_filters = (isset($filter['region_id']) && $filter['region_id']>0)?true:false;
 
-       $data_countries = array_column($this->exec_query('SELECT country_id from kpi_data_view GROUP BY country_id '),'country_id');
+		// Use a more efficient query to get countries that have KPI data
+		$data_countries = DB::table('kpi_data_view')
+			->select('country_id')
+			->distinct()
+			->pluck('country_id');
 
-        $countries = DB::table('country')
-                ->where('national','National')
-                ->whereIn('id',$data_countries)
-                ->when($use_filters, function ($query, $use_filters) use($filter) {
+		$countries = DB::table('country')
+			->where('national','National')
+			->whereIn('id',$data_countries)
+			->when($use_filters, function ($query) use($filter) {
+				return $query->where('region_id',$filter['region_id']);
+			})
+			->get();
 
-                    return $query->where('region_id',$filter['region_id']);
-
-                });
-				
-				// ->when(true,function($query){
-
-				// 	return $this->access_filter($query,true);
-				// });
-
-				$records = $countries->get();
-
-		return $records;
+		return $countries;
 	}
 
 	public function get_data_kpis($filter=[])
 	{
-		$kpi_ids_with_data = KpiData::orderBy('kpi_id','desc');
-
+		// Use a more efficient query to get KPI IDs that have data
+		$query = DB::table('kpi_data_view')
+			->select('kpi_id')
+			->distinct();
 
 		if(isset($filter['region_id'])){
 			$country_ids = $this->region_countries($filter['region_id']);
-			$kpi_ids_with_data->whereIn('country_id',$country_ids->toArray());
+			if(count($country_ids) > 0) {
+				$query->whereIn('country_id', $country_ids->toArray());
+			}
 		}
-		
-		$this->access_filter($kpi_ids_with_data,true);
 
-		$kpi_ids = $kpi_ids_with_data->get()->pluck('kpi_id');
+		// Apply access filter more efficiently
+		$user = current_user();
+		if($user && $user->access_level) {
+			$level = $user->access_level;
+			
+			if($level->level_name == "Country" && states_enabled()) {
+				$query->where('country_id', $user->country_id);
+			} elseif($level->level_name == "RCC" && states_enabled()) {
+				// Get RCC countries directly
+				$rcc_countries = Country::where('region_id', $user->country->region_id)->pluck('id');
+				$query->whereIn('country_id', $rcc_countries);
+			}
+		}
 
-		$kpis     =  Kpi::whereIn('id',$kpi_ids->toArray())->get()->pluck('id');
-
-		return $kpis;
+		$kpi_ids = $query->pluck('kpi_id');
+		return $kpi_ids;
 	}
 
 	public function get_periods_years()
 	{
-        $data = $this->exec_query("SELECT period_year FROM kpi_data_view GROUP BY period_year");
-		return array_column($data, 'period_year');
+		$data = DB::table('kpi_data_view')
+			->select('period_year')
+			->distinct()
+			->pluck('period_year');
+		return $data->toArray();
 	}
 
 	public function get_kpis($filter = [], $only_ids=false)
@@ -318,6 +330,110 @@ class GraphsRepository extends SharedRepo{
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
 	}
 
+	// Optimized method to get country KPIs with previous year data in a single query
+	public function get_country_kpis_with_previous_year($filter = [], $current_year = null)
+	{
+		if (!$current_year) {
+			$current_year = date('Y');
+		}
+		$previous_year = $current_year - 1;
+
+		$kpi_ids = $this->get_kpis($filter, true);
+
+		if(count($kpi_ids) == 0)
+			return [];
+
+		// Get current year data
+		$current_filter = $filter;
+		$current_filter['period_year'] = $current_year;
+		
+		$current_query = DB::table('kpi_data_view as kdv1')
+			->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
+				return $query->whereIn('kdv1.kpi_id',$kpi_ids->toArray());
+			});
+
+		if(isset($filter['region_id'])){
+			$country_ids = $this->region_countries($filter['region_id']);
+			if(count($country_ids) == 0)
+				return [];
+			$current_query->when(count($country_ids) > 0, function ($query) use($country_ids) {
+				return $query->whereIn('kdv1.country_id', $country_ids->toArray());
+			});
+		}
+
+		if (!empty($filter)) {
+			foreach ($filter as $key => $value) {
+				if (!empty($value)) {
+					$is_intended = ($key == "kpi_id" || $key == "country_id")?true:false;
+					$current_query->when($is_intended, function ($query) use($key,$value) {
+						return $query->where("kdv1.$key", $value);
+					});
+				}
+			}
+		}
+
+		$current_query->select([
+			'kdv1.kpi_name',
+			'kdv1.period',
+			'kdv1.kpi_value',
+			'kdv1.kpi_id',
+			'kdv1.country_id'
+		])
+		->whereRaw('kdv1.period = (
+			SELECT MAX(kdv2.period) 
+			FROM kpi_data_view kdv2 
+			WHERE kdv2.kpi_id = kdv1.kpi_id 
+			AND kdv2.country_id = kdv1.country_id
+			AND YEAR(kdv2.period) = ?
+		)', [$current_year]);
+
+		$current_results = $current_query->get();
+
+		// Get previous year data for the same KPIs and countries
+		$kpi_country_pairs = $current_results->map(function($item) {
+			return ['kpi_id' => $item->kpi_id, 'country_id' => $item->country_id];
+		});
+
+		$previous_data = collect();
+		if ($kpi_country_pairs->count() > 0) {
+			$previous_query = DB::table('kpi_data_view as kdv1')
+				->select([
+					'kdv1.kpi_id',
+					'kdv1.country_id',
+					'kdv1.kpi_value'
+				])
+				->whereRaw('kdv1.period = (
+					SELECT MAX(kdv2.period) 
+					FROM kpi_data_view kdv2 
+					WHERE kdv2.kpi_id = kdv1.kpi_id 
+					AND kdv2.country_id = kdv1.country_id
+					AND YEAR(kdv2.period) = ?
+				)', [$previous_year]);
+
+			// Add the kpi_id and country_id conditions
+			$previous_query->where(function($query) use($kpi_country_pairs) {
+				foreach($kpi_country_pairs as $pair) {
+					$query->orWhere(function($q) use($pair) {
+						$q->where('kdv1.kpi_id', $pair['kpi_id'])
+						  ->where('kdv1.country_id', $pair['country_id']);
+					});
+				}
+			});
+
+			$previous_data = $previous_query->get()->keyBy(function($item) {
+				return $item->kpi_id . '_' . $item->country_id;
+			});
+		}
+
+		// Merge current and previous year data
+		$results = $current_results->map(function($item) use($previous_data) {
+			$key = $item->kpi_id . '_' . $item->country_id;
+			$item->previous_year = $previous_data->get($key)?->kpi_value ?? 0;
+			return $item;
+		});
+
+		return $results->toArray();
+	}
 
     private function exec_query($query){
 
