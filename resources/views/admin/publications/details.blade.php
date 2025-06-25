@@ -183,7 +183,7 @@
                                 <ul class="list-group mb-3">
                                     @foreach ($publication->attachments as $pub_file)
                                         <li class="list-group-item"><a
-                                                href="{{ storage_link('uploads/publications/') }}{{ $pub_file->file }}"
+                                                href="{{ $pub_file->file }}"
                                                 target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i>
                                                 {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
                                         @php

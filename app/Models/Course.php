@@ -9,6 +9,10 @@ class Course extends Model
 {
     use HasFactory;
     protected $guarded=[];
+    protected $fillable = [
+        'moodle_id', 'fullname', 'shortname', 'cover_image', 'category_id', 'summary',
+        'provider', 'content', 'course_url', 'is_moodle', 'is_active'
+    ];
     public $appends = ['course_link'];
 
     public function getCourseLinkAttribute()
@@ -18,7 +22,7 @@ class Course extends Model
 
 
     public function category(){
-        return $this->belongsTo(CourseCategory::class,'course_id','moodle_id');
+        return $this->belongsTo(CourseCategory::class, 'category_id', 'id');
     }
 
     public function getCoverImageAttribute($value){

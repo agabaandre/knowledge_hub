@@ -18,8 +18,14 @@ class CreateCoursesTable extends Migration
             $table->integer('moodle_id')->unique();
             $table->string('fullname');
             $table->string('shortname');
+            $table->string('cover_image')->nullable();
             $table->integer('category_id');
             $table->text('summary')->nullable();
+            $table->string('provider')->nullable();
+            $table->text('content')->nullable();
+            $table->string('course_url');
+            $table->boolean('is_moodle')->default(false);
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

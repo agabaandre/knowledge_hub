@@ -1,5 +1,5 @@
 <div class="modal" id="edit-tag-modal">
-    <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-dialog modal-md modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalToggleLabel">Edit Tag</h5>
@@ -27,6 +27,13 @@
                         </div>
                       </div>
 
+                    <div class="col-md-12">
+                        <div class="mb-3">
+                          <label class="form-label" for="overview">Overview</label>
+                          <textarea class="form-control summernote" id="overview" name="overview"></textarea>
+                        </div>
+                    </div>
+
                     <input type="hidden" name="tag_id" id="tag_id" value="">
                 </div>
                 <div class="modal-footer">
@@ -40,17 +47,30 @@
 
 
 @push('modal-scripts')
-    <script>
-        // JavaScript for specific modal
-        $('#edit-tag-modal').on('show.bs.modal', function (event) {
-            var button = $(event.relatedTarget);
-            var tag_id = button.data('id');
-            var tag_text = button.data('tag');
-             var is_emergency = button.data('is_health_emergency');
-             $('#is_health_emergency').val(is_emergency);
-
-            $('#tag_id').val(tag_id);
-            $('#tag_text').val(tag_text);
-        });
+<script>
+    $('#edit-tag-modal').on('show.bs.modal', function (event) {
+        var button = $(event.relatedTarget);
+        var tag_id = button.data('id');
+        var tag_text = button.data('tag');
+        var is_health_emergency = button.data('is_health_emergency');
+        var overview = button.data('overview');
+    
+        var modal = $(this);
+        modal.find('#tag_id').val(tag_id);
+        modal.find('#tag_text').val(tag_text);
+        modal.find('#is_health_emergency').val(is_health_emergency);
+        modal.find('#overview').summernote('code', overview);
+    
+        function toggleOverviewRequired() {
+            if (modal.find('#is_health_emergency').val() == '1') {
+                modal.find('#overview').attr('required', true);
+            } else {
+                modal.find('#overview').removeAttr('required');
+            }
+        }
+    
+        modal.find('#is_health_emergency').on('change', toggleOverviewRequired);
+        toggleOverviewRequired();
+    });
     </script>
 @endpush

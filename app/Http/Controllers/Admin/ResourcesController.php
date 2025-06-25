@@ -149,4 +149,27 @@ class ResourcesController extends Controller
         return response()->download(public_path('import-template.xlsx'));
     }
 
+    public function bulkAction(Request $request)
+    {
+        $action = $request->input('action');
+        $ids = $request->input('selected_ids', []);
+
+        if (empty($ids)) {
+            return back()->with('error', 'No publications selected.');
+        }
+        switch ($action) {
+            case 'inactive':
+                $this->publicationsRepo->bulkInactive($ids);
+                return back()->with('success', 'Selected publications unpublished.');
+            case 'delete':
+                $this->publicationsRepo->bulkDelete($ids);
+                return back()->with('success', 'Selected publications deleted.');
+            case 'featured':
+                $this->publicationsRepo->bulkFeatured($ids);
+                return back()->with('success', 'Selected publications marked as featured.');
+            default:
+                return back()->with('error', 'Invalid action.');
+        }
+    }
+
 }

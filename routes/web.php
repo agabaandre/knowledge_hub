@@ -214,6 +214,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/summary_approval", [ResourcesController::class, 'summary_approval']);
         Route::post("/import", [ResourcesController::class, 'import']);
         Route::get("/import-template", [ResourcesController::class, 'import_template']);
+        Route::post("/bulk-action", [ResourcesController::class, 'bulkAction'])->name('admin.publications.bulk-action');
+
     });
 
     //geo areas
@@ -425,6 +427,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "courses"], function () {
 
         Route::get("/", [AdminCoursesController::class, 'index']);
+        Route::post("/store", [AdminCoursesController::class, 'store']);
+        Route::post("/import", [AdminCoursesController::class, 'import']);
     });
 
 // Admin Messaging routes
@@ -559,4 +563,11 @@ Route::get('/proxy-pdf', function () {
     $url = request()->query('url');
 
     return StreamRemotePdf($url, 'resource.pdf');
+});
+
+Route::group(["prefix" => "admin/static-links"], function () {
+    Route::get('/', [\App\Http\Controllers\Admin\StaticLinksController::class, 'index'])->name('admin.static_links.index');
+    Route::post('/store', [\App\Http\Controllers\Admin\StaticLinksController::class, 'store'])->name('admin.static_links.store');
+    Route::put('/update/{id}', [\App\Http\Controllers\Admin\StaticLinksController::class, 'update'])->name('admin.static_links.update');
+    Route::delete('/delete/{id}', [\App\Http\Controllers\Admin\StaticLinksController::class, 'destroy'])->name('admin.static_links.destroy');
 });

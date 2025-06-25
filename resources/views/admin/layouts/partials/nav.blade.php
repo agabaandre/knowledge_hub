@@ -171,6 +171,8 @@
                         <li aria-haspopup="true"><a href="{{ url('admin/tags') }}">Tags</a></li>
                     @endcan
 
+                    <li aria-haspopup="true"><a href="{{ url('admin/static-links') }}">Static Links</a></li>
+
                     @can('view_privacy_policy')
                         <li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
                     @endcan

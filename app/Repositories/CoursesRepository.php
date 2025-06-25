@@ -30,6 +30,28 @@ class CoursesRepository{
         return $categories;
     }
 
+    public function create(array $data)
+    {
+        return Course::create($data);
+    }
 
+    public function update($id, array $data)
+    {
+        $course = Course::findOrFail($id);
+        $course->update($data);
+        return $course;
+    }
+
+    public function import(array $rows)
+    {
+        $imported = [];
+        foreach ($rows as $row) {
+            //dd($row);
+            $imported[] = Course::create($row);
+        }
+
+        return $imported;
+    }
+    
 
 }

@@ -11,6 +11,8 @@
                 <h3 class="card-title float-left">{{ $title ?? 'Tags' }}</h3>
                 <hr>
             </div>
+
+            
             <!-- Card Header With Form Filters -->
             <div class="card-header">
                 <form class="container-fluid">
@@ -62,13 +64,14 @@
                         $i = 1;
                     @endphp
 
-                    @foreach($tags as $row)
+                    @foreach($all_tags as $row)
                         <tr>
                             <td>{{ $row->tag_text }}</td>
                             <td>{{ ($row->is_health_emergency) ? 'Yes':'No' }}</td>
                             <td>
                                 <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" 
-                                    is_health_emergency="{{$row->is_health_emergency }}" 
+                                    data-is_health_emergency="{{$row->is_health_emergency }}" 
+                                    data-overview="{{$row->overview }}"
                                     class="btn btn-sm btn-primary ml-1">Edit</a>
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
                                    onclick="openDeleteModal('{{ $row->id }}')">Delete</a>
@@ -78,17 +81,21 @@
                     </tbody>
                 </table>
 
-                <div class="py-2"> {{$tags->links() }}</div>
+                <div class="py-2"> {{ $all_tags->links() }}</div>
 
             </div>
 
         </div>
+
 
         @include('admin.tags.partials.create-modal')
         <!-- Include edit-modal.php -->
         @include('admin.tags.partials.edit-modal')
         <!-- Include delete-modal.php -->
         @include('admin.tags.partials.delete-modal')
+
+        
+        @include('partials.general.summernote')
 
 
     </div>

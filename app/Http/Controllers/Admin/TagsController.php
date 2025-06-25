@@ -17,7 +17,8 @@ class TagsController extends Controller
 
     public function index(Request $request){
 
-        $data['tags'] = $this->tagsRepo->get($request);
+        $data['all_tags'] = $this->tagsRepo->get($request,false);
+        //dd($data['tags']);
         $data['search']    = (Object) $request->all();
         return view('admin.tags.index',$data);
     }

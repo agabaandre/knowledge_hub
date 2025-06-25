@@ -272,6 +272,13 @@
                             placeholder="Associated Authors"
                             value="{{ @$row->associated_authors ?? old('associated_authors') }}">
                     </div>
+                    <div class="form-group">
+                        <label class="form-label" for="sources">Associated Tags</label>
+                        @include('partials.tags.dropdown', [
+                            'field' => 'tags[]',
+                            'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
+                        ])
+                    </div>
                 </div>
 
             </div>

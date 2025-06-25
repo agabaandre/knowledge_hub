@@ -383,11 +383,13 @@
                      <li class="categories">
                         <a href="javascript:void(0);">Guidelines & Frameworks<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
-                             <li><a href="#">Africa CDC statute</a></li>
-                            <li><a href="#">AU declarartions</a></li>
-                            <li><a href="#">Statements</a></li>
-                            <li><a href="#">MS guidelines</a></li>
-                           <li><a href="{{ url('tools') }}">Tools</a></li>
+                            
+                            @if(isset($staticLinks) && count($staticLinks))
+                                @foreach($staticLinks as $link)
+                                    <li><a href="{{ $link->link }}" @if($link->open_in_new_tab) target="_blank" @endif>{{ $link->title }}</a></li>
+                                @endforeach
+                            @endif
+                            <li><a href="{{ url('tools') }}">Tools</a></li>
                         </ul>
                     </li>
 

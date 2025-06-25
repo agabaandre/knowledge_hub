@@ -1,6 +1,6 @@
 <!--  Extra Large modal example -->
 <div class="modal fade" id="create-modal">
-  <div class="modal-dialog modal-md">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="myExtraLargeModalLabel">Create Tag</h5>
@@ -31,6 +31,13 @@
             </div>
           </div>
 
+          <div class="col-md-12">
+            <div class="mb-3">
+              <label class="form-label" for="overview">Overview</label>
+              <textarea class="form-control summernote" id="overview" name="overview"></textarea>
+            </div>
+          </div>
+
           <!-- <div  class="col-md-4"> -->
           <!-- </div> -->
         </div>
@@ -46,3 +53,26 @@
     </div><!-- /.modal-content -->
   </div><!-- /.modal-dialog -->
 </div>
+
+<script>
+function toggleOverviewRequired(modalSelector) {
+    var $modal = $(modalSelector);
+    $modal.find('#is_health_emergency').on('change', function() {
+        if ($(this).val() == '1') {
+            $modal.find('#overview').attr('required', true);
+        } else {
+            $modal.find('#overview').removeAttr('required');
+        }
+    }).trigger('change');
+}
+
+// For create modal
+$('#create-modal').on('shown.bs.modal', function () {
+    toggleOverviewRequired('#create-modal');
+});
+
+// For edit modal
+$('#edit-tag-modal').on('shown.bs.modal', function () {
+    toggleOverviewRequired('#edit-tag-modal');
+});
+</script>

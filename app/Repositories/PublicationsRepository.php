@@ -457,9 +457,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 $attachmentData[] = [
                     "description" => $description,
                     "file" => $file_path,
-                    "publication_id" => $publication_id,
-                    "created_at" => now(),
-                    "updated_at" => now()
+                    "publication_id" => $publication_id
                 ];
             }
         }
@@ -766,7 +764,19 @@ public function getLightweight(Request $request, $return_array = false)
     return $return_array ? $results : $results;
 }
 
+public function bulkInactive($ids)
+{
+    Publication::whereIn('id', $ids)->update(['is_active' => 'In-Active']);
+}
 
+public function bulkDelete($ids)
+{
+    Publication::whereIn('id', $ids)->delete();
+}
 
+public function bulkFeatured($ids)
+{
+    Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
+}
 
 }

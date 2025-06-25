@@ -10,6 +10,8 @@ use App\Services\ChatPDFService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\View;
+use App\Models\StaticLink;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -51,5 +53,8 @@ class AppServiceProvider extends ServiceProvider
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
         
+        View::composer('layouts.header*', function ($view) {
+            $view->with('staticLinks', StaticLink::orderBy('order')->get());
+        });
     }
 }
