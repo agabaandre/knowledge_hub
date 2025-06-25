@@ -397,7 +397,7 @@
                         <ul class="nav-dropdown nav-submenu">
                              <li><a href="{{ url('forums') }}">Forums</a></li>
                             <li><a href="{{ url('communities') }}">Communities</a></li>
-                            <li><a href="#">Press Releases</a></li>
+                           
                         </ul>
                     </li>
 

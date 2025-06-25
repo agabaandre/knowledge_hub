@@ -22,7 +22,7 @@
             </div>
 	</form>
      <div class="col-lg-12 col-md-12 col-sm-12 px-3">
-        @include('home.partials.quotes')
+        {{-- @include('home.partials.quotes') --}}
        {{-- @include('home.partials.tags') --}}
     </div>
 
