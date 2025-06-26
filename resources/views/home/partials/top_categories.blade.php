@@ -1,6 +1,6 @@
-@section('title', 'Explore Key Sections')
+
 @php $primary = settings()->primary_color ?? '#222'; @endphp
-@section('styles')
+
 <style>
     .category-card {
         background-color: #fff;
@@ -43,9 +43,7 @@
         }
     }
 </style>
-@endsection
 
-@section('content')
 <!-- ================================ Categorization Section ================================ -->
 <section class="py-5 bg-light" id="categorization">
     <div class="container">
@@ -77,4 +75,3 @@
         </div>
     </div>
 </section>
-@endsection
