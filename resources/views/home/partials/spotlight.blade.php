@@ -1,4 +1,4 @@
-<div class="spotlight px-3 py-3 custom-bg"  style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;">
+<div class="spotlight px-3 py-3 custom-bg"  style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;" style="background-color: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important; background-image: url({{settings()->spotlight_banner }});">
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
 							<div class="row no-gutters bg-white rounded search-form" id="simple_search">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
