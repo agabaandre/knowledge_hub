@@ -24,8 +24,13 @@
 @section('content')
     @include('home.partials.' . $theme . 'spotlight')
 
-    @if (empty($theme))
-        @include('home.partials.' . $theme . 'top_categories')
+    @if(empty($theme))
+        {{-- @include('home.partials.' . $theme . 'top_categories') --}}
+
+        @if(count($initiatives)>0)
+            @include('home.partials.' . $theme . 'initiatives',['initiatives'=>$initiatives])
+        @endif
+        
         @include('home.partials.' . $theme . 'featured')
     @endif
 

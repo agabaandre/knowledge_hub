@@ -30,9 +30,9 @@ class HomeController extends Controller
 
         
      
-        $data['publications'] = $this->publicationsRepo->get($request);
-        $data['recent']       = $data['publications']; //$this->publicationsRepo->get($request);
-        $data['authors']      = $this->authorsRepo->get($request);
+        $data['publications']  = $this->publicationsRepo->get($request);
+        $data['recent']        = $data['publications']; //$this->publicationsRepo->get($request);
+        $data['authors']       = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
 		$request['is_featured'] = 1;
         $data['featured']     = $this->publicationsRepo->get($request,false,true);
@@ -41,6 +41,8 @@ class HomeController extends Controller
         $data['quotes']       = $this->quotesRepo->get($request);
 		$data['subthemes']	  = $this->publicationsRepo->get_subthemes();
 		$data['themes']		  = $this->themesRepo->get($request);
+		$request['category']  = 10;
+        $data['initiatives'] = $this->publicationsRepo->get($request);
         $data['is_home']      = true;
 
         return view('home.index',$data);

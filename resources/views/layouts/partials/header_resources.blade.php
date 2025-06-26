@@ -132,7 +132,7 @@
     }
 
     .custom-bg {
-        background-color: var(--theme-color-primary) !important;
+        background-color: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;
         background-image: url('{{ settings()->spotlight_banner }}');
         background-repeat: no-repeat;
         background-size: cover;

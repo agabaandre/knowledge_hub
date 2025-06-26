@@ -1,64 +1,216 @@
 <style>
     .theme-grid {
-        background: linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.4)), url('/path/to/bg.jpg') center/cover no-repeat;
-        padding: 4rem 0;
-        min-height: 100vh;
+        padding: 3rem 0;
+        min-height: 80vh;
         display: flex;
         align-items: center;
+        min-width: 100%;
+        z-index: 800;
+        padding-bottom: 50px;
+    }
+
+    .themes-section-title {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2d3748;
+        margin-bottom: 3rem;
+        text-align: center;
+        position: relative;
+    }
+
+
+    /* Fixed grid container */
+    .themes-container {
+        width: 100%;
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 0 15px;
+    }
+
+    .themes-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+        gap: 1.5rem;
+        width: 100%;
+    }
+
+    .theme-item {
+        width: 100%;
+        /* Removed max-width that was causing the single column issue */
     }
 
     .theme-card {
         background: #ffffff;
-        border-radius: 1rem;
-        padding: 1.5rem;
+        border-radius: 0.75rem;
+        padding: 1.25rem 1rem;
         text-align: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        min-height: 160px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
+        min-height: 120px;
         display: flex;
         flex-direction: column;
         justify-content: center;
+        border: 1px solid rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .theme-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, #119A48, #16c653);
+        transform: scaleX(0);
+        transition: transform 0.3s ease;
     }
 
     .theme-card:hover {
-        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(17, 154, 72, 0.15), 0 2px 4px rgba(0, 0, 0, 0.1);
+        transform: translateY(-2px);
+        border-color: rgba(17, 154, 72, 0.1);
+    }
+
+    .theme-card:hover::before {
+        transform: scaleX(1);
+    }
+
+    .theme-card:hover .theme-icon {
+        transform: scale(1.1);
+        color: #16c653;
     }
 
     .theme-icon {
-        font-size: 2rem;
+        font-size: 1.5rem;
         color: #119A48;
         margin-bottom: 0.75rem;
+        transition: all 0.3s ease;
+        display: block;
     }
 
     .theme-title {
-        font-size: 1rem;
+        font-size: 0.875rem;
         font-weight: 600;
-        color: #333;
-        line-height: 1.3;
+        color: #4a5568;
+        line-height: 1.4;
+        margin: 0;
+        transition: color 0.3s ease;
     }
 
-    @media (max-width: 767px) {
-        .theme-title {
-            font-size: 0.95rem;
+    .theme-card:hover .theme-title {
+        color: #2d3748;
+    }
+
+    .theme-link {
+        text-decoration: none;
+        display: block;
+        height: 100%;
+        width: 100%;
+    }
+
+    .theme-link:hover {
+        text-decoration: none;
+    }
+
+    /* Responsive adjustments */
+    @media (min-width: 1200px) {
+        .themes-grid {
+            grid-template-columns: repeat(6, 1fr);
         }
     }
+
+    @media (min-width: 992px) and (max-width: 1199px) {
+        .themes-grid {
+            grid-template-columns: repeat(4, 1fr);
+        }
+    }
+
+    @media (min-width: 768px) and (max-width: 991px) {
+        .themes-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+    }
+
+    @media (min-width: 576px) and (max-width: 767px) {
+        .themes-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @media (max-width: 575px) {
+        .theme-grid {
+            padding: 2rem 0;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 2rem;
+            padding: 0 1rem;
+        }
+        
+        .themes-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+        
+        .theme-card {
+            min-height: 100px;
+            padding: 1rem 0.75rem;
+        }
+        
+        .theme-icon {
+            font-size: 1.25rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .theme-title {
+            font-size: 0.8rem;
+        }
+    }
+
+    /* Loading animation */
+    .theme-card {
+        animation: fadeInUp 0.6s ease forwards;
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    @keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Stagger animation delay */
+    .theme-item:nth-child(1) .theme-card { animation-delay: 0.1s; }
+    .theme-item:nth-child(2) .theme-card { animation-delay: 0.2s; }
+    .theme-item:nth-child(3) .theme-card { animation-delay: 0.3s; }
+    .theme-item:nth-child(4) .theme-card { animation-delay: 0.4s; }
+    .theme-item:nth-child(5) .theme-card { animation-delay: 0.5s; }
+    .theme-item:nth-child(6) .theme-card { animation-delay: 0.6s; }
+    .theme-item:nth-child(7) .theme-card { animation-delay: 0.7s; }
+    .theme-item:nth-child(8) .theme-card { animation-delay: 0.8s; }
 </style>
 
 <section class="theme-grid">
-    <div class="container">
-        <h3 class="text-center text-white mb-5 font-weight-bold">Click a health theme below to access associated content</h3>
-        <div class="row justify-content-center">
-            @foreach ($themes as $theme)
-                <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 mb-4 d-flex justify-content-center">
-                    <a href="{{ url('records') }}?theme={{ $theme->id }}" class="w-100 text-decoration-none">
+    <div class="themes-container">
+        <h3 class="themes-section-title">
+            Choose a Health Theme to Explore
+        </h3>
+        
+        <div class="themes-grid">
+            @foreach ($themes as $index => $theme)
+                <div class="theme-item">
+                    <a href="{{ url('records') }}?theme={{ $theme->id }}" class="theme-link">
                         <div class="theme-card">
-                            <div class="theme-icon">
-                                <i class="fa {{ $theme->icon }}"></i>
-                            </div>
-                            <div class="theme-title" title="{{ $theme->description }}">
-                                {{ truncate($theme->description, 22) }}
-                            </div>
+                            <i class="fa {{ $theme->icon }} theme-icon" aria-hidden="true"></i>
+                            <p class="theme-title" title="{{ $theme->description }}">
+                                {{ truncate($theme->description, 24) }}
+                            </p>
                         </div>
                     </a>
                 </div>

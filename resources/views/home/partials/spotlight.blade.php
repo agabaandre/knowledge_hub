@@ -1,4 +1,4 @@
-<div class="spotlight px-3 py-3 custom-bg">
+<div class="spotlight px-3 py-3 custom-bg"  style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;">
 <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
 							<div class="row no-gutters bg-white rounded search-form" id="simple_search">
 									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
@@ -21,22 +21,10 @@
             <button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
             </div>
 	</form>
-     <div class="col-lg-12 col-md-12 col-sm-12 px-3">
-        {{-- @include('home.partials.quotes') --}}
-       {{-- @include('home.partials.tags') --}}
-    </div>
 
- 
 <div  class="row spot-row col-sm-12 d-flex align-items-center">
-     
-   
 
-    <div class="col-lg-12 col-md-12 col-sm-12 pb-5" style="z-index: 100;">
-      <div class="row justify-content-center mb-2">
-      
-      </div>
       @include('home.partials.theme_tabs') 
-    </div>
 
 </div>
 

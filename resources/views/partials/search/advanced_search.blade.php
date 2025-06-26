@@ -1,5 +1,4 @@
-<div class="row py-3 advanced_filters main_search">
-
+<div class="row py-3 advanced_filters main_search" style="padding-bottom:0px;">
     @php
 
         $advanced_filter =
