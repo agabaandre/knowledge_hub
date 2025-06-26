@@ -22,35 +22,38 @@
     <div class="row">
         <div class="col-12">
             <h5 class="mb-3 fw-semibold text-dark">Related Publications</h5>
-            
+
             @if($publications->count() > 0)
-                <div class="publication-card-list">
+                <div class="row g-4">
                     @foreach($publications as $publication)
-                        <div class="pub-card d-flex flex-column flex-md-row align-items-start align-items-md-center p-3 bg-white border shadow-sm rounded-4">
-                            <!-- Image -->
-                            <div class="pub-image-wrapper me-md-3 mb-3 mb-md-0">
-                                <img src="{{ $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png') }}" alt="{{ $publication->title }}" class="pub-image">
-                            </div>
-
-                            <!-- Content -->
-                            <div class="flex-grow-1 d-flex flex-column flex-md-row align-items-md-center justify-content-between w-100">
-                                <div class="flex-grow-1">
-                                    <a href="{{ url('records/resource?id=' . $publication->id) }}" class="pub-title-link text-dark">
-                                        <span class="fw-semibold pub-title">{{ $publication->title }}</span>
-                                    </a>
-                                    <div class="pub-desc text-secondary mt-1">
-                                        {{ Str::limit(strip_tags($publication->description), 120) }}
+                        <div class="col-md-6">
+                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden publication-card">
+                                <div class="row g-0 h-100">
+                                    <div class="col-4">
+                                        <img src="{{ $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png') }}"
+                                             alt="{{ $publication->title }}"
+                                             class="img-fluid h-100 w-100 object-fit-cover rounded-start-4">
                                     </div>
-                                </div>
-
-                                <!-- Meta -->
-                                <div class="pub-meta text-md-end mt-3 mt-md-0 ms-md-4 text-secondary">
-                                    @if($publication->author)
-                                        <div><i class="fa fa-user me-1"></i> {{ $publication->author->name }}</div>
-                                    @endif
-                                    @if($publication->created_at)
-                                        <div><i class="fa fa-calendar me-1"></i> {{ $publication->created_at->format('M Y') }}</div>
-                                    @endif
+                                    <div class="col-8 d-flex flex-column justify-content-between p-3">
+                                        <div>
+                                            <a href="{{ url('records/resource?id=' . $publication->id) }}" class="text-dark pub-title-link">
+                                                <h6 class="mb-1 fw-semibold pub-title" style="line-height: 1.3;">
+                                                    {{ Str::limit(strip_tags($publication->title), 80) }}
+                                                </h6>
+                                            </a>
+                                            <div class="text-muted small pub-desc">
+                                                {{ Str::limit(strip_tags($publication->description), 120) }}
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 text-secondary small pub-meta">
+                                            @if($publication->author)
+                                                <div><i class="fa fa-user me-1"></i> {{ $publication->author->name }}</div>
+                                            @endif
+                                            @if($publication->created_at)
+                                                <div><i class="fa fa-calendar me-1"></i> {{ $publication->created_at->format('M Y') }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -63,7 +66,6 @@
                         {{ $publications->links() }}
                     </div>
                 @endif
-
             @else
                 <!-- No Publications -->
                 <div class="text-center py-5">
@@ -81,67 +83,25 @@
 
 <!-- Styles -->
 <style>
-.publication-card-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1.2rem;
-}
-.pub-card {
-    transition: all 0.2s ease;
-    border: 1px solid #dee2e6;
-}
-.pub-card:hover {
-    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
-    border-color: {{ $primary }};
-    transform: translateY(-3px);
-}
-.pub-image-wrapper {
-    width: 90px;
-    height: 90px;
-    background: #f0f2f5;
-    border-radius: 0.8rem;
-    overflow: hidden;
-    flex-shrink: 0;
-}
-.pub-image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 0.8rem;
-}
-.pub-title-link {
-    text-decoration: none;
-    font-size: 1.05rem;
-    color: #212529;
-}
-.pub-title-link:hover {
-    color: {{ $primary }};
-    text-decoration: underline;
-}
-.pub-title {
-    font-size: 1.08rem;
-    font-weight: 600;
-}
-.pub-desc {
-    font-size: 0.96rem;
-    color: #6c757d;
-}
-.pub-meta {
-    font-size: 0.9rem;
-}
-.empty-state {
-    padding: 1rem;
-}
-@media (max-width: 600px) {
-    .pub-card {
-        flex-direction: column !important;
-        align-items: flex-start !important;
+    .publication-card .pub-title-link:hover {
+        color: {{ $primary }};
+        text-decoration: underline;
     }
-    .pub-image-wrapper {
-        width: 100%;
-        height: 180px;
-        margin-bottom: 1rem;
+    .publication-card .pub-title {
+        font-size: 1rem;
+        font-weight: 600;
     }
-}
+    .publication-card .pub-desc {
+        font-size: 0.9rem;
+    }
+    .publication-card .pub-meta {
+        font-size: 0.85rem;
+    }
+    .object-fit-cover {
+        object-fit: cover;
+    }
+    .empty-state {
+        padding: 2rem;
+    }
 </style>
 @endsection
