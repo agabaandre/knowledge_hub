@@ -2,8 +2,8 @@
 .spotlight {
   position: relative;
   min-height: 20vh;
-  padding: 10% 2%;
-  padding-bottom: 30%!important;
+  padding: 8% 2%;
+  padding-bottom: 15px !important;
   background-color:#03343b ;
 }
 
