@@ -67,7 +67,7 @@
 				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">Find us On</h4>
-						<ul class="footer-menu list-inline">
+						<ul class="footer-menu list-inline mb-3">
 							<li class="list-inline-item">
 								<a href="{{ settings()->facebook }}" target="_blank" class="text-decoration-none"
 									data-toggle="tooltip" data-placement="top" title="Facebook">
@@ -98,7 +98,14 @@
 									<i class="fa-brands fa-researchgate"></i>
 								</a>
 							</li>
+							<li class="list-inline-item">
+								<a href="https://play.google.com/store/apps/details?id=com.africacdc.khubmobile&hl=en" target="_blank"
+									class="text-decoration-none" data-toggle="tooltip" data-placement="top" title="Get the Mobile App">
+									<i class="fa-brands fa-google-play"></i>
+								</a>
+							</li>
 						</ul>
+						<p class="text-white small">Download our mobile app for a better experience</p>
 					</div>
 				</div>
 				
