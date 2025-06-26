@@ -55,7 +55,6 @@
             var head = "" + $('.heading' + elem).html();
             var data = "" + $('.pbody' + elem).html();
 
-
             $('.pop' + elem).popover({
                 html: true,
                 title: head,

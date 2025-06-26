@@ -1,4 +1,5 @@
-<div class="px-3 py-3 custom-bg" style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important; margin-top: 96px;">
+<div class="px-3 py-3 custom-bg" 
+style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) url({{settings()->spotlight_banner }}) !important; ">
 	<div class="container">
 		<div class="row justify-content-center">
 			<div class="col-xl-10 col-lg-10 col-md-12">
