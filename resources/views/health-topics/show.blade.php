@@ -4,7 +4,7 @@
 @section('title', $tag->tag_text . ' - Health Topics')
 
 @section('content')
-<div class="container-fluid py-5" style="max-width:960px;">
+<div class="container-fluid py-5">
 
     <!-- Topic Header -->
     <div class="row mb-4">

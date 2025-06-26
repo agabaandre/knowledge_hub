@@ -4,12 +4,13 @@
 @section('title', 'Health Topics')
 
 @section('content')
-<div class="container-fluid py-5" style="max-width: 960px;">
+<div class="container-fluid py-5">
+
     <!-- Page Header -->
     <div class="page-header mb-4">
         <div class="row">
             <div class="col-12">
-                <h2 class="fw-bold text-primary" style="font-size:1.75rem;">Health Topics</h2>
+                <h2 class="fw-bold text-primary" style="font-size: 1.75rem;">Health Topics</h2>
                 <ol class="breadcrumb mb-0 small">
                     <li class="breadcrumb-item"><a href="{{ url('/') }}" class="text-secondary">Home</a></li>
                     <li class="breadcrumb-item active">Health Topics</li>
@@ -30,18 +31,20 @@
         @forelse($groupedTags->flatten() as $tag)
             <div class="col-12 col-md-6 mb-3 topic-card-col">
                 <a href="{{ route('health-topics.show', $tag->id) }}" class="topic-card-link">
-                    <div class="topic-card p-3 d-flex flex-column flex-md-row align-items-start align-items-md-center justify-content-between h-100 border">
-                        <div class="topic-info pe-md-3">
-                            <div class="topic-title text-dark fw-semibold mb-1" style="font-size: 1.05rem;">
+                    <div class="topic-card p-3 d-flex justify-content-between align-items-center h-100">
+                        <!-- Title and Description -->
+                        <div class="topic-info me-3">
+                            <div class="topic-title text-dark fw-semibold mb-1" style="font-size: 1rem;">
                                 {{ $tag->tag_text }}
                             </div>
                             @if($tag->overview)
-                                <div class="topic-desc text-muted" style="font-size: 0.875rem; line-height: 1.4;">
+                                <div class="topic-desc text-muted small" style="line-height: 1.4;">
                                     {{ Str::limit(strip_tags($tag->overview), 80) }}
                                 </div>
                             @endif
                         </div>
-                        <div class="ms-md-auto mt-3 mt-md-0">
+                        <!-- Action -->
+                        <div class="text-end">
                             <span class="btn theme-primary btn-xs shadow-sm px-3 py-1">
                                 View <i class="fa fa-arrow-right ms-1"></i>
                             </span>
@@ -73,8 +76,9 @@
         background: #fff;
         border-radius: 0.75rem;
         border: 1px solid #e0e0e0;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        box-shadow: 0 2px 6px rgba(0,0,0,0.02);
         transition: all 0.15s ease-in-out;
+        min-height: 80px;
     }
 
     .topic-card:hover {
@@ -86,6 +90,17 @@
     .btn-xs {
         font-size: 0.8rem;
         border-radius: 1.2rem;
+        white-space: nowrap;
+    }
+
+    .topic-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .topic-desc {
+        font-size: 0.85rem;
+        color: #6c757d;
     }
 
     .empty-state {
@@ -93,7 +108,7 @@
     }
 </style>
 
-<!-- Script -->
+<!-- Search Script -->
 <script>
     document.addEventListener('DOMContentLoaded', function () {
         const searchInput = document.getElementById('topic-search');
