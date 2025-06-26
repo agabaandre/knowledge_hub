@@ -1,35 +1,84 @@
-			<!-- ================================ Tag Award ================================ -->
-			<section class="py-3" style="margin-top: -5%;" >
-			
-					<div class="row justify-content-center">
-						<div class="col-lg-12 col-md-12 col-sm-12">
-							<div class="crp_box fl_color ovr_top">
-								<div class="row align-items-center">
-								
-								@foreach($categories as $category)
-										
-								<div class="col-xl-3 col-lg-3 col-md-3 col-sm-12">
-								<a href="{{url($category['link'])}}">
-										<div class="dro_140">
-											<div class="dro_141 de">
-												<i class="{{$category['icon']}}"></i>
-												
-											</div>
-											<div class="dro_142">
-												<h6>{{$category['title']}}</h6>
-												<!-- <p>{{$category['stats']}} Records</p> -->
-											</div>
-										</div>
-								</a>
-									</div>
-								@endforeach
+@php $primary = settings()->primary_color ?? '#222'; @endphp
 
-								</div>
 
-							</div>
-						</div>
-					</div>
-				
-				
-			</section>
-		
+
+<style>
+    .category-card {
+        background-color: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+        transition: all 0.15s ease-in-out;
+        padding: 1.25rem;
+        min-height: 180px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+    }
+
+    .category-card:hover {
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+        border-color: {{ $primary }};
+        transform: translateY(-2px);
+    }
+
+    .category-icon i {
+        font-size: 1.8rem;
+        color: var(--theme-color-primary, {{ $primary }});
+        margin-bottom: 0.6rem;
+    }
+
+    .category-card h6 {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+        color: #212529;
+    }
+
+    .category-card p {
+        font-size: 0.82rem;
+        color: #6c757d;
+        margin-bottom: 0;
+    }
+
+    @media (max-width: 575.98px) {
+        .category-card {
+            min-height: auto;
+            padding: 1rem;
+        }
+    }
+</style>
+
+<section class="py-5 bg-light" id="categorization">
+    <div class="container">
+        <!-- Section Title -->
+        <div class="row mb-4">
+            <div class="col text-center">
+                <h3 class="fw-bold text-primary">Explore Key Sections</h3>
+                <p class="text-muted small">Navigate important resources like health topics, contributors, coverage, and forums.</p>
+            </div>
+        </div>
+
+        <!-- Cards -->
+        <div class="row g-3">
+            @foreach($categories as $category)
+                <div class="col-12 col-sm-6 col-md-3">
+                    <a href="{{ url($category['link']) }}" class="text-decoration-none">
+                        <div class="category-card">
+                            <div class="category-icon">
+                                <i class="{{ $category['icon'] }}"></i>
+                            </div>
+                            <h6>{{ $category['title'] }}</h6>
+                            @if(isset($category['description']))
+                                <p>{{ Str::limit($category['description'], 60) }}</p>
+                            @endif
+                        </div>
+                    </a>
+                </div>
+            @endforeach
+        </div>
+    </div>
+</section>
+
