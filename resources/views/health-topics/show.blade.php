@@ -3,6 +3,60 @@
 
 @section('title', $tag->tag_text . ' - Health Topics')
 
+@section('styles')
+<style>
+    .publication-card {
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        overflow: hidden;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .publication-card:hover {
+        box-shadow: 0 6px 20px rgba(0,0,0,0.12);
+        border-color: {{ $primary }};
+        transform: translateY(-2px);
+    }
+
+    .publication-card img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .ratio-4x3 {
+        aspect-ratio: 4 / 3;
+        background-color: #f8f9fa;
+    }
+
+    .pub-title {
+        font-size: 1.05rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .pub-desc {
+        font-size: 0.92rem;
+        color: #6c757d;
+    }
+
+    .pub-meta {
+        font-size: 0.85rem;
+        color: #888;
+    }
+
+    .pub-title-link:hover {
+        color: {{ $primary }};
+        text-decoration: underline;
+    }
+
+    .empty-state {
+        padding: 2rem;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="container-fluid py-5" style="max-width:1020px;">
 
@@ -27,32 +81,33 @@
                 <div class="row g-4">
                     @foreach($publications as $publication)
                         <div class="col-md-6">
-                            <div class="card h-100 shadow-sm border-0 rounded-4 overflow-hidden publication-card">
-                                <div class="row g-0 h-100">
-                                    <div class="col-4">
-                                        <img src="{{ $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png') }}"
-                                             alt="{{ $publication->title }}"
-                                             class="img-fluid h-100 w-100 object-fit-cover rounded-start-4">
+                            <div class="card publication-card h-100 d-flex flex-column">
+                                <!-- Cover Image -->
+                                <div class="ratio ratio-4x3">
+                                    <img src="{{ $publication->image_url ?? $publication->cover ?? asset('assets/img/default-publication.png') }}"
+                                         alt="{{ $publication->title }}">
+                                </div>
+
+                                <!-- Card Body -->
+                                <div class="card-body d-flex flex-column justify-content-between">
+                                    <div>
+                                        <a href="{{ url('records/resource?id=' . $publication->id) }}"
+                                           class="text-decoration-none pub-title-link text-dark">
+                                            <h6 class="pub-title mb-2">
+                                                {{ Str::limit(strip_tags($publication->title), 90) }}
+                                            </h6>
+                                        </a>
+                                        <p class="pub-desc mb-3">
+                                            {{ Str::limit(strip_tags($publication->description), 120) }}
+                                        </p>
                                     </div>
-                                    <div class="col-8 d-flex flex-column justify-content-between p-3">
-                                        <div>
-                                            <a href="{{ url('records/resource?id=' . $publication->id) }}" class="text-dark pub-title-link">
-                                                <h6 class="mb-1 fw-semibold pub-title" style="line-height: 1.3;">
-                                                    {{ Str::limit(strip_tags($publication->title), 80) }}
-                                                </h6>
-                                            </a>
-                                            <div class="text-muted small pub-desc">
-                                                {{ Str::limit(strip_tags($publication->description), 120) }}
-                                            </div>
-                                        </div>
-                                        <div class="mt-2 text-secondary small pub-meta">
-                                            @if($publication->author)
-                                                <div><i class="fa fa-user me-1"></i> {{ $publication->author->name }}</div>
-                                            @endif
-                                            @if($publication->created_at)
-                                                <div><i class="fa fa-calendar me-1"></i> {{ $publication->created_at->format('M Y') }}</div>
-                                            @endif
-                                        </div>
+                                    <div class="pub-meta">
+                                        @if($publication->author)
+                                            <div><i class="fa fa-user me-1"></i>{{ $publication->author->name }}</div>
+                                        @endif
+                                        @if($publication->created_at)
+                                            <div><i class="fa fa-calendar me-1"></i>{{ $publication->created_at->format('M Y') }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -67,41 +122,17 @@
                     </div>
                 @endif
             @else
-                <!-- No Publications -->
+                <!-- No Publications Message -->
                 <div class="text-center py-5">
                     <div class="empty-state">
                         <i class="fa fa-file-alt fa-2x text-muted mb-2"></i>
                         <h5>No Publications Found</h5>
                         <p class="text-secondary">There are currently no publications tagged with <strong>"{{ $tag->tag_text }}"</strong>.</p>
-                        <a href="{{ url('records') }}" class="btn theme-primary mt-2 text-white" style="border: none;">Browse All Publications</a>
+                        <a href="{{ url('records') }}" class="btn theme-primary text-white mt-2" style="border: none;">Browse All Publications</a>
                     </div>
                 </div>
             @endif
         </div>
     </div>
 </div>
-
-<!-- Styles -->
-<style>
-    .publication-card .pub-title-link:hover {
-        color: {{ $primary }};
-        text-decoration: underline;
-    }
-    .publication-card .pub-title {
-        font-size: 1rem;
-        font-weight: 600;
-    }
-    .publication-card .pub-desc {
-        font-size: 0.9rem;
-    }
-    .publication-card .pub-meta {
-        font-size: 0.85rem;
-    }
-    .object-fit-cover {
-        object-fit: cover;
-    }
-    .empty-state {
-        padding: 2rem;
-    }
-</style>
 @endsection
