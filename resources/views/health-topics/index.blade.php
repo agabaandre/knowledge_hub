@@ -4,7 +4,7 @@
 @section('title', 'Health Topics')
 
 @section('content')
-<div class="container-fluid py-5">
+<div class="container-fluid py-5" style="max-width: 1020px;">
 
     <!-- Page Header -->
     <div class="page-header mb-4">
