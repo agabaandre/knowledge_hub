@@ -17,6 +17,8 @@
                 @include('partials.search.advanced_search')
 
                 
+
+                
             <div class="col-md-4 sm-show mt-1">
             <button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
             </div>
