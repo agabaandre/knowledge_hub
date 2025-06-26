@@ -52,9 +52,9 @@ class HomeController extends Controller
 
 		return array(
 			[
-				"title"=>"Health Security Themes",
+				"title"=>"Health Topics",
 				"icon"=>"fa fa-shield",
-				'link'=>"browse/themes",
+				'link'=>"health-topics",
 				"image"=>"health.png",
 				"stats"=> $this->themesRepo->count()
 			],
