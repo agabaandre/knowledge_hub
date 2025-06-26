@@ -1,34 +1,38 @@
-<div class=" px-3 py-3 custom-bg"  style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;">
-<form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;">
-							<div class="row no-gutters bg-white rounded search-form" id="simple_search">
-									<div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
-										<div class="form-group mb-0 position-relative main_search">
-											<input type="text" class="form-control left-ico autocomplete term main-search" name="term" value="{{ @old('term') }}" placeholder="Type Keywords" />
-										</div>
-									</div>
-								
-									<div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 bg-show">
-										<div class="form-group mb-0 position-relative">
-											<button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
-										</div>
-									</div>
+<div class="px-3 py-3 custom-bg" style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important; margin-top: 96px;">
+	<div class="container">
+		<div class="row justify-content-center">
+			<div class="col-xl-10 col-lg-10 col-md-12">
 
-								</div>
-                @include('partials.search.advanced_search')
+				<form action="{{ url('records/search') }}" class="filters w-100">
+					<div class="row g-0 bg-white rounded search-form shadow-sm" id="simple_search">
+						<div class="col-md-8 col-sm-12">
+							<div class="form-group mb-0 position-relative main_search">
+								<input type="text" class="form-control left-ico autocomplete term main-search"
+									name="term" value="{{ @old('term') }}" placeholder="Type Keywords" />
+							</div>
+						</div>
+						<div class="col-md-4 col-sm-12">
+							<div class="form-group mb-0 position-relative">
+								<button class="btn w-100 theme-bg text-white fs-md py-3" type="submit">
+									<i class="fa fa-magnifying-glass"></i> Search
+								</button>
+							</div>
+						</div>
+					</div>
 
-                
-            <div class="col-md-4 sm-show mt-1">
-            <button class="btn full-width  theme-bg text-white fs-md py-3" type="submit"><i class="fa fa-magnifying-glass"></i>Search</button>
-            </div>
-	</form>
+					@include('partials.search.advanced_search')
+				</form>
 
-<div  class="row spot-row col-sm-12 d-flex align-items-center">
+			</div>
+		</div>
 
-      @include('home.partials.theme_tabs') 
+		<!-- Optional spacing before results or tabs -->
+		<div class="row mt-4">
+			<div class="col-12">
+				@include('home.partials.theme_tabs')
+			</div>
+		</div>
 
-</div>
-
-<div  class="spot-row">
-</div>
-
+		<div class="spot-row"></div>
+	</div>
 </div>
