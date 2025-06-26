@@ -27,6 +27,7 @@ use App\View\Composers\PublicationHealthEmergenciesViewComposer;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\Facades;
+use App\Models\StaticLink;
 
 class ViewComposerServiceProvider extends ServiceProvider
 {
@@ -73,6 +74,16 @@ class ViewComposerServiceProvider extends ServiceProvider
         View::composer(['partials/jobs/*'],OccupationsViewComposer::class);
         Facades\View::composer('*',TagsViewComposer::class);
         Facades\View::composer('*',PublicationHealthEmergenciesViewComposer::class);
+
+        View::composer('layouts.*', function ($view) {
+
+            $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+            $static_links = cache()->remember('adminunits',$minutes, function () {
+                return  StaticLink::orderBy('order')->get();
+              });
+            
+            $view->with('staticLinks',$static_links);
+        });
 
         
     }
