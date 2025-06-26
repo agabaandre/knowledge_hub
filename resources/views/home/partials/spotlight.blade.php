@@ -40,7 +40,7 @@
 
 </div>
 
-{{-- <div  class="spot-row">
-</div> --}}
+<div  class="spot-row">
+</div>
 
 </div>
