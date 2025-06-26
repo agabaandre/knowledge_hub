@@ -48,38 +48,39 @@ class HomeController extends Controller
 
 
     
-	private function get_categories(){
-
-		return array(
+	private function get_categories() {
+		return [
 			[
-				"title"=>"Health Topics",
-				"icon"=>"fa fa-shield",
-				'link'=>"health-topics",
-				"image"=>"health.png",
-				"stats"=> $this->themesRepo->count()
+				"title" => "Health Topics",
+				"icon" => "fa fa-shield-alt",
+				"link" => "health-topics",
+				"description" => "Explore diseases, conditions, and key health issues.",
+				"stats" => $this->themesRepo->count()
 			],
 			[
-				"title"=>"Resource Contibuting Sources",
-				"icon"=>"fa fa-pen-nib",
-				'link'=>"browse/authors",
-				"image"=>"resource.png",
-				"stats"=> $this->authorsRepo->count()
+				"title" => "Resource Contributing Sources",
+				"icon" => "fa fa-pen-nib",
+				"link" => "browse/authors",
+				"description" => "Organizations and authors that provide verified resources.",
+				"stats" => $this->authorsRepo->count()
 			],
 			[
-				"title"=>"Geographical Coverage",
-				"icon"=>"fa fa-map-pin",
-				'link'=>"browse/areas",
-				"image"=>"map.png",
-				"stats"=>$this->areasRepo->count()
+				"title" => "Geographical Coverage",
+				"icon" => "fa fa-map-marker-alt",
+				"link" => "browse/areas",
+				"description" => "View data and documents by regions and countries.",
+				"stats" => $this->areasRepo->count()
 			],
 			[
-				"title"=>"Public Discussion Forums",
-				"icon"=>"fa fa-comments",
-				'link'=>"forums",
-				"image"=>"forum.png",
-				"stats"=>$this->forumsRepo->count()
+				"title" => "Public Discussion Forums",
+				"icon" => "fa fa-comments",
+				"link" => "forums",
+				"description" => "Join discussions on pressing health topics and challenges.",
+				"stats" => $this->forumsRepo->count()
 			]
-		);
+		];
 	}
+	
+	
 
 }
