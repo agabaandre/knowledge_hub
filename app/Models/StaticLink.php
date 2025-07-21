@@ -11,4 +11,15 @@ class StaticLink extends Model
     protected $fillable = [
         'title', 'order', 'link', 'open_in_new_tab'
     ];
+
+    
+    protected static function booted()
+    {
+        static::created(function ($static_link) {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+        static::updated(function ($static_link) {
+            \Illuminate\Support\Facades\Cache::flush();
+        });
+    }
 } 
