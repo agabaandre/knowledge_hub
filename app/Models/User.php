@@ -69,7 +69,7 @@ class User extends Authenticatable
      }
 
      public function getPhotottribute(){
-        return ($this->is_photo_external)?$this->photo:user_profile_photo($this->photo);
+        return (intval($this->is_photo_external)==1)?$this->photo:user_profile_photo($this->photo);
      }
 
      public function access_level(){
