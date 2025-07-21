@@ -96,9 +96,8 @@ class UsersRepository {
 
             if(!$user->author_id && !$request->author_id){
 
-                $user->author()->firstOrCreate(['name'=>$user->name]);
-                $user->author_id = $user->author->id;
-                $user->update();
+                $author = Author::firstOrCreate(['name'=>$user->name]);
+                $user->update(['author_id'=>$author->id]);
             }
         }
         catch(\Exception $ex){
