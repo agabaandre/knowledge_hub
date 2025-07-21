@@ -92,18 +92,18 @@ class UsersRepository {
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
-        try{
+       // try{
 
-            if(!$user->author_id && !$request->author_id){
+           // if(!$user->author_id && !$request->author_id){
 
                 $author = Author::firstOrCreate(['name'=>$user->name]);
                 $user->update(['author_id'=>$author->id]);
-            }
-        }
-        catch(\Exception $ex){
-            \Log::info("Error creating author::");
-            \Log::info($ex->getMessage());
-        }
+           // }
+        // }
+        // catch(\Exception $ex){
+        //     \Log::info("Error creating author::");
+        //     \Log::info($ex->getMessage());
+        // }
 
         if(!$is_social)
         $this->send_email($request, $token);
