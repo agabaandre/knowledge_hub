@@ -97,7 +97,10 @@ class UsersRepository {
            // if(!$user->author_id && !$request->author_id){
 
                 $author = Author::firstOrCreate(['name'=>$user->name]);
-                $user->update(['author_id'=>$author->id]);
+                \Log::info("Error creating author::",['user'=>$user->name,'author'=>$author->name]);
+                $user->author_id=$author->id;
+                $user->update();
+                \Log::info("Error creating author::",['user'=>$user->name,'author'=>$author->name]);
            // }
         // }
         // catch(\Exception $ex){
