@@ -125,6 +125,7 @@ class AuthController extends Controller
         $socialUser = Socialite::driver('microsoft')->user();
         // Convert the MicrosoftUser object to a standard object
         $user = json_decode(json_encode($socialUser));
+        \Log::info("Microsoft Login::",['user'=>$user]);
 
         $user_exists = $this->usersRepo->find_by_email($user->user->mail);
         
@@ -157,6 +158,7 @@ class AuthController extends Controller
         
          // Convert the GoogleUser object to a standard object
          $user = json_decode(json_encode($socialUser));
+         \Log::info("Google Login::",['user'=>$user]);
          $user_exists = $this->usersRepo->find_by_email($user->user->email);
         
          if($user_exists):

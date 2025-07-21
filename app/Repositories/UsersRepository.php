@@ -96,9 +96,10 @@ class UsersRepository {
 
            if(!$user->author_id && !$request->author_id){
 
-                $author = Author::firstOrCreate(['name'=>$user->name]);
+                $author = Author::firstOrCreate(['name'=>$user->name,"is_organsiation"=>false]);
                 \Log::info("Error creating author::",['user'=>$user->name,'author'=>$author->name]);
                 $user->author_id=$author->id;
+
                 $user->update(); 
             }
         }
