@@ -309,13 +309,15 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'summaries','versioning',
             'sub_category','data_category'])->find($id);
 
+        if($pub):
         $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
         $viewed      = get_cookie($cookie_name);
 
-        if(!$viewed):
+        if(!$viewed && $pub):
             $pub->visits = $pub->visits + 1;
             $pub->update();
             set_cookie("Viewed".$pub->id,'yes');
+        endif;
         endif;
 
         return $pub;
