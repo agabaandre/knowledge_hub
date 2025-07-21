@@ -166,7 +166,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
   
         if($request->original_id):
 
-            $parent = $this->find($request->original_id);
+            $parent = $this->find($request->original_id,false);
             $pub->sub_thematic_area_id     = $parent->sub_thematic_area_id;
             $pub->geographical_coverage_id = $parent->geographical_coverage_id;
             $pub->is_version = 1;
@@ -299,7 +299,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         endif;
     }
 
-    public function find($id){
+    public function find($id,$update_visits=true){
 
         $pub = Publication::with([
             'file_type',
@@ -309,15 +309,15 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'summaries','versioning',
             'sub_category','data_category'])->find($id);
 
-        if($pub):
-        $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
-        $viewed      = get_cookie($cookie_name);
+        if($pub && $update_visits):
+            $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
+            $viewed      = get_cookie($cookie_name);
 
-        if(!$viewed && $pub):
-            $pub->visits = $pub->visits + 1;
-            $pub->update();
-            set_cookie("Viewed".$pub->id,'yes');
-        endif;
+            if(!$viewed && $pub):
+                $pub->visits = $pub->visits + 1;
+                $pub->update();
+                set_cookie("Viewed".$pub->id,'yes');
+            endif;
         endif;
 
         return $pub;

@@ -93,10 +93,17 @@ class UsersRepository {
         $user = User::find($user->id);
 
         try{
-        if(!$user->author_id && !$request->author_id)
-        $user->author()->firstOrCreate(['name'=>$user->name]);
-        }catch(\Exception $ex){
-            //ignore
+
+            if(!$user->author_id && !$request->author_id){
+
+                $user->author()->firstOrCreate(['name'=>$user->name]);
+                $user->author_id = $user->author->id;
+                $user->update();
+            }
+        }
+        catch(\Exception $ex){
+            \Log::info("Error creating author::");
+            \Log::info($ex->getMessage());
         }
 
         if(!$is_social)
