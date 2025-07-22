@@ -1,7 +1,7 @@
                        @guest
                            <li class=" {{ $class ?? '' }}">
                                <a href="{{ route('login') }}" class="ft-medium text-bold">
-                                   <i class="lni lni-user mr-2"></i>Sign In
+                                   <i class="lni lni-user mr-2"></i>Account
                                </a>
                            </li>
 
