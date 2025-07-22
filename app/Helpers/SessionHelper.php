@@ -23,7 +23,10 @@ if(!function_exists('set_cookie')){
 if(!function_exists('current_user')){
 	function current_user(){
 		$user = Auth::user();
-		$user->photo = (intval($user->is_photo_external)==1)?$user->photo:user_profile_photo($user->photo);
+		if (!$user) {
+			return null;
+		}
+		$user->photo = (intval($user->is_photo_external)==1) ? $user->photo : user_profile_photo($user->photo);
 		return $user;
 	}
 }
