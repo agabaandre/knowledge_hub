@@ -116,18 +116,18 @@
                         <div class="auth-divider">or</div>
 
                         <div class="auth-btn-group mb-2">
-                            <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary auth-btn d-flex align-items-center justify-content-center">
+                            {{-- <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary auth-btn d-flex align-items-center justify-content-center">
                                 <i class="lni lni-microsoft me-2"></i> Login with Microsoft
-                            </a>
+                            </a> --}}
                             <a href="{{ url('auth/google') }}" class="btn btn-outline-danger auth-btn d-flex align-items-center justify-content-center">
                                 <i class="lni lni-google me-2"></i> Login with Google
                             </a>
                         </div>
 
                         <div class="auth-btn-group mb-3">
-                            <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary auth-btn d-flex align-items-center justify-content-center">
+                            {{-- <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary auth-btn d-flex align-items-center justify-content-center">
                                 <i class="lni lni-microsoft me-2"></i> Register with Microsoft
-                            </a>
+                            </a> --}}
                             <a href="{{ url('auth/google') }}" class="btn btn-outline-danger auth-btn d-flex align-items-center justify-content-center">
                                 <i class="lni lni-google me-2"></i> Register with Google
                             </a>
