@@ -567,11 +567,6 @@ Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-reque
     Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->name('update');
     Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->name('destroy');
 });
-Route::get('/proxy-pdf', function () {
-    $url = request()->query('url');
-
-    return StreamRemotePdf($url, 'resource.pdf');
-});
 
 Route::group(["prefix" => "admin/static-links"], function () {
     Route::get('/', [\App\Http\Controllers\Admin\StaticLinksController::class, 'index'])->name('admin.static_links.index');
