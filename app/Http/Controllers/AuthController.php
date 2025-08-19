@@ -128,6 +128,12 @@ class AuthController extends Controller
         \Log::info("Microsoft Login::",['user'=>$user]);
 
         $user_exists = $this->usersRepo->find_by_email($user->user->mail);
+
+        dd($user_exists);
+
+         // Check if the user already exists in the database
+         // If not, create a new user using the social login service
+         // and then log them in
         
         if($user_exists):
             $user = $user_exists;
