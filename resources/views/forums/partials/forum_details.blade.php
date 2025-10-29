@@ -33,11 +33,15 @@
         
         <div class="article_posts_thumb">
             <span class="img">
-                    @if (is_valid_image(storage_link('uploads/users/' . $forum->user->photo)))
-<img src="{{ storage_link('uploads/users/' . $forum->user->photo) }}" >
-@else
-<img src="{{ storage_link('uploads/users/' . $forum->user->photo) }}">
-@endif
+                    @php
+                        $forumUserPhoto = !empty($forum->user->photo) ? storage_link('uploads/users/' . $forum->user->photo) : null;
+                    @endphp
+                    @if(!empty($forumUserPhoto))
+                        <img src="{{ $forumUserPhoto }}" class="user-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                        <span class="user-avatar-fallback" style="display:none; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                    @else
+                        <span class="user-avatar-fallback" style="display:flex; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                    @endif
             </span>
             <small class="text-muted">Posted By</small>
             
@@ -60,12 +64,16 @@
                                     <div class="comment-details">
                                         <div class="comment-meta row">
                                             <div class="comment-left-meta justify-content-center">
-                                                @if (is_image($comment->user->photo))
-                                                    <img src="{{ $comment->user->photo }}" width="30px"
-                                                        class="avatar rounded">
+                                                @php
+                                                    $userPhoto = is_image($comment->user->photo) ? $comment->user->photo : ($forum->user->photo ?? null);
+                                                @endphp
+                                                @if(!empty($userPhoto))
+                                                    <img src="{{ $userPhoto }}" width="30px"
+                                                        class="avatar rounded user-avatar-img"
+                                                        onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                                                    <span class="user-avatar-fallback avatar rounded" style="display:none; width: 30px; height: 30px; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; font-size: 14px;"><i class="fa fa-user"></i></span>
                                                 @else
-                                                    <img src="{{ $forum->user->photo }}" width="30px"
-                                                        class="avatar rounded">
+                                                    <span class="user-avatar-fallback avatar rounded" style="display:inline-flex; width: 30px; height: 30px; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; font-size: 14px;"><i class="fa fa-user"></i></span>
                                                 @endif
                                                 <h4 class="author-name">
                                                     {{ @current_user() && @current_user()->id == $comment->created_by ? 'You' : $comment->user->name }}

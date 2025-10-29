@@ -45,15 +45,11 @@ class User extends Authenticatable
         'is_photo_external' => 'integer',
     ];
 
-    protected $appends = ["names","area","settings"];
+    protected $appends = ["names"];
     
 
     public function getNamesAttribute(){
         return ($this->firstname)?$this->firstname." ".$this->lastname:$this->name;
-    }
-
-    public function getSettingsAttribute(){
-        return settings();
     }
     
 
@@ -65,8 +61,22 @@ class User extends Authenticatable
         return $this->belongsTo(Author::class);
      }
 
+     /**
+      * Get the area attribute - not automatically appended to prevent memory issues
+      * Access via $user->area when needed
+      */
      public function getAreaAttribute(){
-        return ($this->country)?GeoCoverage::where('name','like','%'.$this->country->name.'%')->first():null;
+        if (!$this->country_id) {
+            return null;
+        }
+        
+        // Use the country relationship to get area
+        $country = $this->country;
+        if (!$country || !$country->name) {
+            return null;
+        }
+        
+        return GeoCoverage::where('name','like','%'.$country->name.'%')->first();
      }
 
      public function getPhotottribute(){
@@ -83,6 +93,9 @@ class User extends Authenticatable
     }
 
     public function getPhotoAttribute($photo){
+        if (empty($photo)) {
+            return null;
+        }
         return storage_link('uploads/users/'.$photo);
     }
 

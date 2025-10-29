@@ -21,10 +21,30 @@ class CommonController extends Controller
 
     
     public function endtour(Request $request){
+        $action = $request->input('action', 'finished'); // 'finished', 'skipped', 'declined'
+        $dontShowAgain = $request->input('dont_show_again', false);
 
+        // Set cookie to prevent tour from showing again
         set_cookie('CDC_Tour_Finished',"YES09983kjfiejk");
+        set_cookie('CDC_Tour_Action', $action);
+        
+        // If user doesn't want to see it again, set additional flag
+        if ($dontShowAgain || $action === 'declined') {
+            set_cookie('CDC_Tour_Declined', "true");
+        }
 
-        return 'Finished';
+        // Support both GET (backward compatibility) and POST requests
+        if ($request->isMethod('GET')) {
+            return 'Finished';
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'action' => $action,
+            'message' => $action === 'skipped' || $action === 'declined' 
+                ? 'Tour preference saved. You can restart it anytime from your account settings.' 
+                : 'Tour completed!'
+        ]);
     }
 
 

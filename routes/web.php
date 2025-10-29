@@ -79,7 +79,8 @@ Auth::routes(['verify' => true]);
 
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour');
+Route::post('/endtour', [CommonController::class, 'endtour'])->name('endtour');
+Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour.get'); // Backward compatibility
 
 Route::get('/logout', function () {
     Auth::logout();

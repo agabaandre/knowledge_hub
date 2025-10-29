@@ -41,7 +41,7 @@
                     <ul id="responsive">
 
                         <li><a href="{{ url('/') }}">Home</a></li>
-                        <li><a href="#">Categories</a>
+                        <li><a href="#">Browse</a>
                             <ul class="dropdown-nav">
 
                                 @foreach ($data_categories as $category)
@@ -71,18 +71,16 @@
                                     @endif
                                 @endforeach
 
+                                @if (states_enabled())
+                                    <li><a href="{{ url('countries') }}">Member States</a></li>
+                                @else
+                                    <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
+                                @endif
 
                             </ul>
                         </li>
-                        @if (states_enabled())
-                        @endif
 
                         <li><a href="{{ url('forums') }}">Forums</a></li>
-                        @if (states_enabled())
-                            <li><a href="{{ url('countries') }}">Member States</a></li>
-                        @else
-                            <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
-                        @endif
                         <li><a href="{{ url('faqs') }}">FAQs</a></li>
                         <li><a href="{{ url('tools') }}">Tools</a></li>
                         @include('partials.account.authlinks', ['class' => 'mobileonly'])
@@ -113,7 +111,12 @@
                         <div class="header-notifications-trigger">
                             <a href="#">
                                 <div class="user-avatar status-online">
-                                    <img src="{{ current_user()->photo }}" alt="">
+                                    @if(!empty(current_user()->photo))
+                                        <img src="{{ current_user()->photo }}" alt="" class="user-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                        <span class="user-avatar-fallback" style="display:none; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                                    @else
+                                        <span class="user-avatar-fallback" style="display:flex; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                                    @endif
                                 </div>
                             </a>
                         </div>
@@ -126,8 +129,14 @@
 
                                 <!-- User Name / Avatar -->
                                 <div class="user-details">
-                                    <div class="user-avatar status-online"><img src="{{ current_user()->photo }}"
-                                            alt=""></div>
+                                    <div class="user-avatar status-online">
+                                        @if(!empty(current_user()->photo))
+                                            <img src="{{ current_user()->photo }}" alt="" class="user-avatar-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                            <span class="user-avatar-fallback" style="display:none; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                                        @else
+                                            <span class="user-avatar-fallback" style="display:flex; width: 100%; height: 100%; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%;"><i class="fa fa-user"></i></span>
+                                        @endif
+                                    </div>
                                     <div class="user-name">
                                         {{ ' ' . ucwords(current_user()->name) }}
                                     </div>

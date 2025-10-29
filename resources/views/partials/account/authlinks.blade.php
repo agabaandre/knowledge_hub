@@ -11,9 +11,17 @@
                 </a>
                </li> -->
                        @else
-                           <li class="{{ $class ?? '' }}"><a href="#"><img class="rounded-circle notranslate"
-                                       src="{{ current_user()->photo }}"
-                                       style=" width: 25px; height: 25px; border-radius: 50%;  border: 1px solid #7e7d80;">{{ ' ' . ucwords(current_user()->name) }}</a>
+                           <li class="{{ $class ?? '' }}"><a href="#">
+                                       @if(!empty(current_user()->photo))
+                                           <img class="rounded-circle notranslate user-avatar-img"
+                                               src="{{ current_user()->photo }}"
+                                               style="width: 25px; height: 25px; border-radius: 50%; border: 1px solid #7e7d80; display: inline-block;"
+                                               onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                                           <span class="user-avatar-fallback" style="display:none; width: 25px; height: 25px; border-radius: 50%; border: 1px solid #7e7d80; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 12px;"><i class="fa fa-user"></i></span>
+                                       @else
+                                           <span class="user-avatar-fallback" style="display:inline-flex; width: 25px; height: 25px; border-radius: 50%; border: 1px solid #7e7d80; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 12px;"><i class="fa fa-user"></i></span>
+                                       @endif
+                                       {{ ' ' . ucwords(current_user()->name) }}</a>
                                <ul class="nav-dropdown">
                                    @if (is_admin())
                                        <li class=" {{ $class ?? '' }}">

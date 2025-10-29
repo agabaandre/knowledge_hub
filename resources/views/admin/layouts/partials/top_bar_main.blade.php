@@ -134,8 +134,17 @@
             <!-- Main-header-message closed -->
             <div class="dropdown main-profile-menu nav nav-item nav-link">
 
-                <a class=""><img class="rounded-circle notranslate" src="{{ current_user()->photo }}"
-                        style=" width: 45px; height: 45px; border-radius: 50%;  background-color: #FFE8;  "><span>{{ ' ' . ucwords(@current_user()->name) ?? '' }}</span></a>
+                <a class="">
+                        @if(!empty(current_user()->photo))
+                            <img class="rounded-circle notranslate user-avatar-img"
+                                src="{{ current_user()->photo }}"
+                                style="width: 45px; height: 45px; border-radius: 50%; background-color: #FFE8; display: inline-block;"
+                                onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
+                            <span class="user-avatar-fallback" style="display:none; width: 45px; height: 45px; border-radius: 50%; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 18px;"><i class="fa fa-user"></i></span>
+                        @else
+                            <span class="user-avatar-fallback" style="display:inline-flex; width: 45px; height: 45px; border-radius: 50%; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 18px;"><i class="fa fa-user"></i></span>
+                        @endif
+                        <span>{{ ' ' . ucwords(@current_user()->name) ?? '' }}</span></a>
                 <div class="dropdown-menu animated fadeInUp">
 
                     <a class="dropdown-item" href="{{ route('home') }}" target="_blank"><i class="bx bx-link"></i>

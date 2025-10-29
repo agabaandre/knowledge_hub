@@ -34,6 +34,8 @@ class SettingsRepository{
         $settings->footer_style = $request->footer_style;
         $settings->site_theme   = $request->site_theme;
         $settings->content_disclaimer = $request->content_disclaimer;
+        $settings->gradient_start_color = $request->gradient_start_color;
+        $settings->gradient_end_color = $request->gradient_end_color;
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):

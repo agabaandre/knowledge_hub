@@ -64,6 +64,11 @@ class UsersRepository {
             $user->is_social_login    = 1;
             $user->social_provider    = $request->social_provider;
             $user->is_photo_external  = false;
+            
+            // Auto-verify email for social logins
+            if (!$user->email_verified_at) {
+                $user->email_verified_at = Carbon::now();
+            }
 
             if($request->photo){
                 $user->photo = $request->photo;

@@ -1,7 +1,22 @@
-<div class="spotlight px-3 py-3 custom-bg"
-     style="background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)), url('{{ settings()->spotlight_banner }}'); background-size: cover; background-position: center;">
-    <form action="{{ url('records/search') }}" class="filters" style="min-width: 70%;" role="search" aria-label="Search records">
-        <div class="row no-gutters bg-white rounded search-form" id="simple_search">
+@php
+    $settings = settings();
+    $bannerImage = '';
+    if (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'storage/uploads/config/') !== false) {
+        $bannerImage = $settings->spotlight_banner;
+    }
+    $gradientStart = $settings->gradient_start_color ?? '#119A48';
+    $gradientEnd = $settings->gradient_end_color ?? '#16c653';
+    
+    if (!empty($bannerImage) && strpos($bannerImage, 'http') !== false) {
+        $bgStyle = "background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)), url('{$bannerImage}'); background-size: cover; background-position: center;";
+    } else {
+        $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
+    }
+@endphp
+<div class="spotlight px-3 py-3 custom-bg" style="{{ $bgStyle }}">
+    <div class="search-container" style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 15px; box-sizing: border-box;">
+        <form action="{{ url('records/search') }}" class="filters" role="search" aria-label="Search records">
+        <div class="row no-gutters bg-white rounded search-form" id="simple_search" style="border-radius: 0.375rem !important;">
             <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="form-group mb-0 position-relative main_search">
                     <label for="main-search" class="sr-only">Search Keywords</label>
@@ -23,11 +38,10 @@
                 <i class="fa fa-magnifying-glass"></i> Search
             </button>
         </div>
-    </form>
-
-    <div class="row spot-row col-sm-12 d-flex align-items-center">
-        @include('home.partials.theme_tabs')
+        </form>
     </div>
 
-    <div class="spot-row"></div>
+    <div class="row spot-row col-sm-12 d-flex align-items-center" style="margin-top: 1rem;">
+        @include('home.partials.theme_tabs')
+    </div>
 </div>

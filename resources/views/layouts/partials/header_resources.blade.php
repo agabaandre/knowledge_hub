@@ -66,6 +66,11 @@
 
     body {
         top: 0px !important;
+        background-color: #f4f5f7 !important;
+    }
+
+    html {
+        background-color: #f4f5f7 !important;
     }
 
     .goog-logo-link {
@@ -131,12 +136,58 @@
         border-radius: 4px;
     }
 
+    /* Search/Spotlight area background - image or gradient - only for search areas */
+    .spotlight.custom-bg,
+    .custom-bg.spotlight,
     .custom-bg {
-        background-color: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)) !important;
-        background-image: url('{{ settings()->spotlight_banner }}');
-        background-repeat: no-repeat;
-        background-size: cover;
-        background-position: center;
+        @php
+            $settings = settings();
+            $bgImage = (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'storage/uploads/config/') !== false && strpos($settings->spotlight_banner, 'http') !== false) ? $settings->spotlight_banner : '';
+            $gradientStart = $settings->gradient_start_color ?? '#119A48';
+            $gradientEnd = $settings->gradient_end_color ?? '#16c653';
+        @endphp
+        @if(!empty($bgImage))
+        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ $bgImage }}') !important;
+        background-repeat: no-repeat !important;
+        background-size: cover !important;
+        background-position: center !important;
+        @else
+        background: linear-gradient(135deg, {{ $gradientStart }} 0%, {{ $gradientEnd }} 100%) !important;
+        @endif
+    }
+    
+    /* Ensure other .custom-bg uses (if any) don't conflict */
+    body.custom-bg,
+    html.custom-bg {
+        background: #f4f5f7 !important;
+    }
+
+    /* Consistent background for all pages */
+    .gray {
+        background-color: #f4f5f7 !important;
+        position: relative;
+    }
+
+    /* Ensure content areas have semi-transparent backgrounds for readability */
+    .gray > .container,
+    .gray .container {
+        position: relative;
+        z-index: 1;
+    }
+
+    /* User Avatar Fallback Styling */
+    .user-avatar-fallback {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #e2e8f0;
+        color: #718096;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+
+    .user-avatar-wrapper {
+        position: relative;
     }
 
 
@@ -214,3 +265,31 @@
     })();
 </script> --}}
 <!--End of Tawk.to Script-->
+
+<script>
+    // Global fallback for user avatar images that fail to load
+    document.addEventListener('DOMContentLoaded', function() {
+        // Handle all user avatar images that fail to load
+        document.querySelectorAll('img.user-avatar-img, img[src*="/users/"], img[src*="user.jpg"]').forEach(function(img) {
+            img.addEventListener('error', function() {
+                // Hide the broken image
+                this.style.display = 'none';
+                
+                // Try to find existing fallback
+                var fallback = this.nextElementSibling;
+                if (fallback && fallback.classList.contains('user-avatar-fallback')) {
+                    fallback.style.display = 'inline-flex';
+                } else {
+                    // Create fallback if it doesn't exist
+                    fallback = document.createElement('span');
+                    fallback.className = 'user-avatar-fallback';
+                    var imgWidth = this.style.width || this.getAttribute('width') || '25px';
+                    var imgHeight = this.style.height || this.getAttribute('height') || '25px';
+                    fallback.style.cssText = 'display:inline-flex; width: ' + imgWidth + '; height: ' + imgHeight + '; align-items: center; justify-content: center; background-color: #e2e8f0; color: #718096; border-radius: 50%; border: 1px solid #cbd5e0;';
+                    fallback.innerHTML = '<i class="fa fa-user"></i>';
+                    this.parentElement.insertBefore(fallback, this.nextSibling);
+                }
+            });
+        });
+    });
+</script>

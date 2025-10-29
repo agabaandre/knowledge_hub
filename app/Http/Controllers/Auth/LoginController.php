@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use App\Models\User;
 use Illuminate\Validation\ValidationException;
+use Biscolab\ReCaptcha\Facades\ReCaptcha;
 
 class LoginController extends Controller
 {
@@ -45,15 +46,31 @@ class LoginController extends Controller
 
     protected function validateLogin(Request $request)
     {
-        
-        $request->validate([
+        $rules = [
             'email' => 'required|string|email',
             'password' => 'required|string',
-           // 'g-recaptcha-response' => 'required' //|captcha
-        ], [
-           // 'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
-            //'g-recaptcha-response.captcha' => 'Captcha verification failed, please try again.',
-        ]);
+        ];
+
+        $messages = [];
+
+        // Add reCAPTCHA validation if site key is configured
+        $recaptchaSiteKey = config('recaptcha.sitekey');
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+            $rules['g-recaptcha-response'] = 'required';
+            $messages['g-recaptcha-response.required'] = 'Please complete the CAPTCHA to proceed.';
+        }
+
+        $request->validate($rules, $messages);
+
+        // Validate reCAPTCHA response if provided
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && $request->filled('g-recaptcha-response')) {
+            $recaptchaResponse = $request->input('g-recaptcha-response');
+            if (!ReCaptcha::validate($recaptchaResponse)) {
+                throw ValidationException::withMessages([
+                    'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.',
+                ]);
+            }
+        }
     }
 
     protected function attemptLogin(Request $request)

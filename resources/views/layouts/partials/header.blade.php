@@ -253,7 +253,7 @@
                     <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">
                         {{ settings()->slogan }}</h6>
                 </div>
-                <div class="col-lg-4 col-md-4 text-end d-none d-md-block justify-content-end">
+                <div class="col-lg-4 col-md-4 d-none d-md-block" style="padding-right: 10px; display: flex; align-items: center; justify-content: flex-end;">
                     @include('layouts.partials.langselect')
                 </div>
             </div>
@@ -289,7 +289,7 @@
                 <ul class="nav-menu">
                     <li class="active"><a href="{{ url('/') }}">Home</a></li>
                     
-                     <li class="categories "><a href="javascript:void(0);">Data Categories<span
+                     <li class="categories "><a href="javascript:void(0);">Browse<span
                                 class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
@@ -325,16 +325,14 @@
                                 @endif
                             @endforeach
 
+                            @if (states_enabled())
+                                <li><a href="{{ url('countries') }}">Member States</a></li>
+                            @else
+                                <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
+                            @endif
 
                         </ul>
                     </li>
-
-
-                    @if (states_enabled())
-                        <li><a href="{{ url('countries') }}">Member States</a></li>
-                    @else
-                        <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
-                    @endif
                     
                     
                         @php

@@ -42,6 +42,8 @@
 	<!-- Darktheme css -->
 	<link href="{{ asset('assets/css/style-dark.css') }}" rel="stylesheet">
 
+	<!-- Admin Select2 CSS - Modern dropdown styling -->
+	<link href="{{ asset('assets/css/admin-select2.css') }}" rel="stylesheet">
 
 	<!-- Animations css -->
 	<link href="{{ asset('assets/css/animate.css') }}" rel="stylesheet">

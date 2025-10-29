@@ -1,5 +1,5 @@
-<select class="form-control js-example-basic-single theme {{ $class ?? 'select2' }}" name="{{$field ?? 'thematic_area_id'}}" {{ $required ?? '' }} select2>
-<option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select' }}</option>
+<select class="form-control theme {{ $class ?? 'select2' }}" name="{{$field ?? 'thematic_area_id'}}" {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select Theme' }}">
+<option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select Theme' }}</option>
 @foreach ($themes as $theme)
     <option value="{{$theme->id}}" {{ (@$selected == $theme->id)?'selected':''}}>
         {{$theme->description}}
@@ -20,6 +20,9 @@ $('.theme').on('change',function(e){
     theme_subs.forEach(item=>{
     $('.subtheme').append(`<option value="${item.id}">${item.description}</option>`);
     });
+    
+    // Re-initialize Select2 after updating options
+    $('.subtheme').trigger('change.select2');
 
     });
 

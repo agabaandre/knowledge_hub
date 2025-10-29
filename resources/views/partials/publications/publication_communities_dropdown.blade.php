@@ -1,6 +1,6 @@
-<select class="form-control js-example-basic-single {{ $class ?? 'select2' }}" name="{{ $field ?? 'communities[]' }}"
-    id="communities" {{ $required ?? '' }} multiple placeholder="Choose">
-    <option {{ @$allfield ? '' : 'disabled' }} value="">{{ $allfield ?? 'Choose One or More' }}</option>>
+<select class="form-control {{ $class ?? 'select2' }}" name="{{ $field ?? 'communities[]' }}"
+    id="communities" {{ $required ?? '' }} multiple data-placeholder="{{ $allfield ?? 'Choose Communities' }}">
+    <option {{ @$allfield ? '' : 'disabled' }} value="">{{ $allfield ?? 'Choose Communities' }}</option>
     @foreach ($communities as $comm)
         <option value="{{ $comm->id }}"
             {{ in_array($comm->id, is_array(@$selected) ? $selected : @$selected->pluck('id')->toArray()) ? 'selected' : '' }}>

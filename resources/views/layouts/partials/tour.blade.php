@@ -18,8 +18,8 @@ let tourOptions = {
     tips : [
 
     {
-        title : 'Data Categories',
-        description : 'Choose a data category to browse',
+        title : 'Browse',
+        description : 'Browse categories and member states',
        // image : 'my/image/path.png',
         selector : '.categories',
         x : 50,

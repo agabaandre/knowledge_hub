@@ -8,9 +8,9 @@
          $likes = count($row->favourited);
      @endphp
 
-     <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
-         <div class="card-body text-left">
-             <div class="row"></a>
+    <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
+        <div class="card-body text-left">
+            <div class="row">
                  <div class="col-md-2"
                      style=" background-image:url({{ $row->cover }}); background-size:cover; background-position:center;">
 

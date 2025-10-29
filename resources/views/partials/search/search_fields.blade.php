@@ -2,7 +2,7 @@
 
     @if (@states_enabled())
         <div class="col-md-4">
-            <label class="text-bold"><small>RCC</small></label>
+            <label class="text-bold"><small>Region</small></label>
             @include('partials.regions.dropdown', [
                 'class' => 'rcc select2',
                 'selected' => @$search->rcc,

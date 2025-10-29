@@ -1,5 +1,5 @@
-<select class="form-control js-example-basic-single select2" name="{{$field ?? 'geo_area_id'}}" required select2>
-<option disabled selected value="">Select</option>
+<select class="form-control select2" name="{{$field ?? 'geo_area_id'}}" required data-placeholder="Select Geographic Area">
+<option disabled selected value="">Select Geographic Area</option>
 @foreach ($geoareas as $geoarea)
     <option value="{{$geoarea->id}}" {{($geoarea->id == @$selected)?'selected':''}}>
         {{$geoarea->name ?? $geoarea->country_name}}

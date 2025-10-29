@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
@@ -121,39 +122,84 @@ class AuthController extends Controller
 
     public function microsoftLogin(){
 
-        // Get the user from Microsoft
-        $socialUser = Socialite::driver('microsoft')->user();
-        // Convert the MicrosoftUser object to a standard object
-        $user = json_decode(json_encode($socialUser));
-        \Log::info("Microsoft Login::",['user'=>$user]);
+        try {
+            // Get the user from Microsoft
+            $socialUser = Socialite::driver('microsoft')->user();
+            
+            \Log::info("Microsoft Login::", [
+                'email' => $socialUser->getEmail(),
+                'name' => $socialUser->getName(),
+                'id' => $socialUser->getId()
+            ]);
 
-        $user_exists = $this->usersRepo->find_by_email($user->user->mail);
+            // Get email using Socialite's getEmail() method
+            $email = $socialUser->getEmail();
+            
+            if (!$email) {
+                \Log::error("Microsoft Login Error: No email found in response");
+                return redirect('/login')
+                    ->with('alert_class', 'danger')
+                    ->with('alert', 'Unable to retrieve email from Microsoft. Please try again.');
+            }
 
-        //dd($user_exists);
+            // Check if user exists by email (regardless of social login status)
+            $user_exists = User::where('email', $email)->first();
 
-         // Check if the user already exists in the database
-         // If not, create a new user using the social login service
-         // and then log them in
-        
-        if($user_exists):
-            $user = $user_exists;
-         else:
-            $user =$this->socialLoginService->microsoftCallback($user);
-         endif;
+            // Check if the user already exists in the database
+            // If not, create a new user using the social login service
+            // The service will auto-create and assign to Africa CDC Staff community
+            
+            if($user_exists):
+                $user = $user_exists;
+                \Log::info("Microsoft Login: Existing user found", [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            else:
+                // Auto-create new user and assign to community
+                $user = $this->socialLoginService->microsoftCallback($socialUser);
+                
+                if (!$user || !$user->id) {
+                    \Log::error("Microsoft Login Error: Failed to create user", [
+                        'email' => $email,
+                        'name' => $socialUser->getName()
+                    ]);
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', 'Failed to create your account. Please try again or contact support.');
+                }
+                
+                \Log::info("Microsoft Login: New user created and auto-assigned to community", [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            endif;
 
-         Auth::login($user);
+            Auth::login($user);
 
-        if(!$user->country_id){
-            $data['alert_class'] = 'success';
-            $data['message']     = "Please complete yur profile";
-            $data['status']      = 200;
-            $redirect_to = "/account";
-         }else{
-            $redirect_to ="/";
-            $data = [];
-         }
+            if(!$user->country_id){
+                $data['alert_class'] = 'success';
+                $data['message']     = "Please complete your profile";
+                $data['status']      = 200;
+                $redirect_to = "/account";
+            }else{
+                $redirect_to ="/";
+                $data = [];
+            }
 
-         return redirect($redirect_to)->with($data);
+            return redirect($redirect_to)->with($data);
+            
+        } catch (\Exception $e) {
+            \Log::error("Microsoft Login Exception: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return redirect('/login')
+                ->with('alert_class', 'danger')
+                ->with('alert', 'Microsoft login failed: ' . $e->getMessage());
+        }
    }
 
 

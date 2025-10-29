@@ -1,6 +1,6 @@
 
-<select class="form-control {{ $class ?? '' }} text-left form-select" name="{{ $field ?? 'country_id' }}" {{ $required ?? '' }} {{ $multiple ?? '' }} {{ $onclick ?? '' }}>
-    <option {{ (@$allfield)?'':'disabled' }}  value="">{{ $allfield ?? 'Select' }}</option>
+<select class="form-control {{ $class ?? 'select2' }} text-left form-select" name="{{ $field ?? 'country_id' }}" {{ $required ?? '' }} {{ $multiple ?? '' }} {{ $onclick ?? '' }} data-placeholder="{{ $allfield ?? 'Select Country' }}">
+    <option {{ (@$allfield)?'':'disabled' }}  value="">{{ $allfield ?? 'Select Country' }}</option>
 
     @php
         $selected = $selected ?? false;

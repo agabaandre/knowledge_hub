@@ -26,7 +26,21 @@ if(!function_exists('current_user')){
 		if (!$user) {
 			return null;
 		}
-		$user->photo = (intval($user->is_photo_external)==1) ? $user->photo : user_profile_photo($user->photo);
+		// Get raw photo value to avoid triggering the accessor
+		$rawPhoto = $user->getRawOriginal('photo');
+		$isPhotoExternal = $user->is_photo_external ?? 0;
+		
+		// Only modify photo if needed, avoid loading unnecessary relationships
+		if ($isPhotoExternal && !empty($rawPhoto)) {
+			// Photo is external, use as-is (already a URL)
+			$user->photo = $rawPhoto;
+		} elseif (!empty($rawPhoto)) {
+			// Use raw photo value to avoid recursive loop in user_profile_photo
+			$user->photo = user_profile_photo($rawPhoto);
+		} else {
+			// Return null instead of default image so we can show icon fallback
+			$user->photo = null;
+		}
 		return $user;
 	}
 }
@@ -40,9 +54,9 @@ if(!function_exists('settings')){
         $settings  = cache()->remember('settings',$minutes, function () {
             
 			$settings = DB::table("setting")->first();
-			$settings->logo = asset('storage/uploads/config/'.$settings->logo);
-			$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
-			$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+			$settings->logo = !empty($settings->logo) ? asset('storage/uploads/config/'.$settings->logo) : '';
+			$settings->favicon = !empty($settings->favicon) ? asset('storage/uploads/config/' . $settings->favicon) : '';
+			$settings->spotlight_banner = !empty($settings->spotlight_banner) ? asset('storage/uploads/config/' . $settings->spotlight_banner) : '';
 
 			return $settings;
         });

@@ -1,5 +1,5 @@
-<select class="form-control js-example-basic-single {{ $class ?? 'select2' }}" name="{{$field ?? 'file_type_id'}}" id="file_type" {{ $required ?? '' }} >
-<option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select' }}</option>>
+<select class="form-control {{ $class ?? 'select2' }}" name="{{$field ?? 'file_type_id'}}" id="file_type" {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select File Type' }}">
+<option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select File Type' }}</option>
 @foreach ($file_types as $filetype)
     <option 
     value="{{$filetype->id}}"

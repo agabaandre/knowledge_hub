@@ -1,19 +1,18 @@
 <style>
     .theme-grid {
-        padding: 3rem 0;
-        min-height: 80vh;
+        padding: 1.5rem 0 1.5rem 0;
         display: flex;
         align-items: center;
         min-width: 100%;
         z-index: 800;
-        padding-bottom: 50px;
     }
 
     .themes-section-title {
         font-size: 1.75rem;
         font-weight: 700;
-        color: #2d3748;
-        margin-bottom: 3rem;
+        color: #ffffff;
+        margin-bottom: 1.5rem;
+        margin-top: 0;
         text-align: center;
         position: relative;
     }
@@ -142,7 +141,7 @@
 
     @media (max-width: 575px) {
         .theme-grid {
-            padding: 2rem 0;
+            padding: 1rem 0;
         }
         
         .section-title {

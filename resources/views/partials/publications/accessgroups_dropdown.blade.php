@@ -1,5 +1,5 @@
-<select class="form-control js-example-basic-single {{ $class ?? 'select2' }}" name="{{$field ?? 'accessgroups[]'}}" id="accessgroups" {{ $required ?? '' }} multiple aria-placeholder="Choose" >
-<option {{ (@$allfield)?'':'disabled' }}  value="">{{ $allfield ?? 'Choose One or More' }}</option>>
+<select class="form-control {{ $class ?? 'select2' }}" name="{{$field ?? 'accessgroups[]'}}" id="accessgroups" {{ $required ?? '' }} multiple data-placeholder="{{ $allfield ?? 'Choose Access Groups' }}" >
+<option {{ (@$allfield)?'':'disabled' }}  value="">{{ $allfield ?? 'Choose Access Groups' }}</option>
 @foreach ($accessgroups as $grp)
     <option 
     value="{{$grp->id}}"

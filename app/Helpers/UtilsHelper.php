@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\URL;
 use PHPMailer\PHPMailer\PHPMailer;  
 use PHPMailer\PHPMailer\Exception;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Auth;
 use Smalot\PdfParser\Parser;
 use App\Notifications\SendPushNotification;
 use App\Models\User;
@@ -296,14 +297,28 @@ function clear_cache(){
 }
 
 function user_profile_photo($photo=null){
-
-
-    if (!empty(@current_user()->photo) || $photo):
-        $user_photo = ($photo)?$photo:current_user()->photo;
+    // Avoid recursive calls - just use the photo passed in
+    if (!empty($photo)) {
+        $user_photo = $photo;
+        // If photo is already a full URL, return it as-is
+        if (filter_var($user_photo, FILTER_VALIDATE_URL)) {
+            return $user_photo;
+        }
+        // If photo is already processed by storage_link, return as-is
+        if (strpos($user_photo, '/storage/') !== false || strpos($user_photo, url('/')) !== false) {
+            return $user_photo;
+        }
         $image_link = asset('storage/uploads/users/' . $user_photo);
-    else:
-        $image_link = asset('assets/images/user.jpg');
-    endif;
+    } else {
+        // Only check current_user if no photo provided and avoid recursion
+        $auth_user = Auth::user();
+        if ($auth_user && !empty($auth_user->getRawOriginal('photo'))) {
+            $user_photo = $auth_user->getRawOriginal('photo');
+            $image_link = asset('storage/uploads/users/' . $user_photo);
+        } else {
+            $image_link = asset('assets/images/user.jpg');
+        }
+    }
 
     return $image_link;		 
 }
