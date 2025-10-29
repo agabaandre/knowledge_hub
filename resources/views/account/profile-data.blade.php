@@ -1,4 +1,5 @@
 <div class="row">
+    @if(!$user->is_social_login)
     <div class="col-md-5 col-lg-5 col-xl-5 col-xs-12 col-md-pull-2">
 
         <div class="card">
@@ -34,9 +35,29 @@
             </form>
         </div>
     </div>
+    @else
+    <!-- SSO User Info -->
+    <div class="col-md-12 col-lg-12 col-xl-12 mb-3">
+        <div class="card">
+            <div class="card-header pb-0 border-bottom">
+                <div class="item-user pro-user">
+                    <h4 class="pro-user-username tx-15 pt-2 mt-1 mb-4">
+                        Greetings {{ $user->first_name ? $user->first_name : $user->name }}
+                    </h4>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-info mb-0">
+                    <h5><i class="fa fa-info-circle me-2"></i>Account Managed by {{ ucfirst($user->social_provider ?? 'SSO Provider') }}</h5>
+                    <p class="mb-0">Your account is authenticated through {{ ucfirst($user->social_provider ?? 'your SSO provider') }}. Password changes must be managed through your {{ ucfirst($user->social_provider ?? 'SSO provider') }} account settings.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <!-- Col -->
-    <div class="col-md-7 col-lg-7 col-xl-7">
+    <div class="{{ $user->is_social_login ? 'col-md-12' : 'col-md-7 col-lg-7 col-xl-7' }}">
         <div class="card">
             <form class="form-horizontal" method="post" enctype="multipart/form-data"
                 action="{{ $update_route ?? route('account.update') }}">

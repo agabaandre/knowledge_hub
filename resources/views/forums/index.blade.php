@@ -11,32 +11,30 @@
 }
 
 .forums-header {
-    background: linear-gradient(135deg, var(--theme-color-primary, #119A48) 0%, #16c653 100%);
-    color: white;
-    padding: 3rem 2rem;
-    border-radius: 16px;
+    background: white;
+    border: 1px solid #e2e8f0;
+    padding: 2rem;
     margin-bottom: 2rem;
-    box-shadow: 0 8px 24px rgba(17, 154, 72, 0.2);
 }
 
 .forums-header h1 {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
     margin: 0 0 0.5rem 0;
+    color: #1e293b;
 }
 
 .forums-header p {
-    font-size: 1.1rem;
-    opacity: 0.95;
+    font-size: 1rem;
+    color: #64748b;
     margin: 0;
 }
 
 .forums-filters {
     background: white;
-    border-radius: 12px;
+    border: 1px solid #e2e8f0;
     padding: 1.5rem;
     margin-bottom: 2rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .search-bar {
@@ -46,16 +44,14 @@
 
 .search-bar input {
     width: 100%;
-    padding: 0.875rem 1rem 0.875rem 3rem;
-    border: 2px solid #e2e8f0;
-    border-radius: 10px;
+    padding: 0.75rem 1rem 0.75rem 3rem;
+    border: 1px solid #e2e8f0;
     font-size: 1rem;
     transition: all 0.3s ease;
 }
 
 .search-bar input:focus {
     border-color: var(--theme-color-primary, #119A48);
-    box-shadow: 0 0 0 3px rgba(17, 154, 72, 0.1);
     outline: none;
 }
 
@@ -71,19 +67,18 @@
 .filter-buttons {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.5rem;
 }
 
 .filter-btn {
     padding: 0.5rem 1rem;
-    border: 2px solid #e2e8f0;
+    border: 1px solid #e2e8f0;
     background: white;
-    border-radius: 8px;
     color: #64748b;
     font-weight: 500;
     transition: all 0.2s ease;
     cursor: pointer;
-    font-size: 0.9rem;
+    font-size: 0.875rem;
 }
 
 .filter-btn:hover,
@@ -95,17 +90,13 @@
 
 .forum-card {
     background: white;
-    border-radius: 16px;
-    padding: 2rem;
-    margin-bottom: 1.5rem;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-    transition: all 0.3s ease;
-    border: 2px solid transparent;
+    border: 1px solid #e2e8f0;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
 }
 
 .forum-card:hover {
-    box-shadow: 0 8px 24px rgba(17, 154, 72, 0.15);
-    transform: translateY(-4px);
     border-color: var(--theme-color-primary, #119A48);
 }
 
@@ -119,9 +110,9 @@
 .forum-image {
     width: 120px;
     height: 120px;
-    border-radius: 12px;
     object-fit: cover;
     flex-shrink: 0;
+    border: 1px solid #e2e8f0;
 }
 
 .forum-content {
@@ -188,68 +179,29 @@
 .tag {
     display: inline-flex;
     align-items: center;
-    padding: 0.375rem 0.75rem;
-    background: rgba(17, 154, 72, 0.1);
-    color: var(--theme-color-primary, #119A48);
-    border-radius: 20px;
+    padding: 0.25rem 0.75rem;
+    background: #f1f5f9;
+    color: #64748b;
     font-size: 0.85rem;
     font-weight: 500;
+    border: 1px solid #e2e8f0;
 }
 
 .forum-actions {
     display: flex;
-    gap: 0.75rem;
-    margin-top: 1rem;
-}
-
-.btn-join,
-.btn-view {
-    padding: 0.625rem 1.25rem;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.9rem;
-    transition: all 0.2s ease;
-    text-decoration: none;
-    display: inline-flex;
-    align-items: center;
     gap: 0.5rem;
-}
-
-.btn-join {
-    background: var(--theme-color-primary, #119A48);
-    color: white;
-    border: none;
-}
-
-.btn-join:hover {
-    background: color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black);
-    color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(17, 154, 72, 0.3);
-}
-
-.btn-view {
-    background: white;
-    color: var(--theme-color-primary, #119A48);
-    border: 2px solid var(--theme-color-primary, #119A48);
-}
-
-.btn-view:hover {
-    background: var(--theme-color-primary, #119A48);
-    color: white;
-    text-decoration: none;
+    margin-top: 1rem;
 }
 
 .empty-state {
     text-align: center;
     padding: 4rem 2rem;
     background: white;
-    border-radius: 16px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e2e8f0;
 }
 
 .empty-icon {
-    font-size: 4rem;
+    font-size: 3rem;
     color: #cbd5e1;
     margin-bottom: 1rem;
 }
@@ -259,18 +211,20 @@
     align-items: center;
     gap: 0.5rem;
     padding: 0.5rem 1rem;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
+    background: #f1f5f9;
     font-weight: 600;
+    font-size: 0.875rem;
+    color: #64748b;
+    border: 1px solid #e2e8f0;
 }
 
 @media (max-width: 768px) {
     .forums-header {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem;
     }
 
     .forums-header h1 {
-        font-size: 1.75rem;
+        font-size: 1.5rem;
     }
 
     .forum-header {
@@ -300,20 +254,20 @@
                 <div>
                     <h1><i class="fa fa-comments me-2"></i>Discussions & Forums</h1>
                     <p>Join conversations, share knowledge, and collaborate with the community</p>
-                            </div>
+                </div>
                 @auth
-                <a href="{{ url('forums/create') }}" class="btn btn-light btn-lg" style="font-weight: 600;">
+                <a href="{{ url('forums/create') }}" class="btn btn-sm theme-bg text-white" style="font-weight: 600;">
                     <i class="fa fa-plus-circle me-2"></i>Start New Discussion
-                            </a>
-                            @endauth
-                        </div>
+                </a>
+                @endauth
+            </div>
             <div class="mt-3">
                 <span class="stats-badge">
                     <i class="fa fa-comment-dots"></i>
                     {{ $forums->total() }} {{ $forums->total() === 1 ? 'Discussion' : 'Discussions' }}
                 </span>
-                    </div>
-                </div>
+            </div>
+        </div>
 
         <!-- Filters -->
         <div class="forums-filters">
@@ -341,7 +295,7 @@
                         @if($forum->forum_image)
                         <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }}" class="forum-image">
                         @else
-                        <div class="forum-image" style="background: linear-gradient(135deg, rgba(17, 154, 72, 0.1) 0%, rgba(17, 154, 72, 0.05) 100%); display: flex; align-items: center; justify-content: center; color: var(--theme-color-primary, #119A48); font-size: 3rem;">
+                        <div class="forum-image" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 2rem; border: 1px solid #e2e8f0;">
                             <i class="fa fa-comments"></i>
                         </div>
                         @endif
@@ -377,18 +331,18 @@
                                     <i class="fa fa-comments"></i>
                                     <span>{{ count($forum->comments) }} {{ count($forum->comments) === 1 ? 'Comment' : 'Comments' }}</span>
                                 </div>
-                                </div>
+                            </div>
 
                             <div class="forum-actions">
                                 @if(in_array($forum->id, $my_forums))
-                                    <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn-view">
+                                    <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
                                         <i class="fa fa-eye"></i> View Discussion
                                     </a>
-                                    @else
-                                    <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn-join" id="join{{ $forum->id }}">
+                                @else
+                                    <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
-                                    @endif
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -401,13 +355,13 @@
                     <h3>No Discussions Yet</h3>
                     <p class="text-muted">Be the first to start a discussion!</p>
                     @auth
-                    <a href="{{ url('forums/create') }}" class="btn btn-primary mt-3">
+                    <a href="{{ url('forums/create') }}" class="btn btn-sm theme-bg text-white mt-3">
                         <i class="fa fa-plus-circle me-2"></i>Start First Discussion
                     </a>
                     @endauth
                 </div>
             @endforelse
-            </div>
+        </div>
 
         <!-- Pagination -->
         @if($forums->hasPages())
@@ -465,14 +419,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (filter === 'joined') {
                 shouldShow = card.dataset.joined === 'true';
             } else if (filter === 'recent') {
-                // Already sorted by recent by default
                 shouldShow = true;
             } else if (filter === 'popular') {
                 const comments = parseInt(card.dataset.comments) || 0;
                 shouldShow = comments > 0;
             }
             
-            // Also apply search filter
             if (shouldShow && searchTerm) {
                 const title = card.querySelector('.forum-title').textContent.toLowerCase();
                 const description = card.querySelector('.forum-description').textContent.toLowerCase();
