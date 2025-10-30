@@ -54,6 +54,80 @@ class ChatPDFService implements AIModel{
         return $this->sendRequest($chat_endpoint, $headers, $payload);
     }
 
+    /**
+     * Submit a file for processing (for uploaded files)
+     */
+    private function submitFile($file_path){
+
+        $api_key  = config("ai.chat_pdf_key");
+        $chat_endpoint = 'https://api.chatpdf.com/v1/sources/add-file';
+
+        $headers = [
+            "x-api-key: $api_key"];
+
+        // Prepare file for multipart upload
+        $cfile = new \CURLFile($file_path);
+        $cfile->setMimeType('application/pdf');
+        $cfile->setPostFilename(basename($file_path));
+
+        $payload = ['file' => $cfile];
+        
+        // Use cURL for multipart upload
+        $ch = curl_init($chat_endpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        
+        $response = curl_exec($ch);
+        curl_close($ch);
+
+        Log::info("====FILE UPLOAD RESPONSE::====/n ".$response);
+    
+        return json_decode($response);
+    }
+
+    /**
+     * Summarize an uploaded file (file path, not URL)
+     */
+    public function summarizeFile($file_path, $language = null, $additional_prompt = null)
+    {
+        $source = $this->submitFile($file_path);
+
+        if (!isset($source->sourceId)) {
+            return (object)['error' => 'Failed to upload file to ChatPDF'];
+        }
+
+        $api_key  = config("ai.chat_pdf_key");
+        $chat_endpoint = 'https://api.chatpdf.com/v1/chats/message';
+
+        $headers = [
+            'Content-Type: application/json',
+            "x-api-key: $api_key"
+        ];
+
+        $prompt = [
+            [
+                "role" => "user",
+                "content" => "Provide an accurate, thorough and comprehensive summarization without being very brief. It is good to start with what the document covers as an overview, then give a detailed summary and add on whatever you find important, not forgetting any key definitions and case studies/survey results/data/stats/conclusions or numbers if available. Be sure to touch all major sections, basing main headings. Always return responses in raw html format in a div, ignore html, head and body tags, use nice styling especially using lists but followed by paragraph explanations, headings and paragraphs, don't use any h1 and h2 tags. Use teal color for headings and bold words. For short content given for summarising, always respond saying there's not enough content to be summarised, remember to make your summaries rich enough, to at least enough depending on what you are given but don't make it too small or too big. and avoid using background colors"
+            ]
+        ];
+
+        $additional_prompt = ($additional_prompt ?? '') . ($language ? " Make sure you translate to $language if requested" : '');
+        if ($additional_prompt) {
+            $prompt[] = ["role" => "user", "content" => $additional_prompt];
+        }
+
+        $payload = [
+            'messages' => $prompt,
+            "sourceId" => $source->sourceId
+        ];
+
+        Log::info("====Request::====/n ".json_encode($payload));
+
+        return $this->sendRequest($chat_endpoint, $headers, $payload);
+    }
+
     
     function summarize($resource,$language=null,$additional_prompt=null){
 

@@ -512,8 +512,12 @@ Route::group(["prefix" => "ai"], function () {
 
     Route::post("/summarise",  [AIController::class, 'summarise']);
     Route::post("/compare",  [AIController::class, 'compare']);
+    Route::post("/summarise-file",  [AIController::class, 'summariseFile'])->name('ai.summarise.file');
 
 });
+
+// Summernote image upload
+Route::post('/image-upload', [App\Http\Controllers\CommonController::class, 'imageUpload'])->name('image.upload');
 
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);

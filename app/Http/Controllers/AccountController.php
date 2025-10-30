@@ -76,11 +76,40 @@ class AccountController extends Controller
     public function submit_publication(Request $request){
 
         $val_rules = [
-            //'cover'      =>'required',
-            //'file_type'  =>'required',
-            'sub_theme'  =>'required',
-            'description'=>'required'
+            'data_category_id' => 'required',
+            'theme' => 'required',
+            'sub_theme' => 'required',
+            'title' => 'required|string|max:500',
+            'description' => 'required|string|min:50',
+            'countries' => 'required|array|min:1',
+            'countries.*' => 'required|exists:countries,id',
         ];
+
+        $messages = [
+            'data_category_id.required' => 'Please select a category for your resource.',
+            'theme.required' => 'Please select a thematic area.',
+            'sub_theme.required' => 'Please select a sub-theme.',
+            'title.required' => 'A resource title is required. Please provide a clear, descriptive title.',
+            'title.max' => 'The title cannot exceed 500 characters.',
+            'description.required' => 'A description is required. Please describe your resource in detail.',
+            'description.min' => 'The description must be at least 50 characters long. Please provide more details about your resource.',
+            'countries.required' => 'Please select at least one member state.',
+            'countries.array' => 'Please select at least one member state.',
+            'countries.min' => 'Please select at least one member state.',
+        ];
+
+        // For link type, require URL
+        if($request->upload_type == 'link'):
+            $val_rules['link'] = 'required|url';
+            $messages['link.required'] = 'Please provide the external link URL for your resource.';
+            $messages['link.url'] = 'Please provide a valid URL (starting with http:// or https://).';
+        endif;
+
+        // For upload type, require file if new
+        if($request->upload_type == 'upload' && !$request->id):
+            $val_rules['files'] = 'required';
+            $messages['files.required'] = 'Please upload at least one file for your resource.';
+        endif;
 
         if($request->original_id):
             unset($val_rules['sub_theme']);
@@ -95,7 +124,13 @@ class AccountController extends Controller
             unset($val_rules['cover']);
         endif;
 
-        $request->validate($val_rules);
+        $request->validate($val_rules, $messages);
+
+        // Default: show disclaimer if checkbox not sent
+        if (!$request->has('show_disclaimer')) {
+            $request['show_disclaimer'] = 1;
+        }
+
         $saved   = $this->publicationsRepo->save($request);
         $message = ($saved)?'Publication saved successfully':'Request failed try again';
 

@@ -1,5 +1,9 @@
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script>
+
+// Set PDF.js worker path
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 
 function deleteFile(index) {
     console.log(index);
@@ -15,6 +19,46 @@ function deleteFile(index) {
     filelistall = $('#attachments').prop("files", dT.files);
 
     $('.preview_' + index).remove();
+}
+
+// Function to extract first page of PDF as image
+async function extractPDFCover(pdfFile) {
+    try {
+        const arrayBuffer = await pdfFile.arrayBuffer();
+        const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+        
+        // Get first page
+        const page = await pdf.getPage(1);
+        const viewport = page.getViewport({ scale: 2.0 });
+        
+        // Create canvas
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
+        
+        // Render PDF page to canvas
+        await page.render({
+            canvasContext: context,
+            viewport: viewport
+        }).promise;
+        
+        // Convert canvas to blob
+        return new Promise((resolve, reject) => {
+            canvas.toBlob(function(blob) {
+                if (blob) {
+                    // Create a File object from the blob
+                    const file = new File([blob], pdfFile.name.replace('.pdf', '_cover.png'), { type: 'image/png' });
+                    resolve(file);
+                } else {
+                    reject(new Error('Failed to convert canvas to blob'));
+                }
+            }, 'image/png');
+        });
+    } catch (error) {
+        console.error('Error extracting PDF cover:', error);
+        return null;
+    }
 }
 
 $(function() {
@@ -94,11 +138,74 @@ $(function() {
         }
     };
 
-    $('#attachments').on('change', function() {
+    $('#attachments').on('change', async function() {
         imagesPreview(this, 'div.preview');
+        
+        // Check if any PDF files were uploaded and extract cover
+        if (this.files && this.files.length > 0) {
+            for (let i = 0; i < this.files.length; i++) {
+                const file = this.files[i];
+                if (file.type === 'application/pdf') {
+                    // Extract cover from PDF
+                    const coverFile = await extractPDFCover(file);
+                    if (coverFile && $('#cover').length > 0) {
+                        // Check if cover field is empty
+                        if (!$('#cover')[0].files || $('#cover')[0].files.length === 0) {
+                            // Create a new FileList with the cover image
+                            const dataTransfer = new DataTransfer();
+                            dataTransfer.items.add(coverFile);
+                            $('#cover')[0].files = dataTransfer.files;
+                            
+                            // Trigger change event on cover field to update preview
+                            $('#cover').trigger('change');
+                            
+                            // Show notification
+                            if (typeof Swal !== 'undefined') {
+                                Swal.fire({
+                                    icon: 'success',
+                                    title: 'Cover Image Extracted',
+                                    text: 'Cover image has been automatically extracted from the PDF.',
+                                    timer: 3000,
+                                    showConfirmButton: false
+                                });
+                            } else {
+                                alert('Cover image has been automatically extracted from the PDF.');
+                            }
+                        }
+                        break; // Only extract from first PDF
+                    }
+                }
+            }
+        }
     });
 
-    $('#cover').on('change', function() {
+    $('#cover').on('change', async function() {
+        if (this.files && this.files.length > 0) {
+            const file = this.files[0];
+            
+            // If PDF is directly uploaded to cover field, extract first page
+            if (file.type === 'application/pdf') {
+                const coverFile = await extractPDFCover(file);
+                if (coverFile) {
+                    // Replace the PDF with the extracted image
+                    const dataTransfer = new DataTransfer();
+                    dataTransfer.items.add(coverFile);
+                    this.files = dataTransfer.files;
+                    
+                    // Show notification
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Cover Extracted',
+                            text: 'First page of PDF has been extracted as cover image.',
+                            timer: 3000,
+                            showConfirmButton: false
+                        });
+                    }
+                }
+            }
+        }
+        
         imagesPreview(this, 'div.cover_preview');
     });
 

@@ -86,6 +86,45 @@ class AIService
         return $this->formatResponse($response);
     }
 
+    /**
+     * Summarize content from an uploaded file (before saving as publication)
+     */
+    public function summariseFile($file_path, $language = 'en', $additional_prompt = null)
+    {
+        try {
+            // Check if file is PDF
+            if (strtolower(pathinfo($file_path, PATHINFO_EXTENSION)) === 'pdf') {
+                $this->aiModel = app('chatpdf');
+                $response = $this->aiModel->summarizeFile($file_path, $language, $additional_prompt);
+            } else {
+                // For non-PDF files, extract text and use ChatGPT
+                $file_content = '';
+                if (file_exists($file_path)) {
+                    $file_content = file_get_contents($file_path);
+                    // Limit content size
+                    $file_content = substr($file_content, 0, 100000);
+                }
+                
+                $prompt = "Summarize this document content: " . $file_content;
+                if ($additional_prompt) {
+                    $prompt .= ". Pay attention to: " . $additional_prompt;
+                }
+                if ($language && $language !== 'en') {
+                    $prompt .= ". Translate summary to: $language";
+                }
+                
+                $response = $this->aiModel->summarize($prompt, $additional_prompt);
+            }
+
+            Log::info("FILE SUMMARY RESPONSE: " . json_encode($response));
+
+            return $this->formatResponse($response);
+        } catch (\Exception $e) {
+            Log::error("Error summarizing file: " . $e->getMessage());
+            return ['content' => "<div class='alert alert-danger'><p>Error: " . $e->getMessage() . '</p></div>'];
+        }
+    }
+
     private function formatResponse($response)
     {
         if (isset($response->content)) {

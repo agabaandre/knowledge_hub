@@ -11,9 +11,38 @@
     <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
             <div class="row">
-                 <div class="col-md-2"
-                     style=" background-image:url({{ $row->cover }}); background-size:cover; background-position:center;">
-
+                 @php
+                     // Get raw cover value before accessor processes it
+                     $raw_cover = $row->getRawOriginal('cover');
+                     $cover_is_external = $row->cover_is_exteranl ?? false;
+                     
+                     // Determine image link
+                     if (!empty($raw_cover)) {
+                         if ($cover_is_external) {
+                             // External URL - use as is
+                             $image_link = $raw_cover;
+                         } else {
+                             // Local file - build storage path
+                             $image_link = storage_link('uploads/publications/' . $raw_cover);
+                         }
+                     } else {
+                         // No cover - use default
+                         $image_link = null;
+                     }
+                     
+                     // Default image
+                     $default_image = asset('assets/images/cover.png');
+                     
+                     // Final image to use
+                     $final_image = (!empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) 
+                         ? $image_link 
+                         : $default_image;
+                 @endphp
+                 <div class="col-md-2" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9;">
+                     <img src="{{ $final_image }}" 
+                          alt="{{ $row->title }}" 
+                          style="width: 100%; height: 100%; min-height: 150px; object-fit: cover;"
+                          onerror="this.onerror=null; this.src='{{ $default_image }}';">
                  </div>
                  <div class="col-md-10">
                      <h5 class="text-bold text-lg">

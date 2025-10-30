@@ -30,10 +30,34 @@
                            <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
                                <div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:100%;">
                                    @php
-                                       $image_link = $row->cover;
+                                       $image_link = $row->cover ?? $row->image_url ?? null;
+                                       // Default image is cover.png from public assets/images
+                                       $default_image = asset('assets/images/cover.png');
+                                       
+                                       // Check if image_link is valid URL or path
+                                       if (empty($image_link) || $image_link === null) {
+                                           $image_link = $default_image;
+                                       } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
+                                           // If it's a relative path, try to make it full URL
+                                           if (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) {
+                                               $image_link = asset($image_link);
+                                           } elseif (strpos($image_link, '/') === 0) {
+                                               $image_link = url($image_link);
+                                           } else {
+                                               $image_link = $default_image;
+                                           }
+                                       }
                                    @endphp
 
-                                   <div class="cats-box-caption">
+                                   <!-- Image Section -->
+                                   <div class="cats-box-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                                       <img src="{{ $image_link }}"
+                                            alt="{{ $row->title }}" 
+                                            style="width: 100%; height: 100%; object-fit: cover;"
+                                            onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                                   </div>
+
+                                   <div class="cats-box-caption" style="flex: 1;">
                                        <h4 class="fs-md mb-0 ft-medium text-truncate"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
                                                title="{!! $row->title !!}">{!! truncate($row->title, 40) !!}</a></h4>
