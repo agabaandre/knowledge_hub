@@ -49,12 +49,16 @@
                 </form>
             </div>
             <div class="card-body text-left">
+                @include('layouts.partials.alerts')
                 <!-- Datatable -->
                 <table id="publicationTable" class="table table-striped table-bordered">
                     <thead>
                     <tr>
+                        <th style="width:60px;">#</th>
                         <th>Tag</th>
+                        <th>Health Topic</th>
                         <th>Health Emergency</th>
+                        <th>Description</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -66,11 +70,16 @@
 
                     @foreach($all_tags as $row)
                         <tr>
+                            <td>{{ $all_tags->firstItem() + $loop->index }}</td>
                             <td>{{ $row->tag_text }}</td>
-                            <td>{{ ($row->is_health_emergency) ? 'Yes':'No' }}</td>
+                            <td>{{ ($row->is_health_topic ?? 1) ? 'Yes':'No' }}</td>
+                            <td>{{ ($row->is_health_emergency ?? 0) ? 'Yes':'No' }}</td>
+                            <td style="max-width:420px;">
+                                {!! Str::limit(strip_tags($row->overview ?? ''), 140) ?: '<span class="text-muted">—</span>' !!}
+                            </td>
                             <td>
                                 <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" 
-                                    data-is_health_emergency="{{$row->is_health_emergency }}" 
+                                    data-is_health_topic="{{$row->is_health_topic ?? 1 }}" data-is_health_emergency="{{$row->is_health_emergency ?? 0 }}"
                                     data-overview="{{$row->overview }}"
                                     class="btn btn-sm btn-primary ml-1">Edit</a>
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"

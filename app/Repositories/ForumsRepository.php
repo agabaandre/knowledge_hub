@@ -10,7 +10,9 @@ use App\Models\ForumComment;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\ForumSubscription;
 use App\Models\ForumTag;
+use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema as DBSchema;
 
 class ForumsRepository extends SharedRepo{
 
@@ -92,15 +94,31 @@ class ForumsRepository extends SharedRepo{
         
         if($request->communities && count($request->communities)){
 
-            for($i=0;$i<count($request->communities);$i++){
+            // Filter out empty values (e.g., "All")
+            $copIds = array_values(array_filter($request->communities, function($val){
+                return !is_null($val) && $val !== '' && intval($val) > 0;
+            }));
 
+            foreach ($copIds as $copId){
                 $forumComm = new ForumCommunityOfPractice();
                 $forumComm->forum_id = $forum->id;
-                $forumComm->community_of_practice_id = $request->communities[$i];
-
+                $forumComm->community_of_practice_id = intval($copId);
                 $forumComm->save();
             }
-            
+        }
+
+        // Save tags if provided (expects array of tag IDs)
+        if ($request->tags && $forum->id) {
+            $tagIds = is_array($request->tags) ? $request->tags : (json_decode($request->tags, true) ?? []);
+            if (count($tagIds)) {
+                $tagTexts = Tag::whereIn('id', $tagIds)->pluck('tag_text')->toArray();
+                foreach ($tagTexts as $text) {
+                    $ft = new ForumTag();
+                    $ft->forum_id = $forum->id;
+                    $ft->tag = $text;
+                    $ft->save();
+                }
+            }
         }
 
         if($request->hasFile('attachments') && $forum->id ?? null):
@@ -152,7 +170,12 @@ class ForumsRepository extends SharedRepo{
         $forum->status =1;
         $forum->is_approved =1;
         $forum->is_rejected =0;
-        $forum->approved_by = current_user()->id;
+        if (DBSchema::hasColumn('forums', 'approved_by')) {
+            $forum->approved_by = current_user()->id;
+        }
+        if (DBSchema::hasColumn('forums', 'rejected_by')) {
+            $forum->rejected_by = null;
+        }
         $forum->update();
 
         $alert = array(
@@ -172,7 +195,12 @@ class ForumsRepository extends SharedRepo{
         $forum->status =0;
         $forum->is_approved =0;
         $forum->is_rejected =1;
-        $forum->rejected_by = current_user()->id;
+        if (DBSchema::hasColumn('forums', 'rejected_by')) {
+            $forum->rejected_by = current_user()->id;
+        }
+        if (DBSchema::hasColumn('forums', 'approved_by')) {
+            $forum->approved_by = null;
+        }
         $forum->update();
 
         $alert = array(

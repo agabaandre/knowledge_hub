@@ -19,38 +19,70 @@
 
     <div class="row">
         <div class="card col-lg-12">
-            <div class="card-header text-left">
-                <h3 class="card-title">List of Communities</h3>
-                <button class="btn btn-primary float-right" data-toggle="modal" data-target="#addCommunityModal"
-                    id="addCommunityButton">Add Community</button>
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div>
+                    <h3 class="card-title mb-0">Communities of Practice</h3>
+                    <small class="text-muted">Create, edit and manage communities and their membership</small>
+                </div>
+                <div>
+                    <button class="btn btn-sm btn-dark" data-toggle="modal" data-target="#addCommunityModal" id="addCommunityButton">
+                        <i class="fa fa-plus mr-1"></i> Add Community
+                    </button>
+                </div>
             </div>
             <div class="card-body text-left">
-                <table class="table table-bordered">
-                    <thead>
+                <div class="row mb-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <div class="input-group-prepend"><span class="input-group-text"><i class="fa fa-search"></i></span></div>
+                            <input type="text" id="filter_name" class="form-control" placeholder="Filter by name...">
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select id="filter_active" class="form-control">
+                            <option value="">All Statuses</option>
+                            <option value="1">Active</option>
+                            <option value="0">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+
+                <table class="table table-striped table-hover table-bordered" id="communities_table">
+                    <thead class="thead-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Community Name</th>
+                            <th style="width:70px;">ID</th>
+                            <th>Community</th>
                             <th>Description</th>
-                            <th>Creator</th>
-                            <th>Is Active</th>
-                            <th>Actions</th>
+                            <th style="width:180px;">Creator</th>
+                            <th style="width:110px;">Status</th>
+                            <th style="width:170px;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($communities as $community)
-                            <tr>
-                                <td>{{ $community->id }}</td>
-                                <td>{{ $community->community_name }}</td>
-                                <td>{{ $community->description }}</td>
+                            <tr data-active="{{ $community->is_active ? 1 : 0 }}">
+                                <td><span class="text-muted">#{{ $community->id }}</span></td>
+                                <td class="font-weight-600">{{ $community->community_name }}</td>
+                                <td class="text-muted">{{ \Illuminate\Support\Str::limit(strip_tags($community->description), 120) }}</td>
                                 <td>{{ $community->creator->name ?? 'N/A' }}</td>
-                                <td>{{ $community->is_active ? 'Yes' : 'No' }}</td>
                                 <td>
-                                    <a href="{{ route('admin.commsofpractice.details', $community->id) }}"
-                                        class="btn btn-info btn-sm">View Members</a>
-                                    <button class="btn btn-warning btn-sm editCommunityButton"
+                                    @if($community->is_active)
+                                        <span class="badge badge-success">Active</span>
+                                    @else
+                                        <span class="badge badge-secondary">Inactive</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    <a href="{{ route('admin.commsofpractice.details', $community->id) }}" class="btn btn-sm btn-outline-primary mr-1">
+                                        <i class="fa fa-users"></i> Members
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-dark editCommunityButton"
+                                        title="Edit"
                                         data-id="{{ $community->id }}" data-name="{{ $community->community_name }}"
                                         data-description="{{ $community->description }}"
-                                        data-active="{{ $community->is_active }}">Edit</button>
+                                        data-active="{{ $community->is_active }}">
+                                        <i class="fa fa-edit"></i> Edit
+                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -78,11 +110,11 @@
                         <input type="hidden" id="community_id" name="id">
                         <div class="form-group">
                             <label for="community_name">Community Name</label>
-                            <input type="text" class="form-control" id="community_name" name="community_name" required>
+                            <input type="text" class="form-control" id="community_name" name="community_name" placeholder="e.g., Digital Health" required>
                         </div>
                         <div class="form-group">
                             <label for="description">Description</label>
-                            <textarea class="form-control" id="description" name="description"></textarea>
+                            <textarea class="form-control summernote-sm" id="description" name="description" rows="4" placeholder="Briefly describe the community's focus"></textarea>
                         </div>
                         <div class="form-group">
                             <label for="is_active">Is Active</label>
@@ -91,12 +123,31 @@
                                 <option value="0">No</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <div class="text-right">
+                            <button type="button" class="btn btn-outline-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-dark ml-2"><i class="fa fa-save mr-1"></i> Save</button>
+                        </div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+
+@section('scripts')
+@include('partials.general.summernote')
+<script>
+$(function(){
+    function initSN(){
+        var $el = $('#description');
+        if ($el.length && !$el.data('summernote')) {
+            try { $el.summernote({ height: 150 }); } catch(e) {}
+        }
+    }
+    initSN();
+    $(document).on('shown.bs.modal', '#addCommunityModal', function(){ initSN(); });
+});
+</script>
+@endsection
 @endsection
 
 @section('scripts')
@@ -128,15 +179,26 @@
                     data: $(this).serialize(),
                     success: function(response) {
                         if (response.status === 'success') {
-                            alert(response.message);
-                            location.reload(); // Reload the page to see the changes
+                            location.reload();
                         } else {
-                            alert(response.message);
+                            alert(response.message || 'Operation failed');
                         }
                     },
                     error: function(xhr) {
                         alert('An error occurred. Please try again.');
                     }
+                });
+            });
+
+            // Simple client-side filters
+            $('#filter_name, #filter_active').on('input change', function(){
+                var name = ($('#filter_name').val() || '').toLowerCase();
+                var status = $('#filter_active').val();
+                $('#communities_table tbody tr').each(function(){
+                    var row = $(this);
+                    var matchesName = !name || row.find('td:nth-child(2)').text().toLowerCase().indexOf(name) > -1;
+                    var matchesStatus = !status || row.data('active').toString() === status.toString();
+                    row.toggle(matchesName && matchesStatus);
                 });
             });
         });

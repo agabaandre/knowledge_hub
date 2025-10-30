@@ -2,12 +2,15 @@
     <div class="article_body_wrap">
 
 
-        <div class="article_featured_image">
-            <img class="img-fluid" src="{{ $forum->forum_image }}" alt="">
+        @if(is_image($forum->forum_image))
+        <div class="article_featured_image mb-3">
+            <img class="img-fluid rounded" src="{{ $forum->forum_image }}" alt=""
+                 style="display:block; margin:0 auto; max-width:100%; height:auto; max-height:60vh; object-fit: contain;">
         </div>
+        @endif
 
         <h2 class="post-title mb-2">{!! $forum->forum_title !!}</h2>
-        <div class="article_top_info">
+        <div class="article_top_info d-flex align-items-center justify-content-between flex-wrap" style="gap:10px;">
             <ul class="article_middle_info">
                 <li><span class="text-bold text-red"><i class="lni lni-user mr-1"></i> {{ $forum->user->name }}</span>
                 </li><br>
@@ -15,14 +18,22 @@
                 <li><a href="#"><span class="icons"><i class="ti-comment-alt"></i>
                         </span>{{ count($forum->comments) }} Comments</a></li>
             </ul>
-            <div class="col-lg-6 col-md-6 col-sm-12">
-                <a onclick="summarise({{ $forum->id }},1)" class="btn btn-md btn-success rounded fs-sm ft-medium"
-                    style="min-width:100%; color:white;">
-                    <i class="fa fa-robot"></i> Summarise this for me</a>
+            <div class="d-flex align-items-center" style="gap:8px;">
+                <a onclick="summarise({{ $forum->id }},1)" class="btn btn-sm btn-success text-white"><i class="fa fa-robot"></i> Summarise</a>
+                <div class="btn-group" role="group" aria-label="Share">
+                    @php $shareUrl = url('forums/thread').'?id='.$forum->id; $shareText = urlencode(strip_tags($forum->forum_title)); @endphp
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ $shareText }}" title="Share on X"><i class="fab fa-x-twitter"></i></a>
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}" title="Share on Facebook"><i class="fab fa-facebook-f"></i></a>
+                    <a class="btn btn-sm btn-outline-secondary" target="_blank" href="https://api.whatsapp.com/send?text={{ $shareText }}%20{{ urlencode($shareUrl) }}" title="Share on WhatsApp"><i class="fab fa-whatsapp"></i></a>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" onclick="copyForumLink('{{ $shareUrl }}')" title="Copy link"><i class="fa fa-link"></i></button>
+                </div>
             </div>
         </div>
 
-        <p>{!! cleanHtmlContent($forum->forum_description) !!}</p>
+        <div class="mt-2 p-3" style="background:#ffffff; border:1px solid #e5e7eb; border-radius:10px;">
+            <p class="mb-0">{!! cleanHtmlContent($forum->forum_description) !!}</p>
+        </div>
     </div>
 
 

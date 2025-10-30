@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\AuthorsRepository;
 use App\Services\UITableService;
+use App\Models\Author;
 
 class AuthorsAdminController extends Controller
 {
@@ -17,53 +18,30 @@ class AuthorsAdminController extends Controller
         $this->uiTableService = $uiTableServie;
     }
 
+    public function store(Request $request){
+        $validated = $request->validate([
+            'name' => 'required|string|max:255'
+        ]);
+        $author = ($request->id) ? Author::find($request->id) : new Author();
+        if(!$author){ return back()->with(['message'=>'Author not found','status'=>'failure']); }
+        $author->name = $validated['name'];
+        $saved = $request->id ? $author->update() : $author->save();
+        $data = $saved ? ['message'=>'Author saved successfully','status'=>'success'] : ['message'=>'Operation failed','status'=>'failure'];
+        return back()->with($data);
+    }
+
     public function index(Request $request){
-
-        $col = array();
-        $col["title"] = "Id"; 
-        $col["name"] = "id"; 
-        $col["width"] = "2"; 
-        $col["hidden"] = true;
-        $col["editable"] = false;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"] = "Name"; 
-        $col["name"] = "name"; 
-        $col["width"] = "30"; 
-        $col["editable"] = true;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Organization"; 
-        $col["name"]     = "is_organsiation"; 
-        $col["width"]    = "10"; 
-        $col["editable"] = true;
-        $col["edittype"] = "checkbox";
-        $col["editoptions"] = array("value"=>"Yes:No");
-        $cols[] = $col;
-
-        //$col["edittype"] = "lookup";
-        //$col["editoptions"] = array("table"=>"employees", "id"=>"employee_id", "label"=>"concat(first_name,' ',last_name)");
-
-        //$data['authors'] = $this->authorsRepo->get($request);
-        $sql = "SELECT name,is_organsiation FROM author";
-        $data['uitable'] = $this->uiTableService->get_ui_table("author",$cols,$sql);
-        $data['search']  = (Object) $request->all();
+        $data['search']  = (object) $request->all();
+        $data['authors'] = $this->authorsRepo->get($request);
         return view('admin.authors.index',$data);
     }
 
     public function destroy(Request $request){
-
         $deleted = $this->authorsRepo->delete($request->id);
-
-        if($deleted):
-            $data = ['alert-success'=>'Author deleted successfully','status'=>'success','data'=>$deleted];
-        else:
-            $data = ['alert-danger'=>'Operation failed, try again','status'=>'failure','data'=>$deleted];   
-        endif;
-
-        return response($data,200);
+        return back()->with([
+            'message' => $deleted ? 'Author deleted successfully' : 'Delete failed',
+            'status' => $deleted ? 'success' : 'failure'
+        ]);
     }
 
   

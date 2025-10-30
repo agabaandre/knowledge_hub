@@ -2,7 +2,7 @@
     if (@$row && @$row->cover):
         $image_link = $row->image_url;
     else:
-        $image_link = asset('assets/images/placeholder.jpg');
+        $image_link = asset('assets/images/placeholder.png');
     endif;
 
     // dd($row->country_ids);
@@ -19,6 +19,8 @@
         #smartwizard .select2-container { width: 100% !important; }
         #smartwizard .mb-2 { margin-bottom: 8px !important; }
         #smartwizard .mt-2 { margin-top: 8px !important; }
+        /* Ensure consistent horizontal padding on all steps so first controls aren't clipped */
+        #smartwizard .tab-content .tab-pane { padding-left: 16px; padding-right: 16px; }
     </style>
     <ul class="nav">
         <li>
@@ -36,8 +38,8 @@
     <div class="tab-content">
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
             <div class="row" style="margin-top:12px;">
-                <div class="col-lg-12 mb-2" style="padding-left:12px;">
-                    <div class="d-flex flex-wrap align-items-center" style="gap:10px;">
+                <div class="col-lg-12 mb-2" style="margin-left:12px !important;">
+                    <div class="d-flex flex-wrap align-items-center" style="gap:20px;">
                         <label class="form-check-inline mb-0">
                             <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
                         </label>
@@ -58,7 +60,52 @@
                             <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" {{ isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked' }}> Shows Disclaimer
                         </label>
                         @endif
+                        <div class="w-100"></div>
+                        <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file (PDF, Word, images, etc.). We’ll extract a summary from PDFs where possible.</small>
+                                    <small class="text-muted d-block"><strong>External Link</strong>: Provide a URL to content hosted elsewhere.</small>
+                                    <small class="text-muted d-block"><strong>Embedded On Page</strong>: Display the resource directly on the page (use for embeddable content like videos or interactive views).</small>
+                                </div>
+                                <div class="col-md-6">
+                                    @if (is_admin())
+                                    <small class="text-muted d-block"><strong>Default in Category</strong>: Feature this resource as the primary/default item in its category so it appears prominently in listings.</small>
+                                    <small class="text-muted d-block"><strong>Admin Only Access</strong>: Limit visibility to administrators only.</small>
+                                    <small class="text-muted d-block"><strong>Shows Disclaimer</strong>: Include the standard disclaimer on the resource details page.</small>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
+                </div>
+
+                <!-- Title & URL moved from Step 2 -->
+                <div class="col-md-12 mt-2">
+                    <h3>What is the title of the resource you want to publish?</h3>
+                    <div class="mb-3">
+                        <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
+                            value="{{ @$row->title ?? old('title') }}" required="">
+                    </div>
+                </div>
+
+                <div class="col-md-12 url_wrapper">
+                    <div class="mb-3">
+                        <label class="form-label" for="publication">Publication URL Link</label>
+                        <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                            name="link" value="{{ @$row->publication ?? old('publication') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-6 mb-2">
+                    <label class="form-label" for="year_published">Year of Publication</label>
+                    <select class="form-control select2" name="year_published" id="year_published">
+                        @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
+                        @for($y = $start; $y >= $end; $y--)
+                            <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
+                    <small class="text-muted">Select the year this resource was published.</small>
                 </div>
 
                 <div class="col-md-6 mb-2">
@@ -97,13 +144,14 @@
 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Region</label>
-                    @include('partials.regions.dropdown', [
-                        'field' => 'rccs[]',
-                        'class' => 'rcc select2',
-                        'selected' => @$row->region_ids ?? null,
-                        'multiple' => 'multiple',
-                        'allfield' => 'All',
-                    ])
+                        @include('partials.regions.dropdown', [
+                            'field' => 'rccs[]',
+                            'class' => 'rcc select2',
+                            'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : null),
+                            'multiple' => 'multiple',
+                            'allfield' => 'All',
+                        ])
+                        <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
                 </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Member States</label>
@@ -118,11 +166,11 @@
 
                 @if (is_admin())
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Author</label>
+                    <label class="form-label" for="publication">Corporate Source or Member State <small class="text-muted">(If your source is missing, please contact the system admin)</small></label>
                     @include('partials.authors.dropdown', [
                         'field' => 'author',
                         'selected' => @$row->author_id ?? null,
-                        'allfield' => 'Select Author',
+                        'allfield' => 'Select Corporate Source or Member State',
                     ])
                 </div>
                 @endif
@@ -132,74 +180,30 @@
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
             <br>
             <div class="col-md-12 mt-3">
-
                 <input type="hidden" name="id" id="id" class="newform"
                     value="{{ @$row->id ?? old('id') }}">
-
-
-                <h3>What is the title of the resource you want to publish?</h3>
-
-                <div class="mb-3">
-                    <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
-                        value="{{ @$row->title ?? old('title') }}" required="">
-                </div>
-            </div>
-
-
-            <div class="col-md-12 url_wrapper">
-                <div class="mb-3">
-                    <label class="form-label" for="publication">Publication URL Link</label>
-                    <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                        name="link" value="{{ @$row->publication ?? old('publication') }}">
-                </div>
             </div>
             <h3 class="mb-2" style="font-weight:600;">Attachments & Additional Details</h3>
             <div class="row" style="min-height: 0;">
 
 
-                <div class="col-md-6">
-                    <div class="mb-2 p-2" style="background:#ffffff;">
-                        <label class="form-label" for="publication">Cover Image</label>
-                        <div class="custom-file">
-                            <input type="file" style="display: none;" name="cover" id="cover">
-                            <div onclick="$('#cover').click()" class="cover_preview py-2"
-                                style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
-                        <label class="form-label" for="sources">Associated Authors</label>
-                        <input type="text" class="form-control" name="associated_authors"
-                            placeholder="Associated Authors"
-                            value="{{ @$row->associated_authors ?? old('associated_authors') }}">
-                    </div>
-                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
-                        <label class="form-label" for="sources">Associated Tags/Health Topics</label>
-                        @include('partials.tags.dropdown', [
-                            'field' => 'tags[]',
-                            'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
-                        ])
-                    </div>
-                </div>
-
+                <!-- Attachments LEFT column -->
                 <div class="col-md-6 attachment">
                     <div class="mb-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="publication">Publication Attachments</label>
 
                         @if (@$row && @$row->has_attachments)
-
-                            @php
-                                $count = 1;
-                            @endphp
-
-                            @foreach ($publication->attachments as $pub_file)
-                                <br><a href="{{ url('uploads/publications/') }}{{ $pub_file->file }}" target="_blank"
-                                    class="btn btn-md rounded bg-white border fs-sm ft-medium col-lg-12 text-left"><i
-                                        class="fa fa-file"></i> View Attachment {{ $count > 1 ? $count : '' }}</a>
-                                @php
-                                    $count++;
-                                @endphp
-                            @endforeach
+                            <div class="mb-2">
+                                <small class="text-muted d-block mb-1">Existing Files (check to remove)</small>
+                                <ul class="list-group">
+                                    @foreach ($row->attachments as $pub_file)
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <a href="{{ $pub_file->file }}" target="_blank"><i class="fa fa-paperclip text-muted"></i> {{ $pub_file->description ?? 'Attachment' }}</a>
+                                            <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
                         @endif
 
                         <style>
@@ -238,7 +242,33 @@
                             'selected' => @$row->communities ? $row->communities->pluck('id')->toArray() : [],
                         ])
                     </div>
-                    
+                </div>
+
+                <!-- Cover RIGHT column -->
+                <div class="col-md-6">
+                    <div class="mb-2 p-2" style="background:#ffffff;">
+                        <label class="form-label" for="publication">Cover Image</label>
+                        <div class="custom-file">
+                            <input type="file" style="display: none;" name="cover" id="cover">
+                            <div onclick="$('#cover').click()" class="cover_preview py-2"
+                                style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
+                        <label class="form-label" for="sources">Associated Authors</label>
+                        <input type="text" class="form-control" name="associated_authors"
+                            placeholder="Associated Authors"
+                            value="{{ @$row->associated_authors ?? old('associated_authors') }}">
+                        <small class="text-muted d-block mt-1">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
+                    </div>
+                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
+                        <label class="form-label" for="sources">Associated Tags/Health Topics</label>
+                        @include('partials.tags.dropdown', [
+                            'field' => 'tags[]',
+                            'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
+                        ])
+                    </div>
                 </div>
 
             </div>
@@ -328,6 +358,40 @@
                 $input.trigger('change');
             });
         }
+
+        // AI summary extraction from first selected file
+        function extractSummaryFromFile(file){
+            var formData = new FormData();
+            formData.append('file', file);
+            formData.append('language', 'en');
+            formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
+
+            $.ajax({
+                url: '{{ route("ai.summarise.file") }}',
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(resp){
+                    if(!resp || !resp.content) return;
+                    if (!$('#summernote').next('.note-editor').length && typeof $.fn.summernote === 'function') {
+                        $('#summernote').summernote({ height: 300 });
+                    }
+                    var current = $('#summernote').val();
+                    if (!current || current.trim().length < 50) {
+                        $('#summernote').summernote('code', resp.content);
+                    } else if (confirm('Replace existing description with AI-extracted summary?')) {
+                        $('#summernote').summernote('code', resp.content);
+                    }
+                }
+            });
+        }
+
+        $('#attachments').on('change', function(){
+            var f = this.files && this.files.length ? this.files[0] : null;
+            if(!f) return;
+            extractSummaryFromFile(f);
+        });
 
         });
 

@@ -310,24 +310,9 @@ $totalTopics = $groupedTags->flatten()->count();
     font-weight: 600;
 }
 
-.topics-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-    gap: 1.5rem;
-}
+.topics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 1rem; }
 
-.topic-card {
-    display: block;
-    background: white;
-    border: 2px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 1.5rem;
-    transition: all 0.3s ease;
-    text-decoration: none;
-    color: inherit;
-    position: relative;
-    overflow: hidden;
-}
+.topic-card { display:block; background:#fff; border:2px solid #e2e8f0; border-radius:12px; padding:1rem; transition:all .3s ease; text-decoration:none; color:inherit; position:relative; overflow:hidden; }
 
 .topic-card::before {
     content: '';
@@ -353,22 +338,16 @@ $totalTopics = $groupedTags->flatten()->count();
     transform: scaleX(1);
 }
 
-.topic-card-inner {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
+.topic-card-inner { display:flex; flex-direction:column; gap:.75rem; }
 
-.topic-icon {
-    width: 50px;
-    height: 50px;
+.topic-icon { width:40px; height:40px;
     border-radius: 12px;
     background: linear-gradient(135deg, rgba(17, 154, 72, 0.1) 0%, rgba(17, 154, 72, 0.05) 100%);
     display: flex;
     align-items: center;
     justify-content: center;
     color: var(--theme-color-primary, #119A48);
-    font-size: 1.5rem;
+    font-size: 1.1rem;
 }
 
 .topic-card:hover .topic-icon {
@@ -381,20 +360,12 @@ $totalTopics = $groupedTags->flatten()->count();
     flex: 1;
 }
 
-.topic-title {
-    font-size: 1.25rem;
+.topic-title { font-size:1.05rem;
     font-weight: 700;
     color: #1e293b;
-    margin: 0 0 0.5rem 0;
-    line-height: 1.3;
-}
+    margin: 0 0 0.35rem 0; line-height:1.25; }
 
-.topic-description {
-    font-size: 0.9rem;
-    color: #64748b;
-    margin: 0;
-    line-height: 1.6;
-}
+.topic-description { font-size:.85rem; color:#64748b; margin:0; line-height:1.45; }
 
 .topic-action {
     display: flex;
@@ -402,18 +373,7 @@ $totalTopics = $groupedTags->flatten()->count();
     justify-content: flex-end;
 }
 
-.action-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem 1rem;
-    background: var(--theme-color-primary, #119A48);
-    color: white;
-    border-radius: 8px;
-    font-weight: 600;
-    font-size: 0.875rem;
-    transition: all 0.2s ease;
-}
+.action-btn { display:inline-flex; align-items:center; gap:.35rem; padding:.35rem .6rem; background:var(--theme-color-primary, #119A48); color:#fff; border-radius:8px; font-weight:600; font-size:.82rem; transition:all .2s ease; }
 
 .topic-card:hover .action-btn {
     background: var(--theme-color-secondary, #0d7a3a);

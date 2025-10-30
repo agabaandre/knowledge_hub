@@ -52,6 +52,7 @@
                 </form>
             </div>
             <div class="card-body text-left">
+                @include('layouts.partials.alerts')
                 <!-- Datatable -->
                 <table id="publicationTable" class="table table-striped table-bordered">
                     <thead>

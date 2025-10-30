@@ -201,6 +201,25 @@
     text-decoration: none;
 }
 
+/* Active state styling */
+.nav-menu > li > a { color: #333; border-bottom: 2px solid transparent; }
+.nav-menu > li.active > a,
+.nav-menu > li > a:hover { color: var(--theme-color-primary, #119A48); border-bottom-color: var(--theme-color-primary, #119A48); }
+
+/* Adjust active indicator for mega menu (Health Emergencies) so the green bar doesn't touch the bottom border */
+.nav-menu > li.has-mega-menu > a { position: relative; }
+.nav-menu > li.has-mega-menu.active > a { border-bottom-color: transparent; }
+.nav-menu > li.has-mega-menu.active > a::after,
+.nav-menu > li.has-mega-menu > a:hover::after {
+    content: '';
+    position: absolute;
+    left: 0; right: 0;
+    bottom: 4px; /* lift the bar a bit so it doesn't touch the bottom edge */
+    height: 2px;
+    background: var(--theme-color-primary, #119A48);
+    border-radius: 2px;
+}
+
 .search-btn {
     font-size: 18px;
 }
@@ -272,11 +291,11 @@
                     <ul>
                         <li>
                             @guest
-                                <a href="{{ route('account.profile') }}" class="theme-cl fs-lg">
+                                <a href="{{ route('login') }}" class="theme-cl fs-lg">
                                     <i class="lni lni-user"></i>
                                 </a>
                             @else
-                                <a href="{{ route('login') }}" class="theme-cl fs-lg">
+                                <a href="{{ route('account.profile') }}" class="theme-cl fs-lg">
                                     <i class="lni lni-user"></i>
                                 </a>
                             @endguest
@@ -285,11 +304,12 @@
                 </div>
             </div>
             
+            @php $menuIconsEnabled = settings()->menu_icons_enabled ?? 0; @endphp
             <div class="nav-menus-wrapper" style="transition-property: none;">
                 <ul class="nav-menu">
-                    <li class="active"><a href="{{ url('/') }}">Home</a></li>
+                    <li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">@if($menuIconsEnabled)<i class="fa fa-home mr-1"></i> @endif Home</a></li>
                     
-                     <li class="categories "><a href="javascript:void(0);">Browse<span
+                     <li class="categories {{ ( ((request()->is('records*') && !request()->has('tag'))) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*') ) ? 'active' : '' }}"><a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-compass mr-1"></i> @endif Browse<span
                                 class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
@@ -339,8 +359,8 @@
                         $filteredTags = $tags->filter(fn($tag) => $tag->is_health_emergency)->values();
                         @endphp
 
-                    <li class="categories has-mega-menu">
-                        <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
+                    <li class="categories has-mega-menu {{ request()->has('tag') ? 'active' : '' }}">
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-briefcase-medical mr-1"></i> @endif Health Emergencies <span class="submenu-indicator"></span></a>
 
                         @include('layouts.partials.tags_menu')
                         
@@ -363,8 +383,8 @@
                        </ul>
                         
                     </li>
-                     <li class="categories">
-                        <a href="javascript:void(0);">Guidelines & Frameworks<span class="submenu-indicator"></span></a>
+                    <li class="categories {{ (request()->is('tools')|| (isset($staticLinks) && collect($staticLinks)->pluck('link')->contains(url()->current()))) ? 'active' : '' }}">
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i> @endif Guidelines & Frameworks<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             
                             @if(isset($staticLinks) && count($staticLinks))
@@ -377,8 +397,8 @@
                     </li>
 
                
-                    <li class="categories">
-                        <a href="javascript:void(0);">Discussions<span class="submenu-indicator"></span></a>
+                    <li class="categories {{ (request()->is('forums*') || request()->is('communities*')) ? 'active' : '' }}">
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-comments mr-1"></i> @endif Discussions<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                              <li><a href="{{ url('forums') }}">Forums</a></li>
                             <li><a href="{{ url('communities') }}">Communities</a></li>
@@ -387,15 +407,15 @@
                     </li>
 
 
-                    <li class="categories">
-                        <a href="javascript:void(0);">Learning<span class="submenu-indicator"></span></a>
+                    <li class="categories {{ request()->is('courses*') ? 'active' : '' }}">
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-graduation-cap mr-1"></i> @endif Learning<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             <li><a href="{{ url('courses') }}">Courses</a></li>  
                         </ul>
                     </li>
 
-                    <li class="categories">
-                        <a href="javascript:void(0);">Help<span class="submenu-indicator"></span></a>
+                    <li class="categories {{ (request()->is('faqs') || request()->is('publications/content*')) ? 'active' : '' }}">
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-life-ring mr-1"></i> @endif Help<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             <li><a href="{{ url('faqs') }}">FAQs</a></li> 
                             <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>

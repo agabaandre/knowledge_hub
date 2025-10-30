@@ -18,6 +18,8 @@ class Kernel extends ConsoleKernel
         
         $schedule->command('moodle:fetch-courses')->hourly();
         $schedule->command('telescope:prune --hours=4')->daily();
+        // Purge publications rejected for 90+ days without appeal
+        $schedule->command('publications:purge-rejected --days=90')->dailyAt('02:15');
         
     }
 

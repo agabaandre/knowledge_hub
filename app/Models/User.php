@@ -96,6 +96,10 @@ class User extends Authenticatable
         if (empty($photo)) {
             return null;
         }
+        // If photo is an external URL (set by social login), return as-is
+        if (!empty($this->attributes['is_photo_external']) && intval($this->attributes['is_photo_external']) === 1) {
+            return $photo;
+        }
         return storage_link('uploads/users/'.$photo);
     }
 

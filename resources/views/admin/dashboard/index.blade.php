@@ -14,11 +14,11 @@
 <!-- PAGE-HEADER END -->
 
 <div class="container-fluid">
-    <div class="row">
-        <div class="col-sm-3">
-            <div class="card">
+    <div class="row" style="row-gap:12px;">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $publications_count }} Publications</h5>
+                    <h5 class="card-title mb-1">{{ $publications_count }} Publications</h5>
 
                     <i class="fa fa-pen"></i>
                     @php
@@ -32,10 +32,10 @@ $percentage = ($publications_count / 10000) * 100;
                 </div>
             </div>
         </div>
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $authors_count }} Resource Authors</h5>
+                    <h5 class="card-title mb-1">{{ $authors_count }} Resource Authors</h5>
                     <i class="fa fa-users"></i>
                     @php
                     $percentage = ($authors_count / 1000) * 100;
@@ -48,10 +48,10 @@ $percentage = ($publications_count / 10000) * 100;
                 </div>
             </div>
         </div>
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $experts_count }} Experts</h5>
+                    <h5 class="card-title mb-1">{{ $experts_count }} Experts</h5>
                     <i class="fas fa-user-graduate"></i>
                     @php
 $percentage = ($experts_count / 1000) * 100;
@@ -64,10 +64,10 @@ $percentage = ($experts_count / 1000) * 100;
                 </div>
             </div>
         </div>
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $forums_count }} Forum Discussions</h5>
+                    <h5 class="card-title mb-1">{{ $forums_count }} Forum Discussions</h5>
                     <i class="fab fa-forumbee"></i>
                     @php
 $percentage = ($forums_count / 1000) * 100;
@@ -82,10 +82,10 @@ $percentage = ($forums_count / 1000) * 100;
         </div>
 
         {{-- Others --}}
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $states_count }} Total Member States</h5>
+                    <h5 class="card-title mb-1">{{ $states_count }} Total Member States</h5>
                     <i class="fas fa-globe-africa"></i>
                     @php
 $percentage = ($states_count / 1000) * 100;
@@ -99,10 +99,10 @@ $percentage = ($states_count / 1000) * 100;
             </div>
         </div>
 
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $visits_count }} Daily Visits</h5>
+                    <h5 class="card-title mb-1">{{ $visits_count }} Daily Visits</h5>
                     <i class="fas fa-signal"></i>
                     @php
 $percentage = ($visits_count / 1000) * 100;
@@ -116,10 +116,10 @@ $percentage = ($visits_count / 1000) * 100;
             </div>
         </div>
 
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $admin_units_count }} Total Administrative Units</h5>
+                    <h5 class="card-title mb-1">{{ $admin_units_count }} Total Administrative Units</h5>
                     <i class="far fa-building"></i>
                     @php
 $percentage = ($admin_units_count / 1000) * 100;
@@ -133,10 +133,10 @@ $percentage = ($admin_units_count / 1000) * 100;
             </div>
         </div>
 
-        <div class="col-sm-3">
-            <div class="card">
+        <div class="col-sm-6 col-md-4 col-lg-3">
+            <div class="card shadow-sm" style="border-radius:12px;">
                 <div class="card-body">
-                    <h5 class="card-title">{{ $users_count }} Total Users</h5>
+                    <h5 class="card-title mb-1">{{ $users_count }} Total Users</h5>
                     <i class="fas fa-users-cog"></i>
                     @php
 $percentage = ($users_count / 1000) * 100;
@@ -151,7 +151,7 @@ $percentage = ($users_count / 1000) * 100;
         </div>
     </div>
 
-    <div class="row charts"></div>
+    <div class="row charts" style="row-gap:12px;"></div>
 
     <div class="row">
         <div class="col-md-12">

@@ -1,5 +1,19 @@
 @extends('admin.layouts.main')
 
+@section('styles')
+    <style>
+        .ap-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+        .ap-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+        .ap-card-body{padding:16px}
+        .ap-meta label{display:block;font-size:.75rem;color:#64748b;margin-bottom:2px}
+        .ap-meta .value{font-weight:600;color:#0f172a}
+        .ap-cover{border:1px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc}
+        .ap-list{list-style:none;padding-left:0;margin:0}
+        .ap-list li{padding:6px 0;border-bottom:1px dashed #e5e7eb}
+        .ap-list li:last-child{border-bottom:none}
+    </style>
+@endsection
+
 @section('content')
     <div class="page-header">
         <h1 class="page-title">Publication Details</h1>
@@ -12,99 +26,74 @@
     </div>
 
     @php
-        if ($publication->cover):
-            $image_link = $publication->cover;
-        else:
-            $image_link = storage_link('uploads/publications/cover.jpg');
-        endif;
+        // Derive image link with robust fallback like Top Searches
+        $image_link = $publication->cover ?? $publication->image_url ?? null;
+        $default_image = asset('assets/images/cover.png');
+        if (empty($image_link)) {
+            $image_link = $default_image;
+        } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
+            if (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) {
+                $image_link = asset($image_link);
+            } elseif (strpos($image_link, '/') === 0) {
+                $image_link = url($image_link);
+            } else {
+                $image_link = $default_image;
+            }
+        }
     @endphp
 
-    <!-- ======================= Publication Info ======================== -->
-    <div class="rounded py-5"
-        style="background-image: url({{ asset('frontend/img/dots.png') }}); background-repeat:repeat-x; background-size:contain;">
-        <div class="container">
-
-            @include('layouts.partials.alerts')
-
-            <div class="row">
-                <div class="col-xl-12 col-lg-12 col-md-12 col-12">
-                    <div class="jbd-01 d-flex align-items-center justify-content-between">
-                        <div class="jbd-flex d-flex align-items-center justify-content-start">
-                            <div class="jbd-01-thumb">
-                                <img src="{{ asset('uploads/publications/' . $publication->cover) }}" class="img-fluid"
-                                    width="100" alt="" />
-                            </div>
-                            <div class="jbd-01-caption pl-3">
-                                <div class="tbd-title">
-                                    <h4 class="mb-0 ft-medium fs-md">
-                                        {!! $publication->title !!}
-                                    </h4>
-                                </div>
-                                <div class="jbl_location mb-3">
-
-                                    <span>{!! $publication->theme->description ?? '' !!}</span>
-                                </div>
-
-                                @if (!empty($publication->publication))
-                                    <div class="jbl_location mb-3">
-                                        <a href="{{ $publication->publication }}" target="_blank"
-                                            class="btn btn-sm rounded btn-outline-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;"><i class="fa fa-eye"></i> Visit Resource
-                                            Link</a>
-                                    </div>
-                                @endif
-                                <div class="jbl_info01">
-                                    <span
-                                        class="px-2 py-1 ft-medium medium badge badge-success px-3 rounded mr-2">{{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version: ' . $publication->version_no }}</span>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="jbd-01-right text-right">
-
-                            <div class="jbl_button mb-2">
-
-
-                                @if ($publication->is_approved == 0)
-                                    <div class="row col-12 d-flex">
-                                        @if ($publication->is_rejected == 1)
-                                            <label class="badge badge-danger">Rejected</label>
-                                        @endif
-                                        <a href="#approval-modal" data-toggle="modal"
-                                            class="btn btn-sm rounded btn-success fs-sm ft-medium mb-2"
-                                            style="width:180px !important;"><i class="fa fa-check-circle"></i>
-                                            {{ $publication->is_rejected == 0 ? 'Approve' : 'Reconsider' }}</a>
-                                    </div>
-                                @endif
-                                @if (
-                                    ($publication->is_rejected == 0 && $publication->is_approved == 1) ||
-                                        ($publication->is_rejected == 0 && $publication->is_approved == 0))
-                                    <div class="row col-12 d-flex">
-                                        @if ($publication->is_approved == 1)
-                                            <label class="badge badge-success">Approved</label>
-                                        @endif
-                                        <a href="#reject-modal" data-toggle="modal"
-                                            class="btn btn-sm rounded btn-danger fs-sm ft-medium mb-2"
-                                            style="width:180px !important;"><i class="fa fa-times-circle"></i>
-                                            {{ $publication->is_approved == 1 ? 'Recall' : 'Reject' }}</a>
-                                    </div>
-                                @endif
-
-                                @include('admin.publications.partials.approval-modal', [
-                                    'action' => url('admin/publications/approval'),
-                                    'record' => $publication,
-                                ])
-                                @include('admin.publications.partials.reject-modal', [
-                                    'action' => url('admin/publications/approval'),
-                                    'record' => $publication,
-                                ])
-                            </div>
+    <div class="">
+        @include('layouts.partials.alerts')
+        <div class="ap-card mb-3" style="width:100%;">
+            <div class="ap-card-header d-flex align-items-center justify-content-between" style="width:100%;">
+                <div class="d-flex align-items-center">
+                    <div class="mr-3" style="width:48px;height:48px;overflow:hidden;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;">
+                        <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
+                    </div>
+                    <div>
+                        <h4 class="mb-0" style="font-weight:700;color:#0f172a;">{!! $publication->title !!}</h4>
+                        <div class="text-muted" style="font-size:.9rem;">{!! $publication->theme->description ?? '' !!}</div>
+                        @if(!$publication->is_version)
+                            <div class="text-muted" style="font-size:.8rem;">{!! $publication->sub_theme->description ?? '' !!}</div>
+                        @else
+                            <span class="badge badge-success">Version {{ $publication->version_no }}</span>
+                        @endif
+                        <div class="mt-2 d-flex flex-wrap" style="gap:8px;">
+                            @if($publication->author)
+                                <span class="badge badge-light" title="Source"><i class="fa fa-user mr-1"></i>{{ $publication->author->name }}</span>
+                            @endif
+                            @if(!empty($publication->year_published))
+                                <span class="badge badge-light" title="Year"><i class="fa fa-calendar mr-1"></i>{{ $publication->year_published }}</span>
+                            @endif
+                            @if(@$publication->data_category)
+                                <span class="badge badge-light" title="Category"><i class="fa fa-folder-open mr-1"></i>{{ @$publication->data_category->category_name }}</span>
+                            @endif
+                            <span class="badge badge-light" title="Views"><i class="fa fa-eye mr-1"></i>{{ $publication->visits }}</span>
+                            <span class="badge badge-light" title="Likes"><i class="fa fa-heart mr-1"></i>{{ count($publication->favourited ?? []) }}</span>
+                            <span class="badge badge-light" title="Comments"><i class="fa fa-comments mr-1"></i>{{ count($publication->comments) }}</span>
                         </div>
                     </div>
                 </div>
+                <div class="text-right">
+                    @php
+                        $statusText = $publication->is_approved ? 'Approved' : ($publication->is_rejected ? 'Rejected' : 'Pending');
+                        $statusClass = $publication->is_approved ? 'badge-success' : ($publication->is_rejected ? 'badge-danger' : 'badge-secondary');
+                    @endphp
+                    <span class="badge {{ $statusClass }} mr-2">{{ $statusText }}</span>
+                    @if (!empty($publication->publication))
+                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm"><i class="fa fa-eye mr-1"></i>Visit Resource</a>
+                    @endif
+                    @if ($publication->is_approved == 0)
+                        <a href="#approval-modal" data-toggle="modal" class="btn btn-success btn-sm ml-2"><i class="fa fa-check-circle mr-1"></i>{{ $publication->is_rejected == 0 ? 'Approve' : 'Reconsider' }}</a>
+                    @endif
+                    @if (($publication->is_rejected == 0 && $publication->is_approved == 1) || ($publication->is_rejected == 0 && $publication->is_approved == 0))
+                        <a href="#reject-modal" data-toggle="modal" class="btn btn-danger btn-sm ml-2"><i class="fa fa-times-circle mr-1"></i>{{ $publication->is_approved == 1 ? 'Recall' : 'Reject' }}</a>
+                    @endif
+                </div>
             </div>
         </div>
+        @include('admin.publications.partials.approval-modal', [ 'action' => url('admin/publications/approval'), 'record' => $publication ])
+        @include('admin.publications.partials.reject-modal', [ 'action' => url('admin/publications/approval'), 'record' => $publication ])
     </div>
     <!-- ======================= Publication Info ======================== -->
 
@@ -129,44 +118,9 @@
                         <div class="jbd-01 pr-3">
 
                             <div class="jbd-details mb-4">
-                                <h5 class="ft-medium fs-md text-success">Resource Details</h5>
+                                <h5 class="ft-medium fs-md text-success">Description</h5>
                                 <div class="other-details">
-
-                                    <br>
-                                    <h5 class="ft-medium fs-md">Description</h5>
                                     <p>{!! $publication->description !!}</p>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Source/Author</label>
-                                        <span class="text-dark">{{ $publication->author->name }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">No. of Visits</label>
-                                        <span
-                                            class="px-2 py-1 ft-medium medium theme-bg rounded mr-2">{{ $publication->visits }}
-                                            Visits</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Category</label>
-                                        <span
-                                            class="text-dark">{{ @$publication->data_category->category_name ?? '' }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Sub Category</label>
-                                        <span
-                                            class="text-dark">{{ $publication->sub_category->category_name ?? ('' ?? '') }}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Theme</label>
-                                        <span class="text-dark">{!! $publication->theme->description ?? '' !!}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Sub-Theme</label>
-                                        <span class="text-dark">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
-                                    </div>
-                                    <div class="details ft-medium">
-                                        <label class="text-muted">Associated Authors</label>
-                                        <span class="text-dark">{{ $publication->associated_authors ?? 'N/A' }}</span>
-                                    </div>
                                 </div>
                             </div>
 
@@ -280,27 +234,23 @@
                 </div>
             </div>
 
-            <!-- Sidebar -->
+    <!-- Sidebar -->
 
-            <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+    <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
 
-                <div class="row">
+        <div class="row">
 
-                    <div class="jbd-details mb-4 col-lg-12">
-                        @if ($publication->is_video)
-                            <iframe width="650" height="400" src="{{ $publication->publication }}"></iframe>
-                        @else
-                            <img src="{{ $image_link }}" class="rounded" width="400px" />
-                        @endif
-                    </div>
-
-                </div>
-
+            <div class="jbd-details mb-4 col-lg-12">
+                @if ($publication->is_video)
+                    <div class="ap-cover"><iframe width="100%" height="360" src="{{ $publication->publication }}"></iframe></div>
+                @else
+                    <div class="ap-cover"><img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;display:block;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"></div>
+                @endif
             </div>
-        </div>
-
 
         </div>
+
+    </div>
         </div>
     </section>
 

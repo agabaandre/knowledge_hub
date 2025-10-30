@@ -296,8 +296,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
     //authors
     Route::group(["prefix" => "authors"], function () {
-
-        Route::any("/", [AuthorsAdminController::class, 'index']);
+        Route::get("/", [AuthorsAdminController::class, 'index']);
+        Route::post("/store", [AuthorsAdminController::class, 'store']);
         Route::get("/delete", [AuthorsAdminController::class, 'destroy']);
     });
 
@@ -376,7 +376,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::any("/moderate", [CommsOfPracticeController::class, 'moderate']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
-        Route::get('/commsofpractice/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
+        Route::get('/get', [CommsOfPracticeController::class, 'getOne']);
+        Route::get('/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
         Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction'); // Ensure this line is present
     });
 
@@ -426,8 +427,9 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     });
 
     Route::group(["prefix" => "tools"], function () {
-
-        Route::any("/", [ToolsAdminController::class, 'index']);
+        Route::get("/", [ToolsAdminController::class, 'index']);
+        Route::post("/store", [ToolsAdminController::class, 'store']);
+        Route::get("/delete", [ToolsAdminController::class, 'destroy']);
     });
 
     //accessgroup

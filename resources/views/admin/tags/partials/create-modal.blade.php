@@ -23,9 +23,19 @@
 
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Health Emergency?</label>
-              <select placeholder="Enter Tag" class="form-control newform" id="is_health_emergency" name="is_health_emergency" required>
+              <label class="form-label" for="name">Health Topic?</label>
+              <select class="form-control newform" id="is_health_topic" name="is_health_topic" required>
+                <option value="1" selected>Yes</option>
                 <option value="0">No</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="mb-3">
+              <label class="form-label" for="name">Health Emergency?</label>
+              <select class="form-control newform" id="is_health_emergency" name="is_health_emergency" required>
+                <option value="0" selected>No</option>
                 <option value="1">Yes</option>
               </select>
             </div>
@@ -57,13 +67,21 @@
 <script>
 function toggleOverviewRequired(modalSelector) {
     var $modal = $(modalSelector);
-    $modal.find('#is_health_emergency').on('change', function() {
-        if ($(this).val() == '1') {
+    function checkRequired(){
+        if ($modal.find('#is_health_topic').val() == '1' || $modal.find('#is_health_emergency').val() == '1') {
             $modal.find('#overview').attr('required', true);
         } else {
             $modal.find('#overview').removeAttr('required');
         }
-    }).trigger('change');
+    }
+    $modal.find('#is_health_topic, #is_health_emergency').on('change', function() {
+        if ($(this).val() == '1') {
+            $modal.find('#overview').attr('required', true);
+        } else {
+            checkRequired();
+        }
+    });
+    checkRequired();
 }
 
 // For create modal
@@ -76,3 +94,4 @@ $('#edit-tag-modal').on('shown.bs.modal', function () {
     toggleOverviewRequired('#edit-tag-modal');
 });
 </script>
+

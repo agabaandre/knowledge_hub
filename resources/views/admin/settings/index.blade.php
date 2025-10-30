@@ -424,6 +424,19 @@
                         </div>
                     </div>
 
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Show Icons in Main Menu</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="menu_icons_enabled" name="menu_icons_enabled" value="1" @if($settings->menu_icons_enabled) checked @endif>
+                                    <label class="form-check-label" for="menu_icons_enabled">Enable subtle icons next to top navigation items</label>
+                                </div>
+                                <small class="info-text">Turn this on to display icons in the header menu (Home, Browse, Health Emergencies, etc.).</small>
+                </div>
+                        </div>
+                    </div>
+
                     <div class="form-section-title mt-4">
                         <i class="fa fa-image"></i>
                         Background & Gradient

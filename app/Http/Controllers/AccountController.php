@@ -20,12 +20,9 @@ class AccountController extends Controller
     public function profile(Request $request){
 
         $data['user'] = current_user();
-        $data['preferences'] = [];
+        // Preload selected preferences as an array of SubThemeticArea IDs
+        $data['preferences'] = current_user()->preferences()->pluck('id')->toArray();
         $data['access_groups'] = AccessLevel::all();
-
-        foreach(current_user()->preferences as $pref){
-            $data['preferences'][] = $pref->subtheme_id;
-        }
         
         return view('account.profile',$data);
     }
@@ -81,8 +78,10 @@ class AccountController extends Controller
             'sub_theme' => 'required',
             'title' => 'required|string|max:500',
             'description' => 'required|string|min:50',
-            'countries' => 'required|array|min:1',
-            'countries.*' => 'required|exists:countries,id',
+            'year_published' => 'nullable|integer|min:1900|max:' . date('Y'),
+            // Member States are optional when audience is global/All
+            'countries' => 'nullable|array',
+            'countries.*' => 'exists:country,id',
         ];
 
         $messages = [
@@ -105,11 +104,7 @@ class AccountController extends Controller
             $messages['link.url'] = 'Please provide a valid URL (starting with http:// or https://).';
         endif;
 
-        // For upload type, require file if new
-        if($request->upload_type == 'upload' && !$request->id):
-            $val_rules['files'] = 'required';
-            $messages['files.required'] = 'Please upload at least one file for your resource.';
-        endif;
+        // Attachments are optional at submission time (user may supply a link instead)
 
         if($request->original_id):
             unset($val_rules['sub_theme']);

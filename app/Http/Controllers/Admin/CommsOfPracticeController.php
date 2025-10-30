@@ -116,7 +116,40 @@ class CommsOfPracticeController extends Controller
         $pendingCount = $community->pendingMembers()->count();
         $rejectedCount = $community->rejectedMembers()->count();
 
-        return view('admin.commsofpractice.details', compact('community', 'totalMembers', 'approvedCount', 'pendingCount', 'rejectedCount','membership'));
+        // Recent publications and forums in this community
+        $pubIds = \App\Models\PublicationCommunityOfPractice::where('community_of_practice_id', $id)
+            ->pluck('publication_id');
+        $publications = \App\Models\Publication::whereIn('id', $pubIds)
+            ->orderBy('created_at','desc')->limit(6)->get();
+
+        $forumIds = \App\Models\ForumCommunityOfPractice::where('community_of_practice_id', $id)
+            ->pluck('forum_id');
+        $forums = \App\Models\Forum::with('user')
+            ->whereIn('id', $forumIds)
+            ->orderBy('created_at','desc')->limit(6)->get();
+
+        return view('admin.commsofpractice.details', compact(
+            'community', 'totalMembers', 'approvedCount', 'pendingCount', 'rejectedCount', 'membership',
+            'publications','forums'
+        ));
+    }
+
+    public function getOne(Request $request)
+    {
+        $id = $request->id;
+        $community = $this->commsOfPracticeRepository->find($id);
+        if (!$community) {
+            return response()->json(['status'=>'failure','message'=>'Not found'], 404);
+        }
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'id' => $community->id,
+                'community_name' => $community->community_name,
+                'description' => $community->description,
+                'is_active' => $community->is_active,
+            ]
+        ]);
     }
 
     public function memberAction(Request $request) {

@@ -3,67 +3,107 @@
 @section('styles')
     @include('common.table')
     <style>
-        .stats-card {
-            background-color: #f8f9fa;
-            /* Light gray background */
-            padding: 15px;
-            border-radius: 5px;
-            margin-bottom: 20px;
-        }
-
-        .stats-card p {
-            margin: 0;
-            font-weight: bold;
-        }
+        .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+        .af-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+        .af-card-body{padding:16px}
+        .stat-chip{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.85rem;margin-right:8px}
+        .stat-chip.total{background:#e2e8f0;color:#0f172a}
+        .stat-chip.approved{background:#dcfce7;color:#166534}
+        .stat-chip.pending{background:#fef9c3;color:#854d0e}
+        .stat-chip.rejected{background:#fee2e2;color:#991b1b}
+        .table thead th{background:#f8fafc;border-bottom:1px solid #e2e8f0}
     </style>
 @endsection
 
 @section('content')
     <div class="page-header">
-        <h1 class="page-title">{{ $community->community_name }} Members</h1>
+        <h1 class="page-title">{{ $community->community_name }}</h1>
     </div>
 
     <div class="row">
-        <div class="card col-lg-12">
-            <div class="card-header text-left">
-                <h3 class="card-title">Members of {{ $community->community_name }}</h3>
-                <div class="card-subtitle stats-card">
-                    <p>Total Members: <span class="badge badge-primary">{{ $totalMembers }}</span></p>
-                    <p>Approved Members: <span class="badge badge-success">{{ $approvedCount }}</span></p>
-                    <p>Pending Members: <span class="badge badge-warning">{{ $pendingCount }}</span></p>
-                    <p>Rejected Members: <span class="badge badge-danger">{{ $rejectedCount }}</span></p>
+        <div class="card col-lg-12 af-card">
+            <div class="af-card-header d-flex align-items-center justify-content-between">
+                <div>
+                    <strong>Members</strong>
+                    <div class="text-muted" style="font-size:.9rem;">Manage membership for this community</div>
+                </div>
+                <div>
+                    <span class="stat-chip total">Total: {{ $totalMembers }}</span>
+                    <span class="stat-chip approved">Approved: {{ $approvedCount }}</span>
+                    <span class="stat-chip pending">Pending: {{ $pendingCount }}</span>
+                    <span class="stat-chip rejected">Rejected: {{ $rejectedCount }}</span>
                 </div>
             </div>
-            <div class="card-body text-left">
-                <table class="table table-bordered">
+            <div class="af-card-body">
+                <div class="row">
+                    <div class="col-lg-6">
+                        <div class="af-card mb-3">
+                            <div class="af-card-header"><strong>Recent Publications</strong></div>
+                            <div class="af-card-body">
+                                @if(isset($publications) && count($publications))
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach($publications as $pub)
+                                            <li class="mb-2">
+                                                <a href="{{ url('records/resource') }}?id={{ $pub->id }}">{!! truncate($pub->title, 80) !!}</a>
+                                                <div class="text-muted" style="font-size:.85rem;">{{ time_ago($pub->created_at) }}</div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <div class="text-muted">No publications yet.</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6">
+                        <div class="af-card mb-3">
+                            <div class="af-card-header"><strong>Recent Forums</strong></div>
+                            <div class="af-card-body">
+                                @if(isset($forums) && count($forums))
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach($forums as $f)
+                                            <li class="mb-2">
+                                                <a href="{{ url('forums/thread') }}?id={{ $f->id }}">{!! truncate($f->forum_title, 80) !!}</a>
+                                                <div class="text-muted" style="font-size:.85rem;">by {{ $f->user->name ?? 'Unknown' }} · {{ time_ago($f->created_at) }}</div>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @else
+                                    <div class="text-muted">No forum threads yet.</div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <table class="table table-hover table-bordered">
                     <thead>
                         <tr>
-                            <th>ID</th>
+                            <th style="width:60px;">#</th>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Action</th>
+                            <th style="width:220px;">Action</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach ($membership as $member)
                             <tr>
-                                <td>{{ $member->id }}</td>
+                                <td>{{ $loop->iteration }}</td>
                                 <td>{{ $member->user->name }}</td>
                                 <td>{{ $member->user->email }}</td>
                                 <td>
                                     @if ($member->is_approved == 1)
-                                        <span class="badge badge-success">Approved</span>
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="showModal({{ $member->id }}, 'reject')">Remove</button>
+                                        <span class="badge badge-success mr-2">Approved</span>
+                                        <button class="btn btn-outline-danger btn-sm"
+                                            onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Remove</button>
                                     @elseif ($member->is_approved == 2)
-                                        <span class="badge badge-danger">Rejected</span>
-                                        <button class="btn btn-success btn-sm"
-                                            onclick="showModal({{ $member->id }}, 'approve')">Reconsider</button>
+                                        <span class="badge badge-danger mr-2">Rejected</span>
+                                        <button class="btn btn-outline-success btn-sm"
+                                            onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-undo mr-1"></i>Reconsider</button>
                                     @else
-                                        <button class="btn btn-success btn-sm"
-                                            onclick="showModal({{ $member->id }}, 'approve')">Approve</button>
-                                        <button class="btn btn-danger btn-sm"
-                                            onclick="showModal({{ $member->id }}, 'reject')">Reject</button>
+                                        <button class="btn btn-outline-success btn-sm mr-1"
+                                            onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-check mr-1"></i>Approve</button>
+                                        <button class="btn btn-outline-danger btn-sm"
+                                            onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Reject</button>
                                     @endif
                                 </td>
                             </tr>

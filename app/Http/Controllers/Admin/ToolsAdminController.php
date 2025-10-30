@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\ToolsRepository;
 use App\Http\Controllers\Controller;
 use App\Models\ToolCategory;
+use App\Models\Tool;
 use App\Models\User;
 use App\Services\UITableService;
 
@@ -20,86 +21,41 @@ class ToolsAdminController extends Controller
     }
 
     public function index(Request $request){
-
-        $col = array();
-        $col["title"]    = "Id"; 
-        $col["name"]     = "id"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = false;
-        $col["hidden"]   = true;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Tool Name"; 
-        $col["name"]     = "tool_name"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = true;
-         $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Tool Description"; 
-        $col["name"]     = "tool_desc"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = true;
-        $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Tool URL"; 
-        $col["name"]     = "tool_url"; 
-        $col["width"]    = "30"; 
-        $col["editable"] = true;
-         $cols[] = $col;
-
-        $col = array();
-        $col["title"]    = "Category"; 
-        $col["name"]     = "tool_category_id"; 
-        $col["width"]    = "10"; 
-        $col["editable"] = true;
-        $col["hidden"]   = false;
-        $col["edittype"] = "select";
-       
-        $categories   = ToolCategory::select("id","category_name")->get();
-        $options      = "";
-
-        $count = 0;
-
-        foreach($categories as $cat):
-            $options.= (($count>0)?";":"").$cat->id.":".$cat->category_name;
-            $count++;
-        endforeach;
-
-        $col["editoptions"] = array("value"=>$options);
-        $cols[] = $col;
-
-        $data['search']    = (Object) $request->all();
-        $sql = "SELECT t.id,tool_name,tool_desc,tool_url,c.category_name as tool_category_id FROM tools t left join tool_categories c on c.id=t.tool_category_id";
-        $data['uitable'] = $this->uiTableService->get_ui_table("tools",$cols,$sql);
-        
+        $data['search'] = (object) $request->all();
+        $data['tools']  = $this->toolRepository->get($request);
+        $data['categories'] = ToolCategory::select('id','category_name')->orderBy('category_name')->get();
         return view('admin.tools.index',$data);
     }
 
   
     public function store(Request $request){
+        $validated = $request->validate([
+            'tool_name' => 'required|string|max:200',
+            'tool_category_id' => 'required|integer',
+            'tool_desc' => 'nullable|string',
+            'tool_url' => 'nullable|string'
+        ]);
 
-        $saved = $this->toolRepository->save($request);
-
-        if($saved):
-            $data = ['message'=>'Comunity saved successfully','status'=>'success','data'=>$saved];
-        else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
-        endif;
-
-        if($request->ajax()){
-            return response($data,200);
+        $tool = ($request->id) ? Tool::find($request->id) : new Tool();
+        if(!$tool){
+            return back()->with(['message'=>'Tool not found','status'=>'failure']);
         }
-        
+        $tool->tool_name = $validated['tool_name'];
+        $tool->tool_category_id = $validated['tool_category_id'];
+        $tool->tool_desc = $validated['tool_desc'] ?? null;
+        $tool->tool_url = $validated['tool_url'] ?? null;
+        $saved = $request->id ? $tool->update() : $tool->save();
+
+        $data = $saved ? ['message'=>'Tool saved successfully','status'=>'success','data'=>$tool] : ['message'=>'Operation failed, try again','status'=>'failure'];
         return back()->with($data);
     }
 
 
     public function destroy(Request $request){
-
-        return $this->toolRepository->delete($request->id);
+        if(!$request->id){ return back(); }
+        $tool = Tool::find($request->id);
+        if($tool){ $tool->delete(); }
+        return back();
     }
 
   

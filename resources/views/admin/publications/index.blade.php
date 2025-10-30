@@ -2,6 +2,14 @@
 
 @section('styles')
     @include('common.table')
+    <style>
+        .filter-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; }
+        .filter-card .card-header { background:#f8fafc; border-bottom:1px solid #e2e8f0; }
+        .filter-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid #e2e8f0; border-radius:999px; background:#fff; }
+        .btn-soft { border:1px solid #cbd5e1; background:#ffffff; }
+        .btn-soft:hover { background:#f8fafc; }
+        .form-label-sm { font-size:.875rem; font-weight:600; color:#334155; }
+    </style>
 @endsection
 
 
@@ -19,62 +27,55 @@
     <div class="row">
 
         <div class="card col-lg-12">
-            <div class="card-header text-left">
-
-            </div>
-            <!-- Card Header With Form Filters -->
-            <div class="card-header">
-                <form class="container-fluid">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="title">Title</label>
-                                <input type="text" name="term" id="filterTitle" class="form-control"
-                                    placeholder="Filter by Title" value="{{ @$search->term ?? '' }}">
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="source">Description</label>
-                                <input type="text" name="description" id="filterDesc" class="form-control"
-                                    value="{{ @$search->description ?? '' }}" placeholder="Filter by Description">
-                            </div>
-                        </div>
-
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="source">Source / Author</label>
-                                @include('partials.authors.dropdown', [
-                                    'field' => 'author',
-                                    'selected' => @$search->author,
-                                ])
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label for="file_type">File Type</label>
-                                @include('partials.publications.filetype_dropdown', [
-                                    'field' => 'file_type',
-                                    'selected' => @$search->file_type,
-                                ])
-                            </div>
-                        </div>
+            <!-- Filters -->
+            <div class="filter-card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <div>
+                        <strong>Filter Resources</strong>
+                        <small class="text-muted d-block">Use quick filters or expand advanced filters for precise results</small>
                     </div>
-
-                    <div class="row">
-                        @include('partials.search.search_fields')
+                    <div>
+                        <button class="btn btn-soft btn-sm" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
+                            <i class="fa fa-sliders mr-1"></i> Advanced Filters
+                        </button>
                     </div>
-
-                    <div class="row">
-                        <div class="col-md-12 text-right">
-                            <!-- Export Button -->
-                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                            <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
-                            <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-
+                </div>
+                <div class="card-body">
+                    <form class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-4 col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label-sm" for="title">Keyword</label>
+                                    <input type="text" name="term" id="filterTitle" class="form-control" placeholder="Search by title or keyword" value="{{ @$search->term ?? '' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label-sm" for="author">Source / Author</label>
+                                    @include('partials.authors.dropdown', [ 'field' => 'author', 'selected' => @$search->author ])
+                                </div>
+                            </div>
+                            <div class="col-md-4 col-lg-4">
+                                <div class="form-group">
+                                    <label class="form-label-sm" for="file_type">File Type</label>
+                                    @include('partials.publications.filetype_dropdown', [ 'field' => 'file_type', 'selected' => @$search->file_type ])
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </form>
+
+                        <div id="advancedFilters" class="collapse mt-2">
+                            <div class="row">
+                                @include('partials.search.search_fields')
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end mt-2" style="gap:8px;">
+                            <button type="submit" id="filterButton" class="btn btn-dark btn-sm"><i class="fa fa-filter mr-1"></i> Apply</button>
+                            <button type="button" id="reset" class="btn btn-soft btn-sm"><i class="fa fa-rotate-left mr-1"></i> Reset</button>
+                            <button type="button" id="exportButton" class="btn btn-success btn-sm"><i class="fa fa-download mr-1"></i> Export</button>
+                        </div>
+                    </form>
+                </div>
             </div>
             <div class="card-body text-left">
                 <form id="bulk-actions-form" method="POST" action="">
@@ -92,17 +93,19 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
                     <!-- Datatable -->
-                    <table id="publicationTable" class="table table-striped table-bordered">
-                        <thead>
+                    <div class="table-responsive mt-3">
+                    <table id="publicationTable" class="table table-striped table-hover table-bordered">
+                        <thead class="thead-light">
                             <tr>
                                 <th></th>
-                                <th></th>
+                                <th style="width:60px;">#</th>
                                 <th>Title</th>
                                 <th>Description</th>
                                 <th width="10%">Author</th>
                                 <th width="10%">Member State</th>
                                 <th>Status</th>
-                                <th width="15%">Actions</th>
+                                <th style="width:16%">Approved/Rejected By</th>
+                                <th width="18%">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -111,10 +114,10 @@
                                 $i = 1;
                             @endphp
 
-                            @foreach ($publications as $publication)
+                            @foreach ($publications as $idx => $publication)
                                 <tr>
                                     <td><input type="checkbox" name="selected_ids[]" value="{{ $publication->id }}"></td>
-                                    <td width="5%"><i class="fa {{ $publication->file_type->icon ?? 'fa-file' }} text-muted"></i></td>
+                                    <td><span class="text-muted">{{ $publications->firstItem() + $idx }}</span></td>
                                     <td>
                                         <a href="{{ $publication->publication }}" target="_blank">
                                             {!! truncate($publication->title, 30) !!}
@@ -133,23 +136,36 @@
                                         {{ get_publication_state($publication->is_approved, $publication->is_rejected) }}
                                     </td>
                                     <td>
-                                        <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}"
-                                            class="text-success">Details</a>
-
+                                        @php
+                                            $name = '-';
+        if ($publication->is_approved && $publication->approved_by) {
+            $u = \App\Models\User::find($publication->approved_by); $name = $u->name ?? '-';
+        } elseif ($publication->is_rejected && $publication->rejected_by) {
+            $u = \App\Models\User::find($publication->rejected_by); $name = $u->name ? $u->name.' (Rejected)' : 'Rejected';
+        }
+                                        @endphp
+                                        <span class="text-muted">{{ $name }}</span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" class="btn btn-sm btn-outline-primary mr-1">
+                                            <i class="fa fa-eye mr-1"></i> Details
+                                        </a>
                                         @if ($publication->user_id == current_user()->id || is_admin())
-                                            | <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}"
-                                                class="text-primary">Edit</a>
+                                            <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}" class="btn btn-sm btn-outline-dark mr-1">
+                                                <i class="fa fa-edit mr-1"></i> Edit
+                                            </a>
                                         @endif
-
                                         @can('delete_publications')
-                                            | <a href="javascript:void(0);" onclick="openDeleteModal('{{ $publication->id }}')"
-                                                class="text-danger"> Delete</a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal('{{ $publication->id }}')">
+                                                <i class="fa fa-trash mr-1"></i> Delete
+                                            </button>
                                         @endcan
                                     </td>
                                 </tr>
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
 
                     <div class="py-2"> {{ $publications->links() }}</div>
 
@@ -186,6 +202,7 @@
     @endsection
 
 @section('scripts')
+@include('common.select2')
 <script>
 let pendingBulkAction = null;
 function submitBulkAction(action) {

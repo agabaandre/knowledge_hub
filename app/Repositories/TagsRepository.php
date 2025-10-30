@@ -22,6 +22,14 @@ class TagsRepository{
     public function save(Request $request){
         $tag = new Tag();
         $tag->tag_text = $request->name;
+        if ($request->has('is_health_topic')) {
+            $tag->is_health_topic = $request->is_health_topic ? 1 : 0;
+        } else {
+            $tag->is_health_topic = 1; // default yes
+        }
+        if ($request->has('is_health_emergency')) {
+            $tag->is_health_emergency = $request->is_health_emergency ? 1 : 0;
+        }
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
         }
@@ -43,8 +51,13 @@ class TagsRepository{
             return null; // Or handle the case where tag is not found
         }
 
-        $tag->tag_text = $request->tag_text; // Assuming 'name' is the field name from your form
-        $tag->is_health_emergency = ($request->is_health_emergency) ? true:false;
+        $tag->tag_text = $request->tag_text;
+        if ($request->has('is_health_topic')) {
+            $tag->is_health_topic = $request->is_health_topic ? 1 : 0;
+        }
+        if ($request->has('is_health_emergency')) {
+            $tag->is_health_emergency = $request->is_health_emergency ? 1 : 0;
+        }
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
         }

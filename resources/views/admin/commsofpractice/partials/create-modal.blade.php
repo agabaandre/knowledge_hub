@@ -24,7 +24,7 @@
           <div class="col-md-12">
             <div class="mb-3">
               <label class="form-label" for="group_description">Description</label>
-              <textarea placeholder="Enter Description" class="form-control newform" id="description" name="description" ></textarea>
+              <textarea placeholder="Enter Description" class="form-control newform summernote-sm" id="description" name="description"></textarea>
             </div>
           </div>
 

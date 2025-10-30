@@ -36,6 +36,13 @@ class SettingsRepository{
         $settings->content_disclaimer = $request->content_disclaimer;
         $settings->gradient_start_color = $request->gradient_start_color;
         $settings->gradient_end_color = $request->gradient_end_color;
+        // feature flags
+        if ($request->has('menu_icons_enabled')) {
+            $settings->menu_icons_enabled = (bool)$request->menu_icons_enabled;
+        } else {
+            // unchecked checkbox doesn't submit; set false
+            $settings->menu_icons_enabled = false;
+        }
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):

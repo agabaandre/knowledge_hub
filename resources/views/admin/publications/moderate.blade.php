@@ -39,11 +39,10 @@
                             @else
                                 @foreach ($publications as $publication)
 
-                                    <h4>{!! $publication->title !!}</h4>
-                                    <p>{!! substr($publication->description, 0, 150) !!}...</p>
-                                    <hr />
-
-                                    <table class="table table-striped condensed">
+                                    <h5 class="mb-1">{!! $publication->title !!}</h5>
+                                    <p class="text-muted">{!! substr(strip_tags($publication->description), 0, 150) !!}...</p>
+                                    <div class="table-responsive">
+                                    <table class="table table-striped table-hover table-bordered">
                                         <thead>
                                             <tr>
                                                 <th>Comment</th>
@@ -59,13 +58,14 @@
                                                     <td>{{ $comment->user->name }}</td>
                                                     <td>{{ $comment->created_at }}</td>
                                                     <td>
-                                                        <a href="{{ url('admin/publications/approve_comment')}}?id={{ $comment->id}}>" class="btn btn-success btn-sm approve_comment" id="approve_comment">Approve</a>
-                                                        <a href="{{ url('admin/publications/reject_comment') }}?id={{$comment->id}}" class="btn btn-danger btn-sm reject_comment" id="reject_comment">Reject</a>
+                                                        <a href="{{ url('admin/publications/approve_comment')}}?id={{ $comment->id}}" class="btn btn-sm btn-outline-success approve_comment" id="approve_comment"><i class="fa fa-check mr-1"></i> Approve</a>
+                                                        <a href="{{ url('admin/publications/reject_comment') }}?id={{$comment->id}}" class="btn btn-sm btn-outline-danger reject_comment" id="reject_comment"><i class="fa fa-times mr-1"></i> Reject</a>
                                                     </td>
                                                 </tr>
                                             @endforeach
                                         </tbody>
                                     </table>
+                                    </div>
                                     
                                 @endforeach
                             @endif

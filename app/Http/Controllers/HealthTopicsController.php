@@ -6,13 +6,20 @@ use App\Models\Tag;
 use App\Models\Publication;
 use App\Models\PublicationTag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema as DBSchema;
 
 class HealthTopicsController extends Controller
 {
     public function index()
     {
-        // Get all tags that are health emergencies
-        $tags = Tag::where('is_health_emergency', true)
+        // Get all tags that are marked as health topics
+        $tags = Tag::where(function($q){
+                    if (DBSchema::hasColumn('tags','is_health_topic')) {
+                        $q->where('is_health_topic', true);
+                    } else {
+                        $q->where('is_health_emergency', true);
+                    }
+                  })
                   ->orderBy('tag_text')
                   ->get();
 
@@ -26,8 +33,14 @@ class HealthTopicsController extends Controller
 
     public function show($id)
     {
-        // Find the tag
-        $tag = Tag::where('is_health_emergency', true)
+        // Find the tag (health topic)
+        $tag = Tag::where(function($q){
+                    if (DBSchema::hasColumn('tags','is_health_topic')) {
+                        $q->where('is_health_topic', true);
+                    } else {
+                        $q->where('is_health_emergency', true);
+                    }
+                 })
                  ->findOrFail($id);
 
         // Get publications tagged with this tag

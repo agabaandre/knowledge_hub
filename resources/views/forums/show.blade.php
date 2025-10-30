@@ -73,4 +73,46 @@
 
 @section('scripts')
     @include('partials.general.summernote')
+    <script>
+        function copyForumLink(url){
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(url).then(function(){
+                    alert('Link copied to clipboard');
+                });
+            } else {
+                const el = document.createElement('textarea');
+                el.value = url; document.body.appendChild(el); el.select();
+                try { document.execCommand('copy'); alert('Link copied to clipboard'); } finally { document.body.removeChild(el); }
+            }
+        }
+        // Ensure Summernote initializes on forum comment box with CDN fallback
+        $(function(){
+            function loadSN(cb){
+                if ($.fn && $.fn.summernote) { cb(); return; }
+                if (!$('link[href*="summernote"]').length) {
+                    $('<link>',{rel:'stylesheet',href:'{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}'}).appendTo('head');
+                }
+                var s=document.createElement('script');
+                s.src='{{ asset('assets/plugins/summernote/dist/summernote.min.js') }}';
+                s.onload=cb;
+                s.onerror=function(){
+                    var cdn=document.createElement('script');
+                    cdn.src='https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js';
+                    cdn.onload=function(){
+                        $('<link>',{rel:'stylesheet',href:'https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css'}).appendTo('head');
+                        cb();
+                    };
+                    document.body.appendChild(cdn);
+                };
+                document.body.appendChild(s);
+            }
+            loadSN(function(){
+                var $el = $('textarea.summernote, textarea.summernote-sm, textarea.summernote-lg');
+                if ($el.length && !$el.eq(0).data('summernote')) {
+                    try { $el.summernote({height: 150}); } catch(e) {}
+                }
+            });
+        });
+    </script>
 @endsection
+

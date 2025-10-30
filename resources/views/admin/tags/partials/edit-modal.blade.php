@@ -19,8 +19,18 @@
 
                     <div class="col-md-12">
                         <div class="mb-3">
+                          <label class="form-label" for="name">Health Topic?</label>
+                          <select class="form-control newform" id="is_health_topic" name="is_health_topic" required>
+                            <option value="1">Yes</option>
+                            <option value="0">No</option>
+                          </select>
+                        </div>
+                      </div>
+
+                    <div class="col-md-12">
+                        <div class="mb-3">
                           <label class="form-label" for="name">Health Emergency?</label>
-                          <select placeholder="Enter Tag" class="form-control newform" id="is_health_emergency" name="is_health_emergency" required>
+                          <select class="form-control newform" id="is_health_emergency" name="is_health_emergency" required>
                             <option value="0">No</option>
                             <option value="1">Yes</option>
                           </select>
@@ -52,24 +62,26 @@
         var button = $(event.relatedTarget);
         var tag_id = button.data('id');
         var tag_text = button.data('tag');
+        var is_health_topic = button.data('is_health_topic');
         var is_health_emergency = button.data('is_health_emergency');
         var overview = button.data('overview');
     
         var modal = $(this);
         modal.find('#tag_id').val(tag_id);
         modal.find('#tag_text').val(tag_text);
+        modal.find('#is_health_topic').val(is_health_topic);
         modal.find('#is_health_emergency').val(is_health_emergency);
         modal.find('#overview').summernote('code', overview);
     
         function toggleOverviewRequired() {
-            if (modal.find('#is_health_emergency').val() == '1') {
+            if (modal.find('#is_health_topic').val() == '1' || modal.find('#is_health_emergency').val() == '1') {
                 modal.find('#overview').attr('required', true);
             } else {
                 modal.find('#overview').removeAttr('required');
             }
         }
     
-        modal.find('#is_health_emergency').on('change', toggleOverviewRequired);
+        modal.find('#is_health_topic, #is_health_emergency').on('change', toggleOverviewRequired);
         toggleOverviewRequired();
     });
     </script>

@@ -2,23 +2,25 @@
 
 @section('styles')
  @include('common.table')
+ <style>
+    .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+    .af-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
+    .af-card-body{padding:16px}
+ </style>
 @endsection
 
 @section('content')
 <div class="row">
-	<div class="card col-lg-12">
-		<div class="card-header text-left">
-			<h3 class="card-title float-left">{{ $title ?? 'File Types' }}</h3>
-			 <hr>
+	<div class="card col-lg-12 af-card">
+		<div class="af-card-header d-flex align-items-center justify-content-between">
+			<strong>{{ $title ?? 'File Types' }}</strong>
+			<a href="#create-modal" data-toggle="modal" class="btn btn-primary btn-sm"><i class="fa fa-plus"></i> Add File Type</a>
 		</div>
 		<!-- Card Header With Form Filters -->
-		<div class="card-header">
+		<div class="af-card-body">
+			@include('layouts.partials.alerts')
 			<form  class="container-fluid">
 				  <div class="row">
-				   
-				    <div class="col-md-12 text-right">
-					 <a href="#create-modal" data-toggle="modal" class="btn btn-outline-success float-right"><i class="fa fa-plus"></i> Add File Type</a>
-					</div>
 
 					<div class="col-md-12">
 						<div class="form-group">
@@ -46,12 +48,12 @@
 				</div>
             </form>
 		</div>
-		<div class="card-body text-left">
+		<div class="af-card-body text-left">
 			<!-- Datatable -->
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
-						<th>#</th>
+						<th style="width:60px;">#</th>
 						<th>Filetype Name</th>
 						<th>Filetype Icon</th>
 						<th>Is Downloadable</th>
@@ -66,12 +68,12 @@
 
 					@foreach($filetypes as $row)
 						<tr>
-							<td>{{ $row->id }}</td>
+							<td>{{ $filetypes->firstItem() + $loop->index }}</td>
 							<td>{{ $row->name }}</td>
 							<td>{{ $row->icon }}</td>
 							<td>{{ $row->is_downloadable ? 'YES' : 'NO' }}</td>
 							<td>
-							<a href="#edit-filetype-modal" data-toggle="modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" data-icon="{{ $row->icon }}" data-downloadable="{{ $row->is_downloadable }}" class="btn btn-sm btn-primary ml-1">Edit</a>
+							<a href="#edit-filetype-modal" data-toggle="modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" data-icon="{{ $row->icon }}" data-downloadable="{{ $row->is_downloadable }}" class="btn btn-sm btn-outline-dark ml-1"><i class="fa fa-edit"></i></a>
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
 							</td>
 						</tr>

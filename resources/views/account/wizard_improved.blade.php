@@ -2,7 +2,7 @@
     if (@$row && @$row->cover):
         $image_link = $row->image_url;
     else:
-        $image_link = asset('assets/images/placeholder.jpg');
+        $image_link = asset('assets/images/placeholder.png');
     endif;
 @endphp
 

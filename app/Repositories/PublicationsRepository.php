@@ -128,7 +128,14 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])->orderBy('id','desc');
         $pubs->where('user_id',$user_id);
-        $result = $pubs->paginate($rows_count);
+        if($request->term){
+            $t = trim($request->term);
+            $pubs->where(function($q) use ($t){
+                $q->where('title','like','%'.$t.'%')
+                  ->orWhere('description','like','%'.$t.'%');
+            });
+        }
+        $result = $pubs->paginate($rows_count)->appends($request->all());
 
         return $result;
     }
@@ -161,6 +168,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         Log::info("Request:: ". json_encode($request->all()));
 
+        // When creating a version from an existing resource, always create a new record
+        if ($request->original_id) {
+            $request['id'] = null; // prevent overwriting parent
+        }
+
         $pub  = ($request->id)? Publication::find($request->id):new Publication();
         $user = ($request->user_id)?User::find($request->user_id):auth()->user();
   
@@ -170,6 +182,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pub->sub_thematic_area_id     = $parent->sub_thematic_area_id;
             $pub->geographical_coverage_id = $parent->geographical_coverage_id;
             $pub->is_version = 1;
+            $pub->parent_id = $parent->id; // link to parent resource
             $pub->title                    = $parent->title;
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
@@ -193,6 +206,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->user_id              = $user->id;
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
         $pub->publication          = $request->link;
+        if ($request->has('year_published')) {
+            $pub->year_published = intval($request->year_published) ?: null;
+        } elseif (!$request->id && !$request->original_id) {
+            // default for new records when not provided
+            $pub->year_published = intval(date('Y'));
+        }
         $pub->description          = $request->description;
         $pub->publication_catgory_id  = $request->data_category_id;
         $pub->associated_authors     = $request->associated_authors;
@@ -229,6 +248,13 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $saved = ($request->id)?$pub->update():$pub->save();
 
         $id = ($request->id)?$request->id:$pub->id;
+
+        // delete selected existing attachments
+        if($request->id && isset($request->remove_attachments) && is_array($request->remove_attachments)){
+            PublicationAttachment::where('publication_id', $id)
+                ->whereIn('id', $request->remove_attachments)
+                ->delete();
+        }
 
         $attachment_path =null;
         //save attachments
@@ -504,11 +530,21 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
    public function  save_comment(Request $request){
 
+    // Accept content from multiple keys and guard against null/empty
+    $raw = $request->input('comment');
+    if ($raw === null) {
+        $raw = $request->input('commentInput', $request->input('content', $request->input('message')));
+    }
+    $raw = is_string($raw) ? trim($raw) : '';
+    if ($raw === '') {
+        abort(422, 'Comment is required');
+    }
+
     $comment = new PublicationComment();
 
-    $comment->user_id = current_user()->id;
+    $comment->user_id = current_user() ? current_user()->id : ($request->user_id ?? null);
     $comment->publication_id = $request->publication_id;
-    $comment->comment = $request->comment;
+    $comment->comment = $raw;
     $comment->save();
 
     return $comment;
@@ -524,6 +560,10 @@ public function change_approval_status(Request $request){
 
      $publication->is_approved= 1;
      $publication->is_rejected= 0;
+     if(property_exists($publication, 'approved_by')){ $publication->approved_by = current_user()->id; }
+     if(property_exists($publication, 'rejected_by')){ $publication->rejected_by = null; }
+     if(property_exists($publication, 'rejected_reason')){ $publication->rejected_reason = null; }
+     if(property_exists($publication, 'rejected_at')){ $publication->rejected_at = null; }
 
      if(!$request->is_summary)
      $publication->is_active= 'Active';
@@ -536,6 +576,10 @@ public function change_approval_status(Request $request){
 
      $publication->is_rejected= 1;
      $publication->is_approved= 0;
+     if(property_exists($publication, 'rejected_by')){ $publication->rejected_by = current_user()->id; }
+     if(property_exists($publication, 'approved_by')){ $publication->approved_by = null; }
+     if(property_exists($publication, 'rejected_reason')){ $publication->rejected_reason = $request->input('rejected_reason'); }
+     if(property_exists($publication, 'rejected_at')){ $publication->rejected_at = now(); }
 
      if(!$request->is_summary)
      $publication->is_active= 'In-Active';
@@ -548,9 +592,13 @@ public function change_approval_status(Request $request){
 
     $publication->update();
     
+    $reason = $request->input('rejected_reason');
+    $body = ($action === 'Rejected' && $reason)
+        ? ($msg.' Reason: '.$reason)
+        : $msg;
     $alert = array(
         'title' => "Resource  $publication->title has been $action",
-        'body'=>$msg,
+        'body'=> $body,
         'email'=>@$publication->user->email
     );
     SendMailJob::dispatch( $alert);
@@ -766,19 +814,19 @@ public function getLightweight(Request $request, $return_array = false)
     return $return_array ? $results : $results;
 }
 
-public function bulkInactive($ids)
-{
-    Publication::whereIn('id', $ids)->update(['is_active' => 'In-Active']);
-}
+    public function bulkInactive($ids)
+    {
+        Publication::whereIn('id', $ids)->update(['is_active' => 'In-Active']);
+    }
 
-public function bulkDelete($ids)
-{
-    Publication::whereIn('id', $ids)->delete();
-}
+    public function bulkDelete($ids)
+    {
+        Publication::whereIn('id', $ids)->delete();
+    }
 
-public function bulkFeatured($ids)
-{
-    Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
-}
+    public function bulkFeatured($ids)
+    {
+        Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
+    }
 
 }

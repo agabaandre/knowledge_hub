@@ -1,17 +1,17 @@
    <!-- ======================= Top Searches List ======================== -->
-   <section class="middle gray">
+  <section class="middle gray" style="padding-top: 20px; padding-bottom: 20px;">
        <div class="container">
 
            <div class="row justify-content-center" data-aos="fade-in">
-               <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                   <div class="sec_title position-relative text-center mb-5">
+              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                  <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
                        <h2 class="ft-bold">Top Searches</span></h2>
                    </div>
                </div>
            </div>
 
            <!-- row -->
-           <div class="row align-items-center" id="top_searches">
+          <div class="row align-items-center" id="top_searches" style="margin-top: 0;">
 
                @php
                    $i = 0;
@@ -25,9 +25,9 @@
 
                    <!-- Single -->
 
-                   <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12" data-aos="zoom-in">
-                       <div class="jbr-wrap text-left border rounded">
-                           <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
+                  <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12" data-aos="zoom-in">
+                      <div class="jbr-wrap text-left border rounded">
+                          <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
                                <div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:100%;">
                                    @php
                                        $image_link = $row->cover ?? $row->image_url ?? null;
@@ -57,7 +57,7 @@
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
 
-                                   <div class="cats-box-caption" style="flex: 1;">
+                                  <div class="cats-box-caption" style="flex: 1;">
                                        <h4 class="fs-md mb-0 ft-medium text-truncate"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
                                                title="{!! $row->title !!}">{!! truncate($row->title, 40) !!}</a></h4>
@@ -95,20 +95,24 @@
                                                        onclick="showComments('{{ $row->id }}')"><i
                                                            class="fa fa-comments"></i> {{ count($row->comments) }}
                                                        Comments</span></span>
-                                               @auth()
-                                                   <div class="btn btn-outline-dark btn-sm mt-2 favbtn">
-                                                       @include ('common.favourites_btn')
-                                                   </div>
-                                               @endauth
+                                            <div class="d-flex align-items-center mt-2" style="gap: .5rem;">
+                                                @auth()
+                                                    <div class="btn btn-outline-dark btn-sm favbtn">
+                                                        @include ('common.favourites_btn')
+                                                    </div>
+                                                @else
+                                                    <div class="btn btn-outline-dark btn-sm favbtn">
+                                                        @include ('common.favourites_btn')
+                                                    </div>
+                                                @endauth
+                                                <a href="{{ url('records/resource') }}?id={{ $row->id }}"
+                                                   class="btn btn-sm theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse
+                                                   Resource</a>
+                                            </div>
                                            </span>
 
                                        </div>
-                                   </div>
-                                   <div class="text-center mlb-last">
-                                       <a href="{{ url('records/resource') }}?id={{ $row->id }}"
-                                           class="btn  btn-sm theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse
-                                           Resource</a>
-                                   </div>
+                                  </div>
 
                                </div>
                            </div>
