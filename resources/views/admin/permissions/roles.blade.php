@@ -1,6 +1,8 @@
 @extends('admin.layouts.main')
 @section('content')
 
+@include('common.table')
+
 @include('admin.permissions.partials.add_role_modal')
 
 <!-- PAGE-HEADER -->
@@ -33,9 +35,10 @@
                     </div>
 
                     @if(count($roles)>0)
-                        <table class="table datatable-basic table-striped">
+                        <table id="roles-table" class="table table-striped table-bordered align-middle">
                             <thead>
                                 <tr class="text-bold">
+                                    <th style="width:6%">#</th>
                                     <th>{{ __('auth.role') }}</th>
                                     <th class="text-center">
                                         ...
@@ -44,7 +47,7 @@
                             </thead>
                             <tbody>
 
-                            @foreach($roles as $role)
+                            @foreach($roles as $index => $role)
 
                             @php
                                $rolePerms = [];
@@ -54,6 +57,7 @@
                                 endforeach;
                             @endphp
                                 <tr>
+                                    <td>{{ $roles->firstItem() + $index }}</td>
                                     <td>{{ strtoupper($role->name) }}</td>
                                     <td class="text-center">
 

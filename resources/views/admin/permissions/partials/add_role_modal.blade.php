@@ -1,11 +1,11 @@
 <div id="addRole" class="modal fade" tabindex="-1">
-                    <div class="modal-dialog modal-sm mt-lg-5">
+                    <div class="modal-dialog modal-md mt-lg-5">
                         <div class="modal-content">
                            <div class="modal-header">
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.add') }} {{ __('auth.role') }} 
                                 </span>
-                                <button  type="button" aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button></div>
+                                <button  type="button" aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button></div>
                             <form action="{{ route('permissions.role') }}" method="POST">
                       
                             <div class="modal-body">
@@ -24,7 +24,7 @@
 
                             </div>
 
-                            <div class="modal-footer">
+                            <div class="modal-footer d-flex justify-content-between">
                                 <div class="col-md-12">
                                             <button type="reset" class="btn btn-secondary  reset">
                                                 <i class="icon-cross3 mr-2"></i>

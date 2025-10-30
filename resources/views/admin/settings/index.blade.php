@@ -435,6 +435,36 @@
                                 <small class="info-text">Turn this on to display icons in the header menu (Home, Browse, Health Emergencies, etc.).</small>
                 </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Homepage Sections</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_featured" name="show_featured" value="1" @if(!empty($settings->show_featured)) checked @endif>
+                                    <label class="form-check-label" for="show_featured">Show Featured content</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_events" name="show_events" value="1" @if(!empty($settings->show_events)) checked @endif>
+                                    <label class="form-check-label" for="show_events">Show Events slider</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_top_searches" name="show_top_searches" value="1" @if(!empty($settings->show_top_searches)) checked @endif>
+                                    <label class="form-check-label" for="show_top_searches">Show Top Searches</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_tags" name="show_tags" value="1" @if(!empty($settings->show_tags)) checked @endif>
+                                    <label class="form-check-label" for="show_tags">Show Tags strip</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_quotes" name="show_quotes" value="1" @if(!empty($settings->show_quotes)) checked @endif>
+                                    <label class="form-check-label" for="show_quotes">Show Quotes banner</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_quiz" name="show_quiz" value="1" @if(!empty($settings->show_quiz)) checked @endif>
+                                    <label class="form-check-label" for="show_quiz">Show Quiz button on search results</label>
+                                </div>
+                                <small class="info-text">Toggle which sections appear on the homepage.</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-section-title mt-4">

@@ -43,6 +43,9 @@ class HealthThemesController extends Controller
 
 
     public function destroy(Request $request){
+        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        }
         return $this->themesRepo->delete($request->id);
     }
 

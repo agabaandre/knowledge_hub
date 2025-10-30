@@ -9,6 +9,7 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use Illuminate\Http\Request;
+use App\Models\Event;
 
 class HomeController extends Controller
 {
@@ -43,6 +44,25 @@ class HomeController extends Controller
 		$data['themes']		  = $this->themesRepo->get($request);
 		$request['category']  = 10;
         $data['initiatives'] = $this->publicationsRepo->get($request);
+        // Active/Upcoming events for homepage slider
+        $data['events'] = Event::query()
+            ->when(true, function($q){
+                $q->where(function($w){
+                    $w->where('status', 'active')
+                      ->orWhereNull('status');
+                });
+            })
+            ->where(function($q){
+                $q->whereNull('enddate')
+                  ->orWhere('enddate', '>=', now())
+                  ->orWhere('startdate', '>=', now());
+            })
+            ->orderBy('startdate', 'asc')
+            ->take(12)
+            ->get();
+        if ($data['events']->isEmpty()) {
+            $data['events'] = Event::orderBy('startdate', 'desc')->take(8)->get();
+        }
         $data['is_home']      = true;
 
         return view('home.index',$data);

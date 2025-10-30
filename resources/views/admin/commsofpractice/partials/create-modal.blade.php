@@ -1,7 +1,11 @@
 <!--  Extra Large modal example -->
-<div class="modal" id="create-modal">
-  <div class="modal-dialog modal-md">
+<div class="modal fade" id="create-modal">
+  <div class="modal-dialog modal-lg modal-dialog-centered">
     <div class="modal-content">
+      <style>
+        /* Keep footer visible by constraining body height */
+        #create-modal .modal-body{ max-height:70vh; overflow-y:auto; }
+      </style>
       <div class="modal-header">
         <h5 class="modal-title" id="myExtraLargeModalLabel">Create Access Group </h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">

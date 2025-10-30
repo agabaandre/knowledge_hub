@@ -29,9 +29,10 @@
                         </div>
                         <div class="form-group col-md-3">
                         <label><i class="icon-user mr-2"></i>User</label>
-                            <select class="form-control select2" name="user">
+                            <select class="form-control select2" name="user" data-placeholder="Select user">
+                                <option></option>
                                 @foreach($users as $user)
-                                <option value="{{$user->id}}">{{$user->name}}</option>
+                                <option value="{{$user->id}}" {{ request('user')==$user->id?'selected':'' }}>{{$user->name}}</option>
                                 @endforeach
                             </select>
                         </div>
@@ -60,23 +61,27 @@
                 <div class="card-body services-body">
 
                     @if(count($trails)>0)
-                        <table class="table datatable-basic table-striped">
+                        @include('common.table')
+                        <table class="table table-striped table-bordered align-middle">
                             <thead>
                                 <tr class="text-bold">
+                                    <th style="width:6%">#</th>
                                     <th>Date</th>
                                     <th>Action</th>
                                     <th>User</th>
+                                    <th>Details</th>
                                 </tr>
                             </thead>
                             <tbody>
 
-                            @foreach($trails as $row)
+                            @foreach($trails as $idx => $row)
                                 <tr>
-                                     <td>{{ $row->created_at }}</td>
+                                     <td>{{ $trails->firstItem() + $idx }}</td>
+                                     <td>{{ time_ago($row->created_at) }}</td>
                                      <td>{{ $row->action }}</td>
                                      <td>{{ $row->user->name }}</td>
                                      <td>
-                                         <a data-toggle="modal" href="#trail{{ $row->id }}0">Detail</a>
+                                         <a data-toggle="modal" class="btn btn-sm btn-outline-secondary" href="#trail{{ $row->id }}0">View</a>
                                      </td>
                                 </tr>
                                     @include('admin.permissions.partials.audit_trail_modal')

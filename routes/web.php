@@ -61,6 +61,7 @@ use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\Admin\ContentRequestAdminController;
 use App\Http\Controllers\HealthTopicsController;
+use App\Http\Controllers\EventsController as PublicEventsController;
 
 
 /*
@@ -111,7 +112,8 @@ Route::group(["prefix" => "browse"], function () {
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
     Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
     Route::get("authors", [AuthorsController::class, 'index']);
-    Route::get("areas", [AreasController::class, "index"]);
+    // Redirect legacy areas route to countries page
+    Route::get("areas", function(){ return redirect('countries'); });
 
 });
 
@@ -125,6 +127,9 @@ Route::group(["prefix" => "records"], function () {
     Route::get("/shortened", [PublicationsController::class, 'shortened']);
     Route::post("/comment", [PublicationsController::class, 'comment']);
 });
+
+// Public Events
+Route::get('/events/{id}', [PublicEventsController::class, 'show'])->name('events.show');
 
 Route::group(["prefix" => "authors"], function () {
     Route::get("/", [AuthorsController::class, 'index']);
@@ -184,6 +189,7 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
 Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function () {
 
     Route::get("/", [AdminController::class, 'index'])->name('admin.index');
+    Route::get("/dashboard", [AdminController::class, 'dashboards'])->name('admin.dashboard');
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
     Route::get('/dashboards', [DashboardsController::class, 'details'])->name('admin.dashboard.details');
@@ -372,7 +378,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //commsofpractice
     Route::group(["prefix" => "commsofpractice"], function () {
 
-        Route::any("/", [CommsOfPracticeController::class, 'getAllWithMembership']);
+        Route::any("/", [CommsOfPracticeController::class, 'index']);
         Route::any("/moderate", [CommsOfPracticeController::class, 'moderate']);
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
@@ -465,6 +471,8 @@ Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], funct
     Route::post('/reset',  [PermissionController::class, 'resetUser'])->name('permissions.reset');
 
     Route::post('/delete',  [PermissionController::class, 'deleteUser'])->name('permissions.delete');
+    Route::post('/send-verification',  [PermissionController::class, 'sendVerification'])->name('permissions.sendverification');
+    Route::post('/verify-user',  [PermissionController::class, 'verifyUser'])->name('permissions.verifyuser');
     Route::any('/trail',  [PermissionController::class, 'trail'])->name('permissions.trail');
     Route::any('/profile',  [PermissionController::class, 'profile'])->name('permissions.profile');
 });

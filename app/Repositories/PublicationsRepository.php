@@ -232,6 +232,28 @@ public function get(Request $request, $return_array = false, $featured = false,$
             if($request->author)
             $pub->geographical_coverage_id  = Author::find($request->author)->user->country_id;
         }
+        else {
+            // Auto-publish when submitted by privileged roles (IDs), configurable via ENV
+            try {
+                $autoRoleIds = collect(explode(',', env('AUTO_PUBLISH_ROLE_IDS', '')))
+                    ->filter(function($v){ return trim($v) !== ''; })
+                    ->map(function($v){ return (int) trim($v); });
+
+                $hasAutoRole = false;
+                if ($user && method_exists($user, 'roles')) {
+                    $userRoleIds = $user->roles ? $user->roles->pluck('id') : collect();
+                    $hasAutoRole = $autoRoleIds->isNotEmpty() && $userRoleIds->intersect($autoRoleIds)->isNotEmpty();
+                }
+
+                if ($hasAutoRole || is_admin()) {
+                    $pub->is_active   = 'Active';
+                    $pub->is_approved = 1;
+                    $pub->is_rejected = 0;
+                }
+            } catch (\Throwable $e) {
+                // no-op; fallback to default behaviour
+            }
+        }
 
         //save cover
         if($request->hasFile('cover')):

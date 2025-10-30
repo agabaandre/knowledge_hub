@@ -171,8 +171,8 @@
     }
 
     .region-card-header:hover {
-        background: linear-gradient(135deg, var(--theme-color-primary, #119A48) 0%, #0d7a3a 100%);
-        color: white;
+        background: #ffffff;
+        color: #1e293b;
     }
 
     .region-card-header h5 {
@@ -214,7 +214,7 @@
     }
 
     .region-card-header:hover .chevron {
-        color: white;
+        color: #64748b;
     }
 
     .region-countries {

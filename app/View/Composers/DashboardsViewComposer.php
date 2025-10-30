@@ -11,9 +11,12 @@ class DashboardsViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
         
         $dashboards = cache()->remember('dashboards', $minutes, function () {
-            return Publication::whereHas('data_category', function ($query) {
-                $query->where('is_dashboard', 1);
-            })->get();
+            // Show only items that are admin-only access, and for the menu specifically
+            // constrain to the Dashboard category (publication_catgory_id = 6)
+            return Publication::where('is_admin_only_access', 1)
+                ->where('publication_catgory_id', 6)
+                ->orderBy('id','desc')
+                ->get();
         });
     
         $view->with('dashboards', $dashboards);

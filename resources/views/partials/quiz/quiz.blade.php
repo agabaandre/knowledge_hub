@@ -1,7 +1,7 @@
-@if(isset($questions) && count($questions) > 0)
+@if(isset($questions) && count($questions) > 0 && (settings()->show_quiz ?? false))
 <!-- Quiz Trigger Button -->
-<div class="quiz-trigger-wrapper text-center mb-4">
-    <button id="showQuizBtn" class="btn btn-lg btn-primary-theme btn-quiz-trigger">
+<div class="quiz-trigger-wrapper text-left mb-4">
+    <button id="showQuizBtn" class="btn btn-sm btn-primary-theme btn-quiz-trigger">
         <i class="fa fa-question-circle me-2"></i> Start Health Quiz
     </button>
 </div>
@@ -15,7 +15,7 @@
             </div>
             <button class="quiz-close-btn" onclick="toggleQuiz()" title="Close Quiz">
                 <i class="fa fa-times"></i>
-            </button>
+					</button>
         </div>
 
         <div class="questions-slide">
@@ -34,16 +34,16 @@
                     <div class="quiz-info">
                         <small><i class="fa fa-info-circle me-1"></i>{{ count($questions) }} {{ count($questions) === 1 ? 'question' : 'questions' }} available</small>
                     </div>
-                </div>
-            </div>
+				</div>
+			</div>
 
-            @php
-                $count = 0;
-            @endphp
-            @foreach($questions as $qn)
-                @php
-                    $count++;
-                @endphp
+		@php
+$count = 0;
+		@endphp
+		@foreach($questions as $qn)
+		@php
+	$count++;
+		@endphp
                 @if(count($qn->answers) > 0)
                     <div class="quiz-slide question-slide">
                         <div class="quiz-slide-content">
@@ -57,33 +57,33 @@
                             <h4 class="question-text">{{ $qn->question_text }}</h4>
                             
                             <div class="answers-container">
-                                @foreach($qn->answers as $ans)
+			    @foreach($qn->answers as $ans)
                                     <button type="button" 
                                             class="answer-option answer answer_{{$qn->id}}{{$ans->id}}" 
                                             onclick="markQuestion({{$qn->id}},{{$ans->id}})">
                                         <span class="answer-text">{{ $ans->answer_text }}</span>
                                     </button>
-                                @endforeach
-                            </div>
-                            
+				@endforeach
+			</div>
+			  
                             <div class="question-navigation">
-                                @if($count > 1)
+			   @if($count > 1)
                                     <button class="nav-btn prev-btn" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickPrev')">
                                         <i class="fa fa-arrow-left me-2"></i>Previous Question
-                                    </button>
-                                @endif
-                                
-                                @if($count < count($questions))
+					</button>
+				@endif
+
+				@if($count < count($questions))
                                     <button class="nav-btn next-btn" onclick="$('.question_stats').hide();$('.questions-slide').slick('slickNext')">
                                         Next Question<i class="fa fa-arrow-right ms-2"></i>
-                                    </button>
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-                @endif
-            @endforeach
-        </div>
+				</button>
+				@endif
+			</div>
+			</div>
+		   </div>
+		   @endif
+		   @endforeach
+		</div>
 
         <div class="question_stats"></div>
     </div>
@@ -366,9 +366,9 @@
     color: white;
     border: none;
     border-radius: 10px;
-    padding: 0.75rem 1.5rem;
+    padding: 0.5rem 1rem;
     font-weight: 600;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
     box-shadow: 0 2px 8px rgba(17, 154, 72, 0.3);
 }
@@ -409,7 +409,7 @@
 }
 </style>
 
-<script>
+		<script>
 function toggleQuiz() {
     const container = document.getElementById('quizContainer');
     const btn = document.getElementById('showQuizBtn');
@@ -455,34 +455,34 @@ function toggleQuiz() {
 </script>
 
 <script>
-    function getCookie(name) {
-        function escape(s) { return s.replace(/([.*+?\^$(){}|\[\]\/\\])/g, '\\$1'); }
-        var match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape(name) + '=([^;]*)'));
-        return match ? match[1] : null;
-    }
+			function getCookie(name) {
+				function escape(s) { return s.replace(/([.*+?\^$(){}|\[\]\/\\])/g, '\\$1'); }
+				var match = document.cookie.match(RegExp('(?:^|;\\s*)' + escape(name) + '=([^;]*)'));
+				return match ? match[1] : null;
+			}
 
     function saveStats(question_id, answer_id) {
-        let formData = new FormData();
+				let formData = new FormData();
         formData.append('_token', '<?php echo csrf_token(); ?>');
         formData.append('ans_id', answer_id);
         formData.append('qn_id', question_id);
 
-        $.ajax({
+				$.ajax({
             method: 'POST',
-            processData: false,
-            contentType: false,
+					processData: false,
+                    contentType: false,
             url: `{{ route('quiz.savestat') }}`,
             data: formData,
             success: function(data) {
                 console.log(data);
-            }
-        });
-    }
+					}
+				});
+			}
 
     function markQuestion(question_id, answer_id) {
-        $('.answer').removeClass('bg-success').removeClass('bg-danger').removeClass('text-white');
+			    $('.answer').removeClass('bg-success').removeClass('bg-danger').removeClass('text-white');
 
-        var qns = '<?php echo json_encode($questions->toArray()); ?>';
+				var qns = '<?php echo json_encode($questions->toArray()); ?>';
         const questions = JSON.parse(qns);
 
         const current_qn = questions.find((item) => item.id === parseInt(question_id));
@@ -490,9 +490,9 @@ function toggleQuiz() {
         let all_answers = current_qn.responses.length;
         let right_answers = current_qn.right_answers;
         let wrong_answers = current_qn.wrong_answers;
-        let increment_value = 0;
+				let increment_value = 0;
 
-        const already_answered = getCookie(`answered_${current_qn.id}`);
+				const already_answered = getCookie(`answered_${current_qn.id}`);
 
         if (!already_answered)
             increment_value = 1;
@@ -501,34 +501,34 @@ function toggleQuiz() {
         const correct_ans = current_qn.answers.find((item) => item.is_correct === 1);
 
         const elem_class = `.answer_${question_id}${answer_id}`;
-        const correct_class = `.answer_${question_id}${correct_ans.id}`;
+				const correct_class = `.answer_${question_id}${correct_ans.id}`;
 
         all_answers += increment_value;
 
         $(elem_class).html('<span class="answer-text">' + current_ans.answer_text + '</span>');
         $(correct_class).html('<span class="answer-text">' + correct_ans.answer_text + '</span>');
 
-        const correct_icon = '<i class="fa fa-check text-white mr-2"></i> ';
+				const correct_icon = '<i class="fa fa-check text-white mr-2"></i> ';
         const wrong_icon = '<i class="fa fa-times text-white mr-2"></i> ';
-
+				
         if (current_ans.id === correct_ans.id) {
-            $(elem_class).addClass('bg-success text-white');
+					$(elem_class).addClass('bg-success text-white');
             $(elem_class).html(correct_icon + '<span class="answer-text">' + correct_ans.answer_text + '</span>');
             $(elem_class).effect("bounce", { times: 3 }, 300);
 
             right_answers += increment_value;
         } else {
-            $(elem_class).addClass('bg-danger text-white');
+					$(elem_class).addClass('bg-danger text-white');
 
             $(elem_class).html(wrong_icon + '<span class="answer-text">' + current_ans.answer_text + '</span>');
-
+					
             right_answers += increment_value;
-
+					
             $(elem_class).effect("shake", { times: 2 }, 300);
-
+					
             setTimeout(() => {
                 $(correct_class).html(correct_icon + '<span class="answer-text">' + correct_ans.answer_text + '</span>');
-                $(correct_class).addClass('bg-success text-white');
+					    $(correct_class).addClass('bg-success text-white');
                 $(correct_class).effect("bounce", { times: 5 }, 800);
             }, 1000);
         }
@@ -571,5 +571,5 @@ function toggleQuiz() {
             toggleQuiz();
         });
     });
-</script>
+		</script>
 @endif

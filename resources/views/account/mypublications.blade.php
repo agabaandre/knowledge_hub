@@ -4,6 +4,7 @@
 
 
  @include('common.table')
+ <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 
 @endsection
 
@@ -32,7 +33,7 @@
 					<button class="btn btn-dark" type="submit"><i class="fa fa-search"></i> Search</button>
 				</div>
 			</form>
-            <table class="table table-striped table-bordered align-middle">
+            <table id="my-publications" class="table table-striped table-bordered align-middle">
 				<thead>
 					<tr>
 						<th>#</th>
@@ -42,38 +43,9 @@
                         <th width="240">Actions</th>
 					</tr>
 				</thead>
-				@foreach ($publications as $idx => $row) 
-					<tr>
-						<td width="5%">{{ $publications->firstItem() + $idx }}</td>
-						<td>
-							<a href="{{ $row->publication}}" target="_blank">{!! truncate($row->title, 50) !!} </a>
-						</td>
-                        <td>{!!  truncate(html_to_text($row->description), 80) !!}
-                            @if(($row->is_rejected ?? 0) == 1 && !empty($row->rejected_reason))
-                                <div class="mt-2 p-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;">
-                                    <small class="text-danger"><strong>Rejection reason:</strong> {{ $row->rejected_reason }}</small>
-                                </div>
-                            @endif
-                        </td>
-                        <td>
-                            @php $state = get_publication_state($row->is_approved,$row->is_rejected); @endphp
-                            <span class="badge {{ $row->is_approved? 'badge-success':'badge-secondary' }}">{{ $state }}</span>
-                        </td>
-                        <td>
-                            <div class="btn-group btn-group-sm" role="group" aria-label="Actions">
-                                <button type="button" class="btn btn-outline-secondary preview-attachment" data-file-url="{{ url('records/resource') }}?id={{ $row->id }}" data-file-ext="html" data-file-office="0"><i class="fa fa-eye"></i> Preview</button>
-                                <a href="{{ route('account.publications.edit') }}?ref={{ $row->id}}" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>
-                                <a href="javascript:void(0);" onclick="openDeleteModal({{$row->id}})" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>
-                            </div>
-                        </td>
-					</tr>
-				@endforeach
-				@if(count($publications) == 0)
-
-				@endif
+                <tbody></tbody>
             </table>
 
-            {{ $publications->appends(request()->all())->links() }}
 
             @include('account.partials.delete_pub')
 
@@ -86,6 +58,33 @@
 
 @section('scripts')
 <script>
+// Ensure DataTables library is loaded for non-admin layout
+if (typeof $.fn.DataTable === 'undefined') {
+  document.write('\x3Cscript src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"\x3E\x3C/script\x3E');
+}
+$(function(){
+  $('#my-publications').DataTable({
+    processing: true,
+    serverSide: true,
+    searching: true,
+    lengthChange: true,
+    ajax: {
+      url: '{{ route('account.publications') }}',
+      data: function(d){ d.datatable = 1; }
+    },
+    order: [[0,'desc']],
+    columns: [
+      { data: 0, orderable: true, searchable: false, width: '5%' },
+      { data: 1, orderable: true },
+      { data: 2, orderable: false },
+      { data: 3, orderable: true, searchable: false },
+      { data: 4, orderable: false, searchable: false, width: '240px' }
+    ],
+    drawCallback: function(){
+      // enable bootstrap tooltips/popovers if needed later
+    }
+  });
+});
 // Simple page preview using modal to show resource page in iframe
 if (!document.getElementById('previewModal')) {
   const modal = `

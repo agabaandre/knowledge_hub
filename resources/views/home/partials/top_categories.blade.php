@@ -51,13 +51,14 @@
     }
 </style>
 
-<section class="py-5 bg-light" id="categorization">
+<section class="py-5 bg-light" id="categorization" style="margin-bottom: 2px;">
     <div class="container">
         <!-- Section Title -->
-        <div class="row mb-4">
-            <div class="col text-center">
-                <h3 class="fw-bold text-primary">Explore Key Sections</h3>
-                <p class="text-muted small">Navigate important resources like health topics, contributors, coverage, and forums.</p>
+        <div class="row justify-content-center">
+            <div class="col-lg-8 col-md-10">
+                <div class="sec_title text-center">
+                    <h2>Explore Key Sections</h2>
+                </div>
             </div>
         </div>
 

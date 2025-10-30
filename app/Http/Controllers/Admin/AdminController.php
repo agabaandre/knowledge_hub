@@ -61,18 +61,45 @@ class AdminController extends Controller
         $data['visits_count'] = round($total_visits / $days_diff);
 
         $data['admin_units_count'] = AdministrativeUnit::count();
-        $data['users_count'] = User::whereDoesntHave('roles', function($query) {
-            $query->where('name', 'ADMIN');
-        })->count();
+        // Show total registered users for clarity on the dashboard
+        $data['users_count'] = User::count();
 
     
-
+        // Admin-only dashboards list: publications whose data category is marked as dashboard
+        try{
+            $data['dashboards'] = \App\Models\Publication::where(function($q){
+                $q->whereHas('data_category', function($dq){
+                    $dq->where('is_dashboard', 1);
+                })
+                ->orWhere('is_admin_only_access', 1);
+            })
+            ->orderBy('id','desc')
+            ->get();
+        }catch(\Throwable $e){ $data['dashboards'] = collect(); }
 
         return view('admin.dashboard.index',$data);
     }
 
     public function rccdashboards(Request $request){
         return view('admin.dashboard.rcc');
+    }
+
+    public function dashboards(Request $request){
+        // List admin-only content (all categories), with search and pagination
+        try{
+            $query = \App\Models\Publication::with(['author','data_category'])
+                ->where('is_admin_only_access', 1);
+            if ($term = trim((string) $request->input('term', ''))) {
+                $query->where(function($q) use ($term){
+                    $q->where('title', 'like', '%'.$term.'%')
+                      ->orWhere('description', 'like', '%'.$term.'%');
+                });
+            }
+            $dashboards = $query->orderBy('id','desc')
+                ->paginate($request->input('rows', 20));
+        }catch(\Throwable $e){ $dashboards = collect(); }
+
+        return view('admin.dashboard.list', ['dashboards' => $dashboards]);
     }
 
 }

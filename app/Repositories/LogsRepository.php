@@ -11,10 +11,19 @@ class LogsRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:24;
-        $areas      = AccessLog::orderBy('id','desc');
+        $areas      = AccessLog::with('user')->orderBy('id','desc');
 
-        if($request->term)
-        $areas->where('country','like','%'.$request->term.'%');
+        if($request->term){
+            $t = trim($request->term);
+            $areas->where(function($q) use ($t){
+                $q->where('country','like','%'.$t.'%')
+                  ->orWhere('city','like','%'.$t.'%')
+                  ->orWhere('ip_address','like','%'.$t.'%');
+            });
+        }
+        if($request->filled('user_id')){
+            $areas->where('user_id', $request->user_id);
+        }
 
         $result = $areas->paginate($rows_count);
         return $result;

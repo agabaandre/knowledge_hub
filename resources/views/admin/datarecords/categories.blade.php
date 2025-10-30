@@ -44,7 +44,9 @@
 								<a class="btn btn-primary btn-sm" 
 								>Edit</a>
 								<!-- Delete Modal Action -->
-								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> Delete</a>
+                                @can('delete_meta_data')
+                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> Delete</a>
+                                @endcan
 							</td>
 						</tr>
 					@endforeach

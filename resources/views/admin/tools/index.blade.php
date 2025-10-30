@@ -44,7 +44,9 @@
                         </td>
                         <td>
                             <button class="btn btn-outline-dark btn-sm mr-1" onclick="openEditTool({{ $tool->id }})"><i class="fa fa-edit"></i></button>
+                            @can('delete_meta_data')
                             <button class="btn btn-outline-danger btn-sm" onclick="confirmDelete({{ $tool->id }})"><i class="fa fa-trash"></i></button>
+                            @endcan
                         </td>
                     </tr>
                     @endforeach

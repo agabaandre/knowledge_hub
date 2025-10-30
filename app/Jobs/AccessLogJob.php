@@ -36,55 +36,106 @@ class AccessLogJob implements ShouldQueue
      */
     public function handle()
     {
-       // $user_ip_address_info = @json_decode(file_get_contents("http://www.geoplugin.net/json.gp?ip=".$this->ip_address)); // CALLING THE API
         try{
-        $apiUrl = "http://ipinfo.io/{$this->ip_address}/json"; // Construct the query URL
+            // Skip logging for private/local IPs or known bots
+            if ($this->isPrivateIp($this->ip_address) || $this->isBot()) {
+                return;
+            }
 
-        // Use file_get_contents to fetch the data
-        $response = file_get_contents($apiUrl);
-        $geoData  = json_decode($response); 
+            $geoData = null;
+            $apiUrl = "http://ipinfo.io/{$this->ip_address}/json";
+            $context = stream_context_create([
+                'http' => [
+                    'timeout' => 2.5,
+                    'ignore_errors' => true,
+                ]
+            ]);
+            try {
+                $response = @file_get_contents($apiUrl, false, $context);
+                if ($response) {
+                    $geoData  = json_decode($response);
+                }
+            } catch (\Throwable $e) {
+                // Non-fatal, fall back to minimal data
+                Log::debug('Geo lookup failed', ['ip' => $this->ip_address, 'error' => $e->getMessage()]);
+            }
 
-        Log::info(json_encode($response));
+            $country = strtoupper(@$geoData->country ?: '');
+            $city    = @$geoData->city ?: '';
+            $loc     = @$geoData->loc ?: '';
+            $lat     = '';
+            $long    = '';
+            if (!empty($loc) && strpos($loc, ',') !== false) {
+                [$lat, $long] = explode(',', $loc, 2);
+            }
 
-        if(@$geoData->country){
+            // Infer resource info from request
+            $publicationId = null;
+            try {
+                if (is_array($this->request)) {
+                    $publicationId = $this->request['id'] ?? null;
+                } elseif ($this->request instanceof \Illuminate\Http\Request) {
+                    $publicationId = $this->request->input('id');
+                    if (!$publicationId) {
+                        $path = $this->request->path();
+                        if (stripos($path, 'records/resource') !== false) {
+                            $publicationId = $this->request->query('id');
+                        }
+                    }
+                }
+            } catch (\Throwable $e) {
+                // ignore
+            }
 
-        $visitorInfo = [
-        'Country Code'=>$geoData->country
-        ,'CountryName'=>$geoData->country //explode('/',$geoData->timezone)[0]
-        ,'City'=>$geoData->city
-        ,'Region'=>$geoData->region 
-        ,'Latitude'=>explode(',',$geoData->loc)[0] 
-        ,'Longitude'=>explode(',',$geoData->loc)[1]
-        ,'Time_zone'=>$geoData->timezone  
-        //,'ContinentCode'=>$user_ip_address_info->geoplugin_continentCode 
-       // ,'ContinentName'=>$user_ip_address_info->geoplugin_continentName 
-       // ,'CurrencyCode'=>$user_ip_address_info->geoplugin_currencyCode
-        ];
+            $locationLog = new AccessLog();
+            $locationLog->ip_address = $this->ip_address;
+            $locationLog->country    = $country ?: 'UNKNOWN';
+            $locationLog->city       = $city ?: null;
+            $locationLog->lat        = $lat ?: null;
+            $locationLog->long       = $long ?: null;
+            $locationLog->publication_id = $publicationId;
+            $locationLog->user_id    = optional(current_user())->id;
 
+            // Best-effort save without crashing
+            try { $locationLog->save(); } catch (\Throwable $e) {
+                Log::debug('AccessLog save failed', ['error' => $e->getMessage()]);
+            }
 
-        if($visitorInfo && @$geoData->country):
-        
-        $data = (Object) $visitorInfo;
-
-        $locationLog = new AccessLog();
-        $locationLog->ip_address = $this->ip_address;
-        $locationLog->country = $data->CountryName;
-        $locationLog->city    = $data->City;
-        $locationLog->lat     = $data->Latitude;
-        $locationLog->long    = $data->Longitude;
-        $locationLog->publication_id = ($this->request)?$this->request['id']:null;
-        $locationLog->user_id = (current_user())?current_user()->id:null;
-        $locationLog->save();
-
-        endif;
+        } catch(\Throwable $exception){
+            Log::debug('AccessLogJob exception', ['error' => $exception->getMessage()]);
+        }
     }
 
+    private function isPrivateIp($ip): bool
+    {
+        if (!filter_var($ip, FILTER_VALIDATE_IP)) return true;
+        $long = ip2long($ip);
+        // 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8
+        $private = (
+            ($long >= ip2long('10.0.0.0')    && $long <= ip2long('10.255.255.255')) ||
+            ($long >= ip2long('172.16.0.0')  && $long <= ip2long('172.31.255.255')) ||
+            ($long >= ip2long('192.168.0.0') && $long <= ip2long('192.168.255.255')) ||
+            ($long >= ip2long('127.0.0.0')   && $long <= ip2long('127.255.255.255'))
+        );
+        return $private;
     }
-   catch(\Exception $exception){
-    Log::info($exception->getMessage());
-   }
 
- }
+    private function isBot(): bool
+    {
+        try {
+            $ua = '';
+            if ($this->request instanceof \Illuminate\Http\Request) {
+                $ua = (string) $this->request->header('User-Agent');
+            } elseif (is_array($this->request)) {
+                $ua = (string) ($this->request['HTTP_USER_AGENT'] ?? '');
+            }
+            $ua = strtolower($ua);
+            if ($ua === '') return false;
+            $bots = ['bot', 'spider', 'crawl', 'slurp', 'bingpreview', 'facebookexternalhit', 'curl'];
+            foreach ($bots as $b) { if (strpos($ua, $b) !== false) return true; }
+            return false;
+        } catch (\Throwable $e) { return false; }
+    }
 
 }
 

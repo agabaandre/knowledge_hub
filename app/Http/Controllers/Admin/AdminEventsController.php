@@ -38,22 +38,29 @@ class AdminEventsController extends Controller
             'status' => 'required|string|max:50',
             'is_online' => 'required|boolean',
             'contact_person' => 'required|string|max:255',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
 
         $this->eventsRepo->create($request->all());
 
-        return redirect()->route('events.index')->with('success', 'Event created successfully.');
+        return redirect()->route('admin.events.index')->with('success', 'Event created successfully.');
     }
 
     public function show($id)
     {
         $event = $this->eventsRepo->find($id);
+        if (request()->ajax()) {
+            return response()->json($event);
+        }
         return view('admin.events.show', compact('event'));
     }
 
     public function edit($id)
     {
         $event = $this->eventsRepo->find($id);
+        // Load tags relationship
+        $event->load('tags');
         return view('admin.events.edit', compact('event'));
     }
 
@@ -71,11 +78,13 @@ class AdminEventsController extends Controller
             'status' => 'required|string|max:50',
             'is_online' => 'required|boolean',
             'contact_person' => 'required|string|max:255',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
         ]);
 
         $this->eventsRepo->update($event, $request->all());
 
-        return redirect()->route('events.index')->with('success', 'Event updated successfully.');
+        return redirect()->route('admin.events.index')->with('success', 'Event updated successfully.');
     }
 
     public function destroy($id)

@@ -33,13 +33,27 @@
                 </div>
                 @include('partials.search.advanced_search')
 
+                {{-- Tags directly after advanced filters (if enabled) --}}
+                @if(settings()->show_tags ?? false)
+                    <div class="row mt-2 px-2">
+                        @include('home.partials.tags')
+                    </div>
+                @endif
+
             </form>
 
         </div>
-        <!-- Stats -->
+        <!-- Theme Tabs -->
         <div class="row mt-3 px-2 justify-content-center">
             @include('home.partials.theme_tabs')
         </div>
+        @if(settings()->show_quotes ?? false)
+            <div class="row mt-2 px-2">
+                @include('home.partials.quotes')
+            </div>
+        @endif
+
+        
 
     </div>
 </div>

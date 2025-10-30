@@ -319,7 +319,6 @@
                         @enderror
                     </div>
 
-                    @if(config('recaptcha.sitekey') && !empty(config('recaptcha.sitekey')))
                     <div class="form-group">
                         <div class="py-2">
                             {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
@@ -330,7 +329,6 @@
                             @enderror
                         </div>
                     </div>
-                    @endif
 
                     <div class="form-group mb-3">
                         <div class="d-flex align-items-center justify-content-between">

@@ -1,5 +1,37 @@
 @extends('admin.layouts.main')
+@section('styles')
+<style>
+/* Match Bootstrap-like pagination used on Authors page */
+.dataTables_wrapper .dataTables_paginate { padding-top: 8px; }
+.dataTables_wrapper .dataTables_paginate .paginate_button {
+    border: 1px solid #e2e8f0 !important;
+    background: #fff !important;
+    color: #1f2937 !important;
+    padding: .25rem .5rem !important;
+    margin: 0 .125rem !important;
+    border-radius: .25rem !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button:hover {
+    background: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.current,
+.dataTables_wrapper .dataTables_paginate .paginate_button.current:hover {
+    background: #1f2937 !important;
+    color: #fff !important;
+    border-color: #1f2937 !important;
+}
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled,
+.dataTables_wrapper .dataTables_paginate .paginate_button.disabled:hover {
+    color: #9ca3af !important;
+    background: #fff !important;
+}
+</style>
+@endsection
+
 @section('content')
+
+@include('common.table')
 
   <?php 
   
@@ -33,7 +65,7 @@
                 </div>
             </div>
 
-                        <form action="{{ route('permissions.filerusers') }}" method="GET">
+                        <form id="user-filters" action="{{ route('permissions.filerusers') }}" method="GET">
                             @csrf
                             <div class="row bg-white pb-3">
                                 
@@ -43,9 +75,24 @@
                                     <input type="text" name="term"  value="{{@$search->term}}" class="form-control" placeholder="Search by Name,Email,Phone Number etc">
                                 </div>
 
+                                <div class="form-group col-md-3">
+                                    <label>Africa CDC Staff</label>
+                                    <select name="is_staff" id="filter_staff" class="form-control">
+                                        <option value="">All</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                </div>
+                                <div class="form-group col-md-3">
+                                    <label>Verified</label>
+                                    <select name="verified" id="filter_verified" class="form-control">
+                                        <option value="">All</option>
+                                        <option value="1">Yes</option>
+                                        <option value="0">No</option>
+                                    </select>
+                                </div>
                                 <div class="col-md-3 mt-4">
-                                    <button type="submit" class="btn btn-dark"><i class="icon-filter4"></i> 
-                                    {{ __('general.search') }} {{ __('general.users') }}</button>
+                                    <button type="submit" class="btn btn-dark"><i class="icon-filter4"></i> {{ __('general.search') }} {{ __('general.users') }}</button>
                                 </div>
                             </div>
                         </form>
@@ -53,52 +100,23 @@
                 <hr>
 
                     @if(count($users)>0)
-                        <table class="table table-striped">
+                        <table class="table table-striped table-bordered align-middle" id="users-table">
                             <thead>
                                 <tr class="text-bold">
-                                    <th>{{ __('auth.user') }}</th>
-                                    <th>{{ __('general.email') }}</th>
-                                    <th>{{ __('general.phone') }}</th>
-                                    <th>{{ __('general.status') }}</th>
-                                    <th>{{ __('Country') }}</th>
+                                    <th style="width:5%">#</th>
+                                    <th style="width:10%">{{ __('auth.user') }}</th>
+                                    <th>Contact</th>
+                                    <th>Verified</th>
+                                    <th>Status</th>
+                                    <th>Type</th>
+                                    <th>Last Login</th>
                                     <th>{{ __('auth.role') }}</th>
-                                    <th></th>
+                                    <th style="width:22%">Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-
-                            @foreach($users as $user)
-
-                                @php
-                                  $userRole = get_role($user->id);
-
-                                  $statuses = array(
-                                  "0"=>"InActive",
-                                  "2"=>"Restricted",
-                                  "3"=>"Reset",
-                                  "1"=>"Active");
-
-                                @endphp
-
-                                <tr>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->phone_number ?? '' }}</td>
-                                    <td><b class="badge badge-dark">{{ $statuses[$user->status] }}</b></td>
-                                    <td>{{ $user->country_name }}</td>
-                                    <td>{{ ($userRole)?(strtoupper((@$userRole->name)?$userRole->name:'N/A')):'' }}</td>
-                                    <td class="text-center">
-                                             @include('admin.permissions.partials.user_row_dropdown')
-                                             @include('admin.permissions.partials.user_edit_form_modal')
-                                             @include('admin.permissions.partials.reset_modal')
-                                             @include('admin.permissions.partials.delete_user_modal')
-                                    </td>
-                                </tr>
-
-                                @endforeach
-                            </tbody>
+                            <tbody></tbody>
                         </table> 
-                         {{ $users->links() }}
+                        
                         @else
                             <div class="text-center"><br><br>No data found</div>
                         @endif
@@ -107,5 +125,95 @@
   
     <!-- /highlighted tabs -->
 
+    <!-- Hidden forms to avoid CSRF header mismatches -->
+    <form id="sendVerifyForm" method="POST" action="{{ route('permissions.sendverification') }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="id" id="send_verify_user_id">
+    </form>
+    <form id="markVerifyForm" method="POST" action="{{ route('permissions.verifyuser') }}" style="display:none;">
+        @csrf
+        <input type="hidden" name="id" id="mark_verify_user_id">
+    </form>
+
 @endsection
     <!-- /List
+
+@section('scripts')
+<script>
+    $(function(){
+            var table = $('#users-table').DataTable({
+            processing: true,
+            serverSide: false,
+            searching: true,
+            lengthChange: true,
+            pagingType: 'simple_numbers',
+            ajax: {
+                url: '{{ route('permissions.users') }}',
+                data: function(d){
+                    d.term = $('input[name=term]').val();
+                    d.is_staff = $('#filter_staff').val();
+                    d.verified = $('#filter_verified').val();
+                },
+                dataSrc: 'data'
+            },
+            order: [],
+            deferRender: true,
+            autoWidth: false,
+            responsive: true,
+            columns: [
+                { data: 0, orderable: true, width: '5%' },
+                { data: 1, orderable: true, width: '12%' },
+                { data: 2, orderable: false },
+                { data: 3, orderable: false },
+                { data: 4, orderable: false },
+                { data: 5, orderable: false },
+                { data: 6, orderable: true },
+                { data: 7, orderable: true },
+                { data: 8, orderable: false }
+            ],
+            columnDefs: [
+                { targets: [8], orderable:false, searchable:false },
+                { targets: [3,4,5], className: 'text-center' }
+            ]
+        });
+
+            // Global modals handlers
+            $(document).on('click', '.btn-edit-user', function(){
+                var id = $(this).data('id');
+                var name = $(this).data('name');
+                var email = $(this).data('email');
+                var phone = $(this).data('phone');
+                var verified = $(this).data('verified');
+                var status = $(this).data('status');
+                $('#edit_user_id').val(id);
+                $('#edit_name').val(name);
+                $('#edit_email').val(email);
+                $('#edit_phone').val(phone);
+                $('#edit_verified').prop('checked', !!verified);
+                $('#edit_status').val(status);
+                $('#editUserModal').modal('show');
+            });
+            $('#user-filters').on('submit', function(e){ e.preventDefault(); table.ajax.reload(); });
+            $(document).on('click', '.btn-reset-user', function(){
+                $('#reset_user_id').val($(this).data('id'));
+                $('#resetUserModal').modal('show');
+            });
+            $(document).on('click', '.btn-delete-user', function(){
+                $('#delete_user_id').val($(this).data('id'));
+                $('#deleteUserModal').modal('show');
+            });
+            $(document).on('click', '.btn-send-verify', function(){
+                var id = $(this).data('id');
+                $('#send_verify_user_id').val(id);
+                document.getElementById('sendVerifyForm').submit();
+            });
+
+            $(document).on('click', '.btn-mark-verify', function(){
+                var id = $(this).data('id');
+                $('#mark_verify_user_id').val(id);
+                document.getElementById('markVerifyForm').submit();
+            });
+    });
+</script>
+@include('admin.permissions.partials.global_user_modals')
+@endsection

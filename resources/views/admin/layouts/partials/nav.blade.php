@@ -3,9 +3,8 @@
         <!--Nav-->
         <nav class="horizontalMenu clearfix">
             <ul class="horizontalMenu-list">
-                @can('view_dashboard')
-                    <li aria-haspopup="true"><a href="#" class="sub-icon">
-                            <i class=""></i> Dashboards <i class="fe fe-chevron-down horizontal-icon"></i>
+                    <li aria-haspopup="true"><a href="{{ url('admin/dashboard') }}" class="sub-icon">
+                            <i class=""></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i>
                         </a>
                         <ul class="sub-menu">
                             @foreach ($dashboards as $dashboard)
@@ -16,7 +15,6 @@
                             @endforeach
                         </ul>
                     </li>
-                @endcan
 
                 @can('view_rcc_dashboard')
                     @if (states_enabled())
@@ -176,6 +174,7 @@
                     @can('view_privacy_policy')
                         <li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
                     @endcan
+                        <li aria-haspopup="true"><a href="{{ url('admin/events') }}">Events</a></li>
                 </ul>
             </li>
 

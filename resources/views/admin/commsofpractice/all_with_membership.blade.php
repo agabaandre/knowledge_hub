@@ -165,7 +165,12 @@ $(function(){
                 $('#addCommunityModalLabel').text('Edit Community of Practice');
                 $('#community_id').val($(this).data('id')); // Set the ID for editing
                 $('#community_name').val($(this).data('name'));
-                $('#description').val($(this).data('description'));
+                var desc = $(this).data('description') || '';
+                if($('#description').data('summernote')){
+                    $('#description').summernote('code', desc);
+                }else{
+                    $('#description').val(desc);
+                }
                 $('#is_active').val($(this).data('active'));
                 $('#addCommunityModal').modal('show');
             });

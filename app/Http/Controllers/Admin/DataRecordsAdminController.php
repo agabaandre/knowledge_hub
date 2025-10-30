@@ -60,7 +60,9 @@ class DataRecordsAdminController extends Controller
 
 
     public function destroy(Request $request){
-
+        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        }
         return $this->dataRecordsRepo->delete($request->id);
     }
 
@@ -81,6 +83,9 @@ class DataRecordsAdminController extends Controller
     }
 
     public function delete_category(Request $request){
+        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        }
         return $this->dataRecordsRepo->delete_category($request->id);
     }
 

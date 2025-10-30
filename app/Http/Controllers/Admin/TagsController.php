@@ -60,6 +60,9 @@ class TagsController extends Controller
 
 
     public function destroy(Request $request){
+        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        }
         return $this->tagsRepo->delete($request->id);
     }
 

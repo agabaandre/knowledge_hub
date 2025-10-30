@@ -79,8 +79,10 @@ $i = 1;
                                         data-id="{{ $row->id }}" data-description="{!! $row->description !!}" data-icon="{!! $row->icon !!}">Edit
                                         Theme</a>
 
+                                    @can('delete_meta_data')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
                                         onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach

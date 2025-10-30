@@ -18,7 +18,7 @@
                                         {{ __('auth.role').' '.__('general.name')}}
                                     </label>
                                     <input type="text" name="role_name" value="{{ $role->name }}" class="form-control" placeholder="" required>
-                                    <input type="hidden" name="row bg-whiteid" class="row bg-whiteid" value="{{ $role->id }}">
+                                    <input type="hidden" name="id" value="{{ $role->id }}">
                                 </div>
 
                             </div>

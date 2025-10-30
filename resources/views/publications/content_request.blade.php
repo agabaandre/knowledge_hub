@@ -265,7 +265,7 @@
                     <div class="content-request-header">
                         <h2><i class="fa fa-file-alt me-2"></i>Content Request Form</h2>
                         <p>Help us understand what content you need</p>
-                    </div>
+            </div>
 
                     <div class="content-request-body">
                         @if(Session::has('message') || Session::has('alert'))
@@ -295,7 +295,7 @@
                         </div>
 
                         <form method="POST" action="{{ route('content-request') }}" id="content_request_form" enctype="multipart/form-data" data-parsley-validate="">
-                            @csrf
+                        @csrf
 
                             <div class="form-section">
                                 <div class="form-section-title">
@@ -355,19 +355,19 @@
                                                 Which country are you from?
                                                 <span class="required">*</span>
                                             </label>
-                                            @include('partials.countries.dropdown', [
-                                                'field' => 'country_id',
-                                                'required' => 'required',
+                                    @include('partials.countries.dropdown', [
+                                        'field' => 'country_id',
+                                        'required' => 'required',
                                                 'class' => 'select2 form-control-custom @error("country_id") is-invalid @enderror',
                                                 'selected' => old('country_id') ?? (current_user() ? current_user()->country_id : ''),
-                                            ])
+                                    ])
                                             @error('country_id')
                                                 <span class="invalid-feedback" role="alert">
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
-                                        </div>
-                                    </div>
+                                </div>
+                            </div>
 
                                     <div class="form-col">
                                         <div class="form-group">
@@ -377,7 +377,7 @@
                                             </label>
                                             <input type="email" 
                                                    id="email" 
-                                                   name="email" 
+                                        name="email"
                                                    class="form-control-custom @error('email') is-invalid @enderror"
                                                    placeholder="your.email@example.com" 
                                                    value="{{ old('email') ?? (current_user() ? current_user()->email : '') }}"
@@ -387,14 +387,21 @@
                                                     <strong>{{ $message }}</strong>
                                                 </span>
                                             @enderror
-                                        </div>
-                                    </div>
+                                </div>
+                            </div>
                                 </div>
                             </div>
                             @else
                                 <input type="hidden" name="country_id" value="{{ current_user()->country_id }}">
                                 <input type="hidden" name="email" value="{{ current_user()->email }}">
                             @endif
+
+                            <div class="form-group mt-3">
+                                {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+                                @error('g-recaptcha-response')
+                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                @enderror
+                            </div>
 
                             <div class="submit-section">
                                 <a href="{{ url('/') }}" class="btn-cancel">
@@ -403,8 +410,8 @@
                                 <button type="submit" class="btn-submit">
                                     <i class="fa fa-paper-plane me-2"></i>Submit Request
                                 </button>
-                            </div>
-                        </form>
+                        </div>
+                    </form>
                     </div>
                 </div>
             </div>

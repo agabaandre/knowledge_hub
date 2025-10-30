@@ -44,6 +44,14 @@ class SettingsRepository{
             $settings->menu_icons_enabled = false;
         }
 
+        // Homepage content toggles (default false when unchecked)
+        $settings->show_featured = (bool)$request->boolean('show_featured', false);
+        $settings->show_events = (bool)$request->boolean('show_events', false);
+        $settings->show_top_searches = (bool)$request->boolean('show_top_searches', false);
+        $settings->show_tags = (bool)$request->boolean('show_tags', false);
+        $settings->show_quotes = (bool)$request->boolean('show_quotes', false);
+        $settings->show_quiz = (bool)$request->boolean('show_quiz', false);
+
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):
 

@@ -9,7 +9,7 @@ $totalTopics = $groupedTags->flatten()->count();
 @section('content')
 <div class="health-topics-wrapper">
     <div class="container" style="max-width: 1200px;">
-        <!-- Page Header -->
+    <!-- Page Header -->
         <div class="page-header">
             <div class="header-content">
                 <div class="header-title-section">
@@ -36,8 +36,8 @@ $totalTopics = $groupedTags->flatten()->count();
                 <button class="search-clear" id="clear-search" style="display: none;">
                     <i class="fa fa-times"></i>
                 </button>
-            </div>
         </div>
+    </div>
 
         <!-- Alphabetical Filter -->
         @if($groupedTags->count() > 0)
@@ -49,9 +49,9 @@ $totalTopics = $groupedTags->flatten()->count();
                         {{ $letter }}
                     </a>
                 @endforeach
-            </div>
-        </div>
-        @endif
+                            </div>
+                                </div>
+                            @endif
 
         <!-- Health Topics Content -->
         <div class="topics-content">
@@ -84,13 +84,13 @@ $totalTopics = $groupedTags->flatten()->count();
                                         <div class="topic-action">
                                             <span class="action-btn">
                                                 View <i class="fa fa-arrow-right"></i>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </a>
-                            @endforeach
+                            </span>
                         </div>
                     </div>
+                </a>
+                            @endforeach
+                        </div>
+            </div>
                 @endforeach
             @else
                 <div class="empty-state">
@@ -101,7 +101,7 @@ $totalTopics = $groupedTags->flatten()->count();
                     <p>There are currently no health emergency topics configured in the system.</p>
                 </div>
             @endif
-        </div>
+            </div>
     </div>
 </div>
 
@@ -330,7 +330,7 @@ $totalTopics = $groupedTags->flatten()->count();
     border-color: var(--theme-color-primary, #119A48);
     box-shadow: 0 8px 24px rgba(17, 154, 72, 0.15);
     transform: translateY(-4px);
-    text-decoration: none;
+        text-decoration: none;
     color: inherit;
 }
 
@@ -452,12 +452,12 @@ $totalTopics = $groupedTags->flatten()->count();
 .letter-group.hidden,
 .topic-card.hidden {
     display: none;
-}
+    }
 </style>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('topic-search');
+        const searchInput = document.getElementById('topic-search');
     const clearBtn = document.getElementById('clear-search');
     const filterLetters = document.querySelectorAll('.filter-letter');
     const topicCards = document.querySelectorAll('.topic-card');
@@ -552,6 +552,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 500);
         }
     }
-});
+    });
 </script>
 @endsection

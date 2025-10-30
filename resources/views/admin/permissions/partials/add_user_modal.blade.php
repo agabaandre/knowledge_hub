@@ -91,7 +91,7 @@
                         <div class="form-group col-md-6  col-sm-12">
                             <label class="text-bold">
                                 <i class="icon-collaboration mr-2"></i>
-                                Author Account
+                                Associated Corporate Source/Member State
                             </label>
                             @include('partials.authors.dropdown', ['allfield' => 'None'])
                         </div>

@@ -1,6 +1,25 @@
 @extends('admin.layouts.main')
 
 @section('content')
+<style>
+    /* Minimal AdminLTE-inspired widgets (reference: AdminLTE small-box) */
+    .small-box{border-radius:12px;position:relative;display:block;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.05);color:#0f172a}
+    .small-box>.inner{padding:16px 16px 14px 16px}
+    .small-box h3{font-size:1.6rem;font-weight:800;margin:0 0 6px}
+    .small-box p{font-size:.875rem;color:#0f172a99;margin:0}
+    .small-box .icon{position:absolute;top:12px;right:16px;z-index:0;color:#00000020;font-size:42px}
+    .small-box .small-box-footer{position:relative;display:flex;align-items:center;gap:6px;padding:10px 16px;border-top:1px solid #e2e8f0;border-bottom-left-radius:12px;border-bottom-right-radius:12px;color:#0f172aCC}
+    .bg-gradient-primary{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff}
+    .bg-gradient-success{background:linear-gradient(135deg,#059669,#34d399);color:#fff}
+    .bg-gradient-warning{background:linear-gradient(135deg,#d97706,#fbbf24);color:#fff}
+    .bg-gradient-info{background:linear-gradient(135deg,#0ea5e9,#22d3ee);color:#fff}
+    .bg-gradient-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff}
+    .bg-gradient-rose{background:linear-gradient(135deg,#e11d48,#fb7185);color:#fff}
+    .bg-gradient-slate{background:linear-gradient(135deg,#475569,#94a3b8);color:#fff}
+    .small-box .stat{font-weight:800;letter-spacing:.2px}
+    .small-box a{color:inherit}
+    .small-box a:hover{text-decoration:none;opacity:.95}
+</style>
 <!-- PAGE-HEADER -->
 <div class="page-header">
     <h1 class="page-title">Dashboard</h1>
@@ -16,142 +35,135 @@
 <div class="container-fluid">
     <div class="row" style="row-gap:12px;">
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $publications_count }} Publications</h5>
-
-                    <i class="fa fa-pen"></i>
-                    @php
-$percentage = ($publications_count / 10000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progress-bar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Total Number of publications</p>
-                    <a href="{{ url('admin/publications') }}" class="text-primary">View List</a>
+            <a href="{{ url('admin/publications') }}" class="small-box bg-gradient-primary">
+                <div class="inner">
+                    <h3 class="stat">{{ $publications_count }}</h3>
+                    <p>Publications</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fa fa-pen"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $authors_count }} Resource Authors</h5>
-                    <i class="fa fa-users"></i>
-                    @php
-                    $percentage = ($authors_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progress-bar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Number of resource contributing authors</p>
-                    <a href="{{ url('admin/authors') }}" class="text-primary">View List</a>
+            <a href="{{ url('admin/authors') }}" class="small-box bg-gradient-success">
+                <div class="inner">
+                    <h3 class="stat">{{ $authors_count }}</h3>
+                    <p>Resource Authors</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fa fa-users"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $experts_count }} Experts</h5>
-                    <i class="fas fa-user-graduate"></i>
-                    @php
-$percentage = ($experts_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Workforce Experts</p>
-                    <a href="{{ url('admin/experts') }}" class="text-primary">View List</a>
+            <a href="{{ url('admin/experts') }}" class="small-box bg-gradient-info">
+                <div class="inner">
+                    <h3 class="stat">{{ $experts_count }}</h3>
+                    <p>Workforce Experts</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fas fa-user-graduate"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $forums_count }} Forum Discussions</h5>
-                    <i class="fab fa-forumbee"></i>
-                    @php
-$percentage = ($forums_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Active Forum Discussions</p>
-                    <a href="{{ url('admin/forums') }}" class="text-primary">View List</a>
+            <a href="{{ url('admin/forums') }}" class="small-box bg-gradient-warning">
+                <div class="inner">
+                    <h3 class="stat">{{ $forums_count }}</h3>
+                    <p>Forum Discussions</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fab fa-forumbee"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
 
         {{-- Others --}}
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $states_count }} Total Member States</h5>
-                    <i class="fas fa-globe-africa"></i>
-                    @php
-$percentage = ($states_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Total Member States</p>
-                    <a href="{{ url('admin/areas') }}" class="text-primary">View List</a>
+            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="small-box bg-gradient-purple">
+                <div class="inner">
+                    <h3 class="stat">{{ $states_count }}</h3>
+                    <p>Total Member States</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fas fa-globe-africa"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
 
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $visits_count }} Daily Visits</h5>
-                    <i class="fas fa-signal"></i>
-                    @php
-$percentage = ($visits_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Daily Visits</p>
-                    <a href="{{ url('admin/logs/user') }}" class="text-primary">View List</a>
+            <a href="{{ url('admin/logs/user') }}" class="small-box bg-gradient-rose">
+                <div class="inner">
+                    <h3 class="stat">{{ $visits_count }}</h3>
+                    <p>Avg Daily Visits</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fas fa-signal"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
 
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $admin_units_count }} Total Administrative Units</h5>
-                    <i class="far fa-building"></i>
-                    @php
-$percentage = ($admin_units_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Total Administrative Units</p>
-                    <a href="{{ url('admin/forums') }}" class="text-primary">View List</a>
+            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="small-box bg-gradient-slate">
+                <div class="inner">
+                    <h3 class="stat">{{ $admin_units_count }}</h3>
+                    <p>Total Administrative Units</p>
                 </div>
-            </div>
+                <div class="icon"><i class="far fa-building"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
 
         <div class="col-sm-6 col-md-4 col-lg-3">
-            <div class="card shadow-sm" style="border-radius:12px;">
-                <div class="card-body">
-                    <h5 class="card-title mb-1">{{ $users_count }} Total Users</h5>
-                    <i class="fas fa-users-cog"></i>
-                    @php
-$percentage = ($users_count / 1000) * 100;
-                    @endphp
-                    <div class="progress mt-1 mb-2" style="height: 5px;">
-                        <div class="progress-bar progress-bar-striped" role="progressbar" style="width: {{ $percentage }}%;" aria-valuenow="{{ $percentage }}" aria-valuemin="0" aria-valuemax="100"></div>
-                    </div>
-                    <p class="card-text">Total Platform Users</p>
-                    <a href="{{ url('admin/forums') }}" class="text-primary">View List</a>
+            <a href="{{ url('permissions/users') }}" class="small-box bg-gradient-success">
+                <div class="inner">
+                    <h3 class="stat">{{ $users_count }}</h3>
+                    <p>Total Platform Users</p>
                 </div>
-            </div>
+                <div class="icon"><i class="fas fa-users-cog"></i></div>
+                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+            </a>
         </div>
     </div>
 
     <div class="row charts" style="row-gap:12px;"></div>
+
+    {{-- Admin-only Dashboards List --}}
+    @if(isset($dashboards) && count($dashboards))
+    <div class="row mt-4" style="row-gap:12px;">
+        <div class="col-md-12">
+            <div class="card shadow-sm" style="border-radius:12px;">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h4 class="card-title mb-0">Admin Dashboards</h4>
+                    <span class="text-muted small">{{ count($dashboards) }} available</span>
+                </div>
+                <div class="card-body">
+                    <div class="row" style="row-gap:12px;">
+                        @foreach($dashboards as $db)
+                        <div class="col-sm-6 col-md-4 col-lg-3">
+                            <div class="card h-100" style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                                <div class="card-body d-flex flex-column">
+                                    <h6 class="mb-1" style="font-weight:700;line-height:1.2;">{{ strip_tags(Str::limit($db->title, 60)) }}</h6>
+                                    @if(!empty($db->theme))
+                                        <div class="text-muted" style="font-size:.85rem;">{!! Str::limit($db->theme->description ?? '', 60) !!}</div>
+                                    @endif
+                                    <p class="mt-2 mb-3 text-muted" style="font-size:.9rem;">{{ Str::limit(strip_tags($db->description), 100) }}</p>
+                                    <div class="mt-auto d-flex align-items-center justify-content-between">
+                                        @php
+                                            $statusText = $db->is_approved ? 'Approved' : ($db->is_rejected ? 'Rejected' : 'Pending');
+                                            $statusClass = $db->is_approved ? 'badge-success' : ($db->is_rejected ? 'badge-danger' : 'badge-secondary');
+                                            $url = !$db->is_embedded ? url('/admin/dashboards').'?resource='.$db->id : ($db->publication ?? '#');
+                                        @endphp
+                                        <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
+                                        <a href="{{ $url }}" target="{{ $db->is_embedded ? '_blank' : '_self' }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fa fa-chart-line mr-1"></i> Open
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
 
     <div class="row">
         <div class="col-md-12">

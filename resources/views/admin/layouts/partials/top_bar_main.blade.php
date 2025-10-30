@@ -35,17 +35,17 @@
                 </div>
             </div><!-- Full-screen closed -->
             <div class="dropdown  nav-item main-header-message ">
-                <a class="new nav-link menu-icons" href="#">
+                <a class="new nav-link menu-icons position-relative" href="#" data-toggle="dropdown">
                     <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
                     @if ($pending_forum_comments_count > 0)
-                        <span class=" pulse-danger"></span>
+                        <span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;">{{ $pending_forum_comments_count }}</span>
                     @endif
                 </a>
-                <div class="dropdown-menu animated fadeInUp">
+                <div class="dropdown-menu animated fadeInUp dropdown-menu-right" style="min-width:320px;">
                     <div class="menu-header-content text-left d-flex">
                         <div class="">
 
@@ -58,9 +58,9 @@
                             @endif
                         </div>
                     </div>
-                    <div class="main-message-list chat-scroll" style="overflow-y: scroll;">
+                    <div class="main-message-list chat-scroll" style="max-height:320px;overflow-y:auto;">
                         @foreach ($pending_forum_comments as $pending_forum_comment)
-                            <a href="{{ url('forum/moderate') }}" class="p-3 d-flex border-bottom">
+                            <a href="{{ url('admin/forums/moderate') }}" class="p-3 d-flex border-bottom">
                                 <div class="  drop-img  cover-image  "
                                     data-image-src="{{ asset('/img/faces/11.jpg') }}">
                                     <span class="avatar-status bg-teal"></span>
@@ -83,17 +83,17 @@
                 </div>
             </div><!-- Main-header-message closed -->
             <div class="dropdown  nav-item main-header-message ">
-                <a class="new nav-link menu-icons" href="#">
+                <a class="new nav-link menu-icons position-relative" href="#" data-toggle="dropdown">
                     <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
                         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
                         <polyline points="22,6 12,13 2,6"></polyline>
                     </svg>
                     @if ($pending_publication_comments_count > 0)
-                        <span class=" pulse-danger"></span>
+                        <span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;">{{ $pending_publication_comments_count }}</span>
                     @endif
                 </a>
-                <div class="dropdown-menu animated fadeInUp">
+                <div class="dropdown-menu animated fadeInUp dropdown-menu-right" style="min-width:320px;">
                     <div class="menu-header-content text-left d-flex">
                         <div class="">
 
@@ -105,11 +105,11 @@
                             @endif
                         </div>
                     </div>
-                    <div class="main-message-list chat-scroll ">
+                    <div class="main-message-list chat-scroll" style="max-height:320px;overflow-y:auto;">
                         @foreach ($pending_publication_comments as $pending_publication_comment)
-                            <a href="{{ url('publication/moderate') }}" class="p-3 d-flex border-bottom">
+                            <a href="{{ url('admin/publications/moderate') }}" class="p-3 d-flex border-bottom">
                                 <div class="  drop-img  cover-image  "
-                                    data-image-src="{{ asset('/img/faces/11.jpg') }}') }}">
+                                    data-image-src="{{ asset('/img/faces/11.jpg') }}">
                                     <span class="avatar-status bg-teal"></span>
                                 </div>
 

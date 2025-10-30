@@ -1,12 +1,12 @@
 <div id="perms{{$role->id}}0" class="modal fade" tabindex="-1">
-                    <div class="modal-dialog modal-lg mt-lg-5">
+                    <div class="modal-dialog modal-xl mt-lg-5">
                         <div class="modal-content">
                       <form action="{{ route('permissions.torole') }}" class="feeFormperms{{$role->id}} bg-white" method="POST">
                             <div class="modal-header">
                                 <span class="font-weight-semibold modal-title">
                                      {{ strtoupper($role->name) }}   {{ __('auth.permissions') }} 
                                 </span>
-                                <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>  </div>
+                                <button aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>  </div>
 
                             <div class="modal-body">
                                 
@@ -27,8 +27,8 @@
 
                             </div>
 
-                            <div class="modal-footer">
-                                <button data-dismiss="modal" type="button"  class="btn bg-dark btn-warning btn-sm">{{ __('general.close')}}</button>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <button data-dismiss="modal" type="button"  class="btn btn-secondary btn-sm">{{ __('general.close')}}</button>
                                 @php $formRef = 'perms'.$role->id; @endphp
                                 <button type="submit" class="btn btn-sm btn-success">
                                  <i class="icon-plus-circle2 mr-2"></i>

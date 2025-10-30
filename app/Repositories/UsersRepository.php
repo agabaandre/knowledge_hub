@@ -128,6 +128,25 @@ class UsersRepository {
             //@$this->save_communities($user->id,$request->communities);
         }
         
+        // Auto-enroll Africa CDC staff based on email domain
+        try{
+            if ($user && !empty($user->email) && preg_match('/@africacdc\.org$/i', $user->email)) {
+                $africaCDCCommunityId = 31; // Africa CDC Staff
+                $exists = CommunityOfPracticeMembers::where('user_id', $user->id)
+                    ->where('community_of_practice_id', $africaCDCCommunityId)
+                    ->exists();
+                if (!$exists) {
+                    $member = new CommunityOfPracticeMembers();
+                    $member->user_id = $user->id;
+                    $member->community_of_practice_id = $africaCDCCommunityId;
+                    $member->is_approved = 1;
+                    $member->save();
+                }
+            }
+        }catch(\Exception $e){
+            \Log::warning('Auto-enroll Africa CDC Staff failed', ['user_id'=>$user->id ?? null, 'error'=>$e->getMessage()]);
+        }
+        
         return $user;
     }
 

@@ -76,8 +76,9 @@ class LoginController extends Controller
     protected function attemptLogin(Request $request)
     {
         $credentials = $this->credentials($request);
-        // Add custom check for 'is_verified' column
+        // Only allow active & verified accounts
         $credentials['is_verified'] = 1;
+        $credentials['status'] = 1; // Active
 
         return Auth::attempt($credentials, $request->filled('remember'));
     }
@@ -91,6 +92,13 @@ class LoginController extends Controller
         if ($user && !$user->is_verified) {
             throw ValidationException::withMessages([
                 'email' => 'User is not verified',
+            ]);
+        }
+
+        // Check if user is not active
+        if ($user && isset($user->status) && intval($user->status) !== 1) {
+            throw ValidationException::withMessages([
+                'email' => 'User account is not active',
             ]);
         }
 

@@ -384,7 +384,7 @@
                         
                     </li>
                     <li class="categories {{ (request()->is('tools')|| (isset($staticLinks) && collect($staticLinks)->pluck('link')->contains(url()->current()))) ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i> @endif Guidelines & Frameworks<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i>@endif Key Links @if($menuIconsEnabled)<i class="fa fa-angle-right ml-1"></i>@endif<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             
                             @if(isset($staticLinks) && count($staticLinks))

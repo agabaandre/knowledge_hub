@@ -105,19 +105,35 @@
 @section('content')
     @include('home.partials.' . $theme . 'spotlight')
 
-    @if(empty($theme))
-        @include('home.partials.' . $theme . 'top_categories')
+    @if((settings()->show_events ?? false))
+        {{-- Events section header (same style as Explore Key Sections) --}}
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-md-10">
+                    <div class="sec_title text-center">
+                        <h2 style="margin-top: 2px;">Top Events</h2>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        @if(count($initiatives)>0)
-            @include('home.partials.' . $theme . 'initiatives',['initiatives'=>$initiatives])
-        @endif
-
-        @if(count($featured)>0)
-            @include('home.partials.' . $theme . 'featured')
-        @endif
+        {{-- Events slider below header --}}
+        @include('home.partials.' . $theme . 'events_slider', ['events' => $events])
     @endif
 
-    @include('home.partials.' . $theme . 'top_searches')
+    @include('home.partials.' . $theme . 'top_categories')
+
+    @if(count($initiatives)>0)
+        @include('home.partials.' . $theme . 'initiatives',['initiatives'=>$initiatives])
+    @endif
+
+    @if((settings()->show_featured ?? false) && count($featured)>0)
+        @include('home.partials.' . $theme . 'featured')
+    @endif
+
+    @if(settings()->show_top_searches ?? false)
+        @include('home.partials.' . $theme . 'top_searches')
+    @endif
 @endsection
 
 @section('scripts')

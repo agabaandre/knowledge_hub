@@ -1,6 +1,6 @@
 <!--  Extra Large modal example -->
 <div class="modal" id="create-modal">
-  <div class="modal-dialog modal-md">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="myExtraLargeModalLabel">Create Access Group </h5>

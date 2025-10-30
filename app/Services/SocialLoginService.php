@@ -88,9 +88,14 @@ class SocialLoginService {
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
 
         if ($savedUser) {
-            // Auto-assign to Africa CDC Staff community (ID: 31) with auto-approval
+            // Auto-assign to Africa CDC Staff (ID: 31) only for africacdc.org emails
             try {
                 $africaCDCCommunityId = 31;
+                $emailLower = strtolower($savedUser->email ?? '');
+                $isAfricaCDC = (bool) preg_match('/@africacdc\.org$/i', $emailLower);
+                if(!$isAfricaCDC){
+                    return $savedUser;
+                }
                 
                 // Check if user is already a member
                 $existingMember = \App\Models\CommunityOfPracticeMembers::where('user_id', $savedUser->id)

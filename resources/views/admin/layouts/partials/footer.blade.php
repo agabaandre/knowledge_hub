@@ -74,6 +74,26 @@
 <!-- Custom js -->
 <script src="{{  asset('assets/js/custom.js') }}"></script>
 
+<!-- Lobibox Notifications -->
+<script src="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/js/lobibox.min.js"></script>
+<script>
+    window.notifyx = function(type, msg){
+        try{
+            Lobibox.notify(type || 'info', {
+                size: 'mini',
+                sound: false,
+                delay: 3500,
+                title: false,
+                pauseDelayOnHover: true,
+                position: 'top right',
+                msg: msg || ''
+            });
+        }catch(e){
+            try{ if(window.Swal){ Swal.fire(type||'info', msg||'', type||'info'); } else { alert(msg); } }catch(err){}
+        }
+    }
+</script>
+
 
 <!-- Add Select2 Nodemodules -->
 <link href="{{ asset('assets/plugins/select2/css/select2.min.css') }}" rel="stylesheet" />
@@ -178,64 +198,53 @@
 		}
 	});
 
-	$(document).ready(function() {
-		var authorsTable = $('table#authors-table').DataTable({
-			"autoWidth": true,
-			buttons: [
-				'copy', 'csv', 'excel', 'pdf', 'print'
-			],
-			exportOptions: {
-				columns: [0, 1, 2, 3, 4],
+    $(document).ready(function() {
+        // Initialise authors table only if present
+        if ($('table#authors-table').length) {
+            var authorsTable = $('table#authors-table').DataTable({
+                "autoWidth": true,
+                buttons: [
+                    'copy', 'csv', 'excel', 'pdf', 'print'
+                ],
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4],
+                }
+            });
+            $('#exportAuthors').on('click', function() {
+                authorsTable.button(1).trigger();
+            });
+        }
+    });
 
-			}
-		});
+    $(document).ready(function() {
+        // Initialise publications table only if present
+        if ($('#publicationTable').length) {
+            var table = $('#publicationTable').DataTable({
+                "autoWidth": true,
+                "dom": 'bootstrap',
+                "buttons": [
+                    'copy', 'csv', 'excel', 'pdf',
+                ]
+            });
 
+            $('#filterButton').on('click', function() {
+                var filterTitle = $('#filterTitle').val();
+                var filterDesc = $('#filterDesc').val();
+                var filterSource = $('#filterSource').val();
+                table.columns(1).search(filterTitle || '').draw();
+                table.columns(2).search(filterDesc || '').draw();
+                table.columns(3).search(filterSource || '').draw();
+            });
 
-		var exportButton = $('#exportAuthors');
-
-		exportButton.on('click', function() {
-			authorsTable.button(1).trigger();
-		});
-
-	});
-
-	$(document).ready(function() {
-		var table = $('#publicationTable').DataTable({
-			"autoWidth": true,
-			"dom": 'bootstrap',
-			"buttons": [
-				'copy', 'csv', 'excel', 'pdf',
-			]
-		});
-
-
-		var filterButton = $('#filterButton');
-
-		var exportButton = $('#exportButton');
-
-		filterButton.on('click', function() {
-			var filterTitle = $('#filterTitle').val();
-			var filterDesc = $('#filterDesc').val();
-			var filterSource = $('#filterSource').val();
-
-			// Apply both filters
-			table.columns(1).search(filterTitle).draw();
-			table.columns(2).search(filterDesc).draw();
-			table.columns(3).search(filterSource).draw();
-		});
-
-		exportButton.on('click', function() {
-
-			// If filter has value, apply filter to table and export
-			if ($('#filterTitle').val()) {
-				var filter = $('#filterTitle').val();
-				table.search(filter).draw();
-				table.button(1).trigger();
-			} else {
-				table.button(1).trigger();
-			}
-		});
-	});
+            $('#exportButton').on('click', function() {
+                if ($('#filterTitle').val()) {
+                    var filter = $('#filterTitle').val();
+                    table.search(filter).draw();
+                }
+                table.button(1).trigger();
+            });
+        }
+    });
 
 	// On Edit Forum Modal Shown
 	$('#edit-forum-modal').on('show.bs.modal', function(event) {

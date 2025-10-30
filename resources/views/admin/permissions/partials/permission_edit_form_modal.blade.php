@@ -6,7 +6,7 @@
                                 <span class="font-weight-semibold modal-title">
                                     {{ __('general.edit') }} {{ __('auth.permission') }} 
                                 </span>
-                                <button aria-label="Close" class="btn-close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
+                                <button aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                             </div>
                             <form action="{{ route('permissions.permission') }}" class="feeForm{{$perm->id}}" method="POST">
                        
@@ -28,8 +28,8 @@
 
                             </div>
 
-                            <div class="modal-footer">
-                                <button data-dismiss="modal" type="button"  class="btn bg-dark btn-warning btn-sm">{{ __('general.close')}}</button>
+                            <div class="modal-footer d-flex justify-content-between">
+                                <button data-dismiss="modal" type="button"  class="btn btn-secondary btn-sm">{{ __('general.close')}}</button>
                                 <button  type="submit" class="btn btn-sm btn-success">
                                  <i class="icon-plus-circle2 mr-2"></i>
                                  {{ __('general.update')}} {{ __('auth.permission')}}

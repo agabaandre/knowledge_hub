@@ -44,6 +44,8 @@
 
 	<!-- Admin Select2 CSS - Modern dropdown styling -->
 	<link href="{{ asset('assets/css/admin-select2.css') }}" rel="stylesheet">
+    <!-- Lobibox Notifications CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/css/lobibox.min.css" />
 
 	<!-- Animations css -->
 	<link href="{{ asset('assets/css/animate.css') }}" rel="stylesheet">
