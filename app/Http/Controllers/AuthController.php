@@ -38,7 +38,7 @@ class AuthController extends Controller
 
         $saved = $this->usersRepo->save($request);
         
-        $message = ($saved)?'Resgistration successful,Check Email to activate':'Request failed try again';
+        $message = ($saved)?'Registration successful! Your account has been activated. You can now login.':'Request failed try again';
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['alert']       = $message;
 
@@ -151,7 +151,45 @@ class AuthController extends Controller
             
             if($user_exists):
                 $user = $user_exists;
-                \Log::info("Microsoft Login: Existing user found", [
+                // Auto-activate and verify existing users on SSO login
+                if (!$user->email_verified_at) {
+                    $user->email_verified_at = \Carbon\Carbon::now();
+                }
+                if (!$user->is_verified) {
+                    $user->is_verified = 1;
+                }
+                if ($user->status != 1) {
+                    $user->status = 1;
+                }
+                
+                // Update photo from Microsoft if available and user doesn't have one
+                try {
+                    $microsoftPhoto = null;
+                    if (method_exists($socialUser, 'getAvatar')) {
+                        $microsoftPhoto = $socialUser->getAvatar();
+                    }
+                    if (!$microsoftPhoto) {
+                        $rawUser = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : null;
+                        if ($rawUser) {
+                            if (is_array($rawUser)) {
+                                $microsoftPhoto = $rawUser['photo'] ?? $rawUser['picture'] ?? null;
+                            } elseif (is_object($rawUser)) {
+                                $microsoftPhoto = $rawUser->photo ?? $rawUser->picture ?? null;
+                            }
+                        }
+                    }
+                    
+                    // Update photo if Microsoft has one and user doesn't have an external photo
+                    if ($microsoftPhoto && (empty($user->photo) || !$user->is_photo_external)) {
+                        $user->photo = $microsoftPhoto;
+                        $user->is_photo_external = 1;
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to update Microsoft photo for existing user', ['error' => $e->getMessage()]);
+                }
+                
+                $user->save();
+                \Log::info("Microsoft Login: Existing user found and activated", [
                     'user_id' => $user->id,
                     'email' => $user->email
                 ]);
@@ -215,6 +253,17 @@ class AuthController extends Controller
         
          if($user_exists):
             $user = $user_exists;
+            // Auto-activate and verify existing users on SSO login
+            if (!$user->email_verified_at) {
+                $user->email_verified_at = \Carbon\Carbon::now();
+            }
+            if (!$user->is_verified) {
+                $user->is_verified = 1;
+            }
+            if ($user->status != 1) {
+                $user->status = 1;
+            }
+            $user->save();
          else:
             $user =$this->socialLoginService->googleCallback($user);
          endif;

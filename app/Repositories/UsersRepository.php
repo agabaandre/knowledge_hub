@@ -47,8 +47,11 @@ class UsersRepository {
         if(!$is_social || ($user->id && !$user->is_social_login)){
 
             $user->password      = Hash::make($request->password);
-            $token = Str::random(10);
-            $user->verification_token = $token;
+            // Auto-verify and activate regular registrations
+            $user->verification_token = null;
+            $user->is_verified = 1;
+            $user->status = 1;
+            $user->email_verified_at = Carbon::now();
         }
         else{
 
@@ -65,10 +68,13 @@ class UsersRepository {
             $user->social_provider    = $request->social_provider;
             $user->is_photo_external  = false;
             
-            // Auto-verify email for social logins
+            // Auto-verify and activate social logins
             if (!$user->email_verified_at) {
                 $user->email_verified_at = Carbon::now();
             }
+            $user->is_verified = 1;
+            $user->status = 1;
+            $user->verification_token = null;
 
             if($request->photo){
                 $user->photo = $request->photo;
@@ -113,8 +119,8 @@ class UsersRepository {
             \Log::info($ex->getMessage());
         }
 
-        if(!$is_social)
-        $this->send_email($request, $token);
+        // Email verification is no longer needed since we auto-verify
+        // Removed: if(!$is_social) $this->send_email($request, $token);
 
         if($request->preferences){
 

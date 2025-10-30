@@ -63,11 +63,57 @@ class SocialLoginService {
             return null;
         }
 
+        // Get user photo from Microsoft - try multiple methods
+        $photoUrl = null;
+        try {
+            // Try getAvatar() method first (Socialite standard)
+            if (method_exists($socialUser, 'getAvatar')) {
+                $photoUrl = $socialUser->getAvatar();
+            }
+            
+            // If not available, try to get from raw data
+            if (!$photoUrl && method_exists($socialUser, 'getRaw')) {
+                $rawUser = $socialUser->getRaw();
+                if ($rawUser) {
+                    if (is_array($rawUser)) {
+                        $photoUrl = $rawUser['photo'] ?? $rawUser['picture'] ?? null;
+                    } elseif (is_object($rawUser)) {
+                        $photoUrl = $rawUser->photo ?? $rawUser->picture ?? null;
+                    }
+                }
+            }
+            
+            // Also try from userData
+            if (!$photoUrl && !empty($userData)) {
+                if (is_array($userData)) {
+                    $photoUrl = $userData['photo'] ?? $userData['picture'] ?? null;
+                } elseif (is_object($userData)) {
+                    $photoUrl = $userData->photo ?? $userData->picture ?? null;
+                }
+            }
+            
+            // Try accessing Microsoft Graph photo endpoint format
+            if (!$photoUrl && method_exists($socialUser, 'getId')) {
+                $userId = $socialUser->getId();
+                if ($userId) {
+                    // Microsoft Graph API photo endpoint format
+                    $photoUrl = "https://graph.microsoft.com/v1.0/me/photo/\$value";
+                }
+            }
+            
+            Log::info('Microsoft Photo Retrieved', [
+                'email' => $email,
+                'photoUrl' => $photoUrl ? substr($photoUrl, 0, 100) : 'no'
+            ]);
+        } catch (\Exception $e) {
+            Log::warning('Failed to get Microsoft photo', ['error' => $e->getMessage()]);
+        }
+
         // Create a new Request object
         $request = new Request();
 
         // Populate the request with user data from Microsoft
-        $request->merge([
+        $requestData = [
             'firstname' => $firstName,
             'lastname' => $lastName,
             'email' => $email,
@@ -75,14 +121,16 @@ class SocialLoginService {
             'phone' => null,
             'job' => (is_array($userData) ? ($userData['jobTitle'] ?? null) : ($userData->jobTitle ?? null)),
             'subscribe' => null,
-            'photo' => $socialUser->getAvatar() ?? (is_array($userData) ? ($userData['picture'] ?? null) : ($userData->picture ?? null)),
+            'photo' => $photoUrl,
             'preferences' => null,
             'social_provider' => 'microsoft'
-        ]);
+        ];
 
-        if($request->photo):
-            $request->is_photo_external = 1;
+        if($photoUrl):
+            $requestData['is_photo_external'] = 1;
         endif;
+
+        $request->merge($requestData);
 
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
@@ -144,21 +192,24 @@ class SocialLoginService {
         $request = new Request();
 
         // Populate the request with user data from Google
-        $request->merge([
+        $photoUrl = $user->user->picture ?? null;
+        $requestData = [
             'firstname' => $user->user->given_name, // Extracting first name
             'lastname' => $user->user->family_name, // Extracting last name
             'email' => $user->user->email, // Extracting email
             'country_id' => null, // Set this if you have a way to determine the country
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => null, // Google does not provide job title by default
-            'photo' => $user->user->picture ?? null, // Extracting profile picture if available
+            'photo' => $photoUrl, // Extracting profile picture if available
             'preferences' => null, // Handle user preferences if needed
             'social_provider'=>'google'
-        ]);
+        ];
 
-        if($request->photo):
-            $request->is_photo_external = 1;
+        if($photoUrl):
+            $requestData['is_photo_external'] = 1;
         endif;
+
+        $request->merge($requestData);
 
         // Call the save method in UsersRepository
         $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
