@@ -21,7 +21,7 @@ class CountriesViewComposer{
         $countries  = cache()->remember('countries',$minutes, function () {
             $query =   Country::where('national','national');
             $this->sharedRepo->access_filter($query,true);
-            $countries = $query->get();
+            $countries = $query->orderBy('name', 'asc')->get();
             
             return $countries;
         });

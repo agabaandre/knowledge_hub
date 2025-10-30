@@ -12,7 +12,7 @@ class SubThemesViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $subthemes = cache()->remember('subthemes',$minutes, function () {
-            return   SubThemeticArea::all();
+            return   SubThemeticArea::orderBy('description', 'asc')->get();
         });
         
         $view->with('subthemes',$subthemes);

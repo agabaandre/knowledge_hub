@@ -555,13 +555,16 @@ Route::get('auth/google', function () {
 Route::get('auth/google/callback', [AuthController::class,'googleLogin']);
 
 Route::get('auth/linkedin', function () {
-    return Socialite::driver('linkedin')->redirect();
+    try {
+        return Socialite::driver('linkedin')->redirect();
+    } catch (\Exception $e) {
+        \Log::error('LinkedIn redirect error: ' . $e->getMessage());
+        return redirect('/login')->with('alert_class', 'danger')
+            ->with('alert', 'LinkedIn login is currently unavailable. Please try again later.');
+    }
 });
 
-Route::get('auth/linkedin/callback', function () {
-    $user = Socialite::driver('linkedin')->user();
-// Redirect to your desired location
-});
+Route::get('auth/linkedin/callback', [AuthController::class, 'linkedinLogin']);
 
 Route::get("/tests",function(){
 

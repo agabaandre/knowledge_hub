@@ -285,4 +285,140 @@ class AuthController extends Controller
  
     }
 
+    public function linkedinLogin(Request $request){
+
+        try {
+            // Check if there's an error from LinkedIn
+            if ($request->has('error')) {
+                \Log::error("LinkedIn Login Error: " . $request->error, [
+                    'error_description' => $request->error_description
+                ]);
+                return redirect('/login')
+                    ->with('alert_class', 'danger')
+                    ->with('alert', 'LinkedIn login cancelled or failed: ' . ($request->error_description ?? $request->error));
+            }
+
+            // Check if authorization code is present
+            if (!$request->has('code')) {
+                \Log::error("LinkedIn Login Error: No authorization code received", [
+                    'request_params' => $request->all()
+                ]);
+                return redirect('/login')
+                    ->with('alert_class', 'danger')
+                    ->with('alert', 'LinkedIn authorization failed. Please try again.');
+            }
+
+            // Get the user from LinkedIn
+            $socialUser = Socialite::driver('linkedin')->user();
+            
+            \Log::info("LinkedIn Login::", [
+                'email' => $socialUser->getEmail(),
+                'name' => $socialUser->getName(),
+                'id' => $socialUser->getId()
+            ]);
+
+            // Get email using Socialite's getEmail() method
+            $email = $socialUser->getEmail();
+            
+            if (!$email) {
+                \Log::error("LinkedIn Login Error: No email found in response");
+                return redirect('/login')
+                    ->with('alert_class', 'danger')
+                    ->with('alert', 'Unable to retrieve email from LinkedIn. Please ensure you grant email permission.');
+            }
+
+            // Check if user exists by email (regardless of social login status)
+            $user_exists = User::where('email', $email)->first();
+            
+            if($user_exists):
+                $user = $user_exists;
+                // Auto-activate and verify existing users on SSO login
+                if (!$user->email_verified_at) {
+                    $user->email_verified_at = \Carbon\Carbon::now();
+                }
+                if (!$user->is_verified) {
+                    $user->is_verified = 1;
+                }
+                if ($user->status != 1) {
+                    $user->status = 1;
+                }
+                
+                // Update photo from LinkedIn if available and user doesn't have one
+                try {
+                    $linkedinPhoto = null;
+                    if (method_exists($socialUser, 'getAvatar')) {
+                        $linkedinPhoto = $socialUser->getAvatar();
+                    }
+                    if (!$linkedinPhoto) {
+                        $rawUser = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : null;
+                        if ($rawUser) {
+                            if (is_array($rawUser)) {
+                                $linkedinPhoto = $rawUser['profilePicture'] ?? $rawUser['profile_picture'] ?? null;
+                            } elseif (is_object($rawUser)) {
+                                $linkedinPhoto = $rawUser->profilePicture ?? $rawUser->profile_picture ?? null;
+                            }
+                        }
+                    }
+                    
+                    // Update photo if LinkedIn has one and user doesn't have an external photo
+                    if ($linkedinPhoto && (empty($user->photo) || !$user->is_photo_external)) {
+                        $user->photo = $linkedinPhoto;
+                        $user->is_photo_external = 1;
+                    }
+                } catch (\Exception $e) {
+                    \Log::warning('Failed to update LinkedIn photo for existing user', ['error' => $e->getMessage()]);
+                }
+                
+                $user->save();
+                \Log::info("LinkedIn Login: Existing user found and activated", [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            else:
+                // Auto-create new user
+                $user = $this->socialLoginService->linkedinCallback($socialUser);
+                
+                if (!$user || !$user->id) {
+                    \Log::error("LinkedIn Login Error: Failed to create user", [
+                        'email' => $email,
+                        'name' => $socialUser->getName()
+                    ]);
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', 'Failed to create your account. Please try again or contact support.');
+                }
+                
+                \Log::info("LinkedIn Login: New user created", [
+                    'user_id' => $user->id,
+                    'email' => $user->email
+                ]);
+            endif;
+
+            Auth::login($user);
+
+            if(!$user->country_id){
+                $data['alert_class'] = 'success';
+                $data['message']     = "Please complete your profile";
+                $data['status']      = 200;
+                $redirect_to = "/account";
+            }else{
+                $redirect_to ="/";
+                $data = [];
+            }
+
+            return redirect($redirect_to)->with($data);
+            
+        } catch (\Exception $e) {
+            \Log::error("LinkedIn Login Exception: " . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            
+            return redirect('/login')
+                ->with('alert_class', 'danger')
+                ->with('alert', 'LinkedIn login failed: ' . $e->getMessage());
+        }
+   }
+
 }

@@ -12,7 +12,7 @@ class CommunitiesOfPracticeViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $communities  = cache()->remember('communities',$minutes, function () {
-            return   CommunityOfPractice::where('is_active',1)->get();
+            return   CommunityOfPractice::where('is_active',1)->orderBy('community_name', 'asc')->get();
         });
         
         $view->with('communities',$communities);

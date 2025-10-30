@@ -11,7 +11,7 @@ class AuthorsViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $authors = cache()->remember('authors',$minutes, function () {
-            return  Author::all();
+            return  Author::orderBy('name', 'asc')->get();
         });
     
         $view->with('authors',$authors);

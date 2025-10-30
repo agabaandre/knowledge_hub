@@ -203,6 +203,15 @@
             color: #db4437;
         }
 
+        .btn-linkedin {
+            color: #0077b5;
+        }
+
+        .btn-linkedin:hover {
+            border-color: #0077b5;
+            color: #0077b5;
+        }
+
         .register-link {
             text-align: center;
             margin-top: 1.5rem;
@@ -283,7 +292,7 @@
                 @endif
 
                 <form action="{{ route('login') }}" method="POST" id="loginForm">
-                    @csrf
+                        @csrf
 
                     <div class="form-group">
                         <label class="form-label" for="email">Email Address</label>
@@ -296,12 +305,12 @@
                                required 
                                autocomplete="email" 
                                autofocus>
-                        @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
+                            @error('email')
+                                <span class="invalid-feedback" role="alert">
+                                    <strong>{{ $message }}</strong>
+                                </span>
+                            @enderror
+                        </div>
 
                     <div class="form-group">
                         <label class="form-label" for="password">Password</label>
@@ -312,31 +321,31 @@
                                placeholder="Enter your password" 
                                required 
                                autocomplete="current-password">
-                        @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
-
-                    <div class="form-group">
-                        <div class="py-2">
-                            {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
-                            @error('g-recaptcha-response')
+                            @error('password')
                                 <span class="invalid-feedback" role="alert">
                                     <strong>{{ $message }}</strong>
                                 </span>
                             @enderror
                         </div>
-                    </div>
+
+                    <div class="form-group">
+                            <div class="py-2">
+                            {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+                                @error('g-recaptcha-response')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
 
                     <div class="form-group mb-3">
-                        <div class="d-flex align-items-center justify-content-between">
+                            <div class="d-flex align-items-center justify-content-between">
                             <div class="checkbox-wrapper">
                                 <input type="checkbox" 
                                        id="remember" 
                                        name="remember" 
-                                       {{ old('remember') ? 'checked' : '' }}>
+                                        {{ old('remember') ? 'checked' : '' }}>
                                 <label for="remember">Remember me</label>
                             </div>
                             <a href="{{ route('password.request') }}" class="forgot-password-link">
@@ -352,7 +361,7 @@
 
                 <div class="divider">
                     <span>or continue with</span>
-                </div>
+                        </div>
 
                 <div class="social-btn-group">
                     <a href="{{ url('auth/microsoft') }}" class="btn-social btn-microsoft">
@@ -363,7 +372,11 @@
                         <i class="lni lni-google"></i>
                         <span>Google</span>
                     </a>
-                </div>
+                    <a href="{{ url('auth/linkedin') }}" class="btn-social btn-linkedin">
+                        <i class="fab fa-linkedin"></i>
+                        <span>LinkedIn</span>
+                            </a>
+                        </div>
 
                 <div class="register-link">
                     <p>

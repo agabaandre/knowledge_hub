@@ -216,4 +216,144 @@ class SocialLoginService {
 
         return $savedUser;
     }
+
+    public function linkedinCallback($socialUser) {
+    
+        try {
+            Log::info('LinkedIn Response', [
+                'email' => $socialUser->getEmail(),
+                'name' => $socialUser->getName(),
+                'id' => $socialUser->getId()
+            ]);
+
+            // Get user data from LinkedIn - try both array access and object access
+            $userData = [];
+            try {
+                if (property_exists($socialUser, 'user')) {
+                    $userData = $socialUser->user ?? [];
+                } elseif (method_exists($socialUser, 'getRaw')) {
+                    $rawUser = $socialUser->getRaw();
+                    $userData = is_array($rawUser) ? $rawUser : (is_object($rawUser) ? (array)$rawUser : []);
+                }
+            } catch (\Exception $e) {
+                Log::warning('Could not extract user data from LinkedIn response', ['error' => $e->getMessage()]);
+            }
+            
+            // Extract name parts - LinkedIn provides formatted name, we need to split it
+            $name = $socialUser->getName() ?? '';
+            $nameParts = explode(' ', $name, 2);
+            $firstName = $nameParts[0] ?? '';
+            $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
+
+            // Try to get firstName and lastName from user data if available
+            if (is_array($userData)) {
+                $firstName = $userData['firstName'] ?? $userData['first_name'] ?? $userData['localizedFirstName'] ?? $firstName;
+                $lastName = $userData['lastName'] ?? $userData['last_name'] ?? $userData['localizedLastName'] ?? $lastName;
+            } elseif (is_object($userData)) {
+                $firstName = $userData->firstName ?? $userData->first_name ?? $userData->localizedFirstName ?? $firstName;
+                $lastName = $userData->lastName ?? $userData->last_name ?? $userData->localizedLastName ?? $lastName;
+            }
+
+            // Get email - LinkedIn requires email permission
+            $email = $socialUser->getEmail();
+            if (!$email && is_array($userData)) {
+                $email = $userData['email'] ?? $userData['emailAddress'] ?? '';
+            } elseif (!$email && is_object($userData)) {
+                $email = $userData->email ?? $userData->emailAddress ?? '';
+            }
+
+            if (!$email) {
+                Log::error('LinkedIn Callback: No email found', ['userData' => $userData]);
+                return null;
+            }
+
+            // Get user photo from LinkedIn
+            $photoUrl = null;
+            try {
+                // Try getAvatar() method first (Socialite standard)
+                if (method_exists($socialUser, 'getAvatar')) {
+                    $photoUrl = $socialUser->getAvatar();
+                }
+                
+                // If not available, try to get from raw data
+                if (!$photoUrl && method_exists($socialUser, 'getRaw')) {
+                    $rawUser = $socialUser->getRaw();
+                    if ($rawUser) {
+                        if (is_array($rawUser)) {
+                            $photoUrl = $rawUser['profilePicture'] ?? $rawUser['profile_picture'] ?? $rawUser['picture'] ?? null;
+                            // LinkedIn v2 API provides profilePicture->displayImage
+                            if (!$photoUrl && isset($rawUser['profilePicture']['displayImage'])) {
+                                $photoUrl = $rawUser['profilePicture']['displayImage'];
+                            }
+                        } elseif (is_object($rawUser)) {
+                            $photoUrl = $rawUser->profilePicture ?? $rawUser->profile_picture ?? $rawUser->picture ?? null;
+                            if (!$photoUrl && isset($rawUser->profilePicture->displayImage)) {
+                                $photoUrl = $rawUser->profilePicture->displayImage;
+                            }
+                        }
+                    }
+                }
+                
+                // Also try from userData
+                if (!$photoUrl && !empty($userData)) {
+                    if (is_array($userData)) {
+                        $photoUrl = $userData['profilePicture'] ?? $userData['profile_picture'] ?? $userData['picture'] ?? null;
+                    } elseif (is_object($userData)) {
+                        $photoUrl = $userData->profilePicture ?? $userData->profile_picture ?? $userData->picture ?? null;
+                    }
+                }
+                
+                Log::info('LinkedIn Photo Retrieved', [
+                    'email' => $email,
+                    'photoUrl' => $photoUrl ? substr($photoUrl, 0, 100) : 'no'
+                ]);
+            } catch (\Exception $e) {
+                Log::warning('Failed to get LinkedIn photo', ['error' => $e->getMessage()]);
+            }
+
+            // Get job title from LinkedIn if available
+            $jobTitle = null;
+            if (is_array($userData)) {
+                $jobTitle = $userData['headline'] ?? $userData['positions'] ?? null;
+            } elseif (is_object($userData)) {
+                $jobTitle = $userData->headline ?? $userData->positions ?? null;
+            }
+
+            // Create a new Request object
+            $request = new Request();
+
+            // Populate the request with user data from LinkedIn
+            $requestData = [
+                'firstname' => $firstName,
+                'lastname' => $lastName,
+                'email' => $email,
+                'country_id' => null,
+                'phone' => null,
+                'job' => $jobTitle,
+                'subscribe' => null,
+                'photo' => $photoUrl,
+                'preferences' => null,
+                'social_provider' => 'linkedin'
+            ];
+
+            if($photoUrl):
+                $requestData['is_photo_external'] = 1;
+            endif;
+
+            $request->merge($requestData);
+
+            // Call the save method in UsersRepository
+            $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
+
+            return $savedUser;
+            
+        } catch (\Exception $e) {
+            Log::error('LinkedIn Callback Exception: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ]);
+            return null;
+        }
+    }
 }

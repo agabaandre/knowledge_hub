@@ -11,7 +11,7 @@ class PublicationCategoryViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $file_categories = cache()->remember('file_categories',$minutes, function () {
-            return   PublicationCategory::all();
+            return   PublicationCategory::orderBy('category_name', 'asc')->get();
         });
         
         $view->with('file_categories',$file_categories);

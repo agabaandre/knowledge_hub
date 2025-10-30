@@ -11,7 +11,7 @@ class TagsViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $tags = cache()->remember('tags',$minutes, function () {
-            return   Tag::all();
+            return   Tag::orderBy('tag_text', 'asc')->get();
         });
 
         $view->with('tags',$tags);
