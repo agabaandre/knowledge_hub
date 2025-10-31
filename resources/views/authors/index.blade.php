@@ -22,7 +22,16 @@
 					<i class="{{ $author->icon ?? 'fa fa-user' }} fs-lg theme-cl"></i>
 				</div>
 				<div class="cats-box-caption">
-					<h4 class="fs-md mb-0 ft-medium m-catrio">{{truncate($author->name,30)}}</h4>
+					<h4 class="fs-md mb-0 ft-medium m-catrio">
+						@if(!empty($author->orcid))
+						    <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ truncate($author->name,30) }}'s ORCID profile" style="color: inherit; text-decoration: none;">
+						        {{ truncate($author->name,30) }}
+						        <i class="fa fa-external-link-alt" style="font-size: 0.7em; margin-left: 3px;"></i>
+						    </a>
+						@else
+						    {{ truncate($author->name,30) }}
+						@endif
+					</h4>
 					<span class="text-muted">{{count($author->publications)}} Resources</span>
 				</div>
 			</a>

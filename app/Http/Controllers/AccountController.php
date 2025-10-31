@@ -19,10 +19,14 @@ class AccountController extends Controller
 
     public function profile(Request $request){
 
-        $data['user'] = current_user();
+        $user = current_user();
+        $data['user'] = $user;
         // Preload selected preferences as an array of SubThemeticArea IDs
         // Avoid ambiguous column 'id' by qualifying the table name
-        $data['preferences'] = current_user()->preferences()->pluck('sub_thematic_area.id')->toArray();
+        $data['preferences'] = [];
+        if ($user) {
+            $data['preferences'] = $user->preferences()->pluck('subtheme_id')->toArray();
+        }
         $data['access_groups'] = AccessLevel::all();
         
         return view('account.profile',$data);

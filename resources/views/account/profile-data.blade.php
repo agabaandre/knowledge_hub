@@ -147,6 +147,24 @@
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">
+                                <label class="form-label">ORCID</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control" placeholder="ORCID ID (e.g., 0000-0000-0000-0000)"
+                                    name="orcid" value="{{ $user->orcid }}" maxlength="19">
+                                <small class="form-text text-muted">Optional: Your ORCID identifier (19 characters, format: 0000-0000-0000-0000)</small>
+                                @error('orcid')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
                                 <label class="form-label">Your Interests</label>
                             </div>
                             <div class="col-md-9">

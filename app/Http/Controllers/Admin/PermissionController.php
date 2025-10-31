@@ -505,8 +505,11 @@ class PermissionController extends Controller
         $data['preferences'] = [];
         $data['access_groups'] = AccessLevel::all();
 
-        foreach(current_user()->preferences as $pref){
-            $data['preferences'][] = $pref->subtheme_id;
+        $currentUser = current_user();
+        if ($currentUser) {
+            foreach($currentUser->preferences as $pref){
+                $data['preferences'][] = $pref->subtheme_id;
+            }
         }
         
         return view('admin.profile.index')->with($data);

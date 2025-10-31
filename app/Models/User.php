@@ -107,6 +107,10 @@ class User extends Authenticatable
         return $this->hasManyThrough(CommunityOfPractice::class,CommunityOfPracticeMembers::class,"user_id","id","id","community_of_practice_id");
     }
 
+    public function preferences(){
+        return $this->hasMany(UserPreference::class, 'user_id');
+    }
+
      /**
      * Specifies the user's FCM token
      *
@@ -156,3 +160,5 @@ class User extends Authenticatable
             ]);
         }
     }
+
+}

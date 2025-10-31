@@ -240,7 +240,16 @@
                     @if($publication->author)
                     <div>
                         <strong style="color: #5F5F5F;">Affiliation/Source:</strong>
-                        <span style="color: #0f172a;">{{ $publication->author->name }}</span>
+                        <span style="color: #0f172a;">
+                            @if(!empty($publication->author->orcid))
+                                <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $publication->author->name }}'s ORCID profile" style="color: #0f172a; text-decoration: none;">
+                                    {{ $publication->author->name }}
+                                    <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i>
+                                </a>
+                            @else
+                                {{ $publication->author->name }}
+                            @endif
+                        </span>
                     </div>
                     @endif
                 </div>
@@ -327,7 +336,17 @@
                 <div class="card-md">
                     <h5 class="section-heading">Resource Details</h5>
                     <div>
-                        <label class="meta-label">Source</label><span class="meta-value">{{ $publication->author->name }}</span>
+                        <label class="meta-label">Source</label>
+                        <span class="meta-value">
+                            @if(!empty($publication->author->orcid))
+                                <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $publication->author->name }}'s ORCID profile" style="color: inherit; text-decoration: none;">
+                                    {{ $publication->author->name }}
+                                    <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i>
+                                </a>
+                            @else
+                                {{ $publication->author->name }}
+                            @endif
+                        </span>
                         <label class="meta-label">Visits</label><span class="meta-value">{{ $publication->visits }}</span>
                         @if(!empty($publication->year_published))
                         <label class="meta-label">Year</label><span class="meta-value">{{ $publication->year_published }}</span>

@@ -9,6 +9,13 @@ class UserPreference extends Model
 {
     use HasFactory;
 
+    protected $table = 'user_preferences';
+
+    protected $fillable = [
+        'user_id',
+        'subtheme_id',
+    ];
+
     public function subtheme(){
         return $this->belongsTo(SubThemeticArea::class,"subtheme_id","id");
     }

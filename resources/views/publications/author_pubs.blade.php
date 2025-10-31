@@ -11,7 +11,16 @@
 
      <div class="col-lg-8">
      	<div class="row">
-		 <h4>Source: {{$author->name}}</h4>
+		 <h4>Source: 
+		 @if(!empty($author->orcid))
+		     <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $author->name }}'s ORCID profile">
+		         {{ $author->name }}
+		         <i class="fa fa-external-link-alt" style="font-size: 0.8em; margin-left: 5px;"></i>
+		     </a>
+		 @else
+		     {{ $author->name }}
+		 @endif
+		 </h4>
      	</div>
 
 	    @include('publications.partials.publications')

@@ -116,6 +116,86 @@
             line-height: 1.6;
         }
 
+        .alert {
+            position: relative;
+            padding: 1rem 2.5rem 1rem 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .alert-success {
+            color: #0f5132;
+            background-color: #d1e7dd;
+            border-color: #badbcc;
+        }
+
+        .alert-info {
+            color: #084298;
+            background-color: #cfe2ff;
+            border-color: #b6d4fe;
+        }
+
+        .alert-danger {
+            color: #842029;
+            background-color: #f8d7da;
+            border-color: #f5c2c7;
+        }
+
+        .alert-warning {
+            color: #664d03;
+            background-color: #fff3cd;
+            border-color: #ffecb5;
+        }
+
+        .btn-close {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0;
+            background-color: transparent;
+            border: 0;
+            border-radius: 0.375rem;
+            opacity: 0.5;
+            cursor: pointer;
+            width: 1.5rem;
+            height: 1.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: opacity 0.15s ease-in-out;
+        }
+
+        .btn-close:hover {
+            opacity: 1;
+        }
+
+        .btn-close::before {
+            content: '×';
+            font-size: 1.5rem;
+            line-height: 1;
+            font-weight: 700;
+            color: inherit;
+        }
+
+        .alert-success .btn-close::before {
+            color: #0f5132;
+        }
+
+        .alert-info .btn-close::before {
+            color: #084298;
+        }
+
+        .alert-danger .btn-close::before {
+            color: #842029;
+        }
+
+        .alert-warning .btn-close::before {
+            color: #664d03;
+        }
+
         .back-to-login {
             text-align: center;
             margin-top: 1.5rem;
@@ -190,8 +270,8 @@
                     Enter your email address and we'll send you a link to reset your password.
                 </p>
 
-                <form method="POST" action="{{ route('password.email') }}">
-                    @csrf
+                    <form method="POST" action="{{ route('password.email') }}">
+                        @csrf
 
                     <div class="form-group">
                         <label class="form-label" for="email">Email Address</label>
@@ -205,25 +285,43 @@
                                autofocus
                                placeholder="Enter your email address">
 
-                        @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                        </div>
 
                     <button type="submit" class="btn btn-reset">
                         <i class="fa fa-paper-plane me-2"></i>Send Password Reset Link
-                    </button>
-                </form>
+                                </button>
+                    </form>
 
                 <div class="back-to-login">
                     <p>
                         Remember your password?
                         <a href="{{ route('login') }}">Back to Login</a>
                     </p>
-                </div>
+            </div>
             </div>
         </div>
     </div>
+
+    <script>
+        // Handle alert close button clicks
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.btn-close[data-bs-dismiss="alert"]').forEach(function(button) {
+                button.addEventListener('click', function() {
+                    var alert = this.closest('.alert');
+                    if (alert) {
+                        alert.style.transition = 'opacity 0.15s linear';
+                        alert.style.opacity = '0';
+                        setTimeout(function() {
+                            alert.remove();
+                        }, 150);
+                    }
+                });
+            });
+        });
+    </script>
 @endsection

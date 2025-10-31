@@ -29,16 +29,24 @@ class UsersRepository {
         //don't update these values for social signups account edits
         if( (!$user->id || ($user->id && !$user->is_social_login))){
 
-            $user->name          = $request->firstname." ".$request->lastname;
-            $user->first_name    = $request->firstname;
-            $user->last_name     = $request->lastname;
-            $user->email         = $request->email;
+            $firstname = $request->firstname ?? $request->first_name;
+            $lastname = $request->lastname ?? $request->last_name;
+            
+            if($firstname && $lastname) {
+                $user->name          = $firstname." ".$lastname;
+                $user->first_name    = $firstname;
+                $user->last_name     = $lastname;
+            }
+            
+            if($request->email)
+                $user->email         = $request->email;
 
         }
 
         $user->country_id    = ($request->country_id)?$request->country_id:$user->country_id;
-        $user->phone_number  = ($request->phone)?$request->phone:$user->phone;
-        $user->job_title     = ($request->job)?$request->job:$user->job; 
+        $user->phone_number  = ($request->phone ?? $request->phone_number)?($request->phone ?? $request->phone_number):$user->phone_number;
+        $user->job_title     = ($request->job)?$request->job:$user->job;
+        $user->orcid         = ($request->orcid)?$request->orcid:$user->orcid; 
         $user->is_photo_external = ($request->is_photo_external)?$request->is_photo_external:$user->is_photo_external;
         if($user->is_photo_external==null)
         $user->is_photo_external = false;
@@ -219,11 +227,11 @@ class UsersRepository {
         
         $user = User::find($request->id);
 
-        if($request->firstname)
-        $user->first_name = $request->firstname;
+        if($request->firstname || $request->first_name)
+        $user->first_name = $request->firstname ?? $request->first_name;
 
-        if($request->lastname)
-        $user->last_name  = $request->lastname;
+        if($request->lastname || $request->last_name)
+        $user->last_name  = $request->lastname ?? $request->last_name;
 
         if($request->email)
         $user->email      = $request->email;
@@ -231,11 +239,14 @@ class UsersRepository {
         if($request->langauge)
         $user->langauge = $request->langauge;
 
-        if($request->firstname && $request->lastname)
-        $user->name  = $request->firstname." ".$request->lastname;
+        if(($request->firstname || $request->first_name) && ($request->lastname || $request->last_name))
+        $user->name  = ($request->firstname ?? $request->first_name)." ".($request->lastname ?? $request->last_name);
        
         if($request->phone_number)
         $user->phone_number      = $request->phone_number;
+
+        if($request->orcid)
+        $user->orcid      = $request->orcid;
 
         if($request->level_id)
         $user->access_level_id = $request->level_id;
