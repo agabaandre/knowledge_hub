@@ -15,7 +15,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
-use App\Jobs\PushNotificationJob;
+use AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -174,6 +174,16 @@ function export_excel($records,$heading=false) {
 
 function send_email($request){
 
+    // Try Exchange OAuth first (Microsoft Graph API)
+    try {
+        if (sendEmailWithExchange($request->email, $request->subject ?? 'Knowledge Resource Center Email', $request->body)) {
+            return array('success'=>true,'message'=>"Email has been sent.");
+        }
+    } catch (\Exception $e) {
+        \Log::warning('Exchange email failed, falling back to PHPMailer: ' . $e->getMessage());
+    }
+
+    // Fallback to PHPMailer
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
     try {
@@ -224,6 +234,68 @@ function send_email($request){
           return array('success'=>false,'message'=>$e->getMessage());
     }
     
+}
+
+/**
+ * Send email using Exchange service (Microsoft Graph API)
+ * 
+ * @param string|array $to Email address(es)
+ * @param string $subject Email subject
+ * @param string $body Email body (HTML)
+ * @param string $fromEmail From email address
+ * @param string $fromName From name
+ * @param array $cc CC recipients
+ * @param array $bcc BCC recipients
+ * @param array $attachments Attachments
+ * @return bool
+ */
+function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromName = null, $cc = [], $bcc = [], $attachments = [])
+{
+    try {
+        $config = config('exchange-email');
+        
+        // Check if Exchange is configured
+        if (empty($config['tenant_id']) || empty($config['client_id']) || empty($config['client_secret'])) {
+            \Log::warning('Exchange service not configured, falling back to PHPMailer');
+            return false;
+        }
+        
+        // Use Exchange OAuth service
+        $oauth = new \AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth(
+            $config['tenant_id'],
+            $config['client_id'],
+            $config['client_secret'],
+            $config['redirect_uri'],
+            $config['scope'],
+            $config['auth_method']
+        );
+        
+        if (!$oauth->isConfigured()) {
+            \Log::warning('Exchange service not configured, falling back to PHPMailer');
+            return false;
+        }
+        
+        // Get client credentials token (or refresh if needed)
+        if (!$oauth->hasValidToken()) {
+            $oauth->getClientCredentialsToken();
+        }
+        
+        return $oauth->sendEmail(
+            $to,
+            $subject,
+            $body,
+            true, // HTML email
+            $fromEmail ?: env('MAIL_FROM_ADDRESS'),
+            $fromName ?: env('MAIL_FROM_NAME', 'Africa CDC Knowledge Hub'),
+            $cc,
+            $bcc,
+            $attachments
+        );
+        
+    } catch (\Exception $e) {
+        \Log::error('Exchange email failed: ' . $e->getMessage());
+        return false;
+    }
 }
 function isValidWebLink($link) {
     // Define a regular expression pattern to match web links

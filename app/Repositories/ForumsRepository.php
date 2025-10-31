@@ -184,7 +184,7 @@ class ForumsRepository extends SharedRepo{
             'email'=>$forum->user->email
         );
 
-        SendMailJob::dispatch( $alert);
+        SendMailJob::dispatch( $alert)->onQueue('default');
 
         return $forum;
     }
@@ -209,7 +209,7 @@ class ForumsRepository extends SharedRepo{
             'email'=>$forum->user->email
         );
 
-        SendMailJob::dispatch( $alert);
+        SendMailJob::dispatch( $alert)->onQueue('default');
 
         return $forum;
     }

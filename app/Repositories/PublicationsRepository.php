@@ -330,7 +330,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 'body'=>"Your attention is required to review is called upon",
                 'email'=>"adminemail@gmail.com" // put right admin here
             );
-            SendMailJob::dispatch( $alert);
+            SendMailJob::dispatch( $alert)->onQueue('default');
         }
 
         return $pub;
@@ -638,7 +638,7 @@ public function change_approval_status(Request $request){
         'body'=> $body,
         'email'=>@$publication->user->email
     );
-    SendMailJob::dispatch( $alert);
+    SendMailJob::dispatch( $alert)->onQueue('default');
 
     return $publication;
 }
@@ -655,7 +655,7 @@ public function approve_comment($id){
         'email'=>$comment->user->email
     );
 
-    SendMailJob::dispatch( $alert);
+    SendMailJob::dispatch( $alert)->onQueue('default');
 
 }
 
@@ -671,7 +671,7 @@ public function reject_comment($id){
         'email'=>$comment->user->email
     );
 
-    SendMailJob::dispatch( $alert);
+    SendMailJob::dispatch( $alert)->onQueue('default');
 
 }
 
@@ -715,7 +715,7 @@ public function sumamry_approval_status(Request $request){
         'body'=>$msg,
         'email'=>@$record->user->email
     );
-    SendMailJob::dispatch( $alert);
+    SendMailJob::dispatch( $alert)->onQueue('default');
 
     return $record;
 }

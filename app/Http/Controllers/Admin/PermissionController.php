@@ -170,10 +170,12 @@ class PermissionController extends Controller
         $mail = [
             'subject' => 'Account verification',
             'email'   => $user->email,
-            'body'    => view('emails.simple', [
-                'title' => 'Verify Your Account',
-                'content' => "Hello {$user->name},<br><br>Please verify your email using this token:<br><strong>{$token}</strong>",
-            ])->render(),
+                'body'    => view('emails.simple', [
+                    'title' => 'Verify Your Account',
+                    'content' => "Hello {$user->name},<br><br>Please verify your email using this token:<br><strong>{$token}</strong><br><br>You can use this token to verify your account on the verification page.",
+                    'buttonText' => 'Verify Account',
+                    'buttonUrl' => url('account/verify?token=' . $token),
+                ])->render(),
         ];
         $queued = false;
         try { SendMailJob::dispatch($mail)->onQueue('default'); $queued = true; } catch (\Throwable $e) { $queued = false; }
@@ -459,9 +461,9 @@ class PermissionController extends Controller
             $mail = [
                 'subject' => 'Your account password has been reset',
                 'email'   => $user->email,
-                'body'    => view('emails.simple', [
-                    'title' => 'Password Reset',
-                    'content' => "Hello {$user->name},<br><br>Your password has been reset. Your temporary password is:<br><strong>{$password}</strong><br><br>Please login and change it immediately.",
+                'body'    => view('emails.password_changed', [
+                    'name' => $user->name,
+                    'password' => $password,
                 ])->render(),
             ];
             $queued = false; try{ SendMailJob::dispatch($mail)->onQueue('default'); $queued = true; }catch(\Throwable $e){ $queued = false; }

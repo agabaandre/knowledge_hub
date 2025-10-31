@@ -31,7 +31,7 @@ class AccountController extends Controller
     public function verifyAccount(Request $request){
 
         $verified = $this->usersRepo->verify_account($request);
-        $message  = ($verified)?'Account Verified  successfully':'Verification failed try again, Invalid token.';
+        $message  = ($verified)?'Account verified and activated successfully! You can now login.':'Verification failed. Invalid or expired token. Please try again.';
         $alert_class  = ($verified)?'success':'danger';
 
         return redirect()->route('login')->with(['alert'=>$message,'alert_class'=>$alert_class]);

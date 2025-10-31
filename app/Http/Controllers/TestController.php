@@ -24,7 +24,7 @@ class TestController extends Controller
         $data['email']   = 'agabaandre@gmail.com';
         $data['subject'] = 'Grretings from Us';
         $data['body']    = $body;
-        SendMailJob::dispatch($data);
+        SendMailJob::dispatch($data)->onQueue('default');
 
             // $client  = ApiClient::first();
             // $credentials =['api_key'=>$client->api_key,'api_secret'=>base64_encode($client->api_secret)];

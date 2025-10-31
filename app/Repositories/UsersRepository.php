@@ -162,7 +162,7 @@ class UsersRepository {
         $mail['email'] = $request->email;
         $mail['body'] = view('emails.email_verification', ['token' => $token])->render();
 
-        SendMailJob::dispatch($mail);
+        SendMailJob::dispatch($mail)->onQueue('default');
     }
 
     public function save_preferences($user_id,$preferences){
@@ -205,10 +205,11 @@ class UsersRepository {
         $user = $this->user_by_token($request->t);
 
         if($user):
-        $user->is_verified = 1;
-        $user->verification_token = 0;
-        $user->email_verified_at  = Carbon::now();
-        return $user->update();
+            $user->is_verified = 1;
+            $user->status = 1; // Activate the account
+            $user->verification_token = null; // Clear the token
+            $user->email_verified_at = Carbon::now();
+            return $user->update();
         else:
             return null;
         endif;
