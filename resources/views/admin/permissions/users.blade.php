@@ -180,17 +180,70 @@
             // Global modals handlers
             $(document).on('click', '.btn-edit-user', function(){
                 var id = $(this).data('id');
-                var name = $(this).data('name');
-                var email = $(this).data('email');
-                var phone = $(this).data('phone');
-                var verified = $(this).data('verified');
-                var status = $(this).data('status');
+                var firstName = $(this).data('first-name') || '';
+                var lastName = $(this).data('last-name') || '';
+                var name = $(this).data('name') || '';
+                var email = $(this).data('email') || '';
+                var phone = $(this).data('phone') || '';
+                var roleId = $(this).data('role-id') || '';
+                var countryId = $(this).data('country-id') || '';
+                var administrativeUnitId = $(this).data('administrative-unit-id') || '';
+                var authorId = $(this).data('author-id') || '';
+                var levelId = $(this).data('level-id') || '';
+                var verified = $(this).data('verified') || 0;
+                var status = $(this).data('status') || 0;
+                
+                // Split name if first/last name not provided
+                if (!firstName && !lastName && name) {
+                    var nameParts = name.trim().split(' ');
+                    lastName = nameParts.pop() || '';
+                    firstName = nameParts.join(' ') || '';
+                }
+                
                 $('#edit_user_id').val(id);
-                $('#edit_name').val(name);
+                $('#edit_first_name').val(firstName);
+                $('#edit_last_name').val(lastName);
                 $('#edit_email').val(email);
                 $('#edit_phone').val(phone);
+                $('#edit_role_id').val(roleId).trigger('change');
+                $('#edit_level_id').val(levelId).trigger('change');
+                $('#edit_country_id').val(countryId).trigger('change');
+                $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
+                $('#edit_author_id').val(authorId).trigger('change');
                 $('#edit_verified').prop('checked', !!verified);
                 $('#edit_status').val(status);
+                
+                // Reinitialize Select2 if needed
+                if ($('#edit_role_id').hasClass('select2-hidden-accessible')) {
+                    $('#edit_role_id').select2('destroy');
+                }
+                if ($('#edit_level_id').hasClass('select2-hidden-accessible')) {
+                    $('#edit_level_id').select2('destroy');
+                }
+                if ($('#edit_country_id').hasClass('select2-hidden-accessible')) {
+                    $('#edit_country_id').select2('destroy');
+                }
+                if ($('#edit_administrative_unit_id').hasClass('select2-hidden-accessible')) {
+                    $('#edit_administrative_unit_id').select2('destroy');
+                }
+                if ($('#edit_author_id').hasClass('select2-hidden-accessible')) {
+                    $('#edit_author_id').select2('destroy');
+                }
+                
+                // Reinitialize Select2
+                $('#edit_role_id, #edit_level_id, #edit_country_id, #edit_administrative_unit_id, #edit_author_id').select2({
+                    width: '100%'
+                });
+                
+                // Set values after Select2 initialization
+                setTimeout(function() {
+                    $('#edit_role_id').val(roleId).trigger('change');
+                    $('#edit_level_id').val(levelId).trigger('change');
+                    $('#edit_country_id').val(countryId).trigger('change');
+                    $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
+                    $('#edit_author_id').val(authorId).trigger('change');
+                }, 100);
+                
                 $('#editUserModal').modal('show');
             });
             $('#user-filters').on('submit', function(e){ e.preventDefault(); table.ajax.reload(); });

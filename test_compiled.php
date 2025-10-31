@@ -1,4 +1,4 @@
-@php
+<?php
     if (@$row && @$row->cover) {
         $image_link = $row->image_url;
     } else {
@@ -6,22 +6,8 @@
     }
 
     // Get required fields configuration from settings
-    $requiredFields = [];
-    try {
-        $settingsRequiredFields = settings()->publication_required_fields ?? '{}';
-        $requiredFields = json_decode($settingsRequiredFields, true);
-        if (!is_array($requiredFields) || empty($requiredFields)) {
-            $requiredFields = [
-                'title' => true,
-                'description' => true,
-                'associated_authors' => true,
-                'tags' => true,
-                'theme' => true,
-                'sub_theme' => true,
-                'data_category_id' => true,
-            ];
-        }
-    } catch (\Exception $e) {
+    $requiredFields = json_decode(settings()->publication_required_fields ?? '{}', true);
+    if (empty($requiredFields)) {
         $requiredFields = [
             'title' => true,
             'description' => true,
@@ -35,7 +21,7 @@
 
     // dd($row->country_ids);
 
-@endphp
+?>
 
 <!-- SmartWizard html -->
 <div id="smartwizard" class="mt-3">
@@ -64,7 +50,7 @@
 
 
     <div class="tab-content">
-        <div id="step-1" class="tab-pane active" role="tabpanel" aria-labelledby="step-1">
+        <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
             <!-- Required Fields Reminder -->
             <div class="alert alert-info mb-3" style="background-color: #e7f3ff; border-left: 4px solid #119A48; padding: 12px 16px; border-radius: 4px;">
                 <i class="fa fa-info-circle mr-2" style="color: #119A48;"></i>
@@ -81,19 +67,19 @@
                             <input type="radio" name="upload_type" value="link" class="form-check-input"> External Link
                         </label>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="is_embedded" value="1" class="form-check-input" {{ @$row->is_embedded ? ' checked' : '' }}> Embedded On Page
+                            <input type="checkbox" name="is_embedded" value="1" class="form-check-input" <?php echo e(@$row->is_embedded ? ' checked' : ''); ?>> Embedded On Page
                         </label>
-                        @if (is_admin())
+                        <?php if(is_admin()): ?>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="is_default" value="1" class="form-check-input" {{ @$row->is_default_in_category ? ' checked' : '' }}> Default in Category
-                        </label>
-                        <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="admin_only" value="1" class="form-check-input" {{ @$row->is_admin_only_access ? ' checked' : '' }}> Admin Only Access
+                            <input type="checkbox" name="is_default" value="1" class="form-check-input" <?php echo e(@$row->is_default_in_category ? ' checked' : ''); ?>> Default in Category
                         </label>
                         <label class="form-check-inline mb-0">
-                            <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" {{ isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked' }}> Shows Disclaimer
+                            <input type="checkbox" name="admin_only" value="1" class="form-check-input" <?php echo e(@$row->is_admin_only_access ? ' checked' : ''); ?>> Admin Only Access
                         </label>
-                        @endif
+                        <label class="form-check-inline mb-0">
+                            <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" <?php echo e(isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked'); ?>> Shows Disclaimer
+                        </label>
+                        <?php endif; ?>
                         <div class="w-100"></div>
                         <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
                             <div class="row">
@@ -103,11 +89,11 @@
                                     <small class="text-muted d-block"><strong>Embedded On Page</strong>: Display the resource directly on the page (use for embeddable content like videos or interactive views).</small>
                                 </div>
                                 <div class="col-md-6">
-                                    @if (is_admin())
+                                    <?php if(is_admin()): ?>
                                     <small class="text-muted d-block"><strong>Default in Category</strong>: Feature this resource as the primary/default item in its category so it appears prominently in listings.</small>
                                     <small class="text-muted d-block"><strong>Admin Only Access</strong>: Limit visibility to administrators only.</small>
                                     <small class="text-muted d-block"><strong>Shows Disclaimer</strong>: Include the standard disclaimer on the resource details page.</small>
-                                    @endif
+                                    <?php endif; ?>
                                 </div>
                             </div>
                         </div>
@@ -118,13 +104,9 @@
                 <div class="col-md-12 mt-2">
                     <h3>What is the title of the resource you want to publish?</h3>
                     <div class="mb-3">
-                        <label class="form-label" for="title">Resource Title
-                            @if(($requiredFields['title'] ?? true) == true)
-                                <span class="text-danger">*</span>
-                            @endif
-                        </label>
+                        <label class="form-label" for="title">Resource Title <?php if($requiredFields['title'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
                         <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
-                            value="{{ @$row->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
+                            value="<?php echo e(@$row->title ?? old('title')); ?>" <?php echo e(($requiredFields['title'] ?? true) ? 'required=""' : ''); ?>>
                     </div>
                 </div>
 
@@ -132,112 +114,91 @@
                     <div class="mb-3">
                         <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
                         <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                            name="link" value="{{ @$row->publication ?? old('publication') }}">
+                            name="link" value="<?php echo e(@$row->publication ?? old('publication')); ?>">
                         <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
                     </div>
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="year_published">Year of Publication
-                        @if(($requiredFields['year_published'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
-                        @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
-                        @for($y = $start; $y >= $end; $y--)
-                            <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
+                    <label class="form-label" for="year_published">Year of Publication@if($requiredFields['year_published'] ?? false)<span class="text-danger">*</span><?php endif; ?></label>
+                    <select class="form-control select2" name="year_published" id="year_published" <?php echo e(($requiredFields['year_published'] ?? false) ? 'required' : ''); ?>>
+                        <?php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; ?>
+                        <?php for($y = $start; $y >= $end; $y--): ?>
+                            <option value="<?php echo e($y); ?>" <?php echo e(( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : ''); ?>><?php echo e($y); ?></option>
+                        <?php endfor; ?>
                     </select>
                     <small class="text-muted">Select the year this resource was published.</small>
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label>Category
-                        @if(($requiredFields['data_category_id'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    @include('partials.datarecords.categories_dropdown', [
+                    <label>Category <?php if($requiredFields['data_category_id'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
+                    <?php echo $__env->make('partials.datarecords.categories_dropdown', [
                         'field' => 'data_category_id',
                         'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
                         'exclude_special' => true,
                         'selected' => @$row->publication_catgory_id ? $row->publication_catgory_id : old('data_category_id') ?? '',
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Sub Category</label>
-                    @include('partials.publications.filecategory_dropdown', [
+                    <?php echo $__env->make('partials.publications.filecategory_dropdown', [
                         'field' => 'category_id',
                         'selected' => @$row->data_category_id ? $row->data_category_id : old('category_id'),
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Thematic Area
-                        @if(($requiredFields['theme'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    @include('partials.publications.theme_dropdown', [
+                    <label class="form-label" for="publication">Thematic Area <?php if($requiredFields['theme'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
+                    <?php echo $__env->make('partials.publications.theme_dropdown', [
                         'field' => 'theme',
                         'class' => 'select2 theme',
                         'required' => ($requiredFields['theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_theme->thematic_area_id ? $row->sub_theme->thematic_area_id : old('theme'),
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Sub Theme
-                        @if(($requiredFields['sub_theme'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    @include('partials.publications.subtheme_dropdown', [
+                    <label class="form-label" for="publication">Sub Theme <?php if($requiredFields['sub_theme'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
+                    <?php echo $__env->make('partials.publications.subtheme_dropdown', [
                         'field' => 'sub_theme',
                         'class' => 'select2 subtheme',
                         'required' => ($requiredFields['sub_theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_thematic_area_id ? $row->sub_thematic_area_id : '',
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Region</label>
-                        @include('partials.regions.dropdown', [
+                        <?php echo $__env->make('partials.regions.dropdown', [
                             'field' => 'rccs[]',
                             'class' => 'rcc select2',
                             'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : null),
                             'multiple' => 'multiple',
                             'allfield' => 'All',
-                        ])
+                        ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                         <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
                 </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
-                    @include('partials.countries.dropdown', [
+                    <?php echo $__env->make('partials.countries.dropdown', [
                         'field' => 'countries[]',
                         'required' => 'required',
                         'class' => 'country select2',
                         'selected' => $row->country_ids ?? null,
                         'multiple' => 'multiple',
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
 
-                @if (is_admin())
+                <?php if(is_admin()): ?>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Corporate Source or Member State
-                        @if(($requiredFields['author'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                        <small class="text-muted">(If your source is missing, please contact the system admin)</small>
-                    </label>
-                    @include('partials.authors.dropdown', [
+                    <label class="form-label" for="publication">Corporate Source or Member State@if($requiredFields['author'] ?? false)<span class="text-danger">*</span><?php endif; ?> <small class="text-muted">(If your source is missing, please contact the system admin)</small></label>
+                    <?php echo $__env->make('partials.authors.dropdown', [
                         'field' => 'author',
                         'required' => ($requiredFields['author'] ?? false) ? 'required' : '',
                         'selected' => @$row->author_id ?? null,
                         'allfield' => 'Select Corporate Source or Member State',
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                 </div>
-                @endif
+                <?php endif; ?>
             </div>
         </div>
 
@@ -245,7 +206,7 @@
             <br>
             <div class="col-md-12 mt-3">
                 <input type="hidden" name="id" id="id" class="newform"
-                    value="{{ @$row->id ?? old('id') }}">
+                    value="<?php echo e(@$row->id ?? old('id')); ?>">
             </div>
             <h3 class="mb-2" style="font-weight:600;">Attachments & Additional Details</h3>
             <div class="row" style="min-height: 0;">
@@ -256,19 +217,19 @@
                     <div class="mb-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="publication">Publication Attachments</label>
 
-                        @if (@$row && @$row->has_attachments)
+                        <?php if(@$row && @$row->has_attachments): ?>
                             <div class="mb-2">
                                 <small class="text-muted d-block mb-1">Existing Files (check to remove)</small>
                                 <ul class="list-group">
-                                    @foreach ($row->attachments as $pub_file)
+                                    <?php $__currentLoopData = $row->attachments; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $pub_file): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <a href="{{ $pub_file->file }}" target="_blank"><i class="fa fa-paperclip text-muted"></i> {{ $pub_file->description ?? 'Attachment' }}</a>
-                                            <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
+                                            <a href="<?php echo e($pub_file->file); ?>" target="_blank"><i class="fa fa-paperclip text-muted"></i> <?php echo e($pub_file->description ?? 'Attachment'); ?></a>
+                                            <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="<?php echo e($pub_file->id); ?>"> Remove</label>
                                         </li>
-                                    @endforeach
+                                    <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                                 </ul>
                             </div>
-                        @endif
+                        <?php endif; ?>
 
                         <style>
                             .dropzone-attachments {
@@ -301,10 +262,10 @@
                     <div class="form-group mt-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
                         <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
-                        @include('partials.publications.publication_communities_dropdown', [
+                        <?php echo $__env->make('partials.publications.publication_communities_dropdown', [
                             'field' => 'communities[]',
                             'selected' => @$row->communities ? $row->communities->pluck('id')->toArray() : [],
-                        ])
+                        ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     </div>
                 </div>
 
@@ -315,7 +276,7 @@
                         <div class="custom-file">
                             <input type="file" style="display: none;" name="cover" id="cover">
                             <div onclick="$('#cover').click()" class="cover_preview py-2"
-                                style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
+                                style="width:200px; height:130px; margin-bottom:10px; background-image: url(<?php echo e($image_link); ?>); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
                             </div>
                         </div>
                     </div>
@@ -335,17 +296,13 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-2 p-2" style="background:#ffffff;">
-                        <label class="form-label" for="summernote">Abstract/ Publication Description
-                            @if(($requiredFields['description'] ?? true) == true)
-                                <span class="text-danger">*</span>
-                            @endif
-                        </label>
-                        <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" {{ ($requiredFields['description'] ?? true) ? 'required=""' : '' }}>{!! $row->description ?? old('description') !!}</textarea>
-                        @php
+                        <label class="form-label" for="summernote">Abstract/ Publication Description <?php if($requiredFields['description'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
+                        <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" <?php echo e(($requiredFields['description'] ?? true) ? 'required=""' : ''); ?>><?php echo $row->description ?? old('description'); ?></textarea>
+                        <?php
                             $minWords = settings()->publication_min_words ?? 150;
                             $minChars = $minWords * 5;
-                        @endphp
-                        <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum {{ $minWords }} words required (approximately {{ $minChars }} characters). Please provide a detailed description of your publication.</small>
+                        ?>
+                        <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum <?php echo e($minWords); ?> words required (approximately <?php echo e($minChars); ?> characters). Please provide a detailed description of your publication.</small>
                     </div>
                 </div>
             </div>
@@ -353,136 +310,85 @@
             <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Metadata</h3>
             <div class="row">
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="associated_authors">Associated Authors
-                        @if(($requiredFields['associated_authors'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
+                    <label class="form-label" for="associated_authors">Associated Authors <?php if($requiredFields['associated_authors'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
                     <input type="text" class="form-control" name="associated_authors" id="associated_authors"
-                           placeholder="Associated Authors" {{ ($requiredFields['associated_authors'] ?? true) ? 'required' : '' }}
-                           value="{{ @$row->associated_authors ?? old('associated_authors') }}">
+                           placeholder="Associated Authors" <?php echo e(($requiredFields['associated_authors'] ?? true) ? 'required' : ''); ?>
+
+                           value="<?php echo e(@$row->associated_authors ?? old('associated_authors')); ?>">
                     <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
                 </div>
                 
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="tags">Associated Tags/Health Topics
-                        @if(($requiredFields['tags'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    @include('partials.tags.dropdown', [
+                    <label class="form-label" for="tags">Associated Tags/Health Topics <?php if($requiredFields['tags'] ?? true): ?><span class="text-danger">*</span><?php endif; ?></label>
+                    <?php echo $__env->make('partials.tags.dropdown', [
                         'field' => 'tags[]',
                         'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
                         'required' => ($requiredFields['tags'] ?? true) ? 'required' : '',
-                    ])
+                    ], \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
                     <small class="text-muted">Select relevant tags to help categorize this publication. At least one tag is required for content indexing.</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="doi">DOI (Digital Object Identifier)
-                        @if(($requiredFields['doi'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
+                    <label class="form-label" for="doi">DOI (Digital Object Identifier)<?php if($requiredFields['doi'] ?? false): ?><span class="text-danger">*</span><?php endif; ?></label>
                     <input type="text" class="form-control" name="doi" id="doi" 
                            placeholder="10.xxxx/xxxxx" 
-                           {{ ($requiredFields['doi'] ?? false) ? 'required' : '' }}
-                           value="{{ @$row->doi ?? old('doi') }}">
-                    <small class="text-muted">
-                        @if(!($requiredFields['doi'] ?? false))
-                            Optional -
-                        @endif
-                        Format: 10.xxxx/xxxxx
-                    </small>
+                           <?php echo e(($requiredFields['doi'] ?? false) ? 'required' : ''); ?>
+
+                           value="<?php echo e(@$row->doi ?? old('doi')); ?>">
+                    <small class="text-muted"><?php if(!($requiredFields['doi'] ?? false)): ?>Optional - @endifFormat: 10.xxxx/xxxxx</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="issn">ISSN (International Standard Serial Number)
-                        @if(($requiredFields['issn'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
+                    <label class="form-label" for="issn">ISSN (International Standard Serial Number)<?php if($requiredFields['issn'] ?? false): ?><span class="text-danger">*</span><?php endif; ?></label>
                     <input type="text" class="form-control" name="issn" id="issn" 
                            placeholder="0000-0000" 
-                           {{ ($requiredFields['issn'] ?? false) ? 'required' : '' }}
-                           value="{{ @$row->issn ?? old('issn') }}">
-                    <small class="text-muted">
-                        @if(!($requiredFields['issn'] ?? false))
-                            Optional -
-                        @endif
-                        Format: XXXX-XXXX
-                    </small>
+                           <?php echo e(($requiredFields['issn'] ?? false) ? 'required' : ''); ?>
+
+                           value="<?php echo e(@$row->issn ?? old('issn')); ?>">
+                    <small class="text-muted"><?php if(!($requiredFields['issn'] ?? false)): ?>Optional - @endifFormat: XXXX-XXXX</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="isbn">ISBN (International Standard Book Number)
-                        @if(($requiredFields['isbn'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
+                    <label class="form-label" for="isbn">ISBN (International Standard Book Number)<?php if($requiredFields['isbn'] ?? false): ?><span class="text-danger">*</span><?php endif; ?></label>
                     <input type="text" class="form-control" name="isbn" id="isbn" 
                            placeholder="978-0-xxxxx-xxx-x" 
-                           {{ ($requiredFields['isbn'] ?? false) ? 'required' : '' }}
-                           value="{{ @$row->isbn ?? old('isbn') }}">
-                    <small class="text-muted">
-                        @if(!($requiredFields['isbn'] ?? false))
-                            Optional -
-                        @endif
-                        Format: 978-0-xxxxx-xxx-x
-                    </small>
+                           <?php echo e(($requiredFields['isbn'] ?? false) ? 'required' : ''); ?>
+
+                           value="<?php echo e(@$row->isbn ?? old('isbn')); ?>">
+                    <small class="text-muted"><?php if(!($requiredFields['isbn'] ?? false)): ?>Optional - @endifFormat: 978-0-xxxxx-xxx-x</small>
                 </div>
                 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="license_id">License/Copyright Information
-                        @if(($requiredFields['license_id'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                    <select class="form-control select2" name="license_id" id="license_id" {{ ($requiredFields['license_id'] ?? false) ? 'required' : '' }}>
+                    <label class="form-label" for="license_id">License/Copyright Information@if($requiredFields['license_id'] ?? false)<span class="text-danger">*</span><?php endif; ?></label>
+                    <select class="form-control select2" name="license_id" id="license_id" <?php echo e(($requiredFields['license_id'] ?? false) ? 'required' : ''); ?>>
                         <option value="">Select License</option>
-                        @php
+                        <?php
                             $licenses = \App\Models\License::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
-                        @endphp
-                        @foreach($licenses as $license)
-                            <option value="{{ $license->id }}" {{ (@$row->license_id == $license->id || old('license_id') == $license->id) ? 'selected' : '' }}>
-                                {{ $license->name }}
-                                @if($license->short_name ?? false)
-                                    ({{ $license->short_name }})
-                                @endif
+                        ?>
+                        <?php $__currentLoopData = $licenses; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $license): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                            <option value="<?php echo e($license->id); ?>" <?php echo e((@$row->license_id == $license->id || old('license_id') == $license->id) ? 'selected' : ''); ?>>
+                                <?php echo e($license->name); ?><?php if($license->short_name): ?> (<?php echo e($license->short_name); ?>)<?php endif; ?>
                             </option>
-                        @endforeach
+                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
                     </select>
-                    <small class="text-muted">
-                        @if(!($requiredFields['license_id'] ?? false))
-                            Optional -
-                        @endif
-                        Select the license for this publication
-                    </small>
+                    <small class="text-muted"><?php if(!($requiredFields['license_id'] ?? false)): ?>Optional - @endifSelect  the license for this publication</small>
                 </div>
                 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="funder">Funder</label>
                     <input type="text" class="form-control" name="funder" id="funder" 
                            placeholder="Funding organization or agency" 
-                           value="{{ @$row->funder ?? old('funder') }}">
+                           value="<?php echo e(@$row->funder ?? old('funder')); ?>">
                     <small class="text-muted">Optional - Organization or agency that funded this research</small>
                 </div>
                 
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="copyright_info">Copyright Information
-                        @if(($requiredFields['copyright_info'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
+                    <label class="form-label" for="copyright_info">Copyright Information@if($requiredFields['copyright_info'] ?? false)<span class="text-danger">*</span><?php endif; ?></label>
                     <textarea class="form-control" name="copyright_info" id="copyright_info" rows="2" 
-                              {{ ($requiredFields['copyright_info'] ?? false) ? 'required' : '' }}
-                              placeholder="Additional copyright information">{{ @$row->copyright_info ?? old('copyright_info') }}</textarea>
-                    <small class="text-muted">
-                        @if(!($requiredFields['copyright_info'] ?? false))
-                            Optional -
-                        @endif
-                        Additional copyright details
-                    </small>
+                              <?php echo e(($requiredFields['copyright_info'] ?? false) ? 'required' : ''); ?>
+
+                              placeholder="Additional copyright information"><?php echo e(@$row->copyright_info ?? old('copyright_info')); ?></textarea>
+                    <small class="text-muted"><?php if(!($requiredFields['copyright_info'] ?? false)): ?>Optional - @endifAdditional  copyright details</small>
                 </div>
             </div>
 
@@ -491,7 +397,8 @@
                 <div class="col-md-12" style="margin-left: 10px;">
                     <div class="form-check">
                         <input type="checkbox" class="form-check-input" id="is_journal_article" name="is_journal_article" value="1" 
-                               {{ (@$row->journal_name || @$row->journal_volume || @$row->journal_issue || @$row->journal_pages) ? 'checked' : '' }}
+                               <?php echo e((@$row->journal_name || @$row->journal_volume || @$row->journal_issue || @$row->journal_pages) ? 'checked' : ''); ?>
+
                                onclick="document.getElementById('journal-fields').style.display = this.checked ? 'block' : 'none';">
                         <label class="form-check-label" for="is_journal_article">
                             <strong>This is a Journal Article</strong>
@@ -506,28 +413,28 @@
                         <label class="form-label" for="journal_name">Journal Name</label>
                         <input type="text" class="form-control" name="journal_name" id="journal_name" 
                                placeholder="Name of the journal" 
-                               value="{{ @$row->journal_name ?? old('journal_name') }}">
+                               value="<?php echo e(@$row->journal_name ?? old('journal_name')); ?>">
                     </div>
                     
                     <div style="flex: 1 1 25%; min-width: 0;">
                         <label class="form-label" for="journal_volume">Volume</label>
                         <input type="text" class="form-control" name="journal_volume" id="journal_volume" 
                                placeholder="Vol" 
-                               value="{{ @$row->journal_volume ?? old('journal_volume') }}">
+                               value="<?php echo e(@$row->journal_volume ?? old('journal_volume')); ?>">
                     </div>
                     
                     <div style="flex: 1 1 12.5%; min-width: 0;">
                         <label class="form-label" for="journal_issue">Issue</label>
                         <input type="text" class="form-control" name="journal_issue" id="journal_issue" 
                                placeholder="Issue" 
-                               value="{{ @$row->journal_issue ?? old('journal_issue') }}">
+                               value="<?php echo e(@$row->journal_issue ?? old('journal_issue')); ?>">
                     </div>
                     
                     <div style="flex: 1 1 12.5%; min-width: 0;">
                         <label class="form-label" for="journal_pages">Pages</label>
                         <input type="text" class="form-control" name="journal_pages" id="journal_pages" 
                                placeholder="e.g., 123-145" 
-                               value="{{ @$row->journal_pages ?? old('journal_pages') }}">
+                               value="<?php echo e(@$row->journal_pages ?? old('journal_pages')); ?>">
                         <small class="text-muted" style="font-size: 0.75rem;">Page range</small>
                     </div>
                 </div>
@@ -539,7 +446,8 @@
             </div>
             <div class="col-lg-3 mt-5  float-end">
                 <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
-                    {{ @$row ? 'Save Changes' : 'Submit' }}
+                    <?php echo e(@$row ? 'Save Changes' : 'Submit'); ?>
+
                 </button>
             </div>
         </div>
@@ -552,47 +460,25 @@
 </div>
 
 <br>
+</div>
 
-@include('partials.search.fields_js')
+<?php echo $__env->make('partials.search.fields_js', \Illuminate\Support\Arr::except(get_defined_vars(), ['__data', '__path']))->render(); ?>
 
 <script type="text/javascript">
     $(document).ready(function() {
 
         $('.theme').on('change', function(e) {
-            var themeValue = $(this).val();
-            if (!themeValue) {
-                $('.subtheme').html('<option value="">Select Sub-Theme</option>');
-                return;
-            }
 
-            var themes = @json($themes ?? []);
-            if (!themes || !Array.isArray(themes)) {
-                console.error('Themes data not available');
-                return;
-            }
+            var themes = <?php echo json_encode($themes, 15, 512) ?>;
+            const theme = themes.find((item) => item.id === parseFloat(e.target.value));
+            theme_subs = theme.subthemes;
 
-            const theme = themes.find((item) => item.id === parseFloat(themeValue));
-            if (!theme || !theme.subthemes) {
-                console.error('Theme or subthemes not found');
-                $('.subtheme').html('<option value="">Select Sub-Theme</option>');
-                return;
-            }
+            $('.subtheme').html('');
 
-            var theme_subs = theme.subthemes;
-            $('.subtheme').html('<option value="">Select Sub-Theme</option>');
-
-            if (Array.isArray(theme_subs)) {
-                theme_subs.forEach(function(item) {
-                    $('.subtheme').append(
-                        '<option value="' + item.id + '">' + item.description + '</option>'
-                    );
-                });
-            }
-
-            // Re-initialize Select2 after updating options
-            if (typeof $.fn.select2 !== 'undefined') {
-                $('.subtheme').trigger('change.select2');
-            }
+            theme_subs.forEach(item => {
+                $('.subtheme').append(
+                    `<option value="${item.id}">${item.description}</option>`);
+            });
         });
 
         // Fancy drag & drop for attachments
@@ -632,7 +518,7 @@
             formData.append('_token', $('meta[name="csrf-token"]').attr('content'));
 
             $.ajax({
-                url: '{{ route("ai.summarise.file") }}',
+                url: '<?php echo e(route("ai.summarise.file")); ?>',
                 method: 'POST',
                 data: formData,
                 processData: false,
@@ -714,6 +600,8 @@
                 toggleJournalFields();
             }
         });
+
+    });
 
         $('input[name="upload_type"]').on('change', function() {
             var uploadType = $(this).val();
@@ -814,6 +702,7 @@
             $('#smartwizard').smartWizard("next");
             return true;
         });
+
 
     });
 

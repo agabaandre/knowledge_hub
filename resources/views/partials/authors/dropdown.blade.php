@@ -1,4 +1,4 @@
-<select class="form-control {{ $class ?? 'select2' }}" name="{{$field ?? 'author_id'}}" id="author" {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select Author' }}">
+<select class="form-control {{ $class ?? 'select2' }}" name="{{$field ?? 'author_id'}}" id="{{ $id ?? ($field ?? 'author_id') }}" {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select Author' }}">
 <option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select Author' }}</option>
 @php $defaultAuthorId = 1; @endphp
 @foreach ($authors as $author)

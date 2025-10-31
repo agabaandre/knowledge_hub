@@ -45,15 +45,45 @@ class IndicatorsRepository
 
     public function save_data(Request $request)
     {
-
-        $kpi = new KpiDataRecord();
-        $kpi->kpi_id     = $request->kpi_id;
-        $kpi->country_id = $request->country_id;
-        $kpi->value      = $request->indicator_value;
-        $kpi->period     = $request->year."-".$request->month;
-        $kpi->save();
-
-        return $kpi;
+        $saved = [];
+        $errors = [];
+        
+        // Handle multiple rows (Excel-like table format)
+        if ($request->has('data') && is_array($request->data)) {
+            foreach ($request->data as $index => $row) {
+                // Skip empty rows
+                if (empty($row['country_id']) || empty($row['kpi_id']) || empty($row['year']) || empty($row['month']) || empty($row['indicator_value'])) {
+                    continue;
+                }
+                
+                try {
+                    $kpi = new KpiDataRecord();
+                    $kpi->kpi_id     = $row['kpi_id'];
+                    $kpi->country_id = $row['country_id'];
+                    $kpi->value      = $row['indicator_value'];
+                    $kpi->period     = $row['year']."-".str_pad($row['month'], 2, '0', STR_PAD_LEFT);
+                    $kpi->save();
+                    $saved[] = $kpi;
+                } catch (\Exception $e) {
+                    $errors[] = "Row " . ($index + 1) . ": " . $e->getMessage();
+                }
+            }
+        } else {
+            // Handle single record (backward compatibility)
+            $kpi = new KpiDataRecord();
+            $kpi->kpi_id     = $request->kpi_id;
+            $kpi->country_id = $request->country_id;
+            $kpi->value      = $request->indicator_value;
+            $kpi->period     = $request->year."-".str_pad($request->month, 2, '0', STR_PAD_LEFT);
+            $kpi->save();
+            $saved[] = $kpi;
+        }
+        
+        return [
+            'saved' => $saved,
+            'errors' => $errors,
+            'count' => count($saved)
+        ];
     }
 
 
@@ -65,7 +95,7 @@ class IndicatorsRepository
 
     public function get_kpi_data(Request $request = null)
     {
-        $data = KpiData::orderBy('id','desc');
+        $data = KpiData::orderBy('period_year','desc')->orderBy('period_month','desc')->orderBy('kpi_id','desc');
 
         if($request && $request->country_id)
         $data->where('country_id',intval($request->country_id));

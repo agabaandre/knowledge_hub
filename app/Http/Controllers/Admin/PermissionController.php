@@ -47,6 +47,10 @@ class PermissionController extends Controller
     {
         $data['roles'] = Role::all();
         $data['levels'] = AccessLevel::all();
+        
+        // Load countries and authors for dropdowns
+        $data['countries'] = \App\Models\Country::orderBy('name')->get();
+        $data['authors'] = \App\Models\Author::orderBy('name')->get();
 
         $name = urldecode($request->term);
         $country_id = $request->country_id;
@@ -64,9 +68,10 @@ class PermissionController extends Controller
             ->leftJoin('roles', 'roles.id', '=', 'mhr.role_id')
             ->leftJoin(DB::raw('(select user_id, max(created_at) as last_login_at from access_logs group by user_id) as al'), 'al.user_id', '=', 'users.id')
             ->select(
-                'users.id','users.name','users.email','users.phone_number','users.status',
+                'users.id','users.name','users.first_name','users.last_name','users.email','users.phone_number','users.status',
                 'users.email_verified_at','users.is_social_login','users.social_provider',
-                'country.name as country_name','roles.name as role_name','al.last_login_at'
+                'users.country_id','users.administrative_unit_id','users.author_id','users.access_level_id',
+                'country.name as country_name','roles.name as role_name','roles.id as role_id','al.last_login_at'
             )
             ->when($phone, function ($query, $phone) {
                 return $query->where('users.mobile', 'like', $phone . '%');
@@ -106,7 +111,7 @@ class PermissionController extends Controller
                 $lastLogin = $u->last_login_at ? date('M d, Y H:i', strtotime($u->last_login_at)) : '-';
 
                 $actions = '<div class="btn-group btn-group-sm" role="group">'
-                    .'<button type="button" class="btn btn-outline-primary btn-edit-user" data-id="'.$u->id.'" data-name="'.e($u->name).'" data-email="'.e($u->email).'" data-phone="'.e($u->phone_number).'" data-role="'.e($u->role_name ?? '').'" data-verified="'.($u->email_verified_at?1:0).'" data-status="'.(int)$u->status.'">'
+                    .'<button type="button" class="btn btn-outline-primary btn-edit-user" data-id="'.$u->id.'" data-first-name="'.e($u->first_name ?? '').'" data-last-name="'.e($u->last_name ?? '').'" data-name="'.e($u->name ?? '').'" data-email="'.e($u->email ?? '').'" data-phone="'.e($u->phone_number ?? '').'" data-role-id="'.($u->role_id ?? '').'" data-role="'.e($u->role_name ?? '').'" data-country-id="'.($u->country_id ?? '').'" data-administrative-unit-id="'.($u->administrative_unit_id ?? '').'" data-author-id="'.($u->author_id ?? '').'" data-level-id="'.($u->access_level_id ?? '').'" data-verified="'.($u->email_verified_at?1:0).'" data-status="'.(int)$u->status.'">'
                     .'<i class="fa fa-edit"></i> Edit</button>'
                     .'<button type="button" class="btn btn-outline-warning btn-reset-user" data-id="'.$u->id.'"><i class="fa fa-key"></i> Reset</button>'
                     .(!$u->email_verified_at ? '<button type="button" class="btn btn-outline-success btn-send-verify" data-id="'.$u->id.'"><i class="fa fa-paper-plane"></i> Email Verify</button>' : '')
@@ -251,11 +256,13 @@ class PermissionController extends Controller
 
         $saved = ($request->id)? $user->update():$user->save();
 
-        if($saved){ //attach role
+        if($saved && $roleId){ //attach role
+            // Sync roles - remove old and assign new
+            $user->syncRoles([]);
             $user->assignRole($roleId);
         }
 
-        $msg = (!$saved)?"Operation failed, try again":"User <b> $user->name </b> created successfuly with default password <b> $password </b>";
+        $msg = (!$saved)?"Operation failed, try again":($request->id?"User <b> $user->name </b> updated successfully":"User <b> $user->name </b> created successfuly with default password <b> $password </b>");
        
         $alert_class = ($saved)?'success':'danger';
         $alert = ['alert-'.$alert_class=>$msg];

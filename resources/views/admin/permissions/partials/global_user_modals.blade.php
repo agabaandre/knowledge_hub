@@ -6,7 +6,7 @@
         #editUserModal .modal-body{max-height:70vh;overflow:auto}
       </style>
       <div class="modal-header">
-        <h6 class="modal-title">Edit User</h6>
+        <h6 class="modal-title"><i class="fa fa-user-edit text-primary"></i> Edit User</h6>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
       </div>
       <form method="POST" action="{{ route('permissions.saveuser') }}">
@@ -14,45 +14,113 @@
         <div class="modal-body">
             <input type="hidden" name="id" id="edit_user_id"/>
             <div class="row">
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Name</label>
-                    <input type="text" class="form-control" name="first_name" id="edit_name"/>
-                </div>
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-user mr-2"></i>First Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control text-bold" placeholder="First Name"
+                    name="first_name" id="edit_first_name" required />
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" class="form-control" name="email" id="edit_email"/>
-                </div>
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-user mr-2"></i>Last Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control text-bold" placeholder="Last Name"
+                    name="last_name" id="edit_last_name" required />
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Mobile</label>
-                    <input type="text" class="form-control" name="mobile" id="edit_phone"/>
-                 </div>
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-envelope mr-2"></i>Email <span class="text-danger">*</span></label>
+                <input type="email" class="form-control text-bold" placeholder="Email" name="email" id="edit_email" required />
               </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                    <label>Status</label>
-                    <select class="form-control" name="status" id="edit_status">
-                        <option value="1">Active</option>
-                        <option value="0">InActive</option>
-                        <option value="2">Restricted</option>
-                        <option value="3">Reset</option>
-                    </select>
-                </div>
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-phone mr-2"></i>Mobile <span class="text-danger">*</span></label>
+                <input type="text" class="form-control text-bold" placeholder="Mobile" name="mobile" id="edit_phone" required />
               </div>
-              <div class="col-md-12">
-                <div class="form-group">
-                    <label><input type="checkbox" name="is_verified" value="1" id="edit_verified"> Verified</label>
+
+              <div class="form-group col-md-6 col-sm-12">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  {{ __('auth.user') }} {{ __('auth.role') }} <span class="text-danger">*</span>
+                </label>
+                <select class="form-control form-control-select2 select" name="role_id" id="edit_role_id" data-fouc required>
+                  <option value="" disabled>Choose Role</option>
+                  @foreach ($roles as $role)
+                    <option value="{{ $role->id }}">{{ strtoupper($role->name) }}</option>
+                  @endforeach
+                </select>
+              </div>
+
+              @if (states_enabled())
+              <div class="form-group col-md-6 col-sm-12">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  Access Level
+                </label>
+                <select class="form-control form-control-select2 select" name="level_id" id="edit_level_id" data-fouc>
+                  <option value="">Choose Level</option>
+                  @foreach ($levels as $level)
+                    <option value="{{ $level->id }}">{{ strtoupper($level->level_name) }}</option>
+                  @endforeach
+                </select>
+              </div>
+              @endif
+
+              @if (states_enabled())
+              <div class="form-group col-md-6 col-sm-12">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  Member State
+                </label>
+                @include('partials.countries.dropdown', ['field' => 'country_id', 'selected' => '', 'class' => 'select2', 'id' => 'edit_country_id'])
+              </div>
+              @else 
+              <div class="form-group col-md-6 col-sm-12">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  Administrative Unit
+                </label>
+                @include('partials.adminunits.dropdown', ['field' => 'administrative_unit_id', 'selected' => '', 'class' => 'select2', 'id' => 'edit_administrative_unit_id'])
+              </div>
+              @endif
+
+              <div class="form-group col-md-6 col-sm-12">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  Associated Corporate Source/Member State
+                </label>
+                @include('partials.authors.dropdown', ['field' => 'author_id', 'allfield' => 'None', 'selected' => '', 'class' => 'select2', 'id' => 'edit_author_id'])
+              </div>
+
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-lock mr-2"></i>Password</label>
+                <input type="password" class="form-control text-bold"
+                    placeholder="Leave blank to keep current password" name="pass" id="edit_pass" />
+                <small class="text-muted">Leave blank to keep current password</small>
+              </div>
+
+              <div class="form-group col-md-6 col-sm-12">
+                <label><i class="icon-info mr-2"></i>Status</label>
+                <select class="form-control text-bold" name="status" id="edit_status">
+                  <option value="1">Active</option>
+                  <option value="0">InActive</option>
+                  <option value="2">Restricted</option>
+                  <option value="3">Reset</option>
+                </select>
+              </div>
+
+              <div class="form-group col-md-6 col-sm-12">
+                <div class="form-check mt-4">
+                  <input type="checkbox" class="form-check-input" name="is_verified" value="1" id="edit_verified">
+                  <label class="form-check-label" for="edit_verified">
+                    <i class="icon-checkmark-circle mr-2"></i>Verified
+                  </label>
                 </div>
               </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-            <button type="submit" class="btn btn-success">Save</button>
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">
+              <i class="icon-cross3 mr-2"></i>Close
+            </button>
+            <button type="submit" class="btn btn-success">
+              <i class="fa fa-save mr-2"></i>Update User
+            </button>
         </div>
       </form>
     </div>

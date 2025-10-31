@@ -62,9 +62,9 @@
 
                     @foreach($indicators as $row)
                     <tr>
-                        <td>{{ $row->name }}</td>
-                        <td>{!! $row->description !!}</td>
-                        <td>{!! $row->SubjectArea->name !!}</td>
+                        <td>{{ $row->name ?? 'N/A' }}</td>
+                        <td>{!! $row->description ?? '' !!}</td>
+                        <td>{!! $row->SubjectArea ? $row->SubjectArea->name : 'N/A' !!}</td>
                         <td>
                             <a class="text-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
                             <a class=" ml-1" target="_blank" href="openEditModal('{{ $row->id }}')" class="text-danger"> Edit</a>

@@ -37,8 +37,17 @@ class KpiController extends Controller
 
     public function save_data(Request $request)
     {
-        $this->indicatorsRepo->save_data($request);
-        return back();
+        $result = $this->indicatorsRepo->save_data($request);
+        
+        if ($result['count'] > 0) {
+            $message = $result['count'] . ' record(s) saved successfully.';
+            if (!empty($result['errors'])) {
+                $message .= ' However, ' . count($result['errors']) . ' error(s) occurred: ' . implode('; ', $result['errors']);
+            }
+            return back()->with('alert-success', $message);
+        } else {
+            return back()->with('alert-danger', 'No records were saved. Please ensure all required fields are filled.');
+        }
     }
 
     public function data(Request $request)
