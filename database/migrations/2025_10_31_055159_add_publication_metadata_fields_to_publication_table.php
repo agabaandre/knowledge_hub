@@ -11,11 +11,6 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Make sure licenses table exists first
-        if (!Schema::hasTable('licenses')) {
-            throw new \Exception('Licenses table must be created first. Please run the create_licenses_table migration.');
-        }
-
         Schema::table('publication', function (Blueprint $table) {
             // DOI, ISSN, ISBN
             if (!Schema::hasColumn('publication', 'doi')) {
@@ -29,9 +24,15 @@ return new class extends Migration
             }
             
             // License/Copyright
+            // Only add foreign key if licenses table exists
             if (!Schema::hasColumn('publication', 'license_id')) {
-                $table->foreignId('license_id')->nullable()->after('isbn');
-                $table->foreign('license_id')->references('id')->on('licenses')->onDelete('set null');
+                if (Schema::hasTable('licenses')) {
+                    $table->foreignId('license_id')->nullable()->after('isbn');
+                    $table->foreign('license_id')->references('id')->on('licenses')->onDelete('set null');
+                } else {
+                    // If licenses table doesn't exist, just add the column without foreign key
+                    $table->unsignedBigInteger('license_id')->nullable()->after('isbn');
+                }
             }
             if (!Schema::hasColumn('publication', 'copyright_info')) {
                 $table->text('copyright_info')->nullable()->after('license_id');
@@ -56,6 +57,26 @@ return new class extends Migration
                 $table->string('journal_pages', 50)->nullable()->after('journal_issue');
             }
         });
+        
+        // If licenses table exists and license_id column was added without foreign key, add it now
+        if (Schema::hasTable('licenses') && Schema::hasColumn('publication', 'license_id')) {
+            // Check if foreign key already exists
+            $foreignKeys = Schema::getConnection()->getDoctrineSchemaManager()->listTableForeignKeys('publication');
+            $hasForeignKey = false;
+            foreach ($foreignKeys as $foreignKey) {
+                if ($foreignKey->getName() === 'publication_license_id_foreign' || 
+                    in_array('license_id', $foreignKey->getLocalColumns())) {
+                    $hasForeignKey = true;
+                    break;
+                }
+            }
+            
+            if (!$hasForeignKey) {
+                Schema::table('publication', function (Blueprint $table) {
+                    $table->foreign('license_id')->references('id')->on('licenses')->onDelete('set null');
+                });
+            }
+        }
     }
 
     /**
@@ -83,7 +104,12 @@ return new class extends Migration
                 $table->dropColumn('copyright_info');
             }
             if (Schema::hasColumn('publication', 'license_id')) {
-                $table->dropForeign(['license_id']);
+                // Try to drop foreign key if it exists
+                try {
+                    $table->dropForeign(['license_id']);
+                } catch (\Exception $e) {
+                    // Foreign key might not exist, continue
+                }
                 $table->dropColumn('license_id');
             }
             if (Schema::hasColumn('publication', 'isbn')) {
@@ -98,3 +124,4 @@ return new class extends Migration
         });
     }
 };
+
