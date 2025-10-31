@@ -68,6 +68,10 @@ class Publication extends Model
         return $this->belongsTo(SubThemeticArea::class,"sub_thematic_area_id","id");
     }
 
+    public function license(){
+        return $this->belongsTo(License::class);
+    }
+
 
     public function getThemeAttribute(){
 

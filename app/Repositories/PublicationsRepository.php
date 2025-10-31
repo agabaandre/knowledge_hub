@@ -222,6 +222,20 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->is_admin_only_access   = $request->admin_only ?? false;
         $pub->show_disclaimer        = $request->show_disclaimer ?? false;
 
+        // Publication metadata fields
+        $pub->doi = $request->doi ?? null;
+        $pub->issn = $request->issn ?? null;
+        $pub->isbn = $request->isbn ?? null;
+        $pub->license_id = $request->license_id ?? null;
+        $pub->copyright_info = $request->copyright_info ?? null;
+        $pub->funder = $request->funder ?? null;
+        
+        // Journal fields
+        $pub->journal_name = $request->journal_name ?? null;
+        $pub->journal_volume = $request->journal_volume ?? null;
+        $pub->journal_issue = $request->journal_issue ?? null;
+        $pub->journal_pages = $request->journal_pages ?? null;
+
 
         if(!is_admin()){
 
@@ -355,7 +369,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'author','sub_theme',
             'comments','parent',
             'summaries','versioning',
-            'sub_category','data_category'])->find($id);
+            'sub_category','data_category',
+            'license'])->find($id);
 
         if($pub && $update_visits):
             $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');

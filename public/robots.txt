@@ -1,2 +1,259 @@
+# Robots.txt for Africa CDC Knowledge Hub
+# Allow legitimate search engines
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow admin and sensitive areas
+Disallow: /admin/
+Disallow: /account/
+Disallow: /api/
+Disallow: /storage/
+Disallow: /app/
+Disallow: /bootstrap/
+Disallow: /config/
+Disallow: /database/
+Disallow: /resources/
+Disallow: /routes/
+Disallow: /tests/
+Disallow: /vendor/
+Disallow: /*.env
+Disallow: /*.log
+Disallow: /*.sql
+Disallow: /login
+Disallow: /register
+Disallow: /password/reset
+Disallow: /logout
+
+# Allow access to public content
+Allow: /records/
+Allow: /events/
+Allow: /publications/
+Allow: /health-topics/
+Allow: /categories/
+Allow: /authors/
+Allow: /experts/
+Allow: /forums/
+
+# Sitemap location
+Sitemap: https://khub.africacdc.org/sitemap.xml
+
+# Crawl-delay for aggressive bots (optional)
+User-agent: *
+Crawl-delay: 1
+
+# Specific rules for major search engines
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Slurp
+Allow: /
+Crawl-delay: 0
+
+User-agent: DuckDuckBot
+Allow: /
+Crawl-delay: 0
+
+User-agent: Baiduspider
+Allow: /
+Crawl-delay: 1
+
+User-agent: YandexBot
+Allow: /
+Crawl-delay: 1
+
+# Block known bad bots
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: BLEXBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: MegaIndex
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Block common scraping tools
+User-agent: scrapy
+Disallow: /
+
+User-agent: python-requests
+Disallow: /
+
+User-agent: curl
+Disallow: /
+
+User-agent: wget
+Disallow: /
+
+User-agent: libwww-perl
+Disallow: /
+
+User-agent: go-http-client
+Disallow: /
+
+User-agent: apache-httpclient
+Disallow: /
+
+User-agent: okhttp
+Disallow: /
+
+User-agent: Java/
+Disallow: /
+
+User-agent: masscan
+Disallow: /
+
+User-agent: nmap
+Disallow: /
+
+User-agent: nikto
+Disallow: /
+
+User-agent: sqlmap
+Disallow: /
+
+User-agent: zap
+Disallow: /
+
+User-agent: burp
+Disallow: /
+
+User-agent: arachni
+Disallow: /
+
+User-agent: acunetix
+Disallow: /
+
+User-agent: netsparker
+Disallow: /
+
+User-agent: httrack
+Disallow: /
+
+User-agent: BlackWidow
+Disallow: /
+
+User-agent: NetMechanic
+Disallow: /
+
+User-agent: NetSpider
+Disallow: /
+
+User-agent: NetVampire
+Disallow: /
+
+User-agent: Telesoft
+Disallow: /
+
+User-agent: WebStripper
+Disallow: /
+
+User-agent: WebsiteExtractor
+Disallow: /
+
+User-agent: WebZIP
+Disallow: /
+
+User-agent: wget
+Disallow: /
+
+User-agent: WWW-Collector
+Disallow: /
+
+User-agent: Xenu
+Disallow: /
+
+User-agent: Zeus
+Disallow: /
+
+User-agent: Microsoft URL Control
+Disallow: /
+
+# Allow legitimate social media crawlers
+User-agent: facebookexternalhit
+Allow: /
+
+User-agent: Twitterbot
+Allow: /
+
+User-agent: LinkedInBot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Googlebot-Video
+Allow: /
+
+User-agent: Googlebot-News
+Allow: /
+
+User-agent: Googlebot-Mobile
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
+User-agent: Mediapartners-Google
+Allow: /
+
+User-agent: Applebot
+Allow: /
+
+User-agent: Pinterestbot
+Allow: /
+
+User-agent: FlipboardProxy
+Allow: /
+
+User-agent: bitlybot
+Allow: /
+
+User-agent: SkypeUriPreview
+Allow: /
+
+User-agent: Discordbot
+Allow: /
+
+User-agent: Qwantify
+Allow: /
+
+User-agent: Pinterestbot
+Allow: /
+
+User-agent: bitrix link preview
+Allow: /
+
+User-agent: xing-contenttabreceiver
+Allow: /
+
+User-agent: Chrome-Lighthouse
+Allow: /
+
+User-agent: Google Web Preview
+Allow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+# Note: This robots.txt is designed to allow legitimate search engines
+# while blocking malicious scrapers and bots. SEO will not be affected.

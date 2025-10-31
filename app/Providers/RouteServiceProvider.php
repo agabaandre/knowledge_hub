@@ -59,5 +59,28 @@ class RouteServiceProvider extends ServiceProvider
         RateLimiter::for('api', function (Request $request) {
             return Limit::perMinute(60)->by(optional($request->user())->id ?: $request->ip());
         });
+        
+        // Rate limiting for web routes (more lenient for SEO bots)
+        RateLimiter::for('web', function (Request $request) {
+            $userAgent = strtolower($request->header('User-Agent', ''));
+            
+            // Check if it's a legitimate search engine bot
+            $allowedBots = ['googlebot', 'bingbot', 'slurp', 'duckduckbot', 'baiduspider', 'yandexbot'];
+            $isSEO = false;
+            foreach ($allowedBots as $bot) {
+                if (strpos($userAgent, $bot) !== false) {
+                    $isSEO = true;
+                    break;
+                }
+            }
+            
+            // More lenient rate limit for SEO bots
+            if ($isSEO) {
+                return Limit::perMinute(300)->by($request->ip());
+            }
+            
+            // Standard rate limit for regular users
+            return Limit::perMinute(120)->by($request->ip());
+        });
     }
 }

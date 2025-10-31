@@ -22,8 +22,8 @@ $totalTopics = $groupedTags->flatten()->count();
                         <span class="stat-label">Topics</span>
                     </div>
                 </div>
-            </div>
         </div>
+    </div>
 
         <!-- Search Section -->
         <div class="search-section">

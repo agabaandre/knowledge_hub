@@ -3,12 +3,12 @@
        <div class="container">
 
            <div class="row justify-content-center" data-aos="fade-in">
-              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                   <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
-                       <h2 class="ft-bold">Recommended</span></h2>
-                   </div>
-               </div>
-           </div>
+                     <h2 class="ft-bold">Recommended</span></h2>
+                 </div>
+             </div>
+         </div>
 
            <!-- row -->
           <div class="row align-items-center" id="featured" style="margin-top: 0;">
@@ -17,7 +17,7 @@
                    $i = 0;
                @endphp
 
-               @foreach ($featured as $row)
+                     @foreach ($featured as $row)
                    @php
                        $i++;
                        $likes = count($row->favourited);
@@ -52,7 +52,8 @@
                                    <!-- Image Section -->
                                    <div class="cats-box-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
                                        <img src="{{ $image_link }}"
-                                            alt="{{ $row->title }}" 
+                                            alt="{{ $row->title }} - {{ $row->author->name ?? 'Africa CDC' }}" 
+                                            title="{{ $row->title }}"
                                             style="width: 100%; height: 100%; object-fit: cover;"
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
@@ -76,6 +77,10 @@
                                            <span class="muted medium ml-2 text-muted mt-1 "><br>
                                                <i class="lni lni-empty-file mr-1"></i>Category:
                                                {{ @$row->data_category->category_name }}</span>
+                                           @if(!empty($row->associated_authors))
+                                           <span class="muted medium ml-2 theme-cl"><br>
+                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 40) }}</span>
+                                           @endif
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>
                                                    {{ $likes }} Like{{ $likes > 0 ? 's' : '' }} </span>
@@ -111,18 +116,18 @@
                                            </span>
 
                                        </div>
-                                  </div>
+                                         </div>
 
-                               </div>
-                           </div>
+                                         </div>
+                                     </div>
 
                            @include('home.partials.comments')
 
-                       </div>
-                   </div>
-               @endforeach
+                                 </div>
+                             </div>
+                     @endforeach
 
-           </div>
+                 </div>
            <!-- row -->
 
            <div class="row justify-content-center">
@@ -131,10 +136,10 @@
                        <a id="explore" href="{{ url('records') }}"
                            class="btn btn-md theme-bg rounded text-light hover-theme">Explore More Resources<i
                                class="lni lni-arrow-right-circle ml-2"></i></a>
-                   </div>
-               </div>
+             </div>
+         </div>
            </div>
 
-       </div>
-   </section>
+     </div>
+ </section>
    <!-- ======================= Featured / Recommended ======================== -->

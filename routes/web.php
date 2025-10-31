@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\TagsController;
+use App\Http\Controllers\Admin\LicensesController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
@@ -274,6 +275,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [TagsController::class, 'store']);
         Route::put('/update', [TagsController::class, 'update'])->name('update');
         Route::get("/delete", [TagsController::class, 'destroy']);
+    });
+
+    //licenses
+    Route::group(["prefix" => "licenses", 'as' => 'admin.licenses.'], function () {
+        Route::get("/", [LicensesController::class, 'index'])->name('index');
+        Route::get("/create", [LicensesController::class, 'create'])->name('create');
+        Route::post("/save", [LicensesController::class, 'store'])->name('store');
+        Route::get("/{id}/edit", [LicensesController::class, 'edit'])->name('edit');
+        Route::put("/{id}", [LicensesController::class, 'update'])->name('update');
+        Route::delete("/{id}", [LicensesController::class, 'destroy'])->name('destroy');
     });
 
     //quiz

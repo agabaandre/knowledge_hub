@@ -51,7 +51,7 @@
     }
 </style>
 
-<section class="py-5 bg-light" id="categorization" style="margin-bottom: 2px;">
+<section class="py-5 bg-light" id="categorization" style="margin-bottom: 0;">
     <div class="container">
         <!-- Section Title -->
         <div class="row justify-content-center">
@@ -63,7 +63,7 @@
         </div>
 
         <!-- Cards -->
-        <div class="row g-3">
+        <div class="row g-3" style="margin-top: 2rem;">
             @foreach($categories as $category)
                 <div class="col-12 col-sm-6 col-md-3">
                     <a href="{{ url($category['link']) }}" class="text-decoration-none">

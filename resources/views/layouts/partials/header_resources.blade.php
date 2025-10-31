@@ -1,12 +1,14 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<meta name="description" content="{{ @settings()->site_description }}" />
-<meta name="keywords" content="{{ @settings()->seo_keywords }}">
-<meta name="author" content="{{ @settings()->site_name }}" />
 <meta name="csrf-token" content="{{ csrf_token() }}">
+
+{{-- SEO Meta Tags --}}
+@include('partials.seo.meta')
+
 <!-- Title -->
-<title>{!! @settings()->title !!}</title>
+<title>{{ $pageTitle ?? (settings()->title ?? 'Africa CDC Knowledge Hub') }}</title>
+
 {!! @settings()->analytics_script !!}
 <!-- @notifyCss -->
 

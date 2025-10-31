@@ -1,5 +1,135 @@
 @extends('layouts.app')
 
+@php
+    // SEO Meta Tags for Publication Page
+    $pageTitle = $publication->title . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $pageDescription = Str::limit(strip_tags($publication->description ?? ''), 160) ?: ($publication->title . ' - Published by ' . ($publication->author->name ?? 'Africa CDC'));
+    $pageKeywords = $publication->tags->pluck('tag_text')->implode(', ') . ', ' . ($publication->theme->description ?? '') . ', ' . ($publication->sub_theme->description ?? '');
+    $pageImage = $publication->cover ?? $publication->image_url ?? asset('assets/images/cover.png');
+    $pageImage = filter_var($pageImage, FILTER_VALIDATE_URL) ? $pageImage : asset($pageImage);
+    $canonicalUrl = url('records/resource?id=' . $publication->id);
+    $ogType = 'article';
+    
+    // Get publication date
+    $publishDate = $publication->created_at ? $publication->created_at->toIso8601String() : now()->toIso8601String();
+    $modifiedDate = $publication->updated_at ? $publication->updated_at->toIso8601String() : $publishDate;
+    
+    // Get authors
+    $authors = [];
+    if (!empty($publication->associated_authors)) {
+        $authors = array_map('trim', explode(',', $publication->associated_authors));
+    }
+    if ($publication->author) {
+        $authors[] = $publication->author->name;
+    }
+    $authors = array_unique($authors);
+    
+    // Get tags for article meta
+    $tags = $publication->tags->pluck('tag_text')->toArray();
+@endphp
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ScholarlyArticle",
+    "headline": "{{ addslashes($publication->title) }}",
+    "description": "{{ addslashes(Str::limit(strip_tags($publication->description ?? ''), 300)) }}",
+    "image": "{{ $pageImage }}",
+    "datePublished": "{{ $publishDate }}",
+    "dateModified": "{{ $modifiedDate }}",
+    "author": [
+        @foreach($authors as $index => $author)
+        {
+            "@type": "Person",
+            "name": "{{ addslashes($author) }}"
+        }@if(!$loop->last),@endif
+        @endforeach
+    ],
+    @if($publication->author)
+    "publisher": {
+        "@type": "Organization",
+        "name": "{{ addslashes($publication->author->name) }}",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ settings()->logo ?? asset('assets/images/logo.png') }}"
+        }
+    },
+    @endif
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ $canonicalUrl }}"
+    },
+    @if($publication->doi)
+    "identifier": {
+        "@type": "PropertyValue",
+        "propertyID": "DOI",
+        "value": "{{ $publication->doi }}"
+    },
+    @endif
+    @if($publication->issn)
+    "issn": "{{ $publication->issn }}",
+    @endif
+    @if($publication->isbn)
+    "isbn": "{{ $publication->isbn }}",
+    @endif
+    @if($publication->license)
+    "license": "{{ $publication->license->url ?? '' }}",
+    @endif
+    @if($publication->year_published)
+    "copyrightYear": "{{ $publication->year_published }}",
+    @endif
+    @if($publication->funder)
+    "funder": {
+        "@type": "Organization",
+        "name": "{{ addslashes($publication->funder) }}"
+    },
+    @endif
+    @if($publication->journal_name)
+    "isPartOf": {
+        "@type": "Periodical",
+        "name": "{{ addslashes($publication->journal_name) }}",
+        @if($publication->journal_volume)
+        "volumeNumber": "{{ $publication->journal_volume }}",
+        @endif
+        @if($publication->journal_issue)
+        "issueNumber": "{{ $publication->journal_issue }}",
+        @endif
+        @if($publication->journal_pages)
+        "pagination": "{{ $publication->journal_pages }}"
+        @endif
+    },
+    @endif
+    "keywords": "{{ $pageKeywords }}",
+    "inLanguage": "en",
+    "url": "{{ $canonicalUrl }}",
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Publications",
+                "item": "{{ url('records') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ addslashes(Str::limit($publication->title, 50)) }}",
+                "item": "{{ $canonicalUrl }}"
+            }
+        ]
+    }
+}
+</script>
+@endsection
+
 @section('styles')
 {{-- Summernote CSS loaded via partial in scripts to match forums --}}
 <style>
@@ -56,15 +186,37 @@
 
 @section('content')
 @php $likes = count($publication->favourited); @endphp
+<article itemscope itemtype="https://schema.org/ScholarlyArticle">
 <section class="py-5" style="background: #fff;">
     <div class="container">
         <div class="row align-items-center">
             <div class="col-md-3 text-center mb-3">
-                <img src="{{ $publication->image_url }}" class="img-fluid shadow rounded" alt="Cover Image">
+                @php
+                    // Get image with proper fallback logic like top_searches
+                    $image_link = $publication->cover ?? $publication->image_url ?? null;
+                    // Default image is cover.png from public assets/images
+                    $default_image = asset('assets/images/cover.png');
+                    
+                    // Check if image_link is valid URL or path
+                    if (empty($image_link) || $image_link === null) {
+                        $image_link = $default_image;
+                    } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
+                        // If it's a relative path, try to make it full URL
+                        if (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) {
+                            $image_link = asset($image_link);
+                        } elseif (strpos($image_link, '/') === 0) {
+                            $image_link = url($image_link);
+                        } else {
+                            $image_link = $default_image;
+                        }
+                    }
+                @endphp
+                <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 300px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
             </div>
             <div class="col-md-6">
-                <h3 class="font-weight-bold mb-2">{{ $publication->title }}</h3>
-                <p class="text-muted">{{ $publication->theme->description ?? '' }}</p>
+                <h1 itemprop="headline" class="font-weight-bold mb-2">{{ $publication->title }}</h1>
+                <meta itemprop="name" content="{{ $publication->title }}">
+                <p class="text-muted" itemprop="about">{{ $publication->theme->description ?? '' }}</p>
                 <div class="d-flex flex-wrap mb-3">
                     <span class="badge badge-au">
                         {{ !$publication->is_version ? $publication->sub_theme->description ?? '' : 'Version ' . $publication->version_no }}
@@ -75,6 +227,25 @@
                         </span>
                     @endif
                 </div>
+                
+                {{-- Associated Authors and Affiliation/Source --}}
+                @if(!empty($publication->associated_authors) || $publication->author)
+                <div class="mb-3" style="font-size: 0.95rem;">
+                    @if(!empty($publication->associated_authors))
+                    <div class="mb-2">
+                        <strong style="color: #5F5F5F;">Associated Authors:</strong>
+                        <span style="color: #0f172a;">{{ $publication->associated_authors }}</span>
+                    </div>
+                    @endif
+                    @if($publication->author)
+                    <div>
+                        <strong style="color: #5F5F5F;">Affiliation/Source:</strong>
+                        <span style="color: #0f172a;">{{ $publication->author->name }}</span>
+                    </div>
+                    @endif
+                </div>
+                @endif
+                
                 <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
                 </button>
@@ -113,12 +284,14 @@
                             <iframe width="100%" height="400" src="{{ $publication->publication }}"></iframe>
                         </div>
                     @endif
-                    <h5 class="section-heading">Description</h5>
-                    <p>{!! $publication->description !!}</p>
+                    <h2 class="section-heading">Description</h2>
+                    <div itemprop="articleBody">
+                        <p>{!! $publication->description !!}</p>
+                    </div>
                 </div>
 
                 <div class="card-md">
-                    <h5 class="section-heading">Comments ({{ count($publication->comments) }})</h5>
+                    <h2 class="section-heading">Comments ({{ count($publication->comments) }})</h2>
                     @auth
                         <form id="commentForm" action="{{ url('records/comment') }}" method="post" class="mb-3">
                             @csrf
@@ -126,7 +299,7 @@
                             <input type="hidden" name="user_id" value="{{ current_user()->user_id }}">
                             <div class="form-group">
                                 <label class="mb-2">Write a comment</label>
-                                <textarea id="commentEditor" name="comment" class="summernote-sm"></textarea>
+                                <textarea name="comment" class="form-control summernote-sm" cols="30" rows="6" placeholder="Type your comment...."></textarea>
                             </div>
                             <div class="d-flex justify-content-end">
                                 <button type="submit" class="btn btn-au btn-sm">Post</button>
@@ -166,6 +339,74 @@
                         <label class="meta-label">Theme</label><span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
                         <label class="meta-label">Sub-Theme</label><span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
                         <label class="meta-label">Associated Authors</label><span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                        
+                        {{-- Publication Metadata --}}
+                        @if(!empty($publication->doi))
+                        <label class="meta-label">DOI</label>
+                        <span class="meta-value">
+                            <a href="https://doi.org/{{ $publication->doi }}" target="_blank" rel="noopener noreferrer" style="color: #911C39; text-decoration: none;">
+                                {{ $publication->doi }} <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                            </a>
+                        </span>
+                        @endif
+                        
+                        @if(!empty($publication->issn))
+                        <label class="meta-label">ISSN</label><span class="meta-value">{{ $publication->issn }}</span>
+                        @endif
+                        
+                        @if(!empty($publication->isbn))
+                        <label class="meta-label">ISBN</label><span class="meta-value">{{ $publication->isbn }}</span>
+                        @endif
+                        
+                        @if($publication->license)
+                        <label class="meta-label">License</label>
+                        <span class="meta-value">
+                            @if($publication->license->url)
+                                <a href="{{ $publication->license->url }}" target="_blank" rel="noopener noreferrer" style="color: #911C39; text-decoration: none;">
+                                    {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                </a>
+                            @else
+                                {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif
+                            @endif
+                        </span>
+                        @endif
+                        
+                        @if(!empty($publication->copyright_info))
+                        <label class="meta-label">Copyright Information</label><span class="meta-value">{!! nl2br(e($publication->copyright_info)) !!}</span>
+                        @endif
+                        
+                        @if(!empty($publication->funder))
+                        <label class="meta-label">Funder</label><span class="meta-value">{{ $publication->funder }}</span>
+                        @endif
+                        
+                        {{-- Journal Information (if journal article) --}}
+                        @if(!empty($publication->journal_name) || !empty($publication->journal_volume) || !empty($publication->journal_issue) || !empty($publication->journal_pages))
+                        <div style="margin-top: 1rem; padding-top: 1rem; border-top: 1px solid #e2e8f0;">
+                            <label class="meta-label" style="color: #911C39; font-weight: 600;">Journal Information</label>
+                            @if(!empty($publication->journal_name))
+                            <label class="meta-label" style="margin-top: 0.5rem;">Journal Name</label><span class="meta-value">{{ $publication->journal_name }}</span>
+                            @endif
+                            @if(!empty($publication->journal_volume) || !empty($publication->journal_issue) || !empty($publication->journal_pages))
+                            <div style="display: flex; flex-wrap: wrap; gap: 1rem; margin-top: 0.5rem;">
+                                @if(!empty($publication->journal_volume))
+                                <div style="flex: 1 1 auto;">
+                                    <label class="meta-label">Volume</label><span class="meta-value">{{ $publication->journal_volume }}</span>
+                                </div>
+                                @endif
+                                @if(!empty($publication->journal_issue))
+                                <div style="flex: 1 1 auto;">
+                                    <label class="meta-label">Issue</label><span class="meta-value">{{ $publication->journal_issue }}</span>
+                                </div>
+                                @endif
+                                @if(!empty($publication->journal_pages))
+                                <div style="flex: 1 1 auto;">
+                                    <label class="meta-label">Pages</label><span class="meta-value">{{ $publication->journal_pages }}</span>
+                                </div>
+                                @endif
+                            </div>
+                            @endif
+                        </div>
+                        @endif
                     </div>
                     @include('common.favourites_btn',['row'=>$publication])
                 </div>
@@ -247,6 +488,7 @@
         </div>
     </div>
 </section>
+</article>
 @include('common.ai-summary')
 <!-- Modal for preview -->
 <div class="modal fade" id="previewModal" tabindex="-1" aria-labelledby="previewModalLabel" aria-hidden="true">
@@ -267,146 +509,159 @@
 @section('scripts')
 @include('partials.general.summernote')
 <script>
-$(document).on('click', '.preview-attachment', function() {
-    var fileUrl = $(this).data('file-url');
-    var ext = ($(this).data('file-ext') || '').toString();
-    var isOffice = ($(this).data('file-office') || '0').toString() === '1';
-    var modalBody = $('#previewModalBody');
-    var content = '';
-    if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
-        content = '<img src="'+fileUrl+'" class="img-fluid" style="max-height:75vh;max-width:100%;margin:auto;display:block;">';
-    } else if(ext === 'pdf') {
-        content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:75vh;border:none;"></iframe>';
-    } else if(isOffice) {
-        var gdocs = 'https://docs.google.com/viewer?url='+encodeURIComponent(fileUrl)+'&embedded=true';
-        content = '<iframe src="'+gdocs+'" style="width:100%;height:75vh;border:none;"></iframe>';
-    } else {
-        content = '<div class="alert alert-info">Preview not available. <a href="'+fileUrl+'" target="_blank">Download/Open file</a></div>';
-    }
-    modalBody.html(content);
-    var modal = new bootstrap.Modal(document.getElementById('previewModal'));
-    modal.show();
-});
-
-// Async comments with Summernote-like lightweight editor and 1MB upload cap
-$(function(){
-    function ensureSummernoteLoaded(callback){
-        if ($.fn && $.fn.summernote) { callback(); return; }
-        // ensure CSS present
-        var cssLoaded = false;
-        $('link').each(function(){ if(this.href && this.href.indexOf('summernote')>-1) cssLoaded=true; });
-        if(!cssLoaded){
-            $('<link>', { rel:'stylesheet', href:'{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}' }).appendTo('head');
-        }
-        // try local JS then fallback to CDN
-        var script = document.createElement('script');
-        script.src = '{{ asset('assets/plugins/summernote/dist/summernote.min.js') }}';
-        script.onload = callback;
-        script.onerror = function(){
-            var cdn = document.createElement('script');
-            cdn.src = 'https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.js';
-            cdn.onload = function(){
-                if(!cssLoaded){
-                    $('<link>', { rel:'stylesheet', href:'https://cdn.jsdelivr.net/npm/summernote@0.8.20/dist/summernote-lite.min.css' }).appendTo('head');
-                }
-                callback();
-            };
-            document.body.appendChild(cdn);
-        };
-        document.body.appendChild(script);
-    }
-
-    var $editor = $('#commentEditor');
-    if ($editor.length && !$editor.data('summernote')) {
-        ensureSummernoteLoaded(function(){
-        try {
-            if (!$editor.hasClass('summernote') && !$editor.hasClass('summernote-sm')) {
-                $editor.addClass('summernote-sm');
-            }
-            $editor.summernote({
-                placeholder: 'Write a comment... (images ≤ 1MB)',
-                height: 120,
-                toolbar: [
-                    ['style', ['bold','italic','underline']],
-                    ['para', ['ul','ol']]
-                ],
-                callbacks: {
-                    onImageUpload: function(files){
-                        if(!files || !files.length) return;
-                        var file = files[0];
-                        if (file.size > 1024*1024) { // 1MB
-                            alert('Please upload images up to 1MB.');
-                            return;
-                        }
-                        // Use centralized upload endpoint
-                        var data = new FormData();
-                        data.append('file', file);
-                        data.append('_token', '{{ csrf_token() }}');
-                        $.ajax({
-                            url: '{{ route('image.upload') }}',
-                            type: 'POST',
-                            data: data,
-                            cache: false,
-                            contentType: false,
-                            processData: false
-                        }).done(function(resp){
-                            var imageUrl = resp.url || resp;
-                            $editor.summernote('insertImage', imageUrl);
-                        }).fail(function(){
-                            alert('Image upload failed.');
-                        });
-                    }
-                }
-            });
-        } catch(e) {
-            // fallback
-            $editor.replaceWith('<textarea id="commentEditor" class="form-control" rows="3"></textarea>');
-        }
-        });
-    }
-
-    $('#commentForm').on('submit', function(e){
-        e.preventDefault();
-        var html;
-        if ($('#commentEditor').data('summernote')) {
-            html = $('#commentEditor').summernote('code');
-            // ensure textarea has the html value for serialize
-            $('#commentEditor').val(html);
-        } else {
-            html = $('#commentEditor').val();
-        }
-        // simple guard: empty or only tags
-        if (!html || $('<div>').html(html).text().trim().length === 0) {
-            alert('Please write a comment.');
+// Wait for both jQuery and Summernote to be loaded
+(function() {
+    function initScripts() {
+        // Check if jQuery is available
+        if (typeof jQuery === 'undefined') {
+            console.error('jQuery is not loaded');
             return;
         }
-        var form = $(this);
-        $.ajax({
-            url: form.attr('action'),
-            method: 'POST',
-            data: form.serialize()
-        }).done(function(resp){
-            // optimistic render new comment at top
-            var nowText = 'just now';
-            var name = '{{ current_user()->name ?? "You" }}';
-            var safeHtml = html; // server sanitization should also occur
-            var item = '<div class="comment-box">'
-                + '<strong>'+ name +'</strong>'
-                + '<small class="text-muted d-block">'+ nowText +'</small>'
-                + '<div class="mb-0">'+ safeHtml +'</div>'
-                + '</div>';
-            $('#commentsList').prepend(item);
-            // clear editor
-            if ($('#commentEditor').data('summernote')) {
-                $('#commentEditor').summernote('reset');
-                $('#commentEditor').summernote('code', '');
+        
+        var $ = jQuery;
+        
+        $(document).on('click', '.preview-attachment', function() {
+            var fileUrl = $(this).data('file-url');
+            var ext = ($(this).data('file-ext') || '').toString();
+            var isOffice = ($(this).data('file-office') || '0').toString() === '1';
+            var modalBody = $('#previewModalBody');
+            var content = '';
+            if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
+                content = '<img src="'+fileUrl+'" class="img-fluid" style="max-height:75vh;max-width:100%;margin:auto;display:block;">';
+            } else if(ext === 'pdf') {
+                content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:75vh;border:none;"></iframe>';
+            } else if(isOffice) {
+                var gdocs = 'https://docs.google.com/viewer?url='+encodeURIComponent(fileUrl)+'&embedded=true';
+                content = '<iframe src="'+gdocs+'" style="width:100%;height:75vh;border:none;"></iframe>';
             } else {
-                $('#commentEditor').val('');
+                content = '<div class="alert alert-info">Preview not available. <a href="'+fileUrl+'" target="_blank">Download/Open file</a></div>';
             }
-        }).fail(function(xhr){
-            alert('Failed to post comment.');
+            modalBody.html(content);
+            var modal = new bootstrap.Modal(document.getElementById('previewModal'));
+            modal.show();
         });
-    });
-});
+
+        // Initialize Summernote for comment textarea - wait for document ready
+        $(document).ready(function() {
+            // Wait a bit more to ensure Summernote is fully loaded
+            setTimeout(function() {
+                var $editor = $('textarea.summernote-sm');
+                if ($editor.length && !$editor.data('summernote')) {
+                    // Check if Summernote is available
+                    if (typeof $.fn.summernote === 'undefined') {
+                        console.error('Summernote plugin is not loaded');
+                        return;
+                    }
+                    
+                    try {
+                        $editor.summernote({
+                            placeholder: 'Type your comment....',
+                            height: 150,
+                            toolbar: [
+                                ['style', ['bold','italic','underline']],
+                                ['para', ['ul','ol']],
+                                ['insert', ['picture']]
+                            ],
+                            callbacks: {
+                                onImageUpload: function(files){
+                                    if(!files || !files.length) return;
+                                    var file = files[0];
+                                    if (file.size > 1024*1024) { // 1MB
+                                        alert('Please upload images up to 1MB.');
+                                        return;
+                                    }
+                                    // Use centralized upload endpoint
+                                    var data = new FormData();
+                                    data.append('file', file);
+                                    data.append('_token', '{{ csrf_token() }}');
+                                    $.ajax({
+                                        url: '{{ route('image.upload') }}',
+                                        type: 'POST',
+                                        data: data,
+                                        cache: false,
+                                        contentType: false,
+                                        processData: false
+                                    }).done(function(resp){
+                                        var imageUrl = resp.url || resp;
+                                        $editor.summernote('insertImage', imageUrl);
+                                    }).fail(function(){
+                                        alert('Image upload failed.');
+                                    });
+                                }
+                            }
+                        });
+                    } catch(e) {
+                        console.error('Summernote initialization failed:', e);
+                    }
+                }
+
+                $('#commentForm').on('submit', function(e){
+                    e.preventDefault();
+                    var html;
+                    var $editor = $('textarea.summernote-sm');
+                    if ($editor.length && $editor.data('summernote')) {
+                        html = $editor.summernote('code');
+                        // ensure textarea has the html value for serialize
+                        $editor.val(html);
+                    } else {
+                        html = $editor.val();
+                    }
+                    // simple guard: empty or only tags
+                    if (!html || $('<div>').html(html).text().trim().length === 0) {
+                        alert('Please write a comment.');
+                        return;
+                    }
+                    var form = $(this);
+                    $.ajax({
+                        url: form.attr('action'),
+                        method: 'POST',
+                        data: form.serialize()
+                    }).done(function(resp){
+                        // optimistic render new comment at top
+                        var nowText = 'just now';
+                        var name = '{{ current_user()->name ?? "You" }}';
+                        var safeHtml = html; // server sanitization should also occur
+                        var item = '<div class="comment-box">'
+                            + '<strong>'+ name +'</strong>'
+                            + '<small class="text-muted d-block">'+ nowText +'</small>'
+                            + '<div class="mb-0">'+ safeHtml +'</div>'
+                            + '</div>';
+                        $('#commentsList').prepend(item);
+                        // clear editor
+                        if ($editor.length && $editor.data('summernote')) {
+                            $editor.summernote('reset');
+                            $editor.summernote('code', '');
+                        } else {
+                            $editor.val('');
+                        }
+                    }).fail(function(xhr){
+                        alert('Failed to post comment.');
+                    });
+                });
+            }, 100);
+        });
+    }
+    
+    // Check if jQuery is already loaded
+    if (typeof jQuery !== 'undefined') {
+        initScripts();
+    } else {
+        // Wait for jQuery to load
+        var checkJQuery = setInterval(function() {
+            if (typeof jQuery !== 'undefined') {
+                clearInterval(checkJQuery);
+                initScripts();
+            }
+        }, 100);
+        
+        // Timeout after 5 seconds
+        setTimeout(function() {
+            clearInterval(checkJQuery);
+            if (typeof jQuery === 'undefined') {
+                console.error('jQuery failed to load after 5 seconds');
+            }
+        }, 5000);
+    }
+})();
 </script>
 @endsection

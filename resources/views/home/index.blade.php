@@ -2,7 +2,77 @@
 
 @php
     $theme = site_theme();
+    // SEO Meta Tags for Homepage
+    $pageTitle = settings()->title ?? 'Africa CDC Knowledge Hub - Knowledge Repository for Public Health Resources';
+    $pageDescription = settings()->site_description ?? 'Explore comprehensive public health resources, publications, research, and knowledge from Africa CDC. Access verified health information, data, and publications across African countries.';
+    $pageKeywords = settings()->seo_keywords ?? 'Africa CDC, public health, health research, publications, knowledge hub, Africa, health data, medical research, public health resources';
+    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
 @endphp
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "{{ $pageTitle }}",
+    "description": "{{ strip_tags($pageDescription) }}",
+    "url": "{{ url('/') }}",
+    "mainEntity": {
+        "@type": "CollectionPage",
+        "name": "Public Health Resources",
+        "description": "Comprehensive collection of public health publications, research, and resources from Africa CDC"
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [{
+            "@type": "ListItem",
+            "position": 1,
+            "name": "Home",
+            "item": "{{ url('/') }}"
+        }]
+    }
+}
+</script>
+
+@if(isset($recent) && count($recent) > 0)
+{{-- ItemList Schema for Featured Publications --}}
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "Top Publications",
+    "description": "Top searched and featured public health publications from Africa CDC",
+    "itemListElement": [
+        @foreach($recent->take(10) as $index => $pub)
+        {
+            "@type": "ListItem",
+            "position": {{ $index + 1 }},
+            "item": {
+                "@type": "ScholarlyArticle",
+                "name": "{{ addslashes($pub->title) }}",
+                "url": "{{ url('records/resource?id=' . $pub->id) }}",
+                "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}",
+                @if($pub->author)
+                "author": {
+                    "@type": "Organization",
+                    "name": "{{ addslashes($pub->author->name) }}"
+                },
+                @endif
+                @if($pub->created_at)
+                "datePublished": "{{ $pub->created_at->toIso8601String() }}",
+                @endif
+                @if($pub->cover || $pub->image_url)
+                "image": "{{ filter_var($pub->cover ?? $pub->image_url, FILTER_VALIDATE_URL) ? ($pub->cover ?? $pub->image_url) : asset($pub->cover ?? $pub->image_url) }}",
+                @endif
+                "keywords": "{{ addslashes($pub->tags->pluck('tag_text')->implode(', ')) }}"
+            }
+        }@if(!$loop->last),@endif
+        @endforeach
+    ]
+}
+</script>
+@endif
+@endsection
 
 
 @section('styles')
@@ -49,6 +119,10 @@
             background: linear-gradient(90deg, var(--theme-color-primary, #119A48), #16c653);
             margin: 1rem auto 0;
             border-radius: 2px;
+        }
+        
+        .sec_title {
+            margin-bottom: 0;
         }
 
         .single_review {

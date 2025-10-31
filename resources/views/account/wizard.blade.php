@@ -37,6 +37,12 @@
 
     <div class="tab-content">
         <div id="step-1" class="tab-pane" role="tabpanel" aria-labelledby="step-1">
+            <!-- Required Fields Reminder -->
+            <div class="alert alert-info mb-3" style="background-color: #e7f3ff; border-left: 4px solid #119A48; padding: 12px 16px; border-radius: 4px;">
+                <i class="fa fa-info-circle mr-2" style="color: #119A48;"></i>
+                <strong>Please Note:</strong> All fields marked with a <span class="text-danger">*</span> (red asterisk) are <strong>required</strong>. Please ensure you fill in all required fields before proceeding to Step 2.
+            </div>
+            
             <div class="row" style="margin-top:12px;">
                 <div class="col-lg-12 mb-2" style="margin-left:12px !important;">
                     <div class="d-flex flex-wrap align-items-center" style="gap:20px;">
@@ -84,6 +90,7 @@
                 <div class="col-md-12 mt-2">
                     <h3>What is the title of the resource you want to publish?</h3>
                     <div class="mb-3">
+                        <label class="form-label" for="title">Resource Title <span class="text-danger">*</span></label>
                         <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
                             value="{{ @$row->title ?? old('title') }}" required="">
                     </div>
@@ -91,9 +98,10 @@
 
                 <div class="col-md-12 url_wrapper">
                     <div class="mb-3">
-                        <label class="form-label" for="publication">Publication URL Link</label>
+                        <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
                         <input type="text" placeholder="URL Link" class="form-control url" id="publication"
                             name="link" value="{{ @$row->publication ?? old('publication') }}">
+                        <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
                     </div>
                 </div>
 
@@ -109,7 +117,7 @@
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label>Category</label>
+                    <label>Category <span class="text-danger">*</span></label>
                     @include('partials.datarecords.categories_dropdown', [
                         'field' => 'data_category_id',
                         'required' => 'required',
@@ -126,7 +134,7 @@
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Thematic Area</label>
+                    <label class="form-label" for="publication">Thematic Area <span class="text-danger">*</span></label>
                     @include('partials.publications.theme_dropdown', [
                         'field' => 'theme',
                         'class' => 'select2 theme',
@@ -134,7 +142,7 @@
                     ])
                 </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Sub Theme</label>
+                    <label class="form-label" for="publication">Sub Theme <span class="text-danger">*</span></label>
                     @include('partials.publications.subtheme_dropdown', [
                         'field' => 'sub_theme',
                         'class' => 'select2 subtheme',
@@ -154,7 +162,7 @@
                         <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
                 </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Member States</label>
+                    <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
                     @include('partials.countries.dropdown', [
                         'field' => 'countries[]',
                         'required' => 'required',
@@ -255,20 +263,6 @@
                             </div>
                         </div>
                     </div>
-                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
-                        <label class="form-label" for="sources">Associated Authors</label>
-                        <input type="text" class="form-control" name="associated_authors"
-                            placeholder="Associated Authors"
-                            value="{{ @$row->associated_authors ?? old('associated_authors') }}">
-                        <small class="text-muted d-block mt-1">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
-                    </div>
-                    <div class="form-group mt-2 p-2" style="background:#ffffff; position:relative; z-index:1;">
-                        <label class="form-label" for="sources">Associated Tags/Health Topics</label>
-                        @include('partials.tags.dropdown', [
-                            'field' => 'tags[]',
-                            'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
-                        ])
-                    </div>
                 </div>
 
             </div>
@@ -285,8 +279,131 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-2 p-2" style="background:#ffffff;">
-                        <label class="form-label" for="summernote">Publication Description</label>
+                        <label class="form-label" for="summernote">Publication Description <span class="text-danger">*</span></label>
                         <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required="">{!! $row->description ?? old('description') !!}</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Metadata</h3>
+            <div class="row">
+                <div class="col-md-12 mb-2">
+                    <label class="form-label" for="associated_authors">Associated Authors <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="associated_authors" id="associated_authors"
+                           placeholder="Associated Authors" required
+                           value="{{ @$row->associated_authors ?? old('associated_authors') }}">
+                    <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
+                </div>
+                
+                <div class="col-md-12 mb-2">
+                    <label class="form-label" for="tags">Associated Tags/Health Topics <span class="text-danger">*</span></label>
+                    @include('partials.tags.dropdown', [
+                        'field' => 'tags[]',
+                        'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
+                        'required' => 'required',
+                    ])
+                    <small class="text-muted">Select relevant tags to help categorize this publication. At least one tag is required for content indexing.</small>
+                </div>
+                
+                <div class="col-md-4 mb-2">
+                    <label class="form-label" for="doi">DOI (Digital Object Identifier)</label>
+                    <input type="text" class="form-control" name="doi" id="doi" 
+                           placeholder="10.xxxx/xxxxx" 
+                           value="{{ @$row->doi ?? old('doi') }}">
+                    <small class="text-muted">Optional - Format: 10.xxxx/xxxxx</small>
+                </div>
+                
+                <div class="col-md-4 mb-2">
+                    <label class="form-label" for="issn">ISSN (International Standard Serial Number)</label>
+                    <input type="text" class="form-control" name="issn" id="issn" 
+                           placeholder="0000-0000" 
+                           value="{{ @$row->issn ?? old('issn') }}">
+                    <small class="text-muted">Optional - Format: XXXX-XXXX</small>
+                </div>
+                
+                <div class="col-md-4 mb-2">
+                    <label class="form-label" for="isbn">ISBN (International Standard Book Number)</label>
+                    <input type="text" class="form-control" name="isbn" id="isbn" 
+                           placeholder="978-0-xxxxx-xxx-x" 
+                           value="{{ @$row->isbn ?? old('isbn') }}">
+                    <small class="text-muted">Optional - Format: 978-0-xxxxx-xxx-x</small>
+                </div>
+                
+                <div class="col-md-6 mb-2">
+                    <label class="form-label" for="license_id">License/Copyright Information</label>
+                    <select class="form-control select2" name="license_id" id="license_id">
+                        <option value="">Select License</option>
+                        @php
+                            $licenses = \App\Models\License::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+                        @endphp
+                        @foreach($licenses as $license)
+                            <option value="{{ $license->id }}" {{ (@$row->license_id == $license->id || old('license_id') == $license->id) ? 'selected' : '' }}>
+                                {{ $license->name }}@if($license->short_name) ({{ $license->short_name }})@endif
+                            </option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Optional - Select the license for this publication</small>
+                </div>
+                
+                <div class="col-md-6 mb-2">
+                    <label class="form-label" for="funder">Funder</label>
+                    <input type="text" class="form-control" name="funder" id="funder" 
+                           placeholder="Funding organization or agency" 
+                           value="{{ @$row->funder ?? old('funder') }}">
+                    <small class="text-muted">Optional - Organization or agency that funded this research</small>
+                </div>
+                
+                <div class="col-md-12 mb-2">
+                    <label class="form-label" for="copyright_info">Copyright Information</label>
+                    <textarea class="form-control" name="copyright_info" id="copyright_info" rows="2" 
+                              placeholder="Additional copyright information">{{ @$row->copyright_info ?? old('copyright_info') }}</textarea>
+                    <small class="text-muted">Optional - Additional copyright details</small>
+                </div>
+            </div>
+
+            <h3 class="mb-2 mt-3" style="font-weight:600;">Journal Information <small class="text-muted">(For Journal Articles only)</small></h3>
+            <div class="row mb-2">
+                <div class="col-md-12" style="margin-left: 10px;">
+                    <div class="form-check">
+                        <input type="checkbox" class="form-check-input" id="is_journal_article" name="is_journal_article" value="1" 
+                               {{ (@$row->journal_name || @$row->journal_volume || @$row->journal_issue || @$row->journal_pages) ? 'checked' : '' }}
+                               onclick="document.getElementById('journal-fields').style.display = this.checked ? 'block' : 'none';">
+                        <label class="form-check-label" for="is_journal_article">
+                            <strong>This is a Journal Article</strong>
+                        </label>
+                        <small class="text-muted d-block mt-1">Check this box to show journal-specific fields (Volume, Issue, Pages)</small>
+                    </div>
+                </div>
+            </div>
+            <div class="row journal-fields" id="journal-fields" style="display: none;">
+                <div style="display: flex; flex-wrap: wrap; gap: 15px; width: 100%;">
+                    <div style="flex: 1 1 50%; min-width: 0;">
+                        <label class="form-label" for="journal_name">Journal Name</label>
+                        <input type="text" class="form-control" name="journal_name" id="journal_name" 
+                               placeholder="Name of the journal" 
+                               value="{{ @$row->journal_name ?? old('journal_name') }}">
+                    </div>
+                    
+                    <div style="flex: 1 1 25%; min-width: 0;">
+                        <label class="form-label" for="journal_volume">Volume</label>
+                        <input type="text" class="form-control" name="journal_volume" id="journal_volume" 
+                               placeholder="Vol" 
+                               value="{{ @$row->journal_volume ?? old('journal_volume') }}">
+                    </div>
+                    
+                    <div style="flex: 1 1 12.5%; min-width: 0;">
+                        <label class="form-label" for="journal_issue">Issue</label>
+                        <input type="text" class="form-control" name="journal_issue" id="journal_issue" 
+                               placeholder="Issue" 
+                               value="{{ @$row->journal_issue ?? old('journal_issue') }}">
+                    </div>
+                    
+                    <div style="flex: 1 1 12.5%; min-width: 0;">
+                        <label class="form-label" for="journal_pages">Pages</label>
+                        <input type="text" class="form-control" name="journal_pages" id="journal_pages" 
+                               placeholder="e.g., 123-145" 
+                               value="{{ @$row->journal_pages ?? old('journal_pages') }}">
+                        <small class="text-muted" style="font-size: 0.75rem;">Page range</small>
                     </div>
                 </div>
             </div>
@@ -393,22 +510,84 @@
             extractSummaryFromFile(f);
         });
 
+        // Show/hide journal fields based on checkbox
+        function toggleJournalFields() {
+            var checkbox = $('#is_journal_article');
+            var journalFields = $('#journal-fields');
+            
+            if (!checkbox.length || !journalFields.length) {
+                console.log('Journal fields or checkbox not found');
+                return;
+            }
+            
+            var isChecked = checkbox.is(':checked');
+            
+            // Also check if journal fields already have values (for editing)
+            var hasJournalData = $('#journal_name').val() || $('#journal_volume').val() || $('#journal_issue').val() || $('#journal_pages').val();
+            
+            console.log('Toggle journal fields:', { isChecked: isChecked, hasJournalData: hasJournalData });
+            
+            if (isChecked || hasJournalData) {
+                // Remove inline style and show the fields
+                journalFields.removeAttr('style').show();
+                // Auto-check the checkbox if there's existing data
+                if (hasJournalData && !isChecked) {
+                    checkbox.prop('checked', true);
+                }
+            } else {
+                journalFields.hide().attr('style', 'display: none;');
+            }
+        }
+        
+        // Check on page load (with delay to ensure select2 is initialized)
+        setTimeout(function() {
+            toggleJournalFields();
+        }, 500);
+        
+        // Check when checkbox changes - use both change and click events for better compatibility
+        $(document).on('change', '#is_journal_article', function() {
+            console.log('Checkbox changed:', $(this).is(':checked'));
+            toggleJournalFields();
         });
+        
+        $(document).on('click', '#is_journal_article', function() {
+            setTimeout(function() {
+                toggleJournalFields();
+            }, 10);
+        });
+        
+        // Also check when category changes (in case category name contains "journal" or "article")
+        $('#data_category_id').on('change', function() {
+            var categoryText = $(this).find('option:selected').text().toLowerCase();
+            var isJournalArticle = categoryText.includes('journal') || categoryText.includes('article');
+            
+            if (isJournalArticle && !$('#is_journal_article').is(':checked')) {
+                $('#is_journal_article').prop('checked', true);
+                toggleJournalFields();
+            }
+        });
+
+    });
 
         $('input[name="upload_type"]').on('change', function() {
-
-            /*
-            if ($(this).val() == 'upload') {
-                  $('.url_wrapper').show();
-                  $('.url_wrapper').hide();
-              } else {
-                  $('.url_wrapper').hide();
-                  $('.url_wrapper').show();
-              }
-
-              */
-
+            var uploadType = $(this).val();
+            if (uploadType == 'link') {
+                $('.link-required-asterisk').show();
+                $('.link-required-text').show();
+                $('#publication').prop('required', true);
+            } else {
+                $('.link-required-asterisk').hide();
+                $('.link-required-text').hide();
+                $('#publication').prop('required', false);
+            }
         });
+        
+        // Check on page load
+        if ($('input[name="upload_type"]:checked').val() == 'link') {
+            $('.link-required-asterisk').show();
+            $('.link-required-text').show();
+            $('#publication').prop('required', true);
+        }
 
         // Smart Wizard
         $('#smartwizard').smartWizard({
@@ -418,6 +597,14 @@
             toolbarSettings: {
                 toolbarPosition: 'both', // both bottom
             },
+        });
+
+        // Clear error message when tags are selected
+        $('select[name="tags[]"]').on('change', function() {
+            if ($(this).val() && $(this).val().length > 0) {
+                $(this).closest('.form-group').removeClass('has-error');
+                $(this).closest('.mb-2').find('.text-danger').remove();
+            }
         });
 
         // Step show event
@@ -455,10 +642,31 @@
 
 
         $("#next-btn").on("click", function() {
-
+            // Validate required fields before proceeding
+            var isValid = true;
+            var errorMessage = '';
+            
+            // Check tags selection
+            var tagsSelect = $('select[name="tags[]"]');
+            if (tagsSelect.length && (!tagsSelect.val() || tagsSelect.val().length === 0)) {
+                isValid = false;
+                errorMessage = 'Please select at least one tag/health topic before proceeding.';
+                tagsSelect.closest('.form-group').addClass('has-error');
+                if (tagsSelect.closest('.mb-2').find('.text-danger').length === 0) {
+                    tagsSelect.closest('.mb-2').append('<small class="text-danger d-block mt-1">' + errorMessage + '</small>');
+                }
+            } else {
+                tagsSelect.closest('.form-group').removeClass('has-error');
+                tagsSelect.closest('.mb-2').find('.text-danger').remove();
+            }
+            
+            if (!isValid) {
+                alert(errorMessage || 'Please fill in all required fields marked with a red asterisk (*) before proceeding.');
+                return false;
+            }
+            
             $('#smartwizard').smartWizard("next");
             return true;
-
         });
 
 
@@ -474,7 +682,13 @@
 
             })
             .on('form:submit', function() {
-                return false; // Don't submit form for this demo
+                // Additional validation for tags before form submission
+                var tagsSelect = $('select[name="tags[]"]');
+                if (tagsSelect.length && (!tagsSelect.val() || tagsSelect.val().length === 0)) {
+                    alert('Please select at least one tag/health topic to help categorize your publication.');
+                    return false;
+                }
+                return true; // Allow form submission
             });
     });
 </script>

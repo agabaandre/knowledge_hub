@@ -43,13 +43,13 @@
     @endphp
 
     <div class="">
-        @include('layouts.partials.alerts')
+            @include('layouts.partials.alerts')
         <div class="ap-card mb-3" style="width:100%;">
             <div class="ap-card-header d-flex align-items-center justify-content-between" style="width:100%;">
                 <div class="d-flex align-items-center">
                     <div class="mr-3" style="width:48px;height:48px;overflow:hidden;border-radius:8px;background:#f3f4f6;border:1px solid #e5e7eb;display:flex;align-items:center;justify-content:center;">
                         <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
-                    </div>
+                            </div>
                     <div>
                         <h4 class="mb-0" style="font-weight:700;color:#0f172a;">{!! $publication->title !!}</h4>
                         <div class="text-muted" style="font-size:.9rem;">{!! $publication->theme->description ?? '' !!}</div>
@@ -57,17 +57,17 @@
                             <div class="text-muted" style="font-size:.8rem;">{!! $publication->sub_theme->description ?? '' !!}</div>
                         @else
                             <span class="badge badge-success">Version {{ $publication->version_no }}</span>
-                        @endif
+                                @endif
                         <div class="mt-2 d-flex flex-wrap" style="gap:8px;">
                             @if($publication->author)
                                 <span class="badge badge-light" title="Source"><i class="fa fa-user mr-1"></i>{{ $publication->author->name }}</span>
-                            @endif
+                                        @endif
                             @if(!empty($publication->year_published))
                                 <span class="badge badge-light" title="Year"><i class="fa fa-calendar mr-1"></i>{{ $publication->year_published }}</span>
-                            @endif
+                                @endif
                             @if(@$publication->data_category)
                                 <span class="badge badge-light" title="Category"><i class="fa fa-folder-open mr-1"></i>{{ @$publication->data_category->category_name }}</span>
-                            @endif
+                                        @endif
                             <span class="badge badge-light" title="Views"><i class="fa fa-eye mr-1"></i>{{ $publication->visits }}</span>
                             <span class="badge badge-light" title="Likes"><i class="fa fa-heart mr-1"></i>{{ count($publication->favourited ?? []) }}</span>
                             <span class="badge badge-light" title="Comments"><i class="fa fa-comments mr-1"></i>{{ count($publication->comments) }}</span>
@@ -234,23 +234,156 @@
                 </div>
             </div>
 
-    <!-- Sidebar -->
-
-    <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
-
-        <div class="row">
-
-            <div class="jbd-details mb-4 col-lg-12">
-                @if ($publication->is_video)
+            <!-- Sidebar -->
+            <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
+                <div class="row">
+                    <div class="jbd-details mb-4 col-lg-12">
+                        @if ($publication->is_video)
                     <div class="ap-cover"><iframe width="100%" height="360" src="{{ $publication->publication }}"></iframe></div>
                 @else
                     <div class="ap-cover"><img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;display:block;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"></div>
                 @endif
             </div>
-
         </div>
-
-    </div>
+        
+        {{-- Additional Information beside the image --}}
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ap-card">
+                    <div class="ap-card-header">
+                        <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Additional Information</h5>
+                    </div>
+                    <div class="ap-card-body">
+                        <ul class="ap-list">
+                            <li>
+                                <label class="meta-label">Source</label>
+                                <span class="value">{{ $publication->author->name ?? 'N/A' }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Category</label>
+                                <span class="value">{{ @$publication->data_category->category_name ?? 'N/A' }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Sub Category</label>
+                                <span class="value">{{ $publication->sub_category->category_name ?? 'N/A' }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Theme</label>
+                                <span class="value">{!! $publication->theme->description ?? 'N/A' !!}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Sub-Theme</label>
+                                <span class="value">{!! $publication->sub_theme->description ?? 'N/A' !!}</span>
+                            </li>
+                            @if(!empty($publication->doi))
+                            <li>
+                                <label class="meta-label">DOI</label>
+                                <span class="value">
+                                    <a href="https://doi.org/{{ $publication->doi }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
+                                        {{ $publication->doi }} <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                    </a>
+                                </span>
+                            </li>
+                            @endif
+                            @if(!empty($publication->issn))
+                            <li>
+                                <label class="meta-label">ISSN</label>
+                                <span class="value">{{ $publication->issn }}</span>
+                            </li>
+                            @endif
+                            @if(!empty($publication->isbn))
+                            <li>
+                                <label class="meta-label">ISBN</label>
+                                <span class="value">{{ $publication->isbn }}</span>
+                            </li>
+                            @endif
+                            @if(!empty($publication->year_published))
+                            <li>
+                                <label class="meta-label">Year Published</label>
+                                <span class="value">{{ $publication->year_published }}</span>
+                            </li>
+                            @endif
+                            <li>
+                                <label class="meta-label">Visits</label>
+                                <span class="value">{{ $publication->visits }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Likes</label>
+                                <span class="value">{{ count($publication->favourited ?? []) }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Comments</label>
+                                <span class="value">{{ count($publication->comments) }}</span>
+                            </li>
+                            <li>
+                                <label class="meta-label">Associated Authors</label>
+                                <span class="value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                            </li>
+                            @if($publication->license)
+                            <li>
+                                <label class="meta-label">License</label>
+                                <span class="value">
+                                    @if($publication->license->url)
+                                        <a href="{{ $publication->license->url }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
+                                            {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                        </a>
+                        @else
+                                        {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif
+                                    @endif
+                                </span>
+                            </li>
+                            @endif
+                            @if(!empty($publication->copyright_info))
+                            <li>
+                                <label class="meta-label">Copyright Information</label>
+                                <span class="value" style="white-space: pre-wrap;">{{ $publication->copyright_info }}</span>
+                            </li>
+                            @endif
+                            @if(!empty($publication->funder))
+                            <li>
+                                <label class="meta-label">Funder</label>
+                                <span class="value">{{ $publication->funder }}</span>
+                            </li>
+                            @endif
+                        </ul>
+                        
+                        {{-- Journal Information Section --}}
+                        @if(!empty($publication->journal_name) || !empty($publication->journal_volume) || !empty($publication->journal_issue) || !empty($publication->journal_pages))
+                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                            <h6 style="font-weight:600;color:#0f172a;margin-bottom:1rem;">Journal Information</h6>
+                            <ul class="ap-list">
+                                @if(!empty($publication->journal_name))
+                                <li>
+                                    <label class="meta-label">Journal Name</label>
+                                    <span class="value">{{ $publication->journal_name }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->journal_volume))
+                                <li>
+                                    <label class="meta-label">Volume</label>
+                                    <span class="value">{{ $publication->journal_volume }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->journal_issue))
+                                <li>
+                                    <label class="meta-label">Issue</label>
+                                    <span class="value">{{ $publication->journal_issue }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->journal_pages))
+                                <li>
+                                    <label class="meta-label">Pages</label>
+                                    <span class="value">{{ $publication->journal_pages }}</span>
+                                </li>
+                                @endif
+                            </ul>
+                        </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
         </div>
     </section>
 

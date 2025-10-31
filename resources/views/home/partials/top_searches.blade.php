@@ -1,5 +1,5 @@
    <!-- ======================= Top Searches List ======================== -->
-  <section class="middle gray" style="padding-top: 20px; padding-bottom: 20px;">
+  <section class="middle gray" style="padding-top: 0; padding-bottom: 20px; margin-top: -1rem;">
        <div class="container">
 
            <div class="row justify-content-center" data-aos="fade-in">
@@ -52,7 +52,8 @@
                                    <!-- Image Section -->
                                    <div class="cats-box-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
                                        <img src="{{ $image_link }}"
-                                            alt="{{ $row->title }}" 
+                                            alt="{{ $row->title }} - {{ $row->author->name ?? 'Africa CDC' }}" 
+                                            title="{{ $row->title }}"
                                             style="width: 100%; height: 100%; object-fit: cover;"
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
@@ -77,6 +78,10 @@
                                            <span class="muted medium ml-2 text-muted mt-1 "><br>
                                                <i class="lni lni-empty-file mr-1"></i>Category:
                                                {{ @$row->data_category->category_name }}</span>
+                                           @if(!empty($row->associated_authors))
+                                           <span class="muted medium ml-2 theme-cl"><br>
+                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 40) }}</span>
+                                           @endif
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>
                                                    {{ $likes }} Like{{ $likes > 0 ? 's' : '' }} </span>
