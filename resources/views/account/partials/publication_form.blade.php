@@ -56,9 +56,14 @@
                        
                 <div class="col-md-12">
                             <div class="mb-3">
-                                <label class="form-label" for="summernote">Publication Description</label>
+                                <label class="form-label" for="summernote">Publication Description <span class="text-danger">*</span></label>
                                 <textarea placeholder="Descripion" class="form-control newform" id="summernote"
                                  name="description" required>{!! $row->description ?? old('description') !!}</textarea>
+                                @php
+                                    $minWords = settings()->publication_min_words ?? 150;
+                                    $minChars = $minWords * 5;
+                                @endphp
+                                <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum {{ $minWords }} words required (approximately {{ $minChars }} characters). Please provide a detailed description of your publication.</small>
                             </div>
                         </div>
 

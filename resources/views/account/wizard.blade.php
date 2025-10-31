@@ -5,6 +5,20 @@
         $image_link = asset('assets/images/placeholder.png');
     endif;
 
+    // Get required fields configuration from settings
+    $requiredFields = json_decode(settings()->publication_required_fields ?? '{}', true);
+    if (empty($requiredFields)) {
+        $requiredFields = [
+            'title' => true,
+            'description' => true,
+            'associated_authors' => true,
+            'tags' => true,
+            'theme' => true,
+            'sub_theme' => true,
+            'data_category_id' => true,
+        ];
+    }
+
     // dd($row->country_ids);
 
 @endphp
@@ -90,9 +104,9 @@
                 <div class="col-md-12 mt-2">
                     <h3>What is the title of the resource you want to publish?</h3>
                     <div class="mb-3">
-                        <label class="form-label" for="title">Resource Title <span class="text-danger">*</span></label>
+                        <label class="form-label" for="title">Resource Title @if($requiredFields['title'] ?? true)<span class="text-danger">*</span>@endif</label>
                         <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
-                            value="{{ @$row->title ?? old('title') }}" required="">
+                            value="{{ @$row->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
                     </div>
                 </div>
 
@@ -106,8 +120,8 @@
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="year_published">Year of Publication</label>
-                    <select class="form-control select2" name="year_published" id="year_published">
+                    <label class="form-label" for="year_published">Year of Publication@if($requiredFields['year_published'] ?? false)<span class="text-danger">*</span>@endif</label>
+                    <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
                         @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
                         @for($y = $start; $y >= $end; $y--)
                             <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
@@ -117,10 +131,10 @@
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label>Category <span class="text-danger">*</span></label>
+                    <label>Category @if($requiredFields['data_category_id'] ?? true)<span class="text-danger">*</span>@endif</label>
                     @include('partials.datarecords.categories_dropdown', [
                         'field' => 'data_category_id',
-                        'required' => 'required',
+                        'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
                         'exclude_special' => true,
                         'selected' => @$row->publication_catgory_id ? $row->publication_catgory_id : old('data_category_id') ?? '',
                     ])
@@ -134,18 +148,20 @@
                 </div>
 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Thematic Area <span class="text-danger">*</span></label>
+                    <label class="form-label" for="publication">Thematic Area @if($requiredFields['theme'] ?? true)<span class="text-danger">*</span>@endif</label>
                     @include('partials.publications.theme_dropdown', [
                         'field' => 'theme',
                         'class' => 'select2 theme',
+                        'required' => ($requiredFields['theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_theme->thematic_area_id ? $row->sub_theme->thematic_area_id : old('theme'),
                     ])
                 </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Sub Theme <span class="text-danger">*</span></label>
+                    <label class="form-label" for="publication">Sub Theme @if($requiredFields['sub_theme'] ?? true)<span class="text-danger">*</span>@endif</label>
                     @include('partials.publications.subtheme_dropdown', [
                         'field' => 'sub_theme',
                         'class' => 'select2 subtheme',
+                        'required' => ($requiredFields['sub_theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_thematic_area_id ? $row->sub_thematic_area_id : '',
                     ])
                 </div>
@@ -174,9 +190,10 @@
 
                 @if (is_admin())
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Corporate Source or Member State <small class="text-muted">(If your source is missing, please contact the system admin)</small></label>
+                    <label class="form-label" for="publication">Corporate Source or Member State@if($requiredFields['author'] ?? false)<span class="text-danger">*</span>@endif <small class="text-muted">(If your source is missing, please contact the system admin)</small></label>
                     @include('partials.authors.dropdown', [
                         'field' => 'author',
+                        'required' => ($requiredFields['author'] ?? false) ? 'required' : '',
                         'selected' => @$row->author_id ?? null,
                         'allfield' => 'Select Corporate Source or Member State',
                     ])
@@ -279,8 +296,13 @@
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-2 p-2" style="background:#ffffff;">
-                        <label class="form-label" for="summernote">Publication Description <span class="text-danger">*</span></label>
-                        <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required="">{!! $row->description ?? old('description') !!}</textarea>
+                        <label class="form-label" for="summernote">Abstract/ Publication Description @if($requiredFields['description'] ?? true)<span class="text-danger">*</span>@endif</label>
+                        <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" {{ ($requiredFields['description'] ?? true) ? 'required=""' : '' }}>{!! $row->description ?? old('description') !!}</textarea>
+                        @php
+                            $minWords = settings()->publication_min_words ?? 150;
+                            $minChars = $minWords * 5;
+                        @endphp
+                        <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum {{ $minWords }} words required (approximately {{ $minChars }} characters). Please provide a detailed description of your publication.</small>
                     </div>
                 </div>
             </div>
@@ -288,50 +310,53 @@
             <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Metadata</h3>
             <div class="row">
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="associated_authors">Associated Authors <span class="text-danger">*</span></label>
+                    <label class="form-label" for="associated_authors">Associated Authors @if($requiredFields['associated_authors'] ?? true)<span class="text-danger">*</span>@endif</label>
                     <input type="text" class="form-control" name="associated_authors" id="associated_authors"
-                           placeholder="Associated Authors" required
+                           placeholder="Associated Authors" {{ ($requiredFields['associated_authors'] ?? true) ? 'required' : '' }}
                            value="{{ @$row->associated_authors ?? old('associated_authors') }}">
                     <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
                 </div>
                 
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="tags">Associated Tags/Health Topics <span class="text-danger">*</span></label>
+                    <label class="form-label" for="tags">Associated Tags/Health Topics @if($requiredFields['tags'] ?? true)<span class="text-danger">*</span>@endif</label>
                     @include('partials.tags.dropdown', [
                         'field' => 'tags[]',
                         'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
-                        'required' => 'required',
+                        'required' => ($requiredFields['tags'] ?? true) ? 'required' : '',
                     ])
                     <small class="text-muted">Select relevant tags to help categorize this publication. At least one tag is required for content indexing.</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="doi">DOI (Digital Object Identifier)</label>
+                    <label class="form-label" for="doi">DOI (Digital Object Identifier)@if($requiredFields['doi'] ?? false)<span class="text-danger">*</span>@endif</label>
                     <input type="text" class="form-control" name="doi" id="doi" 
                            placeholder="10.xxxx/xxxxx" 
+                           {{ ($requiredFields['doi'] ?? false) ? 'required' : '' }}
                            value="{{ @$row->doi ?? old('doi') }}">
-                    <small class="text-muted">Optional - Format: 10.xxxx/xxxxx</small>
+                    <small class="text-muted">@if(!($requiredFields['doi'] ?? false))Optional - @endifFormat: 10.xxxx/xxxxx</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="issn">ISSN (International Standard Serial Number)</label>
+                    <label class="form-label" for="issn">ISSN (International Standard Serial Number)@if($requiredFields['issn'] ?? false)<span class="text-danger">*</span>@endif</label>
                     <input type="text" class="form-control" name="issn" id="issn" 
                            placeholder="0000-0000" 
+                           {{ ($requiredFields['issn'] ?? false) ? 'required' : '' }}
                            value="{{ @$row->issn ?? old('issn') }}">
-                    <small class="text-muted">Optional - Format: XXXX-XXXX</small>
+                    <small class="text-muted">@if(!($requiredFields['issn'] ?? false))Optional - @endifFormat: XXXX-XXXX</small>
                 </div>
                 
                 <div class="col-md-4 mb-2">
-                    <label class="form-label" for="isbn">ISBN (International Standard Book Number)</label>
+                    <label class="form-label" for="isbn">ISBN (International Standard Book Number)@if($requiredFields['isbn'] ?? false)<span class="text-danger">*</span>@endif</label>
                     <input type="text" class="form-control" name="isbn" id="isbn" 
                            placeholder="978-0-xxxxx-xxx-x" 
+                           {{ ($requiredFields['isbn'] ?? false) ? 'required' : '' }}
                            value="{{ @$row->isbn ?? old('isbn') }}">
-                    <small class="text-muted">Optional - Format: 978-0-xxxxx-xxx-x</small>
+                    <small class="text-muted">@if(!($requiredFields['isbn'] ?? false))Optional - @endifFormat: 978-0-xxxxx-xxx-x</small>
                 </div>
                 
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="license_id">License/Copyright Information</label>
-                    <select class="form-control select2" name="license_id" id="license_id">
+                    <label class="form-label" for="license_id">License/Copyright Information@if($requiredFields['license_id'] ?? false)<span class="text-danger">*</span>@endif</label>
+                    <select class="form-control select2" name="license_id" id="license_id" {{ ($requiredFields['license_id'] ?? false) ? 'required' : '' }}>
                         <option value="">Select License</option>
                         @php
                             $licenses = \App\Models\License::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
@@ -342,7 +367,7 @@
                             </option>
                         @endforeach
                     </select>
-                    <small class="text-muted">Optional - Select the license for this publication</small>
+                    <small class="text-muted">@if(!($requiredFields['license_id'] ?? false))Optional - @endifSelect the license for this publication</small>
                 </div>
                 
                 <div class="col-md-6 mb-2">
@@ -354,10 +379,11 @@
                 </div>
                 
                 <div class="col-md-12 mb-2">
-                    <label class="form-label" for="copyright_info">Copyright Information</label>
+                    <label class="form-label" for="copyright_info">Copyright Information@if($requiredFields['copyright_info'] ?? false)<span class="text-danger">*</span>@endif</label>
                     <textarea class="form-control" name="copyright_info" id="copyright_info" rows="2" 
+                              {{ ($requiredFields['copyright_info'] ?? false) ? 'required' : '' }}
                               placeholder="Additional copyright information">{{ @$row->copyright_info ?? old('copyright_info') }}</textarea>
-                    <small class="text-muted">Optional - Additional copyright details</small>
+                    <small class="text-muted">@if(!($requiredFields['copyright_info'] ?? false))Optional - @endifAdditional copyright details</small>
                 </div>
             </div>
 

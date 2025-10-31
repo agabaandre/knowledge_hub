@@ -197,6 +197,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+    Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');
 
     Route::get("/events", [AdminEventsController::class, 'index'])->name('admin.events');
 

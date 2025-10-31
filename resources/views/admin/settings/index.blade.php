@@ -216,10 +216,88 @@
             color: white;
         }
 
+        .btn-outline-secondary {
+            border: 2px solid #64748b;
+            border-radius: 8px;
+            padding: 0.875rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #64748b;
+            background: white;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-outline-secondary:hover {
+            background: #64748b;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
+        }
+
         .info-text {
             font-size: 0.875rem;
             color: #64748b;
             margin-top: 0.25rem;
+        }
+
+        .terminal-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 0.875rem;
+            padding: 1rem;
+            border-radius: 4px;
+            min-height: 300px;
+            max-height: 500px;
+            overflow-y: auto;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            line-height: 1.6;
+        }
+
+        .terminal-line {
+            margin-bottom: 0.25rem;
+        }
+
+        .terminal-prompt {
+            color: #4ec9b0;
+            font-weight: bold;
+            margin-right: 0.5rem;
+        }
+
+        .terminal-text {
+            color: #d4d4d4;
+        }
+
+        .terminal-success {
+            color: #4ec9b0;
+        }
+
+        .terminal-error {
+            color: #f48771;
+        }
+
+        .terminal-info {
+            color: #569cd6;
+        }
+
+        #cache-output-terminal::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #cache-output-terminal::-webkit-scrollbar-track {
+            background: #252526;
+        }
+
+        #cache-output-terminal::-webkit-scrollbar-thumb {
+            background: #424242;
+            border-radius: 4px;
+        }
+
+        #cache-output-terminal::-webkit-scrollbar-thumb:hover {
+            background: #4e4e4e;
         }
     </style>
 @endsection
@@ -600,6 +678,100 @@
                     </div>
 
                     <div class="form-section-title mt-4">
+                        <i class="fa fa-file-alt"></i>
+                        Publication Form Settings
+                    </div>
+
+                    <div class="form-group">
+                        <label>Minimum Publication Description Words</label>
+                        <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
+                        <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Required Fields on Publication Form</label>
+                        <small class="info-text d-block mb-3">Select which fields should be required when users submit publications:</small>
+                        
+                        @php
+                            $requiredFields = json_decode($settings->publication_required_fields ?? '{}', true);
+                            if (empty($requiredFields)) {
+                                $requiredFields = [
+                                    'title' => true,
+                                    'description' => true,
+                                    'associated_authors' => true,
+                                    'tags' => true,
+                                    'theme' => true,
+                                    'sub_theme' => true,
+                                    'data_category_id' => true,
+                                ];
+                            }
+                        @endphp
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[title]" value="1" id="req_title" @if($requiredFields['title'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_title">Title</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[description]" value="1" id="req_description" @if($requiredFields['description'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_description">Description</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[associated_authors]" value="1" id="req_associated_authors" @if($requiredFields['associated_authors'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_associated_authors">Associated Authors</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[tags]" value="1" id="req_tags" @if($requiredFields['tags'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_tags">Tags/Health Topics</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[theme]" value="1" id="req_theme" @if($requiredFields['theme'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_theme">Theme</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[sub_theme]" value="1" id="req_sub_theme" @if($requiredFields['sub_theme'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_sub_theme">Sub Theme</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[data_category_id]" value="1" id="req_data_category_id" @if($requiredFields['data_category_id'] ?? true) checked @endif>
+                                    <label class="form-check-label" for="req_data_category_id">Category</label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[year_published]" value="1" id="req_year_published" @if($requiredFields['year_published'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_year_published">Year Published</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[author]" value="1" id="req_author" @if($requiredFields['author'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_author">Source/Author</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[doi]" value="1" id="req_doi" @if($requiredFields['doi'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_doi">DOI</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[issn]" value="1" id="req_issn" @if($requiredFields['issn'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_issn">ISSN</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[isbn]" value="1" id="req_isbn" @if($requiredFields['isbn'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_isbn">ISBN</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[license_id]" value="1" id="req_license_id" @if($requiredFields['license_id'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_license_id">License</label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[copyright_info]" value="1" id="req_copyright_info" @if($requiredFields['copyright_info'] ?? false) checked @endif>
+                                    <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
                         <i class="fa fa-sign-in-alt"></i>
                         Social Login Configuration
                     </div>
@@ -630,12 +802,56 @@
                 </div>
 
             <div class="settings-content" style="border-top: 2px solid #e2e8f0; padding: 1.5rem 2rem;">
-                <button type="submit" class="btn btn-save">
-                    <i class="fa fa-save me-2"></i>Save All Changes
-                </button>
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <button type="submit" class="btn btn-save">
+                            <i class="fa fa-save me-2"></i>Save All Changes
+                        </button>
+                    </div>
+                    <div>
+                        <button type="button" 
+                           class="btn btn-outline-secondary" 
+                           onclick="clearCache()"
+                           id="clear-cache-btn"
+                           title="Clear all cached data including settings">
+                            <i class="fa fa-broom me-2"></i>Clear Cache
+                        </button>
+                    </div>
+                </div>
+                <small class="text-muted d-block mt-2">
+                    <i class="fa fa-info-circle"></i> Settings are cached for 24 hours for better performance. Use "Clear Cache" to refresh settings immediately after making changes.
+                </small>
             </div>
         </div>
     </form>
+
+    <!-- Cache Clear Output Modal -->
+    <div class="modal fade" id="cacheOutputModal" tabindex="-1" aria-labelledby="cacheOutputModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="cacheOutputModalLabel">
+                        <i class="fa fa-terminal me-2"></i>Cache Clear Output
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cache-output-terminal" class="terminal-output">
+                        <div class="terminal-line">
+                            <span class="terminal-prompt">$</span>
+                            <span class="terminal-text">Waiting for output...</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary" onclick="copyCacheOutput()">
+                        <i class="fa fa-copy me-2"></i>Copy Output
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 @endsection
 
 @section('scripts')
@@ -644,6 +860,126 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.2.0/js/bootstrap-colorpicker.min.js"></script>
 
     <script>
+        function clearCache() {
+            const btn = document.getElementById('clear-cache-btn');
+            const originalText = btn.innerHTML;
+            
+            // Disable button and show loading
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-2"></i>Clearing...';
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById('cacheOutputModal'));
+            document.getElementById('cache-output-terminal').innerHTML = '<div class="terminal-line"><span class="terminal-prompt">$</span><span class="terminal-text">Initializing cache clear...</span></div>';
+            modal.show();
+            
+            // Make AJAX request
+            fetch('{{ route("admin.config.clear-cache") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Display output
+                let outputHtml = '';
+                if (data.output) {
+                    const lines = data.output.split('\n');
+                    lines.forEach(line => {
+                        if (line.trim() === '') return;
+                        
+                        let className = 'terminal-text';
+                        if (line.includes('✓') || line.includes('successfully')) {
+                            className = 'terminal-success';
+                        } else if (line.includes('✗') || line.includes('Error')) {
+                            className = 'terminal-error';
+                        } else if (line.includes('===') || line.includes('Clearing')) {
+                            className = 'terminal-info';
+                        }
+                        
+                        outputHtml += `<div class="terminal-line"><span class="terminal-text">${escapeHtml(line)}</span></div>`;
+                    });
+                } else {
+                    outputHtml = '<div class="terminal-line"><span class="terminal-success">Cache cleared successfully!</span></div>';
+                }
+                
+                document.getElementById('cache-output-terminal').innerHTML = outputHtml;
+                
+                // Scroll to bottom
+                const terminal = document.getElementById('cache-output-terminal');
+                terminal.scrollTop = terminal.scrollHeight;
+                
+                // Show success message
+                if (data['alert-success']) {
+                    showAlert('success', data['alert-success']);
+                } else if (data['alert-danger']) {
+                    showAlert('danger', data['alert-danger']);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                document.getElementById('cache-output-terminal').innerHTML = 
+                    '<div class="terminal-line"><span class="terminal-error">Error: ' + escapeHtml(error.message) + '</span></div>';
+                showAlert('danger', 'Error clearing cache: ' + error.message);
+            })
+            .finally(() => {
+                // Re-enable button
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+            });
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function copyCacheOutput() {
+            const terminal = document.getElementById('cache-output-terminal');
+            const text = terminal.innerText || terminal.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const btn = event.target;
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fa fa-check me-2"></i>Copied!';
+                btn.classList.add('btn-success');
+                btn.classList.remove('btn-primary');
+                
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-primary');
+                }, 2000);
+            }).catch(err => {
+                alert('Failed to copy: ' + err);
+            });
+        }
+
+        function showAlert(type, message) {
+            // Remove existing alerts
+            const existingAlerts = document.querySelectorAll('.alert');
+            existingAlerts.forEach(alert => alert.remove());
+            
+            // Create new alert
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // Insert at top of content
+            const content = document.querySelector('.settings-container');
+            if (content) {
+                content.insertBefore(alertDiv, content.firstChild);
+            }
+        }
+
         $(function() {
             // Tab switching functionality
             $('.settings-tabs .nav-link').on('click', function(e) {

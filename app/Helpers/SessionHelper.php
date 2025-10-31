@@ -48,10 +48,10 @@ if(!function_exists('current_user')){
 if(!function_exists('settings')){
 	 function settings()
 	 {
-		
-		$minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
+		// Cache settings for 24 hours (1 day)
+		$minutes = 60 * 24; // 1440 minutes = 24 hours
 
-        $settings  = cache()->remember('settings',$minutes, function () {
+        $settings  = cache()->remember('settings', $minutes, function () {
             
 			// Always get the active configuration
 			$settings = DB::table("setting")->where('status', 'active')->first();

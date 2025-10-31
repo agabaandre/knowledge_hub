@@ -94,6 +94,16 @@ class SettingsRepository{
             $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
         }
 
+        // Publication form settings
+        if (Schema::hasColumn('setting', 'publication_min_words')) {
+            $settings->publication_min_words = (int)$request->input('publication_min_words', 150);
+        }
+        
+        if (Schema::hasColumn('setting', 'publication_required_fields')) {
+            $requiredFields = $request->input('required_fields', []);
+            $settings->publication_required_fields = json_encode($requiredFields);
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings
