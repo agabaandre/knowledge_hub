@@ -541,12 +541,20 @@ Route::group(["prefix" => "communities"], function () {
 });
 
 Route::get('auth/microsoft', function () {
+    if (!(settings()->enable_microsoft_login ?? true)) {
+        return redirect('/login')->with('alert_class', 'danger')
+            ->with('alert', 'Microsoft login is currently disabled.');
+    }
     return Socialite::driver('microsoft')->redirect();
 });
 
 Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
 
 Route::get('auth/google', function () {
+    if (!(settings()->enable_google_login ?? true)) {
+        return redirect('/login')->with('alert_class', 'danger')
+            ->with('alert', 'Google login is currently disabled.');
+    }
     $state = session()->get('state');
     \Log::info('Google OAuth State: ' . $state);
     return Socialite::driver('google')->redirect();
@@ -555,8 +563,13 @@ Route::get('auth/google', function () {
 Route::get('auth/google/callback', [AuthController::class,'googleLogin']);
 
 Route::get('auth/linkedin', function () {
+    if (!(settings()->enable_linkedin_login ?? true)) {
+        return redirect('/login')->with('alert_class', 'danger')
+            ->with('alert', 'LinkedIn login is currently disabled.');
+    }
     try {
-        return Socialite::driver('linkedin')->redirect();
+        // Use LinkedIn OpenID Connect provider instead of deprecated scopes
+        return Socialite::driver('linkedin-openid')->redirect();
     } catch (\Exception $e) {
         \Log::error('LinkedIn redirect error: ' . $e->getMessage());
         return redirect('/login')->with('alert_class', 'danger')

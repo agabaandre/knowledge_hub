@@ -186,13 +186,21 @@
 
                         <div class="row justify-content-center">
                             <div class="btn-group" role="group" aria-label="Login with social media">
+                                @if(settings()->enable_microsoft_login ?? true)
                                 <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
                                         class="lni lni-microsoft"></i>
                                     Join with Microsoft</a>
+                                @endif
+                                @if(settings()->enable_google_login ?? true)
                                 <a href="{{ url('auth/google') }}" class="btn btn-outline-danger"><i
                                         class="lni lni-google"></i>
                                     Join with Google</a>
-                                {{-- <a href="{{ url('auth/linkedin') }}" class="btn btn-primary">Login with LinkedIn</a> --}}
+                                @endif
+                                @if(settings()->enable_linkedin_login ?? true)
+                                <a href="{{ url('auth/linkedin') }}" class="btn btn-outline-primary"><i
+                                        class="fab fa-linkedin"></i>
+                                    Join with LinkedIn</a>
+                                @endif
                             </div>
                         </div>
                     </form>

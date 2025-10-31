@@ -52,6 +52,11 @@ class SettingsRepository{
         $settings->show_quotes = (bool)$request->boolean('show_quotes', false);
         $settings->show_quiz = (bool)$request->boolean('show_quiz', false);
 
+        // Social login toggles (default false when unchecked)
+        $settings->enable_microsoft_login = (bool)$request->boolean('enable_microsoft_login', false);
+        $settings->enable_google_login = (bool)$request->boolean('enable_google_login', false);
+        $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
+
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):
 

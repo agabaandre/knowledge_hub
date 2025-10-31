@@ -309,7 +309,7 @@ class AuthController extends Controller
             }
 
             // Get the user from LinkedIn
-            $socialUser = Socialite::driver('linkedin')->user();
+            $socialUser = Socialite::driver('linkedin-openid')->user();
             
             \Log::info("LinkedIn Login::", [
                 'email' => $socialUser->getEmail(),

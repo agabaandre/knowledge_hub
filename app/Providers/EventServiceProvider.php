@@ -25,6 +25,7 @@ class EventServiceProvider extends ServiceProvider
         \SocialiteProviders\Manager\SocialiteWasCalled::class => [
             // ... other providers
             \SocialiteProviders\Microsoft\MicrosoftExtendSocialite::class.'@handle',
+            \SocialiteProviders\LinkedIn\LinkedInExtendSocialite::class.'@handle',
         ],
     ];
 

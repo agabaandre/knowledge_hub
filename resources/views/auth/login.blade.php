@@ -359,24 +359,38 @@
                     </button>
                 </form>
 
+                @php
+                    $hasSocialLogin = (settings()->enable_microsoft_login ?? true) || 
+                                      (settings()->enable_google_login ?? true) || 
+                                      (settings()->enable_linkedin_login ?? true);
+                @endphp
+
+                @if($hasSocialLogin)
                 <div class="divider">
                     <span>or continue with</span>
-                        </div>
+                </div>
 
                 <div class="social-btn-group">
+                    @if(settings()->enable_microsoft_login ?? true)
                     <a href="{{ url('auth/microsoft') }}" class="btn-social btn-microsoft">
                         <i class="lni lni-microsoft"></i>
                         <span>Microsoft</span>
                     </a>
+                    @endif
+                    @if(settings()->enable_google_login ?? true)
                     <a href="{{ url('auth/google') }}" class="btn-social btn-google">
                         <i class="lni lni-google"></i>
                         <span>Google</span>
                     </a>
+                    @endif
+                    @if(settings()->enable_linkedin_login ?? true)
                     <a href="{{ url('auth/linkedin') }}" class="btn-social btn-linkedin">
                         <i class="fab fa-linkedin"></i>
                         <span>LinkedIn</span>
-                            </a>
-                        </div>
+                    </a>
+                    @endif
+                </div>
+                @endif
 
                 <div class="register-link">
                     <p>

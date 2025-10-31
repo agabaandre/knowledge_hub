@@ -598,6 +598,34 @@
                         <label>Content Disclaimer</label>
                         <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
                     </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-sign-in-alt"></i>
+                        Social Login Configuration
+                    </div>
+
+                    <div class="form-group">
+                        <label>Social Login Providers</label>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_microsoft_login" name="enable_microsoft_login" value="1" @if(!empty($settings->enable_microsoft_login)) checked @endif>
+                            <label class="form-check-label" for="enable_microsoft_login">
+                                <i class="lni lni-microsoft me-2" style="color: #00a1f1;"></i>Enable Microsoft Login
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_google_login" name="enable_google_login" value="1" @if(!empty($settings->enable_google_login)) checked @endif>
+                            <label class="form-check-label" for="enable_google_login">
+                                <i class="lni lni-google me-2" style="color: #db4437;"></i>Enable Google Login
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_linkedin_login" name="enable_linkedin_login" value="1" @if(!empty($settings->enable_linkedin_login)) checked @endif>
+                            <label class="form-check-label" for="enable_linkedin_login">
+                                <i class="fab fa-linkedin me-2" style="color: #0077b5;"></i>Enable LinkedIn Login
+                            </label>
+                        </div>
+                        <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
+                    </div>
                 </div>
                 </div>
 
