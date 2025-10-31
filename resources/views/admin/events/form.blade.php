@@ -63,6 +63,11 @@
             </div>
         </div>
         <div class="form-group">
+            <label>ORCID (Optional)</label>
+            <input type="text" name="orcid" class="form-control" placeholder="0000-0000-0000-0000" value="{{ old('orcid', $event->orcid ?? '') }}" pattern="[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}" maxlength="19">
+            <small class="form-text text-muted">Enter the ORCID ID in format: XXXX-XXXX-XXXX-XXXX</small>
+        </div>
+        <div class="form-group">
             <label>Links</label>
             <input type="url" name="event_link" class="form-control mb-2" placeholder="Event/Agenda link (optional)" value="{{ old('event_link', $event->event_link ?? '') }}">
             <input type="url" name="registration_link" class="form-control" placeholder="Registration link (optional)" value="{{ old('registration_link', $event->registration_link ?? '') }}">

@@ -38,6 +38,7 @@ class AdminEventsController extends Controller
             'status' => 'required|string|max:50',
             'is_online' => 'required|boolean',
             'contact_person' => 'required|string|max:255',
+            'orcid' => 'nullable|string|regex:/^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$/',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);
@@ -78,6 +79,7 @@ class AdminEventsController extends Controller
             'status' => 'required|string|max:50',
             'is_online' => 'required|boolean',
             'contact_person' => 'required|string|max:255',
+            'orcid' => 'nullable|string|regex:/^[0-9]{4}-[0-9]{4}-[0-9]{4}-[0-9]{4}$/',
             'tags' => 'nullable|array',
             'tags.*' => 'exists:tags,id',
         ]);

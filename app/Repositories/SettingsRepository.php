@@ -8,12 +8,41 @@ class SettingsRepository{
 
     public function get(Request $request){
 
-        return Setting::first()->toArray();
+        // Always get the active configuration
+        $setting = Setting::where('status', 'active')->first();
+        
+        // If no active setting exists, get the first one (fallback)
+        if (!$setting) {
+            $setting = Setting::first();
+        }
+        
+        return $setting ? $setting->toArray() : [];
     }
     
     public function save(Request $request){
 
-        $settings = Setting::find(1);
+        // Get or create the active configuration
+        $settings = Setting::where('status', 'active')->first();
+        
+        // If no active setting exists, get the first one or create a new one
+        if (!$settings) {
+            $settings = Setting::first();
+            if (!$settings) {
+                $settings = new Setting();
+                $settings->config_name = $request->config_name ?? 'Default Configuration';
+                $settings->status = 'active';
+                $settings->save();
+            } else {
+                // Make the first one active if none is active
+                $settings->status = 'active';
+                $settings->save();
+            }
+        }
+
+        // Update config_name if provided
+        if ($request->has('config_name')) {
+            $settings->config_name = $request->config_name;
+        }
 
         $settings->site_name            = $request->site_name;
         $settings->title                = $request->title;
@@ -56,6 +85,13 @@ class SettingsRepository{
         $settings->enable_microsoft_login = (bool)$request->boolean('enable_microsoft_login', false);
         $settings->enable_google_login = (bool)$request->boolean('enable_google_login', false);
         $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
+
+        // Handle status change - if setting a new config as active, deactivate others
+        if ($request->has('status') && $request->status === 'active') {
+            // Deactivate all other settings
+            Setting::where('id', '!=', $settings->id)->update(['status' => 'inactive']);
+            $settings->status = 'active';
+        }
 
         //save cover
         if($request->hasFile('logo') || $request->hasFile('favicon')|| $request->hasFile('spotlight_banner')):

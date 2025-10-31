@@ -254,20 +254,20 @@
                 <div>
                     <h1><i class="fa fa-comments me-2"></i>Discussions & Forums</h1>
                     <p>Join conversations, share knowledge, and collaborate with the community</p>
-                </div>
+                            </div>
                 @auth
                 <a href="{{ url('forums/create') }}" class="btn btn-sm theme-bg text-white" style="font-weight: 600;">
                     <i class="fa fa-plus-circle me-2"></i>Start New Discussion
-                </a>
-                @endauth
-            </div>
+                            </a>
+                            @endauth
+                        </div>
             <div class="mt-3">
                 <span class="stats-badge">
                     <i class="fa fa-comment-dots"></i>
                     {{ $forums->total() }} {{ $forums->total() === 1 ? 'Discussion' : 'Discussions' }}
                 </span>
-            </div>
-        </div>
+                    </div>
+                </div>
 
         <!-- Filters -->
         <div class="forums-filters">
@@ -331,18 +331,18 @@
                                     <i class="fa fa-comments"></i>
                                     <span>{{ count($forum->comments) }} {{ count($forum->comments) === 1 ? 'Comment' : 'Comments' }}</span>
                                 </div>
-                            </div>
+                                </div>
 
                             <div class="forum-actions">
                                 @if(in_array($forum->id, $my_forums))
                                     <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
                                         <i class="fa fa-eye"></i> View Discussion
                                     </a>
-                                @else
+                                    @else
                                     <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
-                                @endif
+                                    @endif
                             </div>
                         </div>
                     </div>
@@ -361,7 +361,7 @@
                     @endauth
                 </div>
             @endforelse
-        </div>
+            </div>
 
         <!-- Pagination -->
         @if($forums->hasPages())

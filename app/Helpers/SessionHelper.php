@@ -53,10 +53,19 @@ if(!function_exists('settings')){
 
         $settings  = cache()->remember('settings',$minutes, function () {
             
-			$settings = DB::table("setting")->first();
-			$settings->logo = !empty($settings->logo) ? asset('storage/uploads/config/'.$settings->logo) : '';
-			$settings->favicon = !empty($settings->favicon) ? asset('storage/uploads/config/' . $settings->favicon) : '';
-			$settings->spotlight_banner = !empty($settings->spotlight_banner) ? asset('storage/uploads/config/' . $settings->spotlight_banner) : '';
+			// Always get the active configuration
+			$settings = DB::table("setting")->where('status', 'active')->first();
+			
+			// Fallback to first if no active exists
+			if (!$settings) {
+				$settings = DB::table("setting")->first();
+			}
+			
+			if ($settings) {
+				$settings->logo = !empty($settings->logo) ? asset('storage/uploads/config/'.$settings->logo) : '';
+				$settings->favicon = !empty($settings->favicon) ? asset('storage/uploads/config/' . $settings->favicon) : '';
+				$settings->spotlight_banner = !empty($settings->spotlight_banner) ? asset('storage/uploads/config/' . $settings->spotlight_banner) : '';
+			}
 
 			return $settings;
         });

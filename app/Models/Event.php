@@ -11,7 +11,7 @@ class Event extends Model
 
     protected $fillable = [
         'title','description','venue','startdate','enddate','organized_by','fee','status',
-        'event_link','registration_link','is_online','contact_person','banner_image','country_id',
+        'event_link','registration_link','is_online','contact_person','orcid','banner_image','country_id',
         'created_by','updated_by'
     ];
 

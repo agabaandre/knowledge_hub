@@ -61,6 +61,14 @@
               @if(!empty($event->fee))
               <div class="item"><i class="fa fa-ticket mr-1"></i>{{ $event->fee }}</div>
               @endif
+              @if(!empty($event->orcid))
+              <div class="item">
+                <i class="fa fa-id-card mr-1"></i>
+                <a href="https://orcid.org/{{ $event->orcid }}" target="_blank" rel="noopener noreferrer" style="color: inherit; text-decoration: none;">
+                  ORCID: {{ $event->orcid }}
+                </a>
+              </div>
+              @endif
             </div>
             <div class="event-actions">
               @if(!$isPast && $event->registration_link)
