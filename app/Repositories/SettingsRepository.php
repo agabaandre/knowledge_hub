@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsRepository{
 
@@ -82,9 +83,16 @@ class SettingsRepository{
         $settings->show_quiz = (bool)$request->boolean('show_quiz', false);
 
         // Social login toggles (default false when unchecked)
-        $settings->enable_microsoft_login = (bool)$request->boolean('enable_microsoft_login', false);
-        $settings->enable_google_login = (bool)$request->boolean('enable_google_login', false);
-        $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
+        // Only set if columns exist to avoid errors on production
+        if (Schema::hasColumn('setting', 'enable_microsoft_login')) {
+            $settings->enable_microsoft_login = (bool)$request->boolean('enable_microsoft_login', false);
+        }
+        if (Schema::hasColumn('setting', 'enable_google_login')) {
+            $settings->enable_google_login = (bool)$request->boolean('enable_google_login', false);
+        }
+        if (Schema::hasColumn('setting', 'enable_linkedin_login')) {
+            $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
+        }
 
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
