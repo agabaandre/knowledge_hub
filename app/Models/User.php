@@ -117,16 +117,42 @@ class User extends Authenticatable
         return $this->fcm_token;
     }
 
-    public function preferences()
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
     {
-        return $this->hasManyThrough(
-            SubThemeticArea::class,
-            UserPreference::class,
-            'user_id', // Foreign key on UserPreference table
-            'id', // Foreign key on SubThemeticArea table
-            'id', // Local key on User table
-            'subtheme_id' // Local key on UserPreference table
-        );
+        // Use Exchange OAuth instead of Laravel Mail facade
+        try {
+            $resetUrl = url('password/reset?token=' . $token);
+            
+            $mailData = (object) [
+                'email' => $this->email,
+                'subject' => 'Reset Your Password - Africa CDC Knowledge Hub',
+                'body' => view('emails.password_reset', [
+                    'name' => $this->name,
+                    'token' => $token,
+                    'resetUrl' => $resetUrl,
+                ])->render()
+            ];
+            
+            $result = send_email($mailData);
+            
+            if (!$result || (is_array($result) && !($result['success'] ?? false))) {
+                \Log::error('Failed to send password reset notification via Exchange', [
+                    'user_id' => $this->id,
+                    'email' => $this->email,
+                    'error' => is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception sending password reset notification via Exchange: ' . $e->getMessage(), [
+                'user_id' => $this->id,
+                'email' => $this->email,
+                'exception' => get_class($e)
+            ]);
+        }
     }
-
-}

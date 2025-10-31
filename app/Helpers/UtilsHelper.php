@@ -174,52 +174,54 @@ function export_excel($records,$heading=false) {
 
 function send_email($request){
 
-    // Always try Exchange OAuth first if configured
-    try {
-        $config = config('exchange-email');
-        $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
-        
-        if ($exchangeConfigured) {
-            // Exchange is configured, use it exclusively
+    // Check Exchange configuration FIRST - if configured, use it EXCLUSIVELY
+    $config = config('exchange-email');
+    $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
+    
+    // Normalize email data - handle both 'title' and 'subject' fields
+    $subject = $request->subject ?? $request->title ?? 'Knowledge Resource Center Email';
+    $email = $request->email ?? null;
+    $body = $request->body ?? '';
+    
+    if (!$email) {
+        \Log::error('send_email called without email address', ['request' => (array)$request]);
+        return array('success'=>false,'message'=>"Email address is required.");
+    }
+    
+    // If Exchange is configured, ALWAYS use it - NO SMTP fallback
+    if ($exchangeConfigured) {
+        try {
             $result = sendEmailWithExchange(
-                $request->email, 
-                $request->subject ?? 'Knowledge Resource Center Email', 
-                $request->body
+                $email, 
+                $subject, 
+                $body
             );
             
             if ($result) {
                 return array('success'=>true,'message'=>"Email has been sent via Exchange.");
             } else {
-                // Exchange failed, but it's configured - don't fall back to SMTP
-                \Log::error('Exchange email failed but Exchange is configured. SMTP fallback disabled.');
+                // Exchange failed - but since it's configured, DON'T use SMTP
+                \Log::error('Exchange email failed but Exchange is configured. SMTP fallback disabled.', [
+                    'email' => $email,
+                    'subject' => $subject
+                ]);
                 return array('success'=>false,'message'=>"Email sending failed. Exchange OAuth is configured but authentication failed. Please check Exchange configuration.");
             }
-        }
-    } catch (\Exception $e) {
-        \Log::error('Exchange email exception: ' . $e->getMessage());
-        
-        // If Exchange is configured, don't fall back to SMTP
-        $config = config('exchange-email');
-        $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
-        
-        if ($exchangeConfigured) {
+        } catch (\Exception $e) {
+            // Exchange exception - DON'T fall back to SMTP
+            \Log::error('Exchange email exception: ' . $e->getMessage(), [
+                'email' => $email,
+                'subject' => $subject,
+                'exception' => get_class($e),
+                'trace' => $e->getTraceAsString()
+            ]);
             return array('success'=>false,'message'=>"Email sending failed via Exchange: " . $e->getMessage());
         }
-        
-        // Only log warning if Exchange is not configured
-        \Log::warning('Exchange email failed, falling back to PHPMailer: ' . $e->getMessage());
     }
 
-    // Fallback to PHPMailer only if Exchange is NOT configured
-    $config = config('exchange-email');
-    $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
+    // Only use PHPMailer/SMTP if Exchange is NOT configured
+    \Log::info('Exchange not configured, using PHPMailer/SMTP fallback');
     
-    if ($exchangeConfigured) {
-        // Exchange is configured but failed, don't use SMTP
-        return array('success'=>false,'message'=>"Email sending failed. Exchange OAuth is configured but authentication failed. Please check Exchange configuration.");
-    }
-
-    // Only use PHPMailer if Exchange is not configured
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
     try {
@@ -235,7 +237,7 @@ function send_email($request){
         $mail->FromName = config('emails.sender');                // port - 587/465
 
         $mail->setFrom(config('emails.username'), config('emails.sender'),true);
-        $mail->addAddress($request->email);
+        $mail->addAddress($email);
       //  $mail->addCC($request->emailCc);
       //  $mail->addBCC($request->emailBcc);
 
@@ -251,8 +253,8 @@ function send_email($request){
         $mail->isHTML(true);                // Set email content format to HTML
 
        
-        $mail->Subject = $request->subject ?? 'Knowledge Resource Center Email';
-        $mail->Body    = $request->body;
+        $mail->Subject = $subject;
+        $mail->Body    = $body;
 
         // $mail->AltBody = plain text version of email body;
 
