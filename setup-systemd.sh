@@ -12,12 +12,38 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
-# Configuration variables
-APP_PATH="/opt/homebrew/var/www/knowledge_hub"
-PHP_PATH="/usr/bin/php"
-SERVICE_USER="www-data"
-SERVICE_GROUP="www-data"
-QUEUE_CONNECTION="default"
+# Auto-detect Laravel root directory
+detect_laravel_root() {
+    local current_dir="$PWD"
+    local check_dir="$current_dir"
+    
+    # If script is in a subdirectory, try to find Laravel root
+    if [ -f "$current_dir/artisan" ]; then
+        echo "$current_dir"
+        return 0
+    fi
+    
+    # Check parent directories up to 5 levels
+    local depth=0
+    while [ $depth -lt 5 ]; do
+        if [ -f "$check_dir/artisan" ]; then
+            echo "$check_dir"
+            return 0
+        fi
+        check_dir="$(dirname "$check_dir")"
+        depth=$((depth + 1))
+    done
+    
+    # If not found, use current directory as fallback
+    echo "$current_dir"
+}
+
+# Configuration variables (with auto-detection)
+APP_PATH="${APP_PATH:-$(detect_laravel_root)}"
+PHP_PATH="${PHP_PATH:-/usr/bin/php}"
+SERVICE_USER="${SERVICE_USER:-www-data}"
+SERVICE_GROUP="${SERVICE_GROUP:-www-data}"
+QUEUE_CONNECTION="${QUEUE_CONNECTION:-default}"
 QUEUE_TRIES=3
 QUEUE_TIMEOUT=90
 QUEUE_SLEEP=3
@@ -51,31 +77,76 @@ check_root() {
 check_prerequisites() {
     print_info "Checking prerequisites..."
     
+    # Resolve absolute path
+    APP_PATH=$(cd "$APP_PATH" && pwd)
+    
     # Check if PHP is installed
     if [ ! -f "$PHP_PATH" ]; then
         print_error "PHP not found at $PHP_PATH"
-        print_info "Please update PHP_PATH variable in the script"
-        exit 1
+        print_info "Trying to find PHP in common locations..."
+        
+        # Try common PHP locations
+        for php_loc in "/usr/bin/php" "/usr/local/bin/php" "$(which php 2>/dev/null)"; do
+            if [ -n "$php_loc" ] && [ -f "$php_loc" ]; then
+                PHP_PATH="$php_loc"
+                print_success "Found PHP at $PHP_PATH"
+                break
+            fi
+        done
+        
+        if [ ! -f "$PHP_PATH" ]; then
+            print_error "Could not find PHP. Please install PHP or set PHP_PATH environment variable"
+            exit 1
+        fi
     fi
     
     # Check if app directory exists
     if [ ! -d "$APP_PATH" ]; then
         print_error "Application directory not found: $APP_PATH"
-        print_info "Please update APP_PATH variable in the script"
+        print_info "Current working directory: $PWD"
+        print_info "Please run this script from the Laravel root directory or use --path option"
         exit 1
     fi
     
     # Check if artisan exists
     if [ ! -f "$APP_PATH/artisan" ]; then
         print_error "Laravel artisan file not found: $APP_PATH/artisan"
+        print_info "This doesn't appear to be a Laravel application directory"
+        print_info "Current directory: $APP_PATH"
+        print_info "Please run this script from the Laravel root directory or use --path option"
         exit 1
+    fi
+    
+    # Verify it's a Laravel app by checking for composer.json
+    if [ ! -f "$APP_PATH/composer.json" ]; then
+        print_warning "composer.json not found. This might not be a Laravel application."
+        read -p "Continue anyway? (y/n) " -n 1 -r
+        echo
+        if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+            exit 0
+        fi
     fi
     
     # Check if user exists
     if ! id "$SERVICE_USER" &>/dev/null; then
-        print_error "User $SERVICE_USER does not exist"
-        print_info "Please update SERVICE_USER variable in the script"
-        exit 1
+        print_warning "User $SERVICE_USER does not exist"
+        print_info "Trying to find a suitable web server user..."
+        
+        # Try common web server users
+        for user in "www-data" "nginx" "apache" "httpd" "www"; do
+            if id "$user" &>/dev/null; then
+                SERVICE_USER="$user"
+                SERVICE_GROUP="$user"
+                print_success "Using user: $SERVICE_USER"
+                break
+            fi
+        done
+        
+        if ! id "$SERVICE_USER" &>/dev/null; then
+            print_error "Could not find a suitable web server user"
+            print_info "Please set SERVICE_USER environment variable or use --user option"
+            exit 1
+        fi
     fi
     
     print_success "All prerequisites met"
@@ -224,24 +295,31 @@ Usage: sudo ./setup-systemd.sh [OPTIONS]
 
 Options:
     -h, --help          Show this help message
-    -p, --path PATH     Set application path (default: $APP_PATH)
-    -u, --user USER     Set service user (default: $SERVICE_USER)
-    -q, --queue QUEUE   Set queue name (default: $QUEUE_CONNECTION)
+    -p, --path PATH     Set application path (auto-detected from current directory)
+    -u, --user USER     Set service user (auto-detected: www-data, nginx, etc.)
+    -q, --queue QUEUE   Set queue name (default: default)
+    --php-path PATH     Set PHP path (auto-detected)
     --skip-start        Don't start services (only create and enable)
     --skip-permissions  Don't set file permissions
     --status            Show service status and exit
 
-Configuration Variables (edit script to change):
-    APP_PATH: $APP_PATH
-    PHP_PATH: $PHP_PATH
-    SERVICE_USER: $SERVICE_USER
-    SERVICE_GROUP: $SERVICE_GROUP
-    QUEUE_CONNECTION: $QUEUE_CONNECTION
-    QUEUE_TRIES: $QUEUE_TRIES
-    QUEUE_TIMEOUT: $QUEUE_TIMEOUT
-    QUEUE_SLEEP: $QUEUE_SLEEP
-    QUEUE_MAX_JOBS: $QUEUE_MAX_JOBS
-    QUEUE_MAX_TIME: $QUEUE_MAX_TIME
+Auto-Detection:
+    The script automatically detects:
+    - Laravel root directory (from current directory)
+    - PHP executable path
+    - Web server user (www-data, nginx, apache, etc.)
+
+Configuration Variables (can be overridden via environment variables):
+    APP_PATH: Auto-detected or use --path option
+    PHP_PATH: Auto-detected or use --php-path option  
+    SERVICE_USER: Auto-detected or use --user option
+    SERVICE_GROUP: Same as SERVICE_USER
+    QUEUE_CONNECTION: default
+    QUEUE_TRIES: 3
+    QUEUE_TIMEOUT: 90
+    QUEUE_SLEEP: 3
+    QUEUE_MAX_JOBS: 1000
+    QUEUE_MAX_TIME: 3600
 
 Examples:
     sudo ./setup-systemd.sh
@@ -264,14 +342,21 @@ while [[ $# -gt 0 ]]; do
             ;;
         -p|--path)
             APP_PATH="$2"
+            # Resolve to absolute path
+            APP_PATH=$(cd "$APP_PATH" 2>/dev/null && pwd || echo "$APP_PATH")
             shift 2
             ;;
         -u|--user)
             SERVICE_USER="$2"
+            SERVICE_GROUP="$2"  # Also set group to same as user
             shift 2
             ;;
         -q|--queue)
             QUEUE_CONNECTION="$2"
+            shift 2
+            ;;
+        --php-path)
+            PHP_PATH="$2"
             shift 2
             ;;
         --skip-start)
@@ -309,6 +394,9 @@ main() {
     fi
     
     check_prerequisites
+    
+    # Resolve absolute paths
+    APP_PATH=$(cd "$APP_PATH" && pwd)
     
     echo ""
     print_info "Configuration:"
