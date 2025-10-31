@@ -6,7 +6,6 @@ use App\Mail\Subscribe as MailSubscribe;
 use App\Mail\Unsubscribe;
 use App\Models\Subscribe;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 
 class Subscription extends Controller
@@ -38,7 +37,23 @@ class Subscription extends Controller
             'email' => $request->email,
         ]);
 
-        Mail::to($request->email)->send(new MailSubscribe($subscriber));
+        // Use Exchange OAuth instead of Laravel Mail facade
+        try {
+            $mail = new MailSubscribe($subscriber);
+            $mailData = (object) [
+                'email' => $request->email,
+                'subject' => $mail->subject ?? 'Subscription Confirmation',
+                'body' => view('emails.subscribed', ['subscriber' => $subscriber])->render()
+            ];
+            
+            $result = send_email($mailData);
+            
+            if (!$result || (is_array($result) && !($result['success'] ?? false))) {
+                \Log::error('Failed to send subscription email: ' . (is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'));
+            }
+        } catch (\Exception $e) {
+            \Log::error('Exception sending subscription email: ' . $e->getMessage());
+        }
 
         return response()->json([
             'status' => 'SUCCESS',
@@ -58,8 +73,23 @@ class Subscription extends Controller
             $subscriber->status = 'unsubscribed';
             $subscriber->save();
 
-            // Send out email using notification class
-            Mail::to($request->email)->send(new Unsubscribe($subscriber));
+            // Use Exchange OAuth instead of Laravel Mail facade
+            try {
+                $mail = new Unsubscribe($subscriber);
+                $mailData = (object) [
+                    'email' => $request->email,
+                    'subject' => $mail->subject ?? 'Unsubscription Confirmation',
+                    'body' => view('emails.unsubscribed', ['subscriber' => $subscriber])->render()
+                ];
+                
+                $result = send_email($mailData);
+                
+                if (!$result || (is_array($result) && !($result['success'] ?? false))) {
+                    \Log::error('Failed to send unsubscription email: ' . (is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'));
+                }
+            } catch (\Exception $e) {
+                \Log::error('Exception sending unsubscription email: ' . $e->getMessage());
+            }
 
             return response()->json([
                 'status' => 'SUCCESS',

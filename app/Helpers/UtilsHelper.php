@@ -174,16 +174,52 @@ function export_excel($records,$heading=false) {
 
 function send_email($request){
 
-    // Try Exchange OAuth first (Microsoft Graph API)
+    // Always try Exchange OAuth first if configured
     try {
-        if (sendEmailWithExchange($request->email, $request->subject ?? 'Knowledge Resource Center Email', $request->body)) {
-            return array('success'=>true,'message'=>"Email has been sent.");
+        $config = config('exchange-email');
+        $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
+        
+        if ($exchangeConfigured) {
+            // Exchange is configured, use it exclusively
+            $result = sendEmailWithExchange(
+                $request->email, 
+                $request->subject ?? 'Knowledge Resource Center Email', 
+                $request->body
+            );
+            
+            if ($result) {
+                return array('success'=>true,'message'=>"Email has been sent via Exchange.");
+            } else {
+                // Exchange failed, but it's configured - don't fall back to SMTP
+                \Log::error('Exchange email failed but Exchange is configured. SMTP fallback disabled.');
+                return array('success'=>false,'message'=>"Email sending failed. Exchange OAuth is configured but authentication failed. Please check Exchange configuration.");
+            }
         }
     } catch (\Exception $e) {
+        \Log::error('Exchange email exception: ' . $e->getMessage());
+        
+        // If Exchange is configured, don't fall back to SMTP
+        $config = config('exchange-email');
+        $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
+        
+        if ($exchangeConfigured) {
+            return array('success'=>false,'message'=>"Email sending failed via Exchange: " . $e->getMessage());
+        }
+        
+        // Only log warning if Exchange is not configured
         \Log::warning('Exchange email failed, falling back to PHPMailer: ' . $e->getMessage());
     }
 
-    // Fallback to PHPMailer
+    // Fallback to PHPMailer only if Exchange is NOT configured
+    $config = config('exchange-email');
+    $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
+    
+    if ($exchangeConfigured) {
+        // Exchange is configured but failed, don't use SMTP
+        return array('success'=>false,'message'=>"Email sending failed. Exchange OAuth is configured but authentication failed. Please check Exchange configuration.");
+    }
+
+    // Only use PHPMailer if Exchange is not configured
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
     try {
@@ -256,7 +292,7 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
         
         // Check if Exchange is configured
         if (empty($config['tenant_id']) || empty($config['client_id']) || empty($config['client_secret'])) {
-            \Log::warning('Exchange service not configured, falling back to PHPMailer');
+            \Log::warning('Exchange service not configured. Missing tenant_id, client_id, or client_secret.');
             return false;
         }
         
@@ -271,16 +307,28 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
         );
         
         if (!$oauth->isConfigured()) {
-            \Log::warning('Exchange service not configured, falling back to PHPMailer');
+            \Log::warning('Exchange service not properly configured. OAuth object validation failed.');
             return false;
         }
         
         // Get client credentials token (or refresh if needed)
         if (!$oauth->hasValidToken()) {
-            $oauth->getClientCredentialsToken();
+            \Log::info('Getting new Exchange OAuth token...');
+            $tokenResult = $oauth->getClientCredentialsToken();
+            
+            if (!$tokenResult) {
+                \Log::error('Failed to obtain Exchange OAuth token. Check your Exchange credentials.');
+                return false;
+            }
         }
         
-        return $oauth->sendEmail(
+        \Log::info('Sending email via Exchange OAuth', [
+            'to' => is_array($to) ? implode(', ', $to) : $to,
+            'subject' => $subject,
+            'from' => $fromEmail ?: env('MAIL_FROM_ADDRESS')
+        ]);
+        
+        $result = $oauth->sendEmail(
             $to,
             $subject,
             $body,
@@ -292,8 +340,19 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
             $attachments
         );
         
+        if ($result) {
+            \Log::info('Email sent successfully via Exchange OAuth');
+            return true;
+        } else {
+            \Log::error('Exchange sendEmail returned false. Check Exchange OAuth configuration and permissions.');
+            return false;
+        }
+        
     } catch (\Exception $e) {
-        \Log::error('Exchange email failed: ' . $e->getMessage());
+        \Log::error('Exchange email failed with exception: ' . $e->getMessage(), [
+            'exception' => get_class($e),
+            'trace' => $e->getTraceAsString()
+        ]);
         return false;
     }
 }
