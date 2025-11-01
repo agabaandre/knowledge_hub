@@ -41,6 +41,16 @@
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
+                                       <a href="{{ route('account.my-forums') }}">
+                                           <i class="fa fa-comments mr-1"></i> My Forums
+                                       </a>
+                                   </li>
+                                   <li class=" {{ $class ?? '' }}">
+                                       <a href="{{ route('account.my-communities') }}">
+                                           <i class="fa fa-users mr-1"></i> My Communities
+                                       </a>
+                                   </li>
+                                   <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.favourites') }}">
                                            <i class="fa fa-star mr-1"></i> My Favourites
                                        </a>

@@ -700,6 +700,19 @@ public function get(Request $request, $return_array = false, $featured = false,$
             
             if (!empty($communityData)) {
                 PublicationCommunityOfPractice::insert($communityData);
+                
+                // Send notifications to community members
+                $publication = Publication::with('author')->find($publication_id);
+                if ($publication) {
+                    \App\Jobs\NotifyCommunityMembers::dispatch(
+                        $comunities,
+                        'publication',
+                        $publication_id,
+                        $publication->title ?? 'Untitled Publication',
+                        $publication->description ?? '',
+                        $publication->author->name ?? current_user()->name ?? 'Unknown'
+                    )->onQueue('default');
+                }
             }
        endif;
     }

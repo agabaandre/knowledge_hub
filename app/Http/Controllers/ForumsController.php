@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Repositories\ForumsRepository;
 use Illuminate\Http\Request;
+use Biscolab\ReCaptcha\Facades\ReCaptcha;
 
 class ForumsController extends Controller
 {
@@ -84,6 +85,28 @@ class ForumsController extends Controller
 
     public function comment(Request $request)
     {
+        // Validate reCAPTCHA if not on localhost
+        $recaptchaSiteKey = config('recaptcha.api_site_key');
+        $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) || 
+                       app()->environment('local', 'testing');
+        
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
+            // Check if reCAPTCHA response is provided
+            if (!$request->filled('g-recaptcha-response')) {
+                return back()->withErrors([
+                    'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.',
+                ])->withInput();
+            }
+            
+            // Validate the reCAPTCHA response
+            $recaptchaResponse = $request->input('g-recaptcha-response');
+            if (!ReCaptcha::validate($recaptchaResponse)) {
+                return back()->withErrors([
+                    'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.',
+                ])->withInput();
+            }
+        }
+
         $saved =$this->forumsRepo->save_comment($request);
 
         $message = ($saved)?'Comment saved successfully':'Request failed try again';

@@ -145,8 +145,16 @@
             @forelse ($communities as $community)
                 <div class="col-md-12 col-sm-12 col-lg-4 mb-4">
                     <div class="community-card">
-                        <h4>{{ $community->community_name }}</h4>
-                        <p>{!! $community->description ?? '<br>' !!}</p>
+                        <h4>
+                            @if(request()->routeIs('account.my-communities'))
+                                <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;">
+                                    {{ $community->community_name }}
+                                </a>
+                            @else
+                                {{ $community->community_name }}
+                            @endif
+                        </h4>
+                        <p>{!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 30, '...') !!}</p>
                         <div class="community-stats">
                             <p><i class="fa fa-users theme-text"></i> {{ $community->members_count }} Members</p>
                             <p><i class="fa fa-comments theme-text"></i> {{ $community->forums_count }} Forums</p>

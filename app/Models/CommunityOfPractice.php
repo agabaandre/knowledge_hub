@@ -67,6 +67,12 @@ class CommunityOfPractice extends Model
         return $this->hasMany(ForumCommunityOfPractice::class, 'community_of_practice_id');
     }
 
+    // Define the relationship with invitations
+    public function invitations()
+    {
+        return $this->hasMany(CommunityInvitation::class, 'community_of_practice_id');
+    }
+
     // Accessor to get the count of publications
     public function getPublicationsCountAttribute()
     {

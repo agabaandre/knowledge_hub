@@ -148,6 +148,20 @@ class ForumsRepository extends SharedRepo{
                 $forumComm->community_of_practice_id = intval($copId);
                 $forumComm->save();
             }
+            
+            // Send notifications to community members
+            if (!empty($copIds)) {
+                // Load user relationship for author name
+                $forum->load('user');
+                \App\Jobs\NotifyCommunityMembers::dispatch(
+                    $copIds,
+                    'forum',
+                    $forum->id,
+                    $forum->forum_title ?? 'Untitled Forum',
+                    $forum->forum_description ?? '',
+                    $forum->user->name ?? current_user()->name ?? 'Unknown'
+                )->onQueue('default');
+            }
         }
 
         // Save tags if provided (expects array of tag IDs)
@@ -189,10 +203,7 @@ class ForumsRepository extends SharedRepo{
             \App\Models\ForumEngagement::incrementForumComment($comment->created_by);
         }
 
-        if($request->hasFile('attachments') && $comment->id ?? null):
-            $files           = $request->file('attachments');  
-            $this->save_attachments($files,$comment->id,'forum_comments');
-        endif;
+        // Attachments removed - no longer saving attachments for comments
 
         return $comment;
     }

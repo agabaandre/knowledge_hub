@@ -17,6 +17,12 @@ class AdminEventsController extends Controller
 
     public function index()
     {
+        // Automatically close events that have passed their end date
+        \App\Models\Event::where('status', '!=', 'cancelled')
+            ->whereNotNull('enddate')
+            ->where('enddate', '<', now())
+            ->update(['status' => 'cancelled']);
+
         $events = $this->eventsRepo->getAll();
         return view('admin.events.index', compact('events'));
     }

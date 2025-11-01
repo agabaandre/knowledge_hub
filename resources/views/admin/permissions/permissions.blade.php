@@ -68,7 +68,7 @@
                                             <td class="perm-desc">{{ $perm->description ?? '-' }}</td>
                                             <td class="text-center">
                                                 <div class="btn-group" role="group">
-                                                    <a class="btn btn-sm btn-outline-success" data-toggle="tooltip" data-original-title="Audit" href="javascript:void(0);">
+                                                    <a class="btn btn-sm btn-outline-success" data-toggle="tooltip" data-original-title="Audit" href="{{ route('permissions.trail') }}">
                                                         <i class="fa fa-bar-chart"></i>
                                                     </a>
                                                     <a href="#perm{{$perm->id}}0" class="btn btn-sm btn-outline-info" data-toggle="modal" data-original-title="Edit">

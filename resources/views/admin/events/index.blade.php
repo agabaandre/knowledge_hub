@@ -45,11 +45,23 @@
                             {{ $start }} @if($end) - {{ $end }} @endif
                         </td>
                         <td>{{ $ev->venue ?? ($ev->is_online ? 'Online' : '-') }}</td>
-                        <td><span class="badge {{ $ev->status==='active' ? 'badge-success' : 'badge-secondary' }}">{{ ucfirst($ev->status ?? 'pending') }}</span></td>
+                        <td>
+                            @php
+                                $statusClass = 'badge-secondary';
+                                if ($ev->status === 'active') {
+                                    $statusClass = 'badge-success';
+                                } elseif ($ev->status === 'cancelled') {
+                                    $statusClass = 'badge-danger';
+                                } elseif ($ev->status === 'pending') {
+                                    $statusClass = 'badge-warning';
+                                }
+                            @endphp
+                            <span class="badge {{ $statusClass }}">{{ ucfirst($ev->status ?? 'pending') }}</span>
+                        </td>
                         <td>
                             <a href="{{ route('admin.events.edit', $ev->id) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fa fa-edit"></i></a>
                             <a href="{{ route('admin.events.show', $ev->id) }}" class="btn btn-sm btn-outline-secondary" title="Preview (Admin)"><i class="fa fa-eye"></i></a>
-                            <a href="{{ route('events.show', $ev->id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Preview (Public)"><i class="fa fa-external-link"></i></a>
+                            <a href="{{ route('events.show', $ev->id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Web Preview"><i class="fa fa-external-link mr-1"></i>Web Preview</a>
                             <form action="{{ route('admin.events.destroy', $ev->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this event?')">
                                 @csrf
                                 @method('DELETE')

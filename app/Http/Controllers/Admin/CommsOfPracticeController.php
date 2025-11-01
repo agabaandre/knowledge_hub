@@ -118,6 +118,9 @@ class CommsOfPracticeController extends Controller
         $pendingCount = $community->pendingMembers()->count();
         $rejectedCount = $community->rejectedMembers()->count();
 
+        // Get invitations
+        $invitations = $this->commsOfPracticeRepository->getInvitations($id);
+
         // Recent publications and forums in this community
         $pubIds = \App\Models\PublicationCommunityOfPractice::where('community_of_practice_id', $id)
             ->pluck('publication_id');
@@ -132,8 +135,34 @@ class CommsOfPracticeController extends Controller
 
         return view('admin.commsofpractice.details', compact(
             'community', 'totalMembers', 'approvedCount', 'pendingCount', 'rejectedCount', 'membership',
-            'publications','forums'
+            'publications','forums', 'invitations'
         ));
+    }
+
+    public function sendInvitation(Request $request)
+    {
+        $request->validate([
+            'community_id' => 'required|exists:community_of_practices,id',
+            'email' => 'required|email',
+        ]);
+
+        $result = $this->commsOfPracticeRepository->sendInvitation(
+            $request->community_id,
+            $request->email,
+            auth()->id()
+        );
+
+        if ($result['status'] === 'success') {
+            return response()->json([
+                'status' => 'success',
+                'message' => $result['message']
+            ]);
+        }
+
+        return response()->json([
+            'status' => 'error',
+            'message' => $result['message']
+        ], 400);
     }
 
     public function getOne(Request $request)

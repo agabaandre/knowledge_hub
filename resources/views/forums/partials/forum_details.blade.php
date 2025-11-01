@@ -142,15 +142,21 @@
                                         </div>
                                     </div>
 
-                                    <div class="col-lg-12">
-                                        <label class="form-label" for="attachments">Attachments</label>
-                                        <div class="custom-file">
-                                            <input type="file" class="custom-file-input" name="attachments"
-                                                id="attachments">
-                                            <label class="custom-file-label" for="validatedCustomFile">Choose
-                                                file.s..</label>
-                                            <div class="preview py-2"></div>
-                                        </div>
+                                    <div class="col-lg-12 col-md-12 col-sm-12">
+                                        @php
+                                            $recaptchaSiteKey = config('recaptcha.api_site_key');
+                                            $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1']) || 
+                                                          app()->environment('local', 'testing');
+                                            $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost;
+                                        @endphp
+                                        @if($showRecaptcha)
+                                            <div class="form-group py-2">
+                                                {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+                                                @error('g-recaptcha-response')
+                                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                                @enderror
+                                            </div>
+                                        @endif
                                     </div>
 
                                     <div class="col-lg-12 col-md-12 col-sm-12">

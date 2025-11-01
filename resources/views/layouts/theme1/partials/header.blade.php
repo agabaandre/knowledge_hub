@@ -156,6 +156,12 @@
                                 <li><a href="{{ route('account.publications') }}"><i
                                             class="icon-material-outline-assignment"></i>
                                         Publications</a></li>
+                                <li><a href="{{ route('account.my-forums') }}"><i
+                                            class="icon-material-outline-forum"></i>
+                                        My Forums</a></li>
+                                <li><a href="{{ route('account.my-communities') }}"><i
+                                            class="icon-material-outline-group"></i>
+                                        My Communities</a></li>
                                 <li><a href="{{ route('account.favourites') }}"><i
                                             class="icon-material-outline-favorite-border"></i>
                                         My Favourites</a></li>

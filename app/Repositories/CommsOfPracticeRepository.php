@@ -3,7 +3,11 @@ namespace App\Repositories;
 
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
+use App\Models\CommunityInvitation;
+use App\Mail\CommunityInvitationMail;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\DB;
 
 class CommsOfPracticeRepository{
 
@@ -167,5 +171,126 @@ class CommsOfPracticeRepository{
         }
 
         return true; // Indicate success
+    }
+
+    /**
+     * Send invitation to join community
+     */
+    public function sendInvitation($communityId, $email, $invitedBy)
+    {
+        // Check if user is already a member
+        $existingMember = CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
+            ->whereHas('user', function($query) use ($email) {
+                $query->where('email', $email);
+            })
+            ->first();
+
+        if ($existingMember) {
+            return ['status' => 'error', 'message' => 'User is already a member of this community'];
+        }
+
+        // Check if there's already a pending invitation for this email and community
+        $existingInvitation = CommunityInvitation::where('community_of_practice_id', $communityId)
+            ->where('email', $email)
+            ->whereNull('responded_at')
+            ->where('expires_at', '>', now())
+            ->first();
+
+        if ($existingInvitation) {
+            return ['status' => 'error', 'message' => 'An active invitation already exists for this email'];
+        }
+
+        // Create new invitation
+        $invitation = CommunityInvitation::create([
+            'community_of_practice_id' => $communityId,
+            'email' => $email,
+            'token' => CommunityInvitation::generateToken(),
+            'invited_by' => $invitedBy,
+            'expires_at' => now()->addDays(7),
+        ]);
+
+        // Send invitation email
+        Mail::to($email)->send(new CommunityInvitationMail($invitation));
+
+        return ['status' => 'success', 'message' => 'Invitation sent successfully', 'data' => $invitation];
+    }
+
+    /**
+     * Accept invitation and add user to community
+     */
+    public function acceptInvitation($token)
+    {
+        $invitation = CommunityInvitation::where('token', $token)->first();
+
+        if (!$invitation) {
+            return ['status' => 'error', 'message' => 'Invalid invitation token'];
+        }
+
+        if ($invitation->isExpired()) {
+            return ['status' => 'error', 'message' => 'This invitation has expired'];
+        }
+
+        if ($invitation->isResponded()) {
+            return ['status' => 'error', 'message' => 'This invitation has already been used'];
+        }
+
+        // Find user by email
+        $user = \App\Models\User::where('email', $invitation->email)->first();
+
+        if (!$user) {
+            return ['status' => 'error', 'message' => 'No account found with this email. Please register first.'];
+        }
+
+        // Check if user is already a member
+        $existingMember = CommunityOfPracticeMembers::where('community_of_practice_id', $invitation->community_of_practice_id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if ($existingMember) {
+            // Mark invitation as responded even if already member
+            $invitation->markAsResponded();
+            return ['status' => 'error', 'message' => 'You are already a member of this community'];
+        }
+
+        // Add user to community with auto-approval
+        DB::transaction(function() use ($invitation, $user) {
+            CommunityOfPracticeMembers::create([
+                'community_of_practice_id' => $invitation->community_of_practice_id,
+                'user_id' => $user->id,
+                'is_approved' => 1, // Auto-approve invited members
+            ]);
+
+            // Mark invitation as responded
+            $invitation->markAsResponded();
+        });
+
+        return [
+            'status' => 'success',
+            'message' => 'You have successfully joined the community',
+            'community' => $invitation->community
+        ];
+    }
+
+    /**
+     * Get invitations for a community
+     */
+    public function getInvitations($communityId)
+    {
+        return CommunityInvitation::where('community_of_practice_id', $communityId)
+            ->with('inviter')
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    /**
+     * Delete expired invitations
+     */
+    public function pruneExpiredInvitations()
+    {
+        $deleted = CommunityInvitation::where('expires_at', '<', now())
+            ->whereNull('responded_at')
+            ->delete();
+
+        return $deleted;
     }
 }

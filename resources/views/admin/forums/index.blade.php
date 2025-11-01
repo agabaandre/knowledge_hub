@@ -70,10 +70,9 @@
 								<span class="text-muted">{{ $name }}</span>
 							</td>
 							<td>
-							    <a class="btn btn-sm btn-outline-primary mr-1" href="#details{{$row->id}}" data-toggle="modal"><i class="fa fa-eye mr-1"></i> Preview</a>
 							    <a class="btn btn-sm btn-outline-dark mr-1" href="{{ url('admin/forums/details')}}?id={{$row->id}}"><i class="fa fa-info-circle mr-1"></i> Details</a>
 								<a class="btn btn-sm btn-outline-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')"><i class="fa fa-trash mr-1"></i> Delete</a>
-								<a class="btn btn-sm btn-outline-secondary ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"><i class="fa fa-external-link mr-1"></i> View</a>
+								<a class="btn btn-sm btn-outline-secondary ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"><i class="fa fa-external-link mr-1"></i> View Website</a>
 							</td>
 						</tr>
 						@include('admin.forums.partials.details-modal',['forum'=>$row])

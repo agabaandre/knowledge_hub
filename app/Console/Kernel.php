@@ -20,6 +20,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('telescope:prune --hours=4')->daily();
         // Purge publications rejected for 90+ days without appeal
         $schedule->command('publications:purge-rejected --days=90')->dailyAt('02:15');
+        // Prune expired community invitations
+        $schedule->command('invitations:prune-expired')->dailyAt('03:00');
+        // Automatically close expired events
+        $schedule->command('events:close-expired')->dailyAt('04:00');
         
     }
 

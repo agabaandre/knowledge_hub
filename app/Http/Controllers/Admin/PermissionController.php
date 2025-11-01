@@ -17,16 +17,18 @@ use App\Http\Controllers\Controller;
 use App\Models\AccessLevel;
 use App\Repositories\SharedRepo;
 use App\Repositories\UsersRepository;
+use App\Repositories\LogsRepository;
 
 class PermissionController extends Controller
 {
    
-    private $sharedRepo; private $usersRepo;
+    private $sharedRepo; private $usersRepo; private $logsRepo;
 
-    public function __construct(SharedRepo $sharedRepo, UsersRepository $usersRepo)
+    public function __construct(SharedRepo $sharedRepo, UsersRepository $usersRepo, LogsRepository $logsRepo)
     {
         $this->sharedRepo = $sharedRepo;
         $this->usersRepo  = $usersRepo;
+        $this->logsRepo   = $logsRepo;
     }
 
     /*
@@ -513,6 +515,17 @@ class PermissionController extends Controller
         }
         
         return view('admin.profile.index')->with($data);
+    }
+
+    public function trail(Request $request)
+    {
+        log_user_trail('Accessed',$description=null);
+
+        $data['users']  = User::all();
+        $data['search'] = (Object) $request->all();
+        $data['trails'] = $this->logsRepo->audit_trail($request);
+
+        return view('admin.permissions.audit')->with($data);
     }
 
 

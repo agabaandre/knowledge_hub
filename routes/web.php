@@ -56,7 +56,7 @@ use App\Http\Controllers\Admin\AdminCoursesController;
 use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
-use App\Http\Controllers\Admin\MessagingController;
+use App\Http\Controllers\Admin\MailingListController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
@@ -398,7 +398,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
         Route::get('/get', [CommsOfPracticeController::class, 'getOne']);
         Route::get('/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
-        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction'); // Ensure this line is present
+        Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction');
+        Route::post("/send_invitation", [CommsOfPracticeController::class, 'sendInvitation'])->name('admin.commsofpractice.sendInvitation');
     });
 
     //AdminUnits
@@ -446,6 +447,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [MetricsController::class, 'index']);
     });
 
+    Route::group(["prefix" => "mailing_list"], function () {
+        Route::get("/", [MailingListController::class, 'index'])->name('admin.mailing_list.index');
+        Route::post("/", [MailingListController::class, 'store'])->name('admin.mailing_list.store');
+        Route::put("/{id}", [MailingListController::class, 'update'])->name('admin.mailing_list.update');
+        Route::delete("/{id}", [MailingListController::class, 'destroy'])->name('admin.mailing_list.destroy');
+        Route::post("/send-email", [MailingListController::class, 'sendEmail'])->name('admin.mailing_list.sendEmail');
+        Route::get("/export", [MailingListController::class, 'export'])->name('admin.mailing_list.export');
+        Route::post("/bulk-action", [MailingListController::class, 'bulkAction'])->name('admin.mailing_list.bulkAction');
+    });
+
     Route::group(["prefix" => "tools"], function () {
         Route::get("/", [ToolsAdminController::class, 'index']);
         Route::post("/store", [ToolsAdminController::class, 'store']);
@@ -460,13 +471,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/import", [AdminCoursesController::class, 'import']);
         Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
     });
+});
 
 // Admin Messaging routes
-Route::prefix('messaging')->name('admin.messaging.')->middleware(['auth'])->group(function () {
+Route::prefix('admin/messaging')->name('admin.messaging.')->middleware(['auth'])->group(function () {
     Route::get('/', [MessagingController::class, 'index'])->name('index');
     Route::post('/send', [MessagingController::class, 'sendMessage'])->name('send');
 });
-});
+
+// Mailing List route (also accessible at /mailing_list)
+Route::get('/mailing_list', [MailingListController::class, 'index'])->middleware(['auth'])->name('mailing_list.index');
 
 //permissions and access control
 Route::group(['prefix' => 'permissions', 'middleware' => ['auth', 'web']], function () {
@@ -552,6 +566,8 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
+    Route::get('/accept-invitation/{token}', [CommunitiesController::class, 'acceptInvitation'])->name('community.accept-invitation');
+    Route::get('/detail/{id}', [CommunitiesController::class, 'detail'])->name('community.detail');
 });
 
 Route::get('auth/microsoft', function () {
