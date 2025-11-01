@@ -398,6 +398,14 @@
                 </div>
                 
                 <div class="col-md-12 mb-2">
+                    <label class="form-label" for="author_affiliation">Author Affiliation/Institution <span class="text-danger">*</span></label>
+                    <input type="text" class="form-control" name="author_affiliation" id="author_affiliation"
+                           placeholder="Author Affiliation/Institution" required
+                           value="{{ @$publication->author_affiliation ?? old('author_affiliation') }}">
+                    <small class="text-muted">Enter the institution, organization, or affiliation of the authors listed above.</small>
+                </div>
+                
+                <div class="col-md-12 mb-2">
                     <label class="form-label" for="tags">Associated Tags/Health Topics
                         @if(($requiredFields['tags'] ?? true) == true)
                             <span class="text-danger">*</span>

@@ -217,6 +217,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->title                     = clean_unicode($request->title ?? '');
         $pub->description               = clean_unicode($request->description ?? '');
         $pub->associated_authors        = clean_unicode($request->associated_authors ?? '');
+        $pub->author_affiliation        = clean_unicode($request->author_affiliation ?? '');
         $pub->publication               = clean_unicode($request->link ?? '');
         $pub->publication_catgory_id    = $request->data_category_id;
         $pub->visits                    = ($request->id)?$pub->visits:0;
