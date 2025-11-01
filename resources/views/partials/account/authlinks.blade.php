@@ -37,7 +37,7 @@
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.publications') }}">
-                                           <i class="fa fa-list mr-1"></i> Our Publications
+                                           <i class="fa fa-list mr-1"></i> Publications
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">

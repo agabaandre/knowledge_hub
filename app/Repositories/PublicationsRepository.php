@@ -616,8 +616,14 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $viewed      = get_cookie($cookie_name);
 
             if(!$viewed && $pub):
-                $pub->visits = $pub->visits + 1;
-                $pub->update();
+                // Track monthly views instead of just incrementing
+                \App\Models\PublicationView::incrementView($pub->id);
+                
+                // Keep the visits column for backward compatibility (sum of all monthly views)
+                $totalViews = \App\Models\PublicationView::getTotalViews($pub->id);
+                $pub->visits = $totalViews;
+                $pub->save();
+                
                 set_cookie("Viewed".$pub->id,'yes');
             endif;
         endif;

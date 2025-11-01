@@ -21,6 +21,21 @@ class CommunitiesController extends Controller
         return view('communities.index', compact('communities'));
     }
 
+    public function myCommunities()
+    {
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
+        $userId = Auth::id();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+        
+        $communities = $this->commsOfPracticeRepository->getByUser($userId, request());
+        return view('communities.index', compact('communities'));
+    }
+
     public function join(Request $request)
     {
         if (!Auth::check()) {

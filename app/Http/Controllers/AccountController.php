@@ -77,7 +77,7 @@ class AccountController extends Controller
             // Ordering (default: id desc)
             $orderColIndex = intval($request->input('order.0.column', 0));
             $orderDir      = $request->input('order.0.dir', 'desc');
-            $columns       = ['id','title','description','is_approved'];
+            $columns       = ['id','title','description','is_approved','visits','created_at'];
             $orderCol      = $columns[$orderColIndex] ?? 'id';
 
             $rows = $base->orderBy($orderCol, $orderDir)
@@ -95,6 +95,9 @@ class AccountController extends Controller
                 if (($row->is_rejected ?? 0) == 1 && !empty($row->rejected_reason)) {
                     $desc .= '<div class="mt-2 p-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;"><small class="text-danger"><strong>Rejection reason:</strong> '.e($row->rejected_reason).'</small></div>';
                 }
+                
+                // Get total views from monthly views table
+                $totalViews = \App\Models\PublicationView::getTotalViews($row->id);
                 
                 // Build actions - only show edit/delete if not approved
                 $isApproved = ($row->is_approved ?? 0) == 1;
@@ -114,6 +117,8 @@ class AccountController extends Controller
                     $title,
                     $desc,
                     $statusBadge,
+                    '<span class="badge badge-info">'.number_format($totalViews).'</span>',
+                    $row->created_at ? $row->created_at->format('Y-m-d H:i') : 'N/A',
                     $actions,
                 ];
             }
@@ -126,6 +131,38 @@ class AccountController extends Controller
             ]);
         }
 
+        // Get statistics for the user's publications
+        $userId = auth()->id();
+        $userPublications = \App\Models\Publication::where('user_id', $userId)->get();
+        
+        $stats = [
+            'total' => $userPublications->count(),
+            'approved' => $userPublications->where('is_approved', 1)->count(),
+            'pending' => $userPublications->where('is_approved', 0)->where('is_rejected', 0)->count(),
+            'rejected' => $userPublications->where('is_rejected', 1)->count(),
+            'total_views' => 0,
+        ];
+        
+        // Calculate total views across all publications
+        foreach ($userPublications as $pub) {
+            $stats['total_views'] += \App\Models\PublicationView::getTotalViews($pub->id);
+        }
+        
+        // Get forum engagement statistics
+        $stats['forum_posts'] = \App\Models\ForumEngagement::getTotalForumPosts($userId);
+        $stats['forum_comments'] = \App\Models\ForumEngagement::getTotalForumComments($userId);
+        $stats['forum_engagements'] = \App\Models\ForumEngagement::getTotalEngagements($userId);
+        
+        // Get communities the user belongs to
+        $stats['communities'] = \App\Models\CommunityOfPracticeMembers::where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->with('community')
+            ->get()
+            ->pluck('community.community_name')
+            ->filter()
+            ->toArray();
+        
+        $data['stats'] = $stats;
         $data['publications'] = $this->publicationsRepo->my_publications($request);
         return view('account.mypublications', $data);
     }

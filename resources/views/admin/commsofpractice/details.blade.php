@@ -2,6 +2,7 @@
 
 @section('styles')
     @include('common.table')
+    <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
     <style>
         .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
         .af-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
@@ -75,12 +76,13 @@
                         </div>
                     </div>
                 </div>
-                <table class="table table-hover table-bordered">
+                <table id="members-table" class="table table-hover table-bordered">
                     <thead>
                         <tr>
                             <th style="width:60px;">#</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Status</th>
                             <th style="width:220px;">Action</th>
                         </tr>
                     </thead>
@@ -92,11 +94,18 @@
                                 <td>{{ $member->user->email }}</td>
                                 <td>
                                     @if ($member->is_approved == 1)
-                                        <span class="badge badge-success mr-2">Approved</span>
+                                        <span class="badge badge-success">Approved</span>
+                                    @elseif ($member->is_approved == 2)
+                                        <span class="badge badge-danger">Rejected</span>
+                                    @else
+                                        <span class="badge badge-warning">Pending</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @if ($member->is_approved == 1)
                                         <button class="btn btn-outline-danger btn-sm"
                                             onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Remove</button>
                                     @elseif ($member->is_approved == 2)
-                                        <span class="badge badge-danger mr-2">Rejected</span>
                                         <button class="btn btn-outline-success btn-sm"
                                             onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-undo mr-1"></i>Reconsider</button>
                                     @else
@@ -138,7 +147,43 @@
 @endsection
 
 @section('scripts')
+    <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script>
+        // Initialize DataTable for members table
+        $(function(){
+            var table = $('#members-table').DataTable({
+                pageLength: 15,
+                lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
+                order: [[0, 'asc']],
+                columnDefs: [
+                    { orderable: false, targets: [4] } // Disable sorting on Actions column
+                ],
+                language: {
+                    search: "",
+                    searchPlaceholder: "Search members by name or email...",
+                    lengthMenu: "Show _MENU_ members per page",
+                    info: "Showing _START_ to _END_ of _TOTAL_ members",
+                    infoEmpty: "No members available",
+                    infoFiltered: "(filtered from _MAX_ total members)",
+                    zeroRecords: "No matching members found"
+                },
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
+                drawCallback: function(){
+                    // Reinitialize any tooltips or other interactive elements after table redraw
+                }
+            });
+            
+            // Customize search input styling
+            $('.dataTables_filter input').addClass('form-control').css({
+                'width': '300px',
+                'display': 'inline-block',
+                'margin-left': '10px'
+            });
+            
+            // Add search icon to DataTables filter
+            $('.dataTables_filter').prepend('<i class="fa fa-search" style="margin-right: 5px; color: #6c757d;"></i>');
+        });
+        
         let memberId;
         let action;
 

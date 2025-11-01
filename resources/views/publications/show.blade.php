@@ -346,6 +346,8 @@
         align-items: center;
         justify-content: center;
         position: relative;
+        opacity: 1;
+        transition: opacity 0.15s ease-in-out;
     }
     
     /* PDF iframe - full height */
@@ -1061,10 +1063,7 @@ window.previewAttachmentClick = function(event, button) {
         modal.removeClass('fullscreen');
         $('#fullscreenIcon').removeClass('fa-compress').addClass('fa-expand');
         
-        // Show loading state
-        modalBody.html('<div class="text-center w-100" style="padding: 3rem;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading preview...</span></div><p class="mt-3 text-muted">Loading preview...</p></div>');
-        
-        // Update modal title based on file type
+        // Update modal title based on file type BEFORE showing modal
         if(ext === 'pdf') {
             modalTitle.html('<i class="fa fa-file-pdf mr-2"></i>PDF Preview');
         } else if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
@@ -1088,18 +1087,25 @@ window.previewAttachmentClick = function(event, button) {
             content = '<div class="alert alert-info" style="margin:2rem;text-align:center;"><i class="fa fa-info-circle mr-2"></i>Preview not available for this file type.<br><a href="'+fileUrl+'" target="_blank" class="btn btn-primary btn-sm mt-2"><i class="fa fa-download mr-1"></i>Download File</a></div>';
         }
         
-        // Show modal and update content
+        // Prepare content BEFORE showing modal to prevent flicker
+        // Set loading state first
+        modalBody.html('<div class="text-center w-100" style="padding: 3rem;"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading preview...</span></div><p class="mt-3 text-muted">Loading preview...</p></div>');
+        
+        // Show modal
         modal.modal('show');
         
-        // Update content when modal is shown
-        modal.off('shown.bs.modal').on('shown.bs.modal', function() {
-            modalBody.html(content);
+        // Update content AFTER modal is fully visible (when animation completes)
+        // Using 'shown.bs.modal' ensures modal is fully rendered before content swap
+        modal.off('shown.bs.modal').one('shown.bs.modal', function() {
+            // Fade out loading, then fade in content for smooth transition
+            modalBody.css('opacity', '0.7');
+            setTimeout(function() {
+                modalBody.html(content);
+                setTimeout(function() {
+                    modalBody.css('opacity', '1');
+                }, 10);
+            }, 50);
         });
-        
-        // Also update content immediately (fallback)
-        setTimeout(function() {
-            modalBody.html(content);
-        }, 150);
         
         return false;
     } else {

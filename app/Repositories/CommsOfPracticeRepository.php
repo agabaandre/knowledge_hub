@@ -17,6 +17,22 @@ class CommsOfPracticeRepository{
 
         return $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
     }
+
+    public function getByUser($userId, Request $request)
+    {
+        // Get communities where user is an approved member
+        $memberCommunityIds = CommunityOfPracticeMembers::where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->pluck('community_of_practice_id');
+
+        $query = CommunityOfPractice::whereIn('id', $memberCommunityIds);
+
+        if ($request->input('withRelated', false)) {
+            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+        }
+
+        return $query->paginate($request->rows ?? 20);
+    }
     
     public function save(Request $request){
 

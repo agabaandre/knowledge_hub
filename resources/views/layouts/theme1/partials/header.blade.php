@@ -155,7 +155,7 @@
                                         My Profile</a></li>
                                 <li><a href="{{ route('account.publications') }}"><i
                                             class="icon-material-outline-assignment"></i>
-                                        Our Publications</a></li>
+                                        Publications</a></li>
                                 <li><a href="{{ route('account.favourites') }}"><i
                                             class="icon-material-outline-favorite-border"></i>
                                         My Favourites</a></li>

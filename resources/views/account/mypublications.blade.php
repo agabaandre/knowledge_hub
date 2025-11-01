@@ -117,23 +117,163 @@
 			<div class="clearfix"></div>
 		</div>
 
+		<!-- Statistics Cards -->
+		<div class="card-body">
+			<!-- Action Buttons -->
+			<div class="row mb-4">
+				<div class="col-12">
+					<div class="d-flex flex-wrap" style="gap: 0.5rem;">
+						<a href="{{ route('account.my-forums') }}" class="btn btn-au btn-sm">
+							<i class="fa fa-comments mr-1"></i> My Forums
+						</a>
+						<a href="{{ route('account.my-communities') }}" class="btn btn-au btn-sm">
+							<i class="fa fa-users mr-1"></i> My Communities
+						</a>
+					</div>
+				</div>
+			</div>
+			
+			<h5 class="mb-3"><i class="fa fa-file-alt mr-2"></i>Publications Statistics</h5>
+			<div class="row mb-3">
+				<div class="col-md-3 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #119A48 0%, #0e7a3a 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Publications</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['total'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-file-alt fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Approved</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['approved'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-check-circle fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.9) !important;">Pending</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['pending'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-clock fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-3 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Views</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['total_views'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-eye fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			<h5 class="mb-3 mt-3"><i class="fa fa-comments mr-2"></i>Forum Engagement Statistics</h5>
+			<div class="row mb-3">
+				<div class="col-md-4 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Forum Posts</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_posts'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-comment-dots fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #343a40 0%, #23272b 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Forum Comments</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_comments'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-reply fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+				<div class="col-md-4 col-sm-6 mb-2">
+					<div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.25rem; border: none; color: white !important;">
+						<div class="card-body p-3" style="color: white !important;">
+							<div class="d-flex justify-content-between align-items-center">
+								<div style="color: white !important;">
+									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Engagements</h6>
+									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_engagements'] ?? 0) }}</h5>
+								</div>
+								<div>
+									<i class="fa fa-chart-line fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			
+			@if(!empty($stats['communities']) && count($stats['communities']) > 0)
+			<h5 class="mb-3 mt-3"><i class="fa fa-users mr-2"></i>Communities of Practice</h5>
+			<div class="row mb-3">
+				<div class="col-12">
+					<div class="card" style="border-radius: 0.25rem; border: 1px solid #e0e0e0;">
+						<div class="card-body p-3">
+							<div class="d-flex align-items-center mb-2">
+								<i class="fa fa-users fa-lg text-primary mr-2"></i>
+								<div>
+									<h6 class="mb-0">You belong to <strong>{{ count($stats['communities']) }}</strong> {{ count($stats['communities']) == 1 ? 'Community' : 'Communities' }}</h6>
+									<small class="text-muted">Active member of the following Communities of Practice</small>
+								</div>
+							</div>
+							<div class="mt-2">
+								@foreach($stats['communities'] as $community)
+									<span class="badge badge-primary mr-1 mb-1" style="font-size: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 0.25rem;">
+										<i class="fa fa-circle mr-1" style="font-size: 0.6rem;"></i>{{ $community }}
+									</span>
+								@endforeach
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+			@endif
+		</div>
 	
 		<div class="card-body text-left">
-			<form method="GET" class="row mb-3">
-				<div class="col-md-6">
-					<input type="text" name="term" value="{{ request('term') }}" class="form-control" placeholder="Search title or description">
-				</div>
-				<div class="col-md-2">
-					<select name="rows" class="form-control">
-						@foreach([10,20,50,100] as $r)
-							<option value="{{ $r }}" {{ request('rows')==$r ? 'selected' : '' }}>{{ $r }}/page</option>
-						@endforeach
-					</select>
-				</div>
-				<div class="col-md-2">
-					<button class="btn btn-dark" type="submit"><i class="fa fa-search"></i> Search</button>
-				</div>
-			</form>
             <table id="my-publications" class="table table-striped table-bordered align-middle">
 				<thead>
 					<tr>
@@ -141,6 +281,8 @@
 						<th>Title</th>
 						<th>Description</th>
                         <th>Status</th>
+                        <th>Total Views</th>
+                        <th>Created At</th>
                         <th width="240">Actions</th>
 					</tr>
 				</thead>
@@ -167,8 +309,9 @@ $(function(){
   $('#my-publications').DataTable({
     processing: true,
     serverSide: true,
-    searching: true,
+    searching: false,
     lengthChange: true,
+    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"p>>rtip',
     ajax: {
       url: '{{ route('account.publications') }}',
       data: function(d){ d.datatable = 1; }
@@ -179,7 +322,9 @@ $(function(){
       { data: 1, orderable: true },
       { data: 2, orderable: false },
       { data: 3, orderable: true, searchable: false },
-      { data: 4, orderable: false, searchable: false, width: '240px' }
+      { data: 4, orderable: true, searchable: false },
+      { data: 5, orderable: true, searchable: false },
+      { data: 6, orderable: false, searchable: false, width: '240px' }
     ],
     drawCallback: function(){
       // enable bootstrap tooltips/popovers if needed later

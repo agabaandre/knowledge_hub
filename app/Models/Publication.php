@@ -18,6 +18,7 @@ class Publication extends Model
     protected $appends = ['theme','label','value','is_favourite','approved_comments',
     'pending_comments','has_attachments','tag_ids','image_url',
     'publication_countries','publication_regions','country_ids','region_ids'];
+    protected $dates = ['created_at', 'updated_at', 'date_created'];
 
   
     public function toSearchableArray()
@@ -59,6 +60,10 @@ class Publication extends Model
 
     public function tags(){
         return $this->hasMany(PublicationTag::class, 'publication_id', 'id');
+    }
+
+    public function monthlyViews(){
+        return $this->hasMany(PublicationView::class, 'publication_id', 'id');
     }
 
     public function author(){

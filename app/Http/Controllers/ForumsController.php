@@ -24,6 +24,24 @@ class ForumsController extends Controller
         return view('forums.index', $data);
     }
 
+    public function myForums(Request $request)
+    {
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $userId = auth()->id();
+        if (!$userId) {
+            return redirect()->route('login');
+        }
+
+        $data['forums'] = $this->forumsRepo->getByUser($userId, $request);
+        $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
+        $data['search'] = (object) $request->all();
+
+        return view('forums.index', $data);
+    }
+
     public function thread(Request $request)
     {
 

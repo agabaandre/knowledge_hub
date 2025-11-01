@@ -66,5 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'verify_email' => \App\Http\Middleware\VerifyEmail::class,
         'auth.passport' => \App\Http\Middleware\AuthenticateWithPassportToken::class,
+        'permission' => \App\Http\Middleware\PermissionMiddleware::class,
     ];
 }

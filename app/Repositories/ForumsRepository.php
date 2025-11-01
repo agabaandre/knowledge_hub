@@ -69,6 +69,45 @@ class ForumsRepository extends SharedRepo{
         return $results;
     }
 
+    public function getByUser($userId, Request $request, $approved=1){
+        // Get forums where user has posted or commented
+        $rows_count = ($request->rows) ? $request->rows : 20;
+        
+        // Get forum IDs where user created posts
+        $userForumIds = Forum::where('created_by', $userId)->pluck('id');
+        
+        // Get forum IDs where user made comments
+        $userCommentForumIds = ForumComment::where('created_by', $userId)->pluck('forum_id');
+        
+        // Combine and get unique forum IDs
+        $allForumIds = $userForumIds->merge($userCommentForumIds)->unique();
+        
+        $forums = Forum::with(['user', 'tags', 'comments'])
+            ->whereIn('id', $allForumIds)
+            ->orderBy('created_at', 'desc');
+
+        if($request->term){
+            $forums->where(function($q) use ($request) {
+                $q->where('forum_title','like','%'.$request->term.'%')
+                  ->orWhere('forum_description','like','%'.$request->term.'%');
+            });
+        }
+
+        if($request->tag){
+            $tagged_forums = ForumTag::where('tag',$request->tag)->get()->pluck('forum_id');
+            $forums->whereIn('id',$tagged_forums);
+        }
+
+        if($approved !== 3) {
+            $forums->where('status', $approved);
+        }
+
+        //Access levels effect to query results
+        $this->access_filter($forums);
+
+        return $forums->paginate($rows_count);
+    }
+
     public function save(Request $request){
 
         $forum = new Forum();
@@ -91,6 +130,10 @@ class ForumsRepository extends SharedRepo{
 
         $forum->save();
 
+        // Track forum post engagement
+        if ($forum->created_by) {
+            \App\Models\ForumEngagement::incrementForumPost($forum->created_by);
+        }
         
         if($request->communities && count($request->communities)){
 
@@ -140,6 +183,11 @@ class ForumsRepository extends SharedRepo{
         $comment->comment  = clean_unicode($request->comment ?? '');
         $comment->parent_id = $request->parent_id ?? null;
         $comment->save();
+
+        // Track forum comment engagement
+        if ($comment->created_by) {
+            \App\Models\ForumEngagement::incrementForumComment($comment->created_by);
+        }
 
         if($request->hasFile('attachments') && $comment->id ?? null):
             $files           = $request->file('attachments');  
