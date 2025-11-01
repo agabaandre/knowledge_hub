@@ -38,7 +38,7 @@
                         <td class="text-muted">{!! truncate(strip_tags($c->description), 140) !!}</td>
                         <td>
                             <button class="btn btn-outline-dark btn-sm mr-1" onclick="openEditCommunity({{ $c->id }})"><i class="fa fa-edit"></i></button>
-                            @can('delete_meta_data')
+                            @can('delete_publication_metadata')
                             <button class="btn btn-outline-danger btn-sm" onclick="openDeleteModal({{ $c->id }})"><i class="fa fa-trash"></i></button>
                             @endcan
                         </td>

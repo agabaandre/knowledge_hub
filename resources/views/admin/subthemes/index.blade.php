@@ -84,7 +84,7 @@
                                         data-description="{{ $row->description }}" data-icon="{{ $row->icon }}"
                                         data-thematic_area_id="{{ $row->thematic_area_id }}"
                                         class="btn btn-sm btn-primary ml-1">Edit</a>
-                                    @can('delete_meta_data')
+                                    @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
                                         onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
                                     @endcan

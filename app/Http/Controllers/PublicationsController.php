@@ -220,17 +220,21 @@ class PublicationsController extends Controller
 
             $messages = [];
 
-            // Add reCAPTCHA validation if site key is configured
+            // Check if we're on localhost or local environment
+            $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) || 
+                           app()->environment('local', 'testing');
+
+            // Add reCAPTCHA validation if site key is configured AND not on localhost
             $recaptchaSiteKey = config('recaptcha.api_site_key');
-            if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+            if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
                 $val_rules['g-recaptcha-response'] = 'required';
                 $messages['g-recaptcha-response.required'] = 'Please complete the CAPTCHA to proceed.';
             }
 
             $request->validate($val_rules, $messages);
 
-            // Validate reCAPTCHA response if provided
-            if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+            // Validate reCAPTCHA response if provided and not on localhost
+            if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
                 if (!$request->filled('g-recaptcha-response')) {
                     return back()->withErrors([
                         'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.'

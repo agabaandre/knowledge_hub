@@ -396,18 +396,20 @@
                                 <input type="hidden" name="email" value="{{ current_user()->email }}">
                             @endif
 
-                            <div class="form-group mt-3">
-                                @php
-                                    $recaptchaSiteKey = config('recaptcha.api_site_key');
-                                    $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
-                                @endphp
-                                @if($showRecaptcha)
-                                    {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
-                                    @error('g-recaptcha-response')
-                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                                    @enderror
-                                @endif
-                            </div>
+       <div class="form-group mt-3">
+           @php
+               $recaptchaSiteKey = config('recaptcha.api_site_key');
+               $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1']) || 
+                              app()->environment('local', 'testing');
+               $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost;
+           @endphp
+           @if($showRecaptcha)
+               {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+               @error('g-recaptcha-response')
+                   <span class="text-danger small d-block mt-1">{{ $message }}</span>
+               @enderror
+           @endif
+       </div>
 
                             <div class="submit-section">
                                 <a href="{{ url('/') }}" class="btn-cancel">

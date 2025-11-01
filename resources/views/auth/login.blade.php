@@ -331,7 +331,9 @@
                     <div class="form-group">
                         @php
                             $recaptchaSiteKey = config('recaptcha.api_site_key');
-                            $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
+                            $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1']) || 
+                                          app()->environment('local', 'testing');
+                            $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost;
                         @endphp
                         @if($showRecaptcha)
                             <div class="py-2">

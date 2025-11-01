@@ -53,17 +53,21 @@ class LoginController extends Controller
 
         $messages = [];
 
-        // Add reCAPTCHA validation if site key is configured
+        // Check if we're on localhost or local environment
+        $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) || 
+                       app()->environment('local', 'testing');
+        
+        // Add reCAPTCHA validation if site key is configured AND not on localhost
         $recaptchaSiteKey = config('recaptcha.api_site_key');
-        if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
             $rules['g-recaptcha-response'] = 'required';
             $messages['g-recaptcha-response.required'] = 'Please complete the CAPTCHA to proceed.';
         }
 
         $request->validate($rules, $messages);
 
-        // Validate reCAPTCHA response - must be provided and valid if site key is configured
-        if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+        // Validate reCAPTCHA response - only if not on localhost
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
             // Check if reCAPTCHA response is provided
             if (!$request->filled('g-recaptcha-response')) {
                 throw ValidationException::withMessages([

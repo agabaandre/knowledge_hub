@@ -602,14 +602,14 @@ Route::get("/tests",function(){
 
 });
 
-Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-requests.', 'middleware' => ['auth', 'web']], function () {
+Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-requests.', 'middleware' => ['auth', 'web', 'permission:view_content_requests']], function () {
     Route::get('/', [ContentRequestAdminController::class, 'index'])->name('index');
     Route::get('/create', [ContentRequestAdminController::class, 'create'])->name('create');
-    Route::post('/', [ContentRequestAdminController::class, 'store'])->name('store');
-    Route::get('/{id}/edit', [ContentRequestAdminController::class, 'edit'])->name('edit');
-    Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->name('update');
-    Route::post('/{id}/process', [ContentRequestAdminController::class, 'process'])->name('process');
-    Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->name('destroy');
+    Route::post('/', [ContentRequestAdminController::class, 'store'])->middleware('permission:manage_content_requests')->name('store');
+    Route::get('/{id}/edit', [ContentRequestAdminController::class, 'edit'])->middleware('permission:manage_content_requests')->name('edit');
+    Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->middleware('permission:manage_content_requests')->name('update');
+    Route::post('/{id}/process', [ContentRequestAdminController::class, 'process'])->middleware('permission:manage_content_requests')->name('process');
+    Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->middleware('permission:manage_content_requests')->name('destroy');
 });
 
 Route::group(["prefix" => "admin/static-links"], function () {

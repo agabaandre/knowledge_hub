@@ -38,7 +38,7 @@
                         <td>{{ $a->name }}</td>
                         <td>
                             <button class="btn btn-outline-dark btn-sm mr-1" onclick="openEdit({{ $a->id }})"><i class="fa fa-edit"></i></button>
-                            @can('delete_meta_data')
+                            @can('delete_publication_metadata')
                             <a class="btn btn-outline-danger btn-sm" href="{{ url('admin/authors/delete') }}?id={{ $a->id }}"><i class="fa fa-trash"></i></a>
                             @endcan
                         </td>

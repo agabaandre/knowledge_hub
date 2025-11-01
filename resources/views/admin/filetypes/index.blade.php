@@ -74,7 +74,9 @@
 							<td>{{ $row->is_downloadable ? 'YES' : 'NO' }}</td>
 							<td>
 							<a href="#edit-filetype-modal" data-toggle="modal" data-id="{{ $row->id }}" data-name="{{ $row->name }}" data-icon="{{ $row->icon }}" data-downloadable="{{ $row->is_downloadable }}" class="btn btn-sm btn-outline-dark ml-1"><i class="fa fa-edit"></i></a>
+								@can('delete_publication_metadata')
 								<a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="text-danger"> Delete</a>
+								@endcan
 							</td>
 						</tr>
 					@endforeach

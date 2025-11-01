@@ -82,7 +82,7 @@
                                     data-is_health_topic="{{$row->is_health_topic ?? 1 }}" data-is_health_emergency="{{$row->is_health_emergency ?? 0 }}"
                                     data-overview="{{$row->overview }}"
                                     class="btn btn-sm btn-primary ml-1">Edit</a>
-                                @can('delete_meta_data')
+                                @can('delete_publication_metadata')
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"
                                    onclick="openDeleteModal('{{ $row->id }}')">Delete</a>
                                 @endcan
