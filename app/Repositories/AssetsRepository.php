@@ -10,7 +10,7 @@ class AssetsRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $results    = HealthAsset::orderBy('id','desc');
+        $results    = HealthAsset::with('type')->orderBy('id','desc');
 
        
         if($request->slug){
@@ -20,15 +20,24 @@ class AssetsRepository{
             $results->where('asset_type_id',$type->id);
         }
 
-        if($request->term)
-        $results->where('asset_type_id','like','%'.$request->term.'%');
+        if($request->term){
+            $results->where(function($query) use ($request) {
+                $query->where('asset_name', 'like', '%' . $request->term . '%')
+                      ->orWhere('asset_desc', 'like', '%' . $request->term . '%')
+                      ->orWhere('url', 'like', '%' . $request->term . '%');
+            });
+        }
+
+        if($request->asset_type_id){
+            $results->where('asset_type_id', $request->asset_type_id);
+        }
       
         if($request->export == 1){
             $this->excel_export($results);
             return;
         }
 
-        return $results->paginate($rows_count);
+        return $results->paginate($rows_count)->appends($request->all());
     }
 
     

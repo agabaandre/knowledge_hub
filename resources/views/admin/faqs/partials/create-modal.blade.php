@@ -1,40 +1,36 @@
-<!--  Extra Large modal example -->
-<div class="modal" id="create-modal">
-  <div class="modal-dialog modal-lg">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Create FAQ</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      
-      <form action="{{ url('admin/faqs/save') }}" method="post" id='filetypes' class='filetypes'>
-        @csrf
-      <div class="modal-body">
-        <input type="hidden" name="id" id="id" class="newform">
-        <div class="row">
-
-            <div class="form-group col-md-12">
-              <label class="form-label" for="name">Question</label>
-              <input type="text" placeholder="Enter Question" class="form-control newform" id="question" name="question" required>
+<!-- Create/Edit FAQ Modal -->
+<div class="modal fade" id="create-modal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="faqModalLabel">Create FAQ</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
+            
+            <form action="{{ url('admin/faqs/save') }}" method="post" id="faqForm">
+                @csrf
+                <div class="modal-body">
+                    <input type="hidden" name="id" id="id">
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="question">Question <span class="text-danger">*</span></label>
+                        <input type="text" placeholder="Enter Question" class="form-control" id="question" name="question" required>
+                    </div>
 
-            <div class="form-group col-md-12">
-              <label class="form-label" for="name">Response/Answer</label>
-              <textarea placeholder="Response/Answer" class="form-control summernote" id="answer" name="answer"></textarea>
-            </div>
-         
+                    <div class="form-group">
+                        <label class="form-label" for="answer">Response/Answer <span class="text-danger">*</span></label>
+                        <textarea placeholder="Response/Answer" class="form-control" id="answer" name="answer" required></textarea>
+                        <small class="form-text text-muted">Use the rich text editor to format your answer.</small>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary btn-sm" data-dismiss="modal" type="button">Cancel</button>
+                    <button class="btn btn-primary btn-sm" type="submit" id="saveFaqBtn">Save FAQ</button>
+                </div>
+            </form>
         </div>
-
-      </div>
-      <div class="modal-footer">
-        <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-        <button class="btn btn-primary" type="submit">Save Record</button>
-      </div>
-
-      </form>
-
-    </div><!-- /.modal-content -->
-  </div><!-- /.modal-dialog -->
+    </div>
 </div>

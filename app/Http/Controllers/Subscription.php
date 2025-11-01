@@ -37,22 +37,18 @@ class Subscription extends Controller
             'email' => $request->email,
         ]);
 
-        // Use Exchange OAuth instead of Laravel Mail facade
+        // Send subscription email via queue system (which uses Exchange)
         try {
-            $mail = new MailSubscribe($subscriber);
-            $mailData = (object) [
+            $mailData = [
                 'email' => $request->email,
-                'subject' => $mail->subject ?? 'Subscription Confirmation',
-                'body' => view('emails.subscribed', ['subscriber' => $subscriber])->render()
+                'subject' => 'Subscription Confirmation - Africa CDC Knowledge Hub',
+                'body' => view('emails.subscribed', ['subscriber' => $subscriber])->render(),
+                'title' => 'Subscription Confirmation'
             ];
             
-            $result = send_email($mailData);
-            
-            if (!$result || (is_array($result) && !($result['success'] ?? false))) {
-                \Log::error('Failed to send subscription email: ' . (is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'));
-            }
+            \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');
         } catch (\Exception $e) {
-            \Log::error('Exception sending subscription email: ' . $e->getMessage());
+            \Log::error('Exception queuing subscription email: ' . $e->getMessage());
         }
 
         return response()->json([
@@ -73,22 +69,18 @@ class Subscription extends Controller
             $subscriber->status = 'unsubscribed';
             $subscriber->save();
 
-            // Use Exchange OAuth instead of Laravel Mail facade
+            // Send unsubscription email via queue system (which uses Exchange)
             try {
-                $mail = new Unsubscribe($subscriber);
-                $mailData = (object) [
+                $mailData = [
                     'email' => $request->email,
-                    'subject' => $mail->subject ?? 'Unsubscription Confirmation',
-                    'body' => view('emails.unsubscribed', ['subscriber' => $subscriber])->render()
+                    'subject' => 'Unsubscription Confirmation - Africa CDC Knowledge Hub',
+                    'body' => view('emails.unsubscribed', ['subscriber' => $subscriber])->render(),
+                    'title' => 'Unsubscription Confirmation'
                 ];
                 
-                $result = send_email($mailData);
-                
-                if (!$result || (is_array($result) && !($result['success'] ?? false))) {
-                    \Log::error('Failed to send unsubscription email: ' . (is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'));
-                }
+                \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');
             } catch (\Exception $e) {
-                \Log::error('Exception sending unsubscription email: ' . $e->getMessage());
+                \Log::error('Exception queuing unsubscription email: ' . $e->getMessage());
             }
 
             return response()->json([

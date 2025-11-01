@@ -10,7 +10,7 @@ class ForumComment extends Model
     use HasFactory;
 
     protected $appends =['comment_replies','attachments'];
-    public $timestamps = false;
+    // Timestamps enabled - created_at and updated_at are now tracked
 
     public function getCommentRepliesAttribute(){
          return ForumComment::where('parent_id',$this->id)->get();

@@ -129,31 +129,24 @@ class User extends Authenticatable
      */
     public function sendPasswordResetNotification($token)
     {
-        // Use Exchange OAuth instead of Laravel Mail facade
+        // Send password reset email via queue system (which uses Exchange)
         try {
             $resetUrl = url('password/reset?token=' . $token);
             
-            $mailData = (object) [
+            $mailData = [
                 'email' => $this->email,
                 'subject' => 'Reset Your Password - Africa CDC Knowledge Hub',
                 'body' => view('emails.password_reset', [
                     'name' => $this->name,
                     'token' => $token,
                     'resetUrl' => $resetUrl,
-                ])->render()
+                ])->render(),
+                'title' => 'Reset Your Password'
             ];
             
-            $result = send_email($mailData);
-            
-            if (!$result || (is_array($result) && !($result['success'] ?? false))) {
-                \Log::error('Failed to send password reset notification via Exchange', [
-                    'user_id' => $this->id,
-                    'email' => $this->email,
-                    'error' => is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'
-                ]);
-            }
+            \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');
         } catch (\Exception $e) {
-            \Log::error('Exception sending password reset notification via Exchange: ' . $e->getMessage(), [
+            \Log::error('Exception queuing password reset notification: ' . $e->getMessage(), [
                 'user_id' => $this->id,
                 'email' => $this->email,
                 'exception' => get_class($e)

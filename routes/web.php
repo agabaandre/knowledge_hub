@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\FactsAdminController;
 use App\Http\Controllers\Admin\FaqsAdminController;
 use App\Http\Controllers\Admin\PermissionController;
 use App\Http\Controllers\AssetsController;
+use App\Http\Controllers\Admin\HealthAssetsAdminController;
 use App\Http\Controllers\AuthorsController;
 use App\Http\Controllers\ExpertsController;
 use App\Http\Controllers\FaqsController;
@@ -26,6 +27,7 @@ use App\Http\Controllers\ThemesController;
 
 use App\Http\Controllers\Admin\GeoAreasController;
 use App\Http\Controllers\Admin\FileTypesController;
+use App\Http\Controllers\Admin\AssetTypesController;
 use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\LogsController;
@@ -201,6 +203,10 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
     Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');
 
+    // Notification endpoints
+    Route::get("/notifications/pending-counts", [\App\Http\Controllers\Admin\NotificationController::class, 'getPendingCounts'])->name('admin.notifications.counts');
+    Route::get("/notifications/pending-items", [\App\Http\Controllers\Admin\NotificationController::class, 'getPendingItems'])->name('admin.notifications.items');
+
     Route::get("/events", [AdminEventsController::class, 'index'])->name('admin.events');
 
     Route::prefix('events')->name('admin.events.')->group(function () {
@@ -250,6 +256,14 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [FileTypesController::class, 'index']);
         Route::post("/save", [FileTypesController::class, 'store'])->name('store');
         Route::get("/delete", [FileTypesController::class, 'destroy']);
+    });
+
+    //assettypes
+    Route::group(["prefix" => "assettypes", "as"=> "assettypes."], function () {
+
+        Route::get("/", [AssetTypesController::class, 'index']);
+        Route::post("/save", [AssetTypesController::class, 'store'])->name('store');
+        Route::get("/delete", [AssetTypesController::class, 'destroy']);
     });
 
 
@@ -324,11 +338,15 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //authors
     Route::group(["prefix" => "kpi"], function () {
 
-        Route::get("/", [KpiController::class, 'index']);
-        Route::get("/data", [KpiController::class, 'data']);
-        Route::post("/save", [KpiController::class, 'save']);
-        Route::post("/save_data", [KpiController::class, 'save_data']);
-        Route::get("/delete", [KpiController::class, 'destroy']);
+        Route::get("/", [KpiController::class, 'index'])->middleware('permission:manage_kpis');
+        Route::get("/data", [KpiController::class, 'data'])->middleware('permission:manage_kpis');
+        Route::get("/get", [KpiController::class, 'get']);
+        Route::get("/get_data", [KpiController::class, 'get_data']);
+        Route::post("/save", [KpiController::class, 'save'])->middleware('permission:manage_kpis');
+        Route::post("/save_data", [KpiController::class, 'save_data'])->middleware('permission:manage_kpis');
+        Route::post("/update_data", [KpiController::class, 'update_data'])->middleware('permission:manage_kpis');
+        Route::get("/delete", [KpiController::class, 'destroy'])->middleware('permission:manage_kpis');
+        Route::get("/delete_data", [KpiController::class, 'destroy_data'])->middleware('permission:manage_kpis');
     });
 
     //quotes
@@ -358,6 +376,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "faqs"], function () {
 
         Route::get("/", [FaqsAdminController::class, 'index']);
+        Route::get("/get", [FaqsAdminController::class, 'get']);
         Route::post("/save", [FaqsAdminController::class, 'store']);
         Route::get("/delete", [FaqsAdminController::class, 'destroy']);
     });
@@ -369,6 +388,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [ExpertsAdminController::class, 'index']);
         Route::post("/save", [ExpertsAdminController::class, 'store']);
         Route::get("/delete", [ExpertsAdminController::class, 'destroy']);
+        Route::get("/job-titles-by-isco", [ExpertsAdminController::class, 'getJobTitlesByIsco']);
 
         Route::group(["prefix" => "types"], function () {
 
@@ -378,6 +398,12 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         });
 
+    });
+
+    //healthassets
+    Route::group(["prefix" => "healthassets"], function () {
+        Route::get("/", [HealthAssetsAdminController::class, 'index']);
+        Route::get("/detail", [HealthAssetsAdminController::class, 'details']);
     });
 
 

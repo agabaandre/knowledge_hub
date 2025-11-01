@@ -12,18 +12,28 @@ class ExpertsRepository extends SharedRepo{
     public function get(Request $request,$return_array=false){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $query    = Expert::orderBy('id','desc');
+        $query    = Expert::with(['type', 'country', 'jobTitle', 'iscoClassification'])->orderBy('id','desc');
 
         if($request->term):
-            $query->where('first_name','like','%'.$request->term.'%');
-            $query->orWhere('last_name','like','%'.$request->term.'%');
-            $query->orWhere('job_title','like','%'.$request->term.'%');
-            
-            $query->orWhereIn('expert_type_id',
-            ExpertType::where('type_name','like','%'.$request->term.'%')->pluck('id'));
-            
-            $query->orWhereIn('country_id',
-            Country::where('name','like','%'.$request->term.'%')->pluck('id'));
+            $query->where(function($q) use ($request) {
+                $q->where('first_name','like','%'.$request->term.'%')
+                  ->orWhere('last_name','like','%'.$request->term.'%')
+                  ->orWhere('job_title','like','%'.$request->term.'%')
+                  ->orWhere('email','like','%'.$request->term.'%')
+                  ->orWhere('occupation','like','%'.$request->term.'%')
+                  ->orWhereIn('expert_type_id',
+                      ExpertType::where('type_name','like','%'.$request->term.'%')->pluck('id'))
+                  ->orWhereIn('country_id',
+                      Country::where('name','like','%'.$request->term.'%')->pluck('id'));
+            });
+        endif;
+
+        if($request->country):
+            $query->where('country_id', $request->country);
+        endif;
+
+        if($request->expert_type_id):
+            $query->where('expert_type_id', $request->expert_type_id);
         endif;
 
         if($request->export == 1){
@@ -33,7 +43,7 @@ class ExpertsRepository extends SharedRepo{
        
         $this->access_filter($query);
 
-        $results = ($return_array)?$query->get():$query->paginate($rows_count);
+        $results = ($return_array)?$query->get():$query->paginate($rows_count)->appends($request->all());
         return $results;
     }
 
@@ -83,6 +93,19 @@ class ExpertsRepository extends SharedRepo{
         $expert->phone_number    = $request->phone_number;
         $expert->expert_type_id  = $request->type_id;
         $expert->country_id      = $request->country_id;
+        
+        // Add ISCO classification and job title relationships
+        if($request->isco_classification_id) {
+            $expert->isco_classification_id = $request->isco_classification_id;
+        }
+        if($request->job_title_id) {
+            $expert->job_title_id = $request->job_title_id;
+        }
+        
+        // If occupation/field is provided, save it
+        if($request->has('field')) {
+            $expert->occupation = $request->field;
+        }
 
         $saved= ($request->id)?$expert->update():$expert->save();
 

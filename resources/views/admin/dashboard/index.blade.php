@@ -1,25 +1,65 @@
 @extends('admin.layouts.main')
 
-@section('content')
+@section('styles')
+    @include('common.table')
 <style>
-    /* Minimal AdminLTE-inspired widgets (reference: AdminLTE small-box) */
-    .small-box{border-radius:12px;position:relative;display:block;margin-bottom:20px;box-shadow:0 1px 2px rgba(0,0,0,.05);color:#0f172a}
-    .small-box>.inner{padding:16px 16px 14px 16px}
-    .small-box h3{font-size:1.6rem;font-weight:800;margin:0 0 6px}
-    .small-box p{font-size:.875rem;color:#0f172a99;margin:0}
-    .small-box .icon{position:absolute;top:12px;right:16px;z-index:0;color:#00000020;font-size:42px}
-    .small-box .small-box-footer{position:relative;display:flex;align-items:center;gap:6px;padding:10px 16px;border-top:1px solid #e2e8f0;border-bottom-left-radius:12px;border-bottom-right-radius:12px;color:#0f172aCC}
-    .bg-gradient-primary{background:linear-gradient(135deg,#2563eb,#60a5fa);color:#fff}
-    .bg-gradient-success{background:linear-gradient(135deg,#059669,#34d399);color:#fff}
-    .bg-gradient-warning{background:linear-gradient(135deg,#d97706,#fbbf24);color:#fff}
-    .bg-gradient-info{background:linear-gradient(135deg,#0ea5e9,#22d3ee);color:#fff}
-    .bg-gradient-purple{background:linear-gradient(135deg,#7c3aed,#a78bfa);color:#fff}
-    .bg-gradient-rose{background:linear-gradient(135deg,#e11d48,#fb7185);color:#fff}
-    .bg-gradient-slate{background:linear-gradient(135deg,#475569,#94a3b8);color:#fff}
-    .small-box .stat{font-weight:800;letter-spacing:.2px}
-    .small-box a{color:inherit}
-    .small-box a:hover{text-decoration:none;opacity:.95}
+    .stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        display: block;
+        text-decoration: none;
+        color: inherit;
+    }
+    .stat-card:hover {
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        transform: translateY(-2px);
+    }
+    .stat-card .stat-value {
+        font-size: 2rem;
+        font-weight: bold;
+        color: {{ settings()->au_corporate_green ?? '#1A5632' }};
+        margin-bottom: 0.5rem;
+    }
+    .stat-card .stat-label {
+        font-size: 0.875rem;
+        color: {{ settings()->au_grey_text ?? '#58595B' }};
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+    }
+    .stat-card .stat-icon {
+        font-size: 1.5rem;
+        color: {{ settings()->au_corporate_green ?? '#1A5632' }};
+        margin-top: 0.5rem;
+    }
+    .stat-card .stat-link {
+        font-size: 0.75rem;
+        color: {{ settings()->au_grey_text ?? '#58595B' }};
+        margin-top: 0.5rem;
+        display: block;
+    }
+    .card {
+        border: 1px solid #e2e8f0;
+        border-radius: 0;
+        margin-bottom: 1.5rem;
+    }
+    .card-header {
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1rem 1.5rem;
+    }
+    .card-body {
+        padding: 1.5rem;
+    }
 </style>
+@endsection
+
+@section('content')
 <!-- PAGE-HEADER -->
 <div class="page-header">
     <h1 class="page-title">Dashboard</h1>
@@ -33,90 +73,70 @@
 <!-- PAGE-HEADER END -->
 
 <div class="container-fluid">
-    <div class="row" style="row-gap:12px;">
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('admin/publications') }}" class="small-box bg-gradient-primary">
-                <div class="inner">
-                    <h3 class="stat">{{ $publications_count }}</h3>
-                    <p>Publications</p>
-                </div>
-                <div class="icon"><i class="fa fa-pen"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+    <div class="row">
+        <!-- Statistics Cards -->
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('admin/publications') }}" class="stat-card">
+                <div class="stat-value">{{ $publications_count }}</div>
+                <div class="stat-label">Publications</div>
+                <div class="stat-icon"><i class="fa fa-pen"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('admin/authors') }}" class="small-box bg-gradient-success">
-                <div class="inner">
-                    <h3 class="stat">{{ $authors_count }}</h3>
-                    <p>Resource Authors</p>
-                </div>
-                <div class="icon"><i class="fa fa-users"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('admin/authors') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_green ?? '#1A5632' }};">{{ $authors_count }}</div>
+                <div class="stat-label">Resource Authors</div>
+                <div class="stat-icon" style="color: {{ settings()->au_green ?? '#1A5632' }};"><i class="fa fa-users"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('admin/experts') }}" class="small-box bg-gradient-info">
-                <div class="inner">
-                    <h3 class="stat">{{ $experts_count }}</h3>
-                    <p>Workforce Experts</p>
-                </div>
-                <div class="icon"><i class="fas fa-user-graduate"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('admin/experts') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_gold ?? '#B4A269' }};">{{ $experts_count }}</div>
+                <div class="stat-label">Workforce Experts</div>
+                <div class="stat-icon" style="color: {{ settings()->au_gold ?? '#B4A269' }};"><i class="fas fa-user-graduate"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('admin/forums') }}" class="small-box bg-gradient-warning">
-                <div class="inner">
-                    <h3 class="stat">{{ $forums_count }}</h3>
-                    <p>Forum Discussions</p>
-                </div>
-                <div class="icon"><i class="fab fa-forumbee"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('admin/forums') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_gold ?? '#B4A269' }};">{{ $forums_count }}</div>
+                <div class="stat-label">Forum Discussions</div>
+                <div class="stat-icon" style="color: {{ settings()->au_gold ?? '#B4A269' }};"><i class="fab fa-forumbee"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-
-        {{-- Others --}}
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="small-box bg-gradient-purple">
-                <div class="inner">
-                    <h3 class="stat">{{ $states_count }}</h3>
-                    <p>Total Member States</p>
-                </div>
-                <div class="icon"><i class="fas fa-globe-africa"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_red ?? '#9F2241' }};">{{ $states_count }}</div>
+                <div class="stat-label">Total Member States</div>
+                <div class="stat-icon" style="color: {{ settings()->au_red ?? '#9F2241' }};"><i class="fas fa-globe-africa"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('admin/logs/user') }}" class="small-box bg-gradient-rose">
-                <div class="inner">
-                    <h3 class="stat">{{ $visits_count }}</h3>
-                    <p>Avg Daily Visits</p>
-                </div>
-                <div class="icon"><i class="fas fa-signal"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('admin/logs/user') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_red ?? '#9F2241' }};">{{ $visits_count }}</div>
+                <div class="stat-label">Avg Daily Visits</div>
+                <div class="stat-icon" style="color: {{ settings()->au_red ?? '#9F2241' }};"><i class="fas fa-signal"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="small-box bg-gradient-slate">
-                <div class="inner">
-                    <h3 class="stat">{{ $admin_units_count }}</h3>
-                    <p>Total Administrative Units</p>
-                </div>
-                <div class="icon"><i class="far fa-building"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ states_enabled() ? url('admin/areas') : url('admin/adminunits') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_grey_text ?? '#58595B' }};">{{ $admin_units_count }}</div>
+                <div class="stat-label">Total Administrative Units</div>
+                <div class="stat-icon" style="color: {{ settings()->au_grey_text ?? '#58595B' }};"><i class="far fa-building"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
-
-        <div class="col-sm-6 col-md-4 col-lg-3">
-            <a href="{{ url('permissions/users') }}" class="small-box bg-gradient-success">
-                <div class="inner">
-                    <h3 class="stat">{{ $users_count }}</h3>
-                    <p>Total Platform Users</p>
-                </div>
-                <div class="icon"><i class="fas fa-users-cog"></i></div>
-                <div class="small-box-footer">View list <i class="fa fa-arrow-right ml-1"></i></div>
+        <div class="col-md-4 col-lg-3 mb-4">
+            <a href="{{ url('permissions/users') }}" class="stat-card">
+                <div class="stat-value" style="color: {{ settings()->au_corporate_green ?? '#1A5632' }};">{{ $users_count }}</div>
+                <div class="stat-label">Total Platform Users</div>
+                <div class="stat-icon" style="color: {{ settings()->au_corporate_green ?? '#1A5632' }};"><i class="fas fa-users-cog"></i></div>
+                <div class="stat-link">View list <i class="fa fa-arrow-right ml-1"></i></div>
             </a>
         </div>
     </div>
@@ -135,8 +155,58 @@
                 <div class="card-body">
                     <div class="row" style="row-gap:12px;">
                         @foreach($dashboards as $db)
+                        @php
+                            // Get image with proper fallback logic like frontend
+                            $raw_cover = $db->getRawOriginal('cover');
+                            $cover_is_external = $db->cover_is_exteranl ?? false;
+                            
+                            // Determine image link
+                            if (!empty($raw_cover)) {
+                                if ($cover_is_external) {
+                                    // External URL - use as is
+                                    $image_link = $raw_cover;
+                                } else {
+                                    // Local file - build storage path
+                                    $image_link = storage_link('uploads/publications/' . $raw_cover);
+                                }
+                            } else {
+                                // No cover - use default
+                                $image_link = null;
+                            }
+                            
+                            // Default image
+                            $default_image = asset('assets/images/cover.png');
+                            
+                            // Final image to use
+                            $final_image = (!empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) 
+                                ? $image_link 
+                                : $default_image;
+                            
+                            $statusText = $db->is_approved ? 'Approved' : ($db->is_rejected ? 'Rejected' : 'Pending');
+                            $statusClass = $db->is_approved ? 'badge-success' : ($db->is_rejected ? 'badge-danger' : 'badge-secondary');
+                            
+                            // Use publication link directly if is_embedded != 1, otherwise use admin view
+                            $publication_url = $db->publication ?? '#';
+                            $url = ($db->is_embedded == 1) 
+                                ? url('/admin/dashboards').'?resource='.$db->id 
+                                : $publication_url;
+                            
+                            // Check if URL is external (doesn't match APP_URL)
+                            $app_url = config('app.url');
+                            $url_parsed = parse_url($url);
+                            $app_url_parsed = parse_url($app_url);
+                            $is_external = isset($url_parsed['host']) && 
+                                          isset($app_url_parsed['host']) && 
+                                          $url_parsed['host'] !== $app_url_parsed['host'];
+                        @endphp
                         <div class="col-sm-6 col-md-4 col-lg-3">
                             <div class="card h-100" style="border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;">
+                                <div style="height:140px;background:#f8fafc;background-position:center;background-size:cover;overflow:hidden;">
+                                    <img src="{{ $final_image }}" 
+                                         alt="{{ strip_tags($db->title) }}" 
+                                         style="width:100%;height:100%;object-fit:cover;"
+                                         onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                                </div>
                                 <div class="card-body d-flex flex-column">
                                     <h6 class="mb-1" style="font-weight:700;line-height:1.2;">{{ strip_tags(Str::limit($db->title, 60)) }}</h6>
                                     @if(!empty($db->theme))
@@ -144,13 +214,8 @@
                                     @endif
                                     <p class="mt-2 mb-3 text-muted" style="font-size:.9rem;">{{ Str::limit(strip_tags($db->description), 100) }}</p>
                                     <div class="mt-auto d-flex align-items-center justify-content-between">
-                                        @php
-                                            $statusText = $db->is_approved ? 'Approved' : ($db->is_rejected ? 'Rejected' : 'Pending');
-                                            $statusClass = $db->is_approved ? 'badge-success' : ($db->is_rejected ? 'badge-danger' : 'badge-secondary');
-                                            $url = !$db->is_embedded ? url('/admin/dashboards').'?resource='.$db->id : ($db->publication ?? '#');
-                                        @endphp
                                         <span class="badge {{ $statusClass }}">{{ $statusText }}</span>
-                                        <a href="{{ $url }}" target="{{ $db->is_embedded ? '_blank' : '_self' }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ $url }}" target="{{ $is_external ? '_blank' : '_self' }}" class="btn btn-sm btn-outline-primary">
                                             <i class="fa fa-chart-line mr-1"></i> Open
                                         </a>
                                     </div>
@@ -167,86 +232,85 @@
 
     <div class="row">
         <div class="col-md-12">
-
-            <div class="card">
-                <!-- Card header -->
-                <div class="card-header">
-                    <h4 class="card-title mb-4">Most Recent Resources</h4>
+            <div class="card" style="border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem;">
+                <div class="card-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h3 class="card-title mb-0">Most Recent Resources</h3>
+                    </div>
                 </div>
-
-                <div class="card-header">
-                    <form class="container-fluid" method="get">
+                <div class="card-body" style="padding: 1.5rem;">
+                    <!-- Search and Filter Form -->
+                    <form method="GET" action="{{ url('admin') }}" class="mb-3">
                         <div class="row">
                             <div class="col-md-3">
-                                <!-- Filter By Title -->
-                                <div class="form-group">
-                                    <!-- <label>Filter By Title</label> -->
-                                    <input type="text" class="form-control" id="filter_title" placeholder="Filter By Title" name="search[title]">
-                                </div>
+                                <input type="text" name="search[title]" class="form-control" placeholder="Filter By Title" value="{{ request('search.title') }}">
                             </div>
-
                             <div class="col-md-3">
-                                <!-- Filter By Author -->
-                                <div class="form-group">
-                                    <!-- <label>Filter By Author</label> -->
-                                    <input type="text" class="form-control" id="filter_author" placeholder="Filter By Author" name="search[author]">
-                                </div>
+                                <input type="text" name="search[author]" class="form-control" placeholder="Filter By Author" value="{{ request('search.author') }}">
                             </div>
-
                             <div class="col-md-3">
-                                <!-- Filter By Description -->
-                                <div class="form-group">
-                                    <!-- <label>Filter By Description</label> -->
-                                    <input type="text" class="form-control" id="filter_description" placeholder="Filter By Description" name="search[description]">
-                                </div>
+                                <input type="text" name="search[description]" class="form-control" placeholder="Filter By Description" value="{{ request('search.description') }}">
                             </div>
-
                             <div class="col-md-3">
-                                <!-- Filter By Date range -->
-                                <div class="form-group">
-                                    <!-- <label>Filter By Date range</label> -->
-                                    <input type="text" class="form-control" id="filter_date" placeholder="Filter By Date range" name="search[date]">
+                                <div class="d-flex">
+                                    <button type="submit" class="btn btn-primary btn-sm mr-2">Filter</button>
+                                    <a href="{{ url('admin') }}" class="btn btn-secondary btn-sm">Clear</a>
                                 </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-12 text-right">
-                                <!-- Export Button -->
-                            <button type="submit" id="filterButton" class="btn btn-primary btn-sm">Filter Data</button>
-                            <button type="button" id="reset" class="btn btn-secondary btn-sm">Reset</button>
-                            <button type="button" id="exportButton" class="btn btn-success btn-sm">Export Data</button>
-
                             </div>
                         </div>
                     </form>
-                </div>
 
-                <div class="card-body">
-                    <!-- Datatable -->
+                    <!-- Resources Table -->
                     <div class="table-responsive">
-                        <table id="resource-table" class="table table-bordered table-striped table-hover dataTable">
+                        <table id="resource-table" class="table table-striped table-bordered table-hover" style="border-radius: 0;">
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th width="10%">Created</th>
+                                    <th width="60px">#</th>
+                                    <th width="15%">Created</th>
                                     <th>Title</th>
                                     <th>Description</th>
-                                    <th>Author</th>
+                                    <th width="15%">Author</th>
+                                    <th width="10%">Status</th>
+                                    <th width="120px">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                @foreach($publications as $row)
+                                @foreach($publications as $idx => $row)
                                 <tr>
-                                    <td>#</td>
-                                    <td>{!! time_ago($row->created_at) !!}</td>
-                                    <td>{!! strip_tags($row->title) !!}</td>
-                                    <td>{!! truncate(strip_tags($row->description), 20) !!}</td>
-                                    <td>{!! truncate(strip_tags($row->author->name ?? ''), 20) !!}</td>
+                                    <td><span class="text-muted">{{ $publications->firstItem() + $idx }}</span></td>
+                                    <td>
+                                        @if($row->created_at)
+                                            {{ \Carbon\Carbon::parse($row->created_at)->format('M d, Y') }}
+                                        @else
+                                            -
+                                        @endif
+                                    </td>
+                                    <td>
+                                        <a href="{{ $row->publication ?? url('records/resource?id=' . $row->id) }}" target="_blank">
+                                            {!! Str::limit(strip_tags($row->title ?? ''), 50) !!}
+                                        </a>
+                                    </td>
+                                    <td>{!! Str::limit(strip_tags($row->description ?? ''), 60) !!}</td>
+                                    <td>{{ $row->author->name ?? '-' }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $row->is_approved ? 'success' : ($row->is_rejected ? 'danger' : 'warning') }}">
+                                            {{ $row->is_approved ? 'Approved' : ($row->is_rejected ? 'Rejected' : 'Pending') }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <a href="{{ url('records/resource') }}?id={{ $row->id }}" target="_blank" class="btn btn-sm btn-outline-primary" title="Preview">
+                                            <i class="fa fa-eye mr-1"></i> Preview
+                                        </a>
+                                    </td>
                                 </tr>
                                 @endforeach
                             </tbody>
                         </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    <div class="mt-3">
+                        {{ $publications->links() }}
                     </div>
                 </div>
             </div>
@@ -258,16 +322,10 @@
 
 
 @section('scripts')
-<!-- Add Datatbales to this table -->
 <script>
     $(document).ready(function() {
-        console.log('Document raeady')
-        $('#resource-table').DataTable({
-            "searching": false,
-            lengthChange: false,
-        });
-
-        $('.dataTables_wrapper').removeClass('form-inline');
+        // Remove DataTables initialization - we'll use server-side pagination instead
+        // The table now uses Laravel pagination for better performance
 
         $.ajax({
             method:'GET',

@@ -24,6 +24,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('invitations:prune-expired')->dailyAt('03:00');
         // Automatically close expired events
         $schedule->command('events:close-expired')->dailyAt('04:00');
+        // Send daily approval summary emails to approvers
+        $schedule->command('approvals:daily-summary')->dailyAt('08:00');
+        // Award community badges at the beginning of each month for the previous month
+        $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
         
     }
 

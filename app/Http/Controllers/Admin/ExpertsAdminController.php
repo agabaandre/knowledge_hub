@@ -24,6 +24,8 @@ class ExpertsAdminController extends Controller
         $data['types'] = ExpertType::all();
         $data['countries'] = Country::all();
         $data['jobs'] = JobTitle::all();
+        // Get unique ISCO classifications (removes duplicates by isco_id)
+        $data['isco_classifications'] = \App\Models\IscoClassification::uniqueByIscoId()->get();
         $data['search']  = (Object) $request->all();
         return view('admin.experts.index',$data);
     }
@@ -34,9 +36,7 @@ class ExpertsAdminController extends Controller
         $request->validate([
             'first_name'=>'required',
             'last_name'=>'required',
-            'job_title'=>'required',
             'email'=>'required',
-            'phone_number'=>'required',
             'type_id'=>'required',
             'country_id'=>'required',
         ]);
@@ -98,6 +98,25 @@ class ExpertsAdminController extends Controller
         return $this->expertsRepo->delete_type($request->id);
     }
 
+    public function getJobTitlesByIsco(Request $request){
+        $iscoId = $request->isco_id;
+        
+        // If classification_id is provided instead, get the ISCO ID from the classification
+        if (!$iscoId && $request->classification_id) {
+            $iscoClassification = \App\Models\IscoClassification::find($request->classification_id);
+            if ($iscoClassification) {
+                $iscoId = $iscoClassification->isco_id;
+            }
+        }
+        
+        if ($iscoId) {
+            // Find job titles where isco_id matches
+            $jobTitles = JobTitle::where('isco_id', $iscoId)->orderBy('name')->get();
+            return response()->json($jobTitles);
+        }
+        
+        return response()->json([]);
+    }
 
   
 }

@@ -115,7 +115,7 @@
 
                 <!-- Subscribers Table -->
                 <div class="table-responsive">
-                    <table id="subscribers-table" class="table table-striped table-bordered table-hover">
+                    <table id="subscribers-table" class="table table-striped table-bordered table-hover" style="border-radius: 0;">
                         <thead>
                             <tr>
                                 <th width="30">

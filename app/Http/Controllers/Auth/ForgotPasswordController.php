@@ -63,30 +63,24 @@ class ForgotPasswordController extends Controller
         try {
             $resetUrl = url('password/reset?token=' . $token);
             
-            $mailData = (object) [
+            $mailData = [
                 'email' => $user->email,
                 'subject' => 'Reset Your Password - Africa CDC Knowledge Hub',
                 'body' => view('emails.password_reset', [
                     'name' => $user->name,
                     'token' => $token,
                     'resetUrl' => $resetUrl,
-                ])->render()
+                ])->render(),
+                'title' => 'Reset Your Password'
             ];
             
-            $result = send_email($mailData);
+            // Send via queue system (which uses Exchange)
+            \App\Jobs\SendMailJob::dispatch($mailData)->onQueue('default');
             
-            if (!$result || (is_array($result) && !($result['success'] ?? false))) {
-                \Log::error('Failed to send password reset email via Exchange', [
-                    'user_id' => $user->id,
-                    'email' => $user->email,
-                    'error' => is_array($result) ? ($result['message'] ?? 'Unknown error') : 'Unknown error'
-                ]);
-            } else {
-                \Log::info('Password reset email sent via Exchange', [
-                    'user_id' => $user->id,
-                    'email' => $user->email
-                ]);
-            }
+            \Log::info('Password reset email queued', [
+                'user_id' => $user->id,
+                'email' => $user->email
+            ]);
         } catch (\Exception $e) {
             \Log::error('Exception sending password reset email via Exchange: ' . $e->getMessage(), [
                 'user_id' => $user->id,

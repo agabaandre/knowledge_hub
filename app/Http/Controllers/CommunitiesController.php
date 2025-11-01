@@ -137,25 +137,34 @@ class CommunitiesController extends Controller
             ->limit(5)
             ->get();
 
-        // Get community members with job titles
+        // Get community members with job titles and badges
         $members = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $id)
             ->where('is_approved', 1)
             ->with('user')
             ->get()
-            ->map(function($member) {
+            ->map(function($member) use ($id) {
+                // Get user's badges for this community
+                $badges = \App\Models\UserBadge::getUserBadgesForCommunity($member->user_id, $id);
+                
                 return [
+                    'id' => $member->user_id,
                     'name' => $member->user->name ?? 'Unknown',
                     'job_title' => $member->user->job_title ?? 'Not specified',
                     'email' => $member->user->email ?? '',
+                    'badges' => $badges,
                 ];
             });
+
+        // Get all badge types for displaying requirements
+        $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
 
         return view('communities.detail', compact(
             'community',
             'publications',
             'forums',
             'otherCommunities',
-            'members'
+            'members',
+            'badgeTypes'
         ));
     }
 }

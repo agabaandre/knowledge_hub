@@ -15,4 +15,14 @@ class JobTitle extends Model
         'isco_id',
         'name'
     ];
+
+    public function iscoClassification()
+    {
+        return $this->belongsTo(IscoClassification::class, 'isco_id', 'isco_id');
+    }
+
+    public function experts()
+    {
+        return $this->hasMany(Expert::class, 'job_title_id', 'id');
+    }
 }

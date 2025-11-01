@@ -246,14 +246,70 @@
                 @if($members->count() > 0)
                     @foreach($members as $member)
                         <div class="member-item">
-                            <div class="member-name">{{ $member['name'] }}</div>
-                            <div class="member-title">
-                                <i class="fa fa-briefcase mr-1"></i>{{ $member['job_title'] }}
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <div class="member-name">{{ $member['name'] }}</div>
+                                    <div class="member-title">
+                                        <i class="fa fa-briefcase mr-1"></i>{{ $member['job_title'] }}
+                                    </div>
+                                    @if(isset($member['badges']) && $member['badges']->count() > 0)
+                                        <div class="mt-2">
+                                            @foreach($member['badges']->take(3) as $userBadge)
+                                                <span class="badge mr-1" style="background-color: {{ $userBadge->badgeType->badge_color ?? '#C0C0C0' }}; color: white; font-size: 0.75rem; padding: 4px 8px;" title="{{ $userBadge->badgeType->name }} - {{ Carbon\Carbon::create($userBadge->year, $userBadge->month, 1)->format('M Y') }}">
+                                                    @if($userBadge->badgeType->slug === 'silver')🥈
+                                                    @elseif($userBadge->badgeType->slug === 'gold')🥇
+                                                    @elseif($userBadge->badgeType->slug === 'platinum')💎
+                                                    @elseif($userBadge->badgeType->slug === 'diamond')💠
+                                                    @else🏅
+                                                    @endif
+                                                    {{ $userBadge->badgeType->name }}
+                                                </span>
+                                            @endforeach
+                                            @if($member['badges']->count() > 3)
+                                                <span class="badge badge-secondary" style="font-size: 0.75rem;">+{{ $member['badges']->count() - 3 }} more</span>
+                                            @endif
+                                        </div>
+                                    @endif
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 @else
                     <p class="text-muted">No members found.</p>
+                @endif
+            </div>
+
+            <!-- Badge Requirements Info -->
+            <div class="sidebar-card">
+                <h5><i class="fa fa-trophy theme-text mr-2"></i>Contribution Badges</h5>
+                <p class="small text-muted mb-3">Earn badges based on your monthly contributions (publications, forum posts, and comments):</p>
+                @if(isset($badgeTypes) && $badgeTypes->count() > 0)
+                    @foreach($badgeTypes as $badgeType)
+                        <div class="mb-3 p-2" style="border-left: 3px solid {{ $badgeType->badge_color }}; background: {{ $badgeType->badge_color }}10; border-radius: 4px;">
+                            <div class="d-flex align-items-center mb-1">
+                                <span style="font-size: 1.2em; margin-right: 8px;">
+                                    @if($badgeType->slug === 'silver')🥈
+                                    @elseif($badgeType->slug === 'gold')🥇
+                                    @elseif($badgeType->slug === 'platinum')💎
+                                    @elseif($badgeType->slug === 'diamond')💠
+                                    @else🏅
+                                    @endif
+                                </span>
+                                <strong style="color: {{ $badgeType->badge_color }};">{{ $badgeType->name }}</strong>
+                            </div>
+                            <div class="small text-muted">
+                                {{ $badgeType->contribution_threshold }}+ contributions/month
+                            </div>
+                            @if($badgeType->slug === 'diamond')
+                                <div class="small mt-1" style="font-weight: 600; color: {{ $badgeType->badge_color }};">
+                                    🏆 Hall of Honor
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                    <div class="mt-3 p-2" style="background: #f8f9fa; border-radius: 4px; font-size: 0.85rem;">
+                        <strong>Note:</strong> Badges are awarded monthly based on your contributions. The system automatically calculates and awards badges at the end of each month.
+                    </div>
                 @endif
             </div>
         </div>

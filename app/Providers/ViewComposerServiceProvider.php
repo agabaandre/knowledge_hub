@@ -67,7 +67,7 @@ class ViewComposerServiceProvider extends ServiceProvider
         Facades\View::composer('*',AssetTypesViewComposer::class);
         Facades\View::composer('*',DataCategoriesViewComposer::class);
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
-        Facades\View::composer('admin/*',DashboardsViewComposer::class);
+        Facades\View::composer(['admin/*', 'admin.layouts.partials.nav'], DashboardsViewComposer::class);
      
         View::composer(['partials/publications/*','account/*',],CommunitiesOfPracticeViewComposer::class);
         View::composer(['partials/publications/*','account/*',],AccessGroupsViewComposer::class);

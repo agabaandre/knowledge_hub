@@ -44,25 +44,21 @@ class HomeController extends Controller
 		$data['themes']		  = $this->themesRepo->get($request);
 		$request['category']  = 10;
         $data['initiatives'] = $this->publicationsRepo->get($request);
-        // Active/Upcoming events for homepage slider
+        // Active events only: events where enddate has not passed
+        $today = \Carbon\Carbon::today()->startOfDay();
         $data['events'] = Event::query()
-            ->when(true, function($q){
-                $q->where(function($w){
-                    $w->where('status', 'active')
-                      ->orWhereNull('status');
-                });
+            ->where(function($w){
+                $w->where('status', 'active')
+                  ->orWhereNull('status');
             })
-            ->where(function($q){
+            ->where(function($q) use ($today){
+                // Event is active if enddate is null or enddate has not passed (enddate >= today)
                 $q->whereNull('enddate')
-                  ->orWhere('enddate', '>=', now())
-                  ->orWhere('startdate', '>=', now());
+                  ->orWhereDate('enddate', '>=', $today);
             })
             ->orderBy('startdate', 'asc')
             ->take(12)
             ->get();
-        if ($data['events']->isEmpty()) {
-            $data['events'] = Event::orderBy('startdate', 'desc')->take(8)->get();
-        }
         $data['is_home']      = true;
 
         return view('home.index',$data);

@@ -3,7 +3,7 @@
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="myExtraLargeModalLabel">Add Workforce Type</h5>
+        <h5 class="modal-title" id="title">Create Expert Type</h5>
         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
@@ -20,8 +20,8 @@
           </div>
 
           <div class="form-group col-md-6">
-              <label class="form-label" for="desc">Description</label>
-              <input type="text" placeholder="Description" class="form-control" id="desc" name="description">
+              <label class="form-label" for="description">Description</label>
+              <input type="text" placeholder="Description" class="form-control" id="description" name="description">
           </div>
 
         </div>

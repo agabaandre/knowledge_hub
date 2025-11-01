@@ -20,6 +20,17 @@
 					<strong>{{ $title ?? 'Forums' }}</strong>
 					<small class="text-muted d-block">Search and manage discussion threads</small>
 				</div>
+				@if(isset($pending_forums_count) && $pending_forums_count > 0)
+					<div class="dropdown nav-item">
+						<a class="nav-link position-relative" href="{{ url('admin/forums/moderate') }}" title="Pending Forums">
+							<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+								<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+								<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+							</svg>
+							<span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:20px;">{{ $pending_forums_count }}</span>
+						</a>
+					</div>
+				@endif
 			</div>
 			<div class="card-body">
 				<form class="container-fluid">

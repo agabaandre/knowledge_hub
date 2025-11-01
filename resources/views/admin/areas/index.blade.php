@@ -49,7 +49,8 @@
 			<table id="publicationTable" class="table table-striped table-bordered">
 				<thead>
 					<tr>
-						<th></th>
+						<th width="60px">#</th>
+						<th width="50px"></th>
 						<th>Area Name</th>
 						<th>ISO Code</th>
 						<th>ISO 3 Code</th>
@@ -57,15 +58,11 @@
 					</tr>
 				</thead>
 				<tbody>
-
-					@php
-                    $i = 1;
-                    @endphp
-
-					@foreach($areas as $row)
+					@foreach($areas as $idx => $row)
 						<tr>
-							<td><img src="{{asset('assets/img/flags/' . @$row->flag)}}" width="30px"></td>
-							<td>{{ $row->name }}</td>
+							<td><span class="text-muted">{{ $areas->firstItem() + $idx }}</span></td>
+							<td><img src="{{asset('assets/img/flags/' . @$row->flag)}}" width="30px" alt="{{ $row->name }}"></td>
+							<td><strong>{{ $row->name }}</strong></td>
 							<td>{{ $row->iso_code }}</td>
 							<td>{{ $row->iso3_code }}</td>
 							<td>

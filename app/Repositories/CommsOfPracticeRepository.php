@@ -4,9 +4,7 @@ namespace App\Repositories;
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
-use App\Mail\CommunityInvitationMail;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
 class CommsOfPracticeRepository{
@@ -15,11 +13,27 @@ class CommsOfPracticeRepository{
     {
         $query = CommunityOfPractice::query();
 
+        // Add search functionality
+        if ($request->filled('term')) {
+            $term = $request->input('term');
+            $query->where(function($q) use ($term) {
+                $q->where('community_name', 'like', '%' . $term . '%')
+                  ->orWhere('description', 'like', '%' . $term . '%');
+            });
+        }
+
         if ($request->input('withRelated', false)) {
             $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
         }
 
-        return $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
+        $results = $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
+        
+        // Append query parameters to pagination links
+        if (!$return_array && $request->filled('term')) {
+            $results->appends($request->only(['term']));
+        }
+        
+        return $results;
     }
 
     public function getByUser($userId, Request $request)
@@ -31,11 +45,27 @@ class CommsOfPracticeRepository{
 
         $query = CommunityOfPractice::whereIn('id', $memberCommunityIds);
 
+        // Add search functionality
+        if ($request->filled('term')) {
+            $term = $request->input('term');
+            $query->where(function($q) use ($term) {
+                $q->where('community_name', 'like', '%' . $term . '%')
+                  ->orWhere('description', 'like', '%' . $term . '%');
+            });
+        }
+
         if ($request->input('withRelated', false)) {
             $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
         }
 
-        return $query->paginate($request->rows ?? 20);
+        $results = $query->paginate($request->rows ?? 20);
+        
+        // Append query parameters to pagination links
+        if ($request->filled('term')) {
+            $results->appends($request->only(['term']));
+        }
+        
+        return $results;
     }
     
     public function save(Request $request){
@@ -83,16 +113,37 @@ class CommsOfPracticeRepository{
 
     public function updateMemberStatus($memberId, $action) {
        
-        $member = CommunityOfPracticeMembers::find($memberId);
+        $member = CommunityOfPracticeMembers::with(['user', 'community'])->find($memberId);
 
         
         if ($action === 'approve') {
             $member->is_approved = 1;
+            $member->save();
+            
+            // Send approval email notification to the member
+            if ($member->user && $member->user->email && $member->community) {
+                $subject = 'Community Membership Approved: ' . $member->community->community_name;
+                
+                $body = view('emails.community_membership_approved', [
+                    'memberName' => $member->user->name ?? 'Member',
+                    'communityName' => $member->community->community_name,
+                    'communityDescription' => $member->community->description ?? '',
+                    'communityUrl' => url('communities') . '?term=' . urlencode($member->community->community_name),
+                ])->render();
+
+                $emailData = (object) [
+                    'email' => $member->user->email,
+                    'subject' => $subject,
+                    'body' => $body,
+                    'title' => $subject
+                ];
+
+                \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
+            }
         } elseif ($action === 'reject') {
             $member->is_approved = 2; // Set to 2 for rejected
+            $member->save();
         }
-
-        $member->save();
 
         return $member;
     }
@@ -209,8 +260,28 @@ class CommsOfPracticeRepository{
             'expires_at' => now()->addDays(7),
         ]);
 
-        // Send invitation email
-        Mail::to($email)->send(new CommunityInvitationMail($invitation));
+        // Load relationships for email
+        $invitation->load(['community', 'inviter']);
+
+        // Send invitation email via queue system (which uses Exchange)
+        $acceptUrl = url('/communities/accept-invitation/' . $invitation->token);
+        $subject = 'Invitation to Join: ' . $invitation->community->community_name;
+        
+        $body = view('emails.community_invitation', [
+            'invitation' => $invitation,
+            'community' => $invitation->community,
+            'inviterName' => $invitation->inviter->name ?? 'Administrator',
+            'acceptUrl' => $acceptUrl,
+        ])->render();
+
+        $emailData = (object) [
+            'email' => $email,
+            'subject' => $subject,
+            'body' => $body,
+            'title' => $subject
+        ];
+
+        \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
 
         return ['status' => 'success', 'message' => 'Invitation sent successfully', 'data' => $invitation];
     }

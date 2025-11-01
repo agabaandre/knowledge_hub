@@ -22,14 +22,23 @@ class ResourcesController extends Controller
 
     public function index(Request $request){
         $request['is_admin']  = 1;
+        $request['approved_only'] = true; // Only show approved publications
+        $request['rows'] = $request->rows ?? 20; // Set pagination to 20 per page
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
+        
+        // Count pending publications for notification bell
+        $data['pending_publications_count'] = \App\Models\Publication::where('is_approved', 0)
+            ->where('is_rejected', 0)
+            ->count();
+        
         return view('admin.publications.index',$data);
     }
 
     
     public function pending(Request $request){
         $request['is_admin']  = 1;
+        $request['rows'] = $request->rows ?? 20; // Set pagination to 20 per page
         $data['publications'] = $this->publicationsRepo->get($request,false, false,true);
         $data['search']       = (Object) $request->all();
         return view('admin.publications.pending',$data);

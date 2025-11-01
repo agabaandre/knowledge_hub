@@ -369,6 +369,226 @@
 		});
 	});
 	*/
+
+    // Notification Bell Auto-Refresh
+    (function() {
+        var refreshInterval = 60000; // Refresh every 60 seconds
+        var isDropdownOpen = false;
+
+        // Check if notification bell exists
+        if (!$('#notification-bell').length) {
+            return;
+        }
+
+        // Force close dropdown on page load
+        function ensureDropdownClosed() {
+            var $dropdown = $('#unified-notification-dropdown');
+            var $menu = $('#notification-dropdown-menu');
+            
+            if ($dropdown.length && $menu.length) {
+                // Remove show classes on page load
+                $dropdown.removeClass('show');
+                $menu.removeClass('show');
+                
+                // Hide the dropdown menu
+                $menu.css({
+                    'display': 'none',
+                    'visibility': 'hidden',
+                    'opacity': '0'
+                });
+                
+                // Set aria-expanded to false
+                $('#notification-bell').attr('aria-expanded', 'false');
+            }
+        }
+
+        // Call on page load
+        $(document).ready(function() {
+            ensureDropdownClosed();
+        });
+
+        // Also call immediately in case DOM is already ready
+        ensureDropdownClosed();
+
+        // Fix dropdown positioning to prevent overflow
+        function fixDropdownPosition() {
+            var $dropdown = $('#unified-notification-dropdown');
+            var $menu = $('#notification-dropdown-menu');
+            
+            if ($dropdown.length && $menu.length) {
+                // Remove any existing event handlers to prevent duplicates
+                $dropdown.off('shown.bs.dropdown');
+                
+                $dropdown.on('shown.bs.dropdown', function() {
+                    // Ensure menu is visible when shown
+                    $menu.css({
+                        'display': 'flex',
+                        'visibility': 'visible',
+                        'opacity': '1'
+                    });
+                    
+                    setTimeout(function() {
+                        var windowWidth = $(window).width();
+                        var windowScrollLeft = $(window).scrollLeft();
+                        var dropdownOffset = $dropdown.offset();
+                        var dropdownWidth = $dropdown.outerWidth();
+                        var menuWidth = $menu.outerWidth();
+                        var menuRight = dropdownOffset.left + dropdownWidth;
+                        var spaceOnRight = windowWidth - menuRight + windowScrollLeft;
+                        
+                        // If not enough space on right, position it to fit
+                        if (spaceOnRight < menuWidth) {
+                            var newRight = Math.max(10, windowWidth - (dropdownOffset.left + menuWidth + 10));
+                            $menu.css({
+                                'right': newRight + 'px',
+                                'left': 'auto',
+                                'transform': 'none'
+                            });
+                        } else {
+                            // Reset to default right alignment
+                            $menu.css({
+                                'right': '0',
+                                'left': 'auto'
+                            });
+                        }
+                        
+                        // Ensure dropdown is visible
+                        var menuLeft = $menu.offset().left;
+                        if (menuLeft < 0) {
+                            $menu.css('right', (Math.abs(menuLeft) + 10) + 'px');
+                        }
+                        if (menuLeft + menuWidth > windowWidth) {
+                            var overflow = (menuLeft + menuWidth) - windowWidth;
+                            var currentRight = parseInt($menu.css('right')) || 0;
+                            $menu.css('right', (currentRight + overflow + 10) + 'px');
+                        }
+                    }, 10);
+                });
+
+                // Handle hide event to ensure proper cleanup
+                $dropdown.off('hidden.bs.dropdown');
+                $dropdown.on('hidden.bs.dropdown', function() {
+                    $menu.css({
+                        'display': 'none',
+                        'visibility': 'hidden',
+                        'opacity': '0'
+                    });
+                });
+            }
+        }
+        
+        fixDropdownPosition();
+
+        // Function to update notification counts and badge
+        function updateNotificationCounts() {
+            // Don't refresh if dropdown is open
+            if (isDropdownOpen) {
+                return;
+            }
+
+            $.ajax({
+                url: '{{ route("admin.notifications.counts") }}',
+                method: 'GET',
+                success: function(response) {
+                    if (response.success && response.counts) {
+                        var counts = response.counts;
+                        var total = counts.total;
+
+                        // Update badge
+                        var badge = $('#notification-count-badge');
+                        if (total > 0) {
+                            if (badge.length) {
+                                badge.text(total);
+                            } else {
+                                $('#notification-bell').append(
+                                    '<span class="badge badge-danger badge-pill" id="notification-count-badge" style="position:absolute;top:-4px;right:-6px;min-width:20px;">' + total + '</span>'
+                                );
+                            }
+                        } else {
+                            badge.remove();
+                        }
+
+                        // Update breakdown
+                        var breakdown = $('#notification-breakdown');
+                        if (breakdown.length) {
+                            if (total > 0) {
+                                breakdown.html(
+                                    '<div class="d-flex justify-content-between mb-1">' +
+                                    '<span>Forums:</span>' +
+                                    '<strong>' + counts.forums + '</strong>' +
+                                    '</div>' +
+                                    '<div class="d-flex justify-content-between mb-1">' +
+                                    '<span>Publications:</span>' +
+                                    '<strong>' + counts.publications + '</strong>' +
+                                    '</div>' +
+                                    '<div class="d-flex justify-content-between mb-1">' +
+                                    '<span>Forum Comments:</span>' +
+                                    '<strong>' + counts.forum_comments + '</strong>' +
+                                    '</div>' +
+                                    '<div class="d-flex justify-content-between mb-1">' +
+                                    '<span>Publication Comments:</span>' +
+                                    '<strong>' + counts.publication_comments + '</strong>' +
+                                    '</div>' +
+                                    '<div class="d-flex justify-content-between">' +
+                                    '<span>COP Approvals:</span>' +
+                                    '<strong>' + (counts.cop_approvals || 0) + '</strong>' +
+                                    '</div>'
+                                );
+                            } else {
+                                breakdown.html('<p class="text-muted mb-0">No pending approvals</p>');
+                            }
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.log('Error refreshing notification counts:', error);
+                }
+            });
+        }
+
+        // Track dropdown state
+        $('#unified-notification-dropdown').on('show.bs.dropdown', function() {
+            isDropdownOpen = true;
+        });
+
+        $('#unified-notification-dropdown').on('hide.bs.dropdown', function() {
+            isDropdownOpen = false;
+            // Refresh after dropdown closes
+            setTimeout(updateNotificationCounts, 1000);
+        });
+
+        // Initial update
+        updateNotificationCounts();
+
+        // Set up interval for auto-refresh
+        setInterval(updateNotificationCounts, refreshInterval);
+    })();
+
+    // Date Picker Initialization for Admin
+    $(document).ready(function() {
+        // Initialize jQuery UI datepicker for elements with class 'datepicker', 'date', or 'date2'
+        // This will only run if jQuery UI datepicker is already loaded
+        if (typeof $.fn.datepicker !== 'undefined') {
+            $('.datepicker, input.date, input.date2').each(function() {
+                // Check if datepicker is already initialized
+                if (!$(this).hasClass('hasDatepicker')) {
+                    $(this).datepicker({
+                        dateFormat: 'yy-mm-dd',
+                        changeMonth: true,
+                        changeYear: true,
+                        yearRange: '-100:+10',
+                        showOtherMonths: true,
+                        selectOtherMonths: true,
+                        showButtonPanel: true,
+                        constrainInput: true
+                    });
+                }
+            });
+        }
+
+        // Note: HTML5 date inputs (type="date") already have native date pickers
+        // They work well on modern browsers, so no additional initialization needed
+    });
 </script>
 
 

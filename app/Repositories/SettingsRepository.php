@@ -66,6 +66,29 @@ class SettingsRepository{
         $settings->content_disclaimer = $request->content_disclaimer;
         $settings->gradient_start_color = $request->gradient_start_color;
         $settings->gradient_end_color = $request->gradient_end_color;
+        
+        // AU Color Palette
+        if (Schema::hasColumn('setting', 'au_red')) {
+            $settings->au_red = $request->au_red ?? '#9F2241';
+        }
+        if (Schema::hasColumn('setting', 'au_gold')) {
+            $settings->au_gold = $request->au_gold ?? '#B4A269';
+        }
+        if (Schema::hasColumn('setting', 'au_corporate_green')) {
+            $settings->au_corporate_green = $request->au_corporate_green ?? '#1A5632';
+        }
+        if (Schema::hasColumn('setting', 'au_green')) {
+            $settings->au_green = $request->au_green ?? '#1A5632';
+        }
+        if (Schema::hasColumn('setting', 'au_plum')) {
+            $settings->au_plum = $request->au_plum ?? '#522B39';
+        }
+        if (Schema::hasColumn('setting', 'au_grey_text')) {
+            $settings->au_grey_text = $request->au_grey_text ?? '#58595B';
+        }
+        if (Schema::hasColumn('setting', 'au_white')) {
+            $settings->au_white = $request->au_white ?? '#FFFFFF';
+        }
         // feature flags
         if ($request->has('menu_icons_enabled')) {
             $settings->menu_icons_enabled = (bool)$request->menu_icons_enabled;

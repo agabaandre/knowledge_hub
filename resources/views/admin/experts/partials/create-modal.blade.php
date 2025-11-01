@@ -13,6 +13,11 @@
         @csrf
       <div class="modal-body">
         <input type="hidden" name="id" id="id" value="{{ @$record->id ?? '' }}" class="newform">
+        @php
+            $modalIscoClassifications = $isco_classifications ?? [];
+            $modalJobs = $jobs ?? [];
+            $modalExpertTypes = $expert_types ?? $types ?? [];
+        @endphp
         <div class="row">
           <div class="form-group col-md-6">
               <label class="form-label" for="name">First Name</label>
@@ -35,9 +40,38 @@
           </div>
 
           <div class="form-group col-md-6">
-              <label class="form-label" for="job_tile">Job Title</label>
+              <label class="form-label" for="isco_classification_id">ISCO Classification</label>
+              <select class="form-control js-example-basic-single" id="isco_classification_id" name="isco_classification_id" onchange="loadJobTitles(this)">
+                  <option value="">Select ISCO Classification</option>
+                  @foreach($modalIscoClassifications as $isco)
+                      <option value="{{ $isco->id }}" data-isco-id="{{ $isco->isco_id }}" {{ (@$record->isco_classification_id == $isco->id || old('isco_classification_id') == $isco->id) ? 'selected' : '' }}>
+                          {{ $isco->name }}
+                      </option>
+                  @endforeach
+              </select>
+          </div>
+
+          <div class="form-group col-md-6">
+              <label class="form-label" for="job_title_id">Job Title (from ISCO)</label>
+              <select class="form-control js-example-basic-single" id="job_title_id" name="job_title_id">
+                  <option value="">Select Job Title</option>
+                  @if(@$record && @$record->job_title_id && @$record->iscoClassification)
+                      @foreach($modalJobs as $job)
+                          @if($job->isco_id == @$record->iscoClassification->isco_id)
+                              <option value="{{ $job->id }}" {{ (@$record->job_title_id == $job->id) ? 'selected' : '' }}>
+                                  {{ $job->name }}
+                              </option>
+                          @endif
+                      @endforeach
+                  @endif
+              </select>
+              <small class="form-text text-muted">Select an ISCO classification first to load job titles</small>
+          </div>
+
+          <div class="form-group col-md-6">
+              <label class="form-label" for="job_title">Job Title (Free Text - Optional)</label>
               <input type="text" placeholder="Job Title e.g Physician" class="form-control" id="job_title" name="job_title"
-              value="{{ @$record->job_title ?? old('job_title') }}"  required>
+              value="{{ @$record->job_title ?? old('job_title') }}">
           </div>
 
           <div class="form-group col-md-6">
@@ -54,7 +88,14 @@
 
           <div class="form-group col-md-6">
               <label class="form-label" for="type_id">Expert Type</label>
-              @include('partials.experts.types_dropdown',['selected'=>@$record->expert_type_id])
+              <select class="form-control js-example-basic-single" id="type_id" name="type_id" required>
+                  <option value="">Select Expert Type</option>
+                  @foreach($modalExpertTypes as $type)
+                      <option value="{{ $type->id }}" {{ (@$record->expert_type_id == $type->id || old('type_id') == $type->id) ? 'selected' : '' }}>
+                          {{ $type->type_name ?? $type->name }}
+                      </option>
+                  @endforeach
+              </select>
           </div>
 
           <div class="form-group col-md-6">

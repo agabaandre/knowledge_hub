@@ -7,12 +7,33 @@
                             <i class=""></i> Dashboard <i class="fe fe-chevron-down horizontal-icon"></i>
                         </a>
                         <ul class="sub-menu">
-                            @foreach ($dashboards as $dashboard)
+                            @if(isset($dashboards) && $dashboards->count() > 0)
+                                @foreach ($dashboards as $dashboard)
+                                    @php
+                                        // Use publication link directly if is_embedded != 1, otherwise use admin view
+                                        $dashboard_url = ($dashboard->is_embedded == 1) 
+                                            ? url('/admin/dashboards') . '?resource=' . $dashboard->id 
+                                            : ($dashboard->publication ?? url('/admin/dashboards') . '?resource=' . $dashboard->id);
+                                        
+                                        // Check if external URL
+                                        $app_url = config('app.url');
+                                        $url_parsed = parse_url($dashboard_url);
+                                        $app_url_parsed = parse_url($app_url);
+                                        $is_external_link = isset($url_parsed['host']) && 
+                                                           isset($app_url_parsed['host']) && 
+                                                           $url_parsed['host'] !== $app_url_parsed['host'];
+                                    @endphp
+                                    <li aria-haspopup="true">
+                                        <a href="{{ $dashboard_url }}" 
+                                           target="{{ $is_external_link ? '_blank' : '_self' }}"
+                                           class="slide-item">{{ $dashboard->title }}</a>
+                                    </li>
+                                @endforeach
+                            @else
                                 <li aria-haspopup="true">
-                                    <a href="{{ !$dashboard->is_embedded ? url('/admin/dashboards') . '?resource=' . $dashboard->id : url($dashboard->publication) }}"
-                                        class="slide-item">{{ $dashboard->title }}</a>
+                                    <a href="{{ url('admin/dashboard') }}" class="slide-item">View All Dashboards</a>
                                 </li>
-                            @endforeach
+                            @endif
                         </ul>
                     </li>
 
@@ -35,19 +56,37 @@
                 </li>
 
                 @can('view_publications')
-                    <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Publish<i
-                                class="fe fe-chevron-down horizontal-icon"></i></a>
+                    <li aria-haspopup="true">
+                        <a href="#" class="sub-icon" style="position: relative;">
+                            <i class=""></i>Publish
+                            @if(isset($pending_publications_count) && $pending_publications_count > 0)
+                                <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_publications_count }}</span>
+                            @endif
+                            <i class="fe fe-chevron-down horizontal-icon"></i>
+                        </a>
                         <ul class="sub-menu">
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/create') }}"
                                     class="slide-item">Publish a Resource</a></li>
                                 <li aria-haspopup="true"><a href="{{ url('admin/publications') }}" class="slide-item">Manage
                                         Resources</a></li>
-                            <li aria-haspopup="true"><a href="{{ url('admin/publications/pending') }}" class="slide-item">Pending
-                                    Resources</a></li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/publications/pending') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    Resources Pending Approval
+                                    @if(isset($pending_publications_count) && $pending_publications_count > 0)
+                                        <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_publications_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/summaries') }}"
                                     class="slide-item">Resource Sumaries & Abstracts</a></li>
-                            <li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}"
-                                    class="slide-item">Moderate Comments</a></li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/publications/moderate') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    Moderate Comments
+                                    @if(isset($pending_publication_comments_count) && $pending_publication_comments_count > 0)
+                                        <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_publication_comments_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             @can('view_content_requests')
                             <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="slide-item">
                                 <i class="fa fa-file-alt mr-1"></i>Content Requests</a></li>
@@ -86,12 +125,31 @@
                 @endcan
 
                 @can('view_forumns')
-                    <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Forums<i
-                                class="fe fe-chevron-down horizontal-icon"></i></a>
+                    <li aria-haspopup="true">
+                        <a href="#" class="sub-icon" style="position: relative;">
+                            <i class=""></i>Forums
+                            @if(isset($pending_forums_count) && $pending_forums_count > 0)
+                                <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_forums_count }}</span>
+                            @endif
+                            <i class="fe fe-chevron-down horizontal-icon"></i>
+                        </a>
                         <ul class="sub-menu">
-                            <li aria-haspopup="true"><a href="{{ url('admin/forums') }}" class="slide-item">Forums</a></li>
-                            <li aria-haspopup="true"><a href="{{ url('admin/forums/moderate') }}"
-                                    class="slide-item">Moderate Forums</a></li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/forums') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    Forums
+                                    @if(isset($pending_forums_count) && $pending_forums_count > 0)
+                                        <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_forums_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/forums/moderate') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    Moderate Forums
+                                    @if(isset($pending_forum_comments_count) && $pending_forum_comments_count > 0)
+                                        <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_forum_comments_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                         </ul>
                     </li>
                 @endcan
@@ -108,8 +166,13 @@
 
 
             @can('view_forumns')
-                <li aria-haspopup="true"><a href="{{ url('admin/commsofpractice') }}" class="sub-icon"><i
-                            class=""></i>COPs</a>
+                <li aria-haspopup="true">
+                    <a href="{{ url('admin/commsofpractice') }}" class="sub-icon" style="position: relative;">
+                        <i class=""></i>COPs
+                        @if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)
+                            <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_cop_approvals_count }}</span>
+                        @endif
+                    </a>
                 </li>
             @endcan
 

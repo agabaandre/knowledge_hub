@@ -1,87 +1,105 @@
 @extends('admin.layouts.main')
-@section('content')
 
-@include('common.table')
+@section('styles')
+    @include('common.table')
+    <style>
+        .card { border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem; }
+        .card-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
+        .card-body { padding: 1.5rem; }
+    </style>
+@endsection
+
+@section('content')
 
 @include('admin.permissions.partials.add_role_modal')
 
 <!-- PAGE-HEADER -->
 <div class="page-header">
-            <h1 class="page-title">{{ __('auth.roles') }} {{ __('general.setup') }}</h1>
-            <div>
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">{{ __('auth.roles') }} {{ __('general.setup') }}</li>
-                </ol>
+    <h1 class="page-title">{{ __('auth.roles') }} {{ __('general.setup') }}</h1>
+    <div>
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ __('auth.roles') }} {{ __('general.setup') }}</li>
+        </ol>
+    </div>
+</div>
+<!-- PAGE-HEADER END -->
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h3 class="card-title mb-0">{{ __('auth.roles') }}</h3>
+                    <div>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRole">
+                            <i class="fa fa-plus"></i> {{__('general.add')}} {{__('auth.role')}}
+                        </button>
+                    </div>
+                </div>
             </div>
-        </div>
-        <!-- PAGE-HEADER END -->
+            <div class="card-body">
+                @if(session('alert-success'))
+                    <div class="alert alert-success">{{ session('alert-success') }}</div>
+                @endif
+                @if(session('alert-danger'))
+                    <div class="alert alert-danger">{{ session('alert-danger') }}</div>
+                @endif
 
-<!-- Highlighted tabs -->
-    <div class="row bg-white py-4 rounded">
- 
-   
-        <div class="col-md-12">
-             
-                <div class="row">
-                    <div class="col-md-9">
-                        <h3 class="card-title mb-0">{{ __('auth.roles') }}</h3>
-                    </div>
-                    <div class="col-md-3">
-
-                        <a class="modal-effect btn btn-outline-primary d-block d-grid mb-3 float-right" data-effect="effect-rotate-bottom" data-toggle="modal" href="#addRole"><i class="fa fa-plus-circle"></i> {{__('general.add')}} {{__('auth.role')}}</a>
-                        </div>
-
-                    </div>
-
-                    @if(count($roles)>0)
-                        <table id="roles-table" class="table table-striped table-bordered align-middle">
+                @if(count($roles) > 0)
+                    <div class="table-responsive">
+                        <table id="roles-table" class="table table-striped table-bordered table-hover" style="border-radius: 0;">
                             <thead>
-                                <tr class="text-bold">
-                                    <th style="width:6%">#</th>
+                                <tr>
+                                    <th width="60px">#</th>
                                     <th>{{ __('auth.role') }}</th>
-                                    <th class="text-center">
-                                        ...
-                                    </th>
+                                    <th width="200px" class="text-center">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-
-                            @foreach($roles as $index => $role)
-
-                            @php
-                               $rolePerms = [];
-                               $perms = $role->permissions()->get();
-                               foreach($perms as $p):
-                                  array_push($rolePerms,$p->id);
-                                endforeach;
-                            @endphp
-                                <tr>
-                                    <td>{{ $roles->firstItem() + $index }}</td>
-                                    <td>{{ strtoupper($role->name) }}</td>
-                                    <td class="text-center">
-
-                                          <a href="#role{{$role->id}}0" data-toggle="modal" class="mr-2"><i class="fa fa-pencil text-info"></i></a>
-                                          <a  href="#perms{{$role->id}}0" class=" text-success" data-toggle="modal"><i class="fa fa-shield"></i> {{ __('auth.permissions') }} </a>
-                                    </td>
-                                </tr>
-                                
-                                @include('admin.permissions.partials.role_edit_form_modal')
-                                @include('admin.permissions.partials.role_permissions_modal')
-                                       
+                                @foreach($roles as $index => $role)
+                                    @php
+                                       $rolePerms = [];
+                                       $perms = $role->permissions()->get();
+                                       foreach($perms as $p):
+                                          array_push($rolePerms,$p->id);
+                                        endforeach;
+                                    @endphp
+                                    <tr>
+                                        <td><span class="text-muted">{{ $roles->firstItem() + $index }}</span></td>
+                                        <td><strong>{{ strtoupper($role->name) }}</strong></td>
+                                        <td class="text-center">
+                                            <a href="#role{{$role->id}}0" data-toggle="modal" class="btn btn-sm btn-outline-primary mr-1" title="Edit Role">
+                                                <i class="fa fa-pencil mr-1"></i> Edit
+                                            </a>
+                                            <a href="#perms{{$role->id}}0" class="btn btn-sm btn-outline-success" data-toggle="modal" title="Manage Permissions">
+                                                <i class="fa fa-shield"></i> {{ __('auth.permissions') }}
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    
+                                    @include('admin.permissions.partials.role_edit_form_modal')
+                                    @include('admin.permissions.partials.role_permissions_modal')
                                 @endforeach
                             </tbody>
-                        </table> 
-                        {{ $roles->links() }}
-                        @else
-                            <div class="text-center"><br><br>No data found</div>
-                        @endif
+                        </table>
+                    </div>
 
+                    <!-- Pagination -->
+                    <div class="mt-3">
+                        {{ $roles->links() }}
+                    </div>
+                @else
+                    <div class="text-center py-5">
+                        <p class="text-muted">No roles found</p>
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addRole">
+                            <i class="fa fa-plus"></i> {{__('general.add')}} {{__('auth.role')}}
+                        </button>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
-
- 
-    <!-- /highlighted tabs -->
+</div>
 
 @endsection
-    <!-- /List

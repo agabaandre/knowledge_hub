@@ -21,6 +21,16 @@ class ForumsAdminController extends Controller
 
         $data['forums'] = $this->forumsRepo->get($request,3);
         $data['search']       = (Object) $request->all();
+        
+        // Count pending forums for notification bell
+        $data['pending_forums_count'] = \App\Models\Forum::where('is_approved', 0)
+            ->where('status', 0)
+            ->count();
+        
+        // Count pending forum comments
+        $data['pending_forum_comments_count'] = \App\Models\ForumComment::where('status', 'pending')
+            ->count();
+        
         return view('admin.forums.index',$data);
     }
 
@@ -28,6 +38,11 @@ class ForumsAdminController extends Controller
 
         $data['forums'] = $this->forumsRepo->get($request,0);
         $data['search']       = (Object) $request->all();
+        
+        // Count pending forum comments
+        $data['pending_forum_comments_count'] = \App\Models\ForumComment::where('status', 'pending')
+            ->count();
+        
         return view('admin.forums.moderation',$data);
     }
 

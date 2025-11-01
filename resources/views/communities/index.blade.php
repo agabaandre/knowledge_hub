@@ -20,6 +20,10 @@
             flex-direction: column;
         }
 
+        .community-card.clickable {
+            cursor: pointer;
+        }
+
         .community-card:hover {
             transform: translateY(-3px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
@@ -56,6 +60,27 @@
             font-weight: 500;
             display: inline-block;
             white-space: nowrap;
+        }
+
+        .enter-community-btn {
+            font-size: 0.9rem;
+            padding: 0.6rem 1.75rem;
+            background-color: {{ settings()->primary_color ?? '#119A48' }};
+            color: #fff;
+            border: 1px solid {{ settings()->primary_color ?? '#119A48' }};
+            transition: all 0.3s ease;
+            border-radius: 0.25rem;
+            font-weight: 600;
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .enter-community-btn:hover {
+            background-color: {{ settings()->primary_color ?? '#0d7a3a' }};
+            border-color: {{ settings()->primary_color ?? '#0d7a3a' }};
+            color: #fff;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(17, 154, 72, 0.3);
         }
 
         .join-btn:hover,
@@ -144,10 +169,14 @@
         <div class="row">
             @forelse ($communities as $community)
                 <div class="col-md-12 col-sm-12 col-lg-4 mb-4">
-                    <div class="community-card">
+                    @if(request()->routeIs('account.my-communities') && ($community->user_joined || $community->user_pending_approval))
+                        <div class="community-card clickable" onclick="window.location.href='{{ route('community.detail', $community->id) }}'">
+                    @else
+                        <div class="community-card">
+                    @endif
                         <h4>
                             @if(request()->routeIs('account.my-communities'))
-                                <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;">
+                                <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
                                     {{ $community->community_name }}
                                 </a>
                             @else
@@ -163,7 +192,7 @@
                         @if (Auth::check())
                             @if (!$community->user_joined && !$community->user_pending_approval)
                                 <div class="mt-2" style="text-align: center;">
-                                    <button class="btn btn-sm join-btn" data-community-id="{{ $community->id }}">
+                                    <button class="btn btn-sm join-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
                                         Join Community
                                     </button>
                                 </div>
@@ -174,18 +203,46 @@
                                     </button>
                                 </div>
                             @else
-                                <div class="btn-group" role="group" aria-label="Community Actions">
-                                    <a href="{{ url('/records') }}?community_id={{ $community->id }}"
-                                        class="btn btn-sm publication-btn">
-                                        Publications
-                                    </a>
-                                    <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
-                                        class="btn btn-sm forum-btn">
-                                        Forums
-                                    </a>
-                                    <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}">
-                                        Leave
-                                    </button>
+                                <div style="margin-top: 1rem;">
+                                    @if(request()->routeIs('account.my-communities'))
+                                        <div class="btn-group" role="group" aria-label="Community Actions">
+                                            <a href="{{ route('community.detail', $community->id) }}"
+                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
+                                                <i class="fa fa-eye mr-1"></i>Visit Community
+                                            </a>
+                                            <a href="{{ url('/records') }}?community_id={{ $community->id }}"
+                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
+                                                Publications
+                                            </a>
+                                            <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
+                                                class="btn btn-sm forum-btn" onclick="event.stopPropagation();">
+                                                Forums
+                                            </a>
+                                            <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
+                                                Leave
+                                            </button>
+                                        </div>
+                                    @else
+                                        <div style="text-align: center; margin-bottom: 0.75rem;">
+                                            <a href="{{ route('community.detail', $community->id) }}"
+                                                class="btn enter-community-btn" onclick="event.stopPropagation();">
+                                                <i class="fa fa-sign-in-alt mr-1"></i>Enter the Community
+                                            </a>
+                                        </div>
+                                        <div class="btn-group" role="group" aria-label="Community Actions">
+                                            <a href="{{ url('/records') }}?community_id={{ $community->id }}"
+                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
+                                                Publications
+                                            </a>
+                                            <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
+                                                class="btn btn-sm forum-btn" onclick="event.stopPropagation();">
+                                                Forums
+                                            </a>
+                                            <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
+                                                Leave
+                                            </button>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         @else

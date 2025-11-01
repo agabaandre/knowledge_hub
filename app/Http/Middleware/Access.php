@@ -12,25 +12,32 @@ class Access
 
     public function handle(Request $request, Closure $next)
     {
-        //  /* Static IP address */
-        // $visitorInfo = Location::get($ip);
-
         $ip = env('APP_DEBUG')?'127:0:0:1':$request->ip();
-     
-        $logData = $request->all();
+        
+        // Create a unique session key based on IP and user ID (if authenticated)
+        $userId = auth()->id();
+        $sessionKey = 'access_logged_' . md5($ip . '_' . ($userId ?? 'guest'));
+        
+        // Only log once per session for this IP/user combination
+        if (!session()->has($sessionKey)) {
+            $logData = $request->all();
 
-        unset($logData['cover']);
-        unset($logData['files']);
-        unset($logData['attachments']);
-        unset($logData['file']);
-        unset($logData['image']);
-        unset($logData['photo']);
-        unset($logData['logo']);
-        unset($logData['favicon']);
-        unset($logData['spotlight_banner']);
-        unset($logData['flag']);
+            unset($logData['cover']);
+            unset($logData['files']);
+            unset($logData['attachments']);
+            unset($logData['file']);
+            unset($logData['image']);
+            unset($logData['photo']);
+            unset($logData['logo']);
+            unset($logData['favicon']);
+            unset($logData['spotlight_banner']);
+            unset($logData['flag']);
 
-        AccessLogJob::dispatch($ip,$logData);
+            AccessLogJob::dispatch($ip, $logData);
+            
+            // Mark as logged in this session (session lasts until browser closes or expires)
+            session()->put($sessionKey, true);
+        }
        
         return $next($request);
     }

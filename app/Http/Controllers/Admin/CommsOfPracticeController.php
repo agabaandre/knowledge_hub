@@ -54,10 +54,43 @@ class CommsOfPracticeController extends Controller
         $col["editoptions"] = array("value"=>current_user()->id.":".current_user()->name);
         $cols[] = $col;
 
+        // Get communities with pending member counts
         $data['communities'] = $this->commsOfPracticeRepository->get($request);
+        
+        // Load pending member counts for each community
+        $data['communities']->getCollection()->transform(function ($community) {
+            $community->pending_members_count = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $community->id)
+                ->where('is_approved', 0)
+                ->count();
+            return $community;
+        });
+        
         $data['search']    = (Object) $request->all();
         $sql = "SELECT c.id,community_name,description,is_active,u.name as created_by FROM community_of_practices c left join users u on u.id=c.created_by";
         $data['uitable'] = $this->uiTableService->get_ui_table("community_of_practices",$cols,$sql);
+        
+        // Count pending member approvals for notification bell
+        $data['pending_member_approvals_count'] = \App\Models\CommunityOfPracticeMembers::where('is_approved', 0)
+            ->count();
+        
+        // Get communities with pending member approvals
+        $pendingMembers = \App\Models\CommunityOfPracticeMembers::where('is_approved', 0)
+            ->with(['community', 'user'])
+            ->get()
+            ->groupBy('community_of_practice_id');
+        
+        $data['communities_with_pending'] = collect();
+        foreach ($pendingMembers as $communityId => $members) {
+            $community = \App\Models\CommunityOfPractice::find($communityId);
+            if ($community) {
+                $data['communities_with_pending']->push([
+                    'community' => $community,
+                    'pending_count' => $members->count(),
+                    'members' => $members->take(3) // Get first 3 pending members
+                ]);
+            }
+        }
+        
         return view('admin.commsofpractice.index',$data);
     }
 

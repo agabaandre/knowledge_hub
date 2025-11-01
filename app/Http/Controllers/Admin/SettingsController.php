@@ -18,12 +18,47 @@ class SettingsController extends Controller
     public function index(Request $request){
 
         $data['settings'] = (Object) $this->settingsRepo->get($request);
+        // Load badge types for configuration
+        $data['badgeTypes'] = \App\Models\BadgeType::getAllBadgesInOrder();
         return view('admin.settings.index',$data);
     }
   
     public function store(Request $request){
 
         $saved = $this->settingsRepo->save($request);
+
+        // Update badge configurations if provided
+        if ($request->has('badge_ids') && is_array($request->badge_ids)) {
+            foreach ($request->badge_ids as $badgeId) {
+                $badgeType = \App\Models\BadgeType::find($badgeId);
+                if ($badgeType) {
+                    // Update threshold
+                    if (isset($request->badge_thresholds[$badgeId])) {
+                        $badgeType->contribution_threshold = (int)$request->badge_thresholds[$badgeId];
+                    }
+                    
+                    // Update name
+                    if (isset($request->badge_names[$badgeId])) {
+                        $badgeType->name = $request->badge_names[$badgeId];
+                    }
+                    
+                    // Update description
+                    if (isset($request->badge_descriptions[$badgeId])) {
+                        $badgeType->description = $request->badge_descriptions[$badgeId];
+                    }
+                    
+                    // Update color
+                    if (isset($request->badge_colors[$badgeId])) {
+                        $badgeType->badge_color = $request->badge_colors[$badgeId];
+                    }
+                    
+                    // Update active status
+                    $badgeType->is_active = isset($request->badge_active[$badgeId]) && $request->badge_active[$badgeId] == '1';
+                    
+                    $badgeType->save();
+                }
+            }
+        }
 
         if($saved):
             $data = ['alert-success'=>'Settings saved successfully','status'=>'success','data'=>$saved];

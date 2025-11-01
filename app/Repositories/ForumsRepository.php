@@ -19,7 +19,15 @@ class ForumsRepository extends SharedRepo{
     public function get(Request $request,$approved=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $forums = Forum::with(['user', 'tags', 'comments'])->orderBy('created_at','desc');
+        $forums = Forum::with(['user', 'tags', 'comments']);
+        
+        // If approved=3 (all forums), prioritize pending approvals at the top
+        if($approved === 3) {
+            $forums->orderByRaw('CASE WHEN is_approved = 0 AND status = 0 THEN 0 ELSE 1 END')
+                   ->orderBy('created_at','desc');
+        } else {
+            $forums->orderBy('created_at','desc');
+        }
 
         if($request->term){
             $forums->where('forum_title','like','%'.$request->term.'%');
@@ -184,6 +192,25 @@ class ForumsRepository extends SharedRepo{
         endif;
         
         @$this->join_forum($forum);
+
+        // Send notification to approvers if forum is pending approval (status = 0)
+        if ($forum->id && $forum->status == 0 && $forum->is_approved == 0) {
+            // Load user relationship for author name
+            $forum->load('user');
+            
+            // Build approval URL
+            $approveUrl = url('admin/forums/moderate') . '?id=' . $forum->id;
+            
+            // Dispatch notification to approvers
+            \App\Jobs\NotifyApprovers::dispatch(
+                'forum',
+                $forum->id,
+                $forum->forum_title ?? 'Untitled Forum',
+                $forum->forum_description ?? '',
+                $forum->user->name ?? current_user()->name ?? 'Unknown',
+                $approveUrl
+            )->onQueue('default');
+        }
 
         return $forum;
     }

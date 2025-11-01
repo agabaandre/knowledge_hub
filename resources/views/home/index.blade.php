@@ -179,13 +179,13 @@
 @section('content')
     @include('home.partials.' . $theme . 'spotlight')
 
-    @if((settings()->show_events ?? false))
+    @if((settings()->show_events ?? false) && isset($events) && count($events) > 0)
         {{-- Events section header (same style as Explore Key Sections) --}}
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <div class="sec_title text-center">
-                        <h2 style="margin-top: 2px;">Top Events</h2>
+                        <h2 style="margin-top: 2px;">Events</h2>
                     </div>
                 </div>
             </div>

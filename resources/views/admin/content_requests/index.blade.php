@@ -5,13 +5,70 @@
     <div class="row">
         <div class="col-12">
             <div class="card">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h3 class="card-title mb-0">
+                <div class="card-header">
+                    <h3 class="card-title mb-3">
                         <i class="fa fa-file-alt mr-2"></i>Content Requests
                     </h3>
-                    <a href="{{ route('admin.content-requests.create') }}" class="btn btn-primary btn-sm">
-                        <i class="fa fa-plus mr-1"></i>Create New Request
-                    </a>
+                    
+                    <!-- Filters -->
+                    <form method="GET" action="{{ route('admin.content-requests.index') }}" class="mb-0">
+                        <div class="row g-3">
+                            <div class="col-md-2">
+                                <label for="status" class="form-label small font-weight-bold">Status</label>
+                                <select name="status" id="status" class="form-control form-control-sm">
+                                    <option value="">All Status</option>
+                                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="processed" {{ request('status') == 'processed' ? 'selected' : '' }}>Processed</option>
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="country_id" class="form-label small font-weight-bold">Country</label>
+                                <select name="country_id" id="country_id" class="form-control form-control-sm">
+                                    <option value="">All Countries</option>
+                                    @foreach(\App\Models\Country::orderBy('name')->get() as $country)
+                                        <option value="{{ $country->id }}" {{ request('country_id') == $country->id ? 'selected' : '' }}>
+                                            {{ $country->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-md-2">
+                                <label for="search" class="form-label small font-weight-bold">Search</label>
+                                <input type="text" 
+                                       name="search" 
+                                       id="search" 
+                                       class="form-control form-control-sm" 
+                                       placeholder="Subject, email, description..."
+                                       value="{{ request('search') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="date_from" class="form-label small font-weight-bold">Date From</label>
+                                <input type="text" 
+                                       name="date_from" 
+                                       id="date_from" 
+                                       class="form-control form-control-sm datepicker" 
+                                       placeholder="Select date"
+                                       value="{{ request('date_from') }}">
+                            </div>
+                            <div class="col-md-2">
+                                <label for="date_to" class="form-label small font-weight-bold">Date To</label>
+                                <input type="text" 
+                                       name="date_to" 
+                                       id="date_to" 
+                                       class="form-control form-control-sm datepicker" 
+                                       placeholder="Select date"
+                                       value="{{ request('date_to') }}">
+                            </div>
+                            <div class="col-md-2 d-flex align-items-end">
+                                <button type="submit" class="btn btn-primary btn-sm mr-1">
+                                    <i class="fa fa-filter mr-1"></i>Filter
+                                </button>
+                                <a href="{{ route('admin.content-requests.index') }}" class="btn btn-secondary btn-sm">
+                                    <i class="fa fa-times mr-1"></i>Clear
+                                </a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
                 <div class="card-body">
                     @if(Session::has('success'))

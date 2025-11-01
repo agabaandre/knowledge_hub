@@ -33,13 +33,14 @@ class FaqsAdminController extends Controller
         $saved = $this->faqsRepo->save($request);
 
         if($saved):
-            $data = ['message'=>'FAQ saved successfully','status'=>'success','data'=>$saved];
+            $message = ($request->id) ? 'FAQ updated successfully' : 'FAQ saved successfully';
+            $data = ['message'=>$message,'status'=>'success','data'=>$saved];
         else:
             $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
         endif;
 
         if($request->ajax()){
-            return response($data,200);
+            return response()->json($data,200);
         }
         
         return back()->with($data);
@@ -50,6 +51,34 @@ class FaqsAdminController extends Controller
         return $this->faqsRepo->delete($request->id);
     }
 
+    public function get(Request $request){
+        $id = $request->id;
+        
+        if (!$id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'FAQ ID is required'
+            ], 400);
+        }
+        
+        $faq = $this->faqsRepo->find($id);
+        
+        if ($faq) {
+            return response()->json([
+                'success' => true,
+                'faq' => [
+                    'id' => $faq->id,
+                    'question' => $faq->question,
+                    'answer' => $faq->answer,
+                ]
+            ]);
+        }
+        
+        return response()->json([
+            'success' => false,
+            'message' => 'FAQ not found'
+        ], 404);
+    }
 
   
 }

@@ -126,8 +126,46 @@
 <div class="row">
     <div class="card col-lg-12 af-card">
         <div class="card-header d-flex align-items-center justify-content-between">
-            <strong>Communities of Practice</strong>
-            <div>
+            <div class="d-flex align-items-center">
+                <strong>Communities of Practice</strong>
+            </div>
+            <div class="d-flex align-items-center">
+                @if(isset($pending_member_approvals_count) && $pending_member_approvals_count > 0)
+                    <div class="dropdown nav-item mr-2" id="communities-notification-dropdown">
+                        <a class="nav-link position-relative" href="#" data-toggle="dropdown" title="Communities with Pending Approvals">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:20px;">{{ $pending_member_approvals_count }}</span>
+                        </a>
+                        <div class="dropdown-menu dropdown-menu-right" style="min-width:320px;max-width:400px;max-height:500px;overflow-y:auto;">
+                            <div class="p-3 border-bottom">
+                                <h6 class="mb-2" style="font-weight: 600;">Communities with Pending Approvals</h6>
+                                <small class="text-muted">{{ $pending_member_approvals_count }} members(s) awaiting approval</small>
+                            </div>
+                            <div class="list-group list-group-flush">
+                                @if(isset($communities_with_pending) && $communities_with_pending->count() > 0)
+                                    @foreach($communities_with_pending->take(10) as $item)
+                                        <a href="{{ route('admin.commsofpractice.details', $item['community']->id) }}" class="list-group-item list-group-item-action">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">{{ $item['community']->community_name }}</h6>
+                                                    <small class="text-muted">{{ $item['pending_count'] }} member(s) pending</small>
+                                                </div>
+                                                <span class="badge badge-warning badge-pill">{{ $item['pending_count'] }}</span>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                @else
+                                    <div class="p-3 text-center text-muted">
+                                        <small>No pending approvals</small>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                @endif
                 <button type="button" class="btn btn-primary btn-sm" onclick="openCreateModal()"><i class="fa fa-plus mr-1"></i>Add Community</button>
             </div>
         </div>
@@ -151,7 +189,12 @@
                             <td>{!! \Illuminate\Support\Str::words(strip_tags($c->description), 20, '...') !!}</td>
                             <td>
                                 <div class="btn-group-vertical btn-group-sm" role="group" style="gap: 4px;">
-                                    <a href="{{ route('admin.commsofpractice.details', $c->id) }}" class="btn btn-outline-info btn-sm"><i class="fa fa-users mr-1"></i>Group Members</a>
+                                    <a href="{{ route('admin.commsofpractice.details', $c->id) }}" class="btn btn-outline-info btn-sm" style="position: relative;">
+                                        <i class="fa fa-users mr-1"></i>Group Members
+                                        @if(isset($c->pending_members_count) && $c->pending_members_count > 0)
+                                            <span class="badge badge-danger badge-pill" style="position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $c->pending_members_count }}</span>
+                                        @endif
+                                    </a>
                                     <button class="btn btn-outline-dark btn-sm" onclick="openEditCommunity({{ $c->id }})"><i class="fa fa-edit mr-1"></i>Edit</button>
                                     @can('delete_publication_metadata')
                                     <button class="btn btn-outline-danger btn-sm" onclick="openDeleteModal({{ $c->id }})"><i class="fa fa-trash mr-1"></i>Delete</button>

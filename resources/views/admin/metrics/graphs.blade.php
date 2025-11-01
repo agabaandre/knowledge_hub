@@ -1,18 +1,18 @@
 
-    <div class="container-fluid">
-        <div class="row">
+ 
+      
             <div class="col-md-12">
-                <div class="card">
-                    <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card" style="border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem;">
+                    <div class="card-header d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
                         <h3 class="card-title mb-0">System Metrics</h3>
                         <div class="filters-toolbar">
                             <div class="filter-item">
                                 <i class="fa fa-calendar filter-icon"></i>
-                                <input type="date" id="fromDate" class="filter-control" placeholder="From" />
+                                <input type="text" id="fromDate" class="filter-control datepicker" placeholder="From" />
                             </div>
                             <div class="filter-item">
                                 <i class="fa fa-calendar filter-icon"></i>
-                                <input type="date" id="toDate" class="filter-control" placeholder="To" />
+                                <input type="text" id="toDate" class="filter-control datepicker" placeholder="To" />
                             </div>
                             <div class="filter-item">
                                 <i class="fa fa-globe filter-icon"></i>
@@ -23,28 +23,28 @@
                             <button id="applyFilters" class="btn btn-apply"><i class="fa fa-filter mr-1"></i>Apply</button>
                         </div>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="padding: 1.5rem;">
 
-                       <div class="row">
-                           <div class="col-12 mb-3">
-                               <div class="card">
-                                   <div class="card-header d-flex align-items-center justify-content-between">
-                                       <strong>Visits by Country</strong>
+                       <div id="chart-container" class="row" style="margin-left: -15px; margin-right: -15px;"></div>
+
+                       <div class="row" style="margin-left: -15px; margin-right: -15px; margin-top: 1.5rem;">
+                           <div class="col-12" style="padding-left: 15px; padding-right: 15px;">
+                               <div class="card" style="border: 1px solid #e2e8f0; border-radius: 0;">
+                                   <div class="card-header d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
+                                       <h3 class="card-title mb-0" style="font-size: 1rem; font-weight: 600;">Visits by Country</h3>
                                    </div>
-                                   <div class="card-body p-0">
-                                       <div id="world-map" style="width:100%;height:420px;border-top:1px solid #e2e8f0;border-radius:0 0 10px 10px;"></div>
+                                   <div class="card-body" style="padding: 1.5rem;">
+                                       <div id="world-map" style="width:100%;height:504px;"></div>
                                    </div>
                                </div>
                            </div>
                        </div>
-
-                       <div id="chart-container" class="row" style="margin-left:-6px;margin-right:-6px;"></div>
     
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+       
+   
 
 <script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>
 <!-- Leaflet for OSM basemap -->
@@ -70,14 +70,32 @@
       const values = data.values;
       const title = key.replaceAll('_', ' ').toUpperCase();
 
-      // Create a card wrapper for the chart
+      // Create a card wrapper for the chart with proper spacing
       const col = document.createElement('div');
-      col.className = 'col-xl-6 col-lg-6 col-md-12 mb-3';
-      const card = document.createElement('div'); card.className = 'card h-100';
-      const header = document.createElement('div'); header.className = 'card-header'; header.innerHTML = `<strong>${title}</strong>`;
-      const body = document.createElement('div'); body.className = 'card-body';
-      const chartContainer = document.createElement('div'); chartContainer.id = key + '-chart'; chartContainer.style = 'height:360px;';
-      body.appendChild(chartContainer); card.appendChild(header); card.appendChild(body); col.appendChild(card);
+      col.className = 'col-xl-6 col-lg-6 col-md-12 mb-4';
+      col.style.cssText = 'padding-left: 15px; padding-right: 15px;';
+      
+      const card = document.createElement('div'); 
+      card.className = 'card h-100';
+      card.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 0;';
+      
+      const header = document.createElement('div'); 
+      header.className = 'card-header'; 
+      header.style.cssText = 'background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;';
+      header.innerHTML = `<h3 class="card-title mb-0" style="font-size: 1rem; font-weight: 600;">${title}</h3>`;
+      
+      const body = document.createElement('div'); 
+      body.className = 'card-body';
+      body.style.cssText = 'padding: 1.5rem;';
+      
+      const chartContainer = document.createElement('div'); 
+      chartContainer.id = key + '-chart'; 
+      chartContainer.style.cssText = 'height:360px;';
+      
+      body.appendChild(chartContainer); 
+      card.appendChild(header); 
+      card.appendChild(body); 
+      col.appendChild(card);
       document.getElementById('chart-container').appendChild(col);
 
       // Prepare x-axis categories for bar chart
@@ -86,38 +104,148 @@
         categories = labels;
       }
 
+      // Helper function to lighten colors (simple implementation)
+      function lightenColor(color, amount) {
+        if (color.startsWith('#')) {
+          const num = parseInt(color.replace('#', ''), 16);
+          const r = Math.min(255, (num >> 16) + Math.round(amount * 255));
+          const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(amount * 255));
+          const b = Math.min(255, (num & 0x0000FF) + Math.round(amount * 255));
+          return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+        return color;
+      }
+
+      // AU (African Union) color palette from settings
+      const auColors = {
+        red: '{{ settings()->au_red ?? "#9F2241" }}',
+        gold: '{{ settings()->au_gold ?? "#B4A269" }}',
+        corporateGreen: '{{ settings()->au_corporate_green ?? "#1A5632" }}',
+        green: '{{ settings()->au_green ?? "#1A5632" }}',
+        plum: '{{ settings()->au_plum ?? "#522B39" }}',
+        greyText: '{{ settings()->au_grey_text ?? "#58595B" }}',
+        white: '{{ settings()->au_white ?? "#FFFFFF" }}'
+      };
+      
+      const africaCDCColors = [
+        auColors.corporateGreen,  // AU Corporate Green
+        auColors.red,              // AU Red
+        auColors.gold,             // AU Gold
+        auColors.green,            // AU Green
+        auColors.plum,             // Agenda 2063 Plum
+        auColors.greyText,         // AU Grey Text
+        // Additional shades for variety (lightened versions of AU colors)
+        lightenColor(auColors.corporateGreen, 0.3),  // Lightened Corporate Green
+        lightenColor(auColors.red, 0.3),             // Lightened Red
+        lightenColor(auColors.gold, 0.3),            // Lightened Gold
+        lightenColor(auColors.green, 0.3)            // Lightened Green
+      ];
+
       // Create the chart based on the specified type
       Highcharts.chart(chartContainer.id, {
         chart: {
-          type: chartType
+          type: chartType,
+          backgroundColor: 'transparent'
         },
+        colors: africaCDCColors,
         title: {
-          text: title
+          text: null  // Title is shown in card header instead
         },
         credits: { enabled: false },
         xAxis: {
           categories: categories, // Use categories for bar chart
+          lineColor: '#e2e8f0',
+          tickColor: '#e2e8f0',
+          labels: {
+            style: {
+              color: auColors.greyText
+            }
+          }
         },
         yAxis: {
           title: { text: null },
-          gridLineColor: '#e2e8f0'
+          gridLineColor: '#e2e8f0',
+          lineColor: '#e2e8f0',
+          labels: {
+            style: {
+              color: auColors.greyText
+            }
+          }
         },
-        legend: { enabled: chartType !== 'pie' },
+        legend: { 
+          enabled: chartType !== 'pie',
+          itemStyle: {
+            color: auColors.greyText
+          }
+        },
+        plotOptions: {
+          bar: {
+            colorByPoint: true,
+            dataLabels: {
+              style: {
+                color: '#0f172a',
+                fontWeight: '600'
+              }
+            }
+          },
+          pie: {
+            allowPointSelect: true,
+            cursor: 'pointer',
+            dataLabels: {
+              style: {
+                color: '#0f172a',
+                fontWeight: '600'
+              }
+            },
+            colors: africaCDCColors
+          },
+          line: {
+            marker: {
+              fillColor: auColors.corporateGreen,
+              lineColor: auColors.plum,
+              lineWidth: 2
+            },
+            dataLabels: {
+              style: {
+                color: '#0f172a',
+                fontWeight: '600'
+              }
+            }
+          }
+        },
         series: [{
           name: title,
+          color: africaCDCColors[0], // Default to primary color for single series
           data: chartType === 'pie' ? labels.map((label, index) => ({
             name: label,
-            y: values[index]
+            y: values[index],
+            color: africaCDCColors[index % africaCDCColors.length]
           })) : chartType === 'line' ? values.map((value, index) => ({
             name: labels[index], // Use labels for line chart
-            y: value
-          })) : values, // Use values directly for bar chart
+            y: value,
+            color: africaCDCColors[index % africaCDCColors.length]
+          })) : values.map((value, index) => ({
+            y: value,
+            color: africaCDCColors[index % africaCDCColors.length]
+          })), // Use values with colors for bar chart
           dataLabels: {
             enabled: true,
-            format: chartType === 'pie' ? '{point.name}: {point.percentage:.1f}%' : '{point.y}'
+            format: chartType === 'pie' ? '{point.name}: {point.percentage:.1f}%' : '{point.y}',
+            style: {
+              color: '#0f172a',
+              fontWeight: '600'
+            }
           }
         }],
-        tooltip: { shared: chartType !== 'pie' }
+        tooltip: { 
+          shared: chartType !== 'pie',
+          backgroundColor: auColors.white,
+          borderColor: auColors.corporateGreen,
+          borderRadius: 8,
+          style: {
+            color: '#0f172a'
+          }
+        }
       });
     }
 
@@ -185,9 +313,10 @@
         }
 
         loadGeo(0).then(geo => {
-            // Color scale helper
+            // AU color scale helper (using AU colors)
             function colorFor(v){
-              return v>10000?'#0b5':v>5000?'#1a7f4a':v>1000?'#3fae6c':v>100?'#8cd3a8':v>0?'#d9f2e5':'#eef6f2';
+              // Create gradient using AU colors from high to low values
+              return v>10000?auColors.plum:v>5000?auColors.corporateGreen:v>1000?auColors.green:v>100?auColors.gold:v>0?auColors.red:'#f0f0f0';
             }
 
             function getVal(props){
@@ -241,8 +370,8 @@
 .filters-toolbar .filter-control{
     height:36px; padding:6px 12px 6px 34px; border:1px solid #e2e8f0; border-radius:10px; background:#f8fafc; color:#0f172a; outline:none;
 }
-.filters-toolbar .filter-control:focus{ border-color:#cbd5e1; background:#fff; box-shadow:0 0 0 3px rgba(17,154,72,.08); }
-.filters-toolbar .filter-icon{ position:absolute; left:10px; top:9px; color:#64748b; font-size:14px; }
-.btn-apply{ height:36px; border-radius:10px; background:#1f2937; color:#fff; padding:6px 14px; border:1px solid #111827; }
-.btn-apply:hover{ background:#111827; }
+.filters-toolbar .filter-control:focus{ border-color:#cbd5e1; background:#fff; box-shadow:0 0 0 3px rgba(26,86,50,.08); }
+.filters-toolbar .filter-icon{ position:absolute; left:10px; top:9px; color:{{ settings()->au_grey_text ?? '#58595B' }}; font-size:14px; }
+.btn-apply{ height:36px; border-radius:10px; background:{{ settings()->au_corporate_green ?? '#1A5632' }}; color:{{ settings()->au_white ?? '#FFFFFF' }}; padding:6px 14px; border:1px solid {{ settings()->au_corporate_green ?? '#1A5632' }}; }
+.btn-apply:hover{ background:{{ settings()->au_plum ?? '#522B39' }}; border-color:{{ settings()->au_plum ?? '#522B39' }}; }
 </style>

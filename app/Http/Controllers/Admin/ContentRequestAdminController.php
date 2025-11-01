@@ -12,10 +12,46 @@ class ContentRequestAdminController extends Controller
 {
     public function index(Request $request)
     {
-        // Fetch all content requests with relationships
-        $contentRequests = ContentRequest::with(['country', 'processedBy'])
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+        // Start building the query
+        $query = ContentRequest::with(['country', 'processedBy']);
+
+        // Filter by status (processed/pending)
+        if ($request->filled('status')) {
+            if ($request->status === 'processed') {
+                $query->whereNotNull('processed_at');
+            } elseif ($request->status === 'pending') {
+                $query->whereNull('processed_at');
+            }
+        }
+
+        // Filter by country
+        if ($request->filled('country_id')) {
+            $query->where('country_id', $request->country_id);
+        }
+
+        // Search filter (subject, email, or description)
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('subject', 'like', '%' . $search . '%')
+                  ->orWhere('email', 'like', '%' . $search . '%')
+                  ->orWhere('description', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Date range filter
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        // Order and paginate
+        $contentRequests = $query->orderBy('created_at', 'desc')
+            ->paginate(10)
+            ->appends($request->except('page'));
+
         return view('admin.content_requests.index', compact('contentRequests'));
     }
 

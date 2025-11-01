@@ -102,6 +102,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pubs->where('is_approved', 0);
     }
 
+    // Filter only approved publications if requested (for admin manage publications page)
+    if ($request->approved_only) {
+        $pubs->where('is_approved', 1)->where('is_rejected', 0);
+    }
+
     $results = $pubs->paginate($rows_count)->appends($request->all());
 
     return $return_array ? $results : $results;
@@ -560,14 +565,23 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $this->attach_countries($pub,$request);
         endif;
         
-        if(!is_admin()){
-
-            $alert = array(
-                'title' => "Resource  $pub->title has been". ($request->id)?' Edited':' Submitted fpr approval',
-                'body'=>"Your attention is required to review is called upon",
-                'email'=>"adminemail@gmail.com" // put right admin here
-            );
-            SendMailJob::dispatch( $alert)->onQueue('default');
+        // Send notification to approvers if publication is pending approval (only for new submissions, not edits)
+        if ($saved && !$request->id && !is_admin() && $pub->is_approved == 0) {
+            // Reload publication with author relationship
+            $pub->load('author');
+            
+            // Build approval URL
+            $approveUrl = url('admin/publications/details') . '?id=' . $pub->id;
+            
+            // Dispatch notification to approvers
+            \App\Jobs\NotifyApprovers::dispatch(
+                'publication',
+                $pub->id,
+                $pub->title ?? 'Untitled Publication',
+                $pub->description ?? '',
+                $pub->author->name ?? ($pub->user->name ?? 'Unknown'),
+                $approveUrl
+            )->onQueue('default');
         }
 
         return $pub;
@@ -616,13 +630,18 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $viewed      = get_cookie($cookie_name);
 
             if(!$viewed && $pub):
-                // Track monthly views instead of just incrementing
+                // Track monthly views in the publication_views table
+                // This does NOT update the publication's updated_at timestamp
                 \App\Models\PublicationView::incrementView($pub->id);
                 
-                // Keep the visits column for backward compatibility (sum of all monthly views)
+                // Optionally update visits column for backward compatibility without touching updated_at
+                // We use updateQuietly or a direct query to avoid triggering updated_at
                 $totalViews = \App\Models\PublicationView::getTotalViews($pub->id);
-                $pub->visits = $totalViews;
-                $pub->save();
+                
+                // Update only the visits column without updating timestamps
+                \DB::table('publication')
+                    ->where('id', $pub->id)
+                    ->update(['visits' => $totalViews]);
                 
                 set_cookie("Viewed".$pub->id,'yes');
             endif;
@@ -931,6 +950,14 @@ public function change_approval_status(Request $request){
    
     $publication = ($request->is_summary)?PublicationSummary::find($request->id):Publication::find($request->id);
     
+    // Load relationships for email notification
+    if (!$request->is_summary) {
+        $publication->load(['user', 'author']);
+    } else {
+        if (method_exists($publication, 'load')) {
+            $publication->load('user');
+        }
+    }
     
     if($request->approved){
 
@@ -944,7 +971,6 @@ public function change_approval_status(Request $request){
      if(!$request->is_summary)
      $publication->is_active= 'Active';
 
-     $msg = 'We are happy to inform you that your publication has been approved';
      $action = "Approved";
 
     }
@@ -962,22 +988,62 @@ public function change_approval_status(Request $request){
 
      $action = "Rejected";
 
-     $msg = 'We are sorry to inform you that your publication has been rejected';
-
     }
 
     $publication->update();
     
-    $reason = $request->input('rejected_reason');
-    $body = ($action === 'Rejected' && $reason)
-        ? ($msg.' Reason: '.$reason)
-        : $msg;
-    $alert = array(
-        'title' => "Resource  $publication->title has been $action",
-        'body'=> $body,
-        'email'=>@$publication->user->email
-    );
-    SendMailJob::dispatch( $alert)->onQueue('default');
+    // Send email notification using proper template
+    $userEmail = null;
+    $userName = null;
+    
+    if (!$request->is_summary && $publication instanceof \App\Models\Publication) {
+        // For publications, try to get email from user or author
+        if ($publication->user && $publication->user->email) {
+            $userEmail = $publication->user->email;
+            $userName = $publication->user->name ?? 'Member';
+        } elseif ($publication->author && $publication->author->email) {
+            $userEmail = $publication->author->email;
+            $userName = $publication->author->name ?? 'Member';
+        }
+    } else {
+        // For summaries, try to get email from user
+        if (isset($publication->user) && $publication->user && $publication->user->email) {
+            $userEmail = $publication->user->email;
+            $userName = $publication->user->name ?? 'Member';
+        }
+    }
+    
+    if ($userEmail) {
+        if ($action === 'Approved') {
+            $subject = 'Publication Approved: ' . ($publication->title ?? 'Your Resource');
+            
+            $publicationUrl = !$request->is_summary 
+                ? url('records/resource') . '?id=' . $publication->id
+                : url('admin/publications/summaries');
+            
+            $body = view('emails.publication_approved', [
+                'userName' => $userName,
+                'publicationTitle' => $publication->title ?? 'Your Resource',
+                'publicationDescription' => $publication->description ?? '',
+                'publicationUrl' => $publicationUrl,
+                'isSummary' => $request->is_summary ?? false,
+            ])->render();
+        } else {
+            // Rejected - use simple format for now (can create a template later)
+            $reason = $request->input('rejected_reason');
+            $msg = 'We are sorry to inform you that your publication has been rejected';
+            $body = $reason ? ($msg . ' Reason: ' . $reason) : $msg;
+        }
+        
+        $emailData = (object) [
+            'email' => $userEmail,
+            'subject' => $subject ?? "Resource " . ($publication->title ?? '') . " has been $action",
+            'body' => $body,
+            'title' => $subject ?? "Resource " . ($publication->title ?? '') . " has been $action"
+        ];
+        
+        SendMailJob::dispatch($emailData)->onQueue('default');
+    }
 
     return $publication;
 }

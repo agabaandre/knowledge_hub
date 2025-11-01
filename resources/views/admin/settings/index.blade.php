@@ -345,6 +345,11 @@
                     </button>
                 </li>
                 <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="badges-tab" data-tab="badges" type="button" role="tab" aria-controls="badges" aria-selected="false">
+                        <i class="fa fa-trophy me-2"></i>Badges
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
                     <button class="nav-link" id="advanced-tab" data-tab="advanced" type="button" role="tab" aria-controls="advanced" aria-selected="false">
                         <i class="fa fa-sliders me-2"></i>Advanced
                     </button>
@@ -594,6 +599,108 @@
                         <small class="info-text">Preview of the gradient (shown when no banner image is set)</small>
                     </div>
 
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-palette"></i>
+                        AU (African Union) Color Palette
+                    </div>
+                    <small class="info-text mb-3 d-block">Official African Union colors for consistent branding across the platform</small>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>AU Red <small class="text-muted">(PANTONE 7420 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_red" value="{{ $settings->au_red ?? '#9F2241' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_red ?? '#9F2241' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 159, 34, 65 | CMYK: 27, 98, 66, 18</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>AU Gold <small class="text-muted">(PANTONE 4515 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_gold" value="{{ $settings->au_gold ?? '#B4A269' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_gold ?? '#B4A269' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 180, 162, 105 | CMYK: 31, 31, 69, 2</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>AU Corporate Green <small class="text-muted">(PANTONE 3415 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_corporate_green" value="{{ $settings->au_corporate_green ?? '#1A5632' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_corporate_green ?? '#1A5632' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 26, 86, 50 | CMYK: 86, 40, 91, 39</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>AU Green <small class="text-muted">(PANTONE 7740 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_green" value="{{ $settings->au_green ?? '#1A5632' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_green ?? '#1A5632' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">Official AU Green color</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Agenda 2063 Plum <small class="text-muted">(PANTONE 3415 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_plum" value="{{ $settings->au_plum ?? '#522B39' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_plum ?? '#522B39' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 82, 43, 57 | CMYK: 54, 86, 50, 48</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Grey Text <small class="text-muted">(PANTONE 425 C)</small></label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_grey_text" value="{{ $settings->au_grey_text ?? '#58595B' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_grey_text ?? '#58595B' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 83, 87, 90 | CMYK: 65, 56, 53, 29</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Bright White</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="au_white" value="{{ $settings->au_white ?? '#FFFFFF' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->au_white ?? '#FFFFFF' }}; border: 1px solid #ddd;"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">RGB: 255, 255, 255 | CMYK: 0, 0, 0, 0</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -657,6 +764,140 @@
                         <label>Timezone</label>
                         @include('partials.general.timezones', ['selected' => $settings->timezone])
                     </div>
+                </div>
+
+                <!-- Badges Tab -->
+                <div class="tab-pane fade" id="badges" role="tabpanel">
+                    <div class="form-section-title">
+                        <i class="fa fa-trophy"></i>
+                        Community Contribution Badges
+                    </div>
+                    
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle me-2"></i>
+                        <strong>Badge Configuration:</strong> Adjust the contribution thresholds required to earn each badge. Badges are awarded monthly based on the total contributions (publications + forum posts + forum comments) in a community. Changes will apply to future badge awards.
+                    </div>
+
+                    @if(isset($badgeTypes) && $badgeTypes->count() > 0)
+                        <div class="row">
+                            @foreach($badgeTypes as $badgeType)
+                                <div class="col-md-6 mb-4">
+                                    <div class="card" style="border-left: 4px solid {{ $badgeType->badge_color }}; border-radius: 8px;">
+                                        <div class="card-body">
+                                            <div class="d-flex align-items-center mb-3">
+                                                <span style="font-size: 2em; margin-right: 12px;">
+                                                    @if($badgeType->slug === 'silver')🥈
+                                                    @elseif($badgeType->slug === 'gold')🥇
+                                                    @elseif($badgeType->slug === 'platinum')💎
+                                                    @elseif($badgeType->slug === 'diamond')💠
+                                                    @else🏅
+                                                    @endif
+                                                </span>
+                                                <div>
+                                                    <h5 class="mb-0" style="color: {{ $badgeType->badge_color }};">
+                                                        {{ $badgeType->name }}
+                                                        @if($badgeType->slug === 'diamond')
+                                                            <span class="badge badge-secondary ml-2" style="font-size: 0.7rem;">Hall of Honor</span>
+                                                        @endif
+                                                    </h5>
+                                                    <small class="text-muted">{{ $badgeType->description }}</small>
+                                                </div>
+                                            </div>
+
+                                            <input type="hidden" name="badge_ids[]" value="{{ $badgeType->id }}">
+                                            
+                                            <div class="form-group mb-3">
+                                                <label for="threshold_{{ $badgeType->id }}" style="font-weight: 600;">
+                                                    Contribution Threshold <span class="text-danger">*</span>
+                                                </label>
+                                                <div class="input-group">
+                                                    <input type="number" 
+                                                           name="badge_thresholds[{{ $badgeType->id }}]" 
+                                                           id="threshold_{{ $badgeType->id }}"
+                                                           value="{{ $badgeType->contribution_threshold }}" 
+                                                           class="form-control" 
+                                                           min="1" 
+                                                           max="1000" 
+                                                           step="1"
+                                                           required>
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">contributions/month</span>
+                                                    </div>
+                                                </div>
+                                                <small class="info-text">
+                                                    Minimum number of contributions (publications + forum posts + comments) required in a month.
+                                                </small>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="badge_name_{{ $badgeType->id }}" style="font-weight: 600;">
+                                                    Badge Name <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" 
+                                                       name="badge_names[{{ $badgeType->id }}]" 
+                                                       id="badge_name_{{ $badgeType->id }}"
+                                                       value="{{ $badgeType->name }}" 
+                                                       class="form-control" 
+                                                       required>
+                                            </div>
+
+                                            <div class="form-group mb-3">
+                                                <label for="badge_desc_{{ $badgeType->id }}" style="font-weight: 600;">
+                                                    Description
+                                                </label>
+                                                <textarea name="badge_descriptions[{{ $badgeType->id }}]" 
+                                                          id="badge_desc_{{ $badgeType->id }}"
+                                                          rows="2" 
+                                                          class="form-control">{{ $badgeType->description }}</textarea>
+                                            </div>
+
+                                            <div class="form-group mb-0">
+                                                <label for="badge_color_{{ $badgeType->id }}" style="font-weight: 600;">
+                                                    Badge Color
+                                                </label>
+                                                <div class="colorPicker" id="badgeColorPicker{{ $badgeType->id }}">
+                                                    <input type="text" 
+                                                           name="badge_colors[{{ $badgeType->id }}]" 
+                                                           id="badge_color_{{ $badgeType->id }}"
+                                                           value="{{ $badgeType->badge_color }}" 
+                                                           class="form-control">
+                                                    <div class="input-group-append">
+                                                        <span class="input-group-text">
+                                                            <div class="color-preview" style="background-color: {{ $badgeType->badge_color }};"></div>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            <div class="form-group mt-3 mb-0">
+                                                <div class="custom-control custom-switch">
+                                                    <input type="checkbox" 
+                                                           class="custom-control-input" 
+                                                           id="badge_active_{{ $badgeType->id }}"
+                                                           name="badge_active[{{ $badgeType->id }}]"
+                                                           value="1"
+                                                           {{ $badgeType->is_active ? 'checked' : '' }}>
+                                                    <label class="custom-control-label" for="badge_active_{{ $badgeType->id }}">
+                                                        Active (Award this badge)
+                                                    </label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+
+                        <div class="alert alert-warning mt-4">
+                            <i class="fa fa-exclamation-triangle me-2"></i>
+                            <strong>Important:</strong> Badge thresholds should be in ascending order (e.g., 5, 10, 20, 40). The system awards the highest badge a user qualifies for based on their contribution count.
+                        </div>
+                    @else
+                        <div class="alert alert-warning">
+                            <i class="fa fa-exclamation-triangle me-2"></i>
+                            No badge types found. Please run the migrations to create default badges.
+                        </div>
+                    @endif
                 </div>
 
                 <!-- Advanced Tab -->
@@ -1014,15 +1255,16 @@
                 $('#' + targetTab).addClass('show active');
             });
 
-            // Initialize color pickers
+            // Initialize color pickers (including badge color pickers)
             $('.colorPicker').each(function() {
                 var $picker = $(this);
                 var $input = $picker.find('input[type="text"]');
                 var $preview = $picker.find('.color-preview');
+                var defaultColor = $input.val() || '#119A48';
 
                 $picker.colorpicker({
                     format: 'hex',
-                    color: $input.val() || '#119A48'
+                    color: defaultColor
                 }).on('colorpickerChange colorpickerCreate', function(e) {
                     $preview.css('background-color', e.color.toString());
                     $input.val(e.color.toString());
@@ -1032,6 +1274,11 @@
                         updateGradientPreview();
                     }
                 });
+                
+                // Initialize preview color
+                if ($preview.length) {
+                    $preview.css('background-color', defaultColor);
+                }
             });
 
             // Update gradient preview function
