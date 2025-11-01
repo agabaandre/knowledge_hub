@@ -209,8 +209,10 @@
     
     /* A4-like PDF Preview Modal Styles */
     #previewModal .modal-dialog {
-        max-width: 90vw;
-        margin: 1.75rem auto;
+        max-width: 100vw;
+        width: 100vw;
+        margin: 0;
+        padding: 0;
         transition: all 0.3s ease;
     }
     
@@ -235,7 +237,8 @@
     
     @media (min-width: 1200px) {
         #previewModal:not(.fullscreen) .modal-dialog {
-            max-width: 900px; /* A4 width equivalent at reasonable scale */
+            max-width: 100vw; /* Full width for better viewing */
+            width: 100vw;
         }
     }
     
@@ -243,6 +246,8 @@
         border-radius: 0;
         box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         background: #ffffff;
+        width: 100%;
+        height: 100vh;
     }
     
     #previewModal .modal-header {
@@ -254,6 +259,14 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        width: 100%;
+    }
+    
+    #previewModal .modal-header .header-left {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex: 1;
     }
     
     #previewModal .modal-header .header-actions {
@@ -266,11 +279,14 @@
         background: rgba(255, 255, 255, 0.2);
         border: 1px solid rgba(255, 255, 255, 0.3);
         color: white;
-        padding: 0.25rem 0.5rem;
+        padding: 0.4rem 0.6rem;
         border-radius: 0.25rem;
         font-size: 0.875rem;
         cursor: pointer;
         transition: all 0.2s ease;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
     }
     
     #previewModal .btn-fullscreen:hover {
@@ -282,6 +298,8 @@
         font-weight: 600;
         font-size: 1.1rem;
         color: white;
+        margin: 0;
+        flex: 1;
     }
     
     #previewModal .close {
@@ -289,6 +307,9 @@
         opacity: 0.9;
         text-shadow: none;
         font-weight: 300;
+        font-size: 1.5rem;
+        padding: 0.5rem;
+        line-height: 1;
     }
     
     #previewModal .close:hover {
@@ -301,8 +322,9 @@
     }
     
     #previewModal .modal-body {
-        min-height: 500px;
-        max-height: 80vh;
+        min-height: calc(100vh - 60px);
+        height: calc(100vh - 60px);
+        max-height: calc(100vh - 60px);
         overflow: hidden;
         padding: 0;
         background: #f8fafc;
@@ -310,6 +332,7 @@
         align-items: center;
         justify-content: center;
         position: relative;
+        width: 100%;
     }
     
     /* A4-like paper container */
@@ -325,20 +348,20 @@
         position: relative;
     }
     
-    /* PDF iframe - A4 aspect ratio */
+    /* PDF iframe - full height */
     #previewModalBody iframe {
         width: 100%;
-        height: calc(100vh * 0.75); /* 75vh for A4-like height */
-        min-height: 500px;
+        height: 100%;
+        min-height: calc(100vh - 60px);
         border: none;
         border-radius: 0;
         background: #ffffff;
     }
     
-    /* Image preview - centered with A4-like constraints */
+    /* Image preview - centered with full height constraints */
     #previewModalBody img {
         max-width: 100%;
-        max-height: calc(100vh * 0.75);
+        max-height: 100%;
         height: auto;
         border-radius: 0.25rem;
         box-shadow: 0 4px 8px rgba(0,0,0,0.15);
@@ -864,6 +887,10 @@
                         <label class="meta-label">ISBN</label><span class="meta-value">{{ $publication->isbn }}</span>
                         @endif
                         
+                        @if(!empty($publication->publisher))
+                        <label class="meta-label">Publisher</label><span class="meta-value">{{ $publication->publisher }}</span>
+                        @endif
+                        
                         @if($publication->license)
                         <label class="meta-label">License</label>
                         <span class="meta-value">
@@ -973,22 +1000,24 @@
 @include('common.ai-summary')
 <!-- Modal for preview - Bootstrap 4 compatible -->
 <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document" style="max-width: 90%;">
+  <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 100vw; width: 100vw; margin: 0; padding: 0;">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="previewModalLabel">
-          <i class="fa fa-file-pdf mr-2"></i>Attachment Preview
-        </h5>
-        <div class="header-actions">
+        <div class="header-left">
           <button type="button" class="btn-fullscreen" id="toggleFullscreen" title="Toggle Fullscreen">
             <i class="fa fa-expand" id="fullscreenIcon"></i>
           </button>
+          <h5 class="modal-title" id="previewModalLabel">
+            <i class="fa fa-file-pdf mr-2"></i>Attachment Preview
+          </h5>
+        </div>
+        <div class="header-actions">
           <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; opacity: 0.9; cursor: pointer; padding: 0.5rem; color: white;">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
       </div>
-      <div class="modal-body" id="previewModalBody" style="padding: 0; min-height: 500px;">
+      <div class="modal-body" id="previewModalBody" style="padding: 0; min-height: calc(100vh - 60px); height: calc(100vh - 60px);">
         <div class="text-center w-100" style="padding: 3rem;">
           <div class="spinner-border text-primary" role="status">
             <span class="visually-hidden">Loading preview...</span>
@@ -1049,12 +1078,12 @@ window.previewAttachmentClick = function(event, button) {
         // Generate content based on file type
         var content = '';
         if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
-            content = '<div style="text-align:center;padding:2rem;"><img src="'+fileUrl+'" class="img-fluid" style="max-height:calc(100vh * 0.75);max-width:100%;margin:auto;display:block;" onerror="this.parentElement.innerHTML=\'<div class=\\\'alert alert-warning\\\' style=\\\'margin:2rem;\\\'>Failed to load image. <a href=\\\''+fileUrl+'\\\' target=\\\'_blank\\\'>Download file</a></div>\';"></div>';
+            content = '<div style="text-align:center;padding:2rem;"><img src="'+fileUrl+'" class="img-fluid" style="max-height:calc(100vh - 120px);max-width:100%;margin:auto;display:block;" onerror="this.parentElement.innerHTML=\'<div class=\\\'alert alert-warning\\\' style=\\\'margin:2rem;\\\'>Failed to load image. <a href=\\\''+fileUrl+'\\\' target=\\\'_blank\\\'>Download file</a></div>\';"></div>';
         } else if(ext === 'pdf') {
-            content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:calc(100vh * 0.75);min-height:500px;border:none;background:#ffffff;"></iframe>';
+            content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:100%;min-height:calc(100vh - 60px);border:none;background:#ffffff;"></iframe>';
         } else if(isOffice) {
             var gdocs = 'https://docs.google.com/viewer?url='+encodeURIComponent(fileUrl)+'&embedded=true';
-            content = '<iframe src="'+gdocs+'" style="width:100%;height:calc(100vh * 0.75);min-height:500px;border:none;background:#ffffff;"></iframe>';
+            content = '<iframe src="'+gdocs+'" style="width:100%;height:100%;min-height:calc(100vh - 60px);border:none;background:#ffffff;"></iframe>';
         } else {
             content = '<div class="alert alert-info" style="margin:2rem;text-align:center;"><i class="fa fa-info-circle mr-2"></i>Preview not available for this file type.<br><a href="'+fileUrl+'" target="_blank" class="btn btn-primary btn-sm mt-2"><i class="fa fa-download mr-1"></i>Download File</a></div>';
         }
@@ -1085,12 +1114,12 @@ window.previewAttachmentClick = function(event, button) {
             if (modalBody) {
                 var content = '';
                 if(['jpg','jpeg','png','gif','webp'].includes(ext)) {
-                    content = '<div style="text-align:center;padding:2rem;"><img src="'+fileUrl+'" class="img-fluid" style="max-height:calc(100vh * 0.75);max-width:100%;margin:auto;display:block;"></div>';
+                    content = '<div style="text-align:center;padding:2rem;"><img src="'+fileUrl+'" class="img-fluid" style="max-height:calc(100vh - 120px);max-width:100%;margin:auto;display:block;"></div>';
                 } else if(ext === 'pdf') {
-                    content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:calc(100vh * 0.75);min-height:500px;border:none;background:#ffffff;"></iframe>';
+                    content = '<iframe src="'+fileUrl+'#toolbar=1&navpanes=0&scrollbar=1" style="width:100%;height:100%;min-height:calc(100vh - 60px);border:none;background:#ffffff;"></iframe>';
                 } else if(isOffice) {
                     var gdocs = 'https://docs.google.com/viewer?url='+encodeURIComponent(fileUrl)+'&embedded=true';
-                    content = '<iframe src="'+gdocs+'" style="width:100%;height:calc(100vh * 0.75);min-height:500px;border:none;background:#ffffff;"></iframe>';
+                    content = '<iframe src="'+gdocs+'" style="width:100%;height:100%;min-height:calc(100vh - 60px);border:none;background:#ffffff;"></iframe>';
                 } else {
                     content = '<div class="alert alert-info" style="margin:2rem;text-align:center;"><i class="fa fa-info-circle mr-2"></i>Preview not available for this file type.<br><a href="'+fileUrl+'" target="_blank" class="btn btn-primary btn-sm mt-2"><i class="fa fa-download mr-1"></i>Download File</a></div>';
                 }

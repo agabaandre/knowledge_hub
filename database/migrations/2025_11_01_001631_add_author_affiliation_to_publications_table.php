@@ -13,8 +13,8 @@ class AddAuthorAffiliationToPublicationsTable extends Migration
      */
     public function up()
     {
-        Schema::table('publications', function (Blueprint $table) {
-            if (!Schema::hasColumn('publications', 'author_affiliation')) {
+        Schema::table('publication', function (Blueprint $table) {
+            if (!Schema::hasColumn('publication', 'author_affiliation')) {
                 $table->string('author_affiliation', 500)->nullable()->after('associated_authors');
             }
         });
@@ -27,8 +27,8 @@ class AddAuthorAffiliationToPublicationsTable extends Migration
      */
     public function down()
     {
-        Schema::table('publications', function (Blueprint $table) {
-            if (Schema::hasColumn('publications', 'author_affiliation')) {
+        Schema::table('publication', function (Blueprint $table) {
+            if (Schema::hasColumn('publication', 'author_affiliation')) {
                 $table->dropColumn('author_affiliation');
             }
         });

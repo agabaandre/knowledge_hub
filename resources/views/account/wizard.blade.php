@@ -274,6 +274,9 @@
                         'allfield' => 'Select Corporate Source or Member State',
                             ])
                 </div>
+            @else
+                {{-- Hidden field for non-admin users - Parsley will ignore it --}}
+                <input type="hidden" name="author" value="" data-parsley-excluded="true">
             @endif
             </div>
         </div>
@@ -359,8 +362,8 @@
                         <span class="sr-only">Loading...</span>
                     </div>
                     <div>
-                        <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description...</strong>
-                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description from your uploaded document.</p>
+                        <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description and extracting metadata...</strong>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation from your uploaded document.</p>
                     </div>
                 </div>
             </div>
@@ -490,6 +493,14 @@
                         @endif
                         Format: 978-0-xxxxx-xxx-x
                     </small>
+                </div>
+                
+                <div class="col-md-4 mb-2">
+                    <label class="form-label" for="publisher">Publisher</label>
+                    <input type="text" class="form-control" name="publisher" id="publisher" 
+                           placeholder="Publisher name" 
+                           value="{{ @$row->publisher ?? old('publisher') }}">
+                    <small class="text-muted">Optional - Name of the publisher or publishing organization</small>
                 </div>
                 
                 <div class="col-md-6 mb-2">
@@ -773,6 +784,8 @@
                     $('#ai-description-loader').slideUp(300);
                     
                     if(!resp || !resp.content) return;
+                    
+                    // Update description
                     if (!$('#summernote').next('.note-editor').length && typeof $.fn.summernote === 'function') {
                         $('#summernote').summernote({ height: 300 });
                     }
@@ -781,6 +794,29 @@
                         $('#summernote').summernote('code', resp.content);
                     } else if (confirm('Replace existing description with AI-extracted summary?')) {
                         $('#summernote').summernote('code', resp.content);
+                    }
+                    
+                    // Update metadata fields if available
+                    if (resp.metadata) {
+                        // Update Associated Authors
+                        if (resp.metadata.authors && resp.metadata.authors.trim() !== '') {
+                            var currentAuthors = $('#associated_authors').val();
+                            if (!currentAuthors || currentAuthors.trim().length === 0) {
+                                $('#associated_authors').val(resp.metadata.authors.trim());
+                            } else if (confirm('Replace existing authors with AI-extracted authors?')) {
+                                $('#associated_authors').val(resp.metadata.authors.trim());
+                            }
+                        }
+                        
+                        // Update Author Affiliation/Institution
+                        if (resp.metadata.affiliation && resp.metadata.affiliation.trim() !== '') {
+                            var currentAffiliation = $('#author_affiliation').val();
+                            if (!currentAffiliation || currentAffiliation.trim().length === 0) {
+                                $('#author_affiliation').val(resp.metadata.affiliation.trim());
+                            } else if (confirm('Replace existing affiliation with AI-extracted affiliation?')) {
+                                $('#author_affiliation').val(resp.metadata.affiliation.trim());
+                            }
+                        }
                     }
                 },
                 error: function(xhr, status, error){
@@ -958,7 +994,20 @@
 
 
     $(function() {
-        $('#publication_form').parsley().on('field:validated', function() {
+        // Initialize Parsley with configuration to exclude hidden fields
+        var parsleyInstance = $('#publication_form').parsley({
+            excluded: 'input[type=hidden], input[data-parsley-excluded="true"]'
+        });
+        
+        // For non-admin users, ensure author field is excluded from Parsley validation
+        @if(!is_admin())
+            parsleyInstance.removeItem('input[name="author"]');
+            // Also remove required attribute if it exists
+            $('select[name="author"]').removeAttr('required');
+            $('select[name="author"]').removeAttr('data-parsley-required');
+        @endif
+        
+        parsleyInstance.on('field:validated', function() {
 
                 var ok = $('.parsley-error').length === 0;
                 $('.bs-callout-info').toggleClass('hidden', !ok);

@@ -169,6 +169,12 @@
                                     <span class="value">{{ $publication->isbn }}</span>
                                 </li>
                                 @endif
+                                @if(!empty($publication->publisher))
+                                <li>
+                                    <label class="meta-label">Publisher</label>
+                                    <span class="value">{{ $publication->publisher }}</span>
+                                </li>
+                                @endif
                                 @if(!empty($publication->year_published))
                                 <li>
                                     <label class="meta-label">Year Published</label>

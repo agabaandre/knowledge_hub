@@ -231,6 +231,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->doi                       = clean_unicode($request->doi ?? null);
         $pub->issn                      = clean_unicode($request->issn ?? null);
         $pub->isbn                      = clean_unicode($request->isbn ?? null);
+        $pub->publisher                 = clean_unicode($request->publisher ?? null);
         $pub->license_id                = $request->license_id ?? null;
         $pub->copyright_info            = clean_unicode($request->copyright_info ?? null);
         $pub->funder                    = clean_unicode($request->funder ?? null);

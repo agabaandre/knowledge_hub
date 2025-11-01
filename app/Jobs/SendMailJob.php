@@ -9,16 +9,10 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use App\Models\User;
+
 class SendMailJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    /**
-     * The name of the queue the job should be sent to.
-     *
-     * @var string|null
-     */
-    public $queue = 'default';
     
     /**
      * Create a new job instance.
@@ -26,10 +20,12 @@ class SendMailJob implements ShouldQueue
      * @return void
      */
     private $data;
+    
     public function __construct($data)
     {
-        //
         $this->data = $data;
+        // Set queue to 'default' via the trait's method
+        $this->onQueue('default');
     }
 
     /**
@@ -39,8 +35,6 @@ class SendMailJob implements ShouldQueue
      */
     public function handle()
     {
-        //
-
         $request = (Object) $this->data;
         send_email($request);
 

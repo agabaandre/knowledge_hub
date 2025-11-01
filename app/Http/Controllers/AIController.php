@@ -54,7 +54,8 @@ class AIController extends Controller
         } catch (\Exception $e) {
             \Log::error("Error in summariseFile: " . $e->getMessage());
             return response()->json([
-                'content' => '<div class="alert alert-danger">Error extracting summary: ' . $e->getMessage() . '</div>'
+                'content' => '<div class="alert alert-danger">Error extracting summary: ' . $e->getMessage() . '</div>',
+                'metadata' => ['authors' => '', 'affiliation' => '']
             ], 500);
         }
     }

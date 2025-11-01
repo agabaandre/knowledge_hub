@@ -170,6 +170,13 @@ class AccountController extends Controller
             ];
         }
 
+        // Check if user is admin using the same logic as the view (role name contains 'admin')
+        $isAdmin = false;
+        if (auth()->check()) {
+            $role = \get_role(auth()->user()->id);
+            $isAdmin = ($role && strpos(strtolower($role->name), 'admin') !== false);
+        }
+
         $val_rules = [
             'title' => ($requiredFields['title'] ?? true) ? 'required|string|max:500' : 'nullable|string|max:500',
             'description' => ($requiredFields['description'] ?? true) ? 'required|string|min:' . $minChars : 'nullable|string|min:' . $minChars,
@@ -181,7 +188,9 @@ class AccountController extends Controller
             'sub_theme' => ($requiredFields['sub_theme'] ?? true) ? 'required' : 'nullable',
             'data_category_id' => ($requiredFields['data_category_id'] ?? true) ? 'required' : 'nullable',
             'year_published' => ($requiredFields['year_published'] ?? false) ? 'required|integer|min:1900|max:' . date('Y') : 'nullable|integer|min:1900|max:' . date('Y'),
-            'author' => ($requiredFields['author'] ?? false) ? 'required' : 'nullable',
+            // Author field: only required for admins OR if explicitly set in requiredFields
+            // For non-admin users, author_id is automatically set from user's author_id
+            'author' => ($isAdmin && ($requiredFields['author'] ?? false)) ? 'required' : 'nullable',
             'doi' => ($requiredFields['doi'] ?? false) ? 'required|string|max:255' : 'nullable|string|max:255',
             'issn' => ($requiredFields['issn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
             'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
@@ -218,6 +227,20 @@ class AccountController extends Controller
             'countries.array' => 'Please select at least one member state.',
             'countries.min' => 'Please select at least one member state.',
         ];
+
+        // For non-admin users, ensure they have an author_id set
+        if (!is_admin() && !auth()->user()->author_id) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'status' => 'error',
+                    'message' => 'Your account is not associated with an author. Please contact the administrator to link your account to an author.',
+                    'alert_class' => 'danger'
+                ], 422);
+            }
+            return back()->withErrors([
+                'author' => 'Your account is not associated with an author. Please contact the administrator to link your account to an author.'
+            ])->withInput();
+        }
 
         // For link type, require URL
         if($request->upload_type == 'link'):
