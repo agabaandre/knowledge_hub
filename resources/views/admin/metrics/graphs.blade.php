@@ -39,7 +39,7 @@
                        </div>
 
                        <div id="chart-container" class="row" style="margin-left:-6px;margin-right:-6px;"></div>
-
+    
                     </div>
                 </div>
             </div>
@@ -231,7 +231,7 @@
         // Currently acts as a no-op visual trigger; hook backend as needed
         // You can extend: fetch metrics with fromDate/toDate/country and rerender charts here
         alert('Filters applied (placeholder). Backend can be wired to return filtered metrics.');
-   });
+    });
 
   </script>
 <style>

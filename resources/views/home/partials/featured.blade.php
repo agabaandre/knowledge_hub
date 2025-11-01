@@ -61,7 +61,7 @@
                                   <div class="cats-box-caption" style="flex: 1;">
                                        <h4 class="fs-md mb-0 ft-medium text-truncate"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
-                                               title="{!! $row->title !!}">{!! truncate($row->title, 40) !!}</a></h4>
+                                               title="{!! clean_unicode($row->title) !!}">{!! truncate(clean_unicode($row->title), 40) !!}</a></h4>
                                        <div class="d-block mb-2 position-relative">
                                            <span class="text-muted medium text-truncate">
                                                Source: <i
@@ -69,17 +69,17 @@
 
                                            <span class="muted medium ml-2 theme-cl"><br>
                                                <i class="lni lni-briefcase mr-1"></i>Theme:
-                                               {!! truncate($row->theme->description ?? '', 40) !!}</span>
+                                               {!! truncate(clean_unicode($row->theme->description ?? ''), 40) !!}</span>
                                            <span class="muted medium ml-2 theme-cl"><br>
                                                <i class="lni lni-archive mr-1"></i>Sub Theme:
-                                               {!! $row->sub_theme->description ?? '' !!}</span>
+                                               {!! clean_unicode($row->sub_theme->description ?? '') !!}</span>
 
                                            <span class="muted medium ml-2 text-muted mt-1 "><br>
                                                <i class="lni lni-empty-file mr-1"></i>Category:
-                                               {{ @$row->data_category->category_name }}</span>
+                                               {{ clean_unicode(@$row->data_category->category_name) }}</span>
                                            @if(!empty($row->associated_authors))
                                            <span class="muted medium ml-2 theme-cl"><br>
-                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 40) }}</span>
+                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate(clean_unicode($row->associated_authors), 30) }}</span>
                                            @endif
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>

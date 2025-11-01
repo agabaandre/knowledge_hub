@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Laravel\Scout\Searchable;
+use Illuminate\Support\Facades\DB;
 
 class Publication extends Model
 {
@@ -57,7 +58,7 @@ class Publication extends Model
 
 
     public function tags(){
-        return $this->hasMany(PublicationTag::class);
+        return $this->hasMany(PublicationTag::class, 'publication_id', 'id');
     }
 
     public function author(){
@@ -165,9 +166,26 @@ class Publication extends Model
 
 
     public function getTagIdsAttribute(){
-        $tag_ids = PublicationTag::where('publication_id',$this->id)
-        ->get()->pluck('id');
-        return $tag_ids->toArray();
+        try {
+            $tagIds = DB::table('publication_tags')
+                ->where('publication_id', $this->id)
+                ->pluck('tag_id')
+                ->toArray();
+            
+            // Log for debugging
+            \Log::debug('Tag IDs accessor called', [
+                'publication_id' => $this->id,
+                'tag_ids_count' => count($tagIds),
+                'tag_ids' => $tagIds
+            ]);
+            
+            return $tagIds;
+        } catch (\Exception $e) {
+            \Log::error('Error getting tag_ids: ' . $e->getMessage(), [
+                'publication_id' => $this->id
+            ]);
+            return [];
+        }
     }
 
     public function country()
@@ -180,7 +198,18 @@ class Publication extends Model
     }
 
     public function getCoverAttribute($value){
-        return ($this->cover_is_exteranl)?$value:storage_link('uploads/publications/'.$value);
+        // Return null if value is empty or null
+        if (empty($value) || $value === null) {
+            return null;
+        }
+        
+        // If external URL, return as is
+        if ($this->cover_is_exteranl) {
+            return $value;
+        }
+        
+        // Local file - use storage_link helper
+        return storage_link('uploads/publications/'.$value);
     }
 
     public function getPublicationAttribute($value)
@@ -209,15 +238,28 @@ class Publication extends Model
     }
 
     public function getCountryIdsAttribute(){
-        return $this->countries()->pluck('country_id')->toArray();
+        return DB::table('publication_countries')
+            ->where('publication_id', $this->id)
+            ->pluck('country_id')
+            ->toArray();
     }
 
     public function getPublicationRegionsAttribute(){
-        return Region::whereIn('id',$this->countries()->pluck('region_id')->toArray())->pluck('region_name')->implode(', ');
+        $countryIds = $this->getCountryIdsAttribute();
+        if (empty($countryIds)) {
+            return '';
+        }
+        $regionIds = Country::whereIn('id', $countryIds)->distinct()->pluck('region_id')->filter()->toArray();
+        return Region::whereIn('id', $regionIds)->pluck('region_name')->implode(', ');
     }
 
     public function getRegionIdsAttribute(){
-        return Region::whereIn('id',$this->countries()->pluck('country_id')->toArray())->pluck('id')->toArray();
+        $countryIds = $this->getCountryIdsAttribute();
+        if (empty($countryIds)) {
+            return [];
+        }
+        $regionIds = Country::whereIn('id', $countryIds)->distinct()->pluck('region_id')->filter()->toArray();
+        return array_values($regionIds);
     }
 
     public function scopeSearchTerm($query, $term)

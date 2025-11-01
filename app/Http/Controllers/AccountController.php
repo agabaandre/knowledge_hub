@@ -95,11 +95,19 @@ class AccountController extends Controller
                 if (($row->is_rejected ?? 0) == 1 && !empty($row->rejected_reason)) {
                     $desc .= '<div class="mt-2 p-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;"><small class="text-danger"><strong>Rejection reason:</strong> '.e($row->rejected_reason).'</small></div>';
                 }
+                
+                // Build actions - only show edit/delete if not approved
+                $isApproved = ($row->is_approved ?? 0) == 1;
                 $actions = '<div class="btn-group btn-group-sm" role="group" aria-label="Actions">'
-                    .'<button type="button" class="btn btn-outline-secondary preview-attachment" data-file-url="'.url('records/resource').'?id='.$row->id.'" data-file-ext="html" data-file-office="0"><i class="fa fa-eye"></i> Preview</button>'
-                    .'<a href="'.route('account.publications.edit').'?ref='.$row->id.'" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>'
-                    .'<a href="javascript:void(0);" onclick="openDeleteModal('.$row->id.')" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>'
-                    .'</div>';
+                    .'<a href="'.url('records/resource').'?id='.$row->id.'" class="btn btn-outline-secondary" target="_blank"><i class="fa fa-eye"></i> Preview</a>';
+                
+                // Only show edit and delete buttons if publication is not approved
+                if (!$isApproved) {
+                    $actions .= '<a href="'.route('account.publications.edit').'?ref='.$row->id.'" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>'
+                        .'<a href="javascript:void(0);" onclick="openDeleteModal('.$row->id.')" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>';
+                }
+                
+                $actions .= '</div>';
 
                 $data[] = [
                     $index++,
@@ -242,10 +250,10 @@ class AccountController extends Controller
 
         $data['alert_class'] = ($saved)?'success':'danger';
         $data['message']     = $data['alert'] = $message;
-        $data['status']      = 200;
+        $data['status']      = ($saved)?'success':'error';
 
         if($request->ajax())
-           return response($data);
+           return response()->json($data, $saved ? 200 : 400);
 
         return redirect()->route('account.publications')->with($data);
 

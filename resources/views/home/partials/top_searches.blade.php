@@ -80,7 +80,7 @@
                                                {{ @$row->data_category->category_name }}</span>
                                            @if(!empty($row->associated_authors))
                                            <span class="muted medium ml-2 theme-cl"><br>
-                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 40) }}</span>
+                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 30) }}</span>
                                            @endif
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>

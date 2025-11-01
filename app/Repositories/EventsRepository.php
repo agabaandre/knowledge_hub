@@ -23,6 +23,13 @@ class EventsRepository
         $tags = $data['tags'] ?? [];
         unset($data['tags']);
 
+        // Clean Unicode characters from text fields before saving
+        $data['title'] = clean_unicode($data['title'] ?? '');
+        $data['description'] = clean_unicode($data['description'] ?? '');
+        $data['venue'] = clean_unicode($data['venue'] ?? '');
+        $data['organized_by'] = clean_unicode($data['organized_by'] ?? '');
+        $data['contact_person'] = clean_unicode($data['contact_person'] ?? '');
+
         $event = Event::create($data);
 
         // Save tags if provided
@@ -38,6 +45,23 @@ class EventsRepository
         // Extract tags if present
         $tags = $data['tags'] ?? null;
         unset($data['tags']);
+
+        // Clean Unicode characters from text fields before updating
+        if (isset($data['title'])) {
+            $data['title'] = clean_unicode($data['title']);
+        }
+        if (isset($data['description'])) {
+            $data['description'] = clean_unicode($data['description']);
+        }
+        if (isset($data['venue'])) {
+            $data['venue'] = clean_unicode($data['venue']);
+        }
+        if (isset($data['organized_by'])) {
+            $data['organized_by'] = clean_unicode($data['organized_by']);
+        }
+        if (isset($data['contact_person'])) {
+            $data['contact_person'] = clean_unicode($data['contact_person']);
+        }
 
         $updated = $event->update($data);
 

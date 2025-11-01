@@ -21,7 +21,7 @@ $totalTopics = $groupedTags->flatten()->count();
                         <span class="stat-number">{{ $totalTopics }}</span>
                         <span class="stat-label">Topics</span>
                     </div>
-                </div>
+            </div>
         </div>
     </div>
 

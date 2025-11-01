@@ -10,7 +10,7 @@
 
     <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
-            <div class="row">
+            <div class="row" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
                  @php
                      // Get raw cover value before accessor processes it
                      $raw_cover = $row->getRawOriginal('cover');
@@ -38,32 +38,32 @@
                          ? $image_link 
                          : $default_image;
                  @endphp
-                 <div class="col-md-2" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9;">
+                 <div class="col-md-3" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9; width: 30%; flex: 0 0 30%; max-width: 30%; padding-right: 0;">
                      <img src="{{ $final_image }}" 
-                          alt="{{ $row->title }}" 
+                          alt="{{ clean_unicode($row->title) }}" 
                           style="width: 100%; height: 100%; min-height: 150px; object-fit: cover;"
                           onerror="this.onerror=null; this.src='{{ $default_image }}';">
                  </div>
-                 <div class="col-md-10">
+                 <div class="col-md-9" style="width: 70%; flex: 1 1 70%; max-width: 70%; padding-left: 1rem;">
                      <h5 class="text-bold text-lg">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
-                             {!! truncate($row->title, 500) !!}</a>
+                             {!! truncate(clean_unicode($row->title), 500) !!}</a>
                      </h5>
                      <p class="text-nothern p-0 pt-2">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
-                             {!! truncate($row->description, 300) !!}
+                             {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 15, '...') !!}
                          </a>
                      </p>
                      <a href="{{ $row->publication }}" class="text-blue"
-                         target="_blank"><small>{{ truncate($row->publication, 100) }}</small></a>
+                         target="_blank"><small>{{ truncate(clean_unicode($row->publication), 100) }}</small></a>
 
                      <span class="muted medium ml-2 theme-cl"><br>
-                         <i class="lni lni-briefcase mr-1"></i>Theme: {!! $row->theme->description ?? '' !!}</span>
+                         <i class="lni lni-briefcase mr-1"></i>Theme: {!! clean_unicode($row->theme->description ?? '') !!}</span>
                      <span class="muted medium ml-1 theme-cl"><br>
-                         <i class="lni lni-archive mr-1"></i>Sub Theme: {!! $row->sub_theme->description ?? '' !!}</span>
+                         <i class="lni lni-archive mr-1"></i>Sub Theme: {!! clean_unicode($row->sub_theme->description ?? '') !!}</span>
                      @if(!empty($row->associated_authors))
                      <span class="muted medium ml-1 theme-cl"><br>
-                         <i class="fa fa-users mr-1"></i>Associated Authors: {{ $row->associated_authors }}</span>
+                         <i class="fa fa-users mr-1"></i>Associated Authors: {{ clean_unicode($row->associated_authors) }}</span>
                      @endif
                      @if ($likes > 0)
                          <span><i class="lni lni-heart mr-1"></i> {{ $likes }} Like{{ $likes > 1 ? 's' : '' }}

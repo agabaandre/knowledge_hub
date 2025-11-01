@@ -139,14 +139,15 @@ $(function() {
     };
 
     $('#attachments').on('change', async function() {
-        imagesPreview(this, 'div.preview');
+        // Skip imagesPreview for attachments - custom preview is handled in wizard.blade.php
+        // imagesPreview(this, 'div.preview'); // Disabled - using custom preview instead
         
-        // Check if any PDF files were uploaded and extract cover
+        // Check if any PDF files were uploaded and extract cover silently
         if (this.files && this.files.length > 0) {
             for (let i = 0; i < this.files.length; i++) {
                 const file = this.files[i];
                 if (file.type === 'application/pdf') {
-                    // Extract cover from PDF
+                    // Extract cover from PDF silently
                     const coverFile = await extractPDFCover(file);
                     if (coverFile && $('#cover').length > 0) {
                         // Check if cover field is empty
@@ -156,21 +157,9 @@ $(function() {
                             dataTransfer.items.add(coverFile);
                             $('#cover')[0].files = dataTransfer.files;
                             
-                            // Trigger change event on cover field to update preview
+                            // Trigger change event on cover field to update preview silently
                             $('#cover').trigger('change');
-                            
-                            // Show notification
-                            if (typeof Swal !== 'undefined') {
-                                Swal.fire({
-                                    icon: 'success',
-                                    title: 'Cover Image Extracted',
-                                    text: 'Cover image has been automatically extracted from the PDF.',
-                                    timer: 3000,
-                                    showConfirmButton: false
-                                });
-                            } else {
-                                alert('Cover image has been automatically extracted from the PDF.');
-                            }
+                            // No alert - extraction happens silently
                         }
                         break; // Only extract from first PDF
                     }
@@ -183,7 +172,7 @@ $(function() {
         if (this.files && this.files.length > 0) {
             const file = this.files[0];
             
-            // If PDF is directly uploaded to cover field, extract first page
+            // If PDF is directly uploaded to cover field, extract first page silently
             if (file.type === 'application/pdf') {
                 const coverFile = await extractPDFCover(file);
                 if (coverFile) {
@@ -191,17 +180,7 @@ $(function() {
                     const dataTransfer = new DataTransfer();
                     dataTransfer.items.add(coverFile);
                     this.files = dataTransfer.files;
-                    
-                    // Show notification
-                    if (typeof Swal !== 'undefined') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'Cover Extracted',
-                            text: 'First page of PDF has been extracted as cover image.',
-                            timer: 3000,
-                            showConfirmButton: false
-                        });
-                    }
+                    // No alert - extraction happens silently
                 }
             }
         }

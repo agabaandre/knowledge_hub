@@ -25,9 +25,83 @@ class PublicationsController extends Controller
         if(!$data['publication'])
             abort(404);
         
-        $request->merge(['thematic_area_id' => $data['publication']->thematic_area_id]);
-        // Get related publications with the same thematic_area_id
-        $data['related_publications'] = $this->publicationsRepo->get($request);
+        // Get related publications - prioritize by tags, then themes/sub-themes
+        $tagIds = $data['publication']->tag_ids ?? [];
+        $thematicAreaId = $data['publication']->thematic_area_id ?? null;
+        $subThematicAreaId = $data['publication']->sub_thematic_area_id ?? null;
+        
+        $relatedPubs = collect();
+        
+        // Priority 1: Publications with matching tags (up to 10)
+        if (!empty($tagIds)) {
+            $taggedPubsQuery = \App\Models\Publication::where('is_version', 0)
+                ->where('is_active', 'Active')
+                ->where('is_approved', 1)
+                ->where('id', '!=', $data['publication']->id)
+                ->whereHas('tags', function($q) use ($tagIds) {
+                    $q->whereIn('tag_id', $tagIds);
+                })
+                ->with(['author', 'tags.tag']);
+            
+            // Apply access control for non-admin users
+            if (!is_admin()) {
+                $taggedPubsQuery->where('is_admin_only_access', 0);
+            }
+            
+            $taggedPubs = $taggedPubsQuery->inRandomOrder()->take(10)->get();
+            $relatedPubs = $relatedPubs->merge($taggedPubs);
+        }
+        
+        // Priority 2: If we don't have enough, add publications with same thematic area
+        if ($relatedPubs->count() < 10 && $thematicAreaId) {
+            $needed = 10 - $relatedPubs->count();
+            $existingIds = $relatedPubs->pluck('id')->toArray();
+            $existingIds[] = $data['publication']->id;
+            
+            $thematicPubsQuery = \App\Models\Publication::where('is_version', 0)
+                ->where('is_active', 'Active')
+                ->where('is_approved', 1)
+                ->where('id', '!=', $data['publication']->id)
+                ->whereNotIn('id', $existingIds)
+                ->whereHas('sub_theme', function($q) use ($thematicAreaId) {
+                    $q->where('thematic_area_id', $thematicAreaId);
+                })
+                ->with(['author', 'tags.tag', 'sub_theme']);
+            
+            // Apply access control for non-admin users
+            if (!is_admin()) {
+                $thematicPubsQuery->where('is_admin_only_access', 0);
+            }
+            
+            $thematicPubs = $thematicPubsQuery->inRandomOrder()->take($needed)->get();
+            $relatedPubs = $relatedPubs->merge($thematicPubs);
+        }
+        
+        // Priority 3: If we still don't have enough, add publications with same sub-theme
+        if ($relatedPubs->count() < 10 && $subThematicAreaId) {
+            $needed = 10 - $relatedPubs->count();
+            $existingIds = $relatedPubs->pluck('id')->toArray();
+            $existingIds[] = $data['publication']->id;
+            
+            $subthemePubsQuery = \App\Models\Publication::where('is_version', 0)
+                ->where('is_active', 'Active')
+                ->where('is_approved', 1)
+                ->where('id', '!=', $data['publication']->id)
+                ->whereNotIn('id', $existingIds)
+                ->where('sub_thematic_area_id', $subThematicAreaId)
+                ->with(['author', 'tags.tag', 'sub_theme']);
+            
+            // Apply access control for non-admin users
+            if (!is_admin()) {
+                $subthemePubsQuery->where('is_admin_only_access', 0);
+            }
+            
+            $subthemePubs = $subthemePubsQuery->inRandomOrder()->take($needed)->get();
+            $relatedPubs = $relatedPubs->merge($subthemePubs);
+        }
+        
+        // Limit to 10 and remove duplicates
+        $data['related_publications'] = $relatedPubs->unique('id')->take(10);
       
         return view('publications.show',$data);
     }
@@ -72,6 +146,19 @@ class PublicationsController extends Controller
         $relatedRequest = clone $request;
         $relatedRequest->merge(['rows' => 5]);
         $data['relatedPublications'] = $this->publicationsRepo->get($relatedRequest);
+        
+        // Get popular tags for sidebar - tags that have approved publications
+        $tagIds = \DB::table('publication_tags')
+            ->join('publication', 'publication_tags.publication_id', '=', 'publication.id')
+            ->where('publication.is_active', 'Active')
+            ->where('publication.is_approved', 1)
+            ->distinct()
+            ->pluck('publication_tags.tag_id');
+        
+        $data['tags'] = \App\Models\Tag::whereIn('id', $tagIds)
+            ->orderBy('id', 'desc')
+            ->limit(20)
+            ->get();
 
         return view('publications.search',$data);
     }

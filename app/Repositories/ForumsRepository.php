@@ -72,8 +72,8 @@ class ForumsRepository extends SharedRepo{
     public function save(Request $request){
 
         $forum = new Forum();
-        $forum->forum_title = $request->title;
-        $forum->forum_description = $request->description;
+        $forum->forum_title = clean_unicode($request->title ?? '');
+        $forum->forum_description = clean_unicode($request->description ?? '');
         $forum->created_by = current_user()->id;
         $forum->status = 0;
 
@@ -137,7 +137,7 @@ class ForumsRepository extends SharedRepo{
 
         $comment->created_by = current_user()->id;
         $comment->forum_id = $request->id;
-        $comment->comment  = $request->comment;
+        $comment->comment  = clean_unicode($request->comment ?? '');
         $comment->parent_id = $request->parent_id ?? null;
         $comment->save();
 

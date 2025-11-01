@@ -80,9 +80,7 @@
                         $statusClass = $publication->is_approved ? 'badge-success' : ($publication->is_rejected ? 'badge-danger' : 'badge-secondary');
                     @endphp
                     <span class="badge {{ $statusClass }} mr-2">{{ $statusText }}</span>
-                    @if (!empty($publication->publication))
-                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm"><i class="fa fa-eye mr-1"></i>Visit Resource</a>
-                    @endif
+                    {{-- External link moved to Resources & Attachments card below --}}
                     @if ($publication->is_approved == 0)
                         <a href="#approval-modal" data-toggle="modal" class="btn btn-success btn-sm ml-2"><i class="fa fa-check-circle mr-1"></i>{{ $publication->is_rejected == 0 ? 'Approve' : 'Reconsider' }}</a>
                     @endif
@@ -100,20 +98,210 @@
     <!-- ============================ Publication Details Start ================================== -->
     <section class="py-5  bg-white">
         <div class="container">
+            <!-- Two Column Layout: Cover Image (Left) + Additional Info & Attachments (Right) -->
+            <div class="row mb-4">
+                <!-- Left Column: Cover Image -->
+                <div class="col-xl-4 col-lg-4 col-md-5 col-sm-12 mb-4">
+                    <div class="ap-card">
+                        <div class="ap-card-header">
+                            <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Cover Image</h5>
+                        </div>
+                        <div class="ap-card-body text-center">
+                            @if ($publication->is_video)
+                                <div class="ap-cover"><iframe width="100%" height="240" src="{{ $publication->publication }}" style="border-radius:8px;"></iframe></div>
+                            @else
+                                <div class="ap-cover" style="max-height:400px;overflow:hidden;">
+                                    <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Additional Info & Attachments -->
+                <div class="col-xl-8 col-lg-8 col-md-7 col-sm-12">
+                    <!-- Additional Information Card -->
+                    <div class="ap-card mb-3">
+                        <div class="ap-card-header">
+                            <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Additional Information</h5>
+                        </div>
+                        <div class="ap-card-body">
+                            <ul class="ap-list">
+                                <li>
+                                    <label class="meta-label">Source</label>
+                                    <span class="value">{{ $publication->author->name ?? 'N/A' }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Category</label>
+                                    <span class="value">{{ @$publication->data_category->category_name ?? 'N/A' }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Sub Category</label>
+                                    <span class="value">{{ $publication->sub_category->category_name ?? 'N/A' }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Theme</label>
+                                    <span class="value">{!! $publication->theme->description ?? 'N/A' !!}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Sub-Theme</label>
+                                    <span class="value">{!! $publication->sub_theme->description ?? 'N/A' !!}</span>
+                                </li>
+                                @if(!empty($publication->doi))
+                                <li>
+                                    <label class="meta-label">DOI</label>
+                                    <span class="value">
+                                        <a href="https://doi.org/{{ $publication->doi }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
+                                            {{ $publication->doi }} <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                        </a>
+                                    </span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->issn))
+                                <li>
+                                    <label class="meta-label">ISSN</label>
+                                    <span class="value">{{ $publication->issn }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->isbn))
+                                <li>
+                                    <label class="meta-label">ISBN</label>
+                                    <span class="value">{{ $publication->isbn }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->year_published))
+                                <li>
+                                    <label class="meta-label">Year Published</label>
+                                    <span class="value">{{ $publication->year_published }}</span>
+                                </li>
+                                @endif
+                                <li>
+                                    <label class="meta-label">Visits</label>
+                                    <span class="value">{{ $publication->visits }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Likes</label>
+                                    <span class="value">{{ count($publication->favourited ?? []) }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Comments</label>
+                                    <span class="value">{{ count($publication->comments) }}</span>
+                                </li>
+                                <li>
+                                    <label class="meta-label">Associated Authors</label>
+                                    <span class="value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                                </li>
+                                @if($publication->license)
+                                <li>
+                                    <label class="meta-label">License</label>
+                                    <span class="value">
+                                        @if($publication->license->url)
+                                            <a href="{{ $publication->license->url }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
+                                                {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                            </a>
+                                        @else
+                                            {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif
+                                        @endif
+                                    </span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->copyright_info))
+                                <li>
+                                    <label class="meta-label">Copyright Information</label>
+                                    <span class="value" style="white-space: pre-wrap;">{{ $publication->copyright_info }}</span>
+                                </li>
+                                @endif
+                                @if(!empty($publication->funder))
+                                <li>
+                                    <label class="meta-label">Funder</label>
+                                    <span class="value">{{ $publication->funder }}</span>
+                                </li>
+                                @endif
+                            </ul>
+                            
+                            {{-- Journal Information Section --}}
+                            @if(!empty($publication->journal_name) || !empty($publication->journal_volume) || !empty($publication->journal_issue) || !empty($publication->journal_pages))
+                            <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
+                                <h6 style="font-weight:600;color:#0f172a;margin-bottom:1rem;">Journal Information</h6>
+                                <ul class="ap-list">
+                                    @if(!empty($publication->journal_name))
+                                    <li>
+                                        <label class="meta-label">Journal Name</label>
+                                        <span class="value">{{ $publication->journal_name }}</span>
+                                    </li>
+                                    @endif
+                                    @if(!empty($publication->journal_volume))
+                                    <li>
+                                        <label class="meta-label">Volume</label>
+                                        <span class="value">{{ $publication->journal_volume }}</span>
+                                    </li>
+                                    @endif
+                                    @if(!empty($publication->journal_issue))
+                                    <li>
+                                        <label class="meta-label">Issue</label>
+                                        <span class="value">{{ $publication->journal_issue }}</span>
+                                    </li>
+                                    @endif
+                                    @if(!empty($publication->journal_pages))
+                                    <li>
+                                        <label class="meta-label">Pages</label>
+                                        <span class="value">{{ $publication->journal_pages }}</span>
+                                    </li>
+                                    @endif
+                                </ul>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resources & Attachments Card - Full Width -->
+            @if (!empty($publication->publication) || $publication->has_attachments)
+            <div class="row mb-4">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
+                    <div class="ap-card">
+                        <div class="ap-card-header">
+                            <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Resources & Attachments</h5>
+                        </div>
+                        <div class="ap-card-body">
+                            <ul class="ap-list">
+                                @if (!empty($publication->publication))
+                                <li>
+                                    <a href="{{ $publication->publication }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none; font-weight: 500;">
+                                        <i class="fa fa-external-link-alt mr-2"></i>
+                                        External Resource Link
+                                        <small class="text-muted d-block mt-1" style="font-weight: normal; color: #64748b;">{{ $publication->publication }}</small>
+                                    </a>
+                                </li>
+                                @endif
+                                
+                                @if ($publication->has_attachments)
+                                    @php
+                                        $count = 1;
+                                    @endphp
+                                    @foreach ($publication->attachments as $pub_file)
+                                        <li>
+                                            <a href="{{ $pub_file->file }}" target="_blank" style="color: #119A48; text-decoration: none; font-weight: 500;">
+                                                <i class="fa fa-download mr-2"></i>
+                                                {{ $pub_file->description ?? 'Attachment ' . $count }}
+                                            </a>
+                                        </li>
+                                        @php
+                                            $count++;
+                                        @endphp
+                                    @endforeach
+                                @endif
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+            <!-- Main Content: Description and Comments -->
             <div class="row">
-
-                @php
-
-                    $col =
-                        count($publication->summaries) > 0 ||
-                        $publication->has_attachments ||
-                        $publication->parent_id > 0
-                            ? '7'
-                            : '12';
-
-                @endphp
-
-                <div class="col-xl-{{ $col }} col-lg-{{ $col }} col-md-{{ $col }} col-sm-12">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                     <div class="rounded mb-4">
                         <div class="jbd-01 pr-3">
 
@@ -127,26 +315,6 @@
                         </div>
 
                         <div class="article_detail_wrapss single_article_wrap format-standard">
-
-
-                            @if ($publication->has_attachments)
-                                @php
-                                    $count = 1;
-                                @endphp
-                                <h5>Attachments</h5>
-                                <ul class="list-group mb-3">
-                                    @foreach ($publication->attachments as $pub_file)
-                                        <li class="list-group-item"><a
-                                                href="{{ $pub_file->file }}"
-                                                target="_blank" class="fs-sm ft-medium"><i class="fa fa-download"></i>
-                                                {{ $pub_file->description ?? 'View Attachment ' . $count }}</a></li>
-                                        @php
-                                            $count++;
-                                        @endphp
-                                    @endforeach
-
-                                </ul>
-                            @endif
 
                             @if (count($publication->summaries) > 0 || count($publication->versioning) > 0 || $publication->parent_id > 0)
                                 <div class="jb-apply-form bg-white shadow rounded py-3 px-4 box-static">
@@ -233,158 +401,6 @@
 
                 </div>
             </div>
-
-            <!-- Sidebar -->
-            <div class="col-xl-5 col-lg-5 col-md-5 col-sm-12">
-                <div class="row">
-                    <div class="jbd-details mb-4 col-lg-12">
-                        @if ($publication->is_video)
-                    <div class="ap-cover"><iframe width="100%" height="360" src="{{ $publication->publication }}"></iframe></div>
-                @else
-                    <div class="ap-cover"><img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;display:block;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"></div>
-                @endif
-            </div>
-        </div>
-        
-        {{-- Additional Information beside the image --}}
-        <div class="row">
-            <div class="col-lg-12">
-                <div class="ap-card">
-                    <div class="ap-card-header">
-                        <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Additional Information</h5>
-                    </div>
-                    <div class="ap-card-body">
-                        <ul class="ap-list">
-                            <li>
-                                <label class="meta-label">Source</label>
-                                <span class="value">{{ $publication->author->name ?? 'N/A' }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Category</label>
-                                <span class="value">{{ @$publication->data_category->category_name ?? 'N/A' }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Sub Category</label>
-                                <span class="value">{{ $publication->sub_category->category_name ?? 'N/A' }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Theme</label>
-                                <span class="value">{!! $publication->theme->description ?? 'N/A' !!}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Sub-Theme</label>
-                                <span class="value">{!! $publication->sub_theme->description ?? 'N/A' !!}</span>
-                            </li>
-                            @if(!empty($publication->doi))
-                            <li>
-                                <label class="meta-label">DOI</label>
-                                <span class="value">
-                                    <a href="https://doi.org/{{ $publication->doi }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
-                                        {{ $publication->doi }} <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
-                                    </a>
-                                </span>
-                            </li>
-                            @endif
-                            @if(!empty($publication->issn))
-                            <li>
-                                <label class="meta-label">ISSN</label>
-                                <span class="value">{{ $publication->issn }}</span>
-                            </li>
-                            @endif
-                            @if(!empty($publication->isbn))
-                            <li>
-                                <label class="meta-label">ISBN</label>
-                                <span class="value">{{ $publication->isbn }}</span>
-                            </li>
-                            @endif
-                            @if(!empty($publication->year_published))
-                            <li>
-                                <label class="meta-label">Year Published</label>
-                                <span class="value">{{ $publication->year_published }}</span>
-                            </li>
-                            @endif
-                            <li>
-                                <label class="meta-label">Visits</label>
-                                <span class="value">{{ $publication->visits }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Likes</label>
-                                <span class="value">{{ count($publication->favourited ?? []) }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Comments</label>
-                                <span class="value">{{ count($publication->comments) }}</span>
-                            </li>
-                            <li>
-                                <label class="meta-label">Associated Authors</label>
-                                <span class="value">{{ $publication->associated_authors ?? 'N/A' }}</span>
-                            </li>
-                            @if($publication->license)
-                            <li>
-                                <label class="meta-label">License</label>
-                                <span class="value">
-                                    @if($publication->license->url)
-                                        <a href="{{ $publication->license->url }}" target="_blank" rel="noopener noreferrer" style="color: #119A48; text-decoration: none;">
-                                            {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
-                                        </a>
-                        @else
-                                        {{ $publication->license->name }}@if($publication->license->short_name) ({{ $publication->license->short_name }})@endif
-                                    @endif
-                                </span>
-                            </li>
-                            @endif
-                            @if(!empty($publication->copyright_info))
-                            <li>
-                                <label class="meta-label">Copyright Information</label>
-                                <span class="value" style="white-space: pre-wrap;">{{ $publication->copyright_info }}</span>
-                            </li>
-                            @endif
-                            @if(!empty($publication->funder))
-                            <li>
-                                <label class="meta-label">Funder</label>
-                                <span class="value">{{ $publication->funder }}</span>
-                            </li>
-                            @endif
-                        </ul>
-                        
-                        {{-- Journal Information Section --}}
-                        @if(!empty($publication->journal_name) || !empty($publication->journal_volume) || !empty($publication->journal_issue) || !empty($publication->journal_pages))
-                        <div style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 2px solid #e2e8f0;">
-                            <h6 style="font-weight:600;color:#0f172a;margin-bottom:1rem;">Journal Information</h6>
-                            <ul class="ap-list">
-                                @if(!empty($publication->journal_name))
-                                <li>
-                                    <label class="meta-label">Journal Name</label>
-                                    <span class="value">{{ $publication->journal_name }}</span>
-                                </li>
-                                @endif
-                                @if(!empty($publication->journal_volume))
-                                <li>
-                                    <label class="meta-label">Volume</label>
-                                    <span class="value">{{ $publication->journal_volume }}</span>
-                                </li>
-                                @endif
-                                @if(!empty($publication->journal_issue))
-                                <li>
-                                    <label class="meta-label">Issue</label>
-                                    <span class="value">{{ $publication->journal_issue }}</span>
-                                </li>
-                                @endif
-                                @if(!empty($publication->journal_pages))
-                                <li>
-                                    <label class="meta-label">Pages</label>
-                                    <span class="value">{{ $publication->journal_pages }}</span>
-                                </li>
-                                @endif
-                            </ul>
-                        </div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-        </div>
-        </div>
-        </div>
     </section>
 
 @endsection

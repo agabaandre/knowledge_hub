@@ -183,7 +183,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pub->geographical_coverage_id = $parent->geographical_coverage_id;
             $pub->is_version = 1;
             $pub->parent_id = $parent->id; // link to parent resource
-            $pub->title                    = $parent->title;
+            $pub->title                    = clean_unicode($parent->title ?? ''); // Clean Unicode from parent title
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
             $request['category_id']= $parent->data_category_id;
@@ -199,42 +199,46 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 $pub->geographical_coverage_id  = $request->countries[0];
             endif;
             
-            $pub->title                     = $request->title;
+            $pub->title                     = clean_unicode($request->title ?? '');
 
         endif;
         
         $pub->user_id              = $user->id;
         $pub->author_id            = ($request->author)?$request->author: $user->author_id;
-        $pub->publication          = $request->link;
+        
         if ($request->has('year_published')) {
             $pub->year_published = intval($request->year_published) ?: null;
         } elseif (!$request->id && !$request->original_id) {
             // default for new records when not provided
             $pub->year_published = intval(date('Y'));
         }
-        $pub->description          = $request->description;
-        $pub->publication_catgory_id  = $request->data_category_id;
-        $pub->associated_authors     = $request->associated_authors;
-        $pub->visits                 = ($request->id)?$pub->visits:0;
-        $pub->data_category_id       = $request->category_id;
-        $pub->is_embedded            = $request->is_embedded ?? false;
-        $pub->is_default_in_category = $request->is_default ?? false;
-        $pub->is_admin_only_access   = $request->admin_only ?? false;
-        $pub->show_disclaimer        = $request->show_disclaimer ?? false;
-
-        // Publication metadata fields
-        $pub->doi = $request->doi ?? null;
-        $pub->issn = $request->issn ?? null;
-        $pub->isbn = $request->isbn ?? null;
-        $pub->license_id = $request->license_id ?? null;
-        $pub->copyright_info = $request->copyright_info ?? null;
-        $pub->funder = $request->funder ?? null;
         
-        // Journal fields
-        $pub->journal_name = $request->journal_name ?? null;
-        $pub->journal_volume = $request->journal_volume ?? null;
-        $pub->journal_issue = $request->journal_issue ?? null;
-        $pub->journal_pages = $request->journal_pages ?? null;
+        // Clean Unicode characters from text fields before saving
+        $pub->title                     = clean_unicode($request->title ?? '');
+        $pub->description               = clean_unicode($request->description ?? '');
+        $pub->associated_authors        = clean_unicode($request->associated_authors ?? '');
+        $pub->publication               = clean_unicode($request->link ?? '');
+        $pub->publication_catgory_id    = $request->data_category_id;
+        $pub->visits                    = ($request->id)?$pub->visits:0;
+        $pub->data_category_id          = $request->category_id;
+        $pub->is_embedded               = $request->is_embedded ?? false;
+        $pub->is_default_in_category    = $request->is_default ?? false;
+        $pub->is_admin_only_access      = $request->admin_only ?? false;
+        $pub->show_disclaimer            = $request->show_disclaimer ?? false;
+
+        // Publication metadata fields - clean Unicode
+        $pub->doi                       = clean_unicode($request->doi ?? null);
+        $pub->issn                      = clean_unicode($request->issn ?? null);
+        $pub->isbn                      = clean_unicode($request->isbn ?? null);
+        $pub->license_id                = $request->license_id ?? null;
+        $pub->copyright_info            = clean_unicode($request->copyright_info ?? null);
+        $pub->funder                    = clean_unicode($request->funder ?? null);
+        
+        // Journal fields - clean Unicode
+        $pub->journal_name              = clean_unicode($request->journal_name ?? null);
+        $pub->journal_volume            = clean_unicode($request->journal_volume ?? null);
+        $pub->journal_issue             = clean_unicode($request->journal_issue ?? null);
+        $pub->journal_pages             = clean_unicode($request->journal_pages ?? null);
 
 
         if(!is_admin()){
@@ -271,14 +275,70 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         //save cover
         if($request->hasFile('cover')):
-
-            $file           = $request->file('cover');
-            $cover_filepath = $this->save_attachments($file);
-            $pub->cover     = $cover_filepath;
-            $filepath       = $cover_filepath;
+            // New cover file uploaded
+            $file = $request->file('cover');
+            
+            // Save cover file directly (cover is saved separately, not as an attachment)
+            if ($file && $file->isValid()) {
+                try {
+                    $description = $file->getClientOriginalName();
+                    $file_name   = md5_file($file->getRealPath());
+                    $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                    $cover_filepath = $file_name.'.'.$extension;
+                    
+                    $storagePath = storage_path().'/app/public/uploads/publications/';
+                    
+                    // Ensure directory exists
+                    if (!is_dir($storagePath)) {
+                        mkdir($storagePath, 0755, true);
+                    }
+                    
+                    $file->move($storagePath, $cover_filepath);
+                    
+                    $pub->cover = $cover_filepath;
+                    $pub->cover_is_exteranl = false; // Reset to local file
+                    
+                    \Log::info('Cover image uploaded', [
+                        'publication_id' => $request->id ?? 'new',
+                        'cover_filepath' => $cover_filepath,
+                        'file_name' => $description
+                    ]);
+                } catch (\Exception $e) {
+                    \Log::error('Error saving cover image: ' . $e->getMessage(), [
+                        'publication_id' => $request->id ?? 'new',
+                        'exception' => $e->getTraceAsString()
+                    ]);
+                }
+            } else {
+                \Log::warning('Invalid cover file uploaded', [
+                    'publication_id' => $request->id ?? 'new',
+                    'file_valid' => $file ? $file->isValid() : 'null'
+                ]);
+            }
         else:
-            if(!$request->id)
-             $pub->cover     =  "cover.jpg";
+            // No new cover file uploaded
+            if(!$request->id):
+                // New publication - set default cover
+                $pub->cover = "cover.jpg";
+                $pub->cover_is_exteranl = false;
+            else:
+                // Editing existing publication - preserve existing cover if not explicitly cleared
+                // Only update if cover_is_exteranl is being set explicitly
+                if ($request->has('cover_is_exteranl')) {
+                    $pub->cover_is_exteranl = (bool)$request->cover_is_exteranl;
+                }
+                // If cover URL is provided for external cover, update it
+                if ($request->has('cover_url') && !empty($request->cover_url)) {
+                    $pub->cover = $request->cover_url;
+                    $pub->cover_is_exteranl = true;
+                }
+                // Otherwise, keep existing cover (don't overwrite)
+                \Log::info('Cover image preserved during edit', [
+                    'publication_id' => $request->id,
+                    'existing_cover' => $pub->getRawOriginal('cover'),
+                    'cover_is_external' => $pub->cover_is_exteranl
+                ]);
+            endif;
         endif;
 
         $saved = ($request->id)?$pub->update():$pub->save();
@@ -293,10 +353,125 @@ public function get(Request $request, $return_array = false, $featured = false,$
         }
 
         $attachment_path =null;
-        //save attachments
-        if($request->hasFile('files') && $saved):
+        //save attachments - handle both single and multiple file uploads
+        // Note: Attachments can be saved even when publication has a link (both are allowed)
+        
+        // Debug: Log all file-related request data
+        \Log::info('File upload check', [
+            'publication_id' => $id,
+            'saved' => $saved,
+            'has_files' => $request->hasFile('files'),
+            'all_files' => $request->allFiles(),
+            'request_keys' => array_keys($request->all())
+        ]);
+        
+        // Check for files in multiple ways to handle different scenarios
+        // Note: Laravel automatically handles 'files[]' as 'files' when using hasFile()
+        $hasFiles = false;
+        $files = null;
+        
+        // Method 1: Standard Laravel way - handles both 'files' and 'files[]'
+        if ($request->hasFile('files')) {
+            $hasFiles = true;
             $files = $request->file('files');
-            $attachment_path = $this->save_attachments($files,$id);
+        }
+        // Method 2: Check for files[] explicitly (sometimes needed for AJAX submissions)
+        elseif ($request->hasFile('files.0') || isset($request->allFiles()['files'])) {
+            $allFiles = $request->allFiles();
+            if (isset($allFiles['files'])) {
+                $hasFiles = true;
+                $files = $allFiles['files'];
+            }
+        }
+        // Method 3: Check all files as fallback
+        elseif (!empty($request->allFiles())) {
+            $allFiles = $request->allFiles();
+            // Check for 'files' (Laravel normalizes 'files[]' to 'files')
+            if (isset($allFiles['files'])) {
+                $hasFiles = true;
+                $files = $allFiles['files'];
+            }
+        }
+        
+        if($saved && $hasFiles):
+            try {
+                \Log::info('Processing file uploads', [
+                    'publication_id' => $id,
+                    'has_files' => $hasFiles,
+                    'files_is_array' => is_array($files),
+                    'files_count' => is_array($files) ? count($files) : ($files ? 1 : 0),
+                    'files_type' => gettype($files)
+                ]);
+                
+                // Handle both single file and array of files
+                if (is_array($files)) {
+                    // Multiple files uploaded - filter out null/invalid entries
+                    $filesToProcess = [];
+                    foreach ($files as $index => $file) {
+                        if ($file && $file->isValid()) {
+                            $filesToProcess[] = $file;
+                            \Log::debug('Valid file found', [
+                                'index' => $index,
+                                'name' => $file->getClientOriginalName(),
+                                'size' => $file->getSize()
+                            ]);
+                        } else {
+                            \Log::warning('Invalid file skipped', [
+                                'index' => $index,
+                                'is_null' => is_null($file),
+                                'is_valid' => $file ? $file->isValid() : 'N/A'
+                            ]);
+                        }
+                    }
+                } else {
+                    // Single file uploaded
+                    if ($files && $files->isValid()) {
+                        $filesToProcess = [$files];
+                        \Log::debug('Single valid file found', [
+                            'name' => $files->getClientOriginalName(),
+                            'size' => $files->getSize()
+                        ]);
+                    } else {
+                        $filesToProcess = [];
+                        \Log::warning('Single file invalid', [
+                            'is_null' => is_null($files),
+                            'is_valid' => $files ? $files->isValid() : 'N/A'
+                        ]);
+                    }
+                }
+                
+                if (!empty($filesToProcess)) {
+                    \Log::info('Saving attachments', [
+                        'publication_id' => $id,
+                        'files_count' => count($filesToProcess)
+                    ]);
+                    $attachment_path = $this->save_attachments($filesToProcess, $id);
+                } else {
+                    \Log::warning('No valid files to process', [
+                        'publication_id' => $id,
+                        'files_received' => is_array($files) ? count($files) : ($files ? 1 : 0)
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error saving attachments: ' . $e->getMessage(), [
+                    'publication_id' => $id,
+                    'files_count' => $hasFiles ? (is_array($files) ? count($files) : ($files ? 1 : 0)) : 0,
+                    'exception' => $e->getTraceAsString()
+                ]);
+                // Don't throw - allow publication to save even if attachments fail
+            }
+        else:
+            // Log when files are not present
+            if ($saved) {
+                \Log::debug('No files uploaded for publication', [
+                    'publication_id' => $id,
+                    'has_files_method1' => $request->hasFile('files'),
+                    'has_files_method2' => !empty($request->allFiles()),
+                    'all_files_keys' => array_keys($request->allFiles() ?? []),
+                    'upload_type' => $request->input('upload_type', 'unknown'),
+                    'request_method' => $request->method()
+                ]);
+            }
         endif;
 
         $attachment_path = ($attachment_path)?storage_path('/app/public/uploads/publications/'.$attachment_path):null;
@@ -317,6 +492,66 @@ public function get(Request $request, $return_array = false, $featured = false,$
          //attach access groups
          if(@$request->accessgroups && $saved):
             $this->attach_to_access_group($request->accessgroups,$id);
+        endif;
+
+        // Save tags - delete old tags first if editing, then save new ones
+        // Check for tags in multiple ways to handle different request formats
+        $tagsToSave = null;
+        
+        if ($request->has('tags')) {
+            $tagsToSave = $request->input('tags');
+        } elseif ($request->has('tags[]')) {
+            $tagsToSave = $request->input('tags[]');
+        }
+        
+        \Log::info('Tags save check', [
+            'publication_id' => $id,
+            'saved' => $saved,
+            'has_tags' => $request->has('tags'),
+            'has_tags_array' => $request->has('tags[]'),
+            'tags_input' => $request->input('tags'),
+            'tags_array_input' => $request->input('tags[]'),
+            'all_tags' => $tagsToSave,
+            'tags_type' => gettype($tagsToSave)
+        ]);
+        
+        if($saved && !empty($tagsToSave)):
+            try {
+                // Delete existing tags for this publication
+                PublicationTag::where('publication_id', $id)->delete();
+                
+                // Ensure tags is an array
+                $tags = is_array($tagsToSave) ? $tagsToSave : (is_string($tagsToSave) ? json_decode($tagsToSave, true) : []);
+                
+                // Filter out null/empty values
+                $tags = array_filter($tags, function($tag_id) {
+                    return !empty($tag_id) && $tag_id !== null && $tag_id !== '';
+                });
+                
+                // Reset array keys
+                $tags = array_values($tags);
+                
+                if (!empty($tags)) {
+                    // Save new tags
+                    $this->save_tags($tags, $id);
+                    \Log::info('Tags saved successfully', [
+                        'publication_id' => $id,
+                        'tags_count' => count($tags),
+                        'tag_ids' => $tags
+                    ]);
+                } else {
+                    \Log::warning('Tags array is empty after filtering', [
+                        'publication_id' => $id,
+                        'original_tags' => $tagsToSave
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error saving tags: ' . $e->getMessage(), [
+                    'publication_id' => $id,
+                    'tags' => $tagsToSave,
+                    'exception' => $e->getTraceAsString()
+                ]);
+            }
         endif;
 
         if($saved):
@@ -370,7 +605,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'comments','parent',
             'summaries','versioning',
             'sub_category','data_category',
-            'license'])->find($id);
+            'license',
+            'countries',
+            'tags.tag'])->find($id);
 
         if($pub && $update_visits):
             $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
@@ -399,16 +636,38 @@ public function get(Request $request, $return_array = false, $featured = false,$
         // Optimized: Use bulk insert instead of individual inserts in a loop
         $tagData = [];
         foreach($tags as $tag_id) {
+            // Skip invalid tag IDs
+            if (empty($tag_id) || $tag_id === null || $tag_id === '') {
+                continue;
+            }
             $tagData[] = [
-                'tag_id' => $tag_id,
-                'publication_id' => $publication_id,
-                'created_at' => now(),
-                'updated_at' => now()
+                'tag_id' => intval($tag_id),
+                'publication_id' => intval($publication_id)
+                // Note: publication_tags table doesn't have timestamps
             ];
         }
         
         if (!empty($tagData)) {
-            PublicationTag::insert($tagData);
+            try {
+                PublicationTag::insert($tagData);
+                \Log::info('Tags inserted into database', [
+                    'publication_id' => $publication_id,
+                    'tags_count' => count($tagData),
+                    'tag_data' => $tagData
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error inserting tags: ' . $e->getMessage(), [
+                    'publication_id' => $publication_id,
+                    'tag_data' => $tagData,
+                    'exception' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
+        } else {
+            \Log::warning('No tag data to insert', [
+                'publication_id' => $publication_id,
+                'original_tags' => $tags
+            ]);
         }
     }
 
@@ -504,32 +763,91 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     private function save_attachments($files,$publication_id=null){
 
+        if (empty($files) || !$publication_id) {
+            \Log::warning('save_attachments called with empty files or no publication_id', [
+                'files_count' => is_array($files) ? count($files) : ($files ? 1 : 0),
+                'publication_id' => $publication_id
+            ]);
+            return null;
+        }
+
         $upfiles   = (!is_array($files))?[$files]:$files;
         $file_path = null;
         $attachmentData = [];
+        $savedCount = 0;
+        $errorCount = 0;
         
         foreach ($upfiles as $file) {
+            // Skip invalid files
+            if (!$file || !$file->isValid()) {
+                \Log::warning('Invalid file skipped in save_attachments', [
+                    'publication_id' => $publication_id,
+                    'file_name' => $file ? $file->getClientOriginalName() : 'null'
+                ]);
+                $errorCount++;
+                continue;
+            }
 
-            $description = $file->getClientOriginalName();
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-           
-            $file->move(storage_path().'/app/public/uploads/publications/',$file_path);
+            try {
+                $description = $file->getClientOriginalName();
+                $file_name   = md5_file($file->getRealPath());
+                $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
+                $file_path   = $file_name.'.'.$extension;
+                
+                $storagePath = storage_path().'/app/public/uploads/publications/';
+                
+                // Ensure directory exists
+                if (!is_dir($storagePath)) {
+                    mkdir($storagePath, 0755, true);
+                }
+               
+                $file->move($storagePath, $file_path);
 
-            // Optimized: Collect attachment data for bulk insert
-            if($publication_id) {
-                $attachmentData[] = [
-                    "description" => $description,
-                    "file" => $file_path,
-                    "publication_id" => $publication_id
-                ];
+                // Optimized: Collect attachment data for bulk insert
+                if($publication_id) {
+                    $attachmentData[] = [
+                        "description" => $description,
+                        "file" => $file_path,
+                        "publication_id" => $publication_id
+                    ];
+                    $savedCount++;
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error processing individual file in save_attachments: ' . $e->getMessage(), [
+                    'publication_id' => $publication_id,
+                    'file_name' => $file->getClientOriginalName(),
+                    'exception' => $e->getTraceAsString()
+                ]);
+                $errorCount++;
+                // Continue processing other files even if one fails
+                continue;
             }
         }
 
         // Optimized: Use bulk insert instead of individual inserts
         if (!empty($attachmentData)) {
-            PublicationAttachment::insert($attachmentData);
+            try {
+                PublicationAttachment::insert($attachmentData);
+                \Log::info('Attachments saved successfully', [
+                    'publication_id' => $publication_id,
+                    'count' => count($attachmentData),
+                    'saved' => $savedCount,
+                    'errors' => $errorCount
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Error inserting attachments: ' . $e->getMessage(), [
+                    'publication_id' => $publication_id,
+                    'attachment_data' => $attachmentData,
+                    'exception' => $e->getTraceAsString()
+                ]);
+                throw $e;
+            }
+        } else {
+            \Log::warning('No attachment data to insert', [
+                'publication_id' => $publication_id,
+                'files_processed' => count($upfiles),
+                'errors' => $errorCount
+            ]);
         }
 
        return $file_path;
@@ -539,8 +857,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         $summary = new PublicationSummary();
         $summary->resource_id = $request->original_id;
-        $summary->title       = $request->title;
-        $summary->description = $request->summary;
+        $summary->title       = clean_unicode($request->title ?? '');
+        $summary->description = clean_unicode($request->summary ?? '');
 
         $user = @current_user();
        
@@ -581,7 +899,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     $comment->user_id = current_user() ? current_user()->id : ($request->user_id ?? null);
     $comment->publication_id = $request->publication_id;
-    $comment->comment = $raw;
+    $comment->comment = clean_unicode($raw);
     $comment->save();
 
     return $comment;
@@ -723,8 +1041,8 @@ public function sumamry_approval_status(Request $request){
 public function save_content_request(Request $request){
 
    $record = new ContentRequest();
-   $record->subject     = $request->title;
-   $record->description = $request->description;
+   $record->subject     = clean_unicode($request->title ?? '');
+   $record->description = clean_unicode($request->description ?? '');
    $record->country_id  = (auth()->user())?auth()->user()->country_id:$request->country_id;
 
    if($request->email)
@@ -802,7 +1120,7 @@ private function applyFilters($query, $request) {
             $q->where('publication_catgory_id', $value);
         },
         'tag' => function ($q, $value) {
-            $taggedpubs = PublicationTag::where('id', $value)->pluck('publication_id');
+            $taggedpubs = PublicationTag::where('tag_id', $value)->pluck('publication_id');
             $q->whereIn('id', $taggedpubs);
         }
 

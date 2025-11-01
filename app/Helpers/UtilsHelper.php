@@ -24,6 +24,40 @@ if(!function_exists('truncate')){
 	}
 }
 
+if(!function_exists('clean_unicode')){
+	/**
+	 * Remove hidden Unicode characters and control characters from text
+	 * This includes zero-width spaces, directional marks, and other invisible characters
+	 */
+	function clean_unicode($text){
+		if (empty($text)) {
+			return $text;
+		}
+		
+		// Remove zero-width characters
+		$text = preg_replace('/[\x{200B}-\x{200D}\x{FEFF}]/u', '', $text);
+		
+		// Remove left-to-right and right-to-left marks
+		$text = preg_replace('/[\x{200E}\x{200F}]/u', '', $text);
+		
+		// Remove zero-width joiner and non-joiner
+		$text = preg_replace('/[\x{200C}\x{200D}]/u', '', $text);
+		
+		// Remove other invisible Unicode characters (control characters)
+		$text = preg_replace('/[\x{0000}-\x{001F}\x{007F}-\x{009F}]/u', '', $text);
+		
+		// Remove other problematic Unicode ranges
+		$text = preg_replace('/[\x{2060}-\x{206F}]/u', '', $text); // Word joiner, invisible plus, etc.
+		$text = preg_replace('/[\x{202A}-\x{202E}]/u', '', $text); // Directional formatting
+		$text = preg_replace('/[\x{2066}-\x{2069}]/u', '', $text); // Directional isolates
+		
+		// Remove soft hyphen (optional, but often unwanted)
+		$text = preg_replace('/[\x{00AD}]/u', '', $text);
+		
+		return trim($text);
+	}
+}
+
 
 if (!function_exists('time_ago')) {
 

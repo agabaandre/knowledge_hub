@@ -4,14 +4,18 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ContentRequest;
+use App\Jobs\SendMailJob;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ContentRequestAdminController extends Controller
 {
     public function index(Request $request)
     {
-        // Fetch all content requests, you can add pagination or filtering as needed
-        $contentRequests = ContentRequest::orderBy('created_at', 'desc')->paginate(10);
+        // Fetch all content requests with relationships
+        $contentRequests = ContentRequest::with(['country', 'processedBy'])
+            ->orderBy('created_at', 'desc')
+            ->paginate(10);
         return view('admin.content_requests.index', compact('contentRequests'));
     }
 
@@ -66,5 +70,45 @@ class ContentRequestAdminController extends Controller
         $contentRequest->delete();
 
         return redirect()->route('admin.content-requests.index')->with('success', 'Content request deleted successfully.');
+    }
+
+    /**
+     * Process a content request - mark as processed and send email to requester
+     */
+    public function process(Request $request, $id)
+    {
+        $request->validate([
+            'content_links' => 'required|string|min:10',
+            'admin_comments' => 'nullable|string|max:1000',
+        ]);
+
+        $contentRequest = ContentRequest::findOrFail($id);
+
+        // Update the content request with processing information
+        $contentRequest->update([
+            'processed_at' => now(),
+            'processed_by' => Auth::id(),
+            'content_links' => $request->content_links,
+            'admin_comments' => $request->admin_comments,
+        ]);
+
+        // Send email to requester
+        if ($contentRequest->email) {
+            $emailData = [
+                'to' => $contentRequest->email,
+                'subject' => 'Your Content Request Has Been Processed - ' . $contentRequest->subject,
+                'title' => 'Content Request Processed',
+                'body' => view('emails.content_request_processed', [
+                    'contentRequest' => $contentRequest,
+                    'contentLinks' => $request->content_links,
+                    'adminComments' => $request->admin_comments,
+                ])->render(),
+            ];
+
+            SendMailJob::dispatch($emailData)->onQueue('default');
+        }
+
+        return redirect()->route('admin.content-requests.index')
+            ->with('success', 'Content request processed successfully and email sent to requester.');
     }
 }

@@ -47,7 +47,7 @@
         width: 50px;
         height: 3px;
         background: var(--theme-color-primary);
-        border-radius: 2px;
+        border-radius: 0.25rem;
     }
 
     .section-subtitle {
@@ -66,72 +66,60 @@
         overflow: hidden;
     }
 
-    .carousel-wrapper {
-        position: relative;
-        overflow: hidden;
-        border-radius: 12px;
-    }
 
     .carousel-track {
         display: flex;
-        transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-        gap: 1.5rem;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 12px;
+        padding: 12px;
+        scroll-behavior: smooth;
+    }
+
+    .carousel-track::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .carousel-track::-webkit-scrollbar-thumb {
+        background: #e2e8f0;
+        border-radius: 0.25rem;
     }
 
     .carousel-slide {
         flex: 0 0 auto;
-        width: 25%;
+        min-width: 520px;
+        max-width: 560px;
+        scroll-snap-align: start;
     }
 
     .initiative-card {
         background: #ffffff;
-        border-radius: 12px;
+        border-radius: 0.25rem;
+        border: 1px solid #e2e8f0;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1);
-        border: 1px solid rgba(0, 0, 0, 0.04);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         position: relative;
         overflow: hidden;
         display: flex;
-        align-items: flex-start;
-        gap: 1rem;
-        padding: 1rem;
-    }
-
-    .initiative-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 2px;
-        background: var(--theme-color-primary);
-        transform: scaleX(0);
-        transition: transform 0.3s ease;
+        height: 170px;
     }
 
     .initiative-card:hover {
-        box-shadow: 0 8px 25px rgba(17, 154, 72, 0.1), 0 4px 10px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(17, 154, 72, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
         border-color: var(--theme-color-primary);
     }
 
-    .initiative-card:hover::before {
-        transform: scaleX(1);
-    }
-
-    .card-header {
-        display: flex;
-        gap: 1rem;
-        margin-bottom: 1rem;
-        align-items: flex-start;
-    }
-
     .card-image {
-        flex-shrink: 0;
-        width: 70px;
-        height: 70px;
-        border-radius: 8px;
+        width: 42%;
+        min-width: 42%;
+        height: 170px;
+        background: #f8fafc;
+        border-right: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         overflow: hidden;
-        background: #f1f5f9;
+        flex-shrink: 0;
     }
 
     .card-image img {
@@ -146,16 +134,19 @@
     }
 
     .card-content {
+        padding: 12px;
         flex: 1;
+        display: flex;
+        flex-direction: column;
         min-width: 0;
     }
 
     .card-title {
-        font-size: 1rem;
-        font-weight: 600;
-        color: #1a202c;
-        margin-bottom: 0.25rem;
-        line-height: 1.3;
+        font-size: 1.08rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0 0 8px;
+        line-height: 1.25;
         display: -webkit-box;
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
@@ -163,12 +154,24 @@
     }
 
     .card-author {
-        color: #64748b;
-        font-size: 0.8rem;
-        margin-bottom: 0.5rem;
+        color: #475569;
+        font-size: 0.86rem;
+        margin-bottom: 4px;
         display: flex;
         align-items: center;
         gap: 0.25rem;
+    }
+
+    .card-desc {
+        font-size: 0.85rem;
+        color: #334155;
+        margin-top: 6px;
+        max-height: 3.2em;
+        overflow: hidden;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        flex: 1;
     }
 
     .card-meta {
@@ -212,17 +215,6 @@
         font-size: 0.65rem;
     }
 
-    .initiative-link {
-        text-decoration: none;
-        color: inherit;
-        display: block;
-        height: 100%;
-    }
-
-    .initiative-link:hover {
-        text-decoration: none;
-        color: inherit;
-    }
 
     /* Responsive Design */
     @media (max-width: 768px) {
@@ -235,34 +227,29 @@
         }
 
         .carousel-slide {
-            width: 50%;
-        }
-
-        .initiative-card {
-            padding: 1.25rem;
+            min-width: 320px;
+            max-width: 360px;
         }
 
         .card-image {
-            width: 60px;
-            height: 60px;
+            height: 140px;
+            width: 45%;
+            min-width: 45%;
+        }
+
+        .initiative-card {
+            height: 140px;
         }
 
         .card-title {
-            font-size: 0.9rem;
+            font-size: 1rem;
         }
     }
 
     @media (max-width: 480px) {
         .carousel-slide {
-            width: 100%;
-        }
-
-        .card-header {
-            gap: 0.75rem;
-        }
-
-        .card-stats {
-            gap: 0.75rem;
+            min-width: 280px;
+            max-width: 300px;
         }
     }
 </style>
@@ -275,30 +262,36 @@
         </div>
 
         <div class="carousel-container">
-            <div class="carousel-wrapper">
-                <div class="carousel-track" id="carouselTrack">
+            <div class="carousel-track" id="carouselTrack">
                     @foreach ($initiatives as $index => $row)
-                        <div class="carousel-slide">
-                            <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="initiative-link">
-                                <div class="initiative-card">
-                                        <div class="card-image">
-                                            <img src="{{ $row->image_url }}" 
-                                                 alt="Cover image of {{ $row->title }}" 
-                                                 loading="lazy" />
-                                        </div>
-                                        <div class="card-content">
-                                            <h4 class="card-title">{{ truncate($row->title, 45) }}</h4>
-                                            <div class="card-author">
-                                                <i class="fa fa-user"></i>
-                                                <span>{{ truncate(@$row->author->name ?: 'Unknown Author', 20) }}</span>
-                                            </div>
-                                        </div>
+                        @php
+                            $imageUrl = $row->image_url ?? asset('assets/images/cover.png');
+                            $authorName = @$row->author->name ?: 'Unknown Author';
+                            $description = !empty($row->description) ? Str::limit(strip_tags($row->description), 140) : '';
+                            $detailsUrl = url('records/resource') . '?id=' . $row->id;
+                        @endphp
+                        <div class="carousel-slide" style="cursor:pointer;" onclick="window.open('{{ $detailsUrl }}','_blank')">
+                            <div class="initiative-card">
+                                <div class="card-image">
+                                    <img src="{{ $imageUrl }}" 
+                                         alt="{{ $row->title }}" 
+                                         loading="lazy"
+                                         onerror="this.onerror=null;this.src='{{ asset('assets/images/cover.png') }}'" />
                                 </div>
-                            </a>
+                                <div class="card-content">
+                                    <div class="card-title">{{ Str::limit(strip_tags(clean_unicode($row->title)), 70) }}</div>
+                                    <div class="card-author">
+                                        <i class="fa fa-user mr-1"></i>
+                                        <span>{{ clean_unicode($authorName) }}</span>
+                                    </div>
+                                    @if($description)
+                                    <div class="card-desc">{{ clean_unicode($description) }}</div>
+                                    @endif
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
         </div>
     </div>
 </section>
@@ -306,10 +299,40 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const track = document.getElementById('carouselTrack');
-    const slides = track.querySelectorAll('.carousel-slide');
+    if (!track) return;
     
-    if (!track || slides.length === 0) return;
+    // Smooth right-to-left auto scroll (similar to events slider)
+    var gap = 12; // matches CSS gap
     
+    function cardWidth() {
+        var card = track.querySelector('.carousel-slide');
+        if (!card) return 300;
+        return card.getBoundingClientRect().width + gap;
+    }
+    
+    // Start at the far right
+    function toEnd() { 
+        track.scrollLeft = track.scrollWidth; 
+    }
+    toEnd();
+    
+    window.initSlide = function(dir) {
+        var delta = cardWidth();
+        // dir: 1 means move right->left, -1 left->right
+        track.scrollLeft -= (dir * delta);
+        if (track.scrollLeft <= 0) { 
+            toEnd(); 
+        }
+        if (track.scrollLeft >= track.scrollWidth - track.clientWidth) { 
+            track.scrollLeft = 0; 
+        }
+    };
+    
+    setInterval(function() { 
+        initSlide(1); 
+    }, 4000); // Move every 4 seconds
+});
+</script>
     let currentIndex = 0;
     let isPlaying = true;
     let autoPlayInterval;

@@ -1,7 +1,44 @@
 @php
-    if (@$row && @$row->cover) {
-        $image_link = $row->image_url;
+    // Handle both $row and $publication (admin form uses $publication, user form uses $row)
+    // Normalize to $publication for consistency
+    $publication = $row ?? $publication ?? null;
+    
+    // Debug: Log tag_ids if publication exists
+    if ($publication && isset($publication->id)) {
+        \Log::info('Wizard loading tags', [
+            'publication_id' => $publication->id,
+            'tag_ids' => $publication->tag_ids ?? 'NOT_SET',
+            'tags_relationship_count' => $publication->tags ? $publication->tags->count() : 0
+        ]);
+    }
+    
+    if (@$publication && isset($publication->id)) {
+        // Get raw cover value (before accessor processes it)
+        $raw_cover = $publication->getRawOriginal('cover');
+        $cover_is_external = $publication->cover_is_exteranl ?? false;
+        
+        // Debug logging
+        \Log::info('Wizard loading cover image', [
+            'publication_id' => $publication->id,
+            'raw_cover' => $raw_cover,
+            'cover_is_external' => $cover_is_external,
+            'cover_accessor' => $publication->cover
+        ]);
+        
+        if (!empty($raw_cover)) {
+            if ($cover_is_external && filter_var($raw_cover, FILTER_VALIDATE_URL)) {
+                // External URL - use as is
+                $image_link = $raw_cover;
+            } else {
+                // Local file - use storage_link helper
+                $image_link = storage_link('uploads/publications/' . $raw_cover);
+            }
+        } else {
+            // No cover image - use placeholder
+            $image_link = asset('assets/images/placeholder.png');
+        }
     } else {
+        // New publication or no publication
         $image_link = asset('assets/images/placeholder.png');
     }
 
@@ -69,21 +106,21 @@
             <div class="alert alert-info mb-3" style="background-color: #e7f3ff; border-left: 4px solid #119A48; padding: 12px 16px; border-radius: 4px;">
                 <i class="fa fa-info-circle mr-2" style="color: #119A48;"></i>
                 <strong>Please Note:</strong> All fields marked with a <span class="text-danger">*</span> (red asterisk) are <strong>required</strong>. Please ensure you fill in all required fields before proceeding to Step 2.
-            </div>
-            
+                </div>
+
             <div class="row" style="margin-top:12px;">
                 <div class="col-lg-12 mb-2" style="margin-left:12px !important;">
                     <div class="d-flex flex-wrap align-items-center" style="gap:20px;">
                         <label class="form-check-inline mb-0">
                             <input type="radio" name="upload_type" value="upload" checked class="form-check-input"> Attachment
-                        </label>
+                    </label>
                         <label class="form-check-inline mb-0">
                             <input type="radio" name="upload_type" value="link" class="form-check-input"> External Link
-                        </label>
+                    </label>
                         <label class="form-check-inline mb-0">
                             <input type="checkbox" name="is_embedded" value="1" class="form-check-input" {{ @$row->is_embedded ? ' checked' : '' }}> Embedded On Page
-                        </label>
-                        @if (is_admin())
+                    </label>
+                    @if (is_admin())
                         <label class="form-check-inline mb-0">
                             <input type="checkbox" name="is_default" value="1" class="form-check-input" {{ @$row->is_default_in_category ? ' checked' : '' }}> Default in Category
                         </label>
@@ -93,7 +130,7 @@
                         <label class="form-check-inline mb-0">
                             <input type="checkbox" name="show_disclaimer" value="1" class="form-check-input" {{ isset($row) ? ($row->show_disclaimer ? ' checked' : '') : 'checked' }}> Shows Disclaimer
                         </label>
-                        @endif
+                    @endif
                         <div class="w-100"></div>
                         <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
                             <div class="row">
@@ -124,7 +161,7 @@
                             @endif
                         </label>
                         <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
-                            value="{{ @$row->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
+                            value="{{ @$publication->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
                     </div>
                 </div>
 
@@ -166,12 +203,12 @@
                     ])
                 </div>
                 <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Sub Category</label>
-                    @include('partials.publications.filecategory_dropdown', [
-                        'field' => 'category_id',
-                        'selected' => @$row->data_category_id ? $row->data_category_id : old('category_id'),
-                    ])
-                </div>
+                        <label class="form-label" for="publication">Sub Category</label>
+                        @include('partials.publications.filecategory_dropdown', [
+                            'field' => 'category_id',
+                            'selected' => @$row->data_category_id ? $row->data_category_id : old('category_id'),
+                        ])
+            </div>
 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Thematic Area
@@ -179,12 +216,12 @@
                             <span class="text-danger">*</span>
                         @endif
                     </label>
-                    @include('partials.publications.theme_dropdown', [
-                        'field' => 'theme',
-                        'class' => 'select2 theme',
+                        @include('partials.publications.theme_dropdown', [
+                            'field' => 'theme',
+                            'class' => 'select2 theme',
                         'required' => ($requiredFields['theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_theme->thematic_area_id ? $row->sub_theme->thematic_area_id : old('theme'),
-                    ])
+                        ])
                 </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Sub Theme
@@ -192,12 +229,12 @@
                             <span class="text-danger">*</span>
                         @endif
                     </label>
-                    @include('partials.publications.subtheme_dropdown', [
-                        'field' => 'sub_theme',
-                        'class' => 'select2 subtheme',
+                        @include('partials.publications.subtheme_dropdown', [
+                            'field' => 'sub_theme',
+                            'class' => 'select2 subtheme',
                         'required' => ($requiredFields['sub_theme'] ?? true) ? 'required' : '',
-                        'selected' => @$row->sub_thematic_area_id ? $row->sub_thematic_area_id : '',
-                    ])
+                            'selected' => @$row->sub_thematic_area_id ? $row->sub_thematic_area_id : '',
+                        ])
                 </div>
 
                 <div class="col-md-6 mb-2">
@@ -213,16 +250,16 @@
                 </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
-                    @include('partials.countries.dropdown', [
-                        'field' => 'countries[]',
-                        'required' => 'required',
-                        'class' => 'country select2',
-                        'selected' => $row->country_ids ?? null,
-                        'multiple' => 'multiple',
-                    ])
-                </div>
+                        @include('partials.countries.dropdown', [
+                            'field' => 'countries[]',
+                            'required' => 'required',
+                            'class' => 'country select2',
+                            'selected' => $row->country_ids ?? null,
+                            'multiple' => 'multiple',
+                        ])
+            </div>
 
-                @if (is_admin())
+            @if (is_admin())
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Corporate Source or Member State
                         @if(($requiredFields['author'] ?? false) == true)
@@ -230,14 +267,14 @@
                         @endif
                         <small class="text-muted">(If your source is missing, please contact the system admin)</small>
                     </label>
-                    @include('partials.authors.dropdown', [
-                        'field' => 'author',
+                            @include('partials.authors.dropdown', [
+                                'field' => 'author',
                         'required' => ($requiredFields['author'] ?? false) ? 'required' : '',
-                        'selected' => @$row->author_id ?? null,
+                                'selected' => @$row->author_id ?? null,
                         'allfield' => 'Select Corporate Source or Member State',
-                    ])
+                            ])
                 </div>
-                @endif
+            @endif
             </div>
         </div>
 
@@ -265,35 +302,17 @@
                                             <a href="{{ $pub_file->file }}" target="_blank"><i class="fa fa-paperclip text-muted"></i> {{ $pub_file->description ?? 'Attachment' }}</a>
                                             <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
                                         </li>
-                                    @endforeach
+                            @endforeach
                                 </ul>
                             </div>
                         @endif
 
-                        <style>
-                            .dropzone-attachments {
-                                border: 2px dashed #94a3b8;
-                                border-radius: 10px;
-                                padding: 16px;
-                                text-align: center;
-                                cursor: pointer;
-                                transition: background-color 0.2s ease, border-color 0.2s ease;
-                                min-height: 90px;
-                                position: relative;
-                            }
-                            .dropzone-attachments.dragover {
-                                background-color: #f8fafc;
-                                border-color: var(--theme-color-primary, #119A48);
-                            }
-                            .dropzone-attachments .hint { color: #64748b; font-size: 0.9rem; }
-                            .cover_preview { display:block; }
-                        </style>
-                        <div class="dropzone-attachments" id="dropzone-attachments">
-                            <i class="fa fa-cloud-upload-alt"></i>
-                            <div class="hint">Drag & drop files here, or click to browse</div>
-                            <small class="text-muted">Images, PDF, Word, Excel, PowerPoint, audio, video</small>
-                            <input type="file" class="custom-file-input" name="files" id="attachments" multiple
-                                   style="position:absolute;left:0;top:0;width:100%;height:100%;opacity:0;cursor:pointer;">
+                        <div class="custom-file">
+                            <input type="file" class="form-control" name="files" id="attachments" multiple
+                                   accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,audio/*,video/*">
+                            <label class="form-label mt-2" for="attachments">
+                                <small class="text-muted">Click to select files (you can add more files by clicking again)</small>
+                            </label>
                         </div>
                         <div class="preview py-2" style="min-height: 24px;"></div>
                     </div>
@@ -317,7 +336,7 @@
                             <div onclick="$('#cover').click()" class="cover_preview py-2"
                                 style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
                             </div>
-                        </div>
+                    </div>
                     </div>
                 </div>
 
@@ -332,6 +351,20 @@
 
             <br>
             <h3 class="mb-2" style="font-weight:600;">Publication Details</h3>
+            
+            <!-- AI Description Loader -->
+            <div id="ai-description-loader" style="display: none; margin-top: 10px; margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #119A48; border-radius: 4px;">
+                <div class="d-flex align-items-center">
+                    <div class="spinner-border spinner-border-sm text-success mr-2" role="status" style="width: 1.5rem; height: 1.5rem;">
+                        <span class="sr-only">Loading...</span>
+                    </div>
+                    <div>
+                        <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description...</strong>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description from your uploaded document.</p>
+                    </div>
+                </div>
+            </div>
+            
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-2 p-2" style="background:#ffffff;">
@@ -360,7 +393,7 @@
                     </label>
                     <input type="text" class="form-control" name="associated_authors" id="associated_authors"
                            placeholder="Associated Authors" {{ ($requiredFields['associated_authors'] ?? true) ? 'required' : '' }}
-                           value="{{ @$row->associated_authors ?? old('associated_authors') }}">
+                           value="{{ @$publication->associated_authors ?? old('associated_authors') }}">
                     <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
                 </div>
                 
@@ -370,9 +403,28 @@
                             <span class="text-danger">*</span>
                         @endif
                     </label>
+                    @php
+                        // Ensure we get tag_ids correctly
+                        $selectedTags = [];
+                        if ($publication && isset($publication->id)) {
+                            try {
+                                $selectedTags = $publication->tag_ids ?? [];
+                                // Fallback: query directly if accessor returns empty
+                                if (empty($selectedTags)) {
+                                    $selectedTags = \Illuminate\Support\Facades\DB::table('publication_tags')
+                                        ->where('publication_id', $publication->id)
+                                        ->pluck('tag_id')
+                                        ->toArray();
+                                }
+                            } catch (\Exception $e) {
+                                \Log::error('Error loading tags in wizard: ' . $e->getMessage());
+                                $selectedTags = [];
+                            }
+                        }
+                    @endphp
                     @include('partials.tags.dropdown', [
                         'field' => 'tags[]',
-                        'selected' => @$row->tags ? $row->tags->pluck('id')->toArray() : [],
+                        'selected' => $selectedTags,
                         'required' => ($requiredFields['tags'] ?? true) ? 'required' : '',
                     ])
                     <small class="text-muted">Select relevant tags to help categorize this publication. At least one tag is required for content indexing.</small>
@@ -442,9 +494,14 @@
                         <option value="">Select License</option>
                         @php
                             $licenses = \App\Models\License::where('is_active', true)->orderBy('sort_order')->orderBy('name')->get();
+                            // Find Open Access license ID for default selection
+                            $openAccessLicense = $licenses->firstWhere('short_name', 'Open Access');
+                            $openAccessId = $openAccessLicense ? $openAccessLicense->id : null;
+                            // Determine if Open Access should be selected (default when no license is set)
+                            $shouldSelectOpenAccess = !@$row->license_id && !old('license_id') && $openAccessId;
                         @endphp
                         @foreach($licenses as $license)
-                            <option value="{{ $license->id }}" {{ (@$row->license_id == $license->id || old('license_id') == $license->id) ? 'selected' : '' }}>
+                            <option value="{{ $license->id }}" {{ (@$row->license_id == $license->id || old('license_id') == $license->id || ($shouldSelectOpenAccess && $license->id == $openAccessId)) ? 'selected' : '' }}>
                                 {{ $license->name }}
                                 @if($license->short_name ?? false)
                                     ({{ $license->short_name }})
@@ -583,7 +640,7 @@
 
             if (Array.isArray(theme_subs)) {
                 theme_subs.forEach(function(item) {
-                    $('.subtheme').append(
+                $('.subtheme').append(
                         '<option value="' + item.id + '">' + item.description + '</option>'
                     );
                 });
@@ -595,37 +652,103 @@
             }
         });
 
-        // Fancy drag & drop for attachments
-        var $drop = $('#dropzone-attachments');
+        // File input with ability to add multiple files incrementally
         var $input = $('#attachments');
-        if ($drop.length && $input.length) {
-            $drop.on('click', function() { $input.trigger('click'); });
-            $drop.on('dragover dragenter', function(e) {
-                e.preventDefault(); e.stopPropagation();
-                $drop.addClass('dragover');
-            });
-            $drop.on('dragleave dragend drop', function(e) {
-                e.preventDefault(); e.stopPropagation();
-                $drop.removeClass('dragover');
-            });
-            $drop.on('drop', function(e) {
-                var files = e.originalEvent.dataTransfer.files;
-                if (!files || !files.length) return;
-                // Merge with existing FileList
+        var existingFiles = []; // Store existing files
+        
+        if ($input.length) {
+            // Clear any existing preview icons from attachment_js.blade.php
+            $input.closest('.mb-2').find('.preview').empty();
+            
+            // Load existing files on page load (for edit mode)
+            if ($input[0].files && $input[0].files.length > 0) {
+                existingFiles = Array.from($input[0].files);
+            }
+            
+            $input.on('change', function() {
+                var newFiles = Array.from(this.files);
+                
+                // Merge new files with existing files (avoid duplicates)
+                var mergedFiles = [...existingFiles];
+                newFiles.forEach(function(newFile) {
+                    // Check if file already exists (by name and size)
+                    var exists = mergedFiles.some(function(existingFile) {
+                        return existingFile.name === newFile.name && existingFile.size === newFile.size;
+                    });
+                    if (!exists) {
+                        mergedFiles.push(newFile);
+                    }
+                });
+                
+                // Update existing files list
+                existingFiles = mergedFiles;
+                
+                // Update the input with merged files using DataTransfer
                 const dT = new DataTransfer();
-                // Add old files first
-                if ($input[0].files && $input[0].files.length) {
-                    Array.from($input[0].files).forEach(f => dT.items.add(f));
-                }
-                // Add new dropped files
-                Array.from(files).forEach(f => dT.items.add(f));
-                $input[0].files = dT.files;
-                $input.trigger('change');
+                mergedFiles.forEach(function(file) {
+                    dT.items.add(file);
+                });
+                this.files = dT.files;
+                
+                // Clear any large icon previews and update with our custom preview
+                var previewDiv = $input.closest('.mb-2').find('.preview');
+                previewDiv.empty(); // Clear any existing preview content
+                updateFilePreview();
             });
+            
+            // Function to update file preview
+            function updateFilePreview() {
+                var files = $input[0].files;
+                var previewDiv = $input.closest('.mb-2').find('.preview');
+                if (files && files.length > 0) {
+                    var fileList = '<div class="mt-2"><small class="text-success"><strong>Selected files (' + files.length + '):</strong></small><ul class="list-unstyled mt-1">';
+                    Array.from(files).forEach(function(file, index) {
+                        fileList += '<li class="mb-1">';
+                        fileList += '<i class="fa fa-file text-muted"></i> ';
+                        fileList += '<span>' + file.name + '</span> ';
+                        fileList += '<small class="text-muted">(' + (file.size / 1024).toFixed(2) + ' KB)</small> ';
+                        fileList += '<button type="button" class="btn btn-sm btn-link text-danger p-0 ml-2" onclick="removeFile(' + index + ')"><i class="fa fa-times"></i></button>';
+                        fileList += '</li>';
+                    });
+                    fileList += '</ul>';
+                    fileList += '<small class="text-muted"><i class="fa fa-info-circle"></i> Click "Choose Files" again to add more files</small>';
+                    fileList += '</div>';
+                    previewDiv.html(fileList);
+                } else {
+                    previewDiv.html('');
+                }
+            }
+            
+            // Function to remove a file (accessible globally)
+            window.removeFile = function(index) {
+                var files = Array.from($input[0].files);
+                files.splice(index, 1);
+                
+                // Update existing files list
+                existingFiles = files;
+                
+                // Update the input with remaining files
+                const dT = new DataTransfer();
+                files.forEach(function(file) {
+                    dT.items.add(file);
+                });
+                $input[0].files = dT.files;
+                
+                // Update preview
+                updateFilePreview();
+            };
+            
+            // Initial preview update
+            if (existingFiles.length > 0) {
+                updateFilePreview();
+            }
         }
 
         // AI summary extraction from first selected file
         function extractSummaryFromFile(file){
+            // Show loader
+            $('#ai-description-loader').slideDown(300);
+            
             var formData = new FormData();
             formData.append('file', file);
             formData.append('language', 'en');
@@ -638,6 +761,9 @@
                 processData: false,
                 contentType: false,
                 success: function(resp){
+                    // Hide loader
+                    $('#ai-description-loader').slideUp(300);
+                    
                     if(!resp || !resp.content) return;
                     if (!$('#summernote').next('.note-editor').length && typeof $.fn.summernote === 'function') {
                         $('#summernote').summernote({ height: 300 });
@@ -648,6 +774,11 @@
                     } else if (confirm('Replace existing description with AI-extracted summary?')) {
                         $('#summernote').summernote('code', resp.content);
                     }
+                },
+                error: function(xhr, status, error){
+                    // Hide loader on error
+                    $('#ai-description-loader').slideUp(300);
+                    console.error('AI extraction error:', error);
                 }
             });
         }
@@ -721,7 +852,7 @@
                 $('.link-required-asterisk').show();
                 $('.link-required-text').show();
                 $('#publication').prop('required', true);
-            } else {
+              } else {
                 $('.link-required-asterisk').hide();
                 $('.link-required-text').hide();
                 $('#publication').prop('required', false);
@@ -810,7 +941,7 @@
                 alert(errorMessage || 'Please fill in all required fields marked with a red asterisk (*) before proceeding.');
                 return false;
             }
-            
+
             $('#smartwizard').smartWizard("next");
             return true;
         });
@@ -826,14 +957,299 @@
                 $('.bs-callout-warning').toggleClass('hidden', ok);
 
             })
-            .on('form:submit', function() {
+            .on('form:submit', function(e) {
                 // Additional validation for tags before form submission
                 var tagsSelect = $('select[name="tags[]"]');
                 if (tagsSelect.length && (!tagsSelect.val() || tagsSelect.val().length === 0)) {
                     alert('Please select at least one tag/health topic to help categorize your publication.');
                     return false;
                 }
-                return true; // Allow form submission
+                
+                // Intercept form submission to manually add files
+                var fileInput = $('#attachments');
+                if (fileInput.length && fileInput[0].files && fileInput[0].files.length > 0) {
+                    console.log('Files detected before submission:', fileInput[0].files.length);
+                    
+                    // Create FormData from form
+                    var form = document.getElementById('publication_form');
+                    var formData = new FormData(form);
+                    
+                    // Clear existing files from FormData and add our files manually
+                    formData.delete('files'); // Remove any existing files entry
+                    formData.delete('files[]'); // Remove any existing files[] entry
+                    
+                    // Add each file individually
+                    Array.from(fileInput[0].files).forEach(function(file, index) {
+                        formData.append('files[]', file);
+                        console.log('Added file to FormData:', file.name, '(' + (file.size / 1024).toFixed(2) + ' KB)');
+                    });
+                    
+                    // Prevent default form submission
+                    e.preventDefault();
+                    
+                    // Show loading indicator
+                    var submitBtn = form.querySelector('button[type="submit"]');
+                    var originalBtnText = submitBtn ? submitBtn.innerHTML : '';
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
+                    }
+                    
+                    // Submit via AJAX with FormData
+                    $.ajax({
+                        url: form.action,
+                        method: 'POST',
+                        data: formData,
+                        processData: false,
+                        contentType: false,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        success: function(response) {
+                            console.log('Form submitted successfully:', response);
+                            
+                            // Handle response
+                            if (response.status === 200 && response.alert_class === 'success') {
+                                // Show success message
+                                if (response.message) {
+                                    alert(response.message);
+                                }
+                                // Redirect to publications page
+                                window.location.href = '{{ route("account.publications") }}';
+                            } else {
+                                // Show error message
+                                alert(response.message || 'An error occurred. Please try again.');
+                                if (submitBtn) {
+                                    submitBtn.disabled = false;
+                                    submitBtn.innerHTML = originalBtnText;
+                                }
+                            }
+                        },
+                        error: function(xhr) {
+                            console.error('Form submission error:', xhr);
+                            var errorMsg = 'An error occurred while submitting the form.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            } else if (xhr.responseText) {
+                                try {
+                                    var errorResponse = JSON.parse(xhr.responseText);
+                                    if (errorResponse.message) {
+                                        errorMsg = errorResponse.message;
+                                    }
+                                } catch(e) {
+                                    // Use default error message
+                                }
+                            }
+                            alert(errorMsg);
+                            if (submitBtn) {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                            }
+                        }
+                    });
+                    
+                    return false; // Prevent default form submission
+                } else {
+                    console.log('No files attached to input - submitting normally');
+                    // No files, submit normally
+                    return true;
+                }
             });
+    });
+    
+    // Add direct form submit handler like admin form (more reliable than Parsley)
+    $(document).ready(function() {
+        var form = $('#publication_form');
+        if (form.length === 0) {
+            // Fallback: try alternate form selector
+            form = $('form.publications');
+        }
+        
+        if (form.length > 0) {
+            form.off('submit').on('submit', function(e) {
+                e.preventDefault();
+                
+                var formEl = $(this);
+                var formData = new FormData(formEl[0]);
+                
+                // Manually add files if they exist (handles DataTransfer-set files)
+                var fileInput = $('#attachments');
+                if (!fileInput.length || !fileInput[0].files || fileInput[0].files.length === 0) {
+                    // Try alternative selector
+                    fileInput = $('input[name="files"]');
+                }
+                
+                if (fileInput.length && fileInput[0].files && fileInput[0].files.length > 0) {
+                    console.log('Frontend form: Files detected before submission:', fileInput[0].files.length);
+                    
+                    // Clear existing files from FormData and add our files manually
+                    formData.delete('files'); // Remove any existing files entry
+                    formData.delete('files[]'); // Remove any existing files[] entry
+                    
+                    // Add each file individually
+                    Array.from(fileInput[0].files).forEach(function(file, index) {
+                        formData.append('files[]', file);
+                        console.log('Frontend form: Added file to FormData:', file.name, '(' + (file.size / 1024).toFixed(2) + ' KB)');
+                    });
+                } else {
+                    console.log('Frontend form: No files detected in input');
+                }
+                
+                var url = formEl.attr('action');
+                
+                // Show loading indicator
+                var submitBtn = formEl.find('button[type="submit"]');
+                var originalBtnText = submitBtn.length ? submitBtn.html() : '';
+                if (submitBtn.length) {
+                    submitBtn.prop('disabled', true);
+                    submitBtn.html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
+                }
+                
+                $.ajax({
+                    url: url,
+                    type: 'post',
+                    data: formData,
+                    cache: false,
+                    contentType: false,
+                    processData: false,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest'
+                    },
+                    success: function(response) {
+                        console.log('Frontend form: Submission response:', response);
+                        
+                        // Check for success using alert_class or status
+                        var isSuccess = (response.alert_class === 'success' || response.status === 'success');
+                        
+                        if (isSuccess) {
+                            // Show success message using LobiBox
+                            var successMsg = response.message || 'Publication submitted successfully!';
+                            
+                            if (typeof Lobibox !== 'undefined') {
+                                Lobibox.notify('success', {
+                                    size: 'mini',
+                                    sound: false,
+                                    delay: 3000,
+                                    title: 'Success',
+                                    pauseDelayOnHover: true,
+                                    position: 'top right',
+                                    msg: successMsg,
+                                    callback: function() {
+                                        // Redirect after notification closes
+                                        window.location.href = '{{ route("account.publications") }}';
+                                    }
+                                });
+                                // Also redirect after delay in case callback doesn't fire
+                                setTimeout(function(){
+                                    window.location.href = '{{ route("account.publications") }}';
+                                }, 3000);
+                            } else {
+                                // Fallback to alert if LobiBox not loaded
+                                alert(successMsg);
+                                setTimeout(function(){
+                                    window.location.href = '{{ route("account.publications") }}';
+                                }, 2000);
+                            }
+                        } else {
+                            // Show error message
+                            var errorMsg = response.message || 'An error occurred. Please try again.';
+                            if (typeof Lobibox !== 'undefined') {
+                                Lobibox.notify('error', {
+                                    size: 'mini',
+                                    sound: false,
+                                    delay: 5000,
+                                    title: 'Error',
+                                    pauseDelayOnHover: true,
+                                    position: 'top right',
+                                    msg: errorMsg
+                                });
+                            } else {
+                                alert(errorMsg);
+                            }
+                            if (submitBtn.length) {
+                                submitBtn.prop('disabled', false);
+                                submitBtn.html(originalBtnText);
+                            }
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Frontend form submission error:', xhr);
+                        
+                        var errorMsg = 'An error occurred while submitting the form.';
+                        var errorMessages = [];
+                        
+                        // Handle validation errors (422 status)
+                        if (xhr.status === 422 && xhr.responseJSON) {
+                            if (xhr.responseJSON.errors) {
+                                // Laravel validation errors
+                                var errors = xhr.responseJSON.errors;
+                                for (var field in errors) {
+                                    if (errors.hasOwnProperty(field)) {
+                                        if (Array.isArray(errors[field])) {
+                                            errorMessages = errorMessages.concat(errors[field]);
+                                        } else {
+                                            errorMessages.push(errors[field]);
+                                        }
+                                    }
+                                }
+                                if (errorMessages.length > 0) {
+                                    errorMsg = errorMessages.join('<br>');
+                                }
+                            } else if (xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                        } else if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMsg = xhr.responseJSON.message;
+                        } else if (xhr.responseText) {
+                            try {
+                                var errorResponse = JSON.parse(xhr.responseText);
+                                if (errorResponse.message) {
+                                    errorMsg = errorResponse.message;
+                                } else if (errorResponse.errors) {
+                                    var errors = errorResponse.errors;
+                                    for (var field in errors) {
+                                        if (errors.hasOwnProperty(field)) {
+                                            if (Array.isArray(errors[field])) {
+                                                errorMessages = errorMessages.concat(errors[field]);
+                                            } else {
+                                                errorMessages.push(errors[field]);
+                                            }
+                                        }
+                                    }
+                                    if (errorMessages.length > 0) {
+                                        errorMsg = errorMessages.join('<br>');
+                                    }
+                                }
+                            } catch(e) {
+                                // Use default error message
+                            }
+                        }
+                        
+                        // Display error using LobiBox
+                        if (typeof Lobibox !== 'undefined') {
+                            Lobibox.notify('error', {
+                                size: 'normal',
+                                sound: false,
+                                delay: 6000,
+                                title: 'Validation Error',
+                                pauseDelayOnHover: true,
+                                position: 'top right',
+                                msg: errorMsg
+                            });
+                        } else {
+                            alert(errorMsg);
+                        }
+                        
+                        // Re-enable submit button
+                        if (submitBtn.length) {
+                            submitBtn.prop('disabled', false);
+                            submitBtn.html(originalBtnText);
+                        }
+                    }
+                });
+                
+                return false;
+            });
+        }
     });
 </script>

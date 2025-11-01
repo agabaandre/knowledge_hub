@@ -104,6 +104,11 @@ class SettingsRepository{
             $settings->publication_required_fields = json_encode($requiredFields);
         }
 
+        // Version submission setting
+        if (Schema::hasColumn('setting', 'enable_version_submission')) {
+            $settings->enable_version_submission = (bool)$request->boolean('enable_version_submission', true);
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings

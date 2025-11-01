@@ -101,8 +101,32 @@
 
         var form = $(this);
 
-        // Get the form data.]
+        // Get the form data
         var formData = new FormData(form.get(0));
+        
+        // Manually add files if they exist (handles DataTransfer-set files)
+        // Check both possible file input IDs/names
+        var fileInput = $('#attachments');
+        if (!fileInput.length || !fileInput[0].files || fileInput[0].files.length === 0) {
+            // Try alternative selector
+            fileInput = $('input[name="files"]');
+        }
+        
+        if (fileInput.length && fileInput[0].files && fileInput[0].files.length > 0) {
+            console.log('Admin form: Files detected before submission:', fileInput[0].files.length);
+            
+            // Clear existing files from FormData and add our files manually
+            formData.delete('files'); // Remove any existing files entry
+            formData.delete('files[]'); // Remove any existing files[] entry
+            
+            // Add each file individually
+            Array.from(fileInput[0].files).forEach(function(file, index) {
+                formData.append('files[]', file);
+                console.log('Admin form: Added file to FormData:', file.name, '(' + (file.size / 1024).toFixed(2) + ' KB)');
+            });
+        } else {
+            console.log('Admin form: No files detected in input');
+        }
 
         var url = form.attr('action');
 
@@ -113,7 +137,11 @@
             cache: false,
             contentType: false,
             processData: false,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function(response) {
+                console.log('Admin form: Submission response:', response);
                 if (response.status == 'success') {
                     swal( 'Success!',response.message,'success');
 
@@ -124,6 +152,14 @@
                 } else {
                     swal( 'Error!',response.message,'Error')
                 }
+            },
+            error: function(xhr) {
+                console.error('Admin form submission error:', xhr);
+                var errorMsg = 'An error occurred while submitting the form.';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMsg = xhr.responseJSON.message;
+                }
+                swal('Error!', errorMsg, 'error');
             }
         });
 

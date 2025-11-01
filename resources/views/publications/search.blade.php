@@ -37,12 +37,12 @@
 
                 <div class="col-lg-4">
                     <style>
-                        .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
+                        .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
                         .sidebar-content h5{color:var(--theme-color-primary, #119A48);margin-bottom:15px}
                         .sidebar-content .btn-outline-primary{color:var(--theme-color-primary, #119A48);border-color:var(--theme-color-primary, #119A48)}
                         .sidebar-content .btn-outline-primary:hover{background:var(--theme-color-primary, #119A48);color:#fff}
                         .sidebar-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
-                        .sidebar-tag-pill{display:inline-block;padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:500;color:#ffffff !important;text-decoration:none;border-radius:12px;transition:all 0.2s ease;white-space:nowrap;background-color:var(--theme-color-primary, #119A48) !important;border:1px solid rgba(17,154,72,0.3)}
+                        .sidebar-tag-pill{display:inline-block;padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:500;color:#ffffff !important;text-decoration:none;border-radius:0.25rem;transition:all 0.2s ease;white-space:nowrap;background-color:var(--theme-color-primary, #119A48) !important;border:1px solid rgba(17,154,72,0.3)}
                         .sidebar-tag-pill:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(17,154,72,0.3);color:#ffffff !important;text-decoration:none;background-color:var(--theme-color-primary, #119A48) !important}
                     </style>
 
@@ -60,6 +60,25 @@
                         @endforeach
                       </div>
                     </div>
+                    @else
+                    {{-- Fallback: Show empty state or get tags from view composer --}}
+                    @php
+                        $allTags = \App\Models\Tag::orderBy('id', 'desc')->limit(10)->get();
+                    @endphp
+                    @if($allTags->count() > 0)
+                    <div class="sidebar-content">
+                      <h5 class="mb-3">Popular Tags</h5>
+                      <div class="sidebar-tags">
+                        @foreach($allTags as $tag)
+                        <a href="{{ url('records')}}?tag={{$tag->id}}" 
+                           class="sidebar-tag-pill" 
+                           title="{{$tag->tag_text}}">
+                          {{ truncate($tag->tag_text,15) }}
+                        </a>
+                        @endforeach
+                      </div>
+                    </div>
+                    @endif
                     @endif
 
                     {{-- Related Resources --}}
@@ -124,6 +143,7 @@
                     </div>
                     @endif
                 </div>
+            </div>
             </div>
         </div>
     @endsection

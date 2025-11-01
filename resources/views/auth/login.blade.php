@@ -352,7 +352,7 @@
                                 Forgot Password?
                             </a>
                         </div>
-                    </div>
+                        </div>
 
                     <button type="submit" class="btn btn-login">
                         <i class="fa fa-sign-in-alt me-2"></i>Sign In
@@ -368,7 +368,7 @@
                 @if($hasSocialLogin)
                 <div class="divider">
                     <span>or continue with</span>
-                </div>
+                        </div>
 
                 <div class="social-btn-group">
                     @if(settings()->enable_microsoft_login ?? true)

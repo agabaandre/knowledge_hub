@@ -6,7 +6,7 @@
     .category-card {
         background-color: #fff;
         border: 1px solid #e0e0e0;
-        border-radius: 0.75rem;
+        border-radius: 0.25rem;
         box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
         transition: all 0.15s ease-in-out;
         padding: 1.25rem;

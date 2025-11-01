@@ -22,8 +22,8 @@ class CommsOfPracticeRepository{
 
         $access_grp = ($request->id)?CommunityOfPractice::find($request->id):new CommunityOfPractice();
 
-        $access_grp->community_name = $request->community_name;
-        $access_grp->description = $request->description;
+        $access_grp->community_name = clean_unicode($request->community_name ?? '');
+        $access_grp->description = clean_unicode($request->description ?? '');
         $access_grp->created_by = current_user()->id;
         $access_grp->save();
 

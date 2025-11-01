@@ -40,10 +40,10 @@ class ToolsAdminController extends Controller
         if(!$tool){
             return back()->with(['message'=>'Tool not found','status'=>'failure']);
         }
-        $tool->tool_name = $validated['tool_name'];
+        $tool->tool_name = clean_unicode($validated['tool_name'] ?? '');
         $tool->tool_category_id = $validated['tool_category_id'];
-        $tool->tool_desc = $validated['tool_desc'] ?? null;
-        $tool->tool_url = $validated['tool_url'] ?? null;
+        $tool->tool_desc = clean_unicode($validated['tool_desc'] ?? null);
+        $tool->tool_url = clean_unicode($validated['tool_url'] ?? null);
         $saved = $request->id ? $tool->update() : $tool->save();
 
         $data = $saved ? ['message'=>'Tool saved successfully','status'=>'success','data'=>$tool] : ['message'=>'Operation failed, try again','status'=>'failure'];

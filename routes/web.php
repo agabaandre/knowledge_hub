@@ -608,6 +608,7 @@ Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-reque
     Route::post('/', [ContentRequestAdminController::class, 'store'])->name('store');
     Route::get('/{id}/edit', [ContentRequestAdminController::class, 'edit'])->name('edit');
     Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->name('update');
+    Route::post('/{id}/process', [ContentRequestAdminController::class, 'process'])->name('process');
     Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->name('destroy');
 });
 

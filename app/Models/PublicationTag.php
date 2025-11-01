@@ -9,7 +9,11 @@ class PublicationTag extends Model
 {
     use HasFactory;
 
+    protected $table = 'publication_tags';
+    
     public $timestamps = false;
+    
+    protected $fillable = ['tag_id', 'publication_id'];
 
     public function tag(){
         return $this->belongsTo(Tag::class,"tag_id","id");

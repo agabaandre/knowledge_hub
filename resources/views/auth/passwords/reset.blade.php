@@ -252,10 +252,10 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('password.update') }}">
-                    @csrf
+                    <form method="POST" action="{{ route('password.update') }}">
+                        @csrf
 
-                    <input type="hidden" name="token" value="{{ $token }}">
+                        <input type="hidden" name="token" value="{{ $token }}">
 
                     <div class="form-group">
                         <label class="form-label" for="email">Email Address</label>
@@ -269,12 +269,12 @@
                                autofocus
                                placeholder="Enter your email address">
 
-                        @error('email')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
+                                @error('email')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                        </div>
 
                     <div class="form-group">
                         <label class="form-label" for="password">New Password</label>
@@ -286,12 +286,12 @@
                                autocomplete="new-password"
                                placeholder="Enter your new password">
 
-                        @error('password')
-                            <span class="invalid-feedback" role="alert">
-                                <strong>{{ $message }}</strong>
-                            </span>
-                        @enderror
-                    </div>
+                                @error('password')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                        </div>
 
                     <div class="form-group">
                         <label class="form-label" for="password-confirm">Confirm Password</label>
@@ -302,12 +302,12 @@
                                required 
                                autocomplete="new-password"
                                placeholder="Confirm your new password">
-                    </div>
+                        </div>
 
                     <button type="submit" class="btn btn-reset">
                         <i class="fa fa-key me-2"></i>Reset Password
-                    </button>
-                </form>
+                                </button>
+                    </form>
 
                 <div class="back-to-login">
                     <p>

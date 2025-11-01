@@ -798,6 +798,22 @@
                         </div>
                         <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
                     </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-file-alt"></i>
+                        Version Submission Configuration
+                    </div>
+
+                    <div class="form-group">
+                        <label>Version Submission Settings</label>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="enable_version_submission" name="enable_version_submission" value="1" @if(!isset($settings->enable_version_submission) || $settings->enable_version_submission) checked @endif>
+                            <label class="form-check-label" for="enable_version_submission">
+                                <i class="fa fa-plus-circle me-2"></i>Enable Version Submission
+                            </label>
+                        </div>
+                        <small class="info-text">When enabled, users can submit new versions of publications. Only parent publications (non-versions) can have versions submitted. Versions themselves cannot have versions submitted.</small>
+                    </div>
                 </div>
                 </div>
 

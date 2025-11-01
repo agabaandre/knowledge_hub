@@ -302,7 +302,7 @@
                         Remember your password?
                         <a href="{{ route('login') }}">Back to Login</a>
                     </p>
-            </div>
+                </div>
             </div>
         </div>
     </div>

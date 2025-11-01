@@ -3,7 +3,7 @@
     <option disabled value="">{{ $allfield ?? 'Select Tags' }}</option>
     @foreach ($tags as $tag)
         <option 
-        {{ (@$selected)?(in_array($tag->id,@$selected)?'selected':''):'' }}
+        {{ (@$selected && is_array(@$selected) && in_array($tag->id, @$selected)) ? 'selected' : '' }}
         
         value="{{$tag->id}}">
             {{$tag->tag_text}}
