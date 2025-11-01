@@ -48,10 +48,8 @@
                                     class="slide-item">Resource Sumaries & Abstracts</a></li>
                             <li aria-haspopup="true"><a href="{{ url('admin/publications/moderate') }}"
                                     class="slide-item">Moderate Comments</a></li>
-                            @can('view_content_requests')
-                                <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="slide-item">
-                                    <i class="fa fa-file-alt mr-1"></i>Content Requests</a></li>
-                            @endcan
+                            <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="slide-item">
+                                <i class="fa fa-file-alt mr-1"></i>Content Requests</a></li>
                             @can('manage_experts')
                                 <li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
                             @endcan

@@ -178,7 +178,7 @@
                     <label class="form-label" for="year_published">Year of Publication
                         @if(($requiredFields['year_published'] ?? false) == true)
                             <span class="text-danger">*</span>
-                        @endif
+                    @endif
                     </label>
                     <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
                         @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
@@ -195,13 +195,13 @@
                             <span class="text-danger">*</span>
                         @endif
                     </label>
-                    @include('partials.datarecords.categories_dropdown', [
-                        'field' => 'data_category_id',
+                        @include('partials.datarecords.categories_dropdown', [
+                            'field' => 'data_category_id',
                         'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
-                        'exclude_special' => true,
+                            'exclude_special' => true,
                         'selected' => @$row->publication_catgory_id ? $row->publication_catgory_id : old('data_category_id') ?? '',
-                    ])
-                </div>
+                        ])
+                    </div>
                 <div class="col-md-6 mb-2">
                         <label class="form-label" for="publication">Sub Category</label>
                         @include('partials.publications.filecategory_dropdown', [
@@ -222,7 +222,7 @@
                         'required' => ($requiredFields['theme'] ?? true) ? 'required' : '',
                         'selected' => @$row->sub_theme->thematic_area_id ? $row->sub_theme->thematic_area_id : old('theme'),
                         ])
-                </div>
+                    </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Sub Theme
                         @if(($requiredFields['sub_theme'] ?? true) == true)
@@ -247,7 +247,7 @@
                             'allfield' => 'All',
                         ])
                         <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
-                </div>
+                    </div>
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
                         @include('partials.countries.dropdown', [
@@ -273,12 +273,12 @@
                                 'selected' => @$row->author_id ?? null,
                         'allfield' => 'Select Corporate Source or Member State',
                             ])
-                </div>
+                        </div>
             @else
                 {{-- Hidden field for non-admin users - Parsley will ignore it --}}
                 <input type="hidden" name="author" value="" data-parsley-excluded="true">
             @endif
-            </div>
+                    </div>
         </div>
 
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
@@ -307,7 +307,7 @@
                                         </li>
                             @endforeach
                                 </ul>
-                            </div>
+                </div>
                         @endif
 
                         <div class="custom-file">
@@ -318,7 +318,7 @@
                             </label>
                         </div>
                         <div class="preview py-2" style="min-height: 24px;"></div>
-                    </div>
+            </div>
 
                     <div class="form-group mt-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
@@ -339,9 +339,9 @@
                             <div onclick="$('#cover').click()" class="cover_preview py-2"
                                 style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
                             </div>
-                    </div>
-                    </div>
                 </div>
+            </div>
+        </div>
 
             </div>
             <div class="col-md-6 justify-content-center video" style="display: none;">
@@ -364,10 +364,10 @@
                     <div>
                         <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description and extracting metadata...</strong>
                         <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation from your uploaded document.</p>
-                    </div>
                 </div>
             </div>
-            
+        </div>
+
             <div class="row">
                 <div class="col-md-12">
                     <div class="mb-2 p-2" style="background:#ffffff;">
@@ -406,7 +406,7 @@
                            placeholder="Author Affiliation/Institution" required
                            value="{{ @$publication->author_affiliation ?? old('author_affiliation') }}">
                     <small class="text-muted">Enter the institution, organization, or affiliation of the authors listed above.</small>
-                </div>
+                            </div>
                 
                 <div class="col-md-12 mb-2">
                     <label class="form-label" for="tags">Associated Tags/Health Topics
@@ -439,7 +439,7 @@
                         'required' => ($requiredFields['tags'] ?? true) ? 'required' : '',
                     ])
                     <small class="text-muted">Select relevant tags to help categorize this publication. At least one tag is required for content indexing.</small>
-                </div>
+                        </div>
                 
                 <div class="col-md-4 mb-2">
                     <label class="form-label" for="doi">DOI (Digital Object Identifier)
@@ -457,7 +457,7 @@
                         @endif
                         Format: 10.xxxx/xxxxx
                     </small>
-                </div>
+                    </div>
                 
                 <div class="col-md-4 mb-2">
                     <label class="form-label" for="issn">ISSN (International Standard Serial Number)
@@ -476,7 +476,7 @@
                         Format: XXXX-XXXX
                     </small>
                 </div>
-                
+
                 <div class="col-md-4 mb-2">
                     <label class="form-label" for="isbn">ISBN (International Standard Book Number)
                         @if(($requiredFields['isbn'] ?? false) == true)
@@ -518,7 +518,7 @@
                             $openAccessId = $openAccessLicense ? $openAccessLicense->id : null;
                             // Determine if Open Access should be selected (default when no license is set)
                             $shouldSelectOpenAccess = !@$row->license_id && !old('license_id') && $openAccessId;
-                        @endphp
+                            @endphp
                         @foreach($licenses as $license)
                             <option value="{{ $license->id }}" {{ (@$row->license_id == $license->id || old('license_id') == $license->id || ($shouldSelectOpenAccess && $license->id == $openAccessId)) ? 'selected' : '' }}>
                                 {{ $license->name }}
@@ -526,7 +526,7 @@
                                     ({{ $license->short_name }})
                                 @endif
                             </option>
-                        @endforeach
+                            @endforeach
                     </select>
                     <small class="text-muted">
                         @if(!($requiredFields['license_id'] ?? false))
@@ -559,8 +559,8 @@
                         @endif
                         Additional copyright details
                     </small>
-                </div>
-            </div>
+                        </div>
+                    </div>
 
             <h3 class="mb-2 mt-3" style="font-weight:600;">Journal Information <small class="text-muted">(For Journal Articles only)</small></h3>
             <div class="row mb-2">
@@ -574,8 +574,8 @@
                         </label>
                         <small class="text-muted d-block mt-1">Check this box to show journal-specific fields (Volume, Issue, Pages)</small>
                     </div>
-                </div>
-            </div>
+                    </div>
+                    </div>
             <div class="row journal-fields" id="journal-fields" style="display: none;">
                 <div style="display: flex; flex-wrap: wrap; gap: 15px; width: 100%;">
                     <div style="flex: 1 1 50%; min-width: 0;">
@@ -583,14 +583,14 @@
                         <input type="text" class="form-control" name="journal_name" id="journal_name" 
                                placeholder="Name of the journal" 
                                value="{{ @$row->journal_name ?? old('journal_name') }}">
-                    </div>
-                    
+                </div>
+
                     <div style="flex: 1 1 25%; min-width: 0;">
                         <label class="form-label" for="journal_volume">Volume</label>
                         <input type="text" class="form-control" name="journal_volume" id="journal_volume" 
                                placeholder="Vol" 
                                value="{{ @$row->journal_volume ?? old('journal_volume') }}">
-                    </div>
+            </div>
                     
                     <div style="flex: 1 1 12.5%; min-width: 0;">
                         <label class="form-label" for="journal_issue">Issue</label>
@@ -733,7 +733,7 @@
                     fileList += '<small class="text-muted"><i class="fa fa-info-circle"></i> Click "Choose Files" again to add more files</small>';
                     fileList += '</div>';
                     previewDiv.html(fileList);
-                } else {
+              } else {
                     previewDiv.html('');
                 }
             }

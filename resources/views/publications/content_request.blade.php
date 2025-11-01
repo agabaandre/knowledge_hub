@@ -398,7 +398,7 @@
 
                             <div class="form-group mt-3">
                                 @php
-                                    $recaptchaSiteKey = config('recaptcha.sitekey');
+                                    $recaptchaSiteKey = config('recaptcha.api_site_key');
                                     $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
                                 @endphp
                                 @if($showRecaptcha)

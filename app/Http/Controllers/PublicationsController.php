@@ -221,7 +221,7 @@ class PublicationsController extends Controller
             $messages = [];
 
             // Add reCAPTCHA validation if site key is configured
-            $recaptchaSiteKey = config('recaptcha.sitekey');
+            $recaptchaSiteKey = config('recaptcha.api_site_key');
             if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
                 $val_rules['g-recaptcha-response'] = 'required';
                 $messages['g-recaptcha-response.required'] = 'Please complete the CAPTCHA to proceed.';

@@ -415,7 +415,7 @@
                     </li>
 
                     <li class="categories {{ (request()->is('faqs') || request()->is('publications/content*')) ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-life-ring mr-1"></i> @endif Help<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-life-ring mr-1"></i> @endif Support<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             <li><a href="{{ url('faqs') }}">FAQs</a></li> 
                             <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>

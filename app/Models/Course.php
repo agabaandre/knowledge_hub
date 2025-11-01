@@ -10,8 +10,14 @@ class Course extends Model
     use HasFactory;
     protected $guarded=[];
     protected $fillable = [
-        'moodle_id', 'fullname', 'shortname', 'cover_image', 'category_id', 'summary',
-        'provider', 'content', 'course_url', 'is_moodle', 'is_active'
+        'moodle_id', 'fullname', 'shortname', 'cover_image', 'category_id', 'summary',                                                                          
+        'provider', 'content', 'course_url', 'is_moodle', 'is_active', 'rating'
+    ];
+
+    protected $casts = [
+        'rating' => 'decimal:2',
+        'is_moodle' => 'boolean',
+        'is_active' => 'boolean',
     ];
     public $appends = ['course_link'];
 

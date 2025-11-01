@@ -330,7 +330,7 @@
 
                     <div class="form-group">
                         @php
-                            $recaptchaSiteKey = config('recaptcha.sitekey');
+                            $recaptchaSiteKey = config('recaptcha.api_site_key');
                             $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
                         @endphp
                         @if($showRecaptcha)
@@ -375,6 +375,15 @@
                 <div class="divider">
                     <span>or continue with</span>
                         </div>
+
+                @if(settings()->enable_microsoft_login ?? true)
+                <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                    <p style="margin: 0; font-size: 0.875rem; color: #2d3748; line-height: 1.5;">
+                        <i class="fa fa-info-circle" style="color: #119A48; margin-right: 0.5rem;"></i>
+                        <strong>Africa CDC Staff:</strong> We recommend using Outlook/Microsoft login for seamless access.
+                    </p>
+                </div>
+                @endif
 
                 <div class="social-btn-group">
                     @if(settings()->enable_microsoft_login ?? true)
