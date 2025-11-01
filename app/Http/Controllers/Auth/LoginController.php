@@ -62,8 +62,16 @@ class LoginController extends Controller
 
         $request->validate($rules, $messages);
 
-        // Validate reCAPTCHA response if provided
-        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && $request->filled('g-recaptcha-response')) {
+        // Validate reCAPTCHA response - must be provided and valid if site key is configured
+        if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+            // Check if reCAPTCHA response is provided
+            if (!$request->filled('g-recaptcha-response')) {
+                throw ValidationException::withMessages([
+                    'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.',
+                ]);
+            }
+            
+            // Validate the reCAPTCHA response
             $recaptchaResponse = $request->input('g-recaptcha-response');
             if (!ReCaptcha::validate($recaptchaResponse)) {
                 throw ValidationException::withMessages([

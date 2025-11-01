@@ -218,15 +218,32 @@ class PublicationsController extends Controller
                 'email' => 'nullable|email',
             ];
 
-            if (config('recaptcha.sitekey')) {
+            $messages = [];
+
+            // Add reCAPTCHA validation if site key is configured
+            $recaptchaSiteKey = config('recaptcha.sitekey');
+            if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
                 $val_rules['g-recaptcha-response'] = 'required';
+                $messages['g-recaptcha-response.required'] = 'Please complete the CAPTCHA to proceed.';
             }
 
-            $messages = [
-                'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',
-            ];
-
             $request->validate($val_rules, $messages);
+
+            // Validate reCAPTCHA response if provided
+            if ($recaptchaSiteKey && !empty($recaptchaSiteKey)) {
+                if (!$request->filled('g-recaptcha-response')) {
+                    return back()->withErrors([
+                        'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.'
+                    ])->withInput();
+                }
+                
+                $recaptchaResponse = $request->input('g-recaptcha-response');
+                if (!\Biscolab\ReCaptcha\Facades\ReCaptcha::validate($recaptchaResponse)) {
+                    return back()->withErrors([
+                        'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.'
+                    ])->withInput();
+                }
+            }
 
             $saved = $this->publicationsRepo->save_content_request($request);
             if($saved):

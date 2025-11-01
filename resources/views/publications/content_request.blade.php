@@ -397,10 +397,16 @@
                             @endif
 
                             <div class="form-group mt-3">
-                                {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
-                                @error('g-recaptcha-response')
-                                    <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                                @enderror
+                                @php
+                                    $recaptchaSiteKey = config('recaptcha.sitekey');
+                                    $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
+                                @endphp
+                                @if($showRecaptcha)
+                                    {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+                                    @error('g-recaptcha-response')
+                                        <span class="text-danger small d-block mt-1">{{ $message }}</span>
+                                    @enderror
+                                @endif
                             </div>
 
                             <div class="submit-section">

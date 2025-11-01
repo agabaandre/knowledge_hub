@@ -329,15 +329,21 @@
                         </div>
 
                     <div class="form-group">
+                        @php
+                            $recaptchaSiteKey = config('recaptcha.sitekey');
+                            $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey);
+                        @endphp
+                        @if($showRecaptcha)
                             <div class="py-2">
-                            {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
+                                {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
                                 @error('g-recaptcha-response')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
                             </div>
-                        </div>
+                        @endif
+                    </div>
 
                     <div class="form-group mb-3">
                             <div class="d-flex align-items-center justify-content-between">
