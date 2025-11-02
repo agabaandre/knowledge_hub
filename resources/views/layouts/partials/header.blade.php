@@ -265,6 +265,71 @@
     display: none;
 }
 
+/* Mobile language selector - only for phones (not tablets) */
+.mobile-language-selector {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 10;
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .nav-header {
+        position: relative;
+        padding-right: 60px; /* Make room for language selector */
+    }
+    
+    .navigation-portrait .nav-header {
+        position: relative;
+        padding-right: 60px; /* Make room for language selector */
+    }
+    
+    .mobile-language-selector {
+        display: block !important;
+        position: absolute;
+        right: 10px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 100;
+    }
+    
+    .mobile-language-selector .menu-language-menu-container {
+        width: auto;
+        justify-content: flex-end;
+        margin: 0;
+    }
+    
+    .mobile-language-selector .language-selector-wrapper {
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .mobile-language-selector .language-selector-btn {
+        padding: 6px 10px;
+        font-size: 12px;
+        border-radius: 4px;
+        min-width: auto;
+    }
+    
+    .mobile-language-selector .language-selector-btn .lang-code {
+        display: none; /* Hide language code on very small screens, show only flag */
+    }
+    
+    .mobile-language-selector .language-dropdown {
+        right: 0;
+        left: auto;
+        min-width: 180px;
+    }
+}
+
+@media (min-width: 768px) {
+    .mobile-language-selector {
+        display: none !important;
+    }
+}
+
 @media (max-width: 1200px) {
     .mega-grid {
         grid-template-columns: repeat(3, 1fr);
@@ -317,6 +382,10 @@
             <div class="nav-header">
                 <a class="nav-brand" href="{{ url('/') }}"></a>
                 <div class="nav-toggle"></div>
+                {{-- Mobile Language Selector (phones only, not tablets) --}}
+                <div class="mobile-language-selector d-block d-md-none">
+                    @include('layouts.partials.langselect')
+                </div>
                 <div class="mobile_nav">
                     <ul>
                         <li>

@@ -69,7 +69,7 @@
                 <div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
                     <div class="footer_widget">
                         <h4 class="widget_title">Find us On</h4>
-                        <ul class="footer-menu list-inline">
+                        <ul class="footer-menu list-inline mb-3">
                             <li class="list-inline-item">
                                 <a href="{{ settings()->facebook }}" target="_blank" class="text-decoration-none"
                                     data-toggle="tooltip" data-placement="top" title="Facebook">
@@ -101,6 +101,57 @@
                                 </a>
                             </li>
                         </ul>
+                        <p class="text-white small mb-3">Download our mobile app for a better experience</p>
+                        
+                        {{-- Tags Section - 10 recent tags --}}
+                        @if((settings()->show_tags ?? false) && isset($tags) && count($tags) > 0)
+                        <div class="mt-3">
+                            <h5 class="widget_title mb-2" style="font-size:0.95rem;">Popular Tags</h5>
+                            <style>
+                            .footer-tags {
+                                display: flex;
+                                flex-wrap: wrap;
+                                gap: 0.5rem;
+                                margin-top: 0.75rem;
+                            }
+
+                            .tag-pill {
+                                display: inline-block;
+                                padding: 0.25rem 0.6rem;
+                                font-size: 0.75rem;
+                                font-weight: 500;
+                                color: #ffffff !important;
+                                text-decoration: none;
+                                border-radius: 12px;
+                                transition: all 0.2s ease;
+                                white-space: nowrap;
+                                background-color: rgba(17, 154, 72, 0.8) !important;
+                                text-shadow: 0 1px 2px rgba(0,0,0,0.3);
+                                border: 1px solid rgba(255,255,255,0.2);
+                            }
+
+                            .tag-pill:hover {
+                                transform: translateY(-2px);
+                                box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+                                color: #ffffff !important;
+                                text-decoration: none;
+                                background-color: rgba(17, 154, 72, 0.95) !important;
+                            }
+                            </style>
+                            <div class="footer-tags">
+                                @php 
+                                    $colors = [settings()->primary_color,settings()->primary_text_color,settings()->icon_font_color];
+                                @endphp
+                                @foreach($tags->take(10) as $tag)
+                                <a href="{{ url('records')}}?tag={{$tag->id}}" 
+                                   class="tag-pill" 
+                                   title="{{$tag->tag_text}}">
+                                    {{ truncate($tag->tag_text,15) }}
+                                </a>
+                                @endforeach
+                            </div>
+                        </div>
+                        @endif
                     </div>
                 </div>
 

@@ -257,15 +257,28 @@
                     @else
                         <div class="community-card">
                     @endif
-                        <h4>
-                            @if(request()->routeIs('account.my-communities'))
-                                <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <h4 style="margin: 0; flex: 1;">
+                                @if(request()->routeIs('account.my-communities'))
+                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
+                                        {{ $community->community_name }}
+                                    </a>
+                                @else
                                     {{ $community->community_name }}
-                                </a>
-                            @else
-                                {{ $community->community_name }}
+                                @endif
+                            </h4>
+                            @if(isset($community->is_public))
+                                @if($community->is_public)
+                                    <span class="badge" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
+                                        <i class="fa fa-globe mr-1"></i>Public
+                                    </span>
+                                @else
+                                    <span class="badge" style="background-color: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
+                                        <i class="fa fa-lock mr-1"></i>Private
+                                    </span>
+                                @endif
                             @endif
-                        </h4>
+                        </div>
                         <p>{!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 30, '...') !!}</p>
                         
                         {{-- Coverage Information --}}

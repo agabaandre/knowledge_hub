@@ -1,4 +1,85 @@
 <section class="middle gray" style="background-color: #f5f8fb;">
+    <style>
+        /* Fix broken cards on theme1 */
+        .task-listing {
+            display: flex;
+            align-items: stretch;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .task-listing:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+            transform: translateY(-2px);
+        }
+        
+        .task-listing-bid {
+            min-width: 200px;
+            width: 200px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+        
+        .task-listing-details {
+            flex: 1;
+            padding: 20px;
+        }
+        
+        .task-listing-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #2d3748;
+        }
+        
+        .task-listing-text {
+            color: #4a5568;
+            margin-top: 10px;
+        }
+        
+        .task-tags {
+            margin-top: 15px;
+        }
+        
+        .task-tags span {
+            display: inline-block;
+            padding: 4px 12px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-right: 8px;
+            font-size: 0.875rem;
+            color: #4a5568;
+        }
+        
+        .task-icons {
+            list-style: none;
+            padding: 0;
+            margin: 10px 0;
+        }
+        
+        .task-icons li {
+            display: inline-block;
+            margin-right: 15px;
+            color: #718096;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 767px) {
+            .task-listing {
+                flex-direction: column;
+            }
+            
+            .task-listing-bid {
+                width: 100%;
+                height: 200px;
+            }
+        }
+    </style>
     <div class="container py-5">
         <div class="row justify-content-center" data-aos="fade-in">
             <div class="col-12">
@@ -9,7 +90,7 @@
         </div>
         <div class="row" id="top_searches">
 
-            <div class="listings-container margin-top-35">
+            <div class="listings-container margin-top-35" style="width: 100%;">
 
                 @php
                     $i = 0;

@@ -1,7 +1,33 @@
 <!-- Intro Banner
 ================================================== -->
 <!-- add class "disable-gradient" to enable consistent background overlay -->
-<div data-background-image="{{ settings()->spotlight_banner }}" class="intro-banner">
+<style>
+.intro-banner {
+    opacity: 1 !important;
+    background-color: rgba(255, 255, 255, 0.95) !important;
+}
+
+.intro-banner::before {
+    background: rgba(255, 255, 255, 0.7) !important;
+    opacity: 0.9 !important;
+}
+
+.intro-banner::after {
+    opacity: 0.3 !important;
+    background: linear-gradient(135deg, rgba(17, 154, 72, 0.1) 0%, rgba(22, 198, 83, 0.1) 100%) !important;
+}
+
+.banner-headline {
+    opacity: 1 !important;
+    color: #333 !important;
+}
+
+.banner-headline * {
+    color: #333 !important;
+    opacity: 1 !important;
+}
+</style>
+<div data-background-image="{{ settings()->spotlight_banner }}" class="intro-banner disable-gradient">
     <div class="container">
 
         <!-- Intro Headline -->
@@ -32,13 +58,6 @@
                     </div>
                 </div>
                 @include('partials.search.advanced_search')
-
-                {{-- Tags directly after advanced filters (if enabled) --}}
-                @if(settings()->show_tags ?? false)
-                    <div class="row mt-2 px-2">
-                        @include('home.partials.tags')
-                    </div>
-                @endif
 
             </form>
 

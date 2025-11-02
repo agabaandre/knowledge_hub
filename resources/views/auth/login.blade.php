@@ -13,7 +13,7 @@
 
         .login-card {
             background: #ffffff;
-            border-radius: 16px;
+            border-radius: 4px;
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             max-width: 450px;
@@ -55,7 +55,7 @@
 
         .form-control {
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 4px;
             padding: 0.75rem 1rem;
             font-size: 0.95rem;
             transition: all 0.3s ease;
@@ -109,7 +109,7 @@
         .btn-login {
             background: var(--theme-color-primary, #119A48);
             border: none;
-            border-radius: 8px;
+            border-radius: 4px;
             padding: 0.875rem 1.5rem;
             font-size: 1rem;
             font-weight: 600;
@@ -163,7 +163,7 @@
             gap: 0.75rem;
             padding: 0.75rem 1rem;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 4px;
             background: white;
             color: #2d3748;
             text-decoration: none;
@@ -255,7 +255,7 @@
 
             .login-card {
                 margin: 1rem;
-                border-radius: 12px;
+                border-radius: 4px;
             }
 
             .login-header {
@@ -379,7 +379,7 @@
                         </div>
 
                 @if(settings()->enable_microsoft_login ?? true)
-                <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem;">
+                <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem;">
                     <p style="margin: 0; font-size: 0.875rem; color: #2d3748; line-height: 1.5;">
                         <i class="fa fa-info-circle" style="color: #119A48; margin-right: 0.5rem;"></i>
                         <strong>Africa CDC Staff:</strong> We recommend using Outlook/Microsoft login for seamless access.

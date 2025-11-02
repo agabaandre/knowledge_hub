@@ -152,6 +152,19 @@
             left: auto;
         }
     }
+    
+    /* Mobile phone specific styles (max-width: 767px, not tablets) */
+    @media (max-width: 767px) {
+        .language-selector-btn {
+            padding: 6px 10px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        
+        .language-selector-btn .lang-code {
+            display: none; /* Hide language code on very small screens, show only flag */
+        }
+    }
 </style>
 
 <div class="menu-language-menu-container">

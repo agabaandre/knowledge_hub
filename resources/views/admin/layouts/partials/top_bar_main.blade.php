@@ -198,7 +198,21 @@
                             
                             @if(isset($pending_cop_approvals) && $pending_cop_approvals->count() > 0)
                                 @foreach ($pending_cop_approvals->take(3) as $approval)
-                                    <a href="{{ route('admin.commsofpractice.details', $approval['community']->id ?? 0) }}" class="p-3 d-flex border-bottom notification-item">
+                                    @php
+                                        $community = $approval['community'] ?? null;
+                                        $communityId = $community ? $community->id : ($approval['member']->community_of_practice_id ?? 0);
+                                        $communityName = $community ? $community->community_name : 'Unknown Community';
+                                        
+                                        // Try to get community name directly if relationship failed
+                                        if (!$community && isset($approval['member']) && $approval['member']->community_of_practice_id) {
+                                            $directCommunity = \App\Models\CommunityOfPractice::find($approval['member']->community_of_practice_id);
+                                            if ($directCommunity) {
+                                                $communityName = $directCommunity->community_name;
+                                                $communityId = $directCommunity->id;
+                                            }
+                                        }
+                                    @endphp
+                                    <a href="{{ route('admin.commsofpractice.details', $communityId) }}" class="p-3 d-flex border-bottom notification-item">
                                         <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                                             <i class="fa fa-users text-primary"></i>
                                         </div>
@@ -211,7 +225,7 @@
                                                     @endif
                                                 </small>
                                             </div>
-                                            <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $approval['community']->community_name ?? 'Unknown Community' }}</p>
+                                            <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
                                             <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
                                         </div>
                                     </a>

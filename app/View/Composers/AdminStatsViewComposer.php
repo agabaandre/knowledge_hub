@@ -87,12 +87,20 @@ class AdminStatsViewComposer{
             ->limit(5)
             ->get()
             ->map(function($member) {
+                // Ensure community relationship is loaded, if null try to reload
+                if (!$member->community && $member->community_of_practice_id) {
+                    $member->load('community');
+                }
                 return [
                     'member' => $member,
                     'community' => $member->community,
                     'user' => $member->user,
                     'created_at' => $member->created_at,
                 ];
+            })
+            ->filter(function($approval) {
+                // Filter out approvals where community doesn't exist
+                return $approval['community'] !== null;
             });
 
         // Calculate total pending count
