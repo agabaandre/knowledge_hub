@@ -633,6 +633,132 @@
 
 <script type="text/javascript">
     $(document).ready(function() {
+        // Get regions data with countries (from ViewComposer)
+        var regionsData = @json($regions ?? []);
+        var allCountries = [];
+        
+        // Build a map of all countries with their region_id for quick lookup
+        if (regionsData && Array.isArray(regionsData)) {
+            regionsData.forEach(function(region) {
+                if (region.countries && Array.isArray(region.countries)) {
+                    region.countries.forEach(function(country) {
+                        allCountries.push({
+                            id: country.id,
+                            name: country.name,
+                            region_id: region.id
+                        });
+                    });
+                }
+            });
+        }
+
+        // Track if user has manually changed countries to prevent auto-override on subsequent region changes
+        var userManuallyChangedCountries = false;
+        var lastAutoSelectedCountries = null;
+        
+        // Handle region selection logic:
+        // - If "all" is selected (alone or with regions) → auto-select all countries
+        // - If ONE specific region is selected → auto-select all countries in that region
+        // - If MULTIPLE regions are selected → auto-select all countries in all those regions
+        // - User can ALWAYS manually change countries after auto-selection
+        $(document).on('change', '.rcc.select2, select[name="rccs[]"]', function() {
+            var selectedValues = $(this).val();
+            var countrySelect = $('.country.select2, select[name="countries[]"]');
+            
+            if (!countrySelect.length) {
+                return;
+            }
+            
+            // Only auto-select if user hasn't manually changed countries
+            // This prevents overriding user's manual selection when they change regions again
+            if (userManuallyChangedCountries) {
+                return; // Don't auto-select, let user's manual selection remain
+            }
+            
+            // Normalize to array
+            if (!Array.isArray(selectedValues)) {
+                selectedValues = selectedValues ? [selectedValues] : [];
+            }
+            
+            // Filter out "all" from the selection to get actual region IDs
+            var hasAll = selectedValues.includes('all');
+            var regionIds = selectedValues.filter(function(val) {
+                return val !== 'all' && val !== '' && val !== null && isNumeric(val);
+            }).map(function(id) { return parseInt(id); });
+            
+            // Helper function to check if value is numeric
+            function isNumeric(value) {
+                return !isNaN(parseFloat(value)) && isFinite(value);
+            }
+            
+            // Case 1: "all" is selected (alone or with other regions) → auto-select all countries
+            if (hasAll) {
+                // Auto-select all countries
+                var allCountryIds = [];
+                countrySelect.find('option').each(function() {
+                    var value = $(this).val();
+                    if (value && value !== '' && value !== null) {
+                        allCountryIds.push(value);
+                    }
+                });
+                
+                // Select all countries using Select2 if available
+                if (allCountryIds.length > 0) {
+                    lastAutoSelectedCountries = allCountryIds.slice(); // Store what was auto-selected
+                    if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
+                        countrySelect.val(allCountryIds).trigger('change.select2');
+                    } else {
+                        countrySelect.val(allCountryIds).trigger('change');
+                    }
+                }
+            }
+            // Case 2: One or more specific regions selected (not "all")
+            else if (regionIds.length > 0) {
+                // Auto-select all countries in all selected regions (one or multiple)
+                var regionCountryIds = [];
+                
+                // Find all countries that belong to the selected region(s) using our countries map
+                allCountries.forEach(function(country) {
+                    if (regionIds.includes(country.region_id)) {
+                        regionCountryIds.push(country.id.toString());
+                    }
+                });
+                
+                // Select all countries in the selected regions
+                if (regionCountryIds.length > 0) {
+                    lastAutoSelectedCountries = regionCountryIds.slice(); // Store what was auto-selected
+                    if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
+                        countrySelect.val(regionCountryIds).trigger('change.select2');
+                    } else {
+                        countrySelect.val(regionCountryIds).trigger('change');
+                    }
+                }
+            }
+        });
+        
+        // Track when user manually changes countries
+        $(document).on('change', '.country.select2, select[name="countries[]"]', function(e) {
+            // Check if this is a user-initiated change (not programmatic)
+            if (e.originalEvent) {
+                var currentValues = $(this).val();
+                // Check if current selection is different from what was auto-selected
+                if (lastAutoSelectedCountries && currentValues) {
+                    var currentArray = Array.isArray(currentValues) ? currentValues.sort() : [currentValues].sort();
+                    var lastArray = lastAutoSelectedCountries.slice().sort();
+                    
+                    // If different, user manually changed it
+                    if (JSON.stringify(currentArray) !== JSON.stringify(lastArray)) {
+                        userManuallyChangedCountries = true;
+                    }
+                } else if (currentValues && lastAutoSelectedCountries === null) {
+                    // If there was no auto-selection but user selected something, it's manual
+                    userManuallyChangedCountries = true;
+                } else if (!currentValues || (Array.isArray(currentValues) && currentValues.length === 0)) {
+                    // User cleared selection - this is also a manual change
+                    userManuallyChangedCountries = true;
+                }
+            }
+        });
 
         $('.theme').on('change', function(e) {
             var themeValue = $(this).val();

@@ -1,11 +1,11 @@
 <div id="perms{{$role->id}}0" class="modal fade" tabindex="-1">
     <div class="modal-dialog modal-xl mt-lg-5">
-        <div class="modal-content">
-            <form action="{{ route('permissions.torole') }}" class="feeFormperms{{$role->id}} bg-white" method="POST">
-                <div class="modal-header">
-                    <span class="font-weight-semibold modal-title">
+                        <div class="modal-content">
+                      <form action="{{ route('permissions.torole') }}" class="feeFormperms{{$role->id}} bg-white" method="POST">
+                            <div class="modal-header">
+                                <span class="font-weight-semibold modal-title">
                         {{ strtoupper($role->name) }} {{ __('auth.permissions') }} 
-                    </span>
+                                </span>
                     <button aria-label="Close" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span></button>
                 </div>
 
@@ -117,27 +117,27 @@
                                                     <span style="font-size: 0.8rem; line-height: 1.3; color: #333;">
                                                         {{ $perm->description ?? ucwords(str_replace('_', ' ', $perm->name)) }}
                                                     </span>
-                                                </label>
-                                            </div>
-                                        @endforeach
-                                    </div>
+	                                    </label>
+	                            </div>
+                              @endforeach
+                            </div>
                                 </div>
                             @endforeach
                         </div>
                     @endforeach
-                </div>
+                            </div>
 
                 <div class="modal-footer d-flex justify-content-between">
                     <button data-dismiss="modal" type="button" class="btn btn-secondary btn-sm">{{ __('general.close')}}</button>
-                    <button type="submit" class="btn btn-sm btn-success">
-                        <i class="icon-plus-circle2 mr-2"></i>
-                        {{ __('general.update')}} {{ __('auth.permissions')}}
-                    </button>
+                                <button type="submit" class="btn btn-sm btn-success">
+                                 <i class="icon-plus-circle2 mr-2"></i>
+                                 {{ __('general.update')}} {{ __('auth.permissions')}}
+                                </button>
+                            </div>
+                        </form>
+                        </div>
+                    </div>
                 </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 <style>
     .permission-module {

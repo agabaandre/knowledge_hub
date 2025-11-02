@@ -100,26 +100,26 @@
                             </div>
                         </div>
                         <table id="members-table" class="table table-hover table-bordered">
-                            <thead>
-                                <tr>
+                    <thead>
+                        <tr>
                                     <th style="width:60px;">#</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
+                            <th>Name</th>
+                            <th>Email</th>
                                     <th>Status</th>
                                     <th style="width:220px;">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($membership as $member)
-                                    <tr>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($membership as $member)
+                            <tr>
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $member->user->name }}</td>
-                                        <td>{{ $member->user->email }}</td>
-                                        <td>
-                                            @if ($member->is_approved == 1)
-                                                <span class="badge badge-success">Approved</span>
-                                            @elseif ($member->is_approved == 2)
-                                                <span class="badge badge-danger">Rejected</span>
+                                <td>{{ $member->user->name }}</td>
+                                <td>{{ $member->user->email }}</td>
+                                <td>
+                                    @if ($member->is_approved == 1)
+                                        <span class="badge badge-success">Approved</span>
+                                    @elseif ($member->is_approved == 2)
+                                        <span class="badge badge-danger">Rejected</span>
                                             @else
                                                 <span class="badge badge-warning">Pending</span>
                                             @endif
@@ -196,14 +196,14 @@
                                         <td>
                                             @if($invitation->responded_at)
                                                 {{ $invitation->responded_at->format('M d, Y H:i') }}
-                                            @else
+                                    @else
                                                 <span class="text-muted">-</span>
-                                            @endif
-                                        </td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
                     </div>
                 </div>
             </div>

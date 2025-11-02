@@ -82,8 +82,8 @@
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover">
-                            <thead>
-                                <tr>
+        <thead>
+            <tr>
                                     <th width="5%">#</th>
                                     <th width="20%">Subject</th>
                                     <th width="25%">Description</th>
@@ -92,9 +92,9 @@
                                     <th width="10%">Status</th>
                                     <th width="10%">Date</th>
                                     <th width="15%">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
+            </tr>
+        </thead>
+        <tbody>
                                 @forelse($contentRequests as $index => $request)
                                     <tr>
                                         <td>{{ $contentRequests->firstItem() + $index }}</td>
@@ -159,12 +159,12 @@
                                                       method="POST" 
                                                       style="display:inline;"
                                                       onsubmit="return confirm('Are you sure you want to delete this content request?');">
-                                                    @csrf
-                                                    @method('DELETE')
+                            @csrf
+                            @method('DELETE')
                                                     <button type="submit" class="btn btn-danger btn-sm" title="Delete">
                                                         <i class="fa fa-trash"></i>
                                                     </button>
-                                                </form>
+                        </form>
                                             </div>
                                         </td>
                                     </tr>
@@ -175,15 +175,15 @@
                                                 <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
                                                 <p class="text-muted">No content requests found.</p>
                                             </div>
-                                        </td>
-                                    </tr>
+                    </td>
+                </tr>
                                 @endforelse
-                            </tbody>
-                        </table>
+        </tbody>
+    </table>
                     </div>
 
                     <div class="d-flex justify-content-center mt-3">
-                        {{ $contentRequests->links() }}
+    {{ $contentRequests->links() }}
                     </div>
                 </div>
             </div>
@@ -334,4 +334,4 @@ $(document).ready(function() {
     });
 });
 </script>
-@endsection
+@endsection 

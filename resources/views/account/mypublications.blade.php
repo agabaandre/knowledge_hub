@@ -5,6 +5,55 @@
 <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 
 <style>
+    /* Stat card styles with colored backgrounds */
+    .stat-card {
+        border-radius: 8px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        color: white !important;
+        min-height: auto;
+    }
+    .stat-card:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        transform: translateY(-2px);
+    }
+    .stat-card .stat-icon-wrapper {
+        display: flex;
+        align-items: center;
+        justify-content: flex-start;
+        margin-bottom: 0.4rem;
+    }
+    .stat-card .stat-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+        flex-shrink: 0;
+        background: rgba(255, 255, 255, 0.2) !important;
+        color: white !important;
+    }
+    .stat-card .stat-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white !important;
+        margin-bottom: 0.15rem;
+        line-height: 1.2;
+    }
+    .stat-card .stat-label {
+        font-size: 0.75rem;
+        color: rgba(255, 255, 255, 0.9) !important;
+        text-transform: uppercase;
+        font-weight: 500;
+        line-height: 1.2;
+    }
+    
     /* A4-like PDF Preview Modal Styles */
     #previewModal .modal-dialog {
         max-width: 90vw;
@@ -136,63 +185,47 @@
 			<h5 class="mb-3"><i class="fa fa-file-alt mr-2"></i>Publications Statistics</h5>
 			<div class="row mb-3">
 				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #119A48 0%, #0e7a3a 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Publications</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['total'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-file-alt fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_corporate_green ?? '#1A5632' }} 0%, {{ settings()->au_green ?? '#1A5632' }} 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-file-alt"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['total'] ?? 0) }}</div>
+						<div class="stat-label">Total Publications</div>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Approved</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['approved'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-check-circle fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_green ?? '#1A5632' }} 0%, #0d7a3a 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-check-circle"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['approved'] ?? 0) }}</div>
+						<div class="stat-label">Approved</div>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.9) !important;">Pending</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['pending'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-clock fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_gold ?? '#B4A269' }} 0%, #9a884f 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-clock"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['pending'] ?? 0) }}</div>
+						<div class="stat-label">Pending</div>
 					</div>
 				</div>
 				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #17a2b8 0%, #138496 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Views</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['total_views'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-eye fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_red ?? '#9F2241' }} 0%, #7a1a33 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-eye"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['total_views'] ?? 0) }}</div>
+						<div class="stat-label">Total Views</div>
 					</div>
 				</div>
 			</div>
@@ -200,48 +233,36 @@
 			<h5 class="mb-3 mt-3"><i class="fa fa-comments mr-2"></i>Forum Engagement Statistics</h5>
 			<div class="row mb-3">
 				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Forum Posts</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_posts'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-comment-dots fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_grey_text ?? '#58595B' }} 0%, #464749 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-comment-dots"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['forum_posts'] ?? 0) }}</div>
+						<div class="stat-label">Forum Posts</div>
 					</div>
 				</div>
 				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #343a40 0%, #23272b 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Forum Comments</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_comments'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-reply fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_plum ?? '#522B39' }} 0%, #3d1f2a 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-reply"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['forum_comments'] ?? 0) }}</div>
+						<div class="stat-label">Forum Comments</div>
 					</div>
 				</div>
 				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="card text-white" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 0.25rem; border: none; color: white !important;">
-						<div class="card-body p-3" style="color: white !important;">
-							<div class="d-flex justify-content-between align-items-center">
-								<div style="color: white !important;">
-									<h6 class="mb-1" style="font-size: 0.75rem; color: rgba(255,255,255,0.8) !important;">Total Engagements</h6>
-									<h5 class="mb-0" style="font-size: 1.25rem; color: white !important;">{{ number_format($stats['forum_engagements'] ?? 0) }}</h5>
-								</div>
-								<div>
-									<i class="fa fa-chart-line fa-lg" style="color: rgba(255,255,255,0.7) !important;"></i>
-								</div>
+					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_corporate_green ?? '#1A5632' }} 0%, {{ settings()->au_green ?? '#1A5632' }} 100%);">
+						<div class="stat-icon-wrapper">
+							<div class="stat-icon">
+								<i class="fa fa-chart-line"></i>
 							</div>
 						</div>
+						<div class="stat-value">{{ number_format($stats['forum_engagements'] ?? 0) }}</div>
+						<div class="stat-label">Total Engagements</div>
 					</div>
 				</div>
 			</div>

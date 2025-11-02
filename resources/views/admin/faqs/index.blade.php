@@ -1,7 +1,7 @@
 @extends('admin.layouts.main')
 
 @section('styles')
-    @include('common.table')
+ @include('common.table')
     <link href="{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}" rel="stylesheet">
     <style>
         .card { border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem; }
@@ -19,12 +19,12 @@
                 <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
                 <li class="breadcrumb-item active" aria-current="page">FAQs</li>
             </ol>
-        </div>
-    </div>
+		</div>
+					</div>
 
     <div class="row">
         <!-- Filters Card -->
-        <div class="col-md-12">
+					<div class="col-md-12">
             <div class="card">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <div>
@@ -54,38 +54,38 @@
                         </div>
                     </form>
                 </div>
-            </div>
-        </div>
-    </div>
+						</div>
+					</div>
+				</div>
 
-    <div class="row">
+				<div class="row">
         <!-- FAQs Table Card -->
         <div class="col-md-12">
             <div class="card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3 class="card-title mb-0">FAQs</h3>
-                    </div>
-                </div>
+					</div>
+				</div>
                 <div class="card-body">
                     @if(session('message'))
                         <div class="alert alert-{{ session('status') == 'success' ? 'success' : 'danger' }}">
                             {{ session('message') }}
-                        </div>
+		</div>
                     @endif
 
                     @if(count($faqs) > 0)
                         <div class="table-responsive">
                             <table id="faqsTable" class="table table-striped table-bordered table-hover" style="border-radius: 0;">
-                                <thead>
-                                    <tr>
+				<thead>
+					<tr>
                                         <th width="60px">#</th>
-                                        <th>Question</th>
-                                        <th>Answer</th>
+						<th>Question</th>
+						<th>Answer</th>
                                         <th width="150px">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
+					</tr>
+				</thead>
+				<tbody>
                                     @foreach($faqs as $idx => $row)
                                         <tr>
                                             <td><span class="text-muted">{{ $faqs->firstItem() + $idx }}</span></td>
@@ -98,12 +98,12 @@
                                                 <a href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')" class="btn btn-sm btn-outline-danger" title="Delete">
                                                     <i class="fa fa-trash"></i>
                                                 </a>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
+							</td>
+						</tr>
+					@endforeach
+				</tbody>
+			</table>
+		</div>
 
                         <!-- Pagination -->
                         <div class="mt-3">
@@ -120,35 +120,35 @@
                 </div>
             </div>
         </div>
-    </div>
+	</div>
 
     <!-- Include modals -->
-    @include('admin.faqs.partials.delete-modal')
-    @include('admin.faqs.partials.create-modal')
+	@include('admin.faqs.partials.delete-modal')
+	@include('admin.faqs.partials.create-modal')
 
-@endsection
+    @endsection
 
-@section('scripts')
+	@section('scripts')
     <script src="{{ asset('assets/plugins/summernote/dist/summernote.min.js') }}"></script>
-    <script>
-        var toDeleteRow = '';
+	<script>  
+		var toDeleteRow = '';
 
         function deleteRow() {
-            let url = `{{ url('admin/faqs/delete')}}?id=${toDeleteRow}`;
+			let url = `{{ url('admin/faqs/delete')}}?id=${toDeleteRow}`;
 
-            fetch(url)
-                .then(res => res.text())
-                .then(res => {
+				fetch(url)
+				.then(res => res.text())
+				.then(res => {
                     console.log(res);
-                    $('#delete-modal').modal('hide');
-                    window.location.reload();
+					$('#delete-modal').modal('hide');
+					window.location.reload();
                 });
-        }
+		}
 
         function openDeleteModal(row = 0) {
-            toDeleteRow = row;
-            $('#delete-modal').modal('show');
-        }
+			toDeleteRow = row;
+			$('#delete-modal').modal('show');
+		}
 
         function openEditModal(rowId) {
             // Convert to integer to ensure proper type
@@ -213,7 +213,7 @@
                         $('#answer').val(faqAnswer);
                         
                         // Show modal
-                        $('#create-modal').modal('show');
+			$('#create-modal').modal('show');
                         
                         // Wait for modal to be shown, then initialize summernote
                         setTimeout(function() {
@@ -321,5 +321,5 @@
                 isEditMode = false;
             });
         });
-    </script>
-@endsection
+	</script>
+	@endsection

@@ -589,27 +589,181 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     public function attach_countries($publication,$request){
         
-        $rccs = (is_array($request->rccs))?$request->rccs:json_decode($request->rccs);
-        $countries = (is_array($request->countries))?$request->countries:json_decode($request->countries);
+        // Normalize inputs to arrays
+        $rccs = (is_array($request->rccs))?$request->rccs:json_decode($request->rccs, true);
+        $countries = (is_array($request->countries))?$request->countries:json_decode($request->countries, true);
+        
+        // Ensure arrays
+        if (!is_array($rccs)) $rccs = [];
+        if (!is_array($countries)) $countries = [];
+        
+        // Debug logging
+        \Log::info('attach_countries called', [
+            'publication_id' => $publication->id ?? null,
+            'rccs_raw' => $request->rccs ?? null,
+            'rccs_processed' => $rccs,
+            'countries_raw' => $request->countries ?? null,
+            'countries_processed' => $countries,
+        ]);
+        
         $countryIds = [];
-        $regionIds  = [];
+        $regionIds = [];
 
-        if ($rccs[0] == 'all' || (is_array($countries) && strtolower($countries[0]) === 'all')):
-            $countryIds = Country::pluck('id')->toArray();
-        else:
-            if($rccs[0] == 'all')
-                $regionIds = Region::pluck('id')->toArray();
-            else
-                $regionIds = Region::whereIn('id', $rccs)->pluck('id')->toArray();
-
-            if (!empty($regionIds))
-                $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
-            else
-                $countryIds = $countries;
+        // Filter out "all" and invalid values from region selections
+        $rccsFiltered = array_filter($rccs, function($rcc) {
+            return $rcc !== 'all' && $rcc !== '' && !empty($rcc) && is_numeric($rcc);
+        });
+        
+        // Filter out "all" and invalid values from country selections (needed for fallback check)
+        $countriesFiltered = array_filter($countries, function($country) {
+            return $country !== 'all' && !empty($country) && is_numeric($country);
+        });
+        
+        // Check if "all" is selected in regions (can be with or without other regions)
+        // Check multiple formats: 'all', 'All', case-insensitive
+        $hasAllRegions = false;
+        if (!empty($rccs)) {
+            foreach ($rccs as $rcc) {
+                $rccLower = is_string($rcc) ? strtolower(trim($rcc)) : '';
+                if ($rccLower === 'all' || $rcc === 'all' || $rcc === 'All') {
+                    $hasAllRegions = true;
+                    break;
+                }
+            }
+        }
+        
+        // Check if "all" is selected in countries (direct selection or all countries auto-selected)
+        $hasAllCountries = false;
+        if (!empty($countries)) {
+            foreach ($countries as $country) {
+                $countryLower = is_string($country) ? strtolower(trim($country)) : '';
+                if ($countryLower === 'all' || $country === 'all' || $country === 'All') {
+                    $hasAllCountries = true;
+                    break;
+                }
+            }
             
-            if(count($countryIds) > 0)
-                $publication->countries()->attach($countryIds);
-        endif;
+            // Fallback: If "all" regions is selected and many/all countries are auto-selected,
+            // treat it as "all" countries (typically 54-55 AU member states)
+            if (!$hasAllCountries && $hasAllRegions && count($countriesFiltered) >= 50) {
+                $totalCountriesCount = Country::where('region_id', '>', 0)->count();
+                // If the selected countries are close to or equal to total countries, treat as "all"
+                if (count($countriesFiltered) >= ($totalCountriesCount * 0.9)) {
+                    $hasAllCountries = true;
+                }
+            }
+        }
+        
+        \Log::info('attach_countries checks', [
+            'hasAllRegions' => $hasAllRegions,
+            'hasAllCountries' => $hasAllCountries,
+            'rccs' => $rccs,
+            'rccsFiltered' => $rccsFiltered,
+            'countries_count' => count($countries ?? []),
+            'countriesFiltered_count' => count($countriesFiltered ?? []),
+        ]);
+
+        // Case 1: "all" regions selected (alone or with other regions) → select ALL countries globally
+        // When "all" regions is selected, it means all countries regardless of country selection
+        if ($hasAllRegions) {
+            // Get all countries that belong to regions (countries always have region_id > 0)
+            $countryIds = Country::where('region_id', '>', 0)->pluck('id')->toArray();
+            \Log::info('attach_countries: Case 1 - All regions selected', [
+                'countryIds_count' => count($countryIds),
+            ]);
+        }
+        // Case 2: Specific region(s) selected (one or more, but NOT "all")
+        elseif (!empty($rccsFiltered)) {
+            // Get valid region IDs
+            $regionIds = Region::whereIn('id', $rccsFiltered)->pluck('id')->toArray();
+            
+            if (!empty($regionIds)) {
+                // IMPORTANT: When specific regions are selected, "all" countries means all countries in those regions ONLY
+                // Check if "all" countries is selected first
+                if ($hasAllCountries) {
+                    // "all" countries with specific regions → get all countries from those specific regions only
+                    $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+                    \Log::info('attach_countries: Case 2a - Specific regions with "all" countries (scoped to regions)', [
+                        'regionIds' => $regionIds,
+                        'countryIds_count' => count($countryIds),
+                    ]);
+                }
+                // If specific countries are manually selected (not "all"), validate they belong to selected regions
+                elseif (!empty($countriesFiltered)) {
+                    // Validate that manually selected countries belong to at least one of the selected regions
+                    // A resource can belong to multiple regions but not all countries in those regions
+                    $validCountryIds = Country::whereIn('id', $countriesFiltered)
+                        ->whereIn('region_id', $regionIds)
+                        ->pluck('id')
+                        ->toArray();
+                    
+                    $countryIds = array_values($validCountryIds);
+                    \Log::info('attach_countries: Case 2b - Specific regions with specific countries', [
+                        'regionIds' => $regionIds,
+                        'countryIds_count' => count($countryIds),
+                    ]);
+                } else {
+                    // No countries selected at all → get all countries from ALL selected regions
+                    // This handles: specific regions selected but no countries specified
+                    $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+                    \Log::info('attach_countries: Case 2c - Specific regions, no countries specified', [
+                        'regionIds' => $regionIds,
+                        'countryIds_count' => count($countryIds),
+                    ]);
+                }
+            } else {
+                // No valid regions found, but countries were selected
+                // Since countries must belong to regions, validate countries have valid region_id
+                if (!empty($countriesFiltered)) {
+                    $validCountryIds = Country::whereIn('id', $countriesFiltered)
+                        ->where('region_id', '>', 0)
+                        ->pluck('id')
+                        ->toArray();
+                    $countryIds = array_values($validCountryIds);
+                }
+            }
+        }
+        // Case 3: Only "all" countries selected (no regions) → select ALL countries globally
+        elseif ($hasAllCountries && empty($rccsFiltered)) {
+            // This case is when user selects "all" countries but no regions
+            // Get all countries that belong to regions
+            $countryIds = Country::where('region_id', '>', 0)->pluck('id')->toArray();
+            \Log::info('attach_countries: Case 3 - "All" countries selected without regions', [
+                'countryIds_count' => count($countryIds),
+            ]);
+        }
+        // Case 3: Only countries selected (no regions) - validate they belong to regions
+        elseif (!empty($countriesFiltered)) {
+            // Ensure all selected countries have valid region_id (countries are chained to regions)
+            $validCountryIds = Country::whereIn('id', $countriesFiltered)
+                ->where('region_id', '>', 0)
+                ->pluck('id')
+                ->toArray();
+            $countryIds = array_values($validCountryIds);
+        }
+        
+        // Sync countries (replace existing, no duplicates)
+        if (!empty($countryIds)) {
+            // Remove duplicates and ensure all IDs are integers
+            $countryIds = array_unique(array_map('intval', $countryIds));
+            \Log::info('attach_countries: Syncing countries', [
+                'publication_id' => $publication->id ?? null,
+                'countryIds_count' => count($countryIds),
+                'countryIds_sample' => array_slice($countryIds, 0, 10),
+            ]);
+            $publication->countries()->sync($countryIds);
+        } else {
+            // If no countries selected, detach all
+            \Log::warning('attach_countries: No countries to sync, detaching all', [
+                'publication_id' => $publication->id ?? null,
+            ]);
+            $publication->countries()->sync([]);
+        }
+        
+        \Log::info('attach_countries: Completed', [
+            'publication_id' => $publication->id ?? null,
+            'final_countries_count' => $publication->countries()->count(),
+        ]);
     }
 
     public function find($id,$update_visits=true){
@@ -676,7 +830,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         
         if (!empty($tagData)) {
             try {
-                PublicationTag::insert($tagData);
+            PublicationTag::insert($tagData);
                 \Log::info('Tags inserted into database', [
                     'publication_id' => $publication_id,
                     'tags_count' => count($tagData),
@@ -829,11 +983,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
 
             try {
-                $description = $file->getClientOriginalName();
-                $file_name   = md5_file($file->getRealPath());
+            $description = $file->getClientOriginalName();
+            $file_name   = md5_file($file->getRealPath());
                 $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                $file_path   = $file_name.'.'.$extension;
-                
+            $file_path   = $file_name.'.'.$extension;
+           
                 $storagePath = storage_path().'/app/public/uploads/publications/';
                 
                 // Ensure directory exists
@@ -843,13 +997,13 @@ public function get(Request $request, $return_array = false, $featured = false,$
                
                 $file->move($storagePath, $file_path);
 
-                // Optimized: Collect attachment data for bulk insert
-                if($publication_id) {
-                    $attachmentData[] = [
-                        "description" => $description,
-                        "file" => $file_path,
-                        "publication_id" => $publication_id
-                    ];
+            // Optimized: Collect attachment data for bulk insert
+            if($publication_id) {
+                $attachmentData[] = [
+                    "description" => $description,
+                    "file" => $file_path,
+                    "publication_id" => $publication_id
+                ];
                     $savedCount++;
                 }
             } catch (\Exception $e) {
@@ -867,7 +1021,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         // Optimized: Use bulk insert instead of individual inserts
         if (!empty($attachmentData)) {
             try {
-                PublicationAttachment::insert($attachmentData);
+            PublicationAttachment::insert($attachmentData);
                 \Log::info('Attachments saved successfully', [
                     'publication_id' => $publication_id,
                     'count' => count($attachmentData),
@@ -1256,19 +1410,19 @@ public function getLightweight(Request $request, $return_array = false)
     return $return_array ? $results : $results;
 }
 
-    public function bulkInactive($ids)
-    {
-        Publication::whereIn('id', $ids)->update(['is_active' => 'In-Active']);
-    }
+public function bulkInactive($ids)
+{
+    Publication::whereIn('id', $ids)->update(['is_active' => 'In-Active']);
+}
 
-    public function bulkDelete($ids)
-    {
-        Publication::whereIn('id', $ids)->delete();
-    }
+public function bulkDelete($ids)
+{
+    Publication::whereIn('id', $ids)->delete();
+}
 
-    public function bulkFeatured($ids)
-    {
-        Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
-    }
+public function bulkFeatured($ids)
+{
+    Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
+}
 
 }

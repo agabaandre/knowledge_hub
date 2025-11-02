@@ -1,6 +1,6 @@
 
  
-      
+
             <div class="col-md-12">
                 <div class="card" style="border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem;">
                     <div class="card-header d-flex align-items-center justify-content-between" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;">
@@ -54,6 +54,29 @@
     // Parse the JSON data
     const jsonData = @json($chart_data);
 
+    // AU (African Union) color palette from settings (global scope for use in charts and map)
+    const auColors = {
+        red: '{{ settings()->au_red ?? "#9F2241" }}',
+        gold: '{{ settings()->au_gold ?? "#B4A269" }}',
+        corporateGreen: '{{ settings()->au_corporate_green ?? "#1A5632" }}',
+        green: '{{ settings()->au_green ?? "#1A5632" }}',
+        plum: '{{ settings()->au_plum ?? "#522B39" }}',
+        greyText: '{{ settings()->au_grey_text ?? "#58595B" }}',
+        white: '{{ settings()->au_white ?? "#FFFFFF" }}'
+    };
+
+    // Helper function to lighten colors (global scope)
+    function lightenColor(color, amount) {
+        if (color.startsWith('#')) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const r = Math.min(255, (num >> 16) + Math.round(amount * 255));
+            const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(amount * 255));
+            const b = Math.min(255, (num & 0x0000FF) + Math.round(amount * 255));
+            return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
+        }
+        return color;
+    }
+
    // Populate country filter from visits_by_country labels
    (function initCountryFilter(){
        const select = document.getElementById('countryFilter');
@@ -88,8 +111,8 @@
       body.className = 'card-body';
       body.style.cssText = 'padding: 1.5rem;';
       
-      const chartContainer = document.createElement('div'); 
-      chartContainer.id = key + '-chart'; 
+      const chartContainer = document.createElement('div');
+      chartContainer.id = key + '-chart';
       chartContainer.style.cssText = 'height:360px;';
       
       body.appendChild(chartContainer); 
@@ -104,29 +127,6 @@
         categories = labels;
       }
 
-      // Helper function to lighten colors (simple implementation)
-      function lightenColor(color, amount) {
-        if (color.startsWith('#')) {
-          const num = parseInt(color.replace('#', ''), 16);
-          const r = Math.min(255, (num >> 16) + Math.round(amount * 255));
-          const g = Math.min(255, ((num >> 8) & 0x00FF) + Math.round(amount * 255));
-          const b = Math.min(255, (num & 0x0000FF) + Math.round(amount * 255));
-          return '#' + ((r << 16) | (g << 8) | b).toString(16).padStart(6, '0');
-        }
-        return color;
-      }
-
-      // AU (African Union) color palette from settings
-      const auColors = {
-        red: '{{ settings()->au_red ?? "#9F2241" }}',
-        gold: '{{ settings()->au_gold ?? "#B4A269" }}',
-        corporateGreen: '{{ settings()->au_corporate_green ?? "#1A5632" }}',
-        green: '{{ settings()->au_green ?? "#1A5632" }}',
-        plum: '{{ settings()->au_plum ?? "#522B39" }}',
-        greyText: '{{ settings()->au_grey_text ?? "#58595B" }}',
-        white: '{{ settings()->au_white ?? "#FFFFFF" }}'
-      };
-      
       const africaCDCColors = [
         auColors.corporateGreen,  // AU Corporate Green
         auColors.red,              // AU Red
@@ -266,92 +266,167 @@
    // Render world map using visits_by_country
    (function renderWorldMap(){
         const data = jsonData['visits_by_country'];
-        if(!data) return;
+        const mapContainer = document.getElementById('world-map');
+        
+        if(!data || !data.labels || !data.values) {
+            if(mapContainer) {
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">No visit data available</div>';
+            }
+            return;
+        }
+
+        if(!mapContainer) {
+            console.error('Map container not found');
+            return;
+        }
+
+        // Show loading state
+        mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map...</div>';
 
         function loadLeaflet(callback){
-            if (window.L && typeof window.L.map === 'function') { callback(); return; }
-            var css = document.createElement('link'); css.rel='stylesheet'; css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
-            document.head.appendChild(css);
+            if (window.L && typeof window.L.map === 'function') { 
+                callback(); 
+                return; 
+            }
+            
+            // Check if Leaflet CSS is already loaded
+            if (!document.querySelector('link[href*="leaflet"]')) {
+                var css = document.createElement('link'); 
+                css.rel='stylesheet'; 
+                css.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+                document.head.appendChild(css);
+            }
+            
+            // Check if Leaflet script is already loading
+            if (document.querySelector('script[src*="leaflet"]')) {
+                var existingScript = document.querySelector('script[src*="leaflet"]');
+                existingScript.onload = callback;
+                return;
+            }
+            
             var s = document.createElement('script');
             s.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
             s.onload = callback;
-            s.onerror = function(){ console.warn('Leaflet failed to load'); };
+            s.onerror = function(){ 
+                console.error('Leaflet failed to load');
+                mapContainer.innerHTML = '<div class="text-danger text-center p-4">Failed to load map library. Please refresh the page.</div>';
+            };
             document.body.appendChild(s);
         }
 
         loadLeaflet(function(){
-            // Create Leaflet map with OSM tiles
-            const map = L.map('world-map', { scrollWheelZoom: false }).setView([20, 0], 2);
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                maxZoom: 6,
-                attribution: '&copy; OpenStreetMap contributors'
-            }).addTo(map);
+            try {
+                // Create Leaflet map with OSM tiles
+                const map = L.map('world-map', { scrollWheelZoom: false }).setView([20, 0], 2);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 6,
+                    attribution: '&copy; OpenStreetMap contributors'
+                }).addTo(map);
 
-        // Build value dictionaries for ISO2 and name
-        const valueByISO2 = {}; const valueByName = {};
-        data.labels.forEach((label,i)=>{
-            const text = (label||'').toString();
-            const lower = text.toLowerCase();
-            if (text.length === 2) valueByISO2[lower] = data.values[i];
-            valueByName[lower] = data.values[i];
-        });
+                // Build value dictionaries for ISO2 and name
+                const valueByISO2 = {}; const valueByName = {};
+                data.labels.forEach((label,i)=>{
+                    const text = (label||'').toString();
+                    const lower = text.toLowerCase();
+                    if (text.length === 2) valueByISO2[lower] = data.values[i];
+                    valueByName[lower] = data.values[i];
+                });
 
-        // Fetch world GeoJSON (contains iso_a2 or similar; we try several props)
-        // Try multiple GeoJSON sources (CORS-friendly) and use the first that loads
-        const sources = [
-            'https://cdn.jsdelivr.net/gh/datasets/geo-countries@master/data/countries.geojson',
-            'https://cdn.jsdelivr.net/npm/geojson-world@1/world.geo.json',
-            'https://unpkg.com/@geo-maps/countries-land-1m@1.0.3/countries-land-1m.geo.json'
-        ];
+                // Fetch world GeoJSON (contains iso_a2 or similar; we try several props)
+                // Try multiple GeoJSON sources (CORS-friendly) and use the first that loads
+                const sources = [
+                    'https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson',
+                    'https://cdn.jsdelivr.net/npm/geojson-world@1/world.geo.json',
+                    'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json'
+                ];
 
-        function loadGeo(idx){
-            if (idx >= sources.length){ throw new Error('No geojson sources available'); }
-            return fetch(sources[idx], { mode:'cors' }).then(r=>{
-                if(!r.ok) throw new Error('Bad response');
-                return r.json();
-            }).catch(()=> loadGeo(idx+1));
-        }
+                function loadGeo(idx){
+                    if (idx >= sources.length){ 
+                        throw new Error('No geojson sources available'); 
+                    }
+                    return fetch(sources[idx], { mode:'cors' }).then(r=>{
+                        if(!r.ok) throw new Error('Bad response');
+                        return r.json();
+                    }).catch((err)=>{
+                        console.warn(`GeoJSON source ${idx + 1} failed:`, err);
+                        return loadGeo(idx+1);
+                    });
+                }
 
-        loadGeo(0).then(geo => {
-            // AU color scale helper (using AU colors)
-            function colorFor(v){
-              // Create gradient using AU colors from high to low values
-              return v>10000?auColors.plum:v>5000?auColors.corporateGreen:v>1000?auColors.green:v>100?auColors.gold:v>0?auColors.red:'#f0f0f0';
+                loadGeo(0).then(geo => {
+                    // AU color scale helper (using AU colors from global scope)
+                    function colorFor(v){
+                      // Create gradient using AU colors from high to low values
+                      if (!auColors) {
+                          console.error('auColors not defined');
+                          return '#f0f0f0';
+                      }
+                      return v>10000?auColors.plum:v>5000?auColors.corporateGreen:v>1000?auColors.green:v>100?auColors.gold:v>0?auColors.red:'#f0f0f0';
+                    }
+
+                    function getVal(props){
+                      const iso2 = (props.iso_a2 || props.ISO_A2 || props.iso2 || props.cca2 || props.ISO2 || props['ISO-2'] || props.ADM0_A3 || '').toString().toLowerCase();
+                      const name = (props.name || props.ADMIN || props.admin || props.COUNTRY || props.NAME || '').toString().toLowerCase();
+                      return (valueByISO2[iso2] ?? valueByName[name] ?? 0);
+                    }
+
+                    // Check if geo has features array (GeoJSON) or is a TopoJSON
+                    let features = [];
+                    if (geo.type === 'FeatureCollection' && geo.features) {
+                        features = geo.features;
+                    } else if (geo.type === 'Topology' && geo.objects) {
+                        // Convert TopoJSON to GeoJSON features
+                        const topojson = window.topojson || null;
+                        if (topojson) {
+                            const objectKey = Object.keys(geo.objects)[0];
+                            features = topojson.feature(geo, geo.objects[objectKey]).features;
+                        } else {
+                            throw new Error('TopoJSON detected but topojson library not available');
+                        }
+                    } else {
+                        throw new Error('Invalid GeoJSON format');
+                    }
+
+                    if (features.length === 0) {
+                        throw new Error('No features found in GeoJSON');
+                    }
+
+                    const layer = L.geoJSON(features, {
+                      style: f => ({ color:'#e2e8f0', weight:1, fillColor: colorFor(getVal(f.properties)), fillOpacity: 0.9 }),
+                      onEachFeature: function (feature, lyr) {
+                        const v = getVal(feature.properties);
+                        const name = feature.properties.name || feature.properties.NAME || feature.properties.ADMIN || 'Unknown';
+                        lyr.bindTooltip(`${name}: <b>${v}</b>`,{sticky:true});
+                      }
+                    }).addTo(map);
+                    
+                    if (layer.getBounds().isValid()) {
+                        map.fitBounds(layer.getBounds(), { padding:[10,10] });
+                    }
+
+                    // Simple legend
+                    const legend = L.control({position:'bottomright'});
+                    legend.onAdd = function(){
+                       const div = L.DomUtil.create('div','info legend');
+                       const grades=[0,1,100,1000,5000,10000];
+                       div.style.background='#fff'; div.style.padding='8px 10px'; div.style.border='1px solid #e2e8f0'; div.style.borderRadius='8px';
+                       let html='<div style="font-weight:600;margin-bottom:4px;">Visits</div>';
+                       for (let i=0;i<grades.length;i++){
+                          const from=grades[i], to=grades[i+1];
+                          html += `<div><span style="display:inline-block;width:12px;height:12px;background:${colorFor(from+0.1)};margin-right:6px;border:1px solid #cbd5e1;"></span>${from}${to?('&ndash;'+to):'+'}</div>`;
+                       }
+                       div.innerHTML=html; return div;
+                    };
+                    legend.addTo(map);
+                  })
+                  .catch((err)=>{
+                    console.error('Map rendering error:', err);
+                    mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Please try refreshing the page.</div>';
+                  });
+            } catch (error) {
+                console.error('Leaflet initialization error:', error);
+                mapContainer.innerHTML = '<div class="text-danger text-center p-4">Error initializing map. Please refresh the page.</div>';
             }
-
-            function getVal(props){
-              const iso2 = (props.iso_a2 || props.ISO_A2 || props.iso2 || props.cca2 || props.ISO2 || props['ISO-2'] || '').toString().toLowerCase();
-              const name = (props.name || props.ADMIN || props.admin || props.COUNTRY || '').toString().toLowerCase();
-              return (valueByISO2[iso2] ?? valueByName[name] ?? 0);
-            }
-
-            const layer = L.geoJSON(geo, {
-              style: f => ({ color:'#e2e8f0', weight:1, fillColor: colorFor(getVal(f.properties)), fillOpacity: 0.9 }),
-              onEachFeature: function (feature, lyr) {
-                const v = getVal(feature.properties);
-                lyr.bindTooltip(`${feature.properties.name}: <b>${v}</b>`,{sticky:true});
-              }
-            }).addTo(map);
-            map.fitBounds(layer.getBounds(), { padding:[10,10] });
-
-            // Simple legend
-            const legend = L.control({position:'bottomright'});
-            legend.onAdd = function(){
-               const div = L.DomUtil.create('div','info legend');
-               const grades=[0,1,100,1000,5000,10000];
-               div.style.background='#fff'; div.style.padding='8px 10px'; div.style.border='1px solid #e2e8f0'; div.style.borderRadius='8px';
-               let html='<div style="font-weight:600;margin-bottom:4px;">Visits</div>';
-               for (let i=0;i<grades.length;i++){
-                  const from=grades[i], to=grades[i+1];
-                  html += `<div><span style="display:inline-block;width:12px;height:12px;background:${colorFor(from+0.1)};margin-right:6px;border:1px solid #cbd5e1;"></span>${from}${to?('&ndash;'+to):'+'}</div>`;
-               }
-               div.innerHTML=html; return div;
-            };
-            legend.addTo(map);
-          })
-          .catch(()=>{
-            document.getElementById('world-map').innerHTML = '<div class="text-muted">Map unavailable</div>';
-          });
         });
    })();
 

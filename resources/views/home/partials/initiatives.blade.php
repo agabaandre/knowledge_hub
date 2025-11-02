@@ -14,14 +14,14 @@
     @media (max-width:768px){.initiative-card{min-width:320px;max-width:360px}.initiative-cover{height:140px;width:45%;min-width:45%}}
 </style>
 
-<div class="container">
+    <div class="container">
     <div class="row justify-content-center" data-aos="fade-in">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
             <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
                 <h2 class="ft-bold">Flagship Initiatives</h2>
             </div>
         </div>
-    </div>
+                                        </div>
     <div class="initiatives-strip">
         <div id="initiativesTrack" class="initiatives-track">
             @foreach($initiatives as $row)
