@@ -32,8 +32,57 @@
             </div>
           </div>
 
-          <!-- <div  class="col-md-4"> -->
-          <!-- </div> -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="region_id">Region</label>
+              @include('partials.regions.dropdown', [
+                  'field' => 'region_id',
+                  'class' => 'rcc select2',
+                  'selected' => null,
+                  'allfield' => 'All Regions',
+                  'id' => 'region_id'
+              ])
+              <small class="text-muted d-block mt-1">Select a region or "All Regions" for global access.</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="country_id">Country</label>
+              @include('partials.countries.dropdown', [
+                  'field' => 'country_id',
+                  'class' => 'country select2',
+                  'selected' => null,
+                  'allfield' => 'All Countries',
+                  'id' => 'country_id'
+              ])
+              <small class="text-muted d-block mt-1">Select a country or "All Countries" within the selected region.</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="organisation">Organisation</label>
+              <input type="text" placeholder="Enter Organisation Name" class="form-control newform" id="organisation" name="organisation">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="department">Department</label>
+              <input type="text" placeholder="Enter Department Name" class="form-control newform" id="department" name="department">
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="mb-3">
+              <div class="form-check">
+                <input type="checkbox" class="form-check-input" id="is_public" name="is_public" value="1" checked>
+                <label class="form-check-label" for="is_public">Public Community</label>
+                <small class="text-muted d-block">Public communities are visible to all users. Uncheck to make this community private.</small>
+              </div>
+            </div>
+          </div>
         </div>
 
       </div>

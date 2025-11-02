@@ -5,6 +5,7 @@ use App\Models\Author;
 use App\Models\Country;
 use App\Models\GeoCoverage;
 use App\Models\Region;
+use App\Models\Forum;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -100,6 +101,62 @@ class AreasRepository{
                 $subQuery->where('country.id', $value);
             })
             ->count();
+    }
+
+    /**
+     * Get unique resources (publications) count for a region
+     * Uses distinct publication IDs to avoid counting duplicates
+     */
+    public function getUniqueResourcesByRegion($regionId) {
+        // Get all country IDs in this region
+        $countryIds = Country::where('region_id', $regionId)->pluck('id');
+        
+        if ($countryIds->isEmpty()) {
+            return 0;
+        }
+        
+        // Count distinct publications linked to countries in this region
+        // Use selectRaw with COUNT(DISTINCT) for accurate unique count
+        $result = DB::table('publication_countries')
+            ->whereIn('country_id', $countryIds)
+            ->selectRaw('COUNT(DISTINCT publication_id) as count')
+            ->value('count') ?? 0;
+        
+        return (int) $result;
+    }
+
+    /**
+     * Get forums count for a region based on publisher's country
+     */
+    public function getForumsByRegion($regionId) {
+        // Get all country IDs in this region
+        $countryIds = Country::where('region_id', $regionId)->pluck('id');
+        
+        if ($countryIds->isEmpty()) {
+            return 0;
+        }
+        
+        // Count forums where the publisher's (user's) country is in this region
+        // Check if status column exists, otherwise just count all forums
+        $forums = Forum::whereHas('user', function($query) use ($countryIds) {
+                $query->whereIn('country_id', $countryIds);
+            });
+        
+        // Only filter by status if the column exists
+        if (DB::getSchemaBuilder()->hasColumn('forums', 'status')) {
+            $forums->where('status', 1); // Only count active/approved forums
+        }
+        
+        return $forums->count();
+    }
+
+    /**
+     * Get total resources (unique publications + forums) for a region
+     */
+    public function getTotalResourcesByRegion($regionId) {
+        $uniquePublications = $this->getUniqueResourcesByRegion($regionId);
+        $forums = $this->getForumsByRegion($regionId);
+        return $uniquePublications + $forums;
     }
 
 }

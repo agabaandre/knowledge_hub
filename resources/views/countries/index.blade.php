@@ -530,8 +530,14 @@
                 $region_countries = array_filter($countries->toArray(), function ($cnt) use ($region) {
                                     return isset($cnt['region_id']) && $cnt['region_id'] == $region->id;
                 });
-                $resources = array_column($region_countries, 'resources');
-                $regionalResources = array_sum($resources);
+                
+                // Get unique resources (publications + forums) for this region
+                $regionResourceData = $region_resources[$region->id] ?? [
+                    'publications' => 0,
+                    'forums' => 0,
+                    'total' => 0
+                ];
+                $regionalResources = $regionResourceData['total'];
                                         @endphp
                             
                             <div class="region-card" data-region-id="{{ $region->id }}">

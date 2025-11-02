@@ -133,7 +133,9 @@
                          margin: 0 !important;
                          float: none !important;
                          border-radius: 0 !important;
-                         height: 100% !important;
+                         height: 60px !important;
+                         margin-top: 3px !important;
+                         padding: 0.8rem 1rem !important;
                      }
                      .search-btn-primary:hover {
                          opacity: 0.9;

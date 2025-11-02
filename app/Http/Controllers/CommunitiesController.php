@@ -4,21 +4,51 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Repositories\CommsOfPracticeRepository;
+use App\Repositories\AreasRepository;
 use Illuminate\Support\Facades\Auth;
 
 class CommunitiesController extends Controller
 {
     private $commsOfPracticeRepository;
+    private $areasRepo;
 
-    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository)
+    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository, AreasRepository $areasRepo)
     {
         $this->commsOfPracticeRepository = $commsOfPracticeRepository;
+        $this->areasRepo = $areasRepo;
     }
 
     public function index()
     {
-        $communities = $this->commsOfPracticeRepository->get(request());
-        return view('communities.index', compact('communities'));
+        // Pass admin=false to ensure only public communities are shown
+        $request = request();
+        $request->merge(['admin' => false]);
+        $communities = $this->commsOfPracticeRepository->get($request);
+        
+        // Get regions and countries for filter dropdowns
+        $regions = $this->areasRepo->regions()->load('countries');
+        $countries = \App\Models\Country::where('region_id', '>', 0)
+            ->orderBy('name', 'asc')
+            ->get();
+        
+        // Get unique organisations and departments for filter dropdowns
+        $organisations = \App\Models\CommunityOfPractice::where('is_public', 1)
+            ->whereNotNull('organisation')
+            ->distinct()
+            ->orderBy('organisation', 'asc')
+            ->pluck('organisation')
+            ->filter()
+            ->values();
+        
+        $departments = \App\Models\CommunityOfPractice::where('is_public', 1)
+            ->whereNotNull('department')
+            ->distinct()
+            ->orderBy('department', 'asc')
+            ->pluck('department')
+            ->filter()
+            ->values();
+        
+        return view('communities.index', compact('communities', 'regions', 'countries', 'organisations', 'departments'));
     }
 
     public function myCommunities()

@@ -13,6 +13,12 @@ class CommsOfPracticeRepository{
     {
         $query = CommunityOfPractice::query();
 
+        // Filter by is_public for public-facing requests (not admin)
+        // Admin can see all communities
+        if (!$request->has('admin')) {
+            $query->where('is_public', 1);
+        }
+
         // Add search functionality
         if ($request->filled('term')) {
             $term = $request->input('term');
@@ -22,15 +28,56 @@ class CommsOfPracticeRepository{
             });
         }
 
+        // Filter by coverage type
+        // Whole of Africa = region_id is null AND country_id is null
+        // Region = region_id is set AND country_id is null
+        // Country = country_id is set
+        if ($request->filled('coverage')) {
+            $coverage = $request->input('coverage');
+            if ($coverage === 'whole_of_africa') {
+                $query->whereNull('region_id')->whereNull('country_id');
+            } elseif ($coverage === 'region') {
+                $query->whereNotNull('region_id')->whereNull('country_id');
+            } elseif ($coverage === 'country') {
+                $query->whereNotNull('country_id');
+            }
+        }
+
+        // Filter by region_id
+        if ($request->filled('region_id')) {
+            $query->where('region_id', $request->input('region_id'));
+        }
+
+        // Filter by country_id
+        if ($request->filled('country_id')) {
+            $query->where('country_id', $request->input('country_id'));
+        }
+
+        // Filter by organisation
+        if ($request->filled('organisation')) {
+            $query->where('organisation', 'like', '%' . $request->input('organisation') . '%');
+        }
+
+        // Filter by department
+        if ($request->filled('department')) {
+            $query->where('department', 'like', '%' . $request->input('department') . '%');
+        }
+
         if ($request->input('withRelated', false)) {
-            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country']);
+        } else {
+            // Always load region and country for displaying coverage info
+            $query->with(['region', 'country']);
         }
 
         $results = $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
         
         // Append query parameters to pagination links
-        if (!$return_array && $request->filled('term')) {
-            $results->appends($request->only(['term']));
+        if (!$return_array) {
+            $appends = array_filter($request->only(['term', 'coverage', 'region_id', 'country_id', 'organisation', 'department']));
+            if (!empty($appends)) {
+                $results->appends($appends);
+            }
         }
         
         return $results;
@@ -75,6 +122,25 @@ class CommsOfPracticeRepository{
         $access_grp->community_name = clean_unicode($request->community_name ?? '');
         $access_grp->description = clean_unicode($request->description ?? '');
         $access_grp->created_by = current_user()->id;
+        
+        // Handle region - if "all" is selected, set to null
+        if ($request->has('region_id') && $request->region_id === 'all') {
+            $access_grp->region_id = null;
+        } else {
+            $access_grp->region_id = $request->region_id ?: null;
+        }
+        
+        // Handle country - if empty or "all" is selected, set to null
+        if (!$request->has('country_id') || $request->country_id === '' || $request->country_id === null) {
+            $access_grp->country_id = null;
+        } else {
+            $access_grp->country_id = $request->country_id;
+        }
+        
+        $access_grp->organisation = $request->organisation ?: null;
+        $access_grp->department = $request->department ?: null;
+        $access_grp->is_public = $request->has('is_public') ? (bool)$request->is_public : true;
+        
         $access_grp->save();
 
         clear_cache();

@@ -271,6 +271,11 @@ function openCreateModal(){
     $('#id').val('');
     $('#community_name').val('');
     if ($('#description').data('summernote')) { $('#description').summernote('code',''); } else { $('#description').val(''); }
+    $('#region_id').val('all').trigger('change');
+    $('#country_id').val('').trigger('change');
+    $('#organisation').val('');
+    $('#department').val('');
+    $('#is_public').prop('checked', true);
     $('#create-modal').modal('show');
 }
 
@@ -281,7 +286,92 @@ function openEditCommunity(id){
     $('#id').val(item.id);
     $('#community_name').val(item.community_name || '');
     if ($('#description').data('summernote')) { $('#description').summernote('code', item.description || ''); } else { $('#description').val(item.description || ''); }
+    
+    // Set region and country
+    if (item.region_id) {
+        $('#region_id').val(item.region_id).trigger('change');
+    } else {
+        $('#region_id').val('all').trigger('change');
+    }
+    
+    // Wait for country dropdown to update, then set country
+    setTimeout(function() {
+        if (item.country_id) {
+            $('#country_id').val(item.country_id).trigger('change');
+        } else {
+            $('#country_id').val('').trigger('change');
+        }
+    }, 300);
+    
+    $('#organisation').val(item.organisation || '');
+    $('#department').val(item.department || '');
+    $('#is_public').prop('checked', item.is_public == 1 || item.is_public === true || item.is_public === null);
+    
     $('#create-modal').modal('show');
 }
+
+// Chained region/country dropdowns
+$(document).ready(function() {
+    // Get regions data with countries (from ViewComposer)
+    var regionsData = @json($regions ?? []);
+    var allCountries = [];
+    
+    // Build a map of all countries with their region_id for quick lookup
+    if (regionsData && Array.isArray(regionsData)) {
+        regionsData.forEach(function(region) {
+            if (region.countries && Array.isArray(region.countries)) {
+                region.countries.forEach(function(country) {
+                    allCountries.push({
+                        id: country.id,
+                        name: country.name,
+                        region_id: region.id
+                    });
+                });
+            }
+        });
+    }
+    
+    // Handle region change - filter countries
+    $(document).on('change', '#region_id', function() {
+        var selectedRegion = $(this).val();
+        var countrySelect = $('#country_id');
+        var currentCountryId = countrySelect.val();
+        
+        // Clear existing options except the "All Countries" option
+        countrySelect.find('option:not(:first)').remove();
+        
+        // If "all" is selected, show all countries
+        if (selectedRegion === 'all' || selectedRegion === '' || selectedRegion === null) {
+            // Add all countries
+            allCountries.forEach(function(country) {
+                countrySelect.append($('<option></option>')
+                    .attr('value', country.id)
+                    .text(country.name));
+            });
+        } else {
+            // Filter countries by selected region
+            var regionId = parseInt(selectedRegion);
+            allCountries.forEach(function(country) {
+                if (country.region_id === regionId) {
+                    countrySelect.append($('<option></option>')
+                        .attr('value', country.id)
+                        .text(country.name));
+                }
+            });
+        }
+        
+        // Reinitialize Select2 if it exists
+        if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
+            countrySelect.trigger('change.select2');
+        } else {
+            countrySelect.trigger('change');
+        }
+        
+        // Try to restore previous selection if it's still valid
+        if (currentCountryId && countrySelect.find('option[value="' + currentCountryId + '"]').length) {
+            countrySelect.val(currentCountryId).trigger('change');
+        }
+    });
+});
 </script>
 @endsection

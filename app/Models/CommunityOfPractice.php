@@ -4,10 +4,24 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\Region;
+use App\Models\Country;
 
 class CommunityOfPractice extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'community_name',
+        'description',
+        'created_by',
+        'is_active',
+        'region_id',
+        'country_id',
+        'organisation',
+        'department',
+        'is_public'
+    ];
 
     // Specify the attributes to append
     protected $appends = [
@@ -71,6 +85,16 @@ class CommunityOfPractice extends Model
     public function invitations()
     {
         return $this->hasMany(CommunityInvitation::class, 'community_of_practice_id');
+    }
+
+    public function region()
+    {
+        return $this->belongsTo(Region::class, 'region_id');
+    }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id');
     }
 
     // Accessor to get the count of publications

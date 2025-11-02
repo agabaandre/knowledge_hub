@@ -4,18 +4,20 @@ namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
 use App\Repositories\CommsOfPracticeRepository;
+use App\Repositories\AreasRepository;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Services\UITableService;
 
 class CommsOfPracticeController extends Controller
 {
-    private $commsOfPracticeRepository,$uiTableService;
+    private $commsOfPracticeRepository,$uiTableService,$areasRepo;
 
-    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository, UITableService $uiTableService)
+    public function __construct(CommsOfPracticeRepository $commsOfPracticeRepository, UITableService $uiTableService, AreasRepository $areasRepo)
     {
         $this->commsOfPracticeRepository = $commsOfPracticeRepository;
         $this->uiTableService  = $uiTableService;
+        $this->areasRepo = $areasRepo;
     }
 
     public function index(Request $request){
@@ -54,8 +56,12 @@ class CommsOfPracticeController extends Controller
         $col["editoptions"] = array("value"=>current_user()->id.":".current_user()->name);
         $cols[] = $col;
 
-        // Get communities with pending member counts
+        // Get communities with pending member counts (admin can see all, including non-public)
+        $request->merge(['admin' => true]);
         $data['communities'] = $this->commsOfPracticeRepository->get($request);
+        
+        // Pass regions data for chained dropdowns
+        $data['regions'] = $this->areasRepo->regions()->load('countries');
         
         // Load pending member counts for each community
         $data['communities']->getCollection()->transform(function ($community) {

@@ -34,6 +34,17 @@ class CountriesController extends Controller
 
         $data['countries'] = $this->areasRepo->member_states($request);
         $data['regions']  = $this->areasRepo->regions();
+        
+        // Pre-calculate resources per region (unique publications + forums)
+        $regionResources = [];
+        foreach ($data['regions'] as $region) {
+            $regionResources[$region->id] = [
+                'publications' => $this->areasRepo->getUniqueResourcesByRegion($region->id),
+                'forums' => $this->areasRepo->getForumsByRegion($region->id),
+                'total' => $this->areasRepo->getTotalResourcesByRegion($region->id)
+            ];
+        }
+        $data['region_resources'] = $regionResources;
 
         return view('countries.index',$data);
     }

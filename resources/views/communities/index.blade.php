@@ -166,6 +166,89 @@
             <h3>Communities of Practice</h3>
             <h6>Join a community of practice to connect with peers, share knowledge, and participate in discussions.</h6>
         </div>
+
+        <!-- Filter Section -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card" style="border-radius: 0.25rem; border: 1px solid #e2e8f0;">
+                    <div class="card-body">
+                        <form method="GET" action="{{ route('community.index') }}" id="filterForm">
+                            <div class="row">
+                                <div class="col-md-3 mb-3">
+                                    <label for="coverage" class="form-label" style="font-weight: 600; color: #2d3748;">Coverage</label>
+                                    <select class="form-control select2" id="coverage" name="coverage" style="width: 100%;">
+                                        <option value="">All Coverage Types</option>
+                                        <option value="whole_of_africa" {{ request('coverage') == 'whole_of_africa' ? 'selected' : '' }}>Whole of Africa</option>
+                                        <option value="region" {{ request('coverage') == 'region' ? 'selected' : '' }}>Region</option>
+                                        <option value="country" {{ request('coverage') == 'country' ? 'selected' : '' }}>Country</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3" id="region_filter_container" style="display: {{ request('coverage') == 'region' ? 'block' : 'none' }};">
+                                    <label for="region_id" class="form-label" style="font-weight: 600; color: #2d3748;">Region</label>
+                                    <select class="form-control select2" id="region_id" name="region_id" style="width: 100%;">
+                                        <option value="">All Regions</option>
+                                        @foreach($regions ?? [] as $region)
+                                            <option value="{{ $region->id }}" {{ request('region_id') == $region->id ? 'selected' : '' }}>
+                                                {{ $region->region_name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3" id="country_filter_container" style="display: {{ request('coverage') == 'country' || request('country_id') ? 'block' : 'none' }};">
+                                    <label for="country_id" class="form-label" style="font-weight: 600; color: #2d3748;">Country</label>
+                                    <select class="form-control select2" id="country_id" name="country_id" style="width: 100%;">
+                                        <option value="">All Countries</option>
+                                        @foreach($countries ?? [] as $country)
+                                            <option value="{{ $country->id }}" {{ request('country_id') == $country->id ? 'selected' : '' }}>
+                                                {{ $country->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="organisation" class="form-label" style="font-weight: 600; color: #2d3748;">Organisation</label>
+                                    <select class="form-control select2" id="organisation" name="organisation" style="width: 100%;">
+                                        <option value="">All Organisations</option>
+                                        @foreach($organisations ?? [] as $org)
+                                            <option value="{{ $org }}" {{ request('organisation') == $org ? 'selected' : '' }}>
+                                                {{ $org }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3">
+                                    <label for="department" class="form-label" style="font-weight: 600; color: #2d3748;">Department</label>
+                                    <select class="form-control select2" id="department" name="department" style="width: 100%;">
+                                        <option value="">All Departments</option>
+                                        @foreach($departments ?? [] as $dept)
+                                            <option value="{{ $dept }}" {{ request('department') == $dept ? 'selected' : '' }}>
+                                                {{ $dept }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mb-3 d-flex align-items-end">
+                                    <button type="submit" class="btn theme-primary" style="width: 100%; border: none; padding: 0.775rem .95rem;">
+                                        <i class="fa fa-filter mr-1"></i> Filter
+                                    </button>
+                                    @if(request()->hasAny(['coverage', 'region_id', 'country_id', 'organisation', 'department']))
+                                        <a href="{{ route('community.index') }}" class="btn theme-secondary ml-2" style="border: none; padding: 0.775rem .95rem; white-space: nowrap;">
+                                            <i class="fa fa-times mr-1"></i> Clear
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             @forelse ($communities as $community)
                 <div class="col-md-12 col-sm-12 col-lg-4 mb-4">
@@ -184,6 +267,30 @@
                             @endif
                         </h4>
                         <p>{!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 30, '...') !!}</p>
+                        
+                        {{-- Coverage Information --}}
+                        <div class="coverage-info" style="margin-bottom: 1rem; padding: 0.5rem; background-color: #f8fafc; border-radius: 0.25rem; text-align: left; font-size: 0.85rem;">
+                            <strong style="color: #2d3748;"><i class="fa fa-globe theme-text mr-1"></i>Coverage:</strong>
+                            @php
+                                $coverageParts = [];
+                                if (!$community->region_id && !$community->country_id) {
+                                    $coverageParts[] = 'Whole of Africa';
+                                } elseif ($community->region_id && !$community->country_id) {
+                                    $coverageParts[] = $community->region->region_name ?? 'Region';
+                                    $coverageParts[] = 'All Countries';
+                                } elseif ($community->country_id) {
+                                    $coverageParts[] = $community->country->name ?? 'Country';
+                                }
+                                
+                                if ($community->organisation) {
+                                    $coverageParts[] = $community->organisation;
+                                }
+                                if ($community->department) {
+                                    $coverageParts[] = $community->department;
+                                }
+                            @endphp
+                            <span style="color: #4a5568;">{{ implode(' • ', $coverageParts) ?: 'Not specified' }}</span>
+                        </div>
                         <div class="community-stats">
                             <p><i class="fa fa-users theme-text"></i> {{ $community->members_count }} Members</p>
                             <p><i class="fa fa-comments theme-text"></i> {{ $community->forums_count }} Forums</p>
@@ -317,7 +424,39 @@
 @endsection
 
 @section('scripts')
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <script>
+        $(document).ready(function() {
+            // Initialize Select2
+            $('.select2').select2({
+                theme: 'bootstrap4',
+                width: '100%'
+            });
+
+            // Show/hide region and country filters based on coverage selection
+            $('#coverage').on('change', function() {
+                var coverage = $(this).val();
+                if (coverage === 'region') {
+                    $('#region_filter_container').show();
+                    $('#country_filter_container').hide();
+                    $('#country_id').val('').trigger('change');
+                } else if (coverage === 'country') {
+                    $('#region_filter_container').hide();
+                    $('#country_filter_container').show();
+                    $('#region_id').val('').trigger('change');
+                } else {
+                    $('#region_filter_container').hide();
+                    $('#country_filter_container').hide();
+                    $('#region_id').val('').trigger('change');
+                    $('#country_id').val('').trigger('change');
+                }
+            });
+
+            // Trigger change on page load if coverage is set
+            $('#coverage').trigger('change');
+        });
+
         let communityId;
 
         $('.join-btn').on('click', function() {
