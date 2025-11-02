@@ -759,6 +759,45 @@
                 }
             }
         });
+        
+        // Handle communities dropdown: Auto-deselect "All" when specific communities are selected
+        // This prevents confusion - either "All" OR specific communities, not both
+        $(document).on('change', '.communities-select, select[name="communities[]"]', function(e, data) {
+            // Skip if this is a programmatic change to prevent recursion
+            if (data && data.skipAutoDeselect) {
+                return;
+            }
+            
+            var $select = $(this);
+            var selectedValues = $select.val() || [];
+            
+            // Normalize to array
+            if (!Array.isArray(selectedValues)) {
+                selectedValues = [selectedValues];
+            }
+            
+            var hasEmptyValue = selectedValues.includes('') || selectedValues.includes(null);
+            var hasSpecificCommunities = selectedValues.some(function(val) {
+                return val !== '' && val !== null && val !== undefined;
+            });
+            
+            // If "All" (empty value) is selected along with specific communities, deselect "All"
+            if (hasEmptyValue && hasSpecificCommunities) {
+                // Remove empty value from selection
+                selectedValues = selectedValues.filter(function(val) {
+                    return val !== '' && val !== null && val !== undefined;
+                });
+                
+                // Update selection without triggering change event recursively
+                if (typeof $.fn.select2 !== 'undefined' && $select.data('select2')) {
+                    $select.val(selectedValues).trigger('change.select2', [{skipAutoDeselect: true}]);
+                } else {
+                    $select.val(selectedValues).trigger('change', [{skipAutoDeselect: true}]);
+                }
+            }
+            // If specific communities are selected but not "All", that's fine
+            // If only "All" is selected, that's also fine (default state)
+        });
 
         $('.theme').on('change', function(e) {
             var themeValue = $(this).val();

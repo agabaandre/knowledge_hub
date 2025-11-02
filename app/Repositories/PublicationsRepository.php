@@ -492,9 +492,38 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->update();
       
         //attach communitites
-        if(@$request->communities && $saved):
-            $this->attach_to_community($request->communities,$id);
-        endif;
+        // Only attach if communities are provided and not empty
+        // Ignore "All" (empty value) - it means publication is visible to everyone
+        if($saved && $request->has('communities')) {
+            $communities = $request->communities;
+            // Check if communities is not empty (not just empty string or array with empty values)
+            if (!empty($communities)) {
+                // Filter out empty values (which represent "All") and invalid values
+                $communities = is_array($communities) ? array_filter($communities, function($c) {
+                    // Ignore empty, null, "all", "All" - these represent "visible to everyone"
+                    return !empty($c) && 
+                           $c !== '' && 
+                           $c !== null && 
+                           strtolower($c) !== 'all' &&
+                           is_numeric($c);
+                }) : $communities;
+                
+                // Only call attach if there are valid specific communities selected
+                // If empty after filtering, it means "All" was selected, so don't attach any communities
+                if (!empty($communities)) {
+                    $this->attach_to_community($communities, $id);
+                } else {
+                    // "All" was selected - clear any existing community attachments
+                    PublicationCommunityOfPractice::where('publication_id', $id)->delete();
+                    \Log::info('Communities cleared - publication visible to everyone', [
+                        'publication_id' => $id
+                    ]);
+                }
+            } else {
+                // No communities sent - clear any existing attachments (defaults to "All")
+                PublicationCommunityOfPractice::where('publication_id', $id)->delete();
+            }
+        }
 
          //attach access groups
          if(@$request->accessgroups && $saved):
@@ -857,14 +886,32 @@ public function get(Request $request, $return_array = false, $featured = false,$
         try{
             
         if(!is_array($comunities))
-        $comunities = json_decode($comunities);
+        $comunities = json_decode($comunities, true);
 
         if(is_array($comunities)):
+            // Filter out null, empty, "all", and invalid values
+            // Empty values represent "All" which means visible to everyone (no specific communities)
+            $validCommunities = array_filter($comunities, function($community_id) {
+                return !empty($community_id) && 
+                       $community_id !== null && 
+                       $community_id !== '' && 
+                       strtolower($community_id) !== 'all' &&
+                       is_numeric($community_id);
+            });
+            
+            if (empty($validCommunities)) {
+                \Log::info('No valid communities to attach', [
+                    'publication_id' => $publication_id,
+                    'original_communities' => $comunities
+                ]);
+                return; // Don't try to insert empty data
+            }
+            
             // Optimized: Use bulk insert instead of individual inserts in a loop
             $communityData = [];
-            foreach($comunities as $community_id) {
+            foreach($validCommunities as $community_id) {
                 $communityData[] = [
-                    'community_of_practice_id' => $community_id,
+                    'community_of_practice_id' => intval($community_id),
                     'publication_id' => $publication_id,
                     'created_at' => now(),
                     'updated_at' => now()
@@ -872,13 +919,22 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
             
             if (!empty($communityData)) {
+                // Delete existing communities first to avoid duplicates
+                PublicationCommunityOfPractice::where('publication_id', $publication_id)->delete();
+                
                 PublicationCommunityOfPractice::insert($communityData);
+                
+                \Log::info('Communities attached successfully', [
+                    'publication_id' => $publication_id,
+                    'communities_count' => count($communityData),
+                    'community_ids' => array_column($communityData, 'community_of_practice_id')
+                ]);
                 
                 // Send notifications to community members
                 $publication = Publication::with('author')->find($publication_id);
                 if ($publication) {
                     \App\Jobs\NotifyCommunityMembers::dispatch(
-                        $comunities,
+                        $validCommunities,
                         'publication',
                         $publication_id,
                         $publication->title ?? 'Untitled Publication',
@@ -890,7 +946,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
        endif;
     }
     catch(\Exception $exception){
-            Log::error("Error occured". $exception->getMessage());
+            Log::error("Error occured". $exception->getMessage(), [
+                'publication_id' => $publication_id,
+                'communities' => $comunities ?? null,
+                'exception' => $exception->getTraceAsString()
+            ]);
     }
 
     }
