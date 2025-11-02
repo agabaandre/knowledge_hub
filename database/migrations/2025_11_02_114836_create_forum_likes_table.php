@@ -37,13 +37,17 @@ class CreateForumLikesTable extends Migration
                     $table->unsignedBigInteger('user_id')->after('forum_id');
                     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 }
-                // Try to add unique constraint if it doesn't exist
-                try {
-                    $table->unique(['forum_id', 'user_id']);
-                } catch (\Exception $e) {
-                    // Constraint might already exist
-                }
             });
+            
+            // Check if unique constraint exists before adding it
+            $indexes = DB::select("SHOW INDEXES FROM forum_likes WHERE Key_name = 'forum_likes_forum_id_user_id_unique'");
+            if (empty($indexes)) {
+                try {
+                    DB::statement('ALTER TABLE forum_likes ADD UNIQUE KEY forum_likes_forum_id_user_id_unique (forum_id, user_id)');
+                } catch (\Exception $e) {
+                    // Constraint might already exist or other error
+                }
+            }
         }
     }
 

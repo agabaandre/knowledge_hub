@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class CreateForumCommentLikesTable extends Migration
 {
@@ -37,13 +38,17 @@ class CreateForumCommentLikesTable extends Migration
                     $table->unsignedBigInteger('user_id')->after('forum_comment_id');
                     $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
                 }
-                // Try to add unique constraint if it doesn't exist
-                try {
-                    $table->unique(['forum_comment_id', 'user_id']);
-                } catch (\Exception $e) {
-                    // Constraint might already exist
-                }
             });
+            
+            // Check if unique constraint exists before adding it
+            $indexes = DB::select("SHOW INDEXES FROM forum_comment_likes WHERE Key_name = 'forum_comment_likes_forum_comment_id_user_id_unique'");
+            if (empty($indexes)) {
+                try {
+                    DB::statement('ALTER TABLE forum_comment_likes ADD UNIQUE KEY forum_comment_likes_forum_comment_id_user_id_unique (forum_comment_id, user_id)');
+                } catch (\Exception $e) {
+                    // Constraint might already exist or other error
+                }
+            }
         }
     }
 
