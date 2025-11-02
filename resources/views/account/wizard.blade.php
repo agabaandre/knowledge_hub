@@ -1236,8 +1236,15 @@
                                 if (response.message) {
                                     alert(response.message);
                                 }
-                                // Redirect to publications page
-                                window.location.href = '{{ route("account.publications") }}';
+                                // Redirect based on context: admin or frontend
+                                var formAction = form.action || '';
+                                if (formAction.includes('/admin/publications') || formAction.includes('admin/publications/save')) {
+                                    // Admin context - redirect to admin publications list
+                                    window.location.href = '{{ url("admin/publications") }}';
+                                } else {
+                                    // Frontend context - redirect to account publications
+                                    window.location.href = '{{ route("account.publications") }}';
+                                }
                             } else {
                                 // Show error message
                                 alert(response.message || 'An error occurred. Please try again.');
@@ -1288,6 +1295,13 @@
         }
         
         if (form.length > 0) {
+            // Skip wizard handler if this is an admin form (admin has its own handler)
+            var formAction = form.attr('action') || '';
+            if (formAction.includes('/admin/publications') || formAction.includes('admin/publications/save')) {
+                // This is an admin form, let the admin handler take care of it
+                return;
+            }
+            
             form.off('submit').on('submit', function(e) {
                 e.preventDefault();
                 
@@ -1358,18 +1372,30 @@
                                     msg: successMsg,
                                     callback: function() {
                                         // Redirect after notification closes
-                                        window.location.href = '{{ route("account.publications") }}';
+                                        var formAction = formEl.attr('action') || '';
+                                        var redirectUrl = (formAction.includes('/admin/publications') || formAction.includes('admin/publications/save')) 
+                                            ? '{{ url("admin/publications") }}' 
+                                            : '{{ route("account.publications") }}';
+                                        window.location.href = redirectUrl;
                                     }
                                 });
                                 // Also redirect after delay in case callback doesn't fire
                                 setTimeout(function(){
-                                    window.location.href = '{{ route("account.publications") }}';
+                                    var formAction = formEl.attr('action') || '';
+                                    var redirectUrl = (formAction.includes('/admin/publications') || formAction.includes('admin/publications/save')) 
+                                        ? '{{ url("admin/publications") }}' 
+                                        : '{{ route("account.publications") }}';
+                                    window.location.href = redirectUrl;
                                 }, 3000);
                             } else {
                                 // Fallback to alert if LobiBox not loaded
                                 alert(successMsg);
                                 setTimeout(function(){
-                                    window.location.href = '{{ route("account.publications") }}';
+                                    var formAction = formEl.attr('action') || '';
+                                    var redirectUrl = (formAction.includes('/admin/publications') || formAction.includes('admin/publications/save')) 
+                                        ? '{{ url("admin/publications") }}' 
+                                        : '{{ route("account.publications") }}';
+                                    window.location.href = redirectUrl;
                                 }, 2000);
                             }
                         } else {

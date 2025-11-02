@@ -1,9 +1,9 @@
 <?php
 
-namespace AgabaandreOffice365\ExchangeEmailService;
+namespace App\Services;
 
 /**
- * Enhanced Exchange OAuth Handler
+ * Enhanced Exchange OAuth Handler Service
  * 
  * Handles multiple OAuth 2.0 flows with Microsoft Graph API:
  * - Authorization Code Flow (user-based)
@@ -15,7 +15,7 @@ namespace AgabaandreOffice365\ExchangeEmailService;
  * @author SendMail ExchangeEmailService
  * @version 2.0.0
  */
-class ExchangeOAuth
+class ExchangeEmailService
 {
     protected $tenantId;
     protected $clientId;

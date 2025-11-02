@@ -50,8 +50,7 @@
         "psr-4": {
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeders/",
-            "AgabaandreOffice365\\ExchangeEmailService\\": "app/ExchangeEmailService/"
+            "Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {

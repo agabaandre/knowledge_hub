@@ -15,7 +15,7 @@ use Kreait\Firebase\Messaging\CloudMessage;
 use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
-use AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth;
+use App\Services\ExchangeEmailService;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -332,8 +332,8 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
             return false;
         }
         
-        // Use Exchange OAuth service
-        $oauth = new \AgabaandreOffice365\ExchangeEmailService\ExchangeOAuth(
+        // Use Exchange Email Service
+        $oauth = new \App\Services\ExchangeEmailService(
             $config['tenant_id'],
             $config['client_id'],
             $config['client_secret'],

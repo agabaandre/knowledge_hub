@@ -96,8 +96,10 @@
         }
     });
 
-    $('#publications').submit(function(e) {
+    // Ensure this handler runs first and prevents wizard handler from executing
+    $('#publications').off('submit').on('submit', function(e) {
         e.preventDefault();
+        e.stopImmediatePropagation(); // Prevent other handlers from executing
 
         var form = $(this);
 
