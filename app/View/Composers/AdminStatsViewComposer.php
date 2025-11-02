@@ -84,24 +84,79 @@ class AdminStatsViewComposer{
         $pendingMembers = CommunityOfPracticeMembers::where('is_approved', 0)
             ->with(['community', 'user'])
             ->orderBy('created_at', 'desc')
-            ->limit(5)
             ->get()
             ->map(function($member) {
                 // Ensure community relationship is loaded, if null try to reload
                 if (!$member->community && $member->community_of_practice_id) {
                     $member->load('community');
                 }
+                // If still null, try to fetch directly
+                if (!$member->community && $member->community_of_practice_id) {
+                    $member->community = \App\Models\CommunityOfPractice::find($member->community_of_practice_id);
+                }
                 return [
                     'member' => $member,
                     'community' => $member->community,
                     'user' => $member->user,
                     'created_at' => $member->created_at,
+                    'type' => 'cop_approval',
                 ];
             })
             ->filter(function($approval) {
                 // Filter out approvals where community doesn't exist
-                return $approval['community'] !== null;
+                return $approval['community'] !== null && $approval['user'] !== null;
             });
+
+        // Combine all notifications into a single sorted list by creation date
+        $allNotifications = collect();
+        
+        // Add forums
+        foreach ($pending_forums as $forum) {
+            $allNotifications->push([
+                'type' => 'forum',
+                'item' => $forum,
+                'created_at' => $forum->created_at,
+            ]);
+        }
+        
+        // Add publications
+        foreach ($pending_publications as $publication) {
+            $allNotifications->push([
+                'type' => 'publication',
+                'item' => $publication,
+                'created_at' => $publication->created_at,
+            ]);
+        }
+        
+        // Add forum comments
+        foreach ($pending_forum_comments as $comment) {
+            $allNotifications->push([
+                'type' => 'forum_comment',
+                'item' => $comment,
+                'created_at' => $comment->created_at,
+            ]);
+        }
+        
+        // Add publication comments
+        foreach ($pending_publication_comments as $comment) {
+            $allNotifications->push([
+                'type' => 'publication_comment',
+                'item' => $comment,
+                'created_at' => $comment->created_at,
+            ]);
+        }
+        
+        // Add COP approvals
+        foreach ($pendingMembers as $approval) {
+            $allNotifications->push([
+                'type' => 'cop_approval',
+                'item' => $approval,
+                'created_at' => $approval['created_at'],
+            ]);
+        }
+        
+        // Sort by created_at descending (most recent first) and take top 10
+        $sortedNotifications = $allNotifications->sortByDesc('created_at')->take(10)->values();
 
         // Calculate total pending count
         $total_pending_count = $pending_forums_count + $pending_publications_count + 
@@ -123,6 +178,7 @@ class AdminStatsViewComposer{
             'pending_forums' => $pending_forums,
             'pending_publications' => $pending_publications,
             'pending_cop_approvals' => $pendingMembers,
+            'sorted_notifications' => $sortedNotifications, // New unified sorted list
         ];
 
         $view->with($data);

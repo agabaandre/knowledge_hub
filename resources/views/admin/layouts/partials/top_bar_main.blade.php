@@ -116,120 +116,204 @@
                     </div>
                     <div class="main-message-list chat-scroll" style="flex:1 1 auto;overflow-y:auto;min-height:0;max-height:none;" id="notification-items-list">
                         @if ($total_pending_count > 0)
-                            @foreach ($pending_forums->take(3) as $forum)
-                                <a href="{{ url('admin/forums/moderate') }}?id={{ $forum->id }}" class="p-3 d-flex border-bottom notification-item">
-                                    <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fa fa-comments text-primary"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1" style="font-size:0.875rem;">Forum</h6>
-                                            <small class="text-muted">
-                                                @if($forum->created_at)
-                                                    {{ \Carbon\Carbon::parse($forum->created_at)->diffForHumans() }}
-                                                @endif
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($forum->forum_title ?? 'Untitled', 50) }}</p>
-                                        <small class="text-muted">By: {{ $forum->user->name ?? 'Unknown' }}</small>
-                                    </div>
-                                </a>
-                            @endforeach
+                            @php
+                                // Use sorted notifications if available, otherwise fall back to old method
+                                $notifications = isset($sorted_notifications) && $sorted_notifications->count() > 0 
+                                    ? $sorted_notifications 
+                                    : collect();
+                            @endphp
                             
-                            @foreach ($pending_publications->take(3) as $publication)
-                                <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" class="p-3 d-flex border-bottom notification-item">
-                                    <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fa fa-file-alt text-success"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1" style="font-size:0.875rem;">Publication</h6>
-                                            <small class="text-muted">
-                                                @if($publication->created_at)
-                                                    {{ \Carbon\Carbon::parse($publication->created_at)->diffForHumans() }}
-                                                @endif
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($publication->title ?? 'Untitled', 50) }}</p>
-                                        <small class="text-muted">By: {{ $publication->author->name ?? ($publication->user->name ?? 'Unknown') }}</small>
-                                    </div>
-                                </a>
-                            @endforeach
-                            
-                            @foreach ($pending_forum_comments->take(3) as $comment)
-                                <a href="{{ url('admin/forums/moderate') }}" class="p-3 d-flex border-bottom notification-item">
-                                    <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fa fa-comment-dots text-info"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1" style="font-size:0.875rem;">Forum Comment</h6>
-                                            <small class="text-muted">
-                                                @if($comment->created_at)
-                                                    {{ \Carbon\Carbon::parse($comment->created_at)->diffForHumans() }}
-                                                @endif
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($comment->comment ?? ''), 50) }}</p>
-                                        <small class="text-muted">By: {{ $comment->user->name ?? 'Anonymous' }}</small>
-                                    </div>
-                                </a>
-                            @endforeach
-                            
-                            @foreach ($pending_publication_comments->take(3) as $comment)
-                                <a href="{{ url('admin/publications/moderate') }}" class="p-3 d-flex border-bottom notification-item">
-                                    <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                                        <i class="fa fa-comment text-warning"></i>
-                                    </div>
-                                    <div class="flex-grow-1">
-                                        <div class="d-flex justify-content-between">
-                                            <h6 class="mb-1" style="font-size:0.875rem;">Publication Comment</h6>
-                                            <small class="text-muted">
-                                                @if($comment->created_at)
-                                                    {{ \Carbon\Carbon::parse($comment->created_at)->diffForHumans() }}
-                                                @endif
-                                            </small>
-                                        </div>
-                                        <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($comment->comment ?? ''), 50) }}</p>
-                                        <small class="text-muted">By: {{ $comment->user->name ?? 'Anonymous' }}</small>
-                                    </div>
-                                </a>
-                            @endforeach
-                            
-                            @if(isset($pending_cop_approvals) && $pending_cop_approvals->count() > 0)
-                                @foreach ($pending_cop_approvals->take(3) as $approval)
+                            @if($notifications->count() > 0)
+                                @foreach ($notifications as $notification)
                                     @php
-                                        $community = $approval['community'] ?? null;
-                                        $communityId = $community ? $community->id : ($approval['member']->community_of_practice_id ?? 0);
-                                        $communityName = $community ? $community->community_name : 'Unknown Community';
-                                        
-                                        // Try to get community name directly if relationship failed
-                                        if (!$community && isset($approval['member']) && $approval['member']->community_of_practice_id) {
-                                            $directCommunity = \App\Models\CommunityOfPractice::find($approval['member']->community_of_practice_id);
-                                            if ($directCommunity) {
-                                                $communityName = $directCommunity->community_name;
-                                                $communityId = $directCommunity->id;
-                                            }
-                                        }
+                                        $type = $notification['type'];
+                                        $item = $notification['item'];
+                                        $createdAt = $notification['created_at'];
                                     @endphp
-                                    <a href="{{ route('admin.commsofpractice.details', $communityId) }}" class="p-3 d-flex border-bottom notification-item">
+                                    
+                                    @if($type === 'forum')
+                                        <a href="{{ url('admin/forums/moderate') }}?id={{ $item->id }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-comments text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">Forum</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($item->forum_title ?? 'Untitled', 50) }}</p>
+                                                <small class="text-muted">By: {{ $item->user->name ?? 'Unknown' }}</small>
+                                            </div>
+                                        </a>
+                                    @elseif($type === 'publication')
+                                        <a href="{{ url('admin/publications/details') }}?id={{ $item->id }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-file-alt text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">Publication</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($item->title ?? 'Untitled', 50) }}</p>
+                                                <small class="text-muted">By: {{ $item->author->name ?? ($item->user->name ?? 'Unknown') }}</small>
+                                            </div>
+                                        </a>
+                                    @elseif($type === 'forum_comment')
+                                        <a href="{{ url('admin/forums/moderate') }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-comment-dots text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">Forum Comment</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($item->comment ?? ''), 50) }}</p>
+                                                <small class="text-muted">By: {{ $item->user->name ?? 'Anonymous' }}</small>
+                                            </div>
+                                        </a>
+                                    @elseif($type === 'publication_comment')
+                                        <a href="{{ url('admin/publications/moderate') }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-comment text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">Publication Comment</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($item->comment ?? ''), 50) }}</p>
+                                                <small class="text-muted">By: {{ $item->user->name ?? 'Anonymous' }}</small>
+                                            </div>
+                                        </a>
+                                    @elseif($type === 'cop_approval')
+                                        @php
+                                            $approval = $item;
+                                            $community = $approval['community'] ?? null;
+                                            $communityId = $community ? $community->id : ($approval['member']->community_of_practice_id ?? 0);
+                                            $communityName = $community ? $community->community_name : 'Unknown Community';
+                                            
+                                            // Try to get community name directly if relationship failed
+                                            if (!$community && isset($approval['member']) && $approval['member']->community_of_practice_id) {
+                                                $directCommunity = \App\Models\CommunityOfPractice::find($approval['member']->community_of_practice_id);
+                                                if ($directCommunity) {
+                                                    $communityName = $directCommunity->community_name;
+                                                    $communityId = $directCommunity->id;
+                                                }
+                                            }
+                                        @endphp
+                                        <a href="{{ route('admin.commsofpractice.details', $communityId) }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-users text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">COP Member Approval</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
+                                                <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
+                                            </div>
+                                        </a>
+                                    @endif
+                                @endforeach
+                            @else
+                                {{-- Fallback to old display method if sorted_notifications not available --}}
+                                @foreach ($pending_forums->take(3) as $forum)
+                                    <a href="{{ url('admin/forums/moderate') }}?id={{ $forum->id }}" class="p-3 d-flex border-bottom notification-item">
                                         <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
-                                            <i class="fa fa-users text-primary"></i>
+                                            <i class="fa fa-comments text-primary"></i>
                                         </div>
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between">
-                                                <h6 class="mb-1" style="font-size:0.875rem;">COP Member Approval</h6>
+                                                <h6 class="mb-1" style="font-size:0.875rem;">Forum</h6>
                                                 <small class="text-muted">
-                                                    @if($approval['created_at'])
-                                                        {{ \Carbon\Carbon::parse($approval['created_at'])->diffForHumans() }}
+                                                    @if($forum->created_at)
+                                                        {{ \Carbon\Carbon::parse($forum->created_at)->diffForHumans() }}
                                                     @endif
                                                 </small>
                                             </div>
-                                            <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
-                                            <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
+                                            <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($forum->forum_title ?? 'Untitled', 50) }}</p>
+                                            <small class="text-muted">By: {{ $forum->user->name ?? 'Unknown' }}</small>
                                         </div>
                                     </a>
                                 @endforeach
+                                
+                                @foreach ($pending_publications->take(3) as $publication)
+                                    <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" class="p-3 d-flex border-bottom notification-item">
+                                        <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                            <i class="fa fa-file-alt text-success"></i>
+                                        </div>
+                                        <div class="flex-grow-1">
+                                            <div class="d-flex justify-content-between">
+                                                <h6 class="mb-1" style="font-size:0.875rem;">Publication</h6>
+                                                <small class="text-muted">
+                                                    @if($publication->created_at)
+                                                        {{ \Carbon\Carbon::parse($publication->created_at)->diffForHumans() }}
+                                                    @endif
+                                                </small>
+                                            </div>
+                                            <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($publication->title ?? 'Untitled', 50) }}</p>
+                                            <small class="text-muted">By: {{ $publication->author->name ?? ($publication->user->name ?? 'Unknown') }}</small>
+                                        </div>
+                                    </a>
+                                @endforeach
+                                
+                                @if(isset($pending_cop_approvals) && $pending_cop_approvals->count() > 0)
+                                    @foreach ($pending_cop_approvals->take(3) as $approval)
+                                        @php
+                                            $community = $approval['community'] ?? null;
+                                            $communityId = $community ? $community->id : ($approval['member']->community_of_practice_id ?? 0);
+                                            $communityName = $community ? $community->community_name : 'Unknown Community';
+                                            
+                                            if (!$community && isset($approval['member']) && $approval['member']->community_of_practice_id) {
+                                                $directCommunity = \App\Models\CommunityOfPractice::find($approval['member']->community_of_practice_id);
+                                                if ($directCommunity) {
+                                                    $communityName = $directCommunity->community_name;
+                                                    $communityId = $directCommunity->id;
+                                                }
+                                            }
+                                        @endphp
+                                        <a href="{{ route('admin.commsofpractice.details', $communityId) }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-users text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">COP Member Approval</h6>
+                                                    <small class="text-muted">
+                                                        @if($approval['created_at'])
+                                                            {{ \Carbon\Carbon::parse($approval['created_at'])->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
+                                                <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
+                                            </div>
+                                        </a>
+                                    @endforeach
+                                @endif
                             @endif
                         @else
                             <div class="p-4 text-center text-muted">
