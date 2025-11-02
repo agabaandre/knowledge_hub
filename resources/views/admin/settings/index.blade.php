@@ -551,6 +551,22 @@
                     </div>
 
                     <div class="form-section-title mt-4">
+                        <i class="fa fa-comments"></i>
+                        Comment Moderation
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="auto_approve_comments" name="auto_approve_comments" value="1" @if($settings->auto_approve_comments ?? 1) checked @endif>
+                                    <label class="form-check-label" for="auto_approve_comments">Auto-approve comments on submission</label>
+                                </div>
+                                <small class="info-text">When enabled, forum and publication comments will be automatically approved upon submission. When disabled, comments will require manual approval.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
                         <i class="fa fa-image"></i>
                         Background & Gradient
                 </div>

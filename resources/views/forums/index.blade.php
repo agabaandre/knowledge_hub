@@ -1,3 +1,7 @@
+@php
+    $hide_search = true;
+@endphp
+
 @extends('layouts.app')
 
 @section('title', 'Discussions & Forums')
@@ -10,25 +14,6 @@
     padding: 2rem 0;
 }
 
-.forums-header {
-    background: white;
-    border: 1px solid #e2e8f0;
-    padding: 2rem;
-    margin-bottom: 2rem;
-}
-
-.forums-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 0.5rem 0;
-    color: #1e293b;
-}
-
-.forums-header p {
-    font-size: 1rem;
-    color: #64748b;
-    margin: 0;
-}
 
 .forums-filters {
     background: white;
@@ -94,6 +79,7 @@
     padding: 1.5rem;
     margin-bottom: 1rem;
     transition: all 0.2s ease;
+    position: relative;
 }
 
 .forum-card:hover {
@@ -107,9 +93,18 @@
     margin-bottom: 1rem;
 }
 
+.forum-user-avatar {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.forum-user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
 .forum-image {
-    width: 120px;
-    height: 120px;
+    width: 180px;
+    height: 180px;
     object-fit: cover;
     flex-shrink: 0;
     border: 1px solid #e2e8f0;
@@ -117,6 +112,7 @@
 
 .forum-content {
     flex: 1;
+    padding-right: 60px; /* Make room for user avatar on the right */
 }
 
 .forum-title {
@@ -191,6 +187,148 @@
     display: flex;
     gap: 0.5rem;
     margin-top: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+/* Comments Panel Styles */
+.comments-panel {
+    margin-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+    padding-top: 1rem;
+}
+
+.comments-toggle-inline {
+    transition: opacity 0.2s ease;
+}
+
+.comments-toggle-inline:hover {
+    opacity: 0.8;
+}
+
+.comments-toggle-inline i {
+    transition: transform 0.3s ease;
+}
+
+.comments-toggle-inline.collapsed i.fa-comments {
+    /* Icon stays normal when collapsed */
+}
+
+.like-forum-btn {
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
+
+.like-forum-btn:hover {
+    opacity: 0.8;
+    transform: scale(1.1);
+}
+
+.like-forum-btn i {
+    transition: color 0.2s ease;
+}
+
+.comments-list {
+    max-height: 400px;
+    overflow-y: auto;
+    padding-right: 0.5rem;
+}
+
+.comment-item-mini {
+    display: flex;
+    gap: 0.75rem;
+    padding: 0.75rem;
+    border-bottom: 1px solid #f1f5f9;
+    background: #fafbfc;
+    border-radius: 6px;
+    margin-bottom: 0.5rem;
+}
+
+.comment-item-mini:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.comment-avatar-mini {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    background: #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+    font-size: 0.875rem;
+    overflow: hidden;
+}
+
+.comment-avatar-mini img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.comment-content-mini {
+    flex: 1;
+    min-width: 0;
+}
+
+.comment-author-mini {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #1e293b;
+    margin-bottom: 0.25rem;
+}
+
+.comment-text-mini {
+    font-size: 0.875rem;
+    color: #64748b;
+    line-height: 1.5;
+    margin-bottom: 0.25rem;
+    word-wrap: break-word;
+}
+
+.comment-time-mini {
+    font-size: 0.75rem;
+    color: #94a3b8;
+}
+
+.inline-comment-form {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+}
+
+.inline-comment-form textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.inline-comment-form textarea:focus {
+    outline: none;
+    border-color: var(--theme-color-primary, #119A48);
+}
+
+.inline-comment-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+    justify-content: flex-end;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 1.5rem;
+    color: #94a3b8;
+    font-size: 0.875rem;
 }
 
 .empty-state {
@@ -219,12 +357,12 @@
 }
 
 @media (max-width: 768px) {
-    .forums-header {
-        padding: 1.5rem;
+    .custom-bg h1 {
+        font-size: 1.75rem;
     }
-
-    .forums-header h1 {
-        font-size: 1.5rem;
+    
+    .custom-bg p {
+        font-size: 0.9rem;
     }
 
     .forum-header {
@@ -233,7 +371,7 @@
 
     .forum-image {
         width: 100%;
-        height: 200px;
+        height: 180px;
     }
 
     .forum-meta {
@@ -246,28 +384,29 @@
 @endsection
 
 @section('content')
-<div class="forums-wrapper">
-    <div class="container" style="max-width: 1200px;">
-        <!-- Header -->
-        <div class="forums-header">
-            <div class="d-flex justify-content-between align-items-center flex-wrap">
-                <div>
-                    <h1><i class="fa fa-comments me-2"></i>Discussions & Forums</h1>
-                    <p>Join conversations, share knowledge, and collaborate with the community</p>
+{{-- Custom Header Section (replaces search bar) --}}
+<div class="pt-5 pt-0 custom-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div style="text-align: center; padding: 2rem 0;">
+                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                        <i class="fa fa-comments me-2"></i>Discussions & Forums
+                    </h1>
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
+                        Join conversations, share knowledge, and collaborate with the community
+                    </p>
+                </div>
                             </div>
-                @auth
-                <a href="{{ url('forums/create') }}" class="btn btn-sm theme-bg text-white" style="font-weight: 600;">
-                    <i class="fa fa-plus-circle me-2"></i>Start New Discussion
-                            </a>
-                            @endauth
                         </div>
-            <div class="mt-3">
-                <span class="stats-badge">
-                    <i class="fa fa-comment-dots"></i>
-                    {{ $forums->total() }} {{ $forums->total() === 1 ? 'Discussion' : 'Discussions' }}
-                </span>
                     </div>
                 </div>
+
+{{-- Secondary Navigation Below Banner --}}
+@include('partials.secondary_navigation', ['forceShow' => true])
+
+<div class="forums-wrapper">
+    <div class="container" style="max-width: 1200px;">
 
         <!-- Filters -->
         <div class="forums-filters">
@@ -289,7 +428,7 @@
                 <div class="forum-card" 
                      data-forum-id="{{ $forum->id }}"
                      data-joined="{{ in_array($forum->id, $my_forums) ? 'true' : 'false' }}"
-                     data-comments="{{ count($forum->comments) }}"
+                     data-comments="{{ $forum->total_comments ?? count($forum->comments) }}"
                      data-date="{{ $forum->created_at }}">
                     <div class="forum-header">
                         @if($forum->forum_image)
@@ -301,6 +440,31 @@
                         @endif
 
                         <div class="forum-content">
+                            @if($forum->user && $forum->user->photo)
+                                @php
+                                    $photoUrl = $forum->user->photo;
+                                    $baseUrl = url('/');
+                                    if (strpos($photoUrl, 'http://') === 0 || strpos($photoUrl, 'https://') === 0) {
+                                        // Already a full URL
+                                    } elseif (strpos($photoUrl, $baseUrl) !== false) {
+                                        // Already contains base URL
+                                    } elseif (strpos($photoUrl, '/storage/') === 0) {
+                                        $photoUrl = $baseUrl . $photoUrl;
+                                    } elseif (strpos($photoUrl, 'storage/') === 0) {
+                                        $photoUrl = $baseUrl . '/' . $photoUrl;
+                                    }
+                                @endphp
+                                <div class="forum-user-avatar" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;"
+                                     onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $photoUrl }}', '{{ $forum->user->name ?? 'Unknown' }}'); }">
+                                    <img src="{{ $photoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
+                                         style="width: 100%; height: 100%; object-fit: cover; object-position: center;"
+                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' style=\'font-size: 1.5rem; color: #64748b;\'></i>';">
+                                </div>
+                            @else
+                                <div class="forum-user-avatar" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 10;">
+                                    <i class="fa fa-user" style="font-size: 1.5rem; color: #64748b;"></i>
+                                </div>
+                            @endif
                             <h2 class="forum-title">
                                 @if(in_array($forum->id, $my_forums))
                                     <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
@@ -308,16 +472,27 @@
                                     {!! $forum->forum_title !!}
                                 @endif
                             </h2>
-                            <p class="forum-description">{!! Str::limit(strip_tags($forum->forum_description), 200) !!}</p>
+                            <p class="forum-description">
+                                @php
+                                    // Limit to 80 words first
+                                    $limitedDescription = Str::words(strip_tags($forum->forum_description), 80, '...');
+                                    // Then process for video links and URLs
+                                    $processedDescription = detect_and_embed_video_links($limitedDescription, 180, 180);
+                                @endphp
+                                {!! $processedDescription !!}
+                            </p>
 
                             @if(count($forum->tags) > 0)
                             <div class="forum-tags">
-                                @foreach($forum->tags as $tag)
+                                    @foreach($forum->tags as $tag)
                                 <span class="tag">#{{ $tag->tag }}</span>
-                                @endforeach
+                                    @endforeach
                             </div>
                             @endif
 
+                            @php
+                                $totalComments = $forum->total_comments ?? count($forum->comments);
+                            @endphp
                             <div class="forum-meta">
                                 <div class="meta-item">
                                     <i class="fa fa-user"></i>
@@ -327,23 +502,124 @@
                                     <i class="fa fa-clock"></i>
                                     <span>{{ time_ago($forum->created_at) }}</span>
                                 </div>
-                                <div class="meta-item">
+                                @if($totalComments > 0)
+                                <div class="meta-item comments-toggle-inline collapsed" 
+                                     data-forum-id="{{ $forum->id }}" 
+                                     onclick="toggleComments({{ $forum->id }})"
+                                     style="cursor: pointer;">
                                     <i class="fa fa-comments"></i>
-                                    <span>{{ count($forum->comments) }} {{ count($forum->comments) === 1 ? 'Comment' : 'Comments' }}</span>
+                                    <span>{{ $totalComments }} {{ $totalComments === 1 ? 'Comment' : 'Comments' }}</span>
                                 </div>
+                                @endif
+                                @php
+                                    $totalLikes = $forum->total_likes ?? count($forum->likes);
+                                    $isLiked = auth()->check() && $forum->isLikedBy(auth()->id());
+                                    $totalViews = isset($forum->views) ? (int)$forum->views : 0;
+                                @endphp
+                                <div class="meta-item like-forum-btn" 
+                                     data-forum-id="{{ $forum->id }}"
+                                     onclick="likeForum({{ $forum->id }})"
+                                     style="cursor: pointer; {{ $isLiked ? 'color: #ef4444;' : '' }}">
+                                    <i class="fa {{ $isLiked ? 'fa-heart' : 'fa-heart-o' }}" style="color: {{ $isLiked ? '#ef4444' : 'inherit' }};"></i>
+                                    <span class="like-count-{{ $forum->id }}">{{ $totalLikes }}</span>
+                                    <span>{{ $totalLikes === 1 ? ' like' : ' likes' }}</span>
                                 </div>
+                                <div class="meta-item">
+                                    <i class="fa fa-eye"></i>
+                                    <span>{{ $totalViews }} {{ $totalViews === 1 ? 'view' : 'views' }}</span>
+                                </div>
+                            </div>
 
                             <div class="forum-actions">
+                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fa fa-info-circle"></i> Details
+                                </a>
                                 @if(in_array($forum->id, $my_forums))
                                     <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
-                                        <i class="fa fa-eye"></i> View Discussion
+                                        <i class="fa fa-comments"></i> View Discussion
                                     </a>
-                                    @else
+                                    <button type="button" class="btn btn-sm theme-bg text-white" 
+                                            onclick="showInlineCommentForm({{ $forum->id }})"
+                                            id="show-comment-btn-{{ $forum->id }}">
+                                        <i class="fa fa-plus-circle me-1"></i> Add Comment
+                                    </button>
+                                @else
                                     <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
+                                @endif
+                            </div>
+
+                            @php
+                                $forumComments = $forum->comments->take(5);
+                                $hasMoreComments = ($totalComments ?? 0) > 5;
+                                $commentsToShow = max(2, min(5, min($totalComments ?? 0, 5)));
+                            @endphp
+
+                            @if($totalComments > 0 || (in_array($forum->id, $my_forums) && auth()->check()))
+                            <div class="comments-panel">
+                                <div class="comments-list" id="comments-list-{{ $forum->id }}" style="display: none;">
+                                    @if($totalComments > 0)
+                                        @foreach($forumComments->take($commentsToShow) as $comment)
+                                            <div class="comment-item-mini">
+                                                <div class="comment-avatar-mini">
+                                                    @if($comment->user && $comment->user->photo)
+                                                        @php
+                                                            $photoUrl = $comment->user->photo;
+                                                            $baseUrl = url('/');
+                                                            if (strpos($photoUrl, 'http://') === 0 || strpos($photoUrl, 'https://') === 0) {
+                                                                // Already a full URL
+                                                            } elseif (strpos($photoUrl, $baseUrl) !== false) {
+                                                                // Already contains base URL
+                                                            } elseif (strpos($photoUrl, '/storage/') === 0) {
+                                                                $photoUrl = $baseUrl . $photoUrl;
+                                                            } elseif (strpos($photoUrl, 'storage/') === 0) {
+                                                                $photoUrl = $baseUrl . '/' . $photoUrl;
+                                                            }
+                                                        @endphp
+                                                        <img src="{{ $photoUrl }}" alt="{{ $comment->user->name ?? 'User' }}" 
+                                                             onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\'></i>';">
+                                                    @else
+                                                        <i class="fa fa-user"></i>
+                                                    @endif
+                                                </div>
+                                                <div class="comment-content-mini">
+                                                    <div class="comment-author-mini">{{ $comment->user->name ?? 'Unknown' }}</div>
+                                                    <div class="comment-text-mini">{!! Str::limit(strip_tags($comment->comment ?? ''), 150) !!}</div>
+                                                    <div class="comment-time-mini">
+                                                        <i class="fa fa-clock me-1"></i>{{ time_ago($comment->created_at ?? now()) }}
+                                                        @if($comment->likes && count($comment->likes) > 0)
+                                                            <span class="ms-2">
+                                                                <i class="fa fa-heart text-danger me-1"></i>{{ count($comment->likes) }}
+                                                            </span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    @else
+                                        <div class="no-comments">No comments yet. Be the first to comment!</div>
+                                    @endif
+                                </div>
+
+                                @if(in_array($forum->id, $my_forums))
+                                <div class="inline-comment-form" id="comment-form-{{ $forum->id }}" style="display: none;">
+                                    <form onsubmit="submitInlineComment(event, {{ $forum->id }})">
+                                        <textarea name="comment" id="inline-comment-{{ $forum->id }}" 
+                                                  placeholder="Add a comment..." required></textarea>
+                                        <div class="inline-comment-actions">
+                                            <button type="button" class="btn btn-sm btn-outline-secondary" 
+                                                    onclick="cancelInlineComment({{ $forum->id }})">Cancel</button>
+                                            <button type="submit" class="btn btn-sm theme-bg text-white">
+                                                <i class="fa fa-paper-plane me-1"></i>Post Comment
+                                            </button>
+                                        </div>
+                                        @csrf
+                                    </form>
+                                </div>
                                     @endif
                             </div>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -373,6 +649,255 @@
 </div>
 
 <script>
+// Image Modal for full view (if not already defined)
+if (typeof openImageModal === 'undefined') {
+    function openImageModal(imageUrl, imageAlt) {
+        let modal = document.getElementById('imageViewModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'imageViewModal';
+            modal.className = 'image-view-modal';
+            modal.innerHTML = `
+                <div class="image-view-modal-overlay" onclick="closeImageModal()"></div>
+                <div class="image-view-modal-content">
+                    <button class="image-view-modal-close" onclick="closeImageModal()">&times;</button>
+                    <img id="imageViewModalImg" src="" alt="" />
+                </div>
+            `;
+            document.body.appendChild(modal);
+            
+            // Add styles if not already present
+            if (!document.getElementById('imageModalStyles')) {
+                const style = document.createElement('style');
+                style.id = 'imageModalStyles';
+                style.textContent = `
+                    .image-view-modal {
+                        display: none;
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        z-index: 9999;
+                        align-items: center;
+                        justify-content: center;
+                        background: rgba(0, 0, 0, 0.9);
+                    }
+                    .image-view-modal-overlay {
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        cursor: pointer;
+                    }
+                    .image-view-modal-content {
+                        position: relative;
+                        max-width: 90%;
+                        max-height: 90%;
+                        z-index: 10000;
+                        text-align: center;
+                    }
+                    .image-view-modal-content img {
+                        max-width: 100%;
+                        max-height: 90vh;
+                        border-radius: 8px;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+                    }
+                    .image-view-modal-close {
+                        position: absolute;
+                        top: -40px;
+                        right: 0;
+                        background: rgba(255, 255, 255, 0.9);
+                        border: none;
+                        width: 40px;
+                        height: 40px;
+                        border-radius: 50%;
+                        font-size: 24px;
+                        cursor: pointer;
+                        color: #2d3748;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: all 0.2s ease;
+                        z-index: 10001;
+                    }
+                    .image-view-modal-close:hover {
+                        background: #ffffff;
+                        transform: scale(1.1);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+        
+        document.getElementById('imageViewModalImg').src = imageUrl;
+        document.getElementById('imageViewModalImg').alt = imageAlt || 'Image';
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }
+    
+    function closeImageModal() {
+        const modal = document.getElementById('imageViewModal');
+        if (modal) {
+            modal.style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+    
+    // Close modal on ESC key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            closeImageModal();
+        }
+    });
+    
+    window.openImageModal = openImageModal;
+    window.closeImageModal = closeImageModal;
+}
+
+function toggleComments(forumId) {
+    const inlineToggle = document.querySelector(`.comments-toggle-inline[data-forum-id="${forumId}"]`);
+    const commentsList = document.getElementById(`comments-list-${forumId}`);
+    
+    if (commentsList) {
+        const isCollapsed = commentsList.style.display === 'none' || !commentsList.style.display;
+        if (isCollapsed) {
+            commentsList.style.display = 'block';
+            if (inlineToggle) inlineToggle.classList.remove('collapsed');
+        } else {
+            commentsList.style.display = 'none';
+            if (inlineToggle) inlineToggle.classList.add('collapsed');
+        }
+    }
+}
+
+function likeForum(forumId) {
+    @auth
+    const likeBtn = document.querySelector(`.like-forum-btn[data-forum-id="${forumId}"]`);
+    const icon = likeBtn ? likeBtn.querySelector('i') : null;
+    const countSpan = likeBtn ? likeBtn.querySelector('.like-count-' + forumId) : null;
+    
+    if (!likeBtn || !icon || !countSpan) return;
+    
+    // Disable button during request
+    likeBtn.style.pointerEvents = 'none';
+    
+    fetch('{{ url("forums/like") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': '{{ csrf_token() }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({ forum_id: forumId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.error) {
+            alert(data.error);
+            return;
+        }
+        
+        // Update icon
+        if (data.liked) {
+            icon.classList.remove('fa-heart-o');
+            icon.classList.add('fa-heart');
+            icon.style.color = '#ef4444';
+            likeBtn.style.color = '#ef4444';
+        } else {
+            icon.classList.remove('fa-heart');
+            icon.classList.add('fa-heart-o');
+            icon.style.color = 'inherit';
+            likeBtn.style.color = 'inherit';
+        }
+        
+        // Update count
+        countSpan.textContent = data.count || 0;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    })
+    .finally(() => {
+        likeBtn.style.pointerEvents = 'auto';
+    });
+    @else
+    alert('Please login to like forums');
+    @endauth
+}
+
+function showInlineCommentForm(forumId) {
+    const form = document.getElementById(`comment-form-${forumId}`);
+    const btn = document.getElementById(`show-comment-btn-${forumId}`);
+    
+    if (form && btn) {
+        form.style.display = 'block';
+        btn.style.display = 'none';
+        form.querySelector('textarea').focus();
+    }
+}
+
+function cancelInlineComment(forumId) {
+    const form = document.getElementById(`comment-form-${forumId}`);
+    const btn = document.getElementById(`show-comment-btn-${forumId}`);
+    const textarea = document.getElementById(`inline-comment-${forumId}`);
+    
+    if (form && btn && textarea) {
+        form.style.display = 'none';
+        btn.style.display = 'block';
+        textarea.value = '';
+    }
+}
+
+function submitInlineComment(event, forumId) {
+    event.preventDefault();
+    
+    const form = event.target;
+    const textarea = form.querySelector('textarea');
+    const commentText = textarea.value.trim();
+    
+    if (!commentText) {
+        alert('Please enter a comment');
+        return;
+    }
+    
+    const formData = new FormData(form);
+    formData.append('forum_id', forumId);
+    formData.append('comment', commentText);
+    
+    // Show loading state
+    const submitBtn = form.querySelector('button[type="submit"]');
+    const originalText = submitBtn.innerHTML;
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i>Posting...';
+    
+    fetch('{{ url("forums/comment") }}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 200 || data.success) {
+            // Reload page to show new comment
+            window.location.reload();
+        } else {
+            alert(data.message || 'Error posting comment. Please try again.');
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    });
+}
+
 document.addEventListener('DOMContentLoaded', function() {
     const searchInput = document.getElementById('forum-search');
     const filterButtons = document.querySelectorAll('.filter-btn');

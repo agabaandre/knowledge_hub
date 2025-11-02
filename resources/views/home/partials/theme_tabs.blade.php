@@ -40,7 +40,7 @@
 
     .theme-card {
         background: #ffffff;
-        border-radius: 0.75rem;
+        border-radius: 0.25rem;
         padding: 1.25rem 1rem;
         text-align: center;
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -53,6 +53,7 @@
         position: relative;
         overflow: hidden;
         width: 100%;
+        opacity: 0.8;
     }
 
     .theme-card::before {
@@ -179,7 +180,7 @@
 
     @keyframes fadeInUp {
         to {
-            opacity: 1;
+            opacity: 0.8;
             transform: translateY(0);
         }
     }

@@ -5,6 +5,12 @@
 @include('layouts.' . $theme . 'partials.styles')
 @include('layouts.' . $theme . 'partials.header')
 
+@if (!@$is_home && !@$hide_search)
+    @include('home.partials.' . $theme . 'page_search')
+@endif
+
+@include('partials.secondary_navigation')
+
 @yield('styles')
 
 @if (Session::has('alert') || Session::has('message') || $errors->any())

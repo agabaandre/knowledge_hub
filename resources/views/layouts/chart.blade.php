@@ -5,6 +5,12 @@
 
 @include('layouts.partials.header')
 
+@if (!@$is_home && !@$hide_search)
+    @include('home.partials.' . site_theme() . 'page_search')
+@endif
+
+@include('partials.secondary_navigation')
+
 @yield('styles')
 
 <link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css')}}"/>

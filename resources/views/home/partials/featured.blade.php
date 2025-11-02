@@ -1,5 +1,28 @@
    <!-- ======================= Featured / Recommended ======================== -->
   <section class="middle gray" style="padding-top: 20px; padding-bottom: 20px;">
+       <style>
+           /* Mobile Styles - Full width images */
+           @media (max-width: 767.98px) {
+               .featured-card {
+                   flex-direction: column !important;
+               }
+               
+               .featured-image {
+                   width: 100% !important;
+                   height: 200px !important;
+                   margin-right: 0 !important;
+                   margin-bottom: 1rem !important;
+               }
+               
+               .featured-image img {
+                   object-position: top center !important;
+               }
+               
+               .featured-content {
+                   width: 100% !important;
+               }
+           }
+       </style>
        <div class="container">
 
            <div class="row justify-content-center" data-aos="fade-in">
@@ -27,8 +50,8 @@
 
                   <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12" data-aos="zoom-in">
                       <div class="jbr-wrap text-left border rounded">
-                          <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3">
-                               <div class="cats-box rounded bg-white d-flex align-items-center" style="min-width:100%;">
+                          <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3 featured-card">
+                               <div class="cats-box rounded bg-white d-flex align-items-center featured-card" style="min-width:100%;">
                                    @php
                                        $image_link = $row->cover ?? $row->image_url ?? null;
                                        // Default image is cover.png from public assets/images
@@ -50,7 +73,7 @@
                                    @endphp
 
                                    <!-- Image Section -->
-                                   <div class="cats-box-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                                   <div class="cats-box-image featured-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
                                        <img src="{{ $image_link }}"
                                             alt="{{ $row->title }} - {{ $row->author->name ?? 'Africa CDC' }}" 
                                             title="{{ $row->title }}"
@@ -58,7 +81,7 @@
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
 
-                                  <div class="cats-box-caption" style="flex: 1;">
+                                  <div class="cats-box-caption featured-content" style="flex: 1;">
                                        <h4 class="fs-md mb-0 ft-medium text-truncate"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
                                                title="{!! clean_unicode($row->title) !!}">{!! truncate(clean_unicode($row->title), 40) !!}</a></h4>
@@ -99,19 +122,37 @@
                                                        onclick="showComments('{{ $row->id }}')"><i
                                                            class="fa fa-comments"></i> {{ count($row->comments) }}
                                                        Comments</span></span>
-                                            <div class="d-flex align-items-center mt-2" style="gap: .5rem;">
-                                                @auth()
-                                                    <div class="btn btn-outline-dark btn-sm favbtn">
-                                                        @include ('common.favourites_btn')
-                                                    </div>
+                                            <div class="d-flex align-items-center mt-2" style="flex-wrap: wrap; gap: 4px;">
+                                                @php
+                                                    $auGold = settings()->au_gold ?? '#B4A269';
+                                                    $goldTextColor = '#5a4d2e';
+                                                @endphp
+                                                @auth
+                                                    @if(!$row->is_favourite)
+                                                        <a href="{{ url('publications/add_favourite') }}?id={{ $row->id }}" 
+                                                           class="btn btn-sm btn-outline-warning" 
+                                                           style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                                            <i class="fa fa-star mr-1"></i> Add to Favourites
+                                                        </a>
+                                                    @else
+                                                        <a href="{{ url('publications/remove_favourite') }}?id={{ $row->id }}" 
+                                                           class="btn btn-sm btn-warning" 
+                                                           style="background-color: {{ $auGold }}; border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
+                                                            <i class="fa fa-star mr-1"></i> Remove favorite
+                                                        </a>
+                                                    @endif
                                                 @else
-                                                    <div class="btn btn-outline-dark btn-sm favbtn">
-                                                        @include ('common.favourites_btn')
-                                                    </div>
+                                                    <a href="{{ url('login') }}" 
+                                                       class="btn btn-sm btn-outline-warning" 
+                                                       style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                                        <i class="fa fa-star mr-1"></i> Add to Favourites
+                                                    </a>
                                                 @endauth
-                                                <a href="{{ url('records/resource') }}?id={{ $row->id }}"
-                                                   class="btn btn-sm theme-bg text-white ft-medium apply-btn fs-sm rounded">Browse
-                                                   Resource</a>
+                                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                                                   class="btn btn-sm btn-primary" 
+                                                   style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
+                                                    <i class="fa fa-eye mr-1"></i> Browse Resource
+                                                </a>
                                             </div>
                                            </span>
 

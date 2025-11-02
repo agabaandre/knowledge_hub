@@ -156,9 +156,17 @@ if (!function_exists('is_valid_image')) {
 if(!function_exists('storage_link')){
 
     function storage_link($file_path){
-
-       return url('/').Storage::disk('local')->url($file_path);
-       
+        // If file_path already contains full URL, return as-is
+        if (strpos($file_path, 'http://') === 0 || strpos($file_path, 'https://') === 0) {
+            return $file_path;
+        }
+        // Get storage URL
+        $storageUrl = Storage::disk('local')->url($file_path);
+        // If storage URL already contains domain, return as-is, otherwise prepend site URL
+        if (strpos($storageUrl, 'http://') === 0 || strpos($storageUrl, 'https://') === 0) {
+            return $storageUrl;
+        }
+        return url('/').$storageUrl;
      }
    
    }
@@ -744,6 +752,138 @@ if (!function_exists('extract_pdf_as_image')) {
              || strpos($path,'.bmp') 
              || strpos($path,'.tiff') 
              || strpos($path,'.ico');
+    }
+}
+
+if (!function_exists('detect_and_embed_video_links')) {
+    /**
+     * Detect video links in text and convert them to embedded previews
+     * Also converts regular URLs to clickable links that open in a new tab
+     * Supports YouTube, Vimeo, and direct video file URLs
+     * 
+     * @param string $text The text content to process
+     * @param int $width Width for video preview (default: 80px)
+     * @param int $height Height for video preview (default: 80px)
+     * @return string Text with video links converted to embedded previews and URLs as clickable links
+     */
+    function detect_and_embed_video_links($text, $width = 80, $height = 80) {
+        if (empty($text)) {
+            return $text;
+        }
+        
+        // First, mark all URLs to prevent double processing
+        // We'll use placeholders for URLs that are already inside HTML tags (like existing links, images, etc.)
+        $placeholders = [];
+        $placeholderIndex = 0;
+        
+        // Protect existing HTML tags and their content
+        $text = preg_replace_callback('/<[^>]+>/i', function($matches) use (&$placeholders, &$placeholderIndex) {
+            $placeholder = '___HTML_PLACEHOLDER_' . $placeholderIndex . '___';
+            $placeholders[$placeholder] = $matches[0];
+            $placeholderIndex++;
+            return $placeholder;
+        }, $text);
+        
+        // YouTube patterns
+        $youtubePattern = '/(?:https?:\/\/)?(?:www\.)?(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|watch\?.+&v=))([\w|-]{11})(?:(?:[\?&]t=)(\S+))?/i';
+        
+        // Vimeo patterns
+        $vimeoPattern = '/https?:\/\/(?:player\.)?vimeo\.com\/(?:video\/)?([0-9]+)(?:\?.*)?/i';
+        
+        // Direct video file patterns (mp4, webm, ogg, etc.)
+        $directVideoPattern = '/(https?:\/\/[^\s<>"\'{}|\\^`\[\]]+\.(mp4|webm|ogg|ogv|mov|avi|wmv|flv|m4v)(?:\?[^\s<>"\'{}|\\^`\[\]]*)?)/i';
+        
+        // Replace YouTube links
+        $text = preg_replace_callback($youtubePattern, function($matches) use ($width, $height) {
+            $videoId = $matches[1];
+            $startTime = isset($matches[2]) ? '?start=' . $matches[2] : '';
+            return '<div class="video-preview-inline" style="display: inline-block; margin: 4px; vertical-align: middle;">
+                        <iframe width="' . $width . '" height="' . $height . '" 
+                                src="https://www.youtube.com/embed/' . $videoId . $startTime . '" 
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen
+                                style="border-radius: 4px; max-width: 100%;">
+                        </iframe>
+                    </div>';
+        }, $text);
+        
+        // Replace Vimeo links
+        $text = preg_replace_callback($vimeoPattern, function($matches) use ($width, $height) {
+            $videoId = $matches[1];
+            return '<div class="video-preview-inline" style="display: inline-block; margin: 4px; vertical-align: middle;">
+                        <iframe width="' . $width . '" height="' . $height . '" 
+                                src="https://player.vimeo.com/video/' . $videoId . '" 
+                                frameborder="0" 
+                                allow="autoplay; fullscreen; picture-in-picture" 
+                                allowfullscreen
+                                style="border-radius: 4px; max-width: 100%;">
+                        </iframe>
+                    </div>';
+        }, $text);
+        
+        // Replace direct video file links
+        $text = preg_replace_callback($directVideoPattern, function($matches) use ($width, $height) {
+            $videoUrl = $matches[1];
+            return '<div class="video-preview-inline" style="display: inline-block; margin: 4px; vertical-align: middle;">
+                        <video width="' . $width . '" height="' . $height . '" 
+                               controls 
+                               preload="metadata"
+                               style="border-radius: 4px; max-width: 100%;">
+                            <source src="' . htmlspecialchars($videoUrl) . '" type="video/' . $matches[2] . '">
+                            Your browser does not support the video tag.
+                        </video>
+                    </div>';
+        }, $text);
+        
+        // Restore HTML placeholders before processing URLs
+        foreach ($placeholders as $placeholder => $original) {
+            $text = str_replace($placeholder, $original, $text);
+        }
+        
+        // Convert remaining URLs to clickable links (only plain URLs, not already processed videos)
+        // Match URLs that are not already inside HTML tags
+        // This pattern matches http/https URLs that are standalone (not in existing tags)
+        $urlPattern = '/(?<!href=["\'])(?<!src=["\'])(?<!<[^>]*>)(?<!["\'>])(https?:\/\/[^\s<>"\'{}|\\^`\[\]\.]+(?:[^\s<>"\'{}|\\^`\[\]])*?)(?![^<]*>)(?![^\s]*[.,;:!?](?=\s|$|[<]))/i';
+        
+        // More reliable approach: split text into parts and process each part
+        // First, extract all existing HTML tags and their positions
+        $parts = preg_split('/(<[^>]+>)/i', $text, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $result = '';
+        
+        foreach ($parts as $part) {
+            // Skip HTML tags
+            if (preg_match('/^<[^>]+>$/i', $part)) {
+                $result .= $part;
+                continue;
+            }
+            
+            // Process plain text parts for URLs
+            $part = preg_replace_callback('/(https?:\/\/[^\s<>"\'{}|\\^`\[\]]+)/i', function($matches) {
+                $url = trim($matches[1]);
+                // Clean trailing punctuation
+                $url = rtrim($url, '.,;:!?)');
+                
+                // Skip if it's already an embedded video (starts with video preview div)
+                if (strpos($url, '<div class="video-preview-inline"') !== false) {
+                    return $url;
+                }
+                
+                // Extract domain for display text
+                $displayText = $url;
+                if (preg_match('/https?:\/\/(?:www\.)?([^\/?#]+)/i', $url, $domainMatch)) {
+                    $displayText = $domainMatch[1];
+                }
+                
+                return '<a href="' . htmlspecialchars($url) . '" target="_blank" rel="noopener noreferrer" style="color: #2563eb; text-decoration: underline; word-break: break-all;">' . htmlspecialchars($displayText) . '</a>';
+            }, $part);
+            
+            $result .= $part;
+        }
+        
+        $text = $result;
+        
+        return $text;
     }
 }
 

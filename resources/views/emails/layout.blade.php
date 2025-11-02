@@ -65,7 +65,7 @@
                                         <table role="presentation" cellspacing="0" cellpadding="0" border="0">
                                             <tr>
                                                 <td style="padding: 0 10px;">
-                                                    <a href="https://www.africacdc.org" style="color: #119A48; text-decoration: none; font-size: 14px;">Website</a>
+                                                    <a href="https://africacdc.org" style="color: #119A48; text-decoration: none; font-size: 14px;">Website</a>
                                                 </td>
                                                 <td style="padding: 0 10px; color: #cbd5e1;">|</td>
                                                 <td style="padding: 0 10px;">

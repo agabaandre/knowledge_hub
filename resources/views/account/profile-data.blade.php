@@ -147,6 +147,40 @@
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">
+                                <label class="form-label">Job Title</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control camel-case-input" placeholder="Job Title"
+                                    name="job_title" value="{{ $user->job_title }}" id="job_title">
+                                @error('job_title')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Organization / Institution</label>
+                            </div>
+                            <div class="col-md-9">
+                                <input type="text" class="form-control camel-case-input" placeholder="Organization / Institution Name"
+                                    name="organization_name" value="{{ $user->organization_name }}" id="organization_name">
+                                @error('organization_name')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
                                 <label class="form-label">ORCID</label>
                             </div>
                             <div class="col-md-9">
@@ -224,6 +258,28 @@
                         </div>
                     @endcan
 
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Monthly Updates</label>
+                            </div>
+                            <div class="col-md-9">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" name="is_subscribed" id="is_subscribed" 
+                                        value="1" {{ $user->is_subscribed ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="is_subscribed">
+                                        Subscribe to monthly updates and newsletters
+                                    </label>
+                                </div>
+                                @error('is_subscribed')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
+
                     @if (!$user->country_id)
                         <div class="form-group mb-2">
                             <div class="row">
@@ -285,3 +341,37 @@
     </div>
     <!-- /Col -->
 </div>
+
+<script>
+(function() {
+    // Title Case transformation function (capitalize first letter of each word)
+    function toTitleCase(str) {
+        if (!str) return '';
+        return str
+            .toLowerCase()
+            .split(/\s+/)
+            .map(function(word) {
+                return word.charAt(0).toUpperCase() + word.slice(1);
+            })
+            .join(' ');
+    }
+
+    // Apply title case on blur
+    document.querySelectorAll('.camel-case-input').forEach(function(input) {
+        input.addEventListener('blur', function() {
+            if (this.value && this.value.trim() !== '') {
+                this.value = toTitleCase(this.value.trim());
+            }
+        });
+
+        // Also apply on paste
+        input.addEventListener('paste', function(e) {
+            setTimeout(() => {
+                if (this.value && this.value.trim() !== '') {
+                    this.value = toTitleCase(this.value.trim());
+                }
+            }, 10);
+        });
+    });
+})();
+</script>

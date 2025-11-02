@@ -9,7 +9,7 @@
 
     .theme-card {
         background: #ffffff;
-        border-radius: 1rem;
+        border-radius: 0.25rem;
         padding: 1.5rem;
         text-align: center;
         transition: all 0.3s ease;
@@ -18,6 +18,7 @@
         display: flex;
         flex-direction: column;
         justify-content: center;
+        opacity: 0.8;
     }
 
     .theme-card:hover {

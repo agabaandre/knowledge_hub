@@ -1,3 +1,69 @@
+<style>
+    /* Mobile Styles (phones) */
+    @media (max-width: 767.98px) {
+        .publication-card-row {
+            flex-direction: column !important;
+            flex-wrap: wrap !important;
+        }
+        
+        .publication-title-mobile {
+            display: block;
+            order: 1;
+            width: 100% !important;
+            margin-bottom: 1rem;
+        }
+        
+        .publication-image-col {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            padding-right: 0 !important;
+            padding-left: 0 !important;
+            margin-bottom: 1rem;
+            order: 2;
+        }
+        
+        .publication-image-link {
+            width: 100%;
+        }
+        
+        .publication-image {
+            min-height: 200px !important;
+            height: 200px !important;
+            object-position: top center !important;
+        }
+        
+        .publication-content-col {
+            width: 100% !important;
+            flex: 0 0 100% !important;
+            max-width: 100% !important;
+            padding-left: 0 !important;
+            order: 3;
+        }
+        
+        .publication-title-desktop {
+            display: none !important;
+        }
+        
+        /* Keep buttons side-by-side on mobile */
+        .publication-card-row .d-flex.align-items-center {
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+    }
+    
+    /* Tablet and Desktop Styles */
+    @media (min-width: 768px) {
+        .publication-title-mobile {
+            display: none !important;
+        }
+        
+        .publication-title-desktop {
+            display: block;
+        }
+    }
+</style>
+
  @php
      $i = 0;
  @endphp
@@ -10,7 +76,14 @@
 
     <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
-            <div class="row" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
+            <!-- Title for Mobile (shown only on mobile, above image) -->
+            <h5 class="text-bold text-lg publication-title-mobile" style="display: none;">
+                <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                    {!! truncate(clean_unicode($row->title), 500) !!}
+                </a>
+            </h5>
+            
+            <div class="row publication-card-row" style="display: flex; flex-wrap: nowrap; align-items: stretch;">
                  @php
                      // Get raw cover value before accessor processes it
                      $raw_cover = $row->getRawOriginal('cover');
@@ -38,14 +111,20 @@
                          ? $image_link 
                          : $default_image;
                  @endphp
-                 <div class="col-md-3" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9; width: 30%; flex: 0 0 30%; max-width: 30%; padding-right: 0;">
-                     <img src="{{ $final_image }}" 
-                          alt="{{ clean_unicode($row->title) }}" 
-                          style="width: 100%; height: 100%; min-height: 150px; object-fit: cover;"
-                          onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                 <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9; width: 30%; flex: 0 0 30%; max-width: 30%; padding-right: 0; position: relative;">
+                     <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                         <img src="{{ $final_image }}" 
+                              alt="{{ clean_unicode($row->title) }}" 
+                              class="publication-image"
+                              style="width: 100%; height: 100%; min-height: 150px; object-fit: cover; transition: transform 0.3s ease;"
+                              onerror="this.onerror=null; this.src='{{ $default_image }}';"
+                              onmouseover="this.style.transform='scale(1.05)'"
+                              onmouseout="this.style.transform='scale(1)'">
+                     </a>
                  </div>
-                 <div class="col-md-9" style="width: 70%; flex: 1 1 70%; max-width: 70%; padding-left: 1rem;">
-                     <h5 class="text-bold text-lg">
+                 <div class="col-md-9 publication-content-col" style="width: 70%; flex: 1 1 70%; max-width: 70%; padding-left: 1rem;">
+                     <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
+                     <h5 class="text-bold text-lg publication-title-desktop">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
                              {!! truncate(clean_unicode($row->title), 500) !!}</a>
                      </h5>
@@ -83,8 +162,40 @@
                                  {{ count($row->comments) }} Comments</span>
                          </a>
                          @include ('home.partials.comments')
-                         @include ('common.favourites_btn')
                      </span>
+                     
+                     <div class="d-flex align-items-center mt-2" style="flex-wrap: wrap; gap: 4px;">
+                         @php
+                             $auGold = settings()->au_gold ?? '#B4A269';
+                             $goldTextColor = '#5a4d2e';
+                         @endphp
+                         @auth
+                             @if(!$row->is_favourite)
+                                 <a href="{{ url('publications/add_favourite') }}?id={{ $row->id }}" 
+                                    class="btn btn-sm btn-outline-warning" 
+                                    style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                     <i class="fa fa-star mr-1"></i> Add to Favourites
+                                 </a>
+                             @else
+                                 <a href="{{ url('publications/remove_favourite') }}?id={{ $row->id }}" 
+                                    class="btn btn-sm btn-warning" 
+                                    style="background-color: {{ $auGold }}; border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
+                                     <i class="fa fa-star mr-1"></i> Remove favorite
+                                 </a>
+                             @endif
+                         @else
+                             <a href="{{ url('login') }}" 
+                                class="btn btn-sm btn-outline-warning" 
+                                style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                 <i class="fa fa-star mr-1"></i> Add to Favourites
+                             </a>
+                         @endauth
+                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                            class="btn btn-sm btn-primary" 
+                            style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
+                             <i class="fa fa-eye mr-1"></i> Browse Resource
+                         </a>
+                     </div>
 
                  </div>
              </div>
@@ -100,8 +211,7 @@
          <h4 class="text-muted">No matching records found</h4>
      </div>
 
-
-     <div class="row justify-content-center">
-         <a href="{{ url('publications/request-content') }}" class="btn btn-dark mt-2">Request Content</a>
-     </div>
- @endif
+    <div class="row justify-content-center">
+        <a href="{{ url('publications/request-content') }}" class="btn btn-dark mt-2">Request Content</a>
+    </div>
+@endif

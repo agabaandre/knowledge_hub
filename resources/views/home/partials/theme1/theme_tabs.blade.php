@@ -1,10 +1,10 @@
 <div class="row justify-content-center custom-row categories" id="themes">
     @foreach ($themes as $theme)
         <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-xs-6 mb-4">
-            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important; opacity:0.85;">
+            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important; opacity:0.8;">
                 <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}"
-                    class="cats-box d-block rounded shadow-sm bg-white px-3 py-3"
-                    style="transition: transform 0.3s, box-shadow 0.3s;">
+                    class="cats-box d-block shadow-sm bg-white px-3 py-3"
+                    style="transition: transform 0.3s, box-shadow 0.3s; border-radius: 0.25rem;">
                     <div
                         class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-1 py-2">
                         <i class="fa {{ $theme->icon }} fa-3x icon-color" style="color: #2980b9;"></i>

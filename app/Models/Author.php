@@ -17,7 +17,7 @@ class Author extends Model
     }
 
     public function user(){
-        return $this->belongsTo(User::class);
+        return $this->hasOne(User::class, 'author_id');
     }
 
     public function getLogoAttribute($value){

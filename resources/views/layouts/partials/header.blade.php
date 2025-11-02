@@ -150,6 +150,36 @@
     animation: fadeInDown 0.3s ease;
 }
 
+.menu-badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-left: 4px;
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 1.2;
+}
+
+.menu-item-badge {
+    background: #ef4444;
+    color: white;
+    border-radius: 10px;
+    padding: 2px 6px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    float: right;
+    margin-top: 2px;
+    line-height: 1.2;
+}
+
+.nav-dropdown li a {
+    position: relative;
+    display: block;
+}
+
 .has-mega-menu .submenu-indicator {
     margin-left: 6px;
     display: inline-block;
@@ -266,10 +296,10 @@
                         <!-- slogan -->
                     </div>
                 </div>
-                <div class="col-lg-5 col-md-5 text-center ">
+                <div class="col-lg-5 col-md-5 col-12 text-center">
                     <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">
                         {{ settings()->site_name }}</h3>
-                    <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">
+                    <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 0;">
                         {{ settings()->slogan }}</h6>
                 </div>
                 <div class="col-lg-4 col-md-4 d-none d-md-block" style="padding-right: 10px; display: flex; align-items: center; justify-content: flex-end;">
@@ -396,12 +426,43 @@
                         </ul>
                     </li>
 
-               
+               @php
+                    // Use cached counts helper for better performance
+                    $userId = auth()->check() ? auth()->id() : null;
+                    $counts = get_menu_counts($userId);
+                    
+                    $totalForums = $counts['forums'];
+                    $totalCommunities = $counts['communities'];
+                    $discussionsBadgeCount = $counts['total'];
+                    $forumsBadgeCount = $counts['forums'];
+                    $communitiesBadgeCount = $counts['communities'];
+                @endphp
                     <li class="categories {{ (request()->is('forums*') || request()->is('communities*')) ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-comments mr-1"></i> @endif Discussions<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">
+                            @if($menuIconsEnabled)<i class="fa fa-comments mr-1"></i> @endif 
+                            Discussions
+                            @if($discussionsBadgeCount > 0)
+                                <span class="menu-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px;">{{ $discussionsBadgeCount }}</span>
+                            @endif
+                            <span class="submenu-indicator"></span>
+                        </a>
                         <ul class="nav-dropdown nav-submenu">
-                             <li><a href="{{ url('forums') }}">Forums</a></li>
-                            <li><a href="{{ url('communities') }}">Communities</a></li>
+                             <li>
+                                 <a href="{{ url('forums') }}">
+                                     Forums
+                                     @if($forumsBadgeCount > 0)
+                                         <span class="menu-item-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px; float: right;">{{ $forumsBadgeCount }}</span>
+                                     @endif
+                                 </a>
+                             </li>
+                            <li>
+                                <a href="{{ url('communities') }}">
+                                    Communities
+                                    @if($communitiesBadgeCount > 0)
+                                        <span class="menu-item-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px; float: right;">{{ $communitiesBadgeCount }}</span>
+                                    @endif
+                                </a>
+                            </li>
                            
                         </ul>
                     </li>
@@ -421,6 +482,12 @@
                             <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
                         </ul>
                     </li>
+
+                    @auth
+                    <li class="{{ request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}">
+                        <a href="{{ route('account.publish') }}">@if($menuIconsEnabled)<i class="fa fa-plus-circle mr-1"></i> @endif Publish</a>
+                    </li>
+                    @endauth
 
                     @include('partials.account.authlinks', ['class' => 'mobileonly'])
                     

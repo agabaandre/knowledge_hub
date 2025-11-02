@@ -36,16 +36,50 @@ class AIService
                 $response = $this->aiModel->summarize($prompt,$additional_prompt);
             }
         } else {
-            $resource = Forum::find($resourceId);
+            // Load forum with all relationships for better summarization
+            $resource = Forum::with([
+                'user',
+                'tags',
+                'comments' => function($query) {
+                    $query->whereNull('parent_id') // Only top-level comments
+                          ->orderBy('created_at', 'asc');
+                },
+                'comments.user',
+                'comments.likes',
+                'comments.replies' => function($query) {
+                    $query->orderBy('created_at', 'asc');
+                },
+                'comments.replies.user',
+                'comments.replies.likes'
+            ])->find($resourceId);
             
             if (!$resource) {
                 return $this->formatResponse((Object) ['message' => 'Forum not found']);
             }
 
-            $prompt = "summary language: $language, forum title: $resource->forum_title,
-             forum content: $resource->forum_description,  
-             forum comments: " . json_encode($resource->comments->toArray());
-            $response = $this->aiModel->summarize($prompt,$additional_prompt);
+            // Build structured comment data for AI
+            $structuredComments = $this->buildStructuredForumComments($resource);
+
+            // Process forum description to extract text content (strip HTML but keep structure)
+            $forumDescriptionText = strip_tags($resource->forum_description ?? '');
+            $forumDescriptionText = html_entity_decode($forumDescriptionText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            
+            $prompt = "Summary language: $language. 
+            
+Forum Title: {$resource->forum_title}
+
+Forum Content: {$forumDescriptionText}
+
+Comments (total: " . count($structuredComments) . "): " . json_encode($structuredComments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "
+
+Please summarize this forum discussion, including:
+- Main points discussed in the forum post
+- Key insights and opinions shared in the comments
+- Important attachments or resources mentioned (mention file types and names)
+- Overall sentiment and engagement level
+- Any questions raised or topics needing clarification";
+
+            $response = $this->aiModel->summarize($prompt, $additional_prompt);
         }
 
         Log::info("RESPONSE: " . json_encode($response));
@@ -219,6 +253,123 @@ class AIService
         }
         
         return $metadata;
+    }
+
+    /**
+     * Build structured comment data for AI summarization
+     * Includes user info, attachments, likes, and reply structure
+     */
+    private function buildStructuredForumComments($forum)
+    {
+        $structuredComments = [];
+        
+        foreach ($forum->comments as $comment) {
+            // Skip replies (they'll be included in their parent comment)
+            if ($comment->parent_id) {
+                continue;
+            }
+            
+            // Get comment text (strip HTML but keep plain text)
+            $commentText = strip_tags($comment->comment ?? '');
+            $commentText = html_entity_decode($commentText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $commentText = trim($commentText);
+            
+            // Get attachments information
+            $attachmentsInfo = [];
+            try {
+                $attachments = $comment->attachments ?? collect();
+                if (!$attachments || (is_object($attachments) && method_exists($attachments, 'count') && $attachments->count() === 0)) {
+                    // Try direct query
+                    $attachments = \App\Models\CustomAttachment::where('model', 'forum_comments')
+                        ->where('record_id', $comment->id ?? 0)
+                        ->get();
+                }
+                
+                foreach ($attachments as $attachment) {
+                    $fileName = $attachment->name ?? basename($attachment->path);
+                    $extension = strtolower(pathinfo($attachment->path ?? $fileName, PATHINFO_EXTENSION));
+                    
+                    $fileType = 'file';
+                    if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])) {
+                        $fileType = 'image';
+                    } elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'ogg', 'ogv'])) {
+                        $fileType = 'video';
+                    } elseif ($extension === 'pdf') {
+                        $fileType = 'pdf';
+                    } elseif (in_array($extension, ['doc', 'docx'])) {
+                        $fileType = 'word';
+                    } elseif (in_array($extension, ['xls', 'xlsx'])) {
+                        $fileType = 'excel';
+                    } elseif (in_array($extension, ['ppt', 'pptx'])) {
+                        $fileType = 'powerpoint';
+                    }
+                    
+                    $attachmentsInfo[] = [
+                        'name' => $fileName,
+                        'type' => $fileType
+                    ];
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error loading attachments for comment: ' . $e->getMessage());
+            }
+            
+            // Build reply structure
+            $replies = [];
+            if ($comment->replies && $comment->replies->count() > 0) {
+                foreach ($comment->replies as $reply) {
+                    $replyText = strip_tags($reply->comment ?? '');
+                    $replyText = html_entity_decode($replyText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                    $replyText = trim($replyText);
+                    
+                    // Get reply attachments
+                    $replyAttachmentsInfo = [];
+                    try {
+                        $replyAttachments = $reply->attachments ?? collect();
+                        if (!$replyAttachments || (is_object($replyAttachments) && method_exists($replyAttachments, 'count') && $replyAttachments->count() === 0)) {
+                            $replyAttachments = \App\Models\CustomAttachment::where('model', 'forum_comments')
+                                ->where('record_id', $reply->id ?? 0)
+                                ->get();
+                        }
+                        
+                        foreach ($replyAttachments as $attachment) {
+                            $fileName = $attachment->name ?? basename($attachment->path);
+                            $extension = strtolower(pathinfo($attachment->path ?? $fileName, PATHINFO_EXTENSION));
+                            $fileType = 'file';
+                            if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) $fileType = 'image';
+                            elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'])) $fileType = 'video';
+                            elseif ($extension === 'pdf') $fileType = 'pdf';
+                            
+                            $replyAttachmentsInfo[] = [
+                                'name' => $fileName,
+                                'type' => $fileType
+                            ];
+                        }
+                    } catch (\Exception $e) {
+                        // Ignore errors for reply attachments
+                    }
+                    
+                    $replies[] = [
+                        'user' => $reply->user->name ?? 'Unknown',
+                        'text' => $replyText,
+                        'likes' => $reply->likes ? $reply->likes->count() : 0,
+                        'attachments' => $replyAttachmentsInfo,
+                        'time' => $reply->created_at ? $reply->created_at->diffForHumans() : ''
+                    ];
+                }
+            }
+            
+            $structuredComments[] = [
+                'user' => $comment->user->name ?? 'Unknown',
+                'text' => $commentText,
+                'likes' => $comment->likes ? $comment->likes->count() : 0,
+                'attachments' => $attachmentsInfo,
+                'replies_count' => $comment->replies ? $comment->replies->count() : 0,
+                'replies' => $replies,
+                'time' => $comment->created_at ? $comment->created_at->diffForHumans() : ''
+            ];
+        }
+        
+        return $structuredComments;
     }
 
     private function formatResponse($response)

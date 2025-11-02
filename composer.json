@@ -51,7 +51,11 @@
             "App\\": "app/",
             "Database\\Factories\\": "database/factories/",
             "Database\\Seeders\\": "database/seeders/"
-        }
+        },
+        "files": [
+            "app/Helpers/UtilsHelper.php",
+            "app/Helpers/MenuCacheHelper.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {

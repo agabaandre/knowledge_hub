@@ -40,7 +40,7 @@
     @endphp
 
     <a data-toggle="collapse" href="#collapseExample" role="button" id="advanced_search"
-        aria-expanded="{{ $advanced_filter }}" aria-controls="collapseExample" class="advanced col-12"
+        aria-expanded="false" aria-controls="collapseExample" class="advanced col-12"
         style="color: {{ $textColor }} !important; font-size:14px; padding: 0.5rem 0; display: block; text-shadow: {{ $textShadow }};">
         <span class="filter text-bold" style="color: {{ $textColor }} !important; text-shadow: {{ $textShadow }};"> 
             <i class="fa fa-sliders-h me-2"></i>Advance your Search With Filters
@@ -48,7 +48,7 @@
         <i class="fa fa-angle-down ms-2" style="color: {{ $textColor }} !important; transition: transform 0.3s ease; text-shadow: {{ $textShadow }};"></i>
     </a>
 
-    <div class="col-12 {{ $advanced_filter ? '' : 'collapse' }} mt-2" id="collapseExample" style="padding: 0; width: 100%; max-width: 100%; box-sizing: border-box;">
+    <div class="col-12 collapse mt-2" id="collapseExample" style="padding: 0; width: 100%; max-width: 100%; box-sizing: border-box;">
         <div class="bg-white rounded p-3" style="box-shadow: 0 2px 8px rgba(0,0,0,0.1); width: 100%; max-width: 100%; box-sizing: border-box;">
 
             @include('partials.search.search_fields')

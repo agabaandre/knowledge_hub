@@ -10,6 +10,8 @@
     @include('home.partials.' . $theme . 'page_search')
 @endif
 
+@include('partials.secondary_navigation')
+
 @yield('styles')
 
 @include('layouts.' . $theme . 'partials.alerts')

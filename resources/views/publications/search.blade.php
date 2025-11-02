@@ -10,16 +10,40 @@
                 <div class="col-lg-8">
                     <div class="row mb-3">
                         <div class="col-12">
-                            <h4 class="mb-3">Search Results</h4>
+                            {{-- Search Results Info Card --}}
+                            @if(isset($results_count) || isset($search_time))
+                            <div class="sidebar-content mb-3" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap">
+                                    <div class="d-flex align-items-center mb-2 mb-md-0">
+                                        <h5 class="mb-0 me-4" style="color:var(--theme-color-primary, #119A48);">Search Results</h5>
+                                        <span class="fw-bold" style="color:#1e293b;font-size:1rem;">
+                                            {{ $results_count ?? ($publications->total() ?? 0) }} {{ ($results_count ?? ($publications->total() ?? 0)) == 1 ? 'result' : 'results' }} found
+                                        </span>
+                                    </div>
+                                    @if(isset($search_time))
+                                    <div class="d-flex align-items-center">
+                                        <i class="fa fa-clock me-2" style="color:#64748b;font-size:0.9rem;"></i>
+                                        <span style="color:#64748b;font-size:0.9rem;">
+                                            {{ $search_time }} ms
+                                        </span>
+                                    </div>
+                                    @endif
+                                </div>
+                            </div>
+                            @endif
+                            
                             @if(isset($_GET['tag']) && !empty($_GET['tag']))
                                 @php
                                     $tagId = $_GET['tag'];
                                     $tag = \App\Models\Tag::find($tagId);
                                     $tagName = $tag ? $tag->tag_text : 'Tag #' . $tagId;
+                                    $auGold = settings()->au_gold ?? '#B4A269';
+                                    $auPlum = settings()->au_plum ?? '#522B39'; // Agenda 2063 Plum (PANTONE 3415 C)
                                 @endphp
-                                <div class="alert alert-info mb-3">
-                                    <i class="fa fa-tag me-2"></i>
-                                    <strong>Tag:</strong> {{ $tagName }}
+                                <div class="mb-3" style="background-color: {{ $auGold }}; border: 1px solid {{ $auGold }}; border-radius: 0.25rem; padding: 0.75rem 1rem;">
+                                    <div style="color: {{ $auPlum }};">
+                                        <strong>Tag:</strong> {{ $tagName }}
+                                    </div>
                                 </div>
                             @endif
                         </div>
@@ -38,7 +62,7 @@
                 <div class="col-lg-4">
                     <style>
                         .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
-                        .sidebar-content h5{color:var(--theme-color-primary, #119A48);margin-bottom:15px}
+                        .sidebar-content h5.popular-tags-title{margin-bottom:10px;font-size:15px;font-weight:500;text-transform:capitalize;color:#2d3748}
                         .sidebar-content .btn-outline-primary{color:var(--theme-color-primary, #119A48);border-color:var(--theme-color-primary, #119A48)}
                         .sidebar-content .btn-outline-primary:hover{background:var(--theme-color-primary, #119A48);color:#fff}
                         .sidebar-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
@@ -49,7 +73,7 @@
                     {{-- Popular Tags --}}
                     @if(isset($tags) && count($tags) > 0)
                     <div class="sidebar-content">
-                      <h5 class="mb-3">Popular Tags</h5>
+                      <h5 class="popular-tags-title">Popular Tags</h5>
                       <div class="sidebar-tags">
                         @foreach($tags->take(10) as $tag)
                         <a href="{{ url('records')}}?tag={{$tag->id}}" 
@@ -67,7 +91,7 @@
                     @endphp
                     @if($allTags->count() > 0)
                     <div class="sidebar-content">
-                      <h5 class="mb-3">Popular Tags</h5>
+                      <h5 class="popular-tags-title">Popular Tags</h5>
                       <div class="sidebar-tags">
                         @foreach($allTags as $tag)
                         <a href="{{ url('records')}}?tag={{$tag->id}}" 

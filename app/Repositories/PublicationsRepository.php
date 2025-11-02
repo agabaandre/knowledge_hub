@@ -151,7 +151,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $user_id    =  auth()->user()->id;
         
         $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
-            ->whereHas('favourites', function($query) use ($user_id) {
+            ->whereHas('favourited', function($query) use ($user_id) {
                 $query->where('user_id', $user_id);
             })
             ->orderBy('id', 'desc');
@@ -159,6 +159,64 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $result = $pubs->paginate($rows_count);
 
         return $result;
+    }
+
+    public function recommendedByPreferences($user_id, $limit = 10){
+        $user = \App\Models\User::find($user_id);
+        if (!$user) {
+            return collect();
+        }
+
+        $subthemes = $user->preferences()->pluck('subtheme_id');
+        if ($subthemes->isEmpty()) {
+            return collect();
+        }
+
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+            ->where('is_version', 0)
+            ->where('is_active', 'Active')
+            ->where('is_approved', 1)
+            ->whereIn('sub_thematic_area_id', $subthemes)
+            ->whereDoesntHave('favourited', function($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            });
+
+        if (!is_admin()) {
+            $pubs->where('is_admin_only_access', 0);
+        }
+
+        return $pubs->inRandomOrder()->take($limit)->get();
+    }
+
+    public function relatedByFavoriteTags($user_id, $limit = 10){
+        // Get tag IDs from user's favorited publications
+        $favoriteTagIds = DB::table('favourites')
+            ->join('publication_tags', 'favourites.publication_id', '=', 'publication_tags.publication_id')
+            ->where('favourites.user_id', $user_id)
+            ->distinct()
+            ->pluck('publication_tags.tag_id');
+
+        if ($favoriteTagIds->isEmpty()) {
+            return collect();
+        }
+
+        // Get publications with these tags (excluding already favorited ones)
+        $pubs = Publication::with(['file_type','author','sub_theme','category','comments'])
+            ->where('is_version', 0)
+            ->where('is_active', 'Active')
+            ->where('is_approved', 1)
+            ->whereHas('tags', function($q) use ($favoriteTagIds) {
+                $q->whereIn('tag_id', $favoriteTagIds);
+            })
+            ->whereDoesntHave('favourited', function($query) use ($user_id) {
+                $query->where('user_id', $user_id);
+            });
+
+        if (!is_admin()) {
+            $pubs->where('is_admin_only_access', 0);
+        }
+
+        return $pubs->inRandomOrder()->take($limit)->get();
     }
 
     public function find_type($id){
@@ -711,7 +769,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 // Check if "all" countries is selected first
                 if ($hasAllCountries) {
                     // "all" countries with specific regions → get all countries from those specific regions only
-                    $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
+                $countryIds = Country::whereIn('region_id', $regionIds)->pluck('id')->toArray();
                     \Log::info('attach_countries: Case 2a - Specific regions with "all" countries (scoped to regions)', [
                         'regionIds' => $regionIds,
                         'countryIds_count' => count($countryIds),
@@ -1154,6 +1212,13 @@ public function get(Request $request, $return_array = false, $featured = false,$
     $comment->user_id = current_user() ? current_user()->id : ($request->user_id ?? null);
     $comment->publication_id = $request->publication_id;
     $comment->comment = clean_unicode($raw);
+    
+    // Check if auto-approve comments is enabled (defaults to true)
+    $autoApprove = settings()->auto_approve_comments ?? true;
+    if ($autoApprove) {
+        $comment->status = 'approved';
+    }
+    
     $comment->save();
 
     return $comment;

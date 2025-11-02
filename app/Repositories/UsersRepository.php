@@ -17,7 +17,16 @@ use App\Models\CommunityOfPracticeMembers;
 
 class UsersRepository {
 
-    
+    /**
+     * Convert string to camel case (Title Case)
+     */
+    private function toCamelCase($str) {
+        if (empty($str)) {
+            return '';
+        }
+        // Convert to lowercase, then capitalize first letter of each word
+        return Str::title(Str::lower(trim($str)));
+    }
 
     public function save(Request $request,$is_social=false){
 
@@ -45,7 +54,21 @@ class UsersRepository {
 
         $user->country_id    = ($request->country_id)?$request->country_id:$user->country_id;
         $user->phone_number  = ($request->phone ?? $request->phone_number)?($request->phone ?? $request->phone_number):$user->phone_number;
-        $user->job_title     = ($request->job)?$request->job:$user->job;
+        
+        // Handle job_title with camel case transformation
+        if($request->job_title) {
+            $user->job_title = $this->toCamelCase($request->job_title);
+        } elseif($request->job) {
+            $user->job_title = $this->toCamelCase($request->job);
+        } elseif($user->job) {
+            $user->job_title = $this->toCamelCase($user->job);
+        }
+        
+        // Handle organization_name with camel case transformation
+        if($request->organization_name) {
+            $user->organization_name = $this->toCamelCase($request->organization_name);
+        }
+        
         $user->orcid         = ($request->orcid)?$request->orcid:$user->orcid; 
         $user->is_photo_external = ($request->is_photo_external)?$request->is_photo_external:$user->is_photo_external;
         if($user->is_photo_external==null)
@@ -102,8 +125,12 @@ class UsersRepository {
             $user->is_photo_external  = false;
         endif;
 
-        if($request->subscribe)
-        $user->is_subscribed     = ($request->subscribe=="on")?true:false;
+        // Handle subscription preference
+        if($request->has('is_subscribed')) {
+            $user->is_subscribed = $request->is_subscribed ? true : false;
+        } elseif($request->subscribe) {
+            $user->is_subscribed = ($request->subscribe=="on")?true:false;
+        }
 
         if($request->author_id)
         $user->author_id= $request->author_id;

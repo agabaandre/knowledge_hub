@@ -93,6 +93,12 @@ class ForumsController extends Controller
         if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
             // Check if reCAPTCHA response is provided
             if (!$request->filled('g-recaptcha-response')) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'Please complete the CAPTCHA to proceed.'
+                    ], 400);
+                }
                 return back()->withErrors([
                     'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.',
                 ])->withInput();
@@ -101,21 +107,107 @@ class ForumsController extends Controller
             // Validate the reCAPTCHA response
             $recaptchaResponse = $request->input('g-recaptcha-response');
             if (!ReCaptcha::validate($recaptchaResponse)) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'CAPTCHA verification failed. Please try again.'
+                    ], 400);
+                }
                 return back()->withErrors([
                     'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.',
                 ])->withInput();
             }
         }
 
-        $saved =$this->forumsRepo->save_comment($request);
+        // Log request details for debugging
+        \Log::info('Forum comment request received', [
+            'ajax' => $request->ajax(),
+            'has_files' => $request->hasFile('attachments'),
+            'files_count' => $request->hasFile('attachments') ? (is_array($request->file('attachments')) ? count($request->file('attachments')) : 1) : 0,
+            'comment_length' => strlen($request->comment ?? ''),
+            'forum_id' => $request->id,
+            'parent_id' => $request->parent_id ?? null
+        ]);
 
-        $message = ($saved)?'Comment saved successfully':'Request failed try again';
+        $comment = $this->forumsRepo->save_comment($request);
 
-        $data['alert_class'] = ($saved)?'success':'danger';
+        if ($request->ajax() || $request->wantsJson()) {
+            // Reload comment with relationships for AJAX response
+            $comment->refresh();
+            $comment->load(['user', 'likes']);
+            
+            // Ensure user photo accessor is triggered by accessing it
+            if ($comment->user) {
+                // Access the photo attribute to trigger the getPhotoAttribute accessor
+                $photo = $comment->user->photo;
+            }
+            
+            // Reload comment to ensure all data is fresh, including attachments
+            $comment->refresh();
+            
+            // Trigger attachments accessor to load attachments from custom_attachments table
+            // The getAttachmentsAttribute accessor queries CustomAttachment where model='forum_comments'
+            $attachments = $comment->attachments;
+            
+            \Log::info('Comment attachments loaded for AJAX response', [
+                'comment_id' => $comment->id,
+                'attachments_count' => $attachments ? $attachments->count() : 0,
+                'attachments_table' => 'custom_attachments',
+                'attachments' => $attachments ? $attachments->map(function($a) {
+                    // Get raw path before accessor transformation
+                    $rawPath = isset($a->attributes['path']) ? $a->attributes['path'] : $a->getOriginal('path');
+                    return [
+                        'id' => $a->id, 
+                        'path' => $a->path, // This uses the accessor which adds storage_link
+                        'raw_path' => $rawPath, // Raw path from database
+                        'model' => $a->model ?? $a->getOriginal('model'), 
+                        'record_id' => $a->record_id ?? $a->getOriginal('record_id'),
+                        'created_at' => $a->created_at ? $a->created_at->toDateTimeString() : null
+                    ];
+                })->toArray() : []
+            ]);
+            
+            // Load attachments manually since it's an accessor
+            $forum = $this->forumsRepo->find($request->id, false);
+            $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
+            return response()->json([
+                'success' => true,
+                'message' => 'Comment saved successfully',
+                'comment' => $comment,
+                'comment_html' => view('forums.partials.comment_item', [
+                    'comment' => $comment,
+                    'forum' => $forum,
+                    'my_forums' => $data['my_forums'] ?? [],
+                    'currentUser' => current_user()
+                ])->render()
+            ]);
+        }
+
+        $message = ($comment)?'Comment saved successfully':'Request failed try again';
+        $data['alert_class'] = ($comment)?'success':'danger';
         $data['message']     = $data['alert'] = $message;
         $data['status']      = 200;
         return back()->with($data);
     }
 
+    public function like(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Please login to like'], 401);
+        }
+
+        $result = $this->forumsRepo->toggleLike($request->forum_id);
+        return response()->json($result);
+    }
+
+    public function likeComment(Request $request)
+    {
+        if (!auth()->check()) {
+            return response()->json(['error' => 'Please login to like'], 401);
+        }
+
+        $result = $this->forumsRepo->toggleCommentLike($request->comment_id);
+        return response()->json($result);
+    }
 
 }

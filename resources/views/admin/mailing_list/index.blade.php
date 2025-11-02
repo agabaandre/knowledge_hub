@@ -37,22 +37,28 @@
 
 <div class="row">
     <!-- Statistics Cards -->
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="stat-card">
             <div class="stat-value">{{ $stats['total'] }}</div>
             <div class="stat-label">Total Subscribers</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="stat-card">
             <div class="stat-value" style="color: #22c55e;">{{ $stats['subscribed'] }}</div>
             <div class="stat-label">Active Subscribers</div>
         </div>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <div class="stat-card">
-            <div class="stat-value" style="color: #ef4444;">{{ $stats['unsubscribed'] }}</div>
-            <div class="stat-label">Unsubscribed</div>
+            <div class="stat-value" style="color: #3b82f6;">{{ $stats['users_count'] }}</div>
+            <div class="stat-label">From User Accounts</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <div class="stat-value" style="color: #f59e0b;">{{ $stats['subscribes_count'] }}</div>
+            <div class="stat-label">Direct Subscribes</div>
         </div>
     </div>
 </div>
@@ -125,6 +131,7 @@
                                 <th>Email</th>
                                 <th>Name</th>
                                 <th>Status</th>
+                                <th>Type</th>
                                 <th>Subscribed Date</th>
                                 <th width="150">Actions</th>
                             </tr>
@@ -133,7 +140,11 @@
                             @foreach($subscribers as $subscriber)
                             <tr>
                                 <td>
-                                    <input type="checkbox" name="ids[]" value="{{ $subscriber->id }}" class="subscriber-checkbox">
+                                    @if($subscriber->type === 'subscribe')
+                                        <input type="checkbox" name="ids[]" value="{{ $subscriber->original_id ?? $subscriber->id }}" class="subscriber-checkbox">
+                                    @else
+                                        <input type="checkbox" disabled class="subscriber-checkbox" title="User subscribers cannot be bulk edited">
+                                    @endif
                                 </td>
                                 <td>{{ $loop->iteration + ($subscribers->currentPage() - 1) * $subscribers->perPage() }}</td>
                                 <td>{{ $subscriber->email }}</td>
@@ -143,18 +154,29 @@
                                         {{ ucfirst($subscriber->status) }}
                                     </span>
                                 </td>
+                                <td>
+                                    <span class="badge badge-{{ $subscriber->type === 'user' ? 'info' : 'warning' }}">
+                                        {{ $subscriber->type === 'user' ? 'User Account' : 'Direct Subscribe' }}
+                                    </span>
+                                </td>
                                 <td>{{ $subscriber->created_at->format('M d, Y') }}</td>
                                 <td>
-                                    <button type="button" class="btn btn-sm btn-outline-primary" onclick="editSubscriber({{ $subscriber->id }}, '{{ $subscriber->email }}', '{{ $subscriber->name ?? '' }}', '{{ $subscriber->status }}')">
-                                        <i class="fa fa-edit"></i>
-                                    </button>
-                                    <form action="{{ route('admin.mailing_list.destroy', $subscriber->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this subscriber?')">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-sm btn-outline-danger">
-                                            <i class="fa fa-trash"></i>
+                                    @if($subscriber->type === 'subscribe')
+                                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="editSubscriber('{{ $subscriber->original_id ?? $subscriber->id }}', '{{ $subscriber->email }}', '{{ $subscriber->name ?? '' }}', '{{ $subscriber->status }}')">
+                                            <i class="fa fa-edit"></i>
                                         </button>
-                                    </form>
+                                        <form action="{{ route('admin.mailing_list.destroy', $subscriber->original_id ?? $subscriber->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this subscriber?')">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fa fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <span class="text-muted" style="font-size: 0.875rem;">
+                                            <i class="fa fa-info-circle" title="User account subscribers can be managed from their profile"></i>
+                                        </span>
+                                    @endif
                                 </td>
                             </tr>
                             @endforeach
@@ -257,8 +279,8 @@
                     <div class="form-group">
                         <label>Recipients <span class="text-danger">*</span></label>
                         <select name="recipients" class="form-control" required>
-                            <option value="subscribed">Subscribed Only ({{ $stats['subscribed'] }} subscribers)</option>
-                            <option value="all">All Subscribers ({{ $stats['total'] }} subscribers)</option>
+                            <option value="subscribed">Subscribed Only ({{ $stats['subscribed'] }} subscribers - includes {{ $stats['users_count'] }} users + {{ $stats['subscribes_count'] - ($stats['unsubscribed'] ?? 0) }} direct)</option>
+                            <option value="all">All Subscribers ({{ $stats['total'] }} total - includes {{ $stats['users_count'] }} users + {{ $stats['subscribes_count'] }} direct)</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -291,7 +313,7 @@
             lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, "All"]],
             order: [[1, 'asc']],
             columnDefs: [
-                { orderable: false, targets: [0, 6] }
+                { orderable: false, targets: [0, 7] }
             ],
             language: {
                 search: "",
@@ -318,7 +340,18 @@
     });
 
     function editSubscriber(id, email, name, status) {
-        $('#editSubscriberForm').attr('action', '{{ url("admin/mailing_list") }}/' + id);
+        // Extract numeric ID if it's in format 'subscribe_X' or 'user_X', or just use the ID if it's already numeric
+        var numericId = id;
+        if (typeof id === 'string' && id.includes('_')) {
+            numericId = id.split('_')[1];
+        } else if (typeof id === 'string' && id.startsWith('subscribe_')) {
+            numericId = id.replace('subscribe_', '');
+        } else if (typeof id === 'string' && id.startsWith('user_')) {
+            // User accounts can't be edited here, but handle it gracefully
+            alert('User account subscribers cannot be edited here. Please manage them from the user profile.');
+            return;
+        }
+        $('#editSubscriberForm').attr('action', '{{ url("admin/mailing_list") }}/' + numericId);
         $('#edit_email').val(email);
         $('#edit_name').val(name);
         $('#edit_status').val(status);

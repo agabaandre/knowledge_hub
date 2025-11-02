@@ -1,26 +1,11 @@
+@php
+    $hide_search = true;
+@endphp
+
 @extends('layouts.app')
 
 @section('styles')
 <style>
-    .faqs-header {
-        background: linear-gradient(135deg, var(--theme-color-primary, #119A48) 0%, color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black) 100%);
-        padding: 3rem 0;
-        color: white;
-        margin-bottom: 3rem;
-    }
-
-    .faqs-header h1 {
-        font-size: 2.5rem;
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-        color: white;
-    }
-
-    .faqs-header p {
-        font-size: 1.125rem;
-        opacity: 0.95;
-        margin: 0;
-    }
 
     .faq-search-container {
         margin-bottom: 2rem;
@@ -152,12 +137,12 @@
     }
 
     @media (max-width: 768px) {
-        .faqs-header h1 {
-            font-size: 2rem;
+        .custom-bg h1 {
+            font-size: 1.75rem;
         }
-
-        .faqs-header {
-            padding: 2rem 0;
+        
+        .custom-bg p {
+            font-size: 0.9rem;
         }
 
         .faq-question {
@@ -176,15 +161,26 @@
 @endsection
 
 @section('content')
-<!-- FAQs Header -->
-<div class="faqs-header">
+{{-- Custom Header Section (replaces search bar) --}}
+<div class="pt-5 pt-0 custom-bg">
     <div class="container">
-        <div class="text-center">
-            <h1><i class="fa fa-question-circle mr-2"></i>Frequently Asked Questions</h1>
-            <p>Find answers to common questions about the Africa CDC Knowledge Hub</p>
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div style="text-align: center; padding: 2rem 0;">
+                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                        <i class="fa fa-question-circle me-2"></i>Frequently Asked Questions
+                    </h1>
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
+                        Find answers to common questions about the Africa CDC Knowledge Hub
+                    </p>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+{{-- Secondary Navigation Below Banner --}}
+@include('partials.secondary_navigation', ['forceShow' => true])
 
 <!-- FAQs Content -->
 <div class="container">
@@ -217,7 +213,7 @@
                     </div>
                     <div class="faq-answer">
                         <div class="faq-answer-content">
-                            {!! nl2br(e($faq->answer)) !!}
+                            {!! $faq->answer !!}
                         </div>
                     </div>
                 </div>

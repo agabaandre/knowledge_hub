@@ -100,6 +100,10 @@ class User extends Authenticatable
         if (!empty($this->attributes['is_photo_external']) && intval($this->attributes['is_photo_external']) === 1) {
             return $photo;
         }
+        // Check if photo already contains full URL to prevent double paths
+        if (strpos($photo, 'http://') === 0 || strpos($photo, 'https://') === 0 || strpos($photo, url('/')) !== false) {
+            return $photo;
+        }
         return storage_link('uploads/users/'.$photo);
     }
 
@@ -109,6 +113,10 @@ class User extends Authenticatable
 
     public function preferences(){
         return $this->hasMany(UserPreference::class, 'user_id');
+    }
+
+    public function badges(){
+        return $this->hasMany(UserBadge::class, 'user_id')->with('badgeType');
     }
 
      /**

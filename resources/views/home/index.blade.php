@@ -168,6 +168,17 @@
             .middle.gray {
                 padding: 2rem 0;
             }
+
+            /* Center header content on mobile */
+            #langauge-container .container .row {
+                justify-content: center !important;
+            }
+
+            #langauge-container .text-center h3,
+            #langauge-container .text-center .slogan {
+                text-align: center !important;
+                margin-left: 0 !important;
+            }
         }
     </style>
 

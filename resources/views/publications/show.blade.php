@@ -466,7 +466,7 @@
                                     <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
                                         <i class="fa fa-eye mr-1"></i>Visits: {{ $publication->visits }}
                                     </span>
-                                </div>
+            </div>
                                 @if(!empty($publication->year_published))
                                 <div class="mb-2 ml-2">
                                     <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
@@ -590,6 +590,106 @@
         </div>
     </div>
 
+                <!-- Resources & Attachments - Mobile/Tablet View (shown only on mobile/tablet) -->
+                @if ($publication->publication || $publication->has_attachments)
+                    <div class="card-md mb-3 d-lg-none">
+                        <h5 class="section-heading">Resources & Attachments</h5>
+                        
+                        @if ($publication->publication)
+                            <div class="mb-3 pb-3 border-bottom">
+                                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                                        <strong><i class="fa fa-link mr-2 text-success"></i>External Resource</strong>
+                                        <p class="mb-0 text-muted" style="font-size: 0.9rem; word-break: break-all;">
+                                            {{ Str::limit($publication->publication, 80) }}
+                                        </p>
+                                    </div>
+                                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
+                                        <i class="fa fa-external-link-alt mr-1"></i> Open
+                                    </a>
+                    </div>
+                </div>
+                        @endif
+
+                @if ($publication->has_attachments)
+                            <div>
+                                <h6 class="mb-3" style="font-weight: 600; color: #5F5F5F;">
+                                    <i class="fa fa-paperclip mr-2"></i>Downloadable Files ({{ count($publication->attachments) }})
+                                </h6>
+                        <ul class="list-group">
+                            @foreach ($publication->attachments as $i => $file)
+                                        @php
+                                            $url = $file->file;
+                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                            $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
+                                            
+                                            // Format attachment name: replace underscores with spaces and truncate to 20 characters
+                                            $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
+                                            $displayName = str_replace('_', ' ', $displayName);
+                                            $displayName = Str::limit($displayName, 20);
+                                            
+                                            // Determine icon based on file extension
+                                            $fileIcon = 'fa-file';
+                                            $iconColor = 'text-muted';
+                                            
+                                            if (in_array($ext, ['pdf'])) {
+                                                $fileIcon = 'fa-file-pdf';
+                                                $iconColor = 'text-danger';
+                                            } elseif (in_array($ext, ['doc', 'docx'])) {
+                                                $fileIcon = 'fa-file-word';
+                                                $iconColor = 'text-primary';
+                                            } elseif (in_array($ext, ['xls', 'xlsx'])) {
+                                                $fileIcon = 'fa-file-excel';
+                                                $iconColor = 'text-success';
+                                            } elseif (in_array($ext, ['ppt', 'pptx'])) {
+                                                $fileIcon = 'fa-file-powerpoint';
+                                                $iconColor = 'text-warning';
+                                            } elseif (in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'])) {
+                                                $fileIcon = 'fa-file-image';
+                                                $iconColor = 'text-info';
+                                            } elseif (in_array($ext, ['zip', 'rar', '7z', 'tar', 'gz'])) {
+                                                $fileIcon = 'fa-file-archive';
+                                                $iconColor = 'text-secondary';
+                                            } elseif (in_array($ext, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'mkv'])) {
+                                                $fileIcon = 'fa-file-video';
+                                                $iconColor = 'text-danger';
+                                            } elseif (in_array($ext, ['mp3', 'wav', 'ogg', 'flac', 'aac'])) {
+                                                $fileIcon = 'fa-file-audio';
+                                                $iconColor = 'text-primary';
+                                            } elseif (in_array($ext, ['txt', 'csv'])) {
+                                                $fileIcon = 'fa-file-alt';
+                                                $iconColor = 'text-muted';
+                                            }
+                                        @endphp
+                                <li class="list-group-item">
+                                            <div class="d-flex flex-column">
+                                                <div class="mb-2">
+                                                    <i class="fa {{ $fileIcon }} {{ $iconColor }} mr-2" style="font-size: 1.1rem;"></i> 
+                                                    <strong>{{ $displayName }}</strong>
+                                                    <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
+                                                        {{ strtoupper($ext) }} file
+                                                    </small>
+                                                </div>
+                                                <div class="d-flex gap-2">
+                                                    <button type="button" class="btn btn-au btn-sm preview-attachment"
+                                                            data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
+                                                            title="Preview file"
+                                                            onclick="window.previewAttachmentClick(event, this); return false;">
+                                                        <i class="fa fa-eye mr-1"></i> Preview
+                                                    </button>
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download file" download>
+                                                        <i class="fa fa-download mr-1"></i> Download
+                                                    </a>
+                                                </div>
+                                            </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                            </div>
+                        @endif
+                    </div>
+                @endif
+
                 <!-- Description Card -->
                 <div class="card-md">
                     @if ($publication->is_embedded)
@@ -603,7 +703,11 @@
                     @endif
                     <h2 class="section-heading">Description</h2>
                     <div itemprop="articleBody">
-                    <p>{!! clean_unicode($publication->description) !!}</p>
+                    @php
+                        // Process publication description to detect and embed video links and convert URLs to clickable links
+                        $processedDescription = detect_and_embed_video_links(clean_unicode($publication->description ?? ''), 180, 180);
+                    @endphp
+                    <p>{!! $processedDescription !!}</p>
                     </div>
                 </div>
 
@@ -635,7 +739,7 @@
                         <a href="{{ url('records') }}" class="btn btn-au btn-sm">
                             View All
                         </a>
-                    </div>
+                            </div>
                     <div id="relatedResourcesTrack" class="related-resources-track">
                         @foreach($related_publications as $relatedPub)
                         @php
@@ -667,7 +771,7 @@
                                         </a>
                                     @else
                                         {{ Str::limit($relatedPub->author->name, 40) }}
-                                    @endif
+                        @endif
                                 </div>
                                 @endif
                                 @if($relatedPub->created_at)
@@ -685,8 +789,8 @@
                                 </div>
                             </div>
                         </div>
-                        @endforeach
-                    </div>
+                    @endforeach
+                            </div>
                 </div>
 
                 <script>
@@ -721,7 +825,7 @@
             <!-- Right Column: Resources & Attachments, Resource Details, and Comments -->
             <div class="col-lg-4">
                 @if ($publication->publication || $publication->has_attachments)
-                    <div class="card-md mb-3">
+                    <div class="card-md mb-3 d-none d-lg-block">
                         <h5 class="section-heading">Resources & Attachments</h5>
                         
                         @if ($publication->publication)
@@ -732,11 +836,11 @@
                                         <p class="mb-0 text-muted" style="font-size: 0.9rem; word-break: break-all;">
                                             {{ Str::limit($publication->publication, 80) }}
                                         </p>
-                                    </div>
+                    </div>
                                     <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
                                         <i class="fa fa-external-link-alt mr-1"></i> Open
                                     </a>
-                    </div>
+                </div>
                 </div>
                         @endif
 

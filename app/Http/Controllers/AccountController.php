@@ -45,6 +45,13 @@ class AccountController extends Controller
     public function favourites(Request $request){
 
         $data['favourites'] = $this->publicationsRepo->favourites($request);
+        
+        // Get recommended content by preferences (10 max)
+        $data['recommendedByPreferences'] = $this->publicationsRepo->recommendedByPreferences(auth()->user()->id, 10);
+        
+        // Get related content by favorite tags (10 max)
+        $data['relatedByFavoriteTags'] = $this->publicationsRepo->relatedByFavoriteTags(auth()->user()->id, 10);
+        
         return view('account.favourites',$data);
     }
 

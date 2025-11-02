@@ -1,23 +1,13 @@
+@php
+    $hide_search = true;
+@endphp
+
 @extends('layouts.app')
 
 @section('styles')
 <style>
     .theme-text {
         color: {{ settings()->primary_color ?? '#119A48' }};
-    }
-    .community-header {
-        background: linear-gradient(135deg, {{ settings()->primary_color ?? '#119A48' }} 0%, #0e7a3a 100%);
-        color: white;
-        padding: 2rem 0;
-        margin-bottom: 2rem;
-    }
-    .community-header h1 {
-        color: white;
-        margin-bottom: 0.5rem;
-    }
-    .community-header p {
-        color: rgba(255,255,255,0.9);
-        margin: 0;
     }
     .community-tabs {
         border-bottom: 2px solid #e2e8f0;
@@ -113,17 +103,37 @@
 @endsection
 
 @section('content')
-<div class="community-header">
+{{-- Custom Header Section (replaces search bar) --}}
+<div class="pt-5 pt-0 custom-bg">
     <div class="container">
-        <h1>{{ $community->community_name }}</h1>
-        <p>{!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 50, '...') !!}</p>
-        <div class="mt-3">
-            <span class="badge badge-light mr-2"><i class="fa fa-users mr-1"></i>{{ $community->approved_members_count ?? $community->members_count ?? 0 }} Members</span>
-            <span class="badge badge-light mr-2"><i class="fa fa-comments mr-1"></i>{{ $community->community_forums_count ?? $community->forums_count ?? 0 }} Forums</span>
-            <span class="badge badge-light"><i class="fa fa-book mr-1"></i>{{ $community->community_publications_count ?? $community->publications_count ?? 0 }} Publications</span>
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div style="text-align: center; padding: 2rem 0;">
+                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                        {{ $community->community_name }}
+                    </h1>
+                    <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
+                        {!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 50, '...') !!}
+                    </p>
+                    <div style="display: flex; justify-content: center; flex-wrap: wrap; gap: 0.5rem;">
+                        <span class="badge badge-light" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <i class="fa fa-users mr-1"></i>{{ $community->approved_members_count ?? $community->members_count ?? 0 }} Members
+                        </span>
+                        <span class="badge badge-light" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <i class="fa fa-comments mr-1"></i>{{ $community->community_forums_count ?? $community->forums_count ?? 0 }} Forums
+                        </span>
+                        <span class="badge badge-light" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            <i class="fa fa-book mr-1"></i>{{ $community->community_publications_count ?? $community->publications_count ?? 0 }} Publications
+                        </span>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+{{-- Secondary Navigation Below Banner --}}
+@include('partials.secondary_navigation', ['forceShow' => true])
 
 <div class="container">
     <div class="row">

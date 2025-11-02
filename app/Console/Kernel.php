@@ -28,6 +28,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('approvals:daily-summary')->dailyAt('08:00');
         // Award community badges at the beginning of each month for the previous month
         $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
+        // Cache forum and community counts every 5 minutes for menu badges
+        $schedule->command('cache:forum-community-counts')->everyFiveMinutes();
         
     }
 

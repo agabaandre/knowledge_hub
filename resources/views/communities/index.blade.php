@@ -226,7 +226,7 @@
                                         <div style="text-align: center; margin-bottom: 0.75rem;">
                                             <a href="{{ route('community.detail', $community->id) }}"
                                                 class="btn enter-community-btn" onclick="event.stopPropagation();">
-                                                <i class="fa fa-sign-in-alt mr-1"></i>Enter the Community
+                                                <i class="fa fa-sign-in-alt mr-1"></i>Visit Community
                                             </a>
                                         </div>
                                         <div class="btn-group" role="group" aria-label="Community Actions">

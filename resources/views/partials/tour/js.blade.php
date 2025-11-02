@@ -448,12 +448,30 @@ var observer = new MutationObserver(function(mutations) {
 });
 
 // Start observing when tour starts
-document.addEventListener('DOMContentLoaded', function() {
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-});
+function startObserver() {
+    try {
+        var body = document.body;
+        // More robust check - ensure body exists and is an actual DOM element
+        if (body && typeof body.nodeType !== 'undefined' && body.nodeType === 1) {
+            observer.observe(body, {
+                childList: true,
+                subtree: true
+            });
+        } else {
+            // Retry if body not ready
+            setTimeout(startObserver, 100);
+        }
+    } catch(e) {
+        console.warn('MutationObserver setup error:', e);
+    }
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', startObserver);
+} else {
+    // DOM already loaded
+    startObserver();
+}
 
 // Keyboard shortcut to skip tour (ESC)
 document.addEventListener('keydown', function(e) {

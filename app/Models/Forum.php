@@ -25,6 +25,17 @@ class Forum extends Model
        return  $this->belongsTo(User::class,"created_by","id");
     }
 
+    public function likes(){
+        return $this->hasMany(ForumLike::class);
+    }
+
+    public function isLikedBy($userId = null){
+        if (!$userId) {
+            $userId = auth()->id();
+        }
+        return $userId ? $this->likes()->where('user_id', $userId)->exists() : false;
+    }
+
     public function communities(){
        
         return $this->hasManyThrough(

@@ -13,10 +13,10 @@
                             </a>
                         </div>
                     </div>
-                    <div class="col-lg-6 col-md-6 text-center ">
+                    <div class="col-lg-6 col-md-6 col-12 text-center">
                         <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">
                             {{ settings()->site_name }}</h3>
-                        <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 20px;">
+                        <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 0;">
                             {{ settings()->slogan }}</h6>
                     </div>
                     <div class="col-lg-4 col-md-4 text-end d-none d-md-block justify-content-end">

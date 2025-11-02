@@ -71,6 +71,27 @@
     .filters {
         margin: auto 20px !important;
     }
+
+    /* Center spotlight content on mobile */
+    .spotlight {
+        text-align: center !important;
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        justify-content: center !important;
+    }
+
+    .spotlight .search-container {
+        display: flex !important;
+        flex-direction: column !important;
+        align-items: center !important;
+        width: 100% !important;
+    }
+
+    .spot-row {
+        justify-content: center !important;
+        text-align: center !important;
+    }
 }
 
 /* Search Container - Fixed width to match themes */

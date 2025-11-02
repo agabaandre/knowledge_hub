@@ -540,6 +540,8 @@ Route::group(["prefix" => "forums"], function () {
     Route::get("/join", [ForumsController::class, 'join'])->name('forums.join');
     Route::post("/comment", [ForumsController::class, 'comment'])->name('forums.comment');
     Route::post("/publish", [ForumsController::class, 'publish'])->name('forums.publish');
+    Route::post("/like", [ForumsController::class, 'like'])->name('forums.like');
+    Route::post("/comment/like", [ForumsController::class, 'likeComment'])->name('forums.comment.like');
 });
 
 //facts

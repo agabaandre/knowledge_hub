@@ -1,3 +1,7 @@
+@php
+    $hide_search = true;
+@endphp
+
 @extends('layouts.app')
 
 @section('styles')
@@ -10,7 +14,7 @@
 
     .content-request-card {
         background: #ffffff;
-        border-radius: 16px;
+        border-radius: 4px;
         box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
         overflow: hidden;
         max-width: 900px;
@@ -18,25 +22,6 @@
         border: 1px solid #e2e8f0;
     }
 
-    .content-request-header {
-        background: linear-gradient(135deg, var(--theme-color-primary, #119A48) 0%, color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black) 100%);
-        padding: 2.5rem 2.5rem 2rem;
-        text-align: center;
-        color: white;
-    }
-
-    .content-request-header h2 {
-        font-size: 2rem;
-        font-weight: 700;
-        margin: 0 0 0.5rem 0;
-        color: white;
-    }
-
-    .content-request-header p {
-        margin: 0;
-        opacity: 0.95;
-        font-size: 1rem;
-    }
 
     .content-request-body {
         padding: 2.5rem 2.5rem;
@@ -74,7 +59,7 @@
 
     .form-control-custom {
         border: 2px solid #e2e8f0;
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 0.875rem 1rem;
         font-size: 0.95rem;
         transition: all 0.3s ease;
@@ -125,7 +110,7 @@
     /* Style Select2 dropdown to match form controls */
     .select2-container .select2-selection--single {
         border: 2px solid #e2e8f0;
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 0.5rem;
         height: auto;
         background: #f8f9fa;
@@ -158,7 +143,7 @@
     .btn-submit {
         background: var(--theme-color-primary, #119A48);
         border: none;
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 0.875rem 2rem;
         font-size: 1rem;
         font-weight: 600;
@@ -184,7 +169,7 @@
     .btn-cancel {
         background: #e2e8f0;
         border: none;
-        border-radius: 8px;
+        border-radius: 4px;
         padding: 0.875rem 2rem;
         font-size: 1rem;
         font-weight: 600;
@@ -206,7 +191,7 @@
         background: #edf2f7;
         border-left: 4px solid var(--theme-color-primary, #119A48);
         padding: 1rem 1.25rem;
-        border-radius: 6px;
+        border-radius: 4px;
         margin-bottom: 2rem;
     }
 
@@ -227,16 +212,16 @@
             padding: 2rem 1rem;
         }
 
-        .content-request-header {
-            padding: 2rem 1.5rem 1.5rem;
-        }
-
-        .content-request-header h2 {
-            font-size: 1.5rem;
-        }
-
         .content-request-body {
             padding: 2rem 1.5rem;
+        }
+        
+        .custom-bg h2 {
+            font-size: 1.5rem;
+        }
+        
+        .custom-bg p {
+            font-size: 0.9rem;
         }
 
         .form-row {
@@ -258,15 +243,31 @@
 @endsection
 
 @section('content')
+    {{-- Custom Header Section (replaces search bar) --}}
+    <div class="pt-5 pt-0 custom-bg">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                    <div style="text-align: center; padding: 2rem 0;">
+                        <h2 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                            <i class="fa fa-file-alt me-2"></i>Content Request Form
+                        </h2>
+                        <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
+                            Help us understand what content you need
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Secondary Navigation Below Banner --}}
+    @include('partials.secondary_navigation', ['forceShow' => true])
+
     <div class="gray py-4">
         <div class="content-request-wrapper">
             <div class="container">
                 <div class="content-request-card">
-                    <div class="content-request-header">
-                        <h2><i class="fa fa-file-alt me-2"></i>Content Request Form</h2>
-                        <p>Help us understand what content you need</p>
-            </div>
-
                     <div class="content-request-body">
                         @if(Session::has('message') || Session::has('alert'))
                             <div class="alert alert-{{ Session::get('alert_class', Session::has('message') ? 'success' : 'info') }} alert-dismissible fade show" role="alert">

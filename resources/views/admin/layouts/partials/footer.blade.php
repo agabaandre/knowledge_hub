@@ -1,7 +1,7 @@
 <!-- Footer opened -->
 <div class="main-footer ht-40">
 	<div class="container-fluid pd-t-0-f ht-100p">
-		<span>Copyright &copy; <?php echo date('Y'); ?><a href="https://www.africacdc.org/">Africa CDC</a> All rights reserved.</span>
+		<span>Copyright &copy; <?php echo date('Y'); ?><a href="https://africacdc.org/">Africa CDC</a> All rights reserved.</span>
 	</div>
 </div>
 <!-- Footer closed -->

@@ -131,11 +131,19 @@ class PublicationsController extends Controller
             'country_id' => 'nullable|integer',
         ]);
 
+        // Track search execution time
+        $startTime = microtime(true);
+
         $request['thematic_area_id'] = $request->theme ?? $request->thematic_area_id;
         $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
 
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
+        
+        // Calculate execution time
+        $endTime = microtime(true);
+        $data['search_time'] = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
+        $data['results_count'] = $data['publications']->total();
 
         // Get latest publications for sidebar
         $latestRequest = clone $request;

@@ -132,6 +132,16 @@ class SettingsRepository{
             $settings->enable_version_submission = (bool)$request->boolean('enable_version_submission', true);
         }
 
+        // Auto-approve comments setting
+        if (Schema::hasColumn('setting', 'auto_approve_comments')) {
+            if ($request->has('auto_approve_comments')) {
+                $settings->auto_approve_comments = (bool)$request->boolean('auto_approve_comments', true);
+            } else {
+                // unchecked checkbox doesn't submit; set false
+                $settings->auto_approve_comments = false;
+            }
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings

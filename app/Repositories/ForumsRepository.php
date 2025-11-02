@@ -19,7 +19,22 @@ class ForumsRepository extends SharedRepo{
     public function get(Request $request,$approved=1){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $forums = Forum::with(['user', 'tags', 'comments']);
+        $forums = Forum::with([
+            'user', 
+            'tags', 
+            'comments' => function($query) {
+                $query->whereNull('parent_id') // Only top-level comments (no replies)
+                      ->with(['user', 'likes'])
+                      ->orderBy('created_at', 'desc')
+                      ->limit(5); // Limit to latest 5 comments
+            },
+            'likes'
+        ])->withCount([
+            'comments as total_comments' => function($query) {
+                $query->whereNull('parent_id'); // Count only top-level comments
+            },
+            'likes as total_likes'
+        ]);
         
         // If approved=3 (all forums), prioritize pending approvals at the top
         if($approved === 3) {
@@ -90,7 +105,22 @@ class ForumsRepository extends SharedRepo{
         // Combine and get unique forum IDs
         $allForumIds = $userForumIds->merge($userCommentForumIds)->unique();
         
-        $forums = Forum::with(['user', 'tags', 'comments'])
+        $forums = Forum::with([
+            'user', 
+            'tags', 
+            'comments' => function($query) {
+                $query->whereNull('parent_id') // Only top-level comments (no replies)
+                      ->with(['user', 'likes'])
+                      ->orderBy('created_at', 'desc')
+                      ->limit(5); // Limit to latest 5 comments
+            },
+            'likes'
+        ])->withCount([
+            'comments as total_comments' => function($query) {
+                $query->whereNull('parent_id'); // Count only top-level comments
+            },
+            'likes as total_likes'
+        ])
             ->whereIn('id', $allForumIds)
             ->orderBy('created_at', 'desc');
 
@@ -223,6 +253,13 @@ class ForumsRepository extends SharedRepo{
         $comment->forum_id = $request->id;
         $comment->comment  = clean_unicode($request->comment ?? '');
         $comment->parent_id = $request->parent_id ?? null;
+        
+        // Check if auto-approve comments is enabled (defaults to true)
+        $autoApprove = settings()->auto_approve_comments ?? true;
+        if ($autoApprove) {
+            $comment->status = 'approved';
+        }
+        
         $comment->save();
 
         // Track forum comment engagement
@@ -230,16 +267,266 @@ class ForumsRepository extends SharedRepo{
             \App\Models\ForumEngagement::incrementForumComment($comment->created_by);
         }
 
-        // Attachments removed - no longer saving attachments for comments
+        // Save attachments if provided
+        // This MUST happen after the comment is saved so we have a valid comment ID
+        if($request->hasFile('attachments') && $comment && $comment->id) {
+            $files = $request->file('attachments');
+            \Log::info('Forum comment attachments received', [
+                'comment_id' => $comment->id,
+                'forum_id' => $comment->forum_id,
+                'files_count' => is_array($files) ? count($files) : ($files ? 1 : 0),
+                'files' => is_array($files) ? array_map(function($f) { 
+                    return [
+                        'name' => $f->getClientOriginalName(), 
+                        'size' => $f->getSize(), 
+                        'type' => $f->getMimeType(),
+                        'extension' => $f->guessExtension()
+                    ]; 
+                }, $files) : [[
+                    'name' => $files->getClientOriginalName(), 
+                    'size' => $files->getSize(), 
+                    'type' => $files->getMimeType(),
+                    'extension' => $files->guessExtension()
+                ]]
+            ]);
+            
+            try {
+                $savedCount = $this->save_comment_attachments($files, $comment->id);
+                \Log::info('Forum comment attachments save completed', [
+                    'comment_id' => $comment->id,
+                    'forum_id' => $comment->forum_id,
+                    'files_provided' => is_array($files) ? count($files) : ($files ? 1 : 0),
+                    'files_saved' => $savedCount,
+                    'saved_to_table' => 'custom_attachments'
+                ]);
+            } catch (\Exception $e) {
+                \Log::error('Failed to save forum comment attachments', [
+                    'comment_id' => $comment->id,
+                    'forum_id' => $comment->forum_id,
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+                // Don't fail the comment save if attachment save fails, but log it
+            }
+        } else {
+            if ($request->hasFile('attachments')) {
+                \Log::warning('Forum comment - files uploaded but comment save failed', [
+                    'has_file' => true,
+                    'comment_exists' => $comment ? true : false,
+                    'comment_id' => $comment->id ?? null,
+                    'files_count' => is_array($request->file('attachments')) ? count($request->file('attachments')) : 1
+                ]);
+            }
+        }
+
+        // Reload comment to ensure attachments are available
+        if ($comment && $comment->id) {
+            $comment->refresh();
+            // Trigger attachments accessor to verify they're loaded
+            $comment->attachments;
+        }
 
         return $comment;
     }
 
+    /**
+     * Save forum comment attachments to filesystem and database
+     * 
+     * @param array|\Illuminate\Http\UploadedFile $files Uploaded file(s)
+     * @param int $comment_id The comment ID to associate attachments with
+     * @return int Number of successfully saved attachments
+     */
+    private function save_comment_attachments($files, $comment_id){
+        // Validate comment exists
+        if (!$comment_id || !ForumComment::find($comment_id)) {
+            \Log::error('Invalid comment ID provided for attachment save', [
+                'comment_id' => $comment_id
+            ]);
+            return 0;
+        }
+
+        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
+        $maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
+        $dangerousExtensions = ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'apk', 'dll', 'sh', 'php', 'asp', 'jsp', 'py', 'rb', 'pl', 'cgi', 'bin', 'msi', 'deb', 'rpm'];
+        
+        $upfiles = (!is_array($files)) ? [$files] : $files;
+        $savedCount = 0;
+        
+        \Log::info('Starting to save comment attachments', [
+            'comment_id' => $comment_id,
+            'files_count' => count($upfiles)
+        ]);
+        
+        foreach ($upfiles as $file) {
+            if (!$file || !$file->isValid()) {
+                \Log::warning('Invalid or missing file in attachment batch', [
+                    'comment_id' => $comment_id,
+                    'file' => $file ? $file->getClientOriginalName() : 'null'
+                ]);
+                continue;
+            }
+
+            $extension = strtolower($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION));
+            $fileSize = $file->getSize();
+
+            // Validate file
+            if (!in_array($extension, $allowedExtensions)) {
+                \Log::warning('File extension not allowed for forum comment', [
+                    'extension' => $extension,
+                    'filename' => $file->getClientOriginalName()
+                ]);
+                continue;
+            }
+
+            if ($fileSize > $maxFileSize) {
+                \Log::warning('File too large for forum comment', [
+                    'size' => $fileSize,
+                    'max' => $maxFileSize,
+                    'filename' => $file->getClientOriginalName()
+                ]);
+                continue;
+            }
+
+            if (in_array($extension, $dangerousExtensions)) {
+                \Log::warning('Dangerous file type blocked for forum comment', [
+                    'extension' => $extension,
+                    'filename' => $file->getClientOriginalName()
+                ]);
+                continue;
+            }
+
+            try {
+                // Store the human-readable original filename
+                $original_filename = $file->getClientOriginalName();
+                $file_name = md5_file($file->getRealPath());
+                $file_path = 'forum/'.$file_name.'.'.$extension;
+               
+                $storagePath = storage_path('/app/public/uploads/forum/');
+                if (!is_dir($storagePath)) {
+                    mkdir($storagePath, 0755, true);
+                    \Log::info('Created forum upload directory', ['path' => $storagePath]);
+                }
+                
+                $moved = $file->move($storagePath, $file_name.'.'.$extension);
+                
+                if (!$moved) {
+                    throw new \Exception('Failed to move uploaded file to ' . $storagePath);
+                }
+                
+                $finalPath = $storagePath . $file_name.'.'.$extension;
+                if (!file_exists($finalPath)) {
+                    throw new \Exception('File does not exist after move: ' . $finalPath);
+                }
+
+                \Log::info('Forum comment attachment saved successfully', [
+                    'comment_id' => $comment_id,
+                    'original_filename' => $original_filename,
+                    'saved_filename' => $file_name.'.'.$extension,
+                    'saved_path' => $finalPath,
+                    'file_size' => filesize($finalPath),
+                    'file_path_for_db' => $file_path
+                ]);
+
+                try {
+                    $attachment = CustomAttachment::create([
+                        'model' => 'forum_comments',
+                        'path' => $file_path,
+                        'name' => $original_filename, // Save human-readable filename
+                        'record_id' => $comment_id
+                    ]);
+                    
+                    if (!$attachment || !$attachment->id) {
+                        throw new \Exception('CustomAttachment::create() returned null or had no ID');
+                    }
+                    
+                    $savedCount++;
+                    \Log::info('Forum comment attachment record created in database', [
+                        'comment_id' => $comment_id,
+                        'attachment_id' => $attachment->id,
+                        'file_path' => $file_path,
+                        'saved_successfully' => true
+                    ]);
+                } catch (\Exception $dbException) {
+                    \Log::error('Database error saving forum comment attachment: ' . $dbException->getMessage(), [
+                        'comment_id' => $comment_id,
+                        'file_path' => $file_path,
+                        'exception' => get_class($dbException),
+                        'trace' => $dbException->getTraceAsString()
+                    ]);
+                    throw $dbException; // Re-throw to be caught by outer try-catch
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error saving forum comment attachment: ' . $e->getMessage(), [
+                    'comment_id' => $comment_id,
+                    'filename' => $file->getClientOriginalName(),
+                    'exception' => get_class($e),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+        
+        \Log::info('Completed saving comment attachments', [
+            'comment_id' => $comment_id,
+            'total_files' => count($upfiles),
+            'saved_count' => $savedCount
+        ]);
+        
+        return $savedCount;
+    }
 
 
-    public function find($id){
 
-        return Forum::find($id);
+    public function find($id, $update_views = true){
+        // Eager load comments with attachments - trigger the accessor by loading comments first
+        $forum = Forum::with([
+            'user', 
+            'tags', 
+            'comments' => function($query) {
+                $query->orderBy('created_at', 'desc');
+            },
+            'comments.user', 
+            'comments.likes', 
+            'comments.replies.user', 
+            'comments.replies.likes', 
+            'likes'
+        ])->find($id);
+        
+        // Load attachments for all comments and replies after the forum is loaded
+        // This ensures attachments are available when rendering comments
+        if ($forum && $forum->comments) {
+            foreach ($forum->comments as $comment) {
+                // Trigger the attachments accessor to load attachments for main comment
+                $comment->attachments;
+                
+                // Load attachments for replies as well
+                if ($comment->replies && $comment->replies->count() > 0) {
+                    foreach ($comment->replies as $reply) {
+                        $reply->attachments;
+                    }
+                }
+            }
+        }
+        
+        if ($forum && $update_views) {
+            // Track views using cookie to prevent duplicate counting from same user in same session
+            $cookie_name = "ForumViewed" . $forum->id . ((auth()->check() && auth()->id()) ? auth()->id() : '');
+            $viewed = get_cookie($cookie_name);
+            
+            if (!$viewed && $forum) {
+                // Increment views counter without triggering updated_at timestamp
+                \DB::table('forums')
+                    ->where('id', $forum->id)
+                    ->increment('views');
+                
+                // Refresh forum model to get updated views count
+                $forum->refresh();
+                
+                // Set cookie to prevent duplicate views (same user viewing same forum again)
+                set_cookie($cookie_name);
+            }
+        }
+        
+        return $forum;
     }
 
     public function delete($id){
@@ -257,7 +544,7 @@ class ForumsRepository extends SharedRepo{
         $forum->is_approved =1;
         $forum->is_rejected =0;
         if (DBSchema::hasColumn('forums', 'approved_by')) {
-            $forum->approved_by = current_user()->id;
+        $forum->approved_by = current_user()->id;
         }
         if (DBSchema::hasColumn('forums', 'rejected_by')) {
             $forum->rejected_by = null;
@@ -282,7 +569,7 @@ class ForumsRepository extends SharedRepo{
         $forum->is_approved =0;
         $forum->is_rejected =1;
         if (DBSchema::hasColumn('forums', 'rejected_by')) {
-            $forum->rejected_by = current_user()->id;
+        $forum->rejected_by = current_user()->id;
         }
         if (DBSchema::hasColumn('forums', 'approved_by')) {
             $forum->approved_by = null;
@@ -353,7 +640,56 @@ class ForumsRepository extends SharedRepo{
        return $file_path;
     }
 
+    public function toggleLike($forumId)
+    {
+        $userId = auth()->id();
+        $like = \App\Models\ForumLike::where('forum_id', $forumId)
+            ->where('user_id', $userId)
+            ->first();
 
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            \App\Models\ForumLike::create([
+                'forum_id' => $forumId,
+                'user_id' => $userId
+            ]);
+            $liked = true;
+        }
 
+        $count = \App\Models\ForumLike::where('forum_id', $forumId)->count();
+
+        return [
+            'liked' => $liked,
+            'count' => $count
+        ];
+    }
+
+    public function toggleCommentLike($commentId)
+    {
+        $userId = auth()->id();
+        $like = \App\Models\ForumCommentLike::where('forum_comment_id', $commentId)
+            ->where('user_id', $userId)
+            ->first();
+
+        if ($like) {
+            $like->delete();
+            $liked = false;
+        } else {
+            \App\Models\ForumCommentLike::create([
+                'forum_comment_id' => $commentId,
+                'user_id' => $userId
+            ]);
+            $liked = true;
+        }
+
+        $count = \App\Models\ForumCommentLike::where('forum_comment_id', $commentId)->count();
+
+        return [
+            'liked' => $liked,
+            'count' => $count
+        ];
+    }
 
 }

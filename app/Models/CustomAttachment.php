@@ -9,6 +9,13 @@ class CustomAttachment extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'model',
+        'path',
+        'name',
+        'record_id',
+    ];
+
     protected $hidden = [
         'model',
         'id',

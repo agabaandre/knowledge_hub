@@ -9,16 +9,28 @@ class AuthorsRepository extends SharedRepo{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:24;
-        $authors = Author::orderBy('id','desc');
+        
+        $authors = Author::with(['user.badges.badgeType', 'user.communities', 'publications']);
 
-
-        if($request->term)
-        $authors->where('name','like','%'.$request->term.'%');
+        if($request->term) {
+            $searchTerm = '%'.$request->term.'%';
+            $authorIds = Author::leftJoin('users', 'author.id', '=', 'users.author_id')
+                ->where(function($query) use ($searchTerm) {
+                    $query->where('author.name', 'like', $searchTerm)
+                          ->orWhere('users.name', 'like', $searchTerm)
+                          ->orWhere('users.job_title', 'like', $searchTerm)
+                          ->orWhere('users.organization_name', 'like', $searchTerm);
+                })
+                ->distinct()
+                ->pluck('author.id');
+            
+            $authors->whereIn('id', $authorIds);
+        }
 
         //Access levels effect to query results
         $this->access_filter($authors);
 
-        $result = $authors ->paginate($rows_count);
+        $result = $authors->orderBy('id','desc')->paginate($rows_count);
 
         return  $result;
     }

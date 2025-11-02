@@ -59,7 +59,7 @@
     "logo": "{{ $pageImage }}",
     "description": "{{ strip_tags($pageDescription) }}",
     "sameAs": [
-        "https://www.africacdc.org",
+        "https://africacdc.org",
         "https://twitter.com/AfricaCDC",
         "https://www.facebook.com/AfricaCDC",
         "https://www.linkedin.com/company/africa-cdc"
