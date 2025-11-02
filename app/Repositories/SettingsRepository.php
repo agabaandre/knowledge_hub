@@ -142,6 +142,15 @@ class SettingsRepository{
             }
         }
 
+        if (Schema::hasColumn('setting', 'enable_ai_search')) {
+            if ($request->has('enable_ai_search')) {
+                $settings->enable_ai_search = (bool)$request->boolean('enable_ai_search', true);
+            } else {
+                // unchecked checkbox doesn't submit; set false
+                $settings->enable_ai_search = false;
+            }
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings

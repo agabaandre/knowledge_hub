@@ -176,18 +176,11 @@
                 @endif
             </a>
             
-            <a href="{{ route('account.favourites') }}" 
-               class="secondary-nav-link {{ request()->routeIs('account.favourites') ? 'active' : '' }}"
-               title="My Favourites">
-                <i class="fa fa-star"></i>
-                <span>My Favourites</span>
-            </a>
-            
             <a href="{{ route('account.publish') }}" 
                class="secondary-nav-link {{ request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}"
                title="Publish a Resource">
                 <i class="fa fa-plus-circle"></i>
-                <span>Publish</span>
+                <span>Publish Resource</span>
             </a>
             
             <a href="{{ route('forums.create') }}" 

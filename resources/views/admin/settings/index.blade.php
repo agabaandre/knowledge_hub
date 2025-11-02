@@ -567,6 +567,22 @@
                     </div>
 
                     <div class="form-section-title mt-4">
+                        <i class="fa fa-search"></i>
+                        Search Settings
+                    </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enable_ai_search" name="enable_ai_search" value="1" @if($settings->enable_ai_search ?? 1) checked @endif>
+                                    <label class="form-check-label" for="enable_ai_search">Enable AI Search</label>
+                                </div>
+                                <small class="info-text">When enabled, the AI Search button will be displayed in the search bar. When disabled, only the regular search button will be shown.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
                         <i class="fa fa-image"></i>
                         Background & Gradient
                 </div>

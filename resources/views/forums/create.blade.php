@@ -1,27 +1,48 @@
-@extends('layouts.plain')
+@php
+    $hide_search = true;
+@endphp
+
+@extends('layouts.app')
+
+@section('title', 'Create Forum')
 
 @section('styles')
 
 @endsection
 
 @section('content')
-<div class="row">
-
-    <div class="card col-lg-12">
-        <div class="card-header">
-            <h4 class="card-title mb-0">Create Forum</h4>
-            <p class="mt-0">Start a new discussion, interested individuals will be alert and will join you!</p>
+{{-- Custom Header Section (replaces search bar) --}}
+<div class="pt-5 pt-0 custom-bg">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
+                <div style="text-align: center; padding: 2rem 0;">
+                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                        <i class="fa fa-comments me-2"></i>Create Forum
+                    </h1>
+                    <p style="margin: 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
+                        Start a new discussion, interested individuals will be alert and will join you!
+                    </p>
+                </div>
+            </div>
         </div>
+    </div>
+</div>
 
-        <div class="card-body text-left">
-            <div class="container">
-            @if(@$message)
-             <div class="alert alert-danger">{{ $message }}</div>
-            @endif
-           <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications' enctype="multipart/form-data">
-            @csrf
-            <div class="modal-body">
-               <div class="row">
+{{-- Secondary Navigation Below Banner --}}
+@include('partials.secondary_navigation', ['forceShow' => true])
+
+<div class="container mt-4" style="margin-bottom: 4px;">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card">
+                <div class="card-body text-left" style="padding: 2rem;">
+                    @if(@$message)
+                     <div class="alert alert-danger">{{ $message }}</div>
+                    @endif
+                   <form method="POST" action="{{ route('forums.publish') }}" id='publications' class='publications' enctype="multipart/form-data">
+                    @csrf
+                       <div class="row">
                     
                  <div class="col-md-12">
                             <div class="mb-3">
@@ -74,25 +95,20 @@
                       </div>
                   </div>
       
-                        </div>
+                       </div>
 
-                    
+                       <div class="form-group mt-4" style="display: flex; gap: 1rem; justify-content: flex-end;">
+                           <a href="{{ url('forums') }}" class="btn btn-secondary" type="button">Cancel</a>
+                           <button class="btn btn-primary theme-bg text-white" type="submit">
+                               <i class="fa fa-paper-plane me-2"></i>Submit Forum
+                           </button>
+                       </div>
 
+                   </form>
                 </div>
-
             </div>
-            <div class="modal-footer">
-
-                <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
-                <button class="btn btn-primary" type="submit">Submit</button>
-            </div>
-
-           </form>
-
-            </div>
-
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
+        </div>
+    </div>
 </div>
 
 @endsection
