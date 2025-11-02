@@ -16,7 +16,7 @@ class CreateForumCommentLikesTable extends Migration
         if (!Schema::hasTable('forum_comment_likes')) {
             Schema::create('forum_comment_likes', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('forum_comment_id');
+                $table->unsignedBigInteger('forum_comment_id'); // Changed from unsignedInteger to match forum_comments.id (BIGINT)
                 $table->unsignedBigInteger('user_id');
                 $table->timestamps();
                 
@@ -30,7 +30,7 @@ class CreateForumCommentLikesTable extends Migration
             // Table exists, ensure columns exist
             Schema::table('forum_comment_likes', function (Blueprint $table) {
                 if (!Schema::hasColumn('forum_comment_likes', 'forum_comment_id')) {
-                    $table->unsignedInteger('forum_comment_id')->after('id');
+                    $table->unsignedBigInteger('forum_comment_id')->after('id'); // Changed from unsignedInteger to match forum_comments.id (BIGINT)
                     $table->foreign('forum_comment_id')->references('id')->on('forum_comments')->onDelete('cascade');
                 }
                 if (!Schema::hasColumn('forum_comment_likes', 'user_id')) {

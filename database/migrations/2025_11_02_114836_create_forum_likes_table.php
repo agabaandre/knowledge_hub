@@ -16,7 +16,7 @@ class CreateForumLikesTable extends Migration
         if (!Schema::hasTable('forum_likes')) {
             Schema::create('forum_likes', function (Blueprint $table) {
                 $table->id();
-                $table->unsignedInteger('forum_id');
+                $table->unsignedBigInteger('forum_id'); // Changed from unsignedInteger to match forums.id (BIGINT)
                 $table->unsignedBigInteger('user_id');
                 $table->timestamps();
                 
@@ -30,7 +30,7 @@ class CreateForumLikesTable extends Migration
             // Table exists, ensure columns exist
             Schema::table('forum_likes', function (Blueprint $table) {
                 if (!Schema::hasColumn('forum_likes', 'forum_id')) {
-                    $table->unsignedInteger('forum_id')->after('id');
+                    $table->unsignedBigInteger('forum_id')->after('id'); // Changed from unsignedInteger to match forums.id (BIGINT)
                     $table->foreign('forum_id')->references('id')->on('forums')->onDelete('cascade');
                 }
                 if (!Schema::hasColumn('forum_likes', 'user_id')) {
