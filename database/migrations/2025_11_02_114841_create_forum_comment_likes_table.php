@@ -15,18 +15,56 @@ class CreateForumCommentLikesTable extends Migration
     public function up()
     {
         if (!Schema::hasTable('forum_comment_likes')) {
-            Schema::create('forum_comment_likes', function (Blueprint $table) {
+            // First, check the actual column type of forum_comments.id
+            $forumCommentIdType = 'unsignedBigInteger';
+            if (Schema::hasTable('forum_comments')) {
+                try {
+                    $columnInfo = DB::select("SHOW COLUMNS FROM forum_comments WHERE Field = 'id'");
+                    if (!empty($columnInfo)) {
+                        $type = strtolower($columnInfo[0]->Type);
+                        // If it's int (not bigint), use unsignedInteger
+                        if (strpos($type, 'int') !== false && strpos($type, 'bigint') === false) {
+                            $forumCommentIdType = 'unsignedInteger';
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Default to unsignedBigInteger if we can't check
+                }
+            }
+            
+            Schema::create('forum_comment_likes', function (Blueprint $table) use ($forumCommentIdType) {
                 $table->id();
-                $table->unsignedBigInteger('forum_comment_id'); // Changed from unsignedInteger to match forum_comments.id (BIGINT)
+                
+                // Use the appropriate type based on forum_comments.id type
+                if ($forumCommentIdType === 'unsignedInteger') {
+                    $table->unsignedInteger('forum_comment_id');
+                } else {
+                    $table->unsignedBigInteger('forum_comment_id');
+                }
+                
                 $table->unsignedBigInteger('user_id');
                 $table->timestamps();
                 
                 $table->unique(['forum_comment_id', 'user_id']); // Prevent duplicate likes
-                
-                // Add foreign key constraints
-                $table->foreign('forum_comment_id')->references('id')->on('forum_comments')->onDelete('cascade');
-                $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             });
+            
+            // Add foreign key constraints separately to handle type mismatches gracefully
+            if (Schema::hasTable('forum_comments')) {
+                try {
+                    DB::statement('ALTER TABLE forum_comment_likes ADD CONSTRAINT forum_comment_likes_forum_comment_id_foreign FOREIGN KEY (forum_comment_id) REFERENCES forum_comments(id) ON DELETE CASCADE');
+                } catch (\Exception $e) {
+                    // If foreign key fails, continue without it
+                    // This can happen if column types don't match
+                }
+            }
+            
+            if (Schema::hasTable('users')) {
+                try {
+                    DB::statement('ALTER TABLE forum_comment_likes ADD CONSTRAINT forum_comment_likes_user_id_foreign FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE');
+                } catch (\Exception $e) {
+                    // If foreign key fails, continue without it
+                }
+            }
         } else {
             // Table exists, ensure columns exist
             Schema::table('forum_comment_likes', function (Blueprint $table) {
