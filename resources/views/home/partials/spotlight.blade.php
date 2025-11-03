@@ -41,12 +41,12 @@
                            name="term" value="{{ old('term') }}" placeholder="Type Keywords" />
                 </div>
             </div>
-            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 bg-show">
+            <div class="{{ $aiSearchEnabled ? 'col-xl-2' : 'col-xl-4' }} col-lg-{{ $aiSearchEnabled ? '2' : '4' }} col-md-{{ $aiSearchEnabled ? '2' : '4' }} col-sm-12 col-12 bg-show">
                 <div class="form-group mb-0 position-relative">
                     <button class="btn full-width text-white fs-md ai-search-btn-primary" type="submit" style="
                         background: {{ $primaryColor }};
                         border: none;
-                        border-radius: 0;
+                        border-radius: {{ $aiSearchEnabled ? '0' : '0 0.375rem 0.375rem 0' }};
                         border-right: {{ $aiSearchEnabled ? '1px solid rgba(255,255,255,0.3)' : 'none' }};
                         height: 100%;
                         min-height: 62px;
@@ -81,7 +81,7 @@
             @endif
         </div>
         @include('partials.search.advanced_search')
-        <div class="col-md-6 sm-show mt-1 d-md-none">
+        <div class="{{ $aiSearchEnabled ? 'col-md-6' : 'col-md-12' }} sm-show mt-1 d-md-none">
             <button class="btn full-width text-white fs-md py-3 ai-search-btn-primary" type="submit" style="background: {{ $primaryColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                 <i class="fa fa-magnifying-glass"></i> Search
             </button>

@@ -61,16 +61,17 @@
                          action="{{ $searchAction }}"
                          class="sidebar-search-form px-0 py-0 filter">
                          <div class="search-buttons-container" style="display: flex; align-items: stretch; width: 100%;">
-                             <input class="px-3 py-0 main_search" style="font-size: 12pt; flex: 1; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
+                             <input class="px-3 py-0 main_search" style="font-size: 12pt; flex: {{ $aiSearchEnabled ? '1' : '2' }}; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
                                  type="search" name="term" placeholder="What are you looking for?">
 
                              <button type="submit" class="search-btn-primary bg-show" style="
                                  background: {{ $primaryColor }};
                                  border: none;
                                  border-right: {{ $aiSearchEnabled ? '1px solid rgba(255,255,255,0.3)' : 'none' }};
+                                 border-radius: {{ $aiSearchEnabled ? '0' : '0 4px 4px 0' }};
                                  white-space: nowrap;
-                                 flex-shrink: 0;
-                                 padding: 0.5rem 0.5rem;
+                                 {{ $aiSearchEnabled ? 'flex-shrink: 0;' : 'flex: 1; min-width: 120px;' }}
+                                 padding: 0.5rem 1rem;
                                  min-height: 40px;
                                  display: flex;
                                  align-items: center;
