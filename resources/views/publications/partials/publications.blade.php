@@ -1,54 +1,94 @@
 <style>
-    /* Mobile Styles (phones) */
+    /* Mobile Styles (phones) - Dropcap images */
     @media (max-width: 767.98px) {
         .publication-card-row {
-            flex-direction: column !important;
-            flex-wrap: wrap !important;
+            display: block !important;
+            flex-direction: unset !important;
+            flex-wrap: unset !important;
         }
         
         .publication-title-mobile {
-            display: block;
-            order: 1;
-            width: 100% !important;
-            margin-bottom: 1rem;
+            display: none !important;
         }
         
         .publication-image-col {
-            width: 100% !important;
-            flex: 0 0 100% !important;
-            max-width: 100% !important;
-            padding-right: 0 !important;
+            width: 120px !important;
+            height: 120px !important;
+            flex: none !important;
+            max-width: 120px !important;
+            padding-right: 12px !important;
             padding-left: 0 !important;
-            margin-bottom: 1rem;
-            order: 2;
+            padding-bottom: 0 !important;
+            margin-right: 12px !important;
+            margin-bottom: 8px !important;
+            margin-left: 0 !important;
+            margin-top: 0 !important;
+            float: left !important;
+            border: none !important;
+            overflow: hidden !important;
+            background: transparent !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            position: relative !important;
+            order: unset !important;
+            shape-outside: margin-box !important;
         }
         
         .publication-image-link {
-            width: 100%;
+            width: 100% !important;
+            height: 100% !important;
+            display: block !important;
         }
         
         .publication-image {
-            min-height: 200px !important;
-            height: 200px !important;
-            object-position: top center !important;
+            min-height: 120px !important;
+            height: 120px !important;
+            width: 100% !important;
+            object-fit: contain !important;
+            object-position: center !important;
+            background: transparent !important;
         }
         
         .publication-content-col {
-            width: 100% !important;
-            flex: 0 0 100% !important;
+            width: auto !important;
+            flex: none !important;
             max-width: 100% !important;
             padding-left: 0 !important;
-            order: 3;
+            display: block !important;
+            overflow: visible !important;
+            text-align: justify !important;
+            order: unset !important;
         }
         
         .publication-title-desktop {
-            display: none !important;
+            display: block !important;
+            text-align: justify !important;
+            overflow-wrap: break-word !important;
+            white-space: normal !important;
+        }
+        
+        .publication-content-col h5,
+        .publication-content-col p,
+        .publication-content-col span {
+            text-overflow: unset !important;
+            white-space: normal !important;
+            overflow: visible !important;
         }
         
         /* Keep buttons side-by-side on mobile */
         .publication-card-row .d-flex.align-items-center {
             flex-wrap: wrap;
             gap: 4px;
+            clear: left;
+            margin-top: 1rem;
+        }
+        
+        /* Clear float after content */
+        .publication-card-row::after {
+            content: "";
+            display: table;
+            clear: both;
         }
     }
     
