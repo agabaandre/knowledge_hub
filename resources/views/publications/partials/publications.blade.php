@@ -165,7 +165,7 @@
                  <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
                      <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
                      <h5 class="text-bold text-lg publication-title-desktop">
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
                              {!! truncate(clean_unicode($row->title), 500) !!}</a>
                      </h5>
                      
