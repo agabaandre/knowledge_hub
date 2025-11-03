@@ -173,10 +173,11 @@
             right: 10px !important;
             left: auto !important;
             position: fixed !important;
-            z-index: 9999999 !important;
+            z-index: 99999999 !important;
             transform: translateX(0);
             max-width: calc(100vw - 20px) !important;
             min-width: 180px !important;
+            isolation: isolate; /* Create new stacking context */
         }
         
         .language-selector-wrapper.active .language-dropdown {
@@ -184,22 +185,30 @@
             opacity: 1 !important;
             visibility: visible !important;
             display: block !important;
-            z-index: 9999999 !important;
+            z-index: 99999999 !important;
         }
         
         .language-selector-wrapper {
             position: relative;
-            z-index: 9999998 !important;
+            z-index: 99999998 !important;
+            isolation: isolate; /* Create new stacking context */
         }
         
         .menu-language-menu-container {
             position: relative;
-            z-index: 9999998 !important;
+            z-index: 99999998 !important;
+            isolation: isolate; /* Create new stacking context */
         }
         
         .language-selector-btn {
             position: relative;
-            z-index: 9999998 !important;
+            z-index: 99999998 !important;
+        }
+        
+        /* Ensure language dropdown is above navigation menu on mobile */
+        #navigation ~ * .language-dropdown,
+        .language-dropdown {
+            z-index: 99999999 !important;
         }
     }
 </style>
@@ -328,13 +337,18 @@
                         var spaceAbove = rect.top;
                         
                         // Calculate position - prefer below button, but flip above if not enough space
+                        // On mobile, move up by 100px from button position
                         var topPosition;
                         if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
-                            // Place below button
-                            topPosition = rect.bottom + 8;
+                            // Place below button, but move up by 100px on mobile
+                            topPosition = rect.bottom + 8 - 140;
+                            // Ensure it doesn't go above viewport
+                            if (topPosition < 8) {
+                                topPosition = 8;
+                            }
                         } else {
                             // Place above button (if more space above)
-                            topPosition = rect.top - dropdownHeight - 8;
+                            topPosition = rect.top - dropdownHeight - 8 - 140;
                             if (topPosition < 8) {
                                 topPosition = 8; // Ensure minimum margin from top
                             }
@@ -350,7 +364,8 @@
                         languageDropdown.style.left = 'auto';
                         languageDropdown.style.maxWidth = Math.min(280, window.innerWidth - 20) + 'px';
                         languageDropdown.style.minWidth = '180px';
-                        languageDropdown.style.zIndex = '9999999';
+                        languageDropdown.style.zIndex = '99999999';
+                        languageDropdown.style.isolation = 'isolate';
                         languageDropdown.style.display = 'block';
                         languageDropdown.style.visibility = 'visible';
                         languageDropdown.style.opacity = '1';
