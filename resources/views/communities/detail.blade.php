@@ -1,8 +1,66 @@
 @php
     $hide_search = true;
+    // SEO Meta Tags for Community Detail Page
+    $pageTitle = ($community->community_name ?? 'Community') . ' - Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $pageDescription = Str::limit(strip_tags($community->description ?? ''), 160) ?: ($community->community_name . ' - A professional community of practice focused on public health topics.');
+    $pageKeywords = 'community of practice, ' . ($community->community_name ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
+    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+    $canonicalUrl = url('communities/detail/' . $community->id);
+    $ogType = 'profile';
+    
+    // Get community stats
+    $memberCount = $community->approved_members_count ?? $community->members_count ?? 0;
+    $forumCount = $community->community_forums_count ?? $community->forums_count ?? 0;
+    $publicationCount = $community->community_publications_count ?? $community->publications_count ?? 0;
 @endphp
 
 @extends('layouts.app')
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "{{ addslashes($community->community_name ?? 'Community') }}",
+    "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 300)) }}",
+    "url": "{{ $canonicalUrl }}",
+    @if($community->region)
+    "areaServed": {
+        "@type": "Place",
+        "name": "{{ addslashes($community->region->name ?? '') }}"
+    },
+    @endif
+    "memberOf": {
+        "@type": "Organization",
+        "name": "{{ settings()->site_name ?? 'Africa CDC Knowledge Hub' }}"
+    },
+    "numberOfMembers": {{ $memberCount }},
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Communities",
+                "item": "{{ url('communities') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ addslashes($community->community_name ?? 'Community') }}",
+                "item": "{{ $canonicalUrl }}"
+            }
+        ]
+    }
+}
+</script>
+@endsection
 
 @section('styles')
 <style>
@@ -109,7 +167,7 @@
         <div class="row justify-content-center">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                 <div style="text-align: center; padding: 2rem 0;">
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;">
+                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;" itemprop="name">
                         {{ $community->community_name }}
                     </h1>
                     <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">

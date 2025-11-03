@@ -76,6 +76,18 @@
 
           <div class="col-md-12">
             <div class="mb-3">
+              <label class="form-label" for="tags">Tags</label>
+              @include('partials.tags.dropdown', [
+                  'field' => 'tags[]',
+                  'selected' => [],
+                  'allfield' => 'Select Tags'
+              ])
+              <small class="text-muted d-block mt-1">Add relevant tags to help categorize and find this community.</small>
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="mb-3">
               <div class="form-check">
                 <input type="checkbox" class="form-check-input" id="is_public" name="is_public" value="1" checked>
                 <label class="form-check-label" for="is_public">Public Community</label>

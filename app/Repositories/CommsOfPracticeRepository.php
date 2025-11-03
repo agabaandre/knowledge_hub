@@ -143,6 +143,15 @@ class CommsOfPracticeRepository{
         
         $access_grp->save();
 
+        // Handle tags
+        if ($request->has('tags') && is_array($request->tags)) {
+            // Sync tags (remove old ones, add new ones)
+            $access_grp->tags()->sync($request->tags);
+        } else {
+            // If no tags provided, remove all tags
+            $access_grp->tags()->sync([]);
+        }
+
         clear_cache();
         
         return $access_grp;
@@ -153,7 +162,10 @@ class CommsOfPracticeRepository{
         $query = CommunityOfPractice::where('id', $id);
 
         if ($withRelated) {
-            $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+            $query->with(['membership', 'approvedMembers', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'tags']);
+        } else {
+            // Always load tags for edit forms
+            $query->with('tags');
         }
 
         return $query->first();

@@ -97,6 +97,11 @@ class CommunityOfPractice extends Model
         return $this->belongsTo(Country::class, 'country_id');
     }
 
+    public function tags()
+    {
+        return $this->belongsToMany(\App\Models\Tag::class, 'community_of_practice_tags', 'community_of_practice_id', 'tag_id');
+    }
+
     // Accessor to get the count of publications
     public function getPublicationsCountAttribute()
     {

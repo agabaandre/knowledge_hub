@@ -213,12 +213,18 @@ class CommsOfPracticeController extends Controller
         }
         return response()->json([
             'status' => 'success',
-            'data' => [
-                'id' => $community->id,
-                'community_name' => $community->community_name,
-                'description' => $community->description,
-                'is_active' => $community->is_active,
-            ]
+            'id' => $community->id,
+            'community_name' => $community->community_name,
+            'description' => $community->description,
+            'is_active' => $community->is_active,
+            'region_id' => $community->region_id,
+            'country_id' => $community->country_id,
+            'organisation' => $community->organisation,
+            'department' => $community->department,
+            'is_public' => $community->is_public,
+            'tags' => $community->tags->map(function($tag) {
+                return ['id' => $tag->id, 'tag_text' => $tag->tag_text];
+            })
         ]);
     }
 

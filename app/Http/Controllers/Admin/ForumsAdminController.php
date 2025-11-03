@@ -54,7 +54,23 @@ class ForumsAdminController extends Controller
     
     public function details(Request $request){
         $forum          =  $this->forumsRepo->find($request->id);
-        $data['forum']  = $forum;       
+        $data['forum']  = $forum;
+        
+        // Get recent forums for sidebar (excluding current forum)
+        $request['rows'] = 6;
+        $forumsPaginator = $this->forumsRepo->get($request, 3);
+        
+        // Filter out current forum from the results
+        if ($forumsPaginator instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            $data['forums'] = $forumsPaginator->getCollection()
+                ->filter(function($f) use ($forum) {
+                    return $f->id != $forum->id;
+                })
+                ->take(5);
+        } else {
+            $data['forums'] = collect();
+        }
+        
         return view('admin.forums.details',$data);
     }
 

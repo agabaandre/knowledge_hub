@@ -48,10 +48,40 @@ class HealthTopicsController extends Controller
                                       ->pluck('publication_id');
 
         $publications = Publication::whereIn('id', $publicationIds)
-                                 ->with(['author', 'file_type'])
+                                 ->with(['author', 'file_type', 'tags'])
                                  ->orderBy('created_at', 'desc')
                                  ->paginate(12);
 
-        return view('health-topics.show', compact('tag', 'publications'));
+        // Get forums tagged with this tag
+        $forumIds = \App\Models\ForumTag::where('tag', $tag->tag_text)
+                                       ->pluck('forum_id');
+
+        $relatedForums = \App\Models\Forum::whereIn('id', $forumIds)
+                                         ->where('is_approved', 1)
+                                         ->where('status', 1)
+                                         ->with(['user', 'tags'])
+                                         ->withCount(['comments as total_comments' => function($query) {
+                                             $query->whereNull('parent_id');
+                                         }, 'likes as total_likes'])
+                                         ->orderBy('created_at', 'desc')
+                                         ->limit(10)
+                                         ->get();
+
+        // Get communities tagged with this tag
+        $relatedCommunities = \App\Models\CommunityOfPractice::whereHas('tags', function($query) use ($tag) {
+                                                $query->where('tags.id', $tag->id);
+                                            })
+                                            ->where('is_active', 1)
+                                            ->with(['creator', 'region', 'country', 'tags'])
+                                            ->withCount([
+                                                'approvedMembers as members_count',
+                                                'communityForums as forums_count',
+                                                'communityPublications as publications_count'
+                                            ])
+                                            ->orderBy('created_at', 'desc')
+                                            ->limit(10)
+                                            ->get();
+
+        return view('health-topics.show', compact('tag', 'publications', 'relatedForums', 'relatedCommunities'));
     }
 } 

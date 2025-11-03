@@ -1,5 +1,64 @@
 @extends('layouts.app')
 
+@php
+    // SEO Meta Tags for Communities Listing Page
+    $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $pageDescription = 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
+    $pageKeywords = 'communities of practice, public health communities, Africa CDC communities, health professionals, networking, collaboration, ' . (settings()->seo_keywords ?? '');
+    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+    $canonicalUrl = url('communities');
+    $ogType = 'website';
+@endphp
+
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "{{ $pageTitle }}",
+    "description": "{{ strip_tags($pageDescription) }}",
+    "url": "{{ $canonicalUrl }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": [
+            @if(isset($communities) && $communities->count() > 0)
+                @foreach($communities->take(10) as $index => $community)
+                {
+                    "@type": "ListItem",
+                    "position": {{ $index + 1 }},
+                    "item": {
+                        "@type": "Organization",
+                        "name": "{{ addslashes($community->community_name) }}",
+                        "url": "{{ url('communities/detail/' . $community->id) }}",
+                        "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 200)) }}"
+                    }
+                }@if(!$loop->last),@endif
+                @endforeach
+            @endif
+        ]
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Communities",
+                "item": "{{ $canonicalUrl }}"
+            }
+        ]
+    }
+}
+</script>
+@endsection
+
 @section('styles')
     <style>
         .theme-text {
@@ -163,8 +222,8 @@
 @section('content')
     <div class="container">
         <div class="page-title pt-3 pb-3">
-            <h3>Communities of Practice</h3>
-            <h6>Join a community of practice to connect with peers, share knowledge, and participate in discussions.</h6>
+            <h1>Communities of Practice</h1>
+            <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">Join a community of practice to connect with peers, share knowledge, and participate in discussions.</p>
         </div>
 
         <!-- Filter Section -->
@@ -255,18 +314,20 @@
                     @if(request()->routeIs('account.my-communities') && ($community->user_joined || $community->user_pending_approval))
                         <div class="community-card clickable" onclick="window.location.href='{{ route('community.detail', $community->id) }}'">
                     @else
-                        <div class="community-card">
+                    <div class="community-card">
                     @endif
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h4 style="margin: 0; flex: 1;">
+                            <h2 style="margin: 0; flex: 1; font-size: 1.1rem;">
                                 @if(request()->routeIs('account.my-communities'))
-                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit;" onclick="event.stopPropagation();">
+                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit; font-weight: 600;" onclick="event.stopPropagation();" title="{{ $community->community_name }}">
                                         {{ $community->community_name }}
                                     </a>
                                 @else
-                                    {{ $community->community_name }}
+                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit; font-weight: 600;" title="{{ $community->community_name }}">
+                                        {{ $community->community_name }}
+                                    </a>
                                 @endif
-                            </h4>
+                            </h2>
                             @if(isset($community->is_public))
                                 @if($community->is_public)
                                     <span class="badge" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
@@ -313,14 +374,14 @@
                             @if (!$community->user_joined && !$community->user_pending_approval)
                                 <div class="mt-2" style="text-align: center;">
                                     <button class="btn btn-sm join-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
-                                        Join Community
-                                    </button>
+                                    Join Community
+                                </button>
                                 </div>
                             @elseif ($community->user_pending_approval)
                                 <div class="mt-2" style="text-align: center;">
                                     <button class="btn btn-sm btn-warning" disabled>
-                                        Request Pending Approval
-                                    </button>
+                                    Request Pending Approval
+                                </button>
                                 </div>
                             @else
                                 <div style="margin-top: 1rem;">
@@ -349,18 +410,18 @@
                                                 <i class="fa fa-sign-in-alt mr-1"></i>Visit Community
                                             </a>
                                         </div>
-                                        <div class="btn-group" role="group" aria-label="Community Actions">
-                                            <a href="{{ url('/records') }}?community_id={{ $community->id }}"
+                                <div class="btn-group" role="group" aria-label="Community Actions">
+                                    <a href="{{ url('/records') }}?community_id={{ $community->id }}"
                                                 class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
-                                                Publications
-                                            </a>
-                                            <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
+                                        Publications
+                                    </a>
+                                    <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
                                                 class="btn btn-sm forum-btn" onclick="event.stopPropagation();">
-                                                Forums
-                                            </a>
+                                        Forums
+                                    </a>
                                             <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
                                                 Leave
-                                            </button>
+                                    </button>
                                         </div>
                                     @endif
                                 </div>
@@ -368,8 +429,8 @@
                         @else
                             <div class="mt-2" style="text-align: center;">
                                 <a href="{{ route('login') }}" class="btn btn-sm join-btn">
-                                    Login to Join
-                                </a>
+                                Login to Join
+                            </a>
                             </div>
                         @endif
                     </div>

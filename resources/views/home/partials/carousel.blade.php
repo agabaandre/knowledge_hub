@@ -4,7 +4,7 @@
             <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important;">
                 <a href="{{ url('records/subtheme')}}?subtheme={{$subtheme->id}}" class="cats-box d-block rounded bg-white px-2 py-4">
                     <div class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-3 py-3 " >
-                        <img src="{{ asset('frontend/img/icons/'.$subtheme->icon)}}" style="max-width: 60%;"/>
+                        <i class="fa {{ $subtheme->icon ?? 'fa-folder' }} fa-3x" style="color: var(--theme-color-primary, #2980b9);"></i>
                     </div>
                     <div class="cats-box-caption">
                         <h4 class="fs-sm mb-0 ft-sm m-catrio" data-bs-toggle="tool-tip" data-bs-title="{{$subtheme->description}}">{{truncate($subtheme->description,16)}}</h4>

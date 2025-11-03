@@ -196,15 +196,15 @@
 
 @section('content')
 <div class="authors-wrapper">
-    <div class="container">
+<div class="container">
         <div class="authors-header">
             <h2><i class="fa fa-users me-2"></i>Contributors</h2>
             <p>Browse our community of knowledge contributors</p>
-        </div>
-
+</div>
+					
         @if(isset($authors) && $authors->count() > 0)
         <div class="row">
-            @foreach($authors as $author)
+@foreach($authors as $author)
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
                 <div class="author-card">
                     <div class="author-header">
@@ -262,8 +262,8 @@
                                 @endif
                             </div>
                             @endif
-                        </div>
-                    </div>
+				</div>
+				</div>
                     <div class="author-stats">
                         <span class="author-resources">
                             <i class="fa fa-book"></i>
@@ -271,12 +271,12 @@
                         </span>
                         <a href="{{ url('authors/publications')}}?author={{$author->id}}" class="view-link">
                             View Resources <i class="fa fa-arrow-right ms-1"></i>
-                        </a>
-                    </div>
-                </div>
+			</a>
+		</div>
+	</div>
             </div>
-            @endforeach
-        </div>
+@endforeach
+</div>
 
         @if($authors->hasPages())
         <div class="row">
@@ -294,6 +294,6 @@
             <p>No contributors match your search criteria.</p>
         </div>
         @endif
-    </div>
+</div>
 </div>
 @endsection

@@ -9,9 +9,9 @@
                
                .featured-image {
                    width: 100% !important;
-                   height: 200px !important;
+                   height: 220px !important;
                    margin-right: 0 !important;
-                   margin-bottom: 1rem !important;
+                   margin-bottom: 0.75rem !important;
                }
                
                .featured-image img {
@@ -50,7 +50,7 @@
 
                   <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12" data-aos="zoom-in">
                       <div class="jbr-wrap text-left border rounded">
-                          <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-3 py-3 featured-card">
+                          <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-2 py-2 featured-card">
                                <div class="cats-box rounded bg-white d-flex align-items-center featured-card" style="min-width:100%;">
                                    @php
                                        $image_link = $row->cover ?? $row->image_url ?? null;
@@ -73,11 +73,11 @@
                                    @endphp
 
                                    <!-- Image Section -->
-                                   <div class="cats-box-image featured-image" style="width: 150px; height: 150px; flex-shrink: 0; margin-right: 1rem; border: 1px solid #e2e8f0; overflow: hidden; background: #f1f5f9; display: flex; align-items: center; justify-content: center;">
+                                   <div class="cats-box-image featured-image" style="width: 180px; height: 180px; flex-shrink: 0; margin-right: 0.5rem; border: none; overflow: hidden; background: transparent; display: flex; align-items: center; justify-content: center; padding: 4px;">
                                        <img src="{{ $image_link }}"
                                             alt="{{ $row->title }} - {{ $row->author->name ?? 'Africa CDC' }}" 
                                             title="{{ $row->title }}"
-                                            style="width: 100%; height: 100%; object-fit: cover;"
+                                            style="width: 100%; height: 100%; object-fit: contain; background: transparent;"
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
 

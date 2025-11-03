@@ -48,7 +48,15 @@ class CommunitiesController extends Controller
             ->filter()
             ->values();
         
-        return view('communities.index', compact('communities', 'regions', 'countries', 'organisations', 'departments'));
+        // SEO variables
+        $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+        $pageDescription = 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
+        $pageKeywords = 'communities of practice, public health communities, Africa CDC communities, health professionals, networking, collaboration, ' . (settings()->seo_keywords ?? '');
+        $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+        $canonicalUrl = url('communities');
+        $ogType = 'website';
+        
+        return view('communities.index', compact('communities', 'regions', 'countries', 'organisations', 'departments', 'pageTitle', 'pageDescription', 'pageKeywords', 'pageImage', 'canonicalUrl', 'ogType'));
     }
 
     public function myCommunities()
@@ -147,6 +155,14 @@ class CommunitiesController extends Controller
             ->with('author')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+        
+        // SEO variables
+        $pageTitle = ($community->community_name ?? 'Community') . ' - Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+        $pageDescription = \Illuminate\Support\Str::limit(strip_tags($community->description ?? ''), 160) ?: ($community->community_name . ' - A professional community of practice focused on public health topics.');
+        $pageKeywords = 'community of practice, ' . ($community->community_name ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
+        $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+        $canonicalUrl = url('communities/detail/' . $community->id);
+        $ogType = 'profile';
 
         // Get forum engagements (forums in this community)
         $forumIds = \App\Models\ForumCommunityOfPractice::where('community_of_practice_id', $id)

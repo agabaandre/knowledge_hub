@@ -43,36 +43,43 @@
                     <i class="fa fa-clock me-1"></i>{{ time_ago($forum->created_at) }}
                 </span>
             </div>
-            @if($forum->forum_image)
-                @php
-                    $forumImageUrl = $forum->forum_image;
-                    $baseUrl = url('/');
-                    if (strpos($forumImageUrl, 'http://') === 0 || strpos($forumImageUrl, 'https://') === 0) {
-                        // Already a full URL
-                    } elseif (strpos($forumImageUrl, $baseUrl) !== false) {
-                        // Already contains base URL
-                    } elseif (strpos($forumImageUrl, '/storage/') === 0) {
-                        $forumImageUrl = $baseUrl . $forumImageUrl;
-                    } elseif (strpos($forumImageUrl, 'storage/') === 0) {
-                        $forumImageUrl = $baseUrl . '/' . $forumImageUrl;
-                    }
-                @endphp
-                <div style="margin-top: 1rem;">
-                    <img src="{{ $forumImageUrl }}" alt="{{ $forum->forum_title ?? 'Forum Image' }}" 
-                         class="forum-thread-image" 
-                         style="width: 281px; height: 281px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0; cursor: pointer;"
-                         onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $forumImageUrl }}', '{{ $forum->forum_title ?? 'Forum Image' }}'); }">
-                </div>
-            @endif
             </div>
         </div>
 
-    <div class="forum-content" style="margin-top: 1rem;">
+    <div class="forum-content" style="margin-top: 1rem; overflow: hidden;">
+        @if($forum->forum_image)
+            @php
+                $forumImageUrl = $forum->forum_image;
+                $baseUrl = url('/');
+                if (strpos($forumImageUrl, 'http://') === 0 || strpos($forumImageUrl, 'https://') === 0) {
+                    // Already a full URL
+                } elseif (strpos($forumImageUrl, $baseUrl) !== false) {
+                    // Already contains base URL
+                } elseif (strpos($forumImageUrl, '/storage/') === 0) {
+                    $forumImageUrl = $baseUrl . $forumImageUrl;
+                } elseif (strpos($forumImageUrl, 'storage/') === 0) {
+                    $forumImageUrl = $baseUrl . '/' . $forumImageUrl;
+                }
+            @endphp
+            <!-- Forum Image as Dropcap -->
+            <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $forumImageUrl }}', '{{ $forum->forum_title ?? 'Forum Image' }}'); } else { window.open('{{ $forumImageUrl }}', '_blank'); }" 
+               style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
+                <img src="{{ $forumImageUrl }}" 
+                     alt="{{ $forum->forum_title ?? 'Forum Image' }}" 
+                     style="width: 144px; height: 144px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
+                     onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"
+                     onmouseover="this.style.transform='scale(1.05)'"
+                     onmouseout="this.style.transform='scale(1)'">
+            </a>
+        @endif
+        
         @php
             // Process forum description to detect and embed video links and convert URLs to clickable links
             $processedDescription = detect_and_embed_video_links($forum->forum_description, 180, 180);
         @endphp
-        {!! cleanHtmlContent($processedDescription) !!}
+        <div style="text-align: justify; overflow-wrap: break-word;">
+            {!! cleanHtmlContent($processedDescription) !!}
+        </div>
     </div>
 
     <div class="forum-actions">
@@ -301,43 +308,62 @@
                                             </div>
                         @endauth
                                         </div>
-                                        <div class="comment-text">
+                                        <div class="comment-text" style="overflow: hidden;">
+                        @if ($comment->attachments && $comment->attachments->count() > 0)
+                            @php
+                                $imageAttachments = [];
+                                $fileAttachments = [];
+                                foreach ($comment->attachments as $attachment) {
+                                    $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
+                                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                    if ($isImage) {
+                                        $imageAttachments[] = $attachment;
+                                    } else {
+                                        $fileAttachments[] = $attachment;
+                                    }
+                                }
+                            @endphp
+                            
+                            <!-- Image Attachments as Dropcaps -->
+                            @if(count($imageAttachments) > 0)
+                                @foreach ($imageAttachments as $attachment)
+                                    <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
+                                       style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
+                                        <img src="{{ $attachment->path }}" 
+                                             alt="{{ $attachment->name ?? 'Attachment' }}" 
+                                             style="width: 144px; height: 144px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
+                                             onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"
+                                             onmouseover="this.style.transform='scale(1.05)'"
+                                             onmouseout="this.style.transform='scale(1)'">
+                                    </a>
+                                @endforeach
+                            @endif
+                        @endif
+                        
                         @php
                             // First limit to 100 words and strip tags for length calculation
                             $limitedText = Str::words(strip_tags($comment->comment), 100, '...');
                             // Then detect and embed video links with 180px previews
                             $processedText = detect_and_embed_video_links($limitedText, 180, 180);
                         @endphp
-                        {!! cleanHtmlContent($processedText) !!}
+                        <div style="text-align: justify; overflow-wrap: break-word;">
+                            {!! cleanHtmlContent($processedText) !!}
+                        </div>
                     </div>
 
-                    @if ($comment->attachments && $comment->attachments->count() > 0)
+                    @if ($comment->attachments && $comment->attachments->count() > 0 && count($fileAttachments) > 0)
                     @php
-                        $imageAttachments = [];
                         $fileAttachments = [];
                         foreach ($comment->attachments as $attachment) {
                             $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
                             $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                            if ($isImage) {
-                                $imageAttachments[] = $attachment;
-                            } else {
+                            if (!$isImage) {
                                 $fileAttachments[] = $attachment;
                             }
                         }
                     @endphp
-                    <div class="comment-attachments">
-                        @if(count($imageAttachments) > 0)
-                        <div class="comment-attachments-row">
-                            <div class="comment-image-attachments">
-                                @foreach ($imageAttachments as $attachment)
-                                <div class="comment-attachment-img-wrapper">
-                                    <img src="{{ $attachment->path }}" alt="{{ $attachment->name ?? 'Attachment' }}" class="comment-attachment-img" 
-                                         onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }"
-                                         style="cursor: pointer; width: 180px; height: 180px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                </div>
-                                @endforeach
-                            </div>
-                            @if(count($fileAttachments) > 0)
+                    <div class="comment-attachments" style="clear: left; margin-top: 1rem;">
+                        @if(count($fileAttachments) > 0)
                             <div class="comment-file-attachments-summary">
                                 @foreach ($fileAttachments as $attachment)
                                     @php
@@ -374,45 +400,6 @@
                                     </a>
                                 @endforeach
                             </div>
-                            @endif
-                        </div>
-                        @elseif(count($fileAttachments) > 0)
-                        <div class="comment-file-attachments-only">
-                            @foreach ($fileAttachments as $attachment)
-                                @php
-                                    $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                                    $isVideo = in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'ogg', 'ogv']);
-                                    $isPdf = $extension === 'pdf';
-                                    $isWord = in_array($extension, ['doc', 'docx']);
-                                    $isExcel = in_array($extension, ['xls', 'xlsx']);
-                                    $isPowerpoint = in_array($extension, ['ppt', 'pptx']);
-                                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
-                                    // Use the saved human-readable name, fallback to basename if not available
-                                    $fileName = $attachment->name ?? basename($attachment->path);
-                                    $canPreview = $isPdf || $isVideo;
-                                    
-                                    // Determine icon class
-                                    $iconClass = 'fa-file-o';
-                                    if ($isPdf) $iconClass = 'fa-file-pdf-o';
-                                    elseif ($isVideo) $iconClass = 'fa-file-video-o';
-                                    elseif ($isWord) $iconClass = 'fa-file-word-o';
-                                    elseif ($isExcel) $iconClass = 'fa-file-excel-o';
-                                    elseif ($isPowerpoint) $iconClass = 'fa-file-powerpoint-o';
-                                    elseif ($isImage) $iconClass = 'fa-file-image-o';
-                                @endphp
-                                <a href="{{ $attachment->path }}" target="_blank" class="comment-attachment-file"
-                                   style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; text-decoration: none; color: #374151; font-size: 0.8125rem; transition: background 0.2s;"
-                                   onmouseover="this.style.background='#f3f4f6'" 
-                                   onmouseout="this.style.background='transparent'"
-                                   @if($canPreview) onclick="event.preventDefault(); previewFile('{{ $attachment->path }}', '{{ $extension }}'); return false;" @endif>
-                                    <i class="fa {{ $iconClass }}" style="font-size: 0.875rem; color: {{ $isPdf ? '#dc2626' : ($isVideo ? '#3b82f6' : ($isWord ? '#2563eb' : ($isExcel ? '#16a34a' : ($isPowerpoint ? '#ea580c' : '#6b7280')))) }};"></i>
-                                    <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fileName }}</span>
-                                    @if($canPreview)
-                                    <i class="fa fa-eye ms-1" style="font-size: 0.75rem; opacity: 0.7;" title="Click to preview"></i>
-                                                    @endif
-                                </a>
-                                                @endforeach
-                        </div>
                         @endif
                     </div>
                     @endif
@@ -535,42 +522,63 @@
                                 </div>
                                 @endauth
                                         </div>
-                                    <div class="comment-text">
+                                    <div class="comment-text" style="overflow: hidden;">
+                                @if ($reply->attachments && $reply->attachments->count() > 0)
+                                    @php
+                                        $replyImageAttachments = [];
+                                        $replyFileAttachments = [];
+                                        foreach ($reply->attachments as $attachment) {
+                                            $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
+                                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
+                                            if ($isImage) {
+                                                $replyImageAttachments[] = $attachment;
+                                            } else {
+                                                $replyFileAttachments[] = $attachment;
+                                            }
+                                        }
+                                    @endphp
+                                    
+                                    <!-- Image Attachments as Dropcaps -->
+                                    @if(count($replyImageAttachments) > 0)
+                                        @foreach ($replyImageAttachments as $attachment)
+                                            <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
+                                               style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
+                                                <img src="{{ $attachment->path }}" 
+                                                     alt="{{ $attachment->name ?? 'Attachment' }}" 
+                                                     style="width: 144px; height: 144px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
+                                                     onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"
+                                                     onmouseover="this.style.transform='scale(1.05)'"
+                                                     onmouseout="this.style.transform='scale(1)'">
+                                            </a>
+                                        @endforeach
+                                    @endif
+                                @endif
+                                
                                 @php
                                     // First limit to 100 words and strip tags for length calculation
                                     $replyLimitedText = Str::words(strip_tags($reply->comment), 100, '...');
                                     // Then detect and embed video links with 180px previews
                                     $replyProcessedText = detect_and_embed_video_links($replyLimitedText, 180, 180);
                                 @endphp
-                                {!! cleanHtmlContent($replyProcessedText) !!}
+                                <div style="text-align: justify; overflow-wrap: break-word;">
+                                    {!! cleanHtmlContent($replyProcessedText) !!}
+                                        </div>
                                     </div>
 
-                            @if ($reply->attachments && $reply->attachments->count() > 0)
+                            @if ($reply->attachments && $reply->attachments->count() > 0 && count($replyFileAttachments) > 0)
                             @php
-                                $replyImageAttachments = [];
                                 $replyFileAttachments = [];
                                 foreach ($reply->attachments as $attachment) {
                                     $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
                                     $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                    if ($isImage) {
-                                        $replyImageAttachments[] = $attachment;
-                                    } else {
+                                    if (!$isImage) {
                                         $replyFileAttachments[] = $attachment;
                                     }
                                 }
                             @endphp
-                            <div class="comment-attachments">
-                                @if(count($replyImageAttachments) > 0)
-                                <div class="comment-attachments-row">
-                                    <div class="comment-image-attachments">
-                                        @foreach ($replyImageAttachments as $attachment)
-                                        <div class="comment-attachment-img-wrapper">
-                                            <img src="{{ $attachment->path }}" alt="{{ $attachment->name ?? 'Attachment' }}" class="comment-attachment-img"
-                                                 onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }"
-                                                 style="cursor: pointer; width: 180px; height: 180px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
-                                        </div>
-                                        @endforeach
-                                    </div>
+                            <div class="comment-attachments" style="clear: left; margin-top: 1rem;">
+                                @if(count($replyFileAttachments) > 0)
+                                    <div class="comment-file-attachments-summary">
                                     @if(count($replyFileAttachments) > 0)
                                     <div class="comment-file-attachments-summary">
                                         @foreach ($replyFileAttachments as $attachment)

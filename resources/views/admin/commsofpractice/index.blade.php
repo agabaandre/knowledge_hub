@@ -217,6 +217,7 @@
 
 @section('scripts')
 @include('partials.general.summernote')
+@include('common.select2')
 <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
 <script>
 $(function(){
@@ -264,7 +265,19 @@ $(function(){
         if ($el.length && !$el.hasClass('summernote-sm')) { $el.addClass('summernote-sm'); }
     }
     initSN();
-    $(document).on('shown.bs.modal', '#create-modal', function(){ initSN(); });
+    $(document).on('shown.bs.modal', '#create-modal', function(){ 
+        initSN(); 
+        // Initialize Select2 for tags dropdown if not already initialized
+        var $tagsSelect = $('#tags\\[\\]');
+        if ($tagsSelect.length && typeof $.fn.select2 !== 'undefined' && !$tagsSelect.hasClass('select2-hidden-accessible')) {
+            $tagsSelect.select2({
+                theme: 'bootstrap4',
+                placeholder: 'Select Tags',
+                allowClear: true,
+                dropdownParent: $('#create-modal') // Ensure dropdown appears in modal
+            });
+        }
+    });
 });
 
 function openCreateModal(){
@@ -276,38 +289,65 @@ function openCreateModal(){
     $('#organisation').val('');
     $('#department').val('');
     $('#is_public').prop('checked', true);
+    // Clear tags selection
+    if ($('#tags\\[\\]').length) {
+        $('#tags\\[\\]').val(null).trigger('change');
+    }
     $('#create-modal').modal('show');
 }
 
 function openEditCommunity(id){
-    const rows = @json($communities->items());
-    const item = rows.find(x => x.id === id);
-    if (!item) { return; }
-    $('#id').val(item.id);
-    $('#community_name').val(item.community_name || '');
-    if ($('#description').data('summernote')) { $('#description').summernote('code', item.description || ''); } else { $('#description').val(item.description || ''); }
-    
-    // Set region and country
-    if (item.region_id) {
-        $('#region_id').val(item.region_id).trigger('change');
-    } else {
-        $('#region_id').val('all').trigger('change');
-    }
-    
-    // Wait for country dropdown to update, then set country
-    setTimeout(function() {
-        if (item.country_id) {
-            $('#country_id').val(item.country_id).trigger('change');
-        } else {
-            $('#country_id').val('').trigger('change');
+    // Fetch community data with tags via AJAX
+    $.ajax({
+        url: '{{ url("admin/commsofpractice/get") }}',
+        type: 'GET',
+        data: { id: id },
+        dataType: 'json',
+        success: function(item) {
+            $('#id').val(item.id);
+            $('#community_name').val(item.community_name || '');
+            if ($('#description').data('summernote')) { 
+                $('#description').summernote('code', item.description || ''); 
+            } else { 
+                $('#description').val(item.description || ''); 
+            }
+            
+            // Set region and country
+            if (item.region_id) {
+                $('#region_id').val(item.region_id).trigger('change');
+            } else {
+                $('#region_id').val('all').trigger('change');
+            }
+            
+            // Wait for country dropdown to update, then set country
+            setTimeout(function() {
+                if (item.country_id) {
+                    $('#country_id').val(item.country_id).trigger('change');
+                } else {
+                    $('#country_id').val('').trigger('change');
+                }
+            }, 300);
+            
+            $('#organisation').val(item.organisation || '');
+            $('#department').val(item.department || '');
+            $('#is_public').prop('checked', item.is_public == 1 || item.is_public === true || item.is_public === null);
+            
+            // Set tags - wait a bit to ensure Select2 is ready
+            setTimeout(function() {
+                if ($('#tags\\[\\]').length && item.tags && Array.isArray(item.tags)) {
+                    var tagIds = item.tags.map(function(tag) { 
+                        return tag.id || (typeof tag === 'object' ? tag.tag_id : tag); 
+                    });
+                    $('#tags\\[\\]').val(tagIds).trigger('change');
+                }
+            }, 400);
+            
+            $('#create-modal').modal('show');
+        },
+        error: function() {
+            alert('Error loading community data');
         }
-    }, 300);
-    
-    $('#organisation').val(item.organisation || '');
-    $('#department').val(item.department || '');
-    $('#is_public').prop('checked', item.is_public == 1 || item.is_public === true || item.is_public === null);
-    
-    $('#create-modal').modal('show');
+    });
 }
 
 // Chained region/country dropdowns

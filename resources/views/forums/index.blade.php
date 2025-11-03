@@ -1,10 +1,73 @@
 @php
     $hide_search = true;
+    // SEO Meta Tags for Forums Listing Page
+    $pageTitle = 'Discussion Forums - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $pageDescription = 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
+    $pageKeywords = 'discussion forums, public health forums, health discussions, Africa CDC forums, health experts, ' . (settings()->seo_keywords ?? '');
+    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+    $canonicalUrl = url('forums');
+    $ogType = 'website';
 @endphp
 
 @extends('layouts.app')
 
-@section('title', 'Discussions & Forums')
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "{{ $pageTitle }}",
+    "description": "{{ strip_tags($pageDescription) }}",
+    "url": "{{ $canonicalUrl }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "itemListElement": [
+            @if(isset($forums) && $forums->count() > 0)
+                @foreach($forums->take(10) as $index => $forum)
+                {
+                    "@type": "ListItem",
+                    "position": {{ $index + 1 }},
+                    "item": {
+                        "@type": "DiscussionForumPosting",
+                        "headline": "{{ addslashes($forum->forum_title ?? 'Forum') }}",
+                        "url": "{{ url('forums/thread?id=' . $forum->id) }}",
+                        "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 200)) }}",
+                        "author": {
+                            "@type": "Person",
+                            "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
+                        },
+                        "datePublished": "{{ $forum->created_at ? (is_string($forum->created_at) ? \Carbon\Carbon::parse($forum->created_at)->toIso8601String() : $forum->created_at->toIso8601String()) : '' }}",
+                        "interactionStatistic": {
+                            "@type": "InteractionCounter",
+                            "interactionType": "https://schema.org/CommentAction",
+                            "userInteractionCount": {{ $forum->total_comments ?? count($forum->comments ?? []) }}
+                        }
+                    }
+                }@if(!$loop->last),@endif
+                @endforeach
+            @endif
+        ]
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Forums",
+                "item": "{{ $canonicalUrl }}"
+            }
+        ]
+    }
+}
+</script>
+@endsection
 
 @section('styles')
 <style>
@@ -407,23 +470,25 @@
 
 <div class="forums-wrapper">
     <div class="container" style="max-width: 1200px;">
+                <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-12 col-md-12">
+                <!-- Filters -->
+                <div class="forums-filters">
+                    <div class="search-bar">
+                        <i class="fa fa-search search-icon"></i>
+                        <input type="text" id="forum-search" placeholder="Search discussions by title, description, or tags...">
+                    </div>
+                    <div class="filter-buttons">
+                        <button class="filter-btn active" data-filter="all">All Discussions</button>
+                        <button class="filter-btn" data-filter="joined">My Discussions</button>
+                        <button class="filter-btn" data-filter="recent">Most Recent</button>
+                        <button class="filter-btn" data-filter="popular">Most Active</button>
+                    </div>
+                </div>
 
-        <!-- Filters -->
-        <div class="forums-filters">
-            <div class="search-bar">
-                <i class="fa fa-search search-icon"></i>
-                <input type="text" id="forum-search" placeholder="Search discussions by title, description, or tags...">
-            </div>
-            <div class="filter-buttons">
-                <button class="filter-btn active" data-filter="all">All Discussions</button>
-                <button class="filter-btn" data-filter="joined">My Discussions</button>
-                <button class="filter-btn" data-filter="recent">Most Recent</button>
-                <button class="filter-btn" data-filter="popular">Most Active</button>
-            </div>
-        </div>
-
-        <!-- Forums List -->
-        <div id="forums-list">
+                <!-- Forums List -->
+                <div id="forums-list">
             @forelse($forums as $forum)
                 <div class="forum-card" 
                      data-forum-id="{{ $forum->id }}"
@@ -432,7 +497,7 @@
                      data-date="{{ $forum->created_at }}">
                     <div class="forum-header">
                         @if($forum->forum_image)
-                        <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }}" class="forum-image">
+                        <img src="{{ $forum->forum_image }}" alt="{{ $forum->forum_title }} - Forum Discussion" class="forum-image" loading="lazy">
                         @else
                         <div class="forum-image" style="background: #f1f5f9; display: flex; align-items: center; justify-content: center; color: #64748b; font-size: 2rem; border: 1px solid #e2e8f0;">
                             <i class="fa fa-comments"></i>
@@ -456,7 +521,7 @@
                                 @endphp
                                 <div class="forum-user-avatar" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;"
                                      onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $photoUrl }}', '{{ $forum->user->name ?? 'Unknown' }}'); }">
-                                    <img src="{{ $photoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
+                                    <img src="{{ $photoUrl }}" alt="Avatar for {{ $forum->user->name ?? 'User' }}"
                                          style="width: 100%; height: 100%; object-fit: cover; object-position: center;"
                                          onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' style=\'font-size: 1.5rem; color: #64748b;\'></i>';">
                                 </div>
@@ -465,7 +530,7 @@
                                     <i class="fa fa-user" style="font-size: 1.5rem; color: #64748b;"></i>
                                 </div>
                             @endif
-                            <h2 class="forum-title">
+                            <h2 class="forum-title" itemprop="headline">
                                 @if(in_array($forum->id, $my_forums))
                                     <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
                                 @else
@@ -577,7 +642,7 @@
                                                                 $photoUrl = $baseUrl . '/' . $photoUrl;
                                                             }
                                                         @endphp
-                                                        <img src="{{ $photoUrl }}" alt="{{ $comment->user->name ?? 'User' }}" 
+                                                        <img src="{{ $photoUrl }}" alt="Avatar for {{ $comment->user->name ?? 'User' }}" 
                                                              onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\'></i>';">
                                                     @else
                                                         <i class="fa fa-user"></i>
@@ -637,14 +702,119 @@
                     @endauth
                 </div>
             @endforelse
+                </div>
+
+                <!-- Pagination -->
+                @if($forums->hasPages())
+                <div class="d-flex justify-content-center mt-4">
+                    {{ $forums->links('pagination::bootstrap-4') }}
+                </div>
+                @endif
             </div>
 
-        <!-- Pagination -->
-        @if($forums->hasPages())
-        <div class="d-flex justify-content-center mt-4">
-            {{ $forums->links('pagination::bootstrap-4') }}
+            <!-- Sidebar -->
+            {{-- <div class="col-lg-4 col-md-12">
+                @php 
+                    $primary = settings()->primary_color ?? '#119A48';
+                    $textColor = settings()->links_active_color ?? settings()->primary_text_color ?? $primary;
+                @endphp
+                <style>
+                    .sidebar-card{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
+                    .sidebar-card-title{margin-bottom:15px;font-size:15px;font-weight:600;color:#2d3748}
+                    .sidebar-item{margin-bottom:15px;padding-bottom:15px;border-bottom:1px solid #e2e8f0}
+                    .sidebar-item:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+                    .sidebar-item-title{font-size:0.9rem;font-weight:600;color:#0f172a;line-height:1.4;margin-bottom:8px}
+                    .sidebar-item-title a{color:{{ $textColor }};text-decoration:none;transition:color 0.2s}
+                    .sidebar-item-title a:hover{color:var(--theme-color-primary, {{ $primary }})}
+                    .sidebar-item-meta{font-size:0.75rem;color:#94a3b8;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+                    .sidebar-item-meta i{color:var(--theme-color-primary, {{ $primary }})}
+                    .sidebar-card .btn-outline-primary{color:var(--theme-color-primary, {{ $primary }});border-color:var(--theme-color-primary, {{ $primary }});width:100%}
+                    .sidebar-card .btn-outline-primary:hover{background:var(--theme-color-primary, {{ $primary }});color:#fff}
+                </style>
+
+                <!-- Related Forums -->
+                @if(isset($relatedForums) && $relatedForums->count() > 0)
+                <div class="sidebar-card">
+                    <h5 class="sidebar-card-title">
+                        <i class="fa fa-comments me-2" style="color: {{ $primary }};"></i>Related Discussions
+                    </h5>
+                    @foreach($relatedForums as $forum)
+                    <div class="sidebar-item">
+                        <div class="sidebar-item-title">
+                            <a href="{{ url('forums/thread?id=' . $forum->id) }}">
+                                {{ Str::limit(strip_tags($forum->forum_title), 80) }}
+                            </a>
+                        </div>
+                        <div class="sidebar-item-meta">
+                            @if($forum->user)
+                            <span><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
+                            @endif
+                            <span><i class="fa fa-comments"></i> {{ $forum->total_comments ?? 0 }} {{ ($forum->total_comments ?? 0) == 1 ? 'comment' : 'comments' }}</span>
+                            @if($forum->created_at)
+                            <span><i class="fa fa-clock"></i> {{ $forum->created_at->diffForHumans() }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                    <a href="{{ url('forums') }}" class="btn btn-sm btn-outline-primary mt-2">View All Forums</a>
+                </div>
+                @endif
+
+                <!-- Related Publications -->
+                @if(isset($relatedPublications) && $relatedPublications->count() > 0)
+                <div class="sidebar-card">
+                    <h5 class="sidebar-card-title">
+                        <i class="fa fa-file-text me-2" style="color: {{ $primary }};"></i>Related Publications
+                    </h5>
+                    @foreach($relatedPublications as $publication)
+                    <div class="sidebar-item">
+                        <div class="sidebar-item-title">
+                            <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                                {{ Str::limit(strip_tags($publication->title), 80) }}
+                            </a>
+                        </div>
+                        <div class="sidebar-item-meta">
+                            @if($publication->author)
+                            <span><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
+                            @endif
+                            <span><i class="fa fa-eye"></i> {{ $publication->visits ?? 0 }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
+                            @if($publication->updated_at)
+                            <span><i class="fa fa-clock"></i> {{ $publication->updated_at->diffForHumans() }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                    <a href="{{ url('records') }}" class="btn btn-sm btn-outline-primary mt-2">View All Publications</a>
+                </div>
+                @endif
+
+                <!-- Related Communities -->
+                @if(isset($relatedCommunities) && $relatedCommunities->count() > 0)
+                <div class="sidebar-card">
+                    <h5 class="sidebar-card-title">
+                        <i class="fa fa-users me-2" style="color: {{ $primary }};"></i>Related Communities
+                    </h5>
+                    @foreach($relatedCommunities as $community)
+                    <div class="sidebar-item">
+                        <div class="sidebar-item-title">
+                            <a href="{{ route('community.detail', $community->id) }}">
+                                {{ Str::limit(strip_tags($community->community_name), 80) }}
+                            </a>
+                        </div>
+                        <div class="sidebar-item-meta">
+                            <span><i class="fa fa-users"></i> {{ $community->members_count ?? 0 }} {{ ($community->members_count ?? 0) == 1 ? 'member' : 'members' }}</span>
+                            <span><i class="fa fa-comments"></i> {{ $community->forums_count ?? 0 }} {{ ($community->forums_count ?? 0) == 1 ? 'forum' : 'forums' }}</span>
+                            @if($community->created_at)
+                            <span><i class="fa fa-clock"></i> {{ $community->created_at->diffForHumans() }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                    <a href="{{ route('community.index') }}" class="btn btn-sm btn-outline-primary mt-2">View All Communities</a>
+                </div>
+                @endif
+            </div> --}}
         </div>
-        @endif
     </div>
 </div>
 

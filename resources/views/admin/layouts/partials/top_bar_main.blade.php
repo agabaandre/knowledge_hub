@@ -153,7 +153,7 @@
                                         <a href="{{ url('admin/publications/details') }}?id={{ $item->id }}" class="p-3 d-flex border-bottom notification-item">
                                             <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                                                 <i class="fa fa-file-alt text-success"></i>
-                                            </div>
+                                </div>
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between">
                                                     <h6 class="mb-1" style="font-size:0.875rem;">Publication</h6>
@@ -162,11 +162,11 @@
                                                             {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
                                                         @endif
                                                     </small>
-                                                </div>
+                                    </div>
                                                 <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($item->title ?? 'Untitled', 50) }}</p>
                                                 <small class="text-muted">By: {{ $item->author->name ?? ($item->user->name ?? 'Unknown') }}</small>
-                                            </div>
-                                        </a>
+                                </div>
+                            </a>
                                     @elseif($type === 'forum_comment')
                                         <a href="{{ url('admin/forums/moderate') }}" class="p-3 d-flex border-bottom notification-item">
                                             <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
@@ -180,23 +180,23 @@
                                                             {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
                                                         @endif
                                                     </small>
-                                                </div>
+                    </div>
                                                 <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($item->comment ?? ''), 50) }}</p>
                                                 <small class="text-muted">By: {{ $item->user->name ?? 'Anonymous' }}</small>
-                                            </div>
+                    </div>
                                         </a>
                                     @elseif($type === 'publication_comment')
                                         <a href="{{ url('admin/publications/moderate') }}" class="p-3 d-flex border-bottom notification-item">
                                             <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                                                 <i class="fa fa-comment text-warning"></i>
-                                            </div>
+                </div>
                                             <div class="flex-grow-1">
                                                 <div class="d-flex justify-content-between">
                                                     <h6 class="mb-1" style="font-size:0.875rem;">Publication Comment</h6>
                                                     <small class="text-muted">
                                                         @if($createdAt)
                                                             {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
-                                                        @endif
+                    @endif
                                                     </small>
                                                 </div>
                                                 <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit(strip_tags($item->comment ?? ''), 50) }}</p>
@@ -251,7 +251,7 @@
                                                 <small class="text-muted">
                                                     @if($forum->created_at)
                                                         {{ \Carbon\Carbon::parse($forum->created_at)->diffForHumans() }}
-                                                    @endif
+                            @endif
                                                 </small>
                                             </div>
                                             <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($forum->forum_title ?? 'Untitled', 50) }}</p>
@@ -264,7 +264,7 @@
                                     <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" class="p-3 d-flex border-bottom notification-item">
                                         <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
                                             <i class="fa fa-file-alt text-success"></i>
-                                        </div>
+                        </div>
                                         <div class="flex-grow-1">
                                             <div class="d-flex justify-content-between">
                                                 <h6 class="mb-1" style="font-size:0.875rem;">Publication</h6>
@@ -273,10 +273,10 @@
                                                         {{ \Carbon\Carbon::parse($publication->created_at)->diffForHumans() }}
                                                     @endif
                                                 </small>
-                                            </div>
+                    </div>
                                             <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($publication->title ?? 'Untitled', 50) }}</p>
                                             <small class="text-muted">By: {{ $publication->author->name ?? ($publication->user->name ?? 'Unknown') }}</small>
-                                        </div>
+                                </div>
                                     </a>
                                 @endforeach
                                 
@@ -307,19 +307,19 @@
                                                             {{ \Carbon\Carbon::parse($approval['created_at'])->diffForHumans() }}
                                                         @endif
                                                     </small>
-                                                </div>
+                                    </div>
                                                 <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
                                                 <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
-                                            </div>
-                                        </a>
-                                    @endforeach
+                                </div>
+                            </a>
+                        @endforeach
                                 @endif
                             @endif
                         @else
                             <div class="p-4 text-center text-muted">
                                 <i class="fa fa-check-circle fa-2x mb-2"></i>
                                 <p class="mb-0">All caught up! No pending approvals.</p>
-                            </div>
+                    </div>
                         @endif
                     </div>
                 </div>

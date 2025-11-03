@@ -18,16 +18,19 @@
         }
         
         .task-listing-bid {
-            min-width: 200px;
-            width: 200px;
-            background-size: cover;
+            min-width: 240px;
+            width: 240px;
+            background-size: contain;
             background-position: center;
+            background-repeat: no-repeat;
+            background-color: transparent;
             flex-shrink: 0;
+            padding: 4px;
         }
         
         .task-listing-details {
             flex: 1;
-            padding: 20px;
+            padding: 16px;
         }
         
         .task-listing-title {
@@ -104,7 +107,7 @@
 
                     <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="task-listing">
                         <div class="task-listing-bid d-none d-sm-block"
-                            style="background-image: url('{{ $row->cover }}'); background-size: cover;">
+                            style="background-image: url('{{ $row->cover }}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: transparent; min-width: 240px; width: 240px;">
                         </div>
                         <div class="task-listing-details">
 

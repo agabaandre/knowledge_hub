@@ -1,8 +1,95 @@
 @php
     $hide_search = true;
+    // SEO Meta Tags for Forum Thread Page
+    $pageTitle = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $pageDescription = Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
+    $pageKeywords = 'forum discussion, ' . ($forum->forum_title ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
+    
+    // Use forum image if available, otherwise default
+    $forumImage = null;
+    if (!empty($forum->forum_image) && is_image($forum->forum_image)) {
+        $forumImage = filter_var($forum->forum_image, FILTER_VALIDATE_URL) ? $forum->forum_image : asset($forum->forum_image);
+    }
+    $pageImage = $forumImage ?? settings()->logo ?? asset('assets/images/logo.png');
+    $canonicalUrl = url('forums/thread?id=' . $forum->id);
+    $ogType = 'article';
+    
+    // Get forum stats
+    $commentCount = $forum->total_comments ?? count($forum->comments ?? []);
+    $likeCount = $forum->total_likes ?? count($forum->likes ?? []);
+    $publishDate = $forum->created_at ? (is_string($forum->created_at) ? \Carbon\Carbon::parse($forum->created_at)->toIso8601String() : $forum->created_at->toIso8601String()) : now()->toIso8601String();
+    $modifiedDate = $forum->updated_at ? (is_string($forum->updated_at) ? \Carbon\Carbon::parse($forum->updated_at)->toIso8601String() : $forum->updated_at->toIso8601String()) : $publishDate;
 @endphp
 
 @extends('layouts.app')
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "DiscussionForumPosting",
+    "headline": "{{ addslashes($forum->forum_title ?? 'Forum Discussion') }}",
+    "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 300)) }}",
+    "image": "{{ $pageImage }}",
+    "datePublished": "{{ $publishDate }}",
+    "dateModified": "{{ $modifiedDate }}",
+    "author": {
+        "@type": "Person",
+        "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
+    },
+    "publisher": {
+        "@type": "Organization",
+        "name": "{{ settings()->site_name ?? 'Africa CDC Knowledge Hub' }}",
+        "logo": {
+            "@type": "ImageObject",
+            "url": "{{ settings()->logo ?? asset('assets/images/logo.png') }}"
+        }
+    },
+    "mainEntityOfPage": {
+        "@type": "WebPage",
+        "@id": "{{ $canonicalUrl }}"
+    },
+    "interactionStatistic": [
+        {
+            "@type": "InteractionCounter",
+            "interactionType": "https://schema.org/CommentAction",
+            "userInteractionCount": {{ $commentCount }}
+        },
+        {
+            "@type": "InteractionCounter",
+            "interactionType": "https://schema.org/LikeAction",
+            "userInteractionCount": {{ $likeCount }}
+        }
+    ],
+    @if($forum->tags && $forum->tags->count() > 0)
+    "keywords": "{{ $forum->tags->pluck('tag_text')->implode(', ') }}",
+    @endif
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            {
+                "@type": "ListItem",
+                "position": 1,
+                "name": "Home",
+                "item": "{{ url('/') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 2,
+                "name": "Forums",
+                "item": "{{ url('forums') }}"
+            },
+            {
+                "@type": "ListItem",
+                "position": 3,
+                "name": "{{ addslashes(Str::limit($forum->forum_title ?? 'Forum', 50)) }}",
+                "item": "{{ $canonicalUrl }}"
+            }
+        ]
+    }
+}
+</script>
+@endsection
 
 @section('styles')
 @php
@@ -856,7 +943,7 @@
                     <a href="{{ url('forums/thread') }}?id={{ $other->id }}" class="forum-sidebar-item">
                         <div>
                                         @if (is_image($other->forum_image))
-                                <img class="forum-sidebar-img" src="{{ $other->forum_image }}" alt="">
+                                <img class="forum-sidebar-img" src="{{ $other->forum_image }}" alt="{{ $other->forum_title ?? 'Forum Discussion' }}" loading="lazy">
                             @else
                                 <div class="forum-sidebar-img" style="background: linear-gradient(135deg, {{ $primaryColor }}, {{ $secondaryColor }}); display: flex; align-items: center; justify-content: center; color: white; font-size: 1.5rem;">
                                     <i class="fa fa-comments"></i>

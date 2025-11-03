@@ -111,18 +111,18 @@
                          ? $image_link 
                          : $default_image;
                  @endphp
-                 <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: #f1f5f9; width: 30%; flex: 0 0 30%; max-width: 30%; padding-right: 0; position: relative;">
+                 <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: transparent; width: 35%; flex: 0 0 35%; max-width: 35%; padding-right: 0; position: relative; border: none;">
                      <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
                          <img src="{{ $final_image }}" 
                               alt="{{ clean_unicode($row->title) }}" 
                               class="publication-image"
-                              style="width: 100%; height: 100%; min-height: 150px; object-fit: cover; transition: transform 0.3s ease;"
+                              style="width: 100%; height: 100%; min-height: 150px; object-fit: contain; transition: transform 0.3s ease; background-color: transparent;"
                               onerror="this.onerror=null; this.src='{{ $default_image }}';"
                               onmouseover="this.style.transform='scale(1.05)'"
                               onmouseout="this.style.transform='scale(1)'">
                      </a>
                  </div>
-                 <div class="col-md-9 publication-content-col" style="width: 70%; flex: 1 1 70%; max-width: 70%; padding-left: 1rem;">
+                 <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
                      <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
                      <h5 class="text-bold text-lg publication-title-desktop">
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">

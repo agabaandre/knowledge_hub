@@ -17,10 +17,108 @@ class ForumsController extends Controller
 
     public function index(Request $request)
     {
-
         $data['forums']    = $this->forumsRepo->get($request);
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         $data['search']    = (object) $request->all();
+
+        // Get related content based on forum tags
+        $forumTagTexts = [];
+        $forumTagIds = [];
+        foreach ($data['forums'] as $forum) {
+            if ($forum->tags && $forum->tags->count() > 0) {
+                foreach ($forum->tags as $tag) {
+                    $tagText = $tag->tag ?? null;
+                    if ($tagText && !in_array($tagText, $forumTagTexts)) {
+                        $forumTagTexts[] = $tagText;
+                        // Get tag ID from Tag model
+                        $tagModel = \App\Models\Tag::where('tag_text', $tagText)->first();
+                        if ($tagModel) {
+                            $forumTagIds[] = $tagModel->id;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Get unique tag IDs
+        $uniqueTagIds = array_unique($forumTagIds);
+        $uniqueTagTexts = array_unique($forumTagTexts);
+        
+        // Get related forums (exclude current forums)
+        $currentForumIds = [];
+        if ($data['forums'] instanceof \Illuminate\Pagination\LengthAwarePaginator) {
+            $currentForumIds = $data['forums']->getCollection()->pluck('id')->toArray();
+        } elseif (is_iterable($data['forums'])) {
+            foreach ($data['forums'] as $forum) {
+                $currentForumIds[] = $forum->id;
+            }
+        }
+        $relatedForums = collect();
+        if (!empty($uniqueTagTexts)) {
+            $relatedForums = \App\Models\Forum::whereHas('tags', function($query) use ($uniqueTagTexts) {
+                                                $query->whereIn('tag', $uniqueTagTexts);
+                                            })
+                                            ->where('is_approved', 1)
+                                            ->where('status', 1)
+                                            ->whereNotIn('id', $currentForumIds)
+                                            ->with(['user', 'tags'])
+                                            ->withCount([
+                                                'comments as total_comments' => function($query) {
+                                                    $query->whereNull('parent_id');
+                                                }, 
+                                                'likes as total_likes'
+                                            ])
+                                            ->orderBy('created_at', 'desc')
+                                            ->limit(5)
+                                            ->get();
+        }
+        $data['relatedForums'] = $relatedForums;
+        
+        // Get related publications
+        $relatedPublications = collect();
+        if (!empty($uniqueTagIds)) {
+            $relatedPublications = \App\Models\Publication::whereHas('tags', function($query) use ($uniqueTagIds) {
+                                                $query->whereIn('tag_id', $uniqueTagIds);
+                                            })
+                                            ->where('is_version', 0)
+                                            ->where('is_active', 'Active')
+                                            ->where('is_approved', 1)
+                                            ->when(!is_admin(), function($query) {
+                                                $query->where('is_admin_only_access', 0);
+                                            })
+                                            ->with(['author', 'tags'])
+                                            ->orderBy('created_at', 'desc')
+                                            ->limit(5)
+                                            ->get();
+        }
+        $data['relatedPublications'] = $relatedPublications;
+        
+        // Get related communities
+        $relatedCommunities = collect();
+        if (!empty($uniqueTagIds)) {
+            $relatedCommunities = \App\Models\CommunityOfPractice::whereHas('tags', function($query) use ($uniqueTagIds) {
+                                                $query->whereIn('tags.id', $uniqueTagIds);
+                                            })
+                                            ->where('is_active', 1)
+                                            ->with(['creator', 'region', 'country', 'tags'])
+                                            ->withCount([
+                                                'approvedMembers as members_count',
+                                                'communityForums as forums_count',
+                                                'communityPublications as publications_count'
+                                            ])
+                                            ->orderBy('created_at', 'desc')
+                                            ->limit(5)
+                                            ->get();
+        }
+        $data['relatedCommunities'] = $relatedCommunities;
+
+        // SEO variables
+        $data['pageTitle'] = 'Discussion Forums - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+        $data['pageDescription'] = 'Join public health discussion forums, share insights, ask questions, and collaborate with experts across Africa. Participate in health-related discussions and knowledge exchange.';
+        $data['pageKeywords'] = 'discussion forums, public health forums, health discussions, Africa CDC forums, health experts, ' . (settings()->seo_keywords ?? '');
+        $data['pageImage'] = settings()->logo ?? asset('assets/images/logo.png');
+        $data['canonicalUrl'] = url('forums');
+        $data['ogType'] = 'website';
 
         return view('forums.index', $data);
     }
@@ -45,9 +143,25 @@ class ForumsController extends Controller
 
     public function thread(Request $request)
     {
-
         $data['forum']     = $this->forumsRepo->find($request->id);
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
+        
+        // SEO variables
+        if ($data['forum']) {
+            $forum = $data['forum'];
+            $data['pageTitle'] = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+            $data['pageDescription'] = \Illuminate\Support\Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
+            $data['pageKeywords'] = 'forum discussion, ' . ($forum->forum_title ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
+            
+            // Use forum image if available, otherwise default
+            $forumImage = null;
+            if (!empty($forum->forum_image) && is_image($forum->forum_image)) {
+                $forumImage = filter_var($forum->forum_image, FILTER_VALIDATE_URL) ? $forum->forum_image : asset($forum->forum_image);
+            }
+            $data['pageImage'] = $forumImage ?? settings()->logo ?? asset('assets/images/logo.png');
+            $data['canonicalUrl'] = url('forums/thread?id=' . $forum->id);
+            $data['ogType'] = 'article';
+        }
         $request['rows']   = 6;
         $data['search']    = (object) $request->all();
         $data['forums']    = $this->forumsRepo->get($request);
