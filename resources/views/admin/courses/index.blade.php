@@ -92,6 +92,9 @@
 													@else
 														<a href="{{ $course->course_url }}" target="_blank" class="btn btn-dark float-right ml-2"><i class="fa fa-external-link"></i> View Course</a>
 													@endif
+													<button type="button" class="btn btn-danger float-right ml-2" onclick="openDeleteCourseModal({{ $course->id }}, '{{ addslashes($course->fullname) }}')">
+														<i class="fa fa-trash"></i> Delete
+													</button>
 													<button type="button" class="btn btn-primary float-right edit-course-btn ml-2" data-toggle="modal" data-target="#edit-course-modal" data-course='@json($course)'><i class="fa fa-pencil"></i> Edit</button>
 												</div>
 											</div>
@@ -115,6 +118,7 @@
 
 	@include('admin.courses.partials.create-modal')
 	@include('admin.courses.partials.edit-modal')
+	@include('admin.courses.partials.delete-modal')
 
 	<!-- Import Courses Modal -->
 	<div class="modal" id="import-courses-modal">

@@ -102,4 +102,21 @@ class AdminCoursesController extends Controller
             return redirect()->back()->with('error', 'Import failed: ' . $e->getMessage());
         }
     }
+
+    public function destroy(Request $request)
+    {
+        $deleted = $this->coursesRepository->delete($request->id);
+        
+        if ($request->ajax()) {
+            return response()->json([
+                'status' => $deleted ? 'success' : 'failure',
+                'message' => $deleted ? 'Course deleted successfully' : 'Course not found or deletion failed'
+            ]);
+        }
+        
+        return redirect()->back()->with([
+            'message' => $deleted ? 'Course deleted successfully' : 'Delete failed',
+            'status' => $deleted ? 'success' : 'failure'
+        ]);
+    }
 }

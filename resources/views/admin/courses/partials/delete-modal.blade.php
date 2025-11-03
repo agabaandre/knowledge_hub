@@ -1,47 +1,71 @@
-<!-- First modal dialog -->
-<div class="modal" id="delete-modal">
+<!-- Delete Course Modal -->
+<div class="modal" id="delete-course-modal">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="exampleModalToggleLabel">Delete</h5>
+                <h5 class="modal-title">Delete Course</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
+					<span aria-hidden="true">&times;</span>
+				</button>
             </div>
             <div class="modal-body">
                 <p>
-                    Are you sure you want to delete this row?
+                    Are you sure you want to delete this course? This action cannot be undone.
                 </p>
+                <p class="text-muted small mb-0" id="course-to-delete-name"></p>
             </div>
             <div class="modal-footer">
-                <!-- Toogle to second dialog -->
-                <button class="btn btn-outline-danger btn-sm edit"
-                        onclick="deleteRow()">Yes Delete</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="deleteCourse()">
+                    <i class="fa fa-trash"></i> Delete Course
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-    <script>
-        
-        var toDeleteRow = '';
+<script>
+    var courseToDelete = null;
+    var courseToDeleteName = '';
 
-        function deleteRow () {
-            let url = `{{ url('admin/authors/delete')}}?id=${toDeleteRow}`;
-
-                fetch(url)
-                .then(res => res.text())
-                .then(res => {
-                    console.log(res)
-                    $('#delete-modal').modal('hide');
-                     window.location.reload();
-                })
+    function deleteCourse() {
+        if (!courseToDelete) {
+            alert('No course selected');
+            return;
         }
 
+        let url = `{{ url('admin/courses/delete') }}?id=${courseToDelete}`;
 
-        function openDeleteModal (row = 0) {
-            toDeleteRow = row;
-            $('#delete-modal').modal('show');
-        }
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            $('#delete-course-modal').modal('hide');
+            if (data.status === 'success') {
+                // Reload the page to show updated list
+                window.location.reload();
+            } else {
+                alert(data.message || 'Delete failed');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            $('#delete-course-modal').modal('hide');
+            alert('An error occurred while deleting the course');
+            // Still reload to see if deletion happened
+            window.location.reload();
+        });
+    }
 
-    </script>
+    function openDeleteCourseModal(courseId, courseName) {
+        courseToDelete = courseId;
+        courseToDeleteName = courseName || 'this course';
+        document.getElementById('course-to-delete-name').textContent = courseToDeleteName ? `Course: ${courseToDeleteName}` : '';
+        $('#delete-course-modal').modal('show');
+    }
+</script>

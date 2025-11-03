@@ -495,6 +495,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [AdminCoursesController::class, 'index']);
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
+        Route::get("/delete", [AdminCoursesController::class, 'destroy']);
         Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
     });
 });

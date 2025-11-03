@@ -57,4 +57,13 @@ class CoursesRepository{
     {
         return Course::find($id);
     }
+
+    public function delete($id)
+    {
+        $course = Course::find($id);
+        if ($course) {
+            return $course->delete();
+        }
+        return false;
+    }
 }
