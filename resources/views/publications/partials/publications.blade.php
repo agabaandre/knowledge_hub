@@ -168,13 +168,12 @@
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
                              {!! truncate(clean_unicode($row->title), 500) !!}</a>
                      </h5>
-                     <p class="text-nothern p-0 pt-2">
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}">
-                             {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 15, '...') !!}
+                     
+                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
+                             {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 40, '...') !!}
                          </a>
-                     </p>
-                     <a href="{{ $row->publication }}" class="text-blue"
-                         target="_blank"><small>{{ truncate(clean_unicode($row->publication), 100) }}</small></a>
+                     
+                     
 
                      <span class="muted medium ml-2 theme-cl"><br>
                          <i class="lni lni-briefcase mr-1"></i>Theme: {!! clean_unicode($row->theme->description ?? '') !!}</span>
