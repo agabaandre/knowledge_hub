@@ -170,14 +170,13 @@
         }
         
         .language-dropdown {
-            right: 0 !important;
+            right: 10px !important;
             left: auto !important;
             position: fixed !important;
-            z-index: 99999 !important;
+            z-index: 999999 !important;
             transform: translateX(0);
-            max-width: calc(100vw - 20px);
-            min-width: 180px;
-            display: block !important;
+            max-width: calc(100vw - 20px) !important;
+            min-width: 180px !important;
         }
         
         .language-selector-wrapper.active .language-dropdown {
@@ -189,12 +188,12 @@
         
         .language-selector-wrapper {
             position: relative;
-            z-index: 100000;
+            z-index: 999998;
         }
         
         .menu-language-menu-container {
             position: relative;
-            z-index: 100001;
+            z-index: 999998;
         }
     }
 </style>
@@ -224,133 +223,227 @@
 </div>
 
 <script>
+// Language Selector - Pure Vanilla JS, No jQuery Required
 (function() {
-    // Use both jQuery and vanilla JS for maximum compatibility
-    function initLanguageSelector() {
-        var languageSelector = document.getElementById('languageSelector');
-        var languageSelectorBtn = document.getElementById('languageSelectorBtn');
-        var languageDropdown = document.getElementById('languageDropdown');
-        
-        if (!languageSelector || !languageSelectorBtn || !languageDropdown) {
-            // Retry if elements not ready
-            setTimeout(initLanguageSelector, 100);
-            return;
-        }
-        
-        function isMobile() {
-            return window.innerWidth <= 767;
-        }
-        
-        function toggleDropdown(e) {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            
-            var isActive = languageSelector.classList.contains('active');
-            
-            if (isActive) {
-                // Closing
-                languageSelector.classList.remove('active');
-                if (isMobile()) {
-                    languageDropdown.style.position = '';
-                    languageDropdown.style.top = '';
-                    languageDropdown.style.right = '';
-                    languageDropdown.style.left = '';
-                    languageDropdown.style.maxWidth = '';
-                }
-            } else {
-                // Opening
-                languageSelector.classList.add('active');
-                
-                if (isMobile()) {
-                    // Use getBoundingClientRect for more accurate positioning
-                    var btnRect = languageSelectorBtn.getBoundingClientRect();
-                    var scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-                    
-                    languageDropdown.style.position = 'fixed';
-                    languageDropdown.style.top = (btnRect.bottom + scrollTop + 8) + 'px';
-                    languageDropdown.style.right = '10px';
-                    languageDropdown.style.left = 'auto';
-                    languageDropdown.style.maxWidth = 'calc(100vw - 20px)';
-                    languageDropdown.style.zIndex = '99999';
-                    languageDropdown.style.display = 'block';
-                    languageDropdown.style.visibility = 'visible';
-                    languageDropdown.style.opacity = '1';
-                    languageDropdown.style.maxHeight = '400px';
-                }
-            }
-        }
-        
-        // Use both touch and click events
-        var touchStartTime = 0;
-        var touchStartPos = null;
-        
-        languageSelectorBtn.addEventListener('touchstart', function(e) {
-            touchStartTime = Date.now();
-            touchStartPos = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            toggleDropdown(e);
-        }, { passive: false });
-        
-        languageSelectorBtn.addEventListener('click', function(e) {
-            // Prevent double-firing - only handle if touch didn't fire recently
-            var timeSinceTouch = Date.now() - touchStartTime;
-            if (timeSinceTouch > 300) {
-                toggleDropdown(e);
-            }
-        });
-        
-        // Close when clicking outside
-        document.addEventListener('click', function(e) {
+    'use strict';
+    
+    var initialized = false;
+    var handlersAttached = false;
+    var touchHandled = false;
+    
+    // Document-level handlers (attach once globally)
+    function handleDocumentClick(e) {
+        var selectors = document.querySelectorAll('#languageSelector');
+        selectors.forEach(function(languageSelector) {
             if (!languageSelector.contains(e.target)) {
                 if (languageSelector.classList.contains('active')) {
+                    var languageDropdown = languageSelector.querySelector('#languageDropdown');
                     languageSelector.classList.remove('active');
-                    if (isMobile()) {
-                        languageDropdown.style.position = '';
-                        languageDropdown.style.top = '';
-                        languageDropdown.style.right = '';
-                        languageDropdown.style.left = '';
-                        languageDropdown.style.maxWidth = '';
+                    if (languageDropdown && window.innerWidth <= 767) {
+                        languageDropdown.style.cssText = '';
                     }
                 }
             }
         });
-        
-        // Prevent dropdown from closing when clicking inside
-        languageDropdown.addEventListener('click', function(e) {
-            e.stopPropagation();
-        });
-        
-        // Also handle touch events on dropdown
-        languageDropdown.addEventListener('touchstart', function(e) {
-            e.stopPropagation();
+    }
+    
+    function handleDocumentTouch(e) {
+        var selectors = document.querySelectorAll('#languageSelector');
+        selectors.forEach(function(languageSelector) {
+            if (!languageSelector.contains(e.target)) {
+                if (languageSelector.classList.contains('active')) {
+                    var languageDropdown = languageSelector.querySelector('#languageDropdown');
+                    languageSelector.classList.remove('active');
+                    if (languageDropdown && window.innerWidth <= 767) {
+                        languageDropdown.style.cssText = '';
+                    }
+                }
+            }
         });
     }
     
-    // Initialize when DOM is ready
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initLanguageSelector);
-    } else {
-        initLanguageSelector();
-    }
-    
-    // Also initialize with jQuery if available (for other dependencies)
-    if (typeof jQuery !== 'undefined') {
-        jQuery(document).ready(function($) {
-            // Ensure dropdown works with jQuery as well
-            var $languageSelector = $('#languageSelector');
-            var $languageSelectorBtn = $('#languageSelectorBtn');
+    function initLanguageSelector() {
+        // Attach document handlers once (if DOM is ready)
+        if (!handlersAttached && document.body) {
+            document.addEventListener('click', handleDocumentClick);
+            document.addEventListener('touchstart', handleDocumentTouch);
+            handlersAttached = true;
+        }
+        // Get all language selector instances (can be multiple on page)
+        var selectors = document.querySelectorAll('#languageSelector');
+        
+        if (selectors.length === 0) {
+            // Elements not ready, retry
+            if (!initialized) {
+                setTimeout(initLanguageSelector, 150);
+            }
+            return;
+        }
+        
+        // Check if mobile
+        function isMobile() {
+            return window.innerWidth <= 767;
+        }
+        
+        // Initialize each selector instance (only if not already initialized)
+        selectors.forEach(function(languageSelector) {
+            // Skip if already has event listeners
+            if (languageSelector.dataset.initialized === 'true') {
+                return;
+            }
             
-            // Add jQuery handlers as backup
-            $languageSelectorBtn.on('click', function(e) {
+            var languageSelectorBtn = languageSelector.querySelector('#languageSelectorBtn');
+            var languageDropdown = languageSelector.querySelector('#languageDropdown');
+            
+            if (!languageSelectorBtn || !languageDropdown) {
+                return; // Skip this instance if elements missing
+            }
+            
+            // Toggle dropdown
+            function toggleDropdown() {
+                var isActive = languageSelector.classList.contains('active');
+                
+                if (isActive) {
+                    // Close
+                    languageSelector.classList.remove('active');
+                    if (isMobile()) {
+                        languageDropdown.style.cssText = '';
+                    }
+                } else {
+                    // Open
+                    languageSelector.classList.add('active');
+                    
+                    if (isMobile()) {
+                        // Mobile: Use fixed positioning relative to viewport
+                        var rect = languageSelectorBtn.getBoundingClientRect();
+                        var viewportHeight = window.innerHeight;
+                        var dropdownHeight = 400; // max height
+                        var spaceBelow = viewportHeight - rect.bottom;
+                        var spaceAbove = rect.top;
+                        
+                        // Calculate position - prefer below button, but flip above if not enough space
+                        var topPosition;
+                        if (spaceBelow >= dropdownHeight || spaceBelow > spaceAbove) {
+                            // Place below button
+                            topPosition = rect.bottom + 8;
+                        } else {
+                            // Place above button (if more space above)
+                            topPosition = rect.top - dropdownHeight - 8;
+                            if (topPosition < 8) {
+                                topPosition = 8; // Ensure minimum margin from top
+                            }
+                        }
+                        
+                        // Calculate right position to align with button
+                        var rightPosition = Math.max(10, window.innerWidth - rect.right);
+                        
+                        // For fixed positioning, use viewport coordinates directly (no scrollY)
+                        languageDropdown.style.position = 'fixed';
+                        languageDropdown.style.top = topPosition + 'px';
+                        languageDropdown.style.right = rightPosition + 'px';
+                        languageDropdown.style.left = 'auto';
+                        languageDropdown.style.maxWidth = Math.min(280, window.innerWidth - 20) + 'px';
+                        languageDropdown.style.minWidth = '180px';
+                        languageDropdown.style.zIndex = '999999';
+                        languageDropdown.style.display = 'block';
+                        languageDropdown.style.visibility = 'visible';
+                        languageDropdown.style.opacity = '1';
+                        languageDropdown.style.maxHeight = '400px';
+                    } else {
+                        // Desktop: Let CSS handle it, clear any mobile styles
+                        languageDropdown.style.cssText = '';
+                    }
+                }
+            }
+            
+            // Button click handler
+            function handleButtonClick(e) {
                 e.preventDefault();
                 e.stopPropagation();
+                
+                // Block if touch was just processed (mobile)
+                if (touchHandled) {
+                    touchHandled = false;
+                    return;
+                }
+                
+                toggleDropdown();
+            }
+            
+            // Touch handler for mobile
+            function handleButtonTouch(e) {
+                if (isMobile()) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    touchHandled = true;
+                    toggleDropdown();
+                    // Reset touch flag
+                    setTimeout(function() {
+                        touchHandled = false;
+                    }, 300);
+                }
+            }
+            
+            // Attach button event listeners
+            languageSelectorBtn.addEventListener('click', handleButtonClick);
+            languageSelectorBtn.addEventListener('touchstart', handleButtonTouch, { passive: false });
+            
+            // Prevent dropdown clicks from closing
+            languageDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
             });
+            
+            languageDropdown.addEventListener('touchstart', function(e) {
+                e.stopPropagation();
+            });
+            
+            // Mark this selector as initialized
+            languageSelector.dataset.initialized = 'true';
+        });
+        
+        // Mark as initialized if we found and processed selectors
+        if (selectors.length > 0) {
+            initialized = true;
+        }
+    }
+    
+    // Initialize when ready
+    function startInit() {
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initLanguageSelector);
+        } else {
+            initLanguageSelector();
+        }
+    }
+    
+    startInit();
+    
+    // Re-check for new selectors if elements are added dynamically
+    var observer = new MutationObserver(function(mutations) {
+        var uninitialized = document.querySelectorAll('#languageSelector');
+        var hasUninitialized = false;
+        uninitialized.forEach(function(sel) {
+            if (sel.dataset.initialized !== 'true') {
+                hasUninitialized = true;
+            }
+        });
+        if (!initialized || hasUninitialized) {
+            initLanguageSelector();
+        }
+    });
+    
+    if (document.body) {
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
         });
     }
 })();
 
-    // Get current language from cookie
+// Language management functions - No jQuery required
+(function() {
+    'use strict';
+    
     function getCurrentLang() {
         var keyValue = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
         if (keyValue) {
@@ -360,7 +453,6 @@
         return '{{ $currentLang }}';
     }
 
-    // Update UI to show current language
     function updateLanguageUI(langCode) {
         var langMap = {
             'en': {flag: '🇺🇸', code: 'EN'},
@@ -372,50 +464,141 @@
         };
 
         var current = langMap[langCode] || langMap['en'];
-        $('#languageSelectorBtn .flag-icon').text(current.flag);
-        $('#languageSelectorBtn .lang-code').text(current.code);
         
-        // Update active state in dropdown
-        $('.language-dropdown-link').removeClass('active');
-        $('.language-dropdown-link[data-lang="' + langCode + '"]').addClass('active');
+        // Update button (all instances)
+        var buttons = document.querySelectorAll('#languageSelectorBtn');
+        buttons.forEach(function(btn) {
+            var flagIcon = btn.querySelector('.flag-icon');
+            var langCodeSpan = btn.querySelector('.lang-code');
+            if (flagIcon) flagIcon.textContent = current.flag;
+            if (langCodeSpan) langCodeSpan.textContent = current.code;
+        });
+        
+        // Update dropdown links
+        var links = document.querySelectorAll('.language-dropdown-link');
+        links.forEach(function(link) {
+            link.classList.remove('active');
+            if (link.getAttribute('data-lang') === langCode) {
+                link.classList.add('active');
+            }
+        });
+        
+        // jQuery fallback if available
+        if (typeof window.jQuery !== 'undefined' && window.jQuery) {
+            window.jQuery('.language-dropdown-link').removeClass('active');
+            window.jQuery('.language-dropdown-link[data-lang="' + langCode + '"]').addClass('active');
+        }
     }
 
-    // Check current language on load
+    // Update UI on load
     setTimeout(function() {
         var currentLang = getCurrentLang();
         updateLanguageUI(currentLang);
     }, 1000);
 
-    // Make changeLanguage available globally
+    // Global changeLanguage function
     window.changeLanguage = function(langCode) {
-        // Update UI first
         updateLanguageUI(langCode);
-        $('#languageSelector').removeClass('active');
         
-        // Save to user profile if logged in (async, don't wait for it)
-        @auth
-        $.ajax({
-            url: '{{ route("account.update") }}',
-            method: 'POST',
-            data: {
-                _token: '{{ csrf_token() }}',
-                langauge: langCode,
-                id: {{ current_user()->id ?? 0 }},
-                first_name: '{{ current_user()->first_name ?? "" }}',
-                last_name: '{{ current_user()->last_name ?? "" }}',
-                email: '{{ current_user()->email ?? "" }}',
-                preferences: ''
-            },
-            success: function() {
-                console.log('Language preference saved');
+        // Close all dropdowns
+        var selectors = document.querySelectorAll('#languageSelector');
+        selectors.forEach(function(selector) {
+            selector.classList.remove('active');
+            var dropdown = selector.querySelector('#languageDropdown');
+            if (dropdown) {
+                dropdown.style.cssText = '';
             }
         });
+        
+        // Save language preference (non-blocking, handles errors gracefully)
+        @auth
+        if (typeof window.jQuery !== 'undefined' && window.jQuery && window.jQuery.ajax) {
+            // Get current user preferences as JSON array
+            @php
+                $userPreferences = [];
+                if (auth()->check() && current_user()) {
+                    $userPreferences = current_user()->preferences()->pluck('subtheme_id')->toArray();
+                }
+            @endphp
+            
+            window.jQuery.ajax({
+                url: '{{ route("account.update") }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    langauge: langCode,
+                    id: {{ current_user()->id ?? 0 }},
+                    first_name: '{{ current_user()->first_name ?? "" }}',
+                    last_name: '{{ current_user()->last_name ?? "" }}',
+                    email: '{{ current_user()->email ?? "" }}',
+                    preferences: {{ json_encode($userPreferences) }}
+                },
+                success: function() {
+                    console.log('Language preference saved');
+                },
+                error: function(xhr, status, error) {
+                    // Fail silently - language change via Google Translate still works
+                    console.log('Language preference save failed (non-critical):', error);
+                }
+            });
+        }
         @endauth
         
-        // Call translation function - it will handle page reload for English
-        doGTranslate(langCode);
+        // Call translation - wait for doGTranslate to be available and widget ready
+        var translationAttempts = 0;
+        var maxAttempts = 50; // Wait up to 5 seconds (50 * 100ms)
+        
+        function triggerTranslation() {
+            translationAttempts++;
+            
+            // Check if doGTranslate function is available
+            if (typeof doGTranslate === 'function') {
+                // Also check if jQuery is available (doGTranslate uses it)
+                if (typeof window.jQuery === 'undefined' && typeof $ === 'undefined') {
+                    if (translationAttempts < maxAttempts) {
+                        setTimeout(triggerTranslation, 100);
+                        return;
+                    }
+                }
+                
+                try {
+                    console.log('Calling doGTranslate with language:', langCode);
+                    doGTranslate(langCode);
+                } catch (e) {
+                    console.error('Translation error:', e);
+                    // Fallback: set cookie and reload page
+                    var date = new Date();
+                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+                    if (langCode === 'en') {
+                        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
+                    } else {
+                        document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
+                    }
+                    window.location.reload();
+                }
+            } else {
+                // Function not loaded yet, wait a bit and try again
+                if (translationAttempts < maxAttempts) {
+                    setTimeout(triggerTranslation, 100);
+                } else {
+                    // Still not available after max attempts, use cookie fallback
+                    console.log('doGTranslate not available after ' + maxAttempts + ' attempts, using cookie fallback');
+                    var date = new Date();
+                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
+                    if (langCode === 'en') {
+                        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
+                    } else {
+                        document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
+                    }
+                    window.location.reload();
+                }
+            }
+        }
+        
+        // Start translation attempt
+        triggerTranslation();
         
         return false;
     };
-});
+})();
 </script>
