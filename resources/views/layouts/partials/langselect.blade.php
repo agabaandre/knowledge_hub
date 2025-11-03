@@ -544,7 +544,65 @@
         }
         @endauth
         
-        // Call translation - wait for doGTranslate to be available and widget ready
+        // Special handling for English - remove translation without reload
+        if (langCode === 'en') {
+            // Clear the translation cookie
+            var date = new Date();
+            date.setTime(date.getTime() - 1); // Expire immediately
+            document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
+            
+            // Remove translation classes and styles using vanilla JS (no jQuery dependency)
+            document.body.classList.remove('translated-rtl');
+            document.documentElement.classList.remove('translated-rtl');
+            
+            // Remove Google Translate stylesheet links
+            var translateLinks = document.querySelectorAll('head link[href*="translate.googleapis.com"]');
+            translateLinks.forEach(function(link) {
+                link.remove();
+            });
+            
+            // Remove inline direction styles
+            var elementsWithDirection = document.querySelectorAll('[style*="direction"]');
+            elementsWithDirection.forEach(function(el) {
+                if (el.style.direction) {
+                    el.style.direction = '';
+                }
+            });
+            
+            // Try to revert translation using Google Translate widget (if available)
+            var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
+            if (teCombo) {
+                // Find English option
+                var enIndex = Array.from(teCombo.options).findIndex(function(option) {
+                    return option.value === 'en' || option.value === '';
+                });
+                if (enIndex !== -1) {
+                    teCombo.selectedIndex = enIndex;
+                    // Fire change event
+                    try {
+                        if (typeof GTranslateFireEvent === 'function') {
+                            GTranslateFireEvent(teCombo, 'change');
+                        } else {
+                            // Fallback: create and dispatch event
+                            var event = new Event('change', { bubbles: true });
+                            teCombo.dispatchEvent(event);
+                        }
+                    } catch (e) {
+                        console.log('Error firing translate event:', e);
+                    }
+                }
+            }
+            
+            // Save English preference cookie
+            date = new Date();
+            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
+            document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
+            
+            console.log('Translation removed (English selected)');
+            return false;
+        }
+        
+        // For non-English languages, use doGTranslate function
         var translationAttempts = 0;
         var maxAttempts = 50; // Wait up to 5 seconds (50 * 100ms)
         
@@ -566,14 +624,10 @@
                     doGTranslate(langCode);
                 } catch (e) {
                     console.error('Translation error:', e);
-                    // Fallback: set cookie and reload page
+                    // Fallback: set cookie and reload page (only for non-English)
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    if (langCode === 'en') {
-                        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
-                    } else {
-                        document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
-                    }
+                    document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             } else {
@@ -585,11 +639,7 @@
                     console.log('doGTranslate not available after ' + maxAttempts + ' attempts, using cookie fallback');
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    if (langCode === 'en') {
-                        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
-                    } else {
-                        document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
-                    }
+                    document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             }
