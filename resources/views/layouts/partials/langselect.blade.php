@@ -84,7 +84,7 @@
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
-        z-index: 10000;
+        z-index: 9999999;
         display: block;
     }
 
