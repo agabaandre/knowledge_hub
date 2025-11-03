@@ -63,9 +63,27 @@
         
         .publication-title-desktop {
             display: block !important;
-            text-align: justify !important;
+            text-align: left !important;
             overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            hyphens: auto !important;
             white-space: normal !important;
+            line-height: 1.4 !important;
+            font-size: 1rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+        
+        .publication-title-desktop a {
+            display: block !important;
+            text-align: left !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+            word-break: break-word !important;
+            hyphens: auto !important;
+            white-space: normal !important;
+            line-height: 1.4 !important;
+            text-decoration: none !important;
         }
         
         .publication-content-col h5,
@@ -74,6 +92,27 @@
             text-overflow: unset !important;
             white-space: normal !important;
             overflow: visible !important;
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+        }
+        
+        /* Extra small devices (phones in portrait, less than 360px) */
+        @media (max-width: 359.98px) {
+            .publication-title-desktop {
+                font-size: 0.9rem !important;
+                line-height: 1.3 !important;
+            }
+            
+            .publication-image-col {
+                width: 100px !important;
+                height: 100px !important;
+                max-width: 100px !important;
+            }
+            
+            .publication-image {
+                min-height: 100px !important;
+                height: 100px !important;
+            }
         }
         
         /* Keep buttons side-by-side on mobile */
@@ -165,8 +204,9 @@
                  <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
                      <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
                      <h5 class="text-bold text-lg publication-title-desktop">
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
-                             {!! truncate(clean_unicode($row->title), 500) !!}</a>
+                         <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                             {!! truncate(clean_unicode($row->title), 500) !!}
+                         </a>
                      </h5>
                      
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">

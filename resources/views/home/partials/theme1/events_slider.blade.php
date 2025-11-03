@@ -7,7 +7,7 @@
     .events-track::-webkit-scrollbar{height:8px}
     .events-track::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:0.25rem}
     .event-card{min-width:520px;max-width:560px;flex:0 0 auto;border:1px solid #e2e8f0;border-radius:0.25rem;scroll-snap-align:start;background:#fff;display:flex;overflow:hidden}
-    .event-cover{width:42%;min-width:42%;height:255px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .event-cover{width:42%;min-width:42%;height:255px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
     .event-cover img{width:100%;height:100%;object-fit:contain;background:transparent}
     .events-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:#fff;border:2px solid var(--theme-color-primary, #119A48);border-radius:50%;width:44px;height:44px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.3s ease;box-shadow:0 2px 8px rgba(0,0,0,0.1)}
     .events-nav:hover{background:var(--theme-color-primary, #119A48);color:#fff;transform:translateY(-50%) scale(1.1);box-shadow:0 4px 12px rgba(0,0,0,0.2)}
@@ -16,21 +16,28 @@
     .events-nav i{font-size:18px;color:var(--theme-color-primary, #119A48);transition:color 0.3s}
     .events-nav:hover i{color:#fff}
     @media (max-width:768px){.events-nav{width:36px;height:36px}.events-nav i{font-size:14px}.events-nav.prev{left:5px}.events-nav.next{right:5px}}
-    .event-body{padding:12px;flex:1}
-    .event-title{font-weight:700;color:#0f172a;margin:0 0 8px;font-size:1.08rem;line-height:1.25}
-    .event-meta{font-size:.86rem;color:#475569;margin-bottom:4px}
-    .event-desc{font-size:.85rem;color:#334155;margin-top:6px;max-height:3.2em;overflow:hidden;line-height:1.4;word-wrap:break-word;overflow-wrap:break-word}
+    .event-body{padding:12px;flex:1;height:255px;display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box}
+    .event-title{font-weight:700;color:#0f172a;margin:0 0 8px;font-size:0.875rem;line-height:1.4;flex-shrink:0}
+    .event-meta{font-size:.86rem;color:#475569;margin-bottom:4px;flex-shrink:0}
+    .event-desc{font-size:.85rem;color:#334155;margin-top:6px;line-height:1.4;word-wrap:break-word;overflow-wrap:break-word;flex:1;min-height:0;overflow-y:auto}
     .event-desc *{max-width:100%}
     .event-actions{display:flex;gap:8px;margin-top:10px}
     .event-actions .btn{padding:6px 10px;border-radius:0.25rem}
     .ev-arrow{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;width:34px;height:34px;display:flex;align-items:center;justify-content:center}
-    @media (max-width:768px){.event-card{min-width:320px;max-width:360px}.event-cover{height:140px;width:45%;min-width:45%}}
+    @media (max-width:768px){
+        .event-card{min-width:320px;max-width:360px;display:block !important;flex-direction:unset !important}
+        .event-cover{height:120px !important;width:120px !important;min-width:120px !important;float:left !important;margin-right:12px !important;margin-bottom:8px !important;margin-left:0 !important;margin-top:0 !important;border-right:none !important;border-bottom:none;shape-outside:margin-box !important}
+        .event-body{display:block !important;overflow:visible !important;text-align:justify !important;width:auto !important;padding:8px !important}
+        .event-title{font-size:0.875rem !important;text-align:justify !important;overflow-wrap:break-word !important;white-space:normal !important;line-height:1.4 !important}
+        .event-meta,.event-desc{text-overflow:unset !important;white-space:normal !important;overflow:visible !important;text-align:justify !important}
+        .event-card::after{content:"";display:table;clear:both}
+    }
     /* Compact mode for spotlight area */
     .events-strip.compact{margin:10px auto;border-radius:0.25rem}
     .events-strip.compact .head{padding:8px 12px}
     .events-strip.compact .event-card{min-width:420px;max-width:460px}
     .events-strip.compact .event-cover{height:225px}
-    .events-strip.compact .event-title{font-size:1rem}
+    .events-strip.compact .event-title{font-size:0.875rem}
 </style>
 
 <div class="container">
@@ -56,7 +63,7 @@
             <div class="event-card event-slide" style="cursor:pointer;" @if($detailsUrl) onclick="window.open('{{ $detailsUrl }}','_blank')" @endif>
                 <div class="event-cover"><img src="{{ $cover }}" alt="{{ $ev->title }}" onerror="this.onerror=null;this.src='{{ asset('assets/images/cover.png') }}'"/></div>
                 <div class="event-body">
-                    <div class="event-title">{{ Str::limit(strip_tags($ev->title),70) }}</div>
+                    <div class="event-title" style="overflow-wrap: break-word; word-wrap: break-word;">{{ Str::limit(strip_tags($ev->title),70) }}</div>
                     <div class="event-meta"><i class="fa fa-clock-o mr-1"></i>{{ $range ?: 'Date TBA' }}</div>
                     @if($ev->venue)
                     <div class="event-meta"><i class="fa fa-map-marker mr-1"></i>{{ $ev->venue }}</div>
@@ -65,7 +72,7 @@
                     <div class="event-meta"><i class="fa fa-building mr-1"></i>{{ $ev->organized_by }}</div>
                     @endif
                     @if(!empty($ev->description))
-                    <div class="event-desc">{!! $ev->description !!}</div>
+                    <div class="event-desc">{!! Str::words(strip_tags($ev->description), 30, '...') !!}</div>
                     @endif
                     <div class="event-actions">
                         @if(!$isPast && $ev->registration_link)

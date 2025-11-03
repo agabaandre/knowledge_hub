@@ -5,10 +5,10 @@
     .initiatives-track::-webkit-scrollbar{height:8px}
     .initiatives-track::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:0.25rem}
     .initiative-card{min-width:520px;max-width:560px;flex:0 0 auto;border:1px solid #e2e8f0;border-radius:0.25rem;scroll-snap-align:start;background:#fff;display:flex;overflow:hidden}
-    .initiative-cover{width:42%;min-width:42%;height:255px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden}
+    .initiative-cover{width:42%;min-width:42%;height:255px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
     .initiative-cover img{width:100%;height:100%;object-fit:contain;background:transparent}
     .initiative-body{padding:12px;flex:1;height:255px;display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box}
-    .initiative-title{font-weight:700;color:#0f172a;margin:0 0 8px;font-size:1.08rem;line-height:1.25;flex-shrink:0}
+    .initiative-title{font-weight:700;color:#0f172a;margin:0 0 8px;font-size:0.875rem;line-height:1.4;flex-shrink:0}
     .initiative-meta{font-size:.86rem;color:#475569;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
     .initiative-meta i{color:var(--theme-color-primary, #119A48);font-size:0.75rem}
     .initiative-desc{font-size:.85rem;color:#334155;margin-top:6px;line-height:1.4;word-wrap:break-word;overflow-wrap:break-word;flex:1;min-height:0;overflow-y:auto}
@@ -19,7 +19,15 @@
     .initiatives-nav.next{right:10px}
     .initiatives-nav i{font-size:18px;color:var(--theme-color-primary, #119A48);transition:color 0.3s}
     .initiatives-nav:hover i{color:#fff}
-    @media (max-width:768px){.initiative-card{min-width:320px;max-width:360px}.initiative-cover{height:140px;width:45%;min-width:45%}.initiative-body{height:140px}.initiatives-nav{width:36px;height:36px}.initiatives-nav i{font-size:14px}.initiatives-nav.prev{left:5px}.initiatives-nav.next{right:5px}}
+    @media (max-width:768px){
+        .initiative-card{min-width:320px;max-width:360px;display:block !important;flex-direction:unset !important}
+        .initiative-cover{height:120px !important;width:120px !important;min-width:120px !important;float:left !important;margin-right:12px !important;margin-bottom:8px !important;margin-left:0 !important;margin-top:0 !important;border-right:none !important;border-bottom:none;shape-outside:margin-box !important}
+        .initiative-body{display:block !important;overflow:visible !important;text-align:justify !important;width:auto !important;height:auto !important;padding:8px !important;flex-direction:unset !important}
+        .initiative-title{font-size:0.875rem !important;text-align:justify !important;overflow-wrap:break-word !important;white-space:normal !important;line-height:1.4 !important}
+        .initiative-meta,.initiative-desc{text-overflow:unset !important;white-space:normal !important;overflow:visible !important;text-align:justify !important}
+        .initiative-card::after{content:"";display:table;clear:both}
+        .initiatives-nav{width:36px;height:36px}.initiatives-nav i{font-size:14px}.initiatives-nav.prev{left:5px}.initiatives-nav.next{right:5px}
+    }
 </style>
 
     <div class="container">
@@ -54,7 +62,7 @@
             <div class="initiative-card initiative-slide" style="cursor:pointer;" onclick="window.open('{{ $detailsUrl }}','_blank')">
                 <div class="initiative-cover"><img src="{{ $imageUrl }}" alt="{{ $row->title }}" onerror="this.onerror=null;this.src='{{ asset('assets/images/cover.png') }}'"/></div>
                 <div class="initiative-body">
-                    <div class="initiative-title">{{ Str::limit(strip_tags(clean_unicode($row->title)),70) }}</div>
+                    <div class="initiative-title" style="overflow-wrap: break-word; word-wrap: break-word;">{{ Str::limit(strip_tags(clean_unicode($row->title)),70) }}</div>
                     <div class="initiative-meta">
                         <span><i class="fa fa-user"></i> {{ clean_unicode($authorName) }}</span>
                         @if($publicationUrl)
@@ -71,7 +79,7 @@
                         @endif
                                             </div>
                     @if($description)
-                    <div class="initiative-desc">{!! $description !!}</div>
+                    <div class="initiative-desc">{!! Str::words(strip_tags($description), 30, '...') !!}</div>
                     @endif
                 </div>
             </div>
@@ -121,9 +129,9 @@
             
             // Reset auto-play timer on manual navigation
             if(isPlaying){
-                clearInterval(autoPlayInterval);
-                startAutoPlay();
-            }
+            clearInterval(autoPlayInterval);
+            startAutoPlay();
+        }
         };
         
         function startAutoPlay(){
@@ -153,11 +161,11 @@
                         setTimeout(function(){
                             toStart();
                         }, 300);
-                    } else {
+            } else {
                         // Normal forward scroll
                         track.scrollLeft = newScroll;
                     }
-                }
+            }
             }, 5000);
         }
         
@@ -169,10 +177,10 @@
         track.addEventListener('mouseenter', function(){
             isPlaying = false;
             clearInterval(autoPlayInterval);
-        });
+    });
         track.addEventListener('mouseleave', function(){
             startAutoPlay();
-        });
+});
     })();
 </script>
 @endif
