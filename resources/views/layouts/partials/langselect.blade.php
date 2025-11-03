@@ -173,7 +173,7 @@
             right: 10px !important;
             left: auto !important;
             position: fixed !important;
-            z-index: 999999 !important;
+            z-index: 9999999 !important;
             transform: translateX(0);
             max-width: calc(100vw - 20px) !important;
             min-width: 180px !important;
@@ -184,16 +184,22 @@
             opacity: 1 !important;
             visibility: visible !important;
             display: block !important;
+            z-index: 9999999 !important;
         }
         
         .language-selector-wrapper {
             position: relative;
-            z-index: 999998;
+            z-index: 9999998 !important;
         }
         
         .menu-language-menu-container {
             position: relative;
-            z-index: 999998;
+            z-index: 9999998 !important;
+        }
+        
+        .language-selector-btn {
+            position: relative;
+            z-index: 9999998 !important;
         }
     }
 </style>
@@ -344,7 +350,7 @@
                         languageDropdown.style.left = 'auto';
                         languageDropdown.style.maxWidth = Math.min(280, window.innerWidth - 20) + 'px';
                         languageDropdown.style.minWidth = '180px';
-                        languageDropdown.style.zIndex = '999999';
+                        languageDropdown.style.zIndex = '9999999';
                         languageDropdown.style.display = 'block';
                         languageDropdown.style.visibility = 'visible';
                         languageDropdown.style.opacity = '1';
