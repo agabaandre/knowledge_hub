@@ -74,12 +74,34 @@
         
         @media (max-width: 767px) {
             .task-listing {
-                flex-direction: column;
+                flex-direction: row;
+                flex-wrap: wrap;
             }
             
             .task-listing-bid {
-                width: 100%;
-                height: 200px;
+                width: 120px !important;
+                height: 120px !important;
+                min-width: 120px !important;
+                float: left !important;
+                margin-right: 12px !important;
+                margin-bottom: 8px !important;
+                margin-left: 2px !important;
+                margin-top: 2px !important;
+                padding: 4px !important;
+                background-size: contain !important;
+            }
+            
+            .task-listing-details {
+                width: 100% !important;
+                overflow: hidden !important;
+                text-align: justify !important;
+            }
+            
+            /* Clear float after content on mobile */
+            .task-listing::after {
+                content: "";
+                display: table;
+                clear: both;
             }
         }
     </style>

@@ -1,25 +1,62 @@
    <!-- ======================= Featured / Recommended ======================== -->
   <section class="middle gray" style="padding-top: 20px; padding-bottom: 20px;">
        <style>
-           /* Mobile Styles - Full width images */
+           /* Mobile Styles - Dropcap images */
            @media (max-width: 767.98px) {
                .featured-card {
-                   flex-direction: column !important;
+                   display: block !important;
+                   flex-direction: unset !important;
+                   flex-wrap: unset !important;
+               }
+               
+               .featured-card .cats-box {
+                   display: block !important;
                }
                
                .featured-image {
-                   width: 100% !important;
-                   height: 220px !important;
-                   margin-right: 0 !important;
-                   margin-bottom: 0.75rem !important;
+                   width: 120px !important;
+                   height: 120px !important;
+                   margin-right: 12px !important;
+                   margin-bottom: 8px !important;
+                   margin-left: 0 !important;
+                   margin-top: 0 !important;
+                   float: left !important;
+                   border: none !important;
+                   overflow: hidden !important;
+                   background: transparent !important;
+                   display: flex !important;
+                   align-items: center !important;
+                   justify-content: center !important;
+                   padding: 4px !important;
+                   shape-outside: margin-box !important;
                }
                
                .featured-image img {
-                   object-position: top center !important;
+                   object-fit: contain !important;
+                   object-position: center !important;
+                   background: transparent !important;
                }
                
                .featured-content {
-                   width: 100% !important;
+                   display: block !important;
+                   overflow: visible !important;
+                   text-align: justify !important;
+                   width: auto !important;
+               }
+               
+               .featured-content h4,
+               .featured-content .text-truncate,
+               .featured-content span {
+                   text-overflow: unset !important;
+                   white-space: normal !important;
+                   overflow: visible !important;
+               }
+               
+               /* Clear float after content on mobile */
+               .featured-card::after {
+                   content: "";
+                   display: table;
+                   clear: both;
                }
            }
        </style>
@@ -81,12 +118,12 @@
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
 
-                                  <div class="cats-box-caption featured-content" style="flex: 1;">
-                                       <h4 class="fs-md mb-0 ft-medium text-truncate"><a
+                                  <div class="cats-box-caption featured-content" style="flex: 1; overflow: hidden;">
+                                       <h4 class="fs-md mb-0 ft-medium" style="text-align: justify; overflow-wrap: break-word;"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
                                                title="{!! clean_unicode($row->title) !!}">{!! truncate(clean_unicode($row->title), 40) !!}</a></h4>
-                                       <div class="d-block mb-2 position-relative">
-                                           <span class="text-muted medium text-truncate">
+                                       <div class="d-block mb-2 position-relative" style="text-align: justify; overflow-wrap: break-word;">
+                                           <span class="text-muted medium" style="display: block;">
                                                Source: <i
                                                    class="fa fa-bank mr-1"></i>{{ truncate($row->author->name ?? '', 40) }}</span>
 

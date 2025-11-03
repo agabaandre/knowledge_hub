@@ -1,25 +1,62 @@
    <!-- ======================= Top Searches List ======================== -->
   <section class="middle gray" style="padding-top: 0; padding-bottom: 20px; margin-top: -1rem;">
        <style>
-           /* Mobile Styles - Full width images */
+           /* Mobile Styles - Dropcap images */
            @media (max-width: 767.98px) {
                .top-searches-card {
-                   flex-direction: column !important;
+                   display: block !important;
+                   flex-direction: unset !important;
+                   flex-wrap: unset !important;
+               }
+               
+               .top-searches-card .cats-box {
+                   display: block !important;
                }
                
                .top-searches-image {
-                   width: 100% !important;
-                   height: 220px !important;
-                   margin-right: 0 !important;
-                   margin-bottom: 0.75rem !important;
+                   width: 120px !important;
+                   height: 120px !important;
+                   margin-right: 12px !important;
+                   margin-bottom: 8px !important;
+                   margin-left: 0 !important;
+                   margin-top: 0 !important;
+                   float: left !important;
+                   border: none !important;
+                   overflow: hidden !important;
+                   background: transparent !important;
+                   display: flex !important;
+                   align-items: center !important;
+                   justify-content: center !important;
+                   padding: 4px !important;
+                   shape-outside: margin-box !important;
                }
                
                .top-searches-image img {
-                   object-position: top center !important;
+                   object-fit: contain !important;
+                   object-position: center !important;
+                   background: transparent !important;
                }
                
                .top-searches-content {
-                   width: 100% !important;
+                   display: block !important;
+                   overflow: visible !important;
+                   text-align: justify !important;
+                   width: auto !important;
+               }
+               
+               .top-searches-content h4,
+               .top-searches-content .text-truncate,
+               .top-searches-content span {
+                   text-overflow: unset !important;
+                   white-space: normal !important;
+                   overflow: visible !important;
+               }
+               
+               /* Clear float after content on mobile */
+               .top-searches-card::after {
+                   content: "";
+                   display: table;
+                   clear: both;
                }
            }
        </style>
@@ -81,13 +118,13 @@
                                             onerror="this.onerror=null; this.src='{{ $default_image }}';">
                                    </div>
 
-                                  <div class="cats-box-caption top-searches-content" style="flex: 1;">
-                                       <h4 class="fs-md mb-0 ft-medium text-truncate"><a
+                                  <div class="cats-box-caption top-searches-content" style="flex: 1; overflow: hidden;">
+                                       <h4 class="fs-md mb-0 ft-medium" style="text-align: justify; overflow-wrap: break-word;"><a
                                                href="{{ url('records/resource') }}?id={{ $row->id }}"
                                                title="{!! $row->title !!}">{!! truncate($row->title, 40) !!}</a></h4>
-                                       <div class="d-block mb-2 position-relative">
+                                       <div class="d-block mb-2 position-relative" style="text-align: justify; overflow-wrap: break-word;">
                                            <!-- <p class="text-nothern p-0"><a href="{{ url('records/resource') }}?id={{ $row->id }}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description, 60))) !!}</a></p> -->
-                                           <span class="text-muted medium text-truncate">
+                                           <span class="text-muted medium" style="display: block;">
                                                Source: <i
                                                    class="fa fa-bank mr-1"></i>{{ truncate($row->author->name ?? '', 40) }}</span>
 
