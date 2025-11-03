@@ -29,23 +29,43 @@
      }
      
      $(document).ready(function () {
-        // Only auto-translate if not English and cookie suggests a different language
         var cookieLang = GTranslateGetCurrentLang();
         var userLang = '{{$langauge}}';
         
-        // If cookie says English or empty, don't auto-translate
-        if (cookieLang === 'en' || !cookieLang) {
-          // Clear any existing translation cookie
+        // Priority: User's saved preference > Cookie > Default (en)
+        @auth
+        // For logged-in users, prioritize saved preference
+        if (userLang && userLang !== 'en') {
+          // User has a saved non-English preference - use it
+          // Sync cookie with user preference if different
+          if (cookieLang !== userLang) {
+            var date = new Date();
+            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
+            document.cookie = "googtrans=/auto/" + userLang + "; expires=" + date.toUTCString() + "; path=/";
+          }
+          doGTranslate(userLang);
+        } else if (userLang === 'en' || !userLang) {
+          // User prefers English or no preference - clear translation
           var date = new Date();
           date.setTime(date.getTime() - 1);
           document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
-        } else if (userLang && userLang !== 'en') {
-          // Only translate if user has a non-English preference
-          doGTranslate(userLang);
+          // Don't translate if user prefers English
+        } else if (cookieLang && cookieLang !== 'en') {
+          // Fallback: use cookie if user has no saved preference
+          doGTranslate(cookieLang);
+        }
+        @else
+        // Guest users: use cookie if available
+        if (cookieLang === 'en' || !cookieLang) {
+          // Clear any existing translation cookie for English
+          var date = new Date();
+          date.setTime(date.getTime() - 1);
+          document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
         } else if (cookieLang && cookieLang !== 'en') {
           // Use cookie language if available and not English
           doGTranslate(cookieLang);
         }
+        @endauth
       });
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
 

@@ -445,12 +445,29 @@
     'use strict';
     
     function getCurrentLang() {
+        // First priority: Use server-provided language (from user's saved preference or cookie)
+        var serverLang = '{{ $currentLang }}';
+        
+        // Second priority: Check cookie
         var keyValue = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
+        var cookieLang = null;
         if (keyValue) {
-            var langCode = keyValue[2].split('/')[2];
-            return langCode || 'en';
+            cookieLang = keyValue[2].split('/')[2];
         }
-        return '{{ $currentLang }}';
+        
+        @auth
+        // For logged-in users, always use server-provided language first (their saved preference)
+        // The server-side logic in langselect.blade.php already checks user preference first
+        // So serverLang should reflect the user's saved preference if they have one
+        if (serverLang) {
+            return serverLang;
+        }
+        // Fallback to cookie if serverLang is somehow empty
+        return cookieLang || 'en';
+        @else
+        // Guest users: use cookie if available, otherwise default to 'en'
+        return cookieLang || serverLang || 'en';
+        @endauth
     }
 
     function updateLanguageUI(langCode) {
@@ -490,11 +507,22 @@
         }
     }
 
-    // Update UI on load
-    setTimeout(function() {
+    // Update UI on load - check immediately and also after a short delay to catch any changes
+    function initializeLanguageUI() {
         var currentLang = getCurrentLang();
+        console.log('Initializing language UI with:', currentLang);
         updateLanguageUI(currentLang);
-    }, 1000);
+    }
+    
+    // Update immediately if DOM is ready
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initializeLanguageUI);
+    } else {
+        initializeLanguageUI();
+    }
+    
+    // Also update after a short delay to catch any late changes from cookie/translation
+    setTimeout(initializeLanguageUI, 500);
 
     // Global changeLanguage function
     window.changeLanguage = function(langCode) {

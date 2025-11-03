@@ -135,6 +135,11 @@ class UsersRepository {
         if($request->author_id)
         $user->author_id= $request->author_id;
 
+        // Save language preference - always update if provided (even if empty string)
+        if($request->has('langauge')) {
+            $user->langauge = $request->langauge;
+        }
+
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 
