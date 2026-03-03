@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Services\AIService;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AIController extends Controller
 {
@@ -16,7 +17,40 @@ class AIController extends Controller
 
     public function summarise(Request $request)
     {
-        return $this->aiService->summarise($request->resource_id, $request->type, $request->language);
+        return $this->aiService->summarise($request->resource_id, $request->type, $request->language, $request->input('prompt'));
+    }
+
+    /**
+     * Stream summary response (for AI summarizer modal).
+     */
+    public function summariseStream(Request $request): StreamedResponse
+    {
+        $request->validate([
+            'resource_id' => 'required',
+            'type' => 'required',
+            'language' => 'nullable|string|max:20',
+            'prompt' => 'nullable|string|max:1000',
+        ]);
+
+        return new StreamedResponse(function () use ($request) {
+            $this->aiService->summariseStream(
+                $request->resource_id,
+                $request->type,
+                $request->input('language', 'en'),
+                $request->input('prompt'),
+                function ($chunk) {
+                    echo $chunk;
+                    if (ob_get_level()) {
+                        ob_flush();
+                    }
+                    flush();
+                }
+            );
+        }, 200, [
+            'Content-Type' => 'text/html; charset=utf-8',
+            'Cache-Control' => 'no-cache',
+            'X-Accel-Buffering' => 'no',
+        ]);
     }
 
     public function compare(Request $request)

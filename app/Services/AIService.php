@@ -87,6 +87,63 @@ Please summarize this forum discussion, including:
         return $this->formatResponse($response);
     }
 
+    /**
+     * Stream summary to $onChunk(string $content). Uses GPT streaming when possible; PDF uses ChatPDF (one chunk).
+     */
+    public function summariseStream($resourceId, $type, $language, $additional_prompt, callable $onChunk): void
+    {
+        $type = intval($type);
+        if ($type === 1) {
+            // Forum: use GPT streaming
+            $resource = Forum::with([
+                'user', 'tags',
+                'comments' => fn ($q) => $q->whereNull('parent_id')->orderBy('created_at'),
+                'comments.user', 'comments.likes',
+                'comments.replies' => fn ($q) => $q->orderBy('created_at'),
+                'comments.replies.user', 'comments.replies.likes'
+            ])->find($resourceId);
+            if (!$resource) {
+                $onChunk('<div class="alert alert-danger">Forum not found.</div>');
+                return;
+            }
+            $structuredComments = $this->buildStructuredForumComments($resource);
+            $forumDescriptionText = strip_tags($resource->forum_description ?? '');
+            $forumDescriptionText = html_entity_decode($forumDescriptionText, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $prompt = "Summary language: $language.\n\nForum Title: {$resource->forum_title}\n\nForum Content: {$forumDescriptionText}\n\nComments (total: " . count($structuredComments) . "): " . json_encode($structuredComments, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) . "\n\nPlease summarize this forum discussion, including: Main points discussed, key insights and opinions in the comments, important attachments or resources mentioned, overall sentiment and engagement, any questions raised. Return raw HTML in a div, use teal for headings, no h1/h2, no background colors. Translate to $language if provided.";
+            if ($additional_prompt) {
+                $prompt .= " Pay attention to: " . $additional_prompt;
+            }
+            $chatGpt = app('chatgpt');
+            $chatGpt->promptStream($prompt, $onChunk);
+            return;
+        }
+
+        // Publication
+        $resource = Publication::find($resourceId);
+        if (!$resource) {
+            $onChunk('<div class="alert alert-danger">Publication not found.</div>');
+            return;
+        }
+
+        if (strpos($resource->publication ?? '', '.pdf') > -1) {
+            // PDF: ChatPDF does not support streaming for summarize; get full response and send as one chunk
+            $aiModel = app('chatpdf');
+            $response = $aiModel->summarize($resource, $language, $additional_prompt);
+            $formatted = $this->formatResponse($response);
+            $onChunk($formatted['content'] ?? '');
+            return;
+        }
+
+        // Non-PDF publication: GPT streaming
+        $prompt = "Use summary language: $language, title: {$resource->title}, body: " . ($resource->description ?? '') . ", attached_content: " . truncate(pdfToText($resource->publication ?? ''), 100000) . ", comments: " . json_encode($resource->comments->toArray());
+        $prompt .= " Summarise for me this. Don't forget to translate to $language if provided.";
+        if ($additional_prompt) {
+            $prompt .= " Pay attention to this: " . $additional_prompt;
+        }
+        $chatGpt = app('chatgpt');
+        $chatGpt->promptStream($prompt, $onChunk);
+    }
+
     public function compare($resourceId, $otherResourceId,$additional_prompt=null)
     {
         $resource = Publication::find($resourceId);

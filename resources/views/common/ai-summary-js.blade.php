@@ -1,112 +1,91 @@
-
-
 <script type="text/javascript">
-  var resourceId=null;
+(function () {
+  var resourceId = null;
   var isForum = 0;
 
- function  summarise(resource,isResourceForum=0){
+  window.summarise = function (resource, isResourceForum) {
+    resourceId = resource;
+    isForum = isResourceForum || 0;
+    document.getElementById('coppable').innerHTML = '';
+    document.querySelector('#summarise-modal .copy').style.display = 'none';
+    $('#summarise-modal').modal('show');
+  };
 
-  $('#summarise-modal').modal('show');
-  resourceId=resource;
-  isForum = isResourceForum; 
+  function getToken() {
+    var m = document.querySelector('meta[name="csrf-token"]');
+    return m ? m.getAttribute('content') : '';
+  }
 
-}
+  window.startAiSummary = function () {
+    var contentEl = document.getElementById('coppable');
+    var goBtn = document.getElementById('ai-summary-go-btn');
+    var copyBtn = document.querySelector('#summarise-modal .copy');
 
-function startAiSummary(){
+    if (!resourceId) return;
+    contentEl.innerHTML = '<p class="ai-streaming-placeholder mb-0"><span class="spinner-border spinner-border-sm mr-2" role="status"></span>Analyzing and generating summary...</p>';
+    copyBtn.style.display = 'none';
+    if (goBtn) {
+      goBtn.disabled = true;
+    }
 
-$('.copy').hide();
-$('.ai-content').html(`<h3 style='width:100%; text-align:center;'>Analyzing, please wait...<br><center><img src="{{asset("assets/images/loader.gif")}}"></center></h3>`);
-    
-const token = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
-let lang   = $('.language').val();
-let prompt = $('#prompt').val();
+    var lang = document.querySelector('#summarise-modal .language');
+    var promptInput = document.getElementById('prompt');
+    var langVal = lang ? lang.value : 'English';
+    var promptVal = promptInput ? promptInput.value.trim() : '';
 
-console.log('Prompt',prompt);
+    var url = '{{ url("ai/summarise-stream") }}';
+    var body = JSON.stringify({
+      resource_id: resourceId,
+      type: isForum,
+      language: langVal,
+      prompt: promptVal || null
+    });
 
-        fetch(`{{url('ai/summarise')}}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': token,
-        },
-        body: JSON.stringify({
-            resource_id: resourceId,
-            type: isForum,
-            language: lang,
-            prompt: prompt
-        })
-        })
-        .then(response => {
-
-            console.log(response);
-            
-            if (!response.ok) {
-            throw new Error('Network response was not ok ' + response.statusText);
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': getToken(),
+        'Accept': 'text/html'
+      },
+      body: body
+    })
+      .then(function (response) {
+        if (!response.ok) throw new Error('Request failed');
+        var reader = response.body.getReader();
+        var decoder = new TextDecoder();
+        var accumulated = '';
+        function read() {
+          return reader.read().then(function (result) {
+            if (result.done) {
+              if (accumulated) {
+                contentEl.innerHTML = accumulated;
+              }
+              copyBtn.style.display = 'inline-block';
+              if (goBtn) goBtn.disabled = false;
+              return;
             }
-
-            return response.json();
-        })
-        .then(data => {
-            console.log(data); // Handle the data
-            
-            console.log('Resp:',data);
-            
-            $('.modal-dialog').addClass(' modal-fullscreen');
-            $('.ai-content').html(data.content);
-            $('.copy').show();
-            //typeHtml($('.ai-content'), data.content, 5000);
-        })
-        .catch(error => {
-            console.error('There was a problem with the fetch operation:', error);
-            $('.ai-content').html(error);
-        });
-}
-
-function typeText(element, text, speed) {
-    
-    let index = 0;
-
-    function type() {
-        if (index < text.length) {
-            element.append(text.charAt(index));
-            index++;
-            setTimeout(type, speed);
+            var chunk = decoder.decode(result.value, { stream: true });
+            accumulated += chunk;
+            contentEl.innerHTML = accumulated;
+            contentEl.scrollTop = contentEl.scrollHeight;
+            return read();
+          });
         }
+        return read();
+      })
+      .catch(function (err) {
+        contentEl.innerHTML = '<div class="alert alert-danger">Could not generate summary. Please try again.</div>';
+        if (goBtn) goBtn.disabled = false;
+      });
+  };
+
+  window.copyToClipboard = function () {
+    var content = document.getElementById('coppable');
+    var text = content ? content.innerText : '';
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(text).catch(function (e) { console.error(e); });
     }
-
-    type();
-}
-
-function typeHtml(element, html, speed) {
-let container = $('<div>').html(html).contents(); // Create a container for the HTML content
-let index = 0;
-
-function type() {
-    if (index < container.length) {
-        let node = container[index];
-        let $node = $(node);
-        if (node.nodeType === 1) { // If it's an element node
-            element.append($node.clone().addClass('hidden')); // Add the element to the DOM with hidden class
-            let $newNode = element.find(':last-child');
-                $newNode.removeClass('hidden'); 
-        } else if (node.nodeType === 3) { // If it's a text node
-            typeText(element, node.textContent, 500);
-        }
-        index++;
-        setTimeout(type, speed);
-    }
-}
-
-type();
-
-}
-
-function copyToClipboard() {
-            const content = document.getElementById('coppable').innerText;
-            navigator.clipboard.writeText(content).then(function() {
-            }, function(err) {
-                console.error('Could not copy text: ', err);
-            });
-        }
-        
+  };
+})();
 </script>

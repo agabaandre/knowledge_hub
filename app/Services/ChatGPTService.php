@@ -58,6 +58,70 @@ class ChatGPTService implements AIModel{
 
     }
 
+    /**
+     * Stream completion: call $onChunk(string $content) for each delta.
+     * Uses OpenAI stream: true (SSE). Parses data: lines and extracts delta.content.
+     */
+    public function promptStream(string $question, callable $onChunk): void
+    {
+        $api_key  = config("ai.open_api_key");
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            "Authorization: Bearer $api_key"
+        ];
+        $systemContent = "You are to act as a high accuracy content development and review expert, providing accurate comprehensive summarization and or comparison without being ridiculously brief and not mentioning specific sections in the document but you can still use bullets and headings , comparison and enrichment of content given to you.If Attached content ('attached_content:<content here>') contains data, work on that first but ignoring table of contents and unreadable characters,for attached content remember to mention that the section u are summarising is from the attachment. Make sure you use only factual data to guide and engage. If the content is short for you to summarise, i.e less than 100 words, make it clear in the title of the response. Always return responses in raw html format in a div, ignore html,head and body tags, use nice styling especially using lists,headings and paragraphs, don't use h1 and h2 tags. Use teal color for headings and bold words. Avoid using background colors. Translate the summary to the summary language if provided.";
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => [
+                ['role' => 'system', 'content' => $systemContent],
+                ['role' => 'user', 'content' => $question],
+            ],
+            'max_tokens' => 3096,
+            'stream' => true,
+        ];
+        $jsonData = json_encode($payload);
+        $headers[] = 'Content-Length: ' . strlen($jsonData);
+
+        $ch = curl_init($endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
+            $len = strlen($data);
+            if ($len > 0) {
+                $this->parseSSELine($data, $onChunk);
+            }
+            return $len;
+        });
+
+        curl_exec($ch);
+        if (curl_errno($ch)) {
+            Log::error('OpenAI stream error: ' . curl_error($ch));
+            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
+        }
+        curl_close($ch);
+    }
+
+    private function parseSSELine(string $data, callable $onChunk): void
+    {
+        $lines = explode("\n", $data);
+        foreach ($lines as $line) {
+            $line = trim($line);
+            if (strpos($line, 'data: ') === 0) {
+                $json = substr($line, 6);
+                if ($json === '[DONE]') {
+                    return;
+                }
+                $decoded = json_decode($json, true);
+                if (isset($decoded['choices'][0]['delta']['content'])) {
+                    $onChunk($decoded['choices'][0]['delta']['content']);
+                }
+            }
+        }
+    }
+
     private function sendRequest($url, $headers, $body) {
         // Initialize cURL session
         $ch = curl_init($url);

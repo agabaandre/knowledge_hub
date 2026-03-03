@@ -570,12 +570,15 @@
                     
                     <!-- Action Buttons - Floated Right -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                        <div>
+                        <div class="d-flex gap-2 flex-wrap">
                 @if($publication->has_any_pdf)
                 <button onclick="openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null))" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> Chat with PDF
                 </button>
                 @endif
+                <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
+                    <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
+                </button>
             </div>
                         <div class="d-flex gap-2">
                 @auth
