@@ -114,7 +114,7 @@
                         <a href="{{ url('records/resource?id=' . $pub->id) }}" class="text-decoration-none">
                           <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
                         </a>
-                        <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags($pub->description ?? ''), 100) }}</p>
+                        <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>
                         <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
                           @if($pub->author)
                           <span class="mr-2"><i class="fa fa-user mr-1"></i>
@@ -145,7 +145,7 @@
                         <a href="{{ url('records/resource?id=' . $pub->id) }}" class="text-decoration-none">
                           <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
                         </a>
-                        <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags($pub->description ?? ''), 100) }}</p>
+                        <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>
                         <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
                           @if($pub->author)
                           <span class="mr-2"><i class="fa fa-user mr-1"></i>

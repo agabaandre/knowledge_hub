@@ -210,7 +210,7 @@
                      </h5>
                      
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
-                             {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 40, '...') !!}
+                             {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
                          </a>
                      
                      

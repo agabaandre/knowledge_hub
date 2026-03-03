@@ -780,7 +780,7 @@
                                 </div>
                                 @endif
                                 @if(!empty($relatedPub->description))
-                                <div class="related-resource-desc">{{ Str::limit(strip_tags($relatedPub->description), 140) }}</div>
+                                <div class="related-resource-desc">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($relatedPub->description))), 140) }}</div>
                         @endif
                                 <div class="related-resource-actions">
                                     <a href="{{ $detailsUrl }}" target="_blank" class="btn btn-au btn-sm" onclick="event.stopPropagation();">

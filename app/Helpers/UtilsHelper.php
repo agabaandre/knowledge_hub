@@ -24,6 +24,20 @@ if(!function_exists('truncate')){
 	}
 }
 
+if(!function_exists('publication_description_for_list')){
+	/**
+	 * Strip leading "Overview of the Document" (and variants) from publication description for list display.
+	 */
+	function publication_description_for_list($description){
+		if (empty($description)) {
+			return $description;
+		}
+		// Remove "Overview of the Document" or "Overview" at the start (case-insensitive, optional punctuation/space)
+		$text = preg_replace('/^\s*(Overview\s+of\s+the\s+Document|Overview)\s*[\.:\s]*/iu', '', $description);
+		return trim($text);
+	}
+}
+
 if(!function_exists('clean_unicode')){
 	/**
 	 * Remove hidden Unicode characters and control characters from text
