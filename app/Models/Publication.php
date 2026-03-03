@@ -270,13 +270,29 @@ class Publication extends Model
     public function scopeSearchTerm($query, $term)
     {
         if (strlen($term) > 2) {
-            $query->where('title', 'like', '%' . $term . '%')
-                ->orWhere('description', 'like', '%' . $term . '%')
-                ->orWhereIn('author_id', Author::where('name', 'like', '%' . $term . '%')->pluck('id'));
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'like', '%' . $term . '%')
+                    ->orWhere('description', 'like', '%' . $term . '%')
+                    ->orWhereIn('author_id', Author::where('name', 'like', '%' . $term . '%')->pluck('id'))
+                    // Search in associated authors (full phrase, e.g. "Beyande Raissa")
+                    ->orWhere('associated_authors', 'like', '%' . $term . '%');
 
-            if (states_enabled()) {
-                $query->orWhereIn('geographical_coverage_id', GeoCoverage::where('name', 'like', '%' . $term . '%')->pluck('id'));
-            }
+                // Multi-word author search: match when all words appear in associated_authors (any order)
+                $words = array_filter(preg_split('/\s+/u', trim($term), -1, PREG_SPLIT_NO_EMPTY), function ($w) {
+                    return strlen($w) > 1;
+                });
+                if (count($words) > 1) {
+                    $q->orWhere(function ($sub) use ($words) {
+                        foreach ($words as $w) {
+                            $sub->where('associated_authors', 'like', '%' . $w . '%');
+                        }
+                    });
+                }
+
+                if (states_enabled()) {
+                    $q->orWhereIn('geographical_coverage_id', GeoCoverage::where('name', 'like', '%' . $term . '%')->pluck('id'));
+                }
+            });
         }
     }
 

@@ -26,15 +26,14 @@ if(!function_exists('truncate')){
 
 if(!function_exists('publication_description_for_list')){
 	/**
-	 * Strip leading "Overview of the Document" (and variants) from publication description for list display.
+	 * Strip "Overview of the Document" from publication description using string replace (leaves a single space).
 	 */
 	function publication_description_for_list($description){
 		if (empty($description)) {
 			return $description;
 		}
-		// Remove "Overview of the Document" or "Overview" at the start (case-insensitive, optional punctuation/space)
-		$text = preg_replace('/^\s*(Overview\s+of\s+the\s+Document|Overview)\s*[\.:\s]*/iu', '', $description);
-		return trim($text);
+		$text = str_ireplace('Overview of the Document', ' ', $description);
+		return trim(preg_replace('/\s+/', ' ', $text));
 	}
 }
 
