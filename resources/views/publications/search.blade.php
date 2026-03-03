@@ -1,4 +1,66 @@
+@php
+    $pageTitle = $pageTitle ?? ('Search Resources & Discussions - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
+    $pageDescription = $pageDescription ?? 'Search publications, resources and discussion forums. Find public health content and join discussions across Africa.';
+    $canonicalUrl = $canonicalUrl ?? url('records/search');
+@endphp
 @extends('layouts.app')
+
+@section('structured_data')
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "SearchResultsPage",
+    "name": "{{ addslashes($pageTitle) }}",
+    "description": "{{ addslashes(strip_tags($pageDescription)) }}",
+    "url": "{{ $canonicalUrl }}",
+    "mainEntity": {
+        "@type": "ItemList",
+        "numberOfItems": {{ $results_count ?? 0 }},
+        "itemListElement": [
+            @if(isset($publications) && $publications->count() > 0)
+                @foreach($publications->take(10) as $index => $pub)
+                {
+                    "@type": "ListItem",
+                    "position": {{ $index + 1 }},
+                    "item": {
+                        "@type": "Article",
+                        "name": "{{ addslashes(Str::limit(strip_tags($pub->title ?? ''), 100)) }}",
+                        "url": "{{ url('records/resource?id=' . $pub->id) }}",
+                        "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}"
+                    }
+                }@if(!$loop->last || (isset($searchForums) && $searchForums->count() > 0)),@endif
+                @endforeach
+            @endif
+            @if(isset($searchForums) && $searchForums->count() > 0)
+                @foreach($searchForums as $index => $forum)
+                {
+                    "@type": "ListItem",
+                    "position": {{ (isset($publications) && $publications->count() > 0 ? min(10, $publications->count()) : 0) + $index + 1 }},
+                    "item": {
+                        "@type": "DiscussionForumPosting",
+                        "name": "{{ addslashes(Str::limit(strip_tags($forum->forum_title ?? ''), 100)) }}",
+                        "url": "{{ url('forums/thread?id=' . $forum->id) }}",
+                        "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 200)) }}",
+                        "author": {
+                            "@type": "Person",
+                            "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
+                        }
+                    }
+                }@if(!$loop->last),@endif
+                @endforeach
+            @endif
+        ]
+    },
+    "breadcrumb": {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+            { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url('/') }}" },
+            { "@type": "ListItem", "position": 2, "name": "Search", "item": "{{ $canonicalUrl }}" }
+        ]
+    }
+}
+</script>
+@endsection
 
 @section('styles')
 @endsection
@@ -29,6 +91,45 @@
                                     </div>
                                     @endif
                                 </div>
+                            </div>
+                            @endif
+
+                            {{-- Related Discussions (forums matching search term) --}}
+                            @if(isset($searchForums) && $searchForums->count() > 0)
+                            <div class="mb-4">
+                                <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
+                                    <i class="fa fa-comments mr-2"></i>Related Discussions
+                                </h5>
+                                <div class="row">
+                                    @foreach($searchForums as $forum)
+                                    <div class="col-12 mb-3">
+                                        <div class="card border rounded" style="border-color:#e2e8f0;">
+                                            <div class="card-body py-3">
+                                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="text-decoration-none">
+                                                    <h6 class="mb-1" style="color:#0f172a;font-size:1rem;">{!! Str::limit(strip_tags($forum->forum_title ?? ''), 120) !!}</h6>
+                                                </a>
+                                                @if(!empty($forum->forum_description))
+                                                <p class="mb-2 text-muted" style="font-size:0.875rem;">{{ Str::limit(strip_tags($forum->forum_description), 140) }}</p>
+                                                @endif
+                                                <div class="d-flex align-items-center flex-wrap" style="font-size:0.8rem;color:#64748b;">
+                                                    @if($forum->user)
+                                                    <span class="mr-3"><i class="fa fa-user mr-1"></i>{{ $forum->user->name ?? 'Unknown' }}</span>
+                                                    @endif
+                                                    <span class="mr-3"><i class="fa fa-clock mr-1"></i>{{ time_ago($forum->created_at) }}</span>
+                                                    <span class="mr-3"><i class="fa fa-comments mr-1"></i>{{ $forum->total_comments ?? 0 }} Comments</span>
+                                                    <span><i class="fa fa-eye mr-1"></i>{{ $forum->views ?? 0 }} Views</span>
+                                                </div>
+                                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                    <i class="fa fa-arrow-right mr-1"></i>View Discussion
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <p class="mb-0 mt-2">
+                                    <a href="{{ url('forums') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-secondary">View all discussions</a>
+                                </p>
                             </div>
                             @endif
                             

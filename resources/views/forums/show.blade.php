@@ -1,10 +1,13 @@
 @php
     $hide_search = true;
-    // SEO Meta Tags for Forum Thread Page
-    $pageTitle = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+    $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+    $forumAuthorName = $forum->user->name ?? 'Anonymous';
+    // SEO Meta Tags for Forum Thread Page – author-optimised
+    $pageTitle = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . $siteName;
     $pageDescription = Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
-    $pageKeywords = 'forum discussion, ' . ($forum->forum_title ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
-    
+    $pageKeywords = 'forum discussion, ' . ($forum->forum_title ?? '') . ', ' . $forumAuthorName . ', public health, ' . (settings()->seo_keywords ?? '');
+    $pageAuthor = $forumAuthorName;
+
     // Use forum image if available, otherwise default
     $forumImage = null;
     if (!empty($forum->forum_image) && is_image($forum->forum_image)) {
@@ -13,12 +16,17 @@
     $pageImage = $forumImage ?? settings()->logo ?? asset('assets/images/logo.png');
     $canonicalUrl = url('forums/thread?id=' . $forum->id);
     $ogType = 'article';
-    
+
+    // Article dates for OG
+    $publishDate = $forum->created_at ? (is_string($forum->created_at) ? \Carbon\Carbon::parse($forum->created_at)->toIso8601String() : $forum->created_at->toIso8601String()) : now()->toIso8601String();
+    $modifiedDate = $forum->updated_at ? (is_string($forum->updated_at) ? \Carbon\Carbon::parse($forum->updated_at)->toIso8601String() : $forum->updated_at->toIso8601String()) : $publishDate;
+    $articlePublishedTime = $publishDate;
+    $articleModifiedTime = $modifiedDate;
+
     // Get forum stats
     $commentCount = $forum->total_comments ?? count($forum->comments ?? []);
     $likeCount = $forum->total_likes ?? count($forum->likes ?? []);
-    $publishDate = $forum->created_at ? (is_string($forum->created_at) ? \Carbon\Carbon::parse($forum->created_at)->toIso8601String() : $forum->created_at->toIso8601String()) : now()->toIso8601String();
-    $modifiedDate = $forum->updated_at ? (is_string($forum->updated_at) ? \Carbon\Carbon::parse($forum->updated_at)->toIso8601String() : $forum->updated_at->toIso8601String()) : $publishDate;
+    $authorProfileUrl = $forum->user ? url('account') : '';
 @endphp
 
 @extends('layouts.app')
@@ -36,7 +44,11 @@
     "author": {
         "@type": "Person",
         "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
+        @if(!empty($authorProfileUrl))
+        ,"url": "{{ $authorProfileUrl }}"
+        @endif
     },
+    "commentCount": {{ (int) ($forum->total_comments ?? count($forum->comments ?? [])) }},
     "publisher": {
         "@type": "Organization",
         "name": "{{ settings()->site_name ?? 'Africa CDC Knowledge Hub' }}",
@@ -62,7 +74,7 @@
         }
     ],
     @if($forum->tags && $forum->tags->count() > 0)
-    "keywords": "{{ $forum->tags->pluck('tag_text')->implode(', ') }}",
+    "keywords": "{{ addslashes($forum->tags->pluck('tag')->filter()->implode(', ')) }}",
     @endif
     "breadcrumb": {
         "@type": "BreadcrumbList",

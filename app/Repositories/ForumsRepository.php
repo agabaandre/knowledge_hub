@@ -12,9 +12,52 @@ use App\Models\ForumSubscription;
 use App\Models\ForumTag;
 use App\Models\Tag;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
 
 class ForumsRepository extends SharedRepo{
+
+    /**
+     * Whether the forums table has a FULLTEXT index (cached).
+     */
+    protected function forumsFulltextAvailable(): bool
+    {
+        return Cache::remember('forums_fulltext_index_available', 3600, function () {
+            $driver = DB::connection()->getDriverName();
+            if ($driver !== 'mysql') {
+                return false;
+            }
+            $db = DB::connection()->getDatabaseName();
+            $result = DB::select(
+                "SELECT 1 FROM information_schema.STATISTICS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'forums' AND INDEX_NAME = 'ft_forum_search' LIMIT 1",
+                [$db]
+            );
+            return !empty($result);
+        });
+    }
+
+    /**
+     * Apply full-text or LIKE search on forum_title and forum_description.
+     */
+    protected function applyForumTermSearch($query, string $term): void
+    {
+        $term = trim($term);
+        if ($term === '') {
+            return;
+        }
+        if ($this->forumsFulltextAvailable()) {
+            $query->whereRaw(
+                'MATCH(forum_title, forum_description) AGAINST(? IN NATURAL LANGUAGE MODE)',
+                [$term]
+            );
+        } else {
+            $query->where(function ($q) use ($term) {
+                $q->where('forum_title', 'like', '%' . $term . '%')
+                  ->orWhere('forum_description', 'like', '%' . $term . '%');
+            });
+        }
+    }
 
     public function get(Request $request,$approved=1){
 
@@ -90,6 +133,50 @@ class ForumsRepository extends SharedRepo{
         $results =  $forums->paginate($rows_count);
 
         return $results;
+    }
+
+    /**
+     * Search forums by term for the records search page (publications + forums combined).
+     * Returns approved forums only, with same community/access rules as get().
+     */
+    public function searchForRecords(Request $request, $limit = 5)
+    {
+        $forums = Forum::with(['user'])
+            ->withCount([
+                'comments as total_comments' => function ($q) { $q->whereNull('parent_id'); },
+                'likes as total_likes'
+            ])
+            ->where('status', 1)
+            ->where('is_approved', 1)
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('term') && strlen(trim($request->term)) > 2) {
+            $this->applyForumTermSearch($forums, trim($request->term));
+        } else {
+            return collect();
+        }
+
+        if (current_user() && current_user()->id) {
+            if (!$request->community_id) {
+                $communities = CommunityOfPracticeMembers::where('user_id', current_user()->id)->pluck('community_of_practice_id');
+                $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communities)->pluck('forum_id');
+                $forums->where(function ($q) use ($commForums) {
+                    $q->whereIn('id', $commForums)
+                      ->orWhere('created_by', current_user()->id)
+                      ->orWhereDoesntHave('communities');
+                });
+            } else {
+                $forums->whereHas('communities', function ($q) use ($request) {
+                    $q->where('community_of_practice_id', $request->community_id);
+                });
+            }
+        } else {
+            $forums->whereDoesntHave('communities');
+        }
+
+        $this->access_filter($forums);
+
+        return $forums->limit($limit)->get();
     }
 
     public function getByUser($userId, Request $request, $approved=1){

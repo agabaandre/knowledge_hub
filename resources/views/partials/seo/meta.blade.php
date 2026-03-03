@@ -13,7 +13,7 @@
 {{-- Basic Meta Tags --}}
 <meta name="description" content="{{ strip_tags($pageDescription) }}">
 <meta name="keywords" content="{{ $pageKeywords }}">
-<meta name="author" content="{{ $siteName }}">
+<meta name="author" content="{{ $pageAuthor ?? $siteName }}">
 <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1">
 <meta name="googlebot" content="index, follow">
 <meta name="language" content="English">
@@ -30,6 +30,15 @@
 <meta property="og:image:alt" content="{{ strip_tags($pageTitle) }}">
 <meta property="og:site_name" content="{{ $siteName }}">
 <meta property="og:locale" content="en_US">
+@if(isset($pageAuthor) && ($ogType ?? '') === 'article')
+<meta property="article:author" content="{{ strip_tags($pageAuthor) }}">
+@if(!empty($articlePublishedTime))
+<meta property="article:published_time" content="{{ $articlePublishedTime }}">
+@endif
+@if(!empty($articleModifiedTime))
+<meta property="article:modified_time" content="{{ $articleModifiedTime }}">
+@endif
+@endif
 
 {{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
@@ -38,6 +47,9 @@
 <meta name="twitter:description" content="{{ strip_tags($pageDescription) }}">
 <meta name="twitter:image" content="{{ $pageImage }}">
 <meta name="twitter:site" content="@AfricaCDC">
+@if(isset($pageAuthor))
+<meta name="twitter:creator" content="{{ strip_tags($pageAuthor) }}">
+@endif
 
 {{-- Canonical URL --}}
 <link rel="canonical" href="{{ $canonicalUrl }}">
