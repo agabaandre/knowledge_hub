@@ -253,6 +253,42 @@ class Publication extends Model
         return file_exists($path) ? $path : null;
     }
 
+    /**
+     * Whether this publication has at least one PDF (main file or any attachment).
+     */
+    public function getHasAnyPdfAttribute()
+    {
+        if ($this->publication_pdf_url || $this->publication_pdf_path) {
+            return true;
+        }
+        foreach ($this->attachments ?? [] as $att) {
+            if ($att->is_pdf) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * List of PDF sources for Chat with PDF: main (if PDF) + each PDF attachment.
+     * Each item: ['type' => 'main'|'attachment', 'label' => string, 'attachment_id' => null|int]
+     */
+    public function getPdfSourcesAttribute()
+    {
+        $sources = [];
+        if ($this->publication_pdf_url || $this->publication_pdf_path) {
+            $sources[] = ['type' => 'main', 'label' => 'Main document', 'attachment_id' => null];
+        }
+        foreach ($this->attachments ?? [] as $att) {
+            if ($att->is_pdf) {
+                $label = $att->description ?? pathinfo($att->getRawOriginal('file'), PATHINFO_FILENAME);
+                $label = \Illuminate\Support\Str::limit(str_replace('_', ' ', $label), 40);
+                $sources[] = ['type' => 'attachment', 'label' => $label, 'attachment_id' => $att->id];
+            }
+        }
+        return $sources;
+    }
+
     // Ensure the content is UTF-8 encoded
     public function getDescriptionAttribute($value)
     {

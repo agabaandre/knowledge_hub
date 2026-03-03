@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Publication;
+use App\Models\PublicationAttachment;
 use App\Models\PdfChatSession;
 use App\Models\PdfChatMessage;
 use App\Services\ChatPDFService;
@@ -20,18 +21,37 @@ class PdfChatController extends Controller
     }
 
     /**
-     * Get or create a PDF chat session for a publication. Returns session id, sourceId, and message history (if logged in).
+     * Get or create a PDF chat session for a publication (main PDF or a specific attachment).
+     * Returns session id, sourceId, and message history (if logged in).
      */
     public function getOrCreateSession(Request $request)
     {
-        $request->validate(['publication_id' => 'required|integer|exists:publications,id']);
+        $request->validate([
+            'publication_id' => 'required|integer|exists:publication,id',
+            'attachment_id' => 'nullable|integer',
+        ]);
 
         $publicationId = (int) $request->publication_id;
+        $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
         $userId = Auth::id();
 
-        $publication = Publication::findOrFail($publicationId);
-        $pdfUrl = $publication->publication_pdf_url;
-        $pdfPath = $publication->publication_pdf_path;
+        $publication = Publication::with('attachments')->findOrFail($publicationId);
+        $pdfUrl = null;
+        $pdfPath = null;
+
+        if ($attachmentId) {
+            $attachment = PublicationAttachment::where('id', $attachmentId)
+                ->where('publication_id', $publicationId)
+                ->first();
+            if (!$attachment || !$attachment->is_pdf) {
+                return response()->json(['error' => 'Attachment not found or is not a PDF.'], 422);
+            }
+            $pdfUrl = $attachment->file_url;
+            $pdfPath = $attachment->file_path;
+        } else {
+            $pdfUrl = $publication->publication_pdf_url;
+            $pdfPath = $publication->publication_pdf_path;
+        }
 
         if (!$pdfUrl && !$pdfPath) {
             return response()->json(['error' => 'This publication has no PDF available for chat.'], 422);
@@ -39,6 +59,13 @@ class PdfChatController extends Controller
 
         $session = PdfChatSession::where('publication_id', $publicationId)
             ->where('user_id', $userId)
+            ->where(function ($q) use ($attachmentId) {
+                if ($attachmentId === null) {
+                    $q->whereNull('attachment_id');
+                } else {
+                    $q->where('attachment_id', $attachmentId);
+                }
+            })
             ->first();
 
         if ($session && !empty($session->source_id)) {
@@ -56,6 +83,7 @@ class PdfChatController extends Controller
             $session = PdfChatSession::create([
                 'user_id' => $userId,
                 'publication_id' => $publicationId,
+                'attachment_id' => $attachmentId,
                 'source_id' => null,
             ]);
         }
@@ -69,7 +97,7 @@ class PdfChatController extends Controller
         }
 
         if (!$sourceId) {
-            Log::warning('ChatPDF: could not obtain sourceId for publication ' . $publicationId);
+            Log::warning('ChatPDF: could not obtain sourceId for publication ' . $publicationId . ' attachment ' . $attachmentId);
             return response()->json(['error' => 'Could not load the PDF for chat. Please try again later.'], 502);
         }
 
@@ -92,20 +120,22 @@ class PdfChatController extends Controller
     public function sendMessage(Request $request)
     {
         $request->validate([
-            'publication_id' => 'required|integer|exists:publications,id',
+            'publication_id' => 'required|integer|exists:publication,id',
             'session_id' => 'nullable|integer|exists:pdf_chat_sessions,id',
+            'attachment_id' => 'nullable|integer',
             'message' => 'required|string|max:4000',
             'stream' => 'nullable|boolean',
         ]);
 
         $publicationId = (int) $request->publication_id;
         $sessionId = $request->session_id ? (int) $request->session_id : null;
+        $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
         $userMessage = $request->message;
         $stream = (bool) $request->get('stream', true);
 
         $userId = Auth::id();
 
-        $session = $this->resolveSession($publicationId, $sessionId, $userId);
+        $session = $this->resolveSession($publicationId, $sessionId, $attachmentId, $userId);
         if (!$session) {
             return response()->json(['error' => 'Session not found or invalid.'], 404);
         }
@@ -132,7 +162,7 @@ class PdfChatController extends Controller
         ]);
     }
 
-    private function resolveSession(int $publicationId, ?int $sessionId, ?int $userId): ?PdfChatSession
+    private function resolveSession(int $publicationId, ?int $sessionId, ?int $attachmentId, ?int $userId): ?PdfChatSession
     {
         if ($sessionId) {
             $session = PdfChatSession::where('id', $sessionId)
@@ -145,26 +175,45 @@ class PdfChatController extends Controller
 
         $session = PdfChatSession::where('publication_id', $publicationId)
             ->where('user_id', $userId)
+            ->where(function ($q) use ($attachmentId) {
+                if ($attachmentId === null) {
+                    $q->whereNull('attachment_id');
+                } else {
+                    $q->where('attachment_id', $attachmentId);
+                }
+            })
             ->first();
 
         if ($session) {
             return $session;
         }
 
-        $publication = Publication::find($publicationId);
+        $publication = Publication::with('attachments')->find($publicationId);
         if (!$publication) {
             return null;
         }
 
-        $pdfUrl = $publication->publication_pdf_url;
-        $pdfPath = $publication->publication_pdf_path;
+        $pdfUrl = null;
+        $pdfPath = null;
+        if ($attachmentId) {
+            $attachment = PublicationAttachment::where('id', $attachmentId)
+                ->where('publication_id', $publicationId)
+                ->first();
+            if (!$attachment || !$attachment->is_pdf) {
+                return null;
+            }
+            $pdfUrl = $attachment->file_url;
+            $pdfPath = $attachment->file_path;
+        } else {
+            $pdfUrl = $publication->publication_pdf_url;
+            $pdfPath = $publication->publication_pdf_path;
+        }
+
         if (!$pdfUrl && !$pdfPath) {
             return null;
         }
 
-        $sourceId = $pdfUrl
-            ? $this->chatPdf->getSourceIdFromUrl($pdfUrl)
-            : null;
+        $sourceId = $pdfUrl ? $this->chatPdf->getSourceIdFromUrl($pdfUrl) : null;
         if (!$sourceId && $pdfPath) {
             $sourceId = $this->chatPdf->getSourceIdFromFile($pdfPath);
         }
@@ -175,6 +224,7 @@ class PdfChatController extends Controller
         return PdfChatSession::create([
             'user_id' => $userId,
             'publication_id' => $publicationId,
+            'attachment_id' => $attachmentId,
             'source_id' => $sourceId,
         ]);
     }

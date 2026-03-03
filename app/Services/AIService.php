@@ -36,7 +36,7 @@ class AIService
                 $response = $this->aiModel->summarize($prompt,$additional_prompt);
             }
         } else {
-            // Load forum with all relationships for better summarization
+            // Forums and other non-PDF content: use GPT (chatgpt) for summarization
             $resource = Forum::with([
                 'user',
                 'tags',

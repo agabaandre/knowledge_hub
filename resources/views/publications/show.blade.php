@@ -571,15 +571,14 @@
                     <!-- Action Buttons - Floated Right -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div>
-                @if($publication->publication_pdf_url)
-                <button onclick="openPdfChat({{ $publication->id }})" class="btn btn-au btn-sm">
-                    <i class="fa-solid fa-microchip"></i> AI Processing (Chat with PDF)
+                @if($publication->has_any_pdf)
+                <button onclick="openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null))" class="btn btn-au btn-sm">
+                    <i class="fa-solid fa-microchip"></i> Chat with PDF
                 </button>
-                @else
+                @endif
                 <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
                 </button>
-                @endif
             </div>
                         <div class="d-flex gap-2">
                 @auth
@@ -603,16 +602,23 @@
                         
                         @if ($publication->publication)
                             <div class="mb-3 pb-3 border-bottom">
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                                         <strong><i class="fa fa-link mr-2 text-success"></i>External Resource</strong>
                                         <p class="mb-0 text-muted" style="font-size: 0.9rem; word-break: break-all;">
                                             {{ Str::limit($publication->publication, 80) }}
                                         </p>
                                     </div>
-                                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
-                                        <i class="fa fa-external-link-alt mr-1"></i> Open
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        @if($publication->publication_pdf_url)
+                                        <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, null)">
+                                            <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
+                                        </button>
+                                        @endif
+                                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
+                                            <i class="fa fa-external-link-alt mr-1"></i> Open
+                                        </a>
+                                    </div>
                     </div>
                 </div>
                         @endif
@@ -676,7 +682,12 @@
                                                         {{ strtoupper($ext) }} file
                                                     </small>
                                                 </div>
-                                                <div class="d-flex gap-2">
+                                                <div class="d-flex gap-2 flex-wrap">
+                                                    @if($ext === 'pdf')
+                                                    <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, {{ $file->id }})" title="Chat with this PDF">
+                                                        <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
+                                                    </button>
+                                                    @endif
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
                                                             data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
@@ -836,16 +847,23 @@
                         
                         @if ($publication->publication)
                             <div class="mb-3 pb-3 border-bottom">
-                                <div class="d-flex justify-content-between align-items-center">
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                     <div>
                                         <strong><i class="fa fa-link mr-2 text-success"></i>External Resource</strong>
                                         <p class="mb-0 text-muted" style="font-size: 0.9rem; word-break: break-all;">
                                             {{ Str::limit($publication->publication, 80) }}
                                         </p>
                     </div>
-                                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
-                                        <i class="fa fa-external-link-alt mr-1"></i> Open
-                                    </a>
+                                    <div class="d-flex gap-2">
+                                        @if($publication->publication_pdf_url)
+                                        <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, null)">
+                                            <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
+                                        </button>
+                                        @endif
+                                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
+                                            <i class="fa fa-external-link-alt mr-1"></i> Open
+                                        </a>
+                                    </div>
                 </div>
                 </div>
                         @endif
@@ -909,7 +927,12 @@
                                                         {{ strtoupper($ext) }} file
                                                     </small>
                                                 </div>
-                                                <div class="d-flex gap-2">
+                                                <div class="d-flex gap-2 flex-wrap">
+                                                    @if($ext === 'pdf')
+                                                    <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, {{ $file->id }})" title="Chat with this PDF">
+                                                        <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
+                                                    </button>
+                                                    @endif
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
                                                             data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
@@ -1126,9 +1149,12 @@
 </section>
 </article>
 @include('common.ai-summary')
-@if($publication->publication_pdf_url ?? null)
+@if($publication->has_any_pdf ?? false)
 @include('common.pdf-chat-modal')
-<script>var pdfChatPublicationId = {{ $publication->id }};</script>
+<script>
+  var pdfChatPublicationId = {{ $publication->id }};
+  var pdfChatAttachmentId = @json($publication->pdf_sources[0]['attachment_id'] ?? null);
+</script>
 @include('common.pdf-chat-js')
 @endif
 <!-- Modal for preview - Bootstrap 4 compatible -->

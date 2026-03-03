@@ -1,12 +1,14 @@
 <script>
 (function () {
   var publicationId = typeof pdfChatPublicationId !== 'undefined' ? pdfChatPublicationId : null;
+  var attachmentId = typeof pdfChatAttachmentId !== 'undefined' ? pdfChatAttachmentId : null;
   var sessionId = null;
   var sourceId = null;
   var isStreaming = false;
 
-  window.openPdfChat = function (pubId) {
+  window.openPdfChat = function (pubId, attId) {
     publicationId = pubId;
+    attachmentId = attId === undefined ? null : attId;
     sessionId = null;
     sourceId = null;
     $('#pdf-chat-modal').modal('show');
@@ -66,7 +68,7 @@
         'X-CSRF-TOKEN': getToken(),
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ publication_id: publicationId })
+      body: JSON.stringify({ publication_id: publicationId, attachment_id: attachmentId || null })
     })
       .then(function (r) {
         if (!r.ok) throw new Error('Session failed');
@@ -116,6 +118,7 @@
     var body = {
       publication_id: publicationId,
       session_id: sessionId,
+      attachment_id: attachmentId || null,
       message: text,
       stream: true
     };
