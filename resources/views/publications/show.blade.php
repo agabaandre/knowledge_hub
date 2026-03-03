@@ -863,7 +863,7 @@
                                         <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
                                             <i class="fa fa-external-link-alt mr-1"></i> Open
                                         </a>
-                                    </div>
+                </div>
                 </div>
                 </div>
                         @endif
