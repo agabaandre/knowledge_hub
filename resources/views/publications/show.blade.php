@@ -576,9 +576,6 @@
                     <i class="fa-solid fa-microchip"></i> Chat with PDF
                 </button>
                 @endif
-                <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
-                    <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
-                </button>
             </div>
                         <div class="d-flex gap-2">
                 @auth
@@ -609,16 +606,9 @@
                                             {{ Str::limit($publication->publication, 80) }}
                                         </p>
                                     </div>
-                                    <div class="d-flex gap-2">
-                                        @if($publication->publication_pdf_url)
-                                        <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, null)">
-                                            <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
-                                        </button>
-                                        @endif
-                                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
+                                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
                                             <i class="fa fa-external-link-alt mr-1"></i> Open
                                         </a>
-                                    </div>
                     </div>
                 </div>
                         @endif
@@ -634,8 +624,8 @@
                                             $url = $file->file;
                                             $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
-                                            
-                                            // Format attachment name: replace underscores with spaces and truncate to 20 characters
+                                            $realFilename = $file->download_filename;
+                                            // Display: short label for UI, real filename for title/tooltip
                                             $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
                                             $displayName = str_replace('_', ' ', $displayName);
                                             $displayName = Str::limit($displayName, 20);
@@ -683,18 +673,13 @@
                                                     </small>
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
-                                                    @if($ext === 'pdf')
-                                                    <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, {{ $file->id }})" title="Chat with this PDF">
-                                                        <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
-                                                    </button>
-                                                    @endif
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
                                                             data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download file" download>
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $realFilename }}" download="{{ $realFilename }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>
@@ -854,13 +839,7 @@
                                             {{ Str::limit($publication->publication, 80) }}
                                         </p>
                     </div>
-                                    <div class="d-flex gap-2">
-                                        @if($publication->publication_pdf_url)
-                                        <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, null)">
-                                            <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
-                                        </button>
-                                        @endif
-                                        <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
+                                    <a href="{{ $publication->publication }}" target="_blank" class="btn btn-outline-success btn-sm">
                                             <i class="fa fa-external-link-alt mr-1"></i> Open
                                         </a>
                 </div>
@@ -879,8 +858,8 @@
                                             $url = $file->file;
                                             $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
-                                            
-                                            // Format attachment name: replace underscores with spaces and truncate to 20 characters
+                                            $realFilename = $file->download_filename;
+                                            // Format attachment name: replace underscores with spaces and truncate to 20 characters for display
                                             $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
                                             $displayName = str_replace('_', ' ', $displayName);
                                             $displayName = Str::limit($displayName, 20);
@@ -928,18 +907,13 @@
                                                     </small>
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
-                                                    @if($ext === 'pdf')
-                                                    <button type="button" class="btn btn-au btn-sm" onclick="openPdfChat({{ $publication->id }}, {{ $file->id }})" title="Chat with this PDF">
-                                                        <i class="fa-solid fa-microchip mr-1"></i> Chat with PDF
-                                                    </button>
-                                                    @endif
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
                                                             data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download file" download>
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $realFilename }}" download="{{ $realFilename }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>

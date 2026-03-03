@@ -37,4 +37,14 @@ class PublicationAttachment extends Model
         $raw = $this->getRawOriginal('file');
         return $raw && strpos(strtolower($raw), '.pdf') !== false;
     }
+
+    /** Real filename for download (basename of stored file). */
+    public function getDownloadFilenameAttribute()
+    {
+        $raw = $this->getRawOriginal('file');
+        if (empty($raw)) {
+            return 'download';
+        }
+        return basename($raw);
+    }
 }
