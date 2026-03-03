@@ -28,7 +28,7 @@
                         "url": "{{ url('records/resource?id=' . $pub->id) }}",
                         "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}"
                     }
-                }@if(!$loop->last || (isset($searchForums) && $searchForums->count() > 0)),@endif
+                }@if(!$loop->last || (isset($searchForums) && $searchForums->count() > 0) || (isset($searchCommunities) && $searchCommunities->count() > 0)),@endif
                 @endforeach
             @endif
             @if(isset($searchForums) && $searchForums->count() > 0)
@@ -45,6 +45,20 @@
                             "@type": "Person",
                             "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
                         }
+                    }
+                }@if(!$loop->last || (isset($searchCommunities) && $searchCommunities->count() > 0)),@endif
+                @endforeach
+            @endif
+            @if(isset($searchCommunities) && $searchCommunities->count() > 0)
+                @foreach($searchCommunities as $index => $community)
+                {
+                    "@type": "ListItem",
+                    "position": {{ (isset($publications) && $publications->count() > 0 ? min(10, $publications->count()) : 0) + (isset($searchForums) ? $searchForums->count() : 0) + $index + 1 }},
+                    "item": {
+                        "@type": "Organization",
+                        "name": "{{ addslashes(Str::limit($community->community_name ?? '', 100)) }}",
+                        "url": "{{ url('communities/detail/' . $community->id) }}",
+                        "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 200)) }}"
                     }
                 }@if(!$loop->last),@endif
                 @endforeach
@@ -100,7 +114,7 @@
                                 <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
                                     <i class="fa fa-comments mr-2"></i>Related Discussions
                                 </h5>
-                                <div class="row">
+                    <div class="row">
                                     @foreach($searchForums as $forum)
                                     <div class="col-12 mb-3">
                                         <div class="card border rounded" style="border-color:#e2e8f0;">
@@ -129,6 +143,45 @@
                                 </div>
                                 <p class="mb-0 mt-2">
                                     <a href="{{ url('forums') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-secondary">View all discussions</a>
+                                </p>
+                            </div>
+                            @endif
+
+                            {{-- Related Communities (matching search term) --}}
+                            @if(isset($searchCommunities) && $searchCommunities->count() > 0)
+                            <div class="mb-4">
+                                <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
+                                    <i class="fa fa-users mr-2"></i>Related Communities
+                                </h5>
+                                <div class="row">
+                                    @foreach($searchCommunities as $community)
+                                    <div class="col-12 mb-3">
+                                        <div class="card border rounded" style="border-color:#e2e8f0;">
+                                            <div class="card-body py-3">
+                                                <a href="{{ url('communities/detail/' . $community->id) }}" class="text-decoration-none">
+                                                    <h6 class="mb-1" style="color:#0f172a;font-size:1rem;">{{ Str::limit($community->community_name ?? '', 120) }}</h6>
+                                                </a>
+                                                @if(!empty($community->description))
+                                                <p class="mb-2 text-muted" style="font-size:0.875rem;">{{ Str::limit(strip_tags($community->description), 140) }}</p>
+                                                @endif
+                                                <div class="d-flex align-items-center flex-wrap" style="font-size:0.8rem;color:#64748b;">
+                                                    @if($community->organisation)
+                                                    <span class="mr-3"><i class="fa fa-building mr-1"></i>{{ Str::limit($community->organisation, 40) }}</span>
+                                                    @endif
+                                                    @if($community->region)
+                                                    <span class="mr-3"><i class="fa fa-globe mr-1"></i>{{ $community->region->name ?? '' }}</span>
+                                                    @endif
+                                                </div>
+                                                <a href="{{ url('communities/detail/' . $community->id) }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                    <i class="fa fa-arrow-right mr-1"></i>View Community
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @endforeach
+                                </div>
+                                <p class="mb-0 mt-2">
+                                    <a href="{{ url('communities') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-secondary">View all communities</a>
                                 </p>
                             </div>
                             @endif

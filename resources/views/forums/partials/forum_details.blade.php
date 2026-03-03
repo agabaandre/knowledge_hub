@@ -396,9 +396,9 @@
                                         <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fileName }}</span>
                                         @if($canPreview)
                                         <i class="fa fa-eye ms-1" style="font-size: 0.75rem; opacity: 0.7;" title="Click to preview"></i>
-                                        @endif
+                                                    @endif
                                     </a>
-                                @endforeach
+                                                @endforeach
                             </div>
                         @endif
                     </div>

@@ -83,6 +83,28 @@ class CommsOfPracticeRepository{
         return $results;
     }
 
+    /**
+     * Search public communities by term for the records search page (combined with publications and forums).
+     */
+    public function searchForRecords(Request $request, $limit = 5)
+    {
+        if (!$request->filled('term') || strlen(trim($request->term)) === 0) {
+            return collect();
+        }
+        $term = trim($request->term);
+        return CommunityOfPractice::with(['region', 'country'])
+            ->where('is_public', 1)
+            ->where(function ($q) use ($term) {
+                $q->where('community_name', 'like', '%' . $term . '%')
+                  ->orWhere('description', 'like', '%' . $term . '%')
+                  ->orWhere('organisation', 'like', '%' . $term . '%')
+                  ->orWhere('department', 'like', '%' . $term . '%');
+            })
+            ->orderBy('community_name')
+            ->limit($limit)
+            ->get();
+    }
+
     public function getByUser($userId, Request $request)
     {
         // Get communities where user is an approved member

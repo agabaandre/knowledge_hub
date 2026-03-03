@@ -70,7 +70,7 @@
             <div class="col-md-8">
                 <!-- Topic Header & Description -->
                 <div class="mb-4">
-                    @if($tag->overview)
+            @if($tag->overview)
                         <div class="sidebar-content" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
                             <div class="d-flex align-items-center justify-content-between mb-3" style="flex-wrap: wrap; gap: 10px;">
                                 <h1 class="fw-bold" style="font-size: 2rem; color: var(--theme-color-primary, {{ $primary }}); margin-bottom: 1rem;">
@@ -83,11 +83,11 @@
                             <div class="overview-text-container" style="font-size: 1rem; line-height: 1.7; color: #4a5568; word-wrap: break-word; overflow-wrap: break-word; overflow-x: hidden; max-width: 100%;">
                                 {!! detect_and_embed_video_links($tag->overview, 180, 180) !!}
                             </div>
-                        </div>
-                    @endif
                 </div>
+            @endif
+        </div>
           
-            </div>
+    </div>
 
             <!-- Sidebar -->
             <div class="col-md-4">
@@ -126,12 +126,12 @@
                     <div style="font-size:0.875rem;color:#64748b;line-height:1.6;">
                         @if(isset($relatedCommunities))
                         <p class="mb-2"><strong>Related Communities:</strong> {{ $relatedCommunities->count() }}</p>
-                        @endif
+                                        @endif
                         @if(isset($relatedForums))
                         <p class="mb-0"><strong>Related Forums:</strong> {{ $relatedForums->count() }}</p>
-                        @endif
-                    </div>
-                </div>
+                                        @endif
+                                    </div>
+                                </div>
 
                 <!-- Related Communities -->
                 @if(isset($relatedCommunities) && $relatedCommunities->count() > 0)
@@ -150,8 +150,8 @@
                             @if($community->created_at)
                             <span><i class="fa fa-clock"></i> {{ $community->created_at->diffForHumans() }}</span>
                             @endif
+                            </div>
                         </div>
-                    </div>
                     @endforeach
                     <a href="{{ route('community.index') }}?tag={{ $tag->tag_text }}" class="btn btn-sm btn-outline-primary mt-2">View All Communities</a>
                 </div>
@@ -172,15 +172,15 @@
                 <!-- Publications List -->
                 @if($publications->count() > 0)
                     @include('health-topics.partials.publications')
-                    
-                    <!-- Pagination -->
-                    @if($publications->hasPages())
-                        <div class="d-flex justify-content-center mt-4">
-                            {{ $publications->links() }}
-                        </div>
-                    @endif
-                @else
-                    <!-- Empty State -->
+
+                <!-- Pagination -->
+                @if($publications->hasPages())
+                    <div class="d-flex justify-content-center mt-4">
+                        {{ $publications->links() }}
+                    </div>
+                @endif
+            @else
+                <!-- Empty State -->
                     <div class="sidebar-content text-center py-5" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
                         <i class="fa fa-file-alt fa-2x text-muted mb-3"></i>
                         <h5>No Publications Found</h5>
@@ -213,7 +213,7 @@
                     @endforeach
                     <a href="{{ url('forums') }}?tag={{ $tag->tag_text }}" class="btn btn-sm btn-outline-primary mt-2">View All Forums</a>
                 </div>
-                @endif
+            @endif
             </div>
         </div>
     </div>

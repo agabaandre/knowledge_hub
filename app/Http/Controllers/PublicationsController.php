@@ -7,18 +7,21 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ForumsRepository;
+use App\Repositories\CommsOfPracticeRepository;
 
 class PublicationsController extends Controller
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo,$commsRepo;
 
     public function __construct(PublicationsRepository $publicationsRepo,
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo, ForumsRepository $forumsRepo)
+    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo, ForumsRepository $forumsRepo,
+    CommsOfPracticeRepository $commsRepo)
     {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
         $this->forumsRepo       = $forumsRepo;
+        $this->commsRepo        = $commsRepo;
     }
 
     public function show(Request $request){
@@ -142,13 +145,14 @@ class PublicationsController extends Controller
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
 
-        // Combined search: forums matching the same term (when term is provided)
+        // Combined search: forums and communities matching the same term (when term is provided)
         $data['searchForums'] = $this->forumsRepo->searchForRecords($request, 5);
+        $data['searchCommunities'] = $this->commsRepo->searchForRecords($request, 5);
 
         // Calculate execution time
         $endTime = microtime(true);
         $data['search_time'] = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
-        $data['results_count'] = $data['publications']->total() + $data['searchForums']->count();
+        $data['results_count'] = $data['publications']->total() + $data['searchForums']->count() + $data['searchCommunities']->count();
 
         // Get latest publications for sidebar
         $latestRequest = clone $request;
@@ -179,9 +183,9 @@ class PublicationsController extends Controller
             ? 'Search: ' . \Illuminate\Support\Str::limit($term, 50) . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub')
             : 'Search Resources & Discussions - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
         $data['pageDescription'] = $term
-            ? 'Search results for "' . \Illuminate\Support\Str::limit($term, 60) . '" – publications and discussion forums from ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub') . '.'
-            : 'Search publications, resources and discussion forums. Find public health content and join discussions across Africa.';
-        $data['pageKeywords'] = ($term ? $term . ', ' : '') . 'search, publications, discussions, forums, ' . (settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
+            ? 'Search results for "' . \Illuminate\Support\Str::limit($term, 60) . '" – publications, communities and discussion forums from ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub') . '.'
+            : 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
+        $data['pageKeywords'] = ($term ? $term . ', ' : '') . 'search, publications, communities, discussions, forums, ' . (settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
         $data['canonicalUrl'] = url('records/search?' . http_build_query(array_filter($request->only(['term', 'rcc', 'country_id', 'author_id', 'thematic_area_id', 'sub_thematic_area_id', 'tag']))));
         $data['ogType'] = 'website';
 

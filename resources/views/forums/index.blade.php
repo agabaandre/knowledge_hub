@@ -785,7 +785,7 @@
                     </div>
                     @endforeach
                     <a href="{{ url('records') }}" class="btn btn-sm btn-outline-primary mt-2">View All Publications</a>
-                </div>
+            </div>
                 @endif
 
                 <!-- Related Communities -->
