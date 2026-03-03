@@ -38,7 +38,8 @@ class ForumsRepository extends SharedRepo{
     }
 
     /**
-     * Apply full-text or LIKE search on forum_title and forum_description.
+     * Apply full search on forums: title, description, and author (creator) name.
+     * Supports a single author name (e.g. "Raissa") so main page search finds forums by that author.
      */
     protected function applyForumTermSearch($query, string $term): void
     {
@@ -46,17 +47,21 @@ class ForumsRepository extends SharedRepo{
         if ($term === '') {
             return;
         }
-        if ($this->forumsFulltextAvailable()) {
-            $query->whereRaw(
-                'MATCH(forum_title, forum_description) AGAINST(? IN NATURAL LANGUAGE MODE)',
-                [$term]
-            );
-        } else {
-            $query->where(function ($q) use ($term) {
+        $query->where(function ($q) use ($term) {
+            if ($this->forumsFulltextAvailable()) {
+                $q->whereRaw(
+                    'MATCH(forum_title, forum_description) AGAINST(? IN NATURAL LANGUAGE MODE)',
+                    [$term]
+                );
+            } else {
                 $q->where('forum_title', 'like', '%' . $term . '%')
                   ->orWhere('forum_description', 'like', '%' . $term . '%');
+            }
+            // Include forums where the creator's name matches (e.g. one author name)
+            $q->orWhereHas('user', function ($uq) use ($term) {
+                $uq->where('name', 'like', '%' . $term . '%');
             });
-        }
+        });
     }
 
     public function get(Request $request,$approved=1){
@@ -87,9 +92,8 @@ class ForumsRepository extends SharedRepo{
             $forums->orderBy('created_at','desc');
         }
 
-        if($request->term){
-            $forums->where('forum_title','like','%'.$request->term.'%');
-            $forums->orWhere('forum_description','like','%'.$request->term.'%');
+        if ($request->filled('term') && strlen(trim($request->term)) > 0) {
+            $this->applyForumTermSearch($forums, trim($request->term));
         }
 
         if($request->tag){
@@ -150,7 +154,7 @@ class ForumsRepository extends SharedRepo{
             ->where('is_approved', 1)
             ->orderBy('created_at', 'desc');
 
-        if ($request->filled('term') && strlen(trim($request->term)) > 2) {
+        if ($request->filled('term') && strlen(trim($request->term)) > 0) {
             $this->applyForumTermSearch($forums, trim($request->term));
         } else {
             return collect();
