@@ -30,7 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
         // Cache forum and community counts every 5 minutes for menu badges
         $schedule->command('cache:forum-community-counts')->everyFiveMinutes();
-        
+        // Clean up PDF chat sessions older than 7 days (saved chats linked to user profiles)
+        $schedule->command('pdf-chat:prune --days=7')->dailyAt('03:30');
     }
 
     /**

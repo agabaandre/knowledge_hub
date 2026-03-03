@@ -42,6 +42,7 @@ use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\AIController;
+use App\Http\Controllers\PdfChatController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -580,6 +581,10 @@ Route::group(["prefix" => "ai"], function () {
     Route::post("/summarise",  [AIController::class, 'summarise']);
     Route::post("/compare",  [AIController::class, 'compare']);
     Route::post("/summarise-file",  [AIController::class, 'summariseFile'])->name('ai.summarise.file');
+
+    // PDF chat (ChatPDF): get/create session, send message (stream or JSON)
+    Route::post("/pdf-chat/session", [PdfChatController::class, 'getOrCreateSession'])->name('ai.pdf-chat.session');
+    Route::post("/pdf-chat/message", [PdfChatController::class, 'sendMessage'])->name('ai.pdf-chat.message');
 
 });
 

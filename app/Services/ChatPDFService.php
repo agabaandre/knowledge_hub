@@ -3,7 +3,105 @@ namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
 
-class ChatPDFService implements AIModel{
+class ChatPDFService implements AIModel
+{
+    private function getApiKey()
+    {
+        return config('ai.chat_pdf_key');
+    }
+
+    /**
+     * Get ChatPDF sourceId from a publicly accessible PDF URL (add-url API).
+     * @see https://www.chatpdf.com/docs/api/backend
+     */
+    public function getSourceIdFromUrl(string $pdfUrl)
+    {
+        $endpoint = 'https://api.chatpdf.com/v1/sources/add-url';
+        $headers = [
+            'Content-Type: application/json',
+            'x-api-key: ' . $this->getApiKey()
+        ];
+        $payload = ['url' => $pdfUrl];
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        return $response->sourceId ?? null;
+    }
+
+    /**
+     * Get ChatPDF sourceId from a local PDF file path (add-file API).
+     */
+    public function getSourceIdFromFile(string $filePath)
+    {
+        $source = $this->submitFile($filePath);
+        return $source->sourceId ?? null;
+    }
+
+    /**
+     * Chat with PDF: send messages and get response (stateless – send full history).
+     * Messages: [ ['role' => 'user'|'assistant', 'content' => '...'], ... ]
+     * Max 6 messages, ~2500 tokens total per API docs.
+     *
+     * @param string $sourceId ChatPDF source ID
+     * @param array $messages Array of { role, content }
+     * @param bool $referenceSources Include page references in response
+     * @return object { content, references? }
+     */
+    public function chat(string $sourceId, array $messages, bool $referenceSources = false)
+    {
+        $endpoint = 'https://api.chatpdf.com/v1/chats/message';
+        $headers = [
+            'Content-Type: application/json',
+            'x-api-key: ' . $this->getApiKey()
+        ];
+        $payload = [
+            'sourceId' => $sourceId,
+            'messages' => array_slice($messages, -6), // API limit: up to 6 messages
+        ];
+        if ($referenceSources) {
+            $payload['referenceSources'] = true;
+        }
+        Log::info('ChatPDF chat request', ['sourceId' => $sourceId, 'messagesCount' => count($payload['messages'])]);
+        return $this->sendRequest($endpoint, $headers, $payload);
+    }
+
+    /**
+     * Stream chat response from ChatPDF (stream: true).
+     * Yields chunks to the callable: $onChunk(string $chunk).
+     */
+    public function chatStream(string $sourceId, array $messages, callable $onChunk): void
+    {
+        $endpoint = 'https://api.chatpdf.com/v1/chats/message';
+        $payload = [
+            'sourceId' => $sourceId,
+            'messages' => array_slice($messages, -6),
+            'stream' => true,
+        ];
+        $jsonData = json_encode($payload);
+        $headers = [
+            'Content-Type: application/json',
+            'x-api-key: ' . $this->getApiKey(),
+            'Content-Length: ' . strlen($jsonData),
+        ];
+
+        $ch = curl_init($endpoint);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
+            $len = strlen($data);
+            if ($len > 0) {
+                $onChunk($data);
+            }
+            return $len;
+        });
+
+        curl_exec($ch);
+        if (curl_errno($ch)) {
+            Log::error('ChatPDF stream error: ' . curl_error($ch));
+            $onChunk(json_encode(['error' => curl_error($ch)]));
+        }
+        curl_close($ch);
+    }
 
     function prompt($file_url=null,$additional_prompt=null){
 

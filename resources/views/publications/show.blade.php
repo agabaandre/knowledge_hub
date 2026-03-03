@@ -571,9 +571,15 @@
                     <!-- Action Buttons - Floated Right -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div>
+                @if($publication->publication_pdf_url)
+                <button onclick="openPdfChat({{ $publication->id }})" class="btn btn-au btn-sm">
+                    <i class="fa-solid fa-microchip"></i> AI Processing (Chat with PDF)
+                </button>
+                @else
                 <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
                     <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
                 </button>
+                @endif
             </div>
                         <div class="d-flex gap-2">
                 @auth
@@ -1120,6 +1126,11 @@
 </section>
 </article>
 @include('common.ai-summary')
+@if($publication->publication_pdf_url ?? null)
+@include('common.pdf-chat-modal')
+<script>var pdfChatPublicationId = {{ $publication->id }};</script>
+@include('common.pdf-chat-js')
+@endif
 <!-- Modal for preview - Bootstrap 4 compatible -->
 <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 100vw; width: 100vw; margin: 0; padding: 0;">

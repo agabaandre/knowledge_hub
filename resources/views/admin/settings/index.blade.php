@@ -548,6 +548,20 @@
                                 <small class="info-text">Toggle which sections appear on the homepage.</small>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Search Page (Records Search)</label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="search_show_forums" name="search_show_forums" value="1" @if($settings->search_show_forums ?? true) checked @endif>
+                                    <label class="form-check-label" for="search_show_forums">Show forums in search results</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="search_show_communities" name="search_show_communities" value="1" @if($settings->search_show_communities ?? true) checked @endif>
+                                    <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
+                                </div>
+                                <small class="info-text">When enabled, the main search page will include matching discussions and communities alongside publications.</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-section-title mt-4">

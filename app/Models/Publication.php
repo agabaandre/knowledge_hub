@@ -222,6 +222,37 @@ class Publication extends Model
         return cleanUTF8($value);
     }
 
+    /**
+     * Full URL for the publication PDF (for ChatPDF add-url). Returns null if not a PDF.
+     */
+    public function getPublicationPdfUrlAttribute()
+    {
+        $raw = $this->getRawOriginal('publication');
+        if (empty($raw) || strpos(strtolower($raw), '.pdf') === false) {
+            return null;
+        }
+        if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {
+            return $raw;
+        }
+        return storage_link('uploads/publications/' . $raw);
+    }
+
+    /**
+     * Absolute path to the publication PDF file on disk (for ChatPDF add-file when URL is not public).
+     */
+    public function getPublicationPdfPathAttribute()
+    {
+        $raw = $this->getRawOriginal('publication');
+        if (empty($raw) || strpos(strtolower($raw), '.pdf') === false) {
+            return null;
+        }
+        if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {
+            return null; // external URL, no local path
+        }
+        $path = storage_path('app/public/uploads/publications/' . $raw);
+        return file_exists($path) ? $path : null;
+    }
+
     // Ensure the content is UTF-8 encoded
     public function getDescriptionAttribute($value)
     {

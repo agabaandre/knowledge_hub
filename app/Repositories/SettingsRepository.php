@@ -105,6 +105,14 @@ class SettingsRepository{
         $settings->show_quotes = (bool)$request->boolean('show_quotes', false);
         $settings->show_quiz = (bool)$request->boolean('show_quiz', false);
 
+        // Search page: show forums and communities in combined results (default true)
+        if (Schema::hasColumn('setting', 'search_show_forums')) {
+            $settings->search_show_forums = (bool)$request->boolean('search_show_forums', true);
+        }
+        if (Schema::hasColumn('setting', 'search_show_communities')) {
+            $settings->search_show_communities = (bool)$request->boolean('search_show_communities', true);
+        }
+
         // Social login toggles (default false when unchecked)
         // Only set if columns exist to avoid errors on production
         if (Schema::hasColumn('setting', 'enable_microsoft_login')) {

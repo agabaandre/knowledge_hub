@@ -145,9 +145,13 @@ class PublicationsController extends Controller
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['search']       = (Object) $request->all();
 
-        // Combined search: forums and communities matching the same term (when term is provided)
-        $data['searchForums'] = $this->forumsRepo->searchForRecords($request, 5);
-        $data['searchCommunities'] = $this->commsRepo->searchForRecords($request, 5);
+        // Combined search: forums and communities (when config allows and term is provided)
+        $data['searchForums'] = (settings()->search_show_forums ?? true)
+            ? $this->forumsRepo->searchForRecords($request, 5)
+            : collect();
+        $data['searchCommunities'] = (settings()->search_show_communities ?? true)
+            ? $this->commsRepo->searchForRecords($request, 5)
+            : collect();
 
         // Calculate execution time
         $endTime = microtime(true);
