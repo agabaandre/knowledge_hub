@@ -63,19 +63,19 @@ if(!function_exists('settings')){
 			return $settings;
         });
 
-		// Per-theme overlay: Theme1 uses theme_settings; default uses base only
-		if ($base && isset($base->site_theme) && $base->site_theme === 'theme1.') {
-			$overlay = cache()->remember('theme_settings_theme1', $minutes, function () {
-				if (!\Illuminate\Support\Facades\Schema::hasTable('theme_settings')) {
-					return [];
-				}
-				return DB::table('theme_settings')->where('theme', 'theme1')->pluck('value', 'key')->toArray();
+		// Per-theme overlay: load theme_settings for active theme (theme1., et, etc.) so each theme has its own config
+		$siteTheme = $base && isset($base->site_theme) ? trim((string) $base->site_theme) : '';
+		$themeKey = $siteTheme === 'theme1.' ? 'theme1' : ($siteTheme !== '' ? $siteTheme : null);
+		if ($base && $themeKey !== null && \Illuminate\Support\Facades\Schema::hasTable('theme_settings')) {
+			$cacheKey = 'theme_settings_' . $themeKey;
+			$overlay = cache()->remember($cacheKey, $minutes, function () use ($themeKey) {
+				return DB::table('theme_settings')->where('theme', $themeKey)->pluck('value', 'key')->toArray();
 			});
 			$settings = clone $base;
 			foreach ($overlay as $key => $value) {
 				$settings->{$key} = $value;
 			}
-			// Re-apply image URLs for theme1 (values from theme_settings are filenames)
+			// Re-apply image URLs (values from theme_settings are filenames)
 			if (!empty($settings->logo) && strpos($settings->logo, 'http') !== 0 && strpos($settings->logo, '//') !== 0) {
 				$settings->logo = asset('storage/uploads/config/' . $settings->logo);
 			}

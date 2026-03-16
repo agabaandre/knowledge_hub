@@ -936,11 +936,18 @@
                 </div>
 
                     <div class="form-group">
+                        <label>Config name</label>
+                        <input type="text" name="config_name" class="form-control" value="{{ settings()->config_name ?? 'Default' }}" placeholder="e.g. Default, Theme1, ET">
+                        <small class="info-text">Name for this configuration (used to identify this theme's config). Saved with the selected theme.</small>
+                    </div>
+                    <div class="form-group">
                         <label>Site Theme</label>
                         <select class="form-control" name="site_theme">
-                            <option value="" @if (settings()->site_theme == '') selected @endif>Default Theme</option>
-                            <option value="theme1." @if (settings()->site_theme == 'theme1.') selected @endif>Theme1</option>
+                            <option value="" @if ((settings()->site_theme ?? '') == '') selected @endif>Default Theme</option>
+                            <option value="theme1." @if ((settings()->site_theme ?? '') == 'theme1.') selected @endif>Theme1</option>
+                            <option value="et" @if ((settings()->site_theme ?? '') == 'et') selected @endif>ET</option>
                         </select>
+                        <small class="info-text">Changing theme and saving creates or loads that theme's configuration row; the previous theme's config is left unchanged.</small>
                     </div>
 
                     <div class="form-section-title mt-4">

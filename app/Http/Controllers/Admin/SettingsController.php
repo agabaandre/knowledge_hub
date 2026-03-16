@@ -118,10 +118,11 @@ class SettingsController extends Controller
                 $allOutput[] = PHP_EOL;
             }
             
-            // Also clear the settings and theme_settings caches
+            // Also clear the settings and theme_settings caches (all theme overlay caches)
             try {
                 cache()->forget('settings');
                 cache()->forget('theme_settings_theme1');
+                cache()->forget('theme_settings_et');
                 $allOutput[] = "Clearing settings cache..." . PHP_EOL;
                 $allOutput[] = "✓ Settings cache cleared successfully" . PHP_EOL . PHP_EOL;
             } catch (\Exception $e) {

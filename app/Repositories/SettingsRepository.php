@@ -31,31 +31,88 @@ class SettingsRepository
         return $setting ? $setting->toArray() : [];
     }
     
+    /**
+     * Normalize theme value for lookup: empty string and null treated as default.
+     */
+    private function normalizeThemeForLookup(?string $theme): ?string
+    {
+        $t = $theme === null ? '' : trim((string) $theme);
+        return $t === '' ? null : $t;
+    }
+
+    /**
+     * Theme key for theme_settings table (theme1. -> theme1, et -> et).
+     */
+    private function themeSettingsKey(?string $siteTheme): ?string
+    {
+        $t = $this->normalizeThemeForLookup($siteTheme);
+        if ($t === null) {
+            return null;
+        }
+        return $t === 'theme1.' ? 'theme1' : $t;
+    }
+
+    /**
+     * Default config name for a theme (used when creating a new row and for display).
+     */
+    private function defaultConfigNameForTheme(?string $siteTheme): string
+    {
+        $t = $this->normalizeThemeForLookup($siteTheme);
+        if ($t === null) {
+            return 'Default';
+        }
+        if ($t === 'theme1.') {
+            return 'Theme1';
+        }
+        if ($t === 'et') {
+            return 'ET';
+        }
+        return \Illuminate\Support\Str::title(str_replace(['.', '_', '-'], ' ', $t));
+    }
+
     public function save(Request $request){
 
-        // Get or create the active configuration
-        $settings = Setting::where('status', 'active')->first();
-        
-        // If no active setting exists, get the first one or create a new one
+        $rawTheme = $request->input('site_theme');
+        $rawTheme = $rawTheme === null ? '' : trim((string) $rawTheme);
+        $requestedTheme = $rawTheme === '' ? null : $rawTheme;
+
+        // Find a configuration row for this theme (one row per theme; load/update by theme)
+        $settings = null;
+        if ($requestedTheme === null) {
+            $settings = Setting::where(function ($q) {
+                $q->whereNull('site_theme')->orWhere('site_theme', '');
+            })->first();
+        } else {
+            $settings = Setting::where('site_theme', $requestedTheme)->first();
+        }
+
+        $configName = $request->filled('config_name')
+            ? $request->config_name
+            : $this->defaultConfigNameForTheme($rawTheme ?: null);
+
         if (!$settings) {
-            $settings = Setting::first();
-            if (!$settings) {
-                $settings = new Setting();
-                $settings->config_name = $request->config_name ?? 'Default Configuration';
-                $settings->status = 'active';
-                $settings->save();
-            } else {
-                // Make the first one active if none is active
-                $settings->status = 'active';
-                $settings->save();
+            // Create a new row for this theme so we don't overwrite other themes' config
+            $currentActive = Setting::where('status', 'active')->first();
+            $settings = new Setting();
+            if ($currentActive) {
+                $attrs = $currentActive->getAttributes();
+                unset($attrs['id']);
+                foreach ($attrs as $key => $value) {
+                    $settings->setAttribute($key, $value);
+                }
             }
+            $settings->site_theme = $rawTheme;
+            $settings->config_name = $configName;
+            $settings->status = 'active';
+            $settings->save();
+            Setting::where('id', '!=', $settings->id)->update(['status' => 'inactive']);
+        } else {
+            Setting::where('id', '!=', $settings->id)->update(['status' => 'inactive']);
+            $settings->status = 'active';
+            $settings->config_name = $configName;
         }
 
-        // Update config_name if provided
-        if ($request->has('config_name')) {
-            $settings->config_name = $request->config_name;
-        }
-
+        // Run updates on this config row (the one whose theme is set)
         $settings->site_name            = $request->site_name;
         $settings->title                = $request->title;
         $settings->site_description     = $request->site_description;
@@ -67,12 +124,13 @@ class SettingsRepository
         $settings->analytics_script  = $request->analytics_script;
         $settings->slogan            = $request->slogan;
         $settings->content_disclaimer = $request->content_disclaimer;
-        $settings->site_theme         = $request->site_theme;
+        $settings->site_theme         = $request->site_theme ?? '';
 
-        $isTheme1 = ($request->site_theme ?? '') === 'theme1.';
+        $themeKey = $this->themeSettingsKey($request->site_theme ?? null);
+        $hasThemeOverlay = $themeKey !== null;
 
-        // Appearance keys: save to theme_settings for Theme1, else to main row
-        if (!$isTheme1) {
+        // Appearance keys: save to theme_settings when theme has overlay (theme1, et, etc.), else to main row
+        if (!$hasThemeOverlay) {
             $settings->primary_color     = $request->primary_color;
             $settings->secondary_color   = $request->secondary_color;
             $settings->primary_text_color = $request->primary_text_color;
@@ -246,63 +304,63 @@ class SettingsRepository
             $settings->status = 'active';
         }
 
-        // Save appearance to theme_settings when Theme1 is selected
-        if ($isTheme1 && Schema::hasTable('theme_settings')) {
-            $this->saveThemeSettings('theme1', $request);
+        // Save appearance to theme_settings when theme has overlay (theme1, et, etc.)
+        if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+            $this->saveThemeSettings($themeKey, $request);
         }
 
-        // Save cover / images: upload new or use existing from gallery (per-theme: default → main row, theme1 → theme_settings only)
+        // Save cover / images: upload new or use existing from gallery (per-theme: default → main row, themed → theme_settings)
         if ($request->hasFile('logo') || $request->hasFile('favicon') || $request->hasFile('spotlight_banner')) {
             if ($request->hasFile('logo')) {
                 $logo_filepath = $this->save_attachments($request->file('logo'));
-                if (!$isTheme1) {
+                if (!$hasThemeOverlay) {
                     $settings->logo = $logo_filepath;
                 }
-                if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting('theme1', 'logo', $logo_filepath);
+                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                    $this->upsertThemeSetting($themeKey, 'logo', $logo_filepath);
                 }
             }
             if ($request->hasFile('favicon')) {
                 $favicon_filepath = $this->save_attachments($request->file('favicon'));
-                if (!$isTheme1) {
+                if (!$hasThemeOverlay) {
                     $settings->favicon = $favicon_filepath;
                 }
-                if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting('theme1', 'favicon', $favicon_filepath);
+                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                    $this->upsertThemeSetting($themeKey, 'favicon', $favicon_filepath);
                 }
             }
             if ($request->hasFile('spotlight_banner')) {
                 $banner_filepath = $this->save_attachments($request->file('spotlight_banner'));
-                if (!$isTheme1) {
+                if (!$hasThemeOverlay) {
                     $settings->spotlight_banner = $banner_filepath;
                 }
-                if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting('theme1', 'spotlight_banner', $banner_filepath);
+                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                    $this->upsertThemeSetting($themeKey, 'spotlight_banner', $banner_filepath);
                 }
             }
         }
         if ($request->filled('logo_existing')) {
-            if (!$isTheme1) {
+            if (!$hasThemeOverlay) {
                 $settings->logo = $request->logo_existing;
             }
-            if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                $this->upsertThemeSetting('theme1', 'logo', $request->logo_existing);
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'logo', $request->logo_existing);
             }
         }
         if ($request->filled('favicon_existing')) {
-            if (!$isTheme1) {
+            if (!$hasThemeOverlay) {
                 $settings->favicon = $request->favicon_existing;
             }
-            if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                $this->upsertThemeSetting('theme1', 'favicon', $request->favicon_existing);
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'favicon', $request->favicon_existing);
             }
         }
         if ($request->filled('spotlight_banner_existing')) {
-            if (!$isTheme1) {
+            if (!$hasThemeOverlay) {
                 $settings->spotlight_banner = $request->spotlight_banner_existing;
             }
-            if ($isTheme1 && Schema::hasTable('theme_settings')) {
-                $this->upsertThemeSetting('theme1', 'spotlight_banner', $request->spotlight_banner_existing);
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'spotlight_banner', $request->spotlight_banner_existing);
             }
         }
 
@@ -425,11 +483,12 @@ class SettingsRepository
             }
         }
 
-        if ($activeTheme === 'theme1.' && Schema::hasTable('theme_settings')) {
+        $exportThemeKey = $this->themeSettingsKey($activeTheme);
+        if ($exportThemeKey !== null && Schema::hasTable('theme_settings')) {
             $themeNode = $dom->createElement('theme_settings');
-            $themeNode->setAttribute('theme', 'theme1');
+            $themeNode->setAttribute('theme', $exportThemeKey);
             $root->appendChild($themeNode);
-            $rows = DB::table('theme_settings')->where('theme', 'theme1')->get();
+            $rows = DB::table('theme_settings')->where('theme', $exportThemeKey)->get();
             foreach ($rows as $row) {
                 if (in_array($row->key, self::IMAGE_KEYS, true)) {
                     continue;
@@ -487,16 +546,17 @@ class SettingsRepository
         }
 
         $activeTheme = $setting->site_theme ?? '';
-        if ($activeTheme === 'theme1.' && Schema::hasTable('theme_settings')) {
+        $importThemeKey = $this->themeSettingsKey($activeTheme);
+        if ($importThemeKey !== null && Schema::hasTable('theme_settings')) {
             $themeNode = $root->getElementsByTagName('theme_settings')->item(0);
-            if ($themeNode && $themeNode->getAttribute('theme') === 'theme1') {
+            if ($themeNode && $themeNode->getAttribute('theme') === $importThemeKey) {
                 foreach ($themeNode->getElementsByTagName('item') as $item) {
                     $key = $item->getAttribute('key');
                     if ($key === '' || in_array($key, self::IMAGE_KEYS, true)) {
                         continue;
                     }
                     $value = $item->textContent;
-                    $this->upsertThemeSetting('theme1', $key, $value);
+                    $this->upsertThemeSetting($importThemeKey, $key, $value);
                 }
             }
         }
