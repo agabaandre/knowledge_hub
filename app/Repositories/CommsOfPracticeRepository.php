@@ -382,7 +382,7 @@ class CommsOfPracticeRepository{
         ];
 
         try {
-            \Illuminate\Support\Facades\Bus::dispatchSync(new \App\Jobs\SendMailJob($emailData));
+            \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
         } catch (\Throwable $e) {
             \Log::error('COP invitation email failed', [
                 'community_id' => $communityId,
@@ -505,7 +505,7 @@ class CommsOfPracticeRepository{
         ];
 
         try {
-            \Illuminate\Support\Facades\Bus::dispatchSync(new \App\Jobs\SendMailJob($emailData));
+            \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
         } catch (\Throwable $e) {
             \Log::error('COP resend invitation email failed', ['invitation_id' => $invitationId, 'error' => $e->getMessage()]);
             return ['status' => 'error', 'message' => 'Email could not be sent: ' . $e->getMessage()];

@@ -131,14 +131,16 @@
     if (confirmBtn) {
         confirmBtn.addEventListener('click', function() {
             if (!sessionIdToDelete) return;
+            var idToDelete = sessionIdToDelete;
+            sessionIdToDelete = null;
             var formData = new FormData();
             formData.append('_token', csrf);
-            formData.append('session_id', sessionIdToDelete);
+            formData.append('session_id', idToDelete);
             fetch(deleteUrl, { method: 'POST', body: formData, headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
                 .then(function(r) { return r.json().then(function(j) { return { ok: r.ok, json: j }; }); })
                 .then(function(result) {
                     if (result.ok && result.json.success) {
-                        var row = document.querySelector('.chats-session-row[data-session-id="' + sessionIdToDelete + '"]');
+                        var row = document.querySelector('.chats-session-row[data-session-id="' + idToDelete + '"]');
                         if (row) {
                             var group = row.closest('.chats-doc-group');
                             row.remove();
@@ -151,7 +153,6 @@
                     }
                 })
                 .catch(function() { alert('Failed to delete chat. Please try again.'); });
-            sessionIdToDelete = null;
         });
     }
 })();
