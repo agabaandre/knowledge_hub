@@ -62,6 +62,8 @@ use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
 use App\Http\Controllers\Admin\MailingListController;
 use App\Http\Controllers\Admin\MessagingController;
+use App\Http\Controllers\Admin\RssFeedController;
+use App\Http\Controllers\Admin\RssStagingController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
@@ -489,6 +491,21 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/send-email", [MailingListController::class, 'sendEmail'])->name('admin.mailing_list.sendEmail');
         Route::get("/export", [MailingListController::class, 'export'])->name('admin.mailing_list.export');
         Route::post("/bulk-action", [MailingListController::class, 'bulkAction'])->name('admin.mailing_list.bulkAction');
+    });
+
+    Route::group(["prefix" => "rss-feeds", "as" => "admin.rss_feeds."], function () {
+        Route::get("/", [RssFeedController::class, 'index'])->name('index');
+        Route::get("/create", [RssFeedController::class, 'create'])->name('create');
+        Route::post("/", [RssFeedController::class, 'store'])->name('store');
+        Route::get("/{id}/edit", [RssFeedController::class, 'edit'])->name('edit');
+        Route::put("/{id}", [RssFeedController::class, 'update'])->name('update');
+        Route::delete("/{id}", [RssFeedController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::group(["prefix" => "rss-staging", "as" => "admin.rss_staging."], function () {
+        Route::get("/", [RssStagingController::class, 'index'])->name('index');
+        Route::get("/{id}/edit", [RssStagingController::class, 'edit'])->name('edit');
+        Route::post("/{id}/reject", [RssStagingController::class, 'reject'])->name('reject');
     });
 
     Route::group(["prefix" => "tools"], function () {

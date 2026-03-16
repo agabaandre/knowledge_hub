@@ -12,6 +12,7 @@ use App\Models\PublicationAttachment;
 use App\Models\PublicationComment;
 use App\Models\PublicationCommunityOfPractice;
 use App\Models\PublicationCountry;
+use App\Models\PublicationStaging;
 use App\Models\PublicationSummary;
 use App\Models\PublicationTag;
 use App\Models\PublicationType;
@@ -656,7 +657,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         endif;
         
         // Send notification to approvers if publication is pending approval (only for new submissions, not edits)
-        if ($saved && !$request->id && !is_admin() && $pub->is_approved == 0) {
+        if ($saved && !$request->id && !is_admin() && $pub->is_approved == 0 && empty($request->from_rss_staging_id)) {
             // Reload publication with author relationship
             $pub->load('author');
             
@@ -672,6 +673,21 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 $pub->author->name ?? ($pub->user->name ?? 'Unknown'),
                 $approveUrl
             )->onQueue('default');
+        }
+
+        // When approving from RSS staging: mark publication as RSS and update staging record
+        if ($saved && !empty($request->from_rss_staging_id)) {
+            $staging = PublicationStaging::find($request->from_rss_staging_id);
+            if ($staging) {
+                $pub->is_rss = true;
+                $pub->rss_id = $staging->rss_feed_id;
+                $pub->save();
+                $staging->update([
+                    'processed_at' => now(),
+                    'processed_status' => PublicationStaging::STATUS_APPROVED,
+                    'publication_id' => $pub->id,
+                ]);
+            }
         }
 
         return $pub;

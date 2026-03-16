@@ -30,6 +30,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('approvals:daily-summary')->dailyAt('08:00');
         // Weekly digest to mailing list subscribers (new resources, forums, community activity)
         $schedule->command('mailing:weekly-digest')->weeklyOn(1, '09:00');
+        // Fetch new items from RSS feeds weekly
+        $schedule->command('rss:fetch')->weeklyOn(2, '03:00');
         // Award community badges at the beginning of each month for the previous month
         $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
         // Cache forum and community counts every 5 minutes for menu badges
