@@ -7,20 +7,24 @@
         .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
         .af-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
         .af-card-body{padding:16px}
-        .stat-chip{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.85rem;margin-right:8px}
-        .stat-chip.total{background:#e2e8f0;color:#0f172a}
-        .stat-chip.approved{background:#dcfce7;color:#166534}
-        .stat-chip.pending{background:#fef9c3;color:#854d0e}
-        .stat-chip.rejected{background:#fee2e2;color:#991b1b}
-        .stat-chip.sent{background:#dbeafe;color:#1e40af}
-        .stat-chip.responded{background:#dcfce7;color:#166534}
-        .stat-chip.expired{background:#fee2e2;color:#991b1b}
+        .stat-chip{display:inline-block;padding:6px 10px;border-radius:999px;font-size:.85rem;margin-right:8px;border:none}
+        /* Traffic-light states: use Bootstrap semantic colors (success/warning/danger/primary/secondary) */
+        .stat-chip.total{background:var(--bs-secondary,#6c757d);color:#fff}
+        .stat-chip.approved{background:var(--bs-success,#198754);color:#fff}
+        .stat-chip.pending{background:var(--bs-warning,#ffc107);color:#212529}
+        .stat-chip.rejected{background:var(--bs-danger,#dc3545);color:#fff}
+        .stat-chip.sent{background:var(--bs-primary,#0d6efd);color:#fff}
+        .stat-chip.responded{background:var(--bs-success,#198754);color:#fff}
+        .stat-chip.expired{background:var(--bs-danger,#dc3545);color:#fff}
         .table thead th{background:#f8fafc;border-bottom:1px solid #e2e8f0}
         .nav-tabs .nav-link{color:#64748b;border:none;border-bottom:2px solid transparent}
         .nav-tabs .nav-link.active{color:#119A48;border-bottom-color:#119A48;font-weight:600}
         .nav-tabs .nav-link:hover{color:#119A48;border-bottom-color:#e2e8f0}
-        /* Ensure red badges show in table */
-        #members-table .badge-danger { background-color: #dc3545 !important; color: #fff !important; }
+        /* Traffic-light badges in tables: use Bootstrap semantic colors */
+        #members-table .badge-success, #invitations-table .badge-success { background-color: var(--bs-success, #198754) !important; color: #fff !important; }
+        #members-table .badge-warning, #invitations-table .badge-warning { background-color: var(--bs-warning, #ffc107) !important; color: #212529 !important; }
+        #members-table .badge-danger, #invitations-table .badge-danger { background-color: var(--bs-danger, #dc3545) !important; color: #fff !important; }
+        #invitations-table .badge-info { background-color: var(--bs-info, #0dcaf0) !important; color: #fff !important; }
     </style>
 @endsection
 
