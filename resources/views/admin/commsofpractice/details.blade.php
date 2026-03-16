@@ -156,8 +156,10 @@
                                                 <button class="btn btn-outline-danger btn-sm"
                                                     onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Remove</button>
                                             @elseif ($member->is_approved == 2)
-                                                <button class="btn btn-outline-success btn-sm"
+                                                <button class="btn btn-outline-success btn-sm mr-1"
                                                     onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-undo mr-1"></i>Reconsider</button>
+                                                <button class="btn btn-outline-danger btn-sm"
+                                                    onclick="showModal({{ $member->id }}, 'delete')" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>Delete</button>
                                             @else
                                                 <button class="btn btn-outline-success btn-sm mr-1"
                                                     onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-check mr-1"></i>Approve</button>
@@ -173,9 +175,12 @@
 
                     <!-- Invitations Tab -->
                     <div class="tab-pane fade" id="invitations" role="tabpanel" aria-labelledby="invitations-tab">
-                        <div class="mb-3">
+                        <div class="mb-3 d-flex flex-wrap gap-2 align-items-center">
                             <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#sendInvitationModal">
                                 <i class="fa fa-envelope mr-1"></i>Send Invitation
+                            </button>
+                            <button class="btn btn-outline-primary btn-sm" type="button" data-toggle="modal" data-target="#importCsvModal">
+                                <i class="fa fa-upload mr-1"></i>Import from CSV
                             </button>
                         </div>
                         
@@ -201,11 +206,12 @@
                                     <th>Expires At</th>
                                     <th>Status</th>
                                     <th>Responded At</th>
+                                    <th style="width:100px;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($invitations as $invitation)
-                                    <tr>
+                                    <tr data-invitation-id="{{ $invitation->id }}">
                                         <td>{{ $loop->iteration }}</td>
                                         <td>{{ $invitation->email }}</td>
                                         <td>{{ $invitation->inviter->name ?? 'Unknown' }}</td>
@@ -223,14 +229,23 @@
                                         <td>
                                             @if($invitation->responded_at)
                                                 {{ $invitation->responded_at->format('M d, Y H:i') }}
-                                    @else
+                                            @else
                                                 <span class="text-muted">-</span>
-                                    @endif
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if(!$invitation->responded_at)
+                                                <button type="button" class="btn btn-outline-primary btn-sm js-resend-invitation" data-invitation-id="{{ $invitation->id }}" title="Resend invitation">
+                                                    <i class="fa fa-redo mr-1"></i>Resend
+                                                </button>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -271,15 +286,74 @@
                 <form id="sendInvitationForm">
                     <div class="modal-body">
                         <div class="form-group">
-                            <label for="invitationEmail">Email Address</label>
-                            <input type="email" class="form-control" id="invitationEmail" name="email" required placeholder="Enter email address">
-                            <small class="form-text text-muted">An invitation will be sent to this email address. The invitation will expire in 7 days.</small>
+                            <label for="invitationEmail">Email Address(es)</label>
+                            <textarea class="form-control" id="invitationEmail" name="email" rows="3" required placeholder="Enter one or more email addresses, separated by commas"></textarea>
+                            <small class="form-text text-muted">Enter multiple emails separated by commas. Existing members and pending invitations for this community are skipped. Invitations expire in 7 days.</small>
                         </div>
                         <input type="hidden" name="community_id" value="{{ $community->id }}">
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Send Invitation</button>
+                        <button type="submit" class="btn btn-primary">Send Invitation(s)</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import from CSV Modal -->
+    <div class="modal fade" id="importCsvModal" tabindex="-1" role="dialog" aria-labelledby="importCsvModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="importCsvModalLabel">Import Invitations from CSV</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="importCsvForm">
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="csvFile">CSV File</label>
+                            <div class="d-flex align-items-center flex-wrap gap-2">
+                                <input type="file" class="form-control-file" id="csvFile" name="csv_file" accept=".csv,.txt" required>
+                                <a href="#" class="btn btn-outline-secondary btn-sm" id="downloadCsvTemplate" title="Download a template with one example row">
+                                    <i class="fa fa-download mr-1"></i>Download CSV template
+                                </a>
+                            </div>
+                            <small class="form-text text-muted">Upload a CSV with an "email" column or use the first column for emails. Already existing participants (members or pending invitations) for each community are skipped.</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Send invitations to</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="scope" id="scopeThis" value="this" checked>
+                                <label class="form-check-label" for="scopeThis">This community only ({{ $community->community_name }})</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="scope" id="scopeAll" value="all">
+                                <label class="form-check-label" for="scopeAll">All communities</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="scope" id="scopeSelected" value="selected">
+                                <label class="form-check-label" for="scopeSelected">Selected communities</label>
+                            </div>
+                        </div>
+                        <div class="form-group ml-4" id="selectedCommunitiesWrap" style="display:none;">
+                            <label class="small text-muted">Select communities</label>
+                            <select name="community_ids[]" id="selectedCommunities" class="form-control" multiple size="8">
+                                @foreach($allCommunities ?? [] as $c)
+                                    <option value="{{ $c->id }}" {{ $c->id == $community->id ? 'selected' : '' }}>{{ $c->community_name }}</option>
+                                @endforeach
+                            </select>
+                            <small class="form-text text-muted">Hold Ctrl/Cmd to select multiple.</small>
+                        </div>
+                        <input type="hidden" name="community_id" value="{{ $community->id }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="importCsvSubmitBtn">
+                            <i class="fa fa-upload mr-1"></i>Import and Send
+                        </button>
                     </div>
                 </form>
             </div>
@@ -316,6 +390,9 @@
                 pageLength: 15,
                 lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
                 order: [[3, 'desc']],
+                columnDefs: [
+                    { orderable: false, targets: 7 }
+                ],
                 language: {
                     search: "",
                     searchPlaceholder: "Search invitations by email...",
@@ -349,21 +426,27 @@
             memberId = id;
             action = actionType;
             $('#actionType').text(actionType);
-            $('#approvalModalText').html('Are you sure you want to <span id="actionType">' + actionType + '</span> this member?');
+            if (actionType === 'delete') {
+                $('#approvalModalText').html('Permanently remove this rejected request? This cannot be undone.');
+            } else {
+                $('#approvalModalText').html('Are you sure you want to <span id="actionType">' + actionType + '</span> this member?');
+            }
             $('#confirmAction').off('click').on('click', confirmSingleAction);
             $('#approvalModal').modal('show');
         }
 
         function confirmSingleAction() {
+            var url = action === 'delete' ? '{{ route('admin.commsofpractice.deleteMember') }}' : '{{ route('admin.commsofpractice.memberAction') }}';
+            var data = {
+                _token: '{{ csrf_token() }}',
+                member_id: memberId,
+                community_id: communityId
+            };
+            if (action !== 'delete') data.action = action;
             $.ajax({
-                url: '{{ route('admin.commsofpractice.memberAction') }}',
+                url: url,
                 method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    member_id: memberId,
-                    action: action,
-                    community_id: communityId
-                },
+                data: data,
                 success: function(response) {
                     $('#approvalModal').modal('hide');
                     location.reload();
@@ -438,6 +521,22 @@
         $('#bulk-approve-btn').on('click', function() { doBulkAction('approve'); });
         $('#bulk-reject-btn').on('click', function() { doBulkAction('reject'); });
 
+        // Resend invitation
+        $(document).on('click', '.js-resend-invitation', function() {
+            var btn = $(this);
+            var invitationId = btn.data('invitation-id');
+            if (!invitationId) return;
+            if (!confirm('Resend this invitation? A new link will be sent and the previous link will no longer work.')) return;
+            btn.prop('disabled', true);
+            $.ajax({
+                url: '{{ route('admin.commsofpractice.resendInvitation') }}',
+                method: 'POST',
+                data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: communityId },
+                success: function(response) { alert(response.message || 'Invitation resent.'); location.reload(); },
+                error: function(xhr) { alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to resend.'); btn.prop('disabled', false); }
+            });
+        });
+
         // Handle send invitation form
         $('#sendInvitationForm').on('submit', function(e) {
             e.preventDefault();
@@ -447,13 +546,13 @@
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    community_id: $('#invitationEmail').closest('form').find('input[name="community_id"]').val(),
-                    email: $('#invitationEmail').val()
+                    community_id: $('#sendInvitationForm').find('input[name="community_id"]').val(),
+                    email: $('#invitationEmail').val().trim()
                 },
                 success: function(response) {
                     $('#sendInvitationModal').modal('hide');
                     $('#sendInvitationForm')[0].reset();
-                    alert(response.message || 'Invitation sent successfully!');
+                    alert(response.message || 'Invitation(s) sent.');
                     location.reload();
                 },
                 error: function(xhr) {
@@ -465,5 +564,58 @@
                 }
             });
         });
+
+        // Download CSV template (header + one example row)
+        $('#downloadCsvTemplate').on('click', function(e) {
+            e.preventDefault();
+            var csv = 'email\nexample@email.com';
+            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            var link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'invitation_emails_template.csv';
+            link.click();
+            URL.revokeObjectURL(link.href);
+        });
+
+        // Import CSV: show/hide selected communities
+        $('input[name="scope"]').on('change', function() {
+            $('#selectedCommunitiesWrap').toggle($(this).val() === 'selected');
+        });
+        // Import CSV form submit
+        $('#importCsvForm').on('submit', function(e) {
+            e.preventDefault();
+            var fd = new FormData(this);
+            fd.append('_token', '{{ csrf_token() }}');
+            fd.append('scope', $('input[name="scope"]:checked').val());
+            fd.append('community_id', '{{ $community->id }}');
+            if ($('input[name="scope"]:checked').val() === 'selected') {
+                $('#selectedCommunities option:selected').each(function() {
+                    fd.append('community_ids[]', $(this).val());
+                });
+            }
+            var $btn = $('#importCsvSubmitBtn');
+            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Sending...');
+            $.ajax({
+                url: '{{ route('admin.commsofpractice.bulkInvite') }}',
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#importCsvModal').modal('hide');
+                    $('#importCsvForm')[0].reset();
+                    $('#selectedCommunitiesWrap').hide();
+                    alert(response.message || 'Done.');
+                    location.reload();
+                },
+                error: function(xhr) {
+                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Import failed.');
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).html('<i class="fa fa-upload mr-1"></i>Import and Send');
+                }
+            });
+        });
+    });
     </script>
 @endsection

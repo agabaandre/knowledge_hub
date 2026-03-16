@@ -172,9 +172,11 @@ class CommsOfPracticeController extends Controller
             ->whereIn('id', $forumIds)
             ->orderBy('created_at','desc')->limit(6)->get();
 
+        $allCommunities = $this->commsOfPracticeRepository->get(new \Illuminate\Http\Request(['admin' => true]), true);
+
         return view('admin.commsofpractice.details', compact(
             'community', 'totalMembers', 'approvedCount', 'pendingCount', 'rejectedCount', 'membership',
-            'publications','forums', 'invitations'
+            'publications','forums', 'invitations', 'allCommunities'
         ));
     }
 
@@ -182,26 +184,123 @@ class CommsOfPracticeController extends Controller
     {
         $request->validate([
             'community_id' => 'required|exists:community_of_practices,id',
-            'email' => 'required|email',
+            'email' => 'required|string', // comma-separated or single
         ]);
 
-        $result = $this->commsOfPracticeRepository->sendInvitation(
-            $request->community_id,
-            $request->email,
+        $emailInput = $request->email;
+        $emails = array_filter(array_map('trim', preg_split('/[\s,]+/', $emailInput)));
+        if (empty($emails)) {
+            return response()->json(['status' => 'error', 'message' => 'Please enter at least one email address.'], 422);
+        }
+
+        $validEmails = [];
+        foreach ($emails as $e) {
+            if (filter_var($e, FILTER_VALIDATE_EMAIL)) {
+                $validEmails[] = $e;
+            }
+        }
+        if (empty($validEmails)) {
+            return response()->json(['status' => 'error', 'message' => 'No valid email address found.'], 422);
+        }
+
+        $result = $this->commsOfPracticeRepository->sendInvitationsBulk(
+            (int) $request->community_id,
+            $validEmails,
+            auth()->id()
+        );
+
+        $msg = $result['sent'] . ' invitation(s) sent.';
+        if ($result['skipped_member'] > 0) {
+            $msg .= ' ' . $result['skipped_member'] . ' already member(s) skipped.';
+        }
+        if ($result['skipped_pending'] > 0) {
+            $msg .= ' ' . $result['skipped_pending'] . ' pending invitation(s) skipped.';
+        }
+        if ($result['invalid'] > 0) {
+            $msg .= ' ' . $result['invalid'] . ' invalid email(s) skipped.';
+        }
+        if (!empty($result['errors'])) {
+            $msg .= ' Errors: ' . implode('; ', array_slice($result['errors'], 0, 3));
+            if (count($result['errors']) > 3) {
+                $msg .= '…';
+            }
+        }
+
+        return response()->json(['status' => 'success', 'message' => $msg, 'result' => $result]);
+    }
+
+    public function resendInvitation(Request $request)
+    {
+        $request->validate([
+            'invitation_id' => 'required|integer',
+            'community_id' => 'required|exists:community_of_practices,id',
+        ]);
+
+        $result = $this->commsOfPracticeRepository->resendInvitation(
+            (int) $request->invitation_id,
+            (int) $request->community_id,
             auth()->id()
         );
 
         if ($result['status'] === 'success') {
-            return response()->json([
-                'status' => 'success',
-                'message' => $result['message']
-            ]);
+            return response()->json(['status' => 'success', 'message' => $result['message']]);
+        }
+        return response()->json(['status' => 'error', 'message' => $result['message']], 400);
+    }
+
+    public function bulkInviteFromCsv(Request $request)
+    {
+        $request->validate([
+            'csv_file' => 'required|file|mimes:csv,txt|max:2048',
+            'scope' => 'required|in:this,all,selected',
+            'community_ids' => 'nullable|array',
+            'community_ids.*' => 'integer|exists:community_of_practices,id',
+            'community_id' => 'nullable|integer|exists:community_of_practices,id', // for scope=this
+        ]);
+
+        $emails = $this->commsOfPracticeRepository->parseEmailsFromCsv($request->file('csv_file'));
+        $validEmails = array_values(array_filter($emails, function ($e) {
+            return filter_var(trim($e), FILTER_VALIDATE_EMAIL);
+        }));
+        $invalidCount = count($emails) - count($validEmails);
+
+        $scope = $request->scope;
+        $communityIds = [];
+        if ($scope === 'this') {
+            $cid = $request->community_id ?? $request->community_ids[0] ?? null;
+            if (!$cid) {
+                return response()->json(['status' => 'error', 'message' => 'Community is required for this scope.'], 422);
+            }
+            $communityIds = [(int) $cid];
+        } elseif ($scope === 'selected') {
+            $communityIds = array_values(array_unique(array_map('intval', $request->community_ids ?? [])));
+            if (empty($communityIds)) {
+                return response()->json(['status' => 'error', 'message' => 'Please select at least one community.'], 422);
+            }
+        }
+
+        $result = $this->commsOfPracticeRepository->bulkInviteFromCsv($scope, $communityIds, $validEmails, auth()->id());
+
+        if (isset($result['error'])) {
+            return response()->json(['status' => 'error', 'message' => $result['error']], 400);
+        }
+
+        $msg = $result['sent'] . ' invitation(s) sent across ' . $result['communities_count'] . ' community(ies).';
+        if ($result['skipped_member'] > 0) {
+            $msg .= ' ' . $result['skipped_member'] . ' already member(s) skipped.';
+        }
+        if ($result['skipped_pending'] > 0) {
+            $msg .= ' ' . $result['skipped_pending'] . ' pending invitation(s) skipped.';
+        }
+        if ($invalidCount > 0) {
+            $msg .= ' ' . $invalidCount . ' invalid email(s) in CSV skipped.';
         }
 
         return response()->json([
-            'status' => 'error',
-            'message' => $result['message']
-        ], 400);
+            'status' => 'success',
+            'message' => $msg,
+            'result' => array_merge($result, ['invalid_in_csv' => $invalidCount]),
+        ]);
     }
 
     public function getOne(Request $request)
@@ -261,5 +360,28 @@ class CommsOfPracticeController extends Controller
             ? 'Member status updated successfully.'
             : $updated . ' member(s) updated successfully.';
         return response()->json(['status' => 'success', 'message' => $message, 'updated' => $updated]);
+    }
+
+    /**
+     * Permanently delete a rejected membership request (clean up).
+     */
+    public function deleteMember(Request $request)
+    {
+        $request->validate([
+            'member_id' => 'required|integer',
+            'community_id' => 'required|exists:community_of_practices,id',
+        ]);
+
+        $member = \App\Models\CommunityOfPracticeMembers::where('id', $request->member_id)
+            ->where('community_of_practice_id', $request->community_id)
+            ->where('is_approved', 2) // only allow delete for rejected
+            ->first();
+
+        if (!$member) {
+            return response()->json(['status' => 'error', 'message' => 'Rejected request not found or already removed.'], 404);
+        }
+
+        $member->delete();
+        return response()->json(['status' => 'success', 'message' => 'Rejected request removed.']);
     }
 }

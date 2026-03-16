@@ -62,6 +62,16 @@
     /* Admin sidebar: dark background + white text so menu labels and links are readable */
     body #root.root #mainnav-container.mainnav,
     body #root.root #mainnav-container .mainnav__inner { background-color: {{ $secondary }} !important; }
+    /* Side nav: use root-relative font size so it responds to browser/OS font size increase (accessibility) */
+    #mainnav-container,
+    #mainnav-container .mainnav__inner { font-size: 1rem !important; }
+    #mainnav-container .nav-link,
+    #mainnav-container .nav-label,
+    #mainnav-container .mainnav__caption,
+    #mainnav-container .mainnav__categoriy h6,
+    #mainnav-container .mainnav__menu a { font-size: inherit !important; }
+    #mainnav-container .mainnav__menu .fs-5,
+    #mainnav-container .mainnav__menu i { font-size: 1em !important; }
     body #root.root {
         --nf-mainnav-bg: {{ $secondary }};
         --nf-mainnav-link-color: rgba(255,255,255,0.92);

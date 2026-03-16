@@ -467,6 +467,182 @@ class CommsOfPracticeRepository{
     }
 
     /**
+     * Resend an invitation (new token, new expiry, send email again).
+     * Only for invitations that have not been responded to.
+     */
+    public function resendInvitation($invitationId, $communityId, $invitedBy)
+    {
+        $invitation = CommunityInvitation::where('id', $invitationId)
+            ->where('community_of_practice_id', $communityId)
+            ->whereNull('responded_at')
+            ->first();
+
+        if (!$invitation) {
+            return ['status' => 'error', 'message' => 'Invitation not found or already used.'];
+        }
+
+        $invitation->update([
+            'token' => CommunityInvitation::generateToken(),
+            'expires_at' => now()->addDays(7),
+            'invited_by' => $invitedBy,
+        ]);
+        $invitation->load(['community', 'inviter']);
+
+        $acceptUrl = url('/communities/accept-invitation/' . $invitation->token);
+        $subject = 'Reminder: Invitation to Join: ' . $invitation->community->community_name;
+        $body = view('emails.community_invitation', [
+            'invitation' => $invitation,
+            'community' => $invitation->community,
+            'inviterName' => $invitation->inviter->name ?? 'Administrator',
+            'acceptUrl' => $acceptUrl,
+        ])->render();
+
+        $emailData = (object) [
+            'email' => $invitation->email,
+            'subject' => $subject,
+            'body' => $body,
+            'title' => $subject
+        ];
+
+        try {
+            \Illuminate\Support\Facades\Bus::dispatchSync(new \App\Jobs\SendMailJob($emailData));
+        } catch (\Throwable $e) {
+            \Log::error('COP resend invitation email failed', ['invitation_id' => $invitationId, 'error' => $e->getMessage()]);
+            return ['status' => 'error', 'message' => 'Email could not be sent: ' . $e->getMessage()];
+        }
+
+        return ['status' => 'success', 'message' => 'Invitation resent successfully.', 'data' => $invitation];
+    }
+
+    /**
+     * Send invitations to multiple emails; skip already members or existing pending invitations.
+     * Returns summary: sent, skipped_member, skipped_pending, invalid.
+     */
+    public function sendInvitationsBulk($communityId, array $emails, $invitedBy)
+    {
+        $emails = array_unique(array_map('strtolower', array_map('trim', $emails)));
+        $sent = 0;
+        $skippedMember = 0;
+        $skippedPending = 0;
+        $invalid = 0;
+        $errors = [];
+
+        foreach ($emails as $email) {
+            if (empty($email) || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $invalid++;
+                continue;
+            }
+
+            $existingMember = CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
+                ->whereHas('user', function ($q) use ($email) {
+                    $q->where('email', $email);
+                })
+                ->first();
+            if ($existingMember) {
+                $skippedMember++;
+                continue;
+            }
+
+            $existingInvitation = CommunityInvitation::where('community_of_practice_id', $communityId)
+                ->where('email', $email)
+                ->whereNull('responded_at')
+                ->where('expires_at', '>', now())
+                ->first();
+            if ($existingInvitation) {
+                $skippedPending++;
+                continue;
+            }
+
+            $result = $this->sendInvitation($communityId, $email, $invitedBy);
+            if ($result['status'] === 'success') {
+                $sent++;
+            } else {
+                $errors[] = $email . ': ' . ($result['message'] ?? 'Failed');
+            }
+        }
+
+        return [
+            'sent' => $sent,
+            'skipped_member' => $skippedMember,
+            'skipped_pending' => $skippedPending,
+            'invalid' => $invalid,
+            'errors' => $errors,
+        ];
+    }
+
+    /**
+     * Parse CSV file and return array of email addresses (first column or column named email).
+     */
+    public function parseEmailsFromCsv($file)
+    {
+        $emails = [];
+        $path = $file->getRealPath();
+        $handle = fopen($path, 'r');
+        if (!$handle) {
+            return $emails;
+        }
+        $header = fgetcsv($handle);
+        $emailIndex = 0;
+        if ($header !== false) {
+            $emailIndex = array_search('email', array_map('strtolower', array_map('trim', $header)));
+            if ($emailIndex === false) {
+                $emailIndex = 0;
+            }
+        }
+        while (($row = fgetcsv($handle)) !== false) {
+            if (isset($row[$emailIndex]) && trim($row[$emailIndex]) !== '') {
+                $emails[] = trim($row[$emailIndex]);
+            }
+        }
+        fclose($handle);
+        return array_unique($emails);
+    }
+
+    /**
+     * Bulk invite from CSV: for each community, send to emails that are not already members and have no active invitation.
+     * $scope: 'this' | 'all' | 'selected'. For 'selected', $communityIds must be provided.
+     */
+    public function bulkInviteFromCsv($scope, array $communityIds, array $emails, $invitedBy)
+    {
+        if ($scope === 'all') {
+            $communityIds = CommunityOfPractice::pluck('id')->toArray();
+        } elseif ($scope === 'selected' && empty($communityIds)) {
+            return ['error' => 'No communities selected.'];
+        }
+
+        $emails = array_unique(array_filter(array_map(function ($e) {
+            $e = strtolower(trim($e));
+            return filter_var($e, FILTER_VALIDATE_EMAIL) ? $e : null;
+        }, $emails)));
+
+        if (empty($emails)) {
+            return ['error' => 'No valid emails in the file.'];
+        }
+
+        $totalSent = 0;
+        $totalSkippedMember = 0;
+        $totalSkippedPending = 0;
+        $perCommunity = [];
+
+        foreach ($communityIds as $cid) {
+            $result = $this->sendInvitationsBulk($cid, $emails, $invitedBy);
+            $totalSent += $result['sent'];
+            $totalSkippedMember += $result['skipped_member'];
+            $totalSkippedPending += $result['skipped_pending'];
+            $perCommunity[$cid] = $result;
+        }
+
+        return [
+            'sent' => $totalSent,
+            'skipped_member' => $totalSkippedMember,
+            'skipped_pending' => $totalSkippedPending,
+            'invalid' => count($emails) * count($communityIds) - $totalSent - $totalSkippedMember - $totalSkippedPending,
+            'per_community' => $perCommunity,
+            'communities_count' => count($communityIds),
+        ];
+    }
+
+    /**
      * Delete expired invitations
      */
     public function pruneExpiredInvitations()
