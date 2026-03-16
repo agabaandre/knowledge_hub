@@ -260,9 +260,9 @@ class SettingsController extends Controller
     public function importConfig(Request $request)
     {
         $request->validate([
-            'config_file' => 'required|file|mimetypes:application/xml,text/xml|max:2048',
+            'config_file' => 'required|file|mimes:xml|max:2048',
         ], [
-            'config_file.mimetypes' => 'The file must be an XML file (application/xml or text/xml).',
+            'config_file.mimes' => 'The file must be an XML file (extension .xml).',
         ]);
         $file = $request->file('config_file');
         $xml = file_get_contents($file->getRealPath());
