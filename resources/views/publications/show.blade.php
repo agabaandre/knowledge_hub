@@ -572,9 +572,10 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons - Chat with PDF (if PDF) or Summarise (if non-PDF); both require auth -->
+                    <!-- Action Buttons - Favorite, Chat with PDF (if PDF) or Summarise (if non-PDF); both require auth -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
-                        <div class="d-flex gap-2 flex-wrap">
+                        <div class="d-flex gap-2 flex-wrap align-items-center">
+                    @include('common.favourites_btn',['row'=>$publication])
                 @auth
                     @if($publication->has_any_pdf)
                     <button type="button" class="btn btn-au btn-sm js-open-pdf-chat"
@@ -1074,7 +1075,6 @@
                         </div>
                         @endif
                     </div>
-                    @include('common.favourites_btn',['row'=>$publication])
                 </div>
 
                 <!-- Comments Card -->

@@ -20,6 +20,13 @@
     .initiatives-nav i{font-size:18px;color:var(--theme-color-primary, #119A48);transition:color 0.3s}
     .initiatives-nav:hover i{color:#fff}
     .initiatives-strip .sec_title { padding: 1rem 12px 0; }
+    .initiative-share-dropdown{position:fixed;z-index:1060;background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;box-shadow:0 4px 12px rgba(0,0,0,0.15);padding:6px 0;min-width:160px}
+    .initiative-share-dropdown a,.initiative-share-dropdown button{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border:none;background:0;color:#334155;text-decoration:none;font-size:0.875rem;cursor:pointer;text-align:left}
+    .initiative-share-dropdown a:hover,.initiative-share-dropdown button:hover{background:#f1f5f9}
+    .initiative-share-dropdown i{width:20px;text-align:center}
+    .initiative-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;flex-shrink:0}
+    .initiative-actions .btn-share-init{border:1px solid #e2e8f0;background:#fff;color:#64748b;padding:0.25rem 0.5rem;font-size:0.8rem;border-radius:0.25rem;cursor:pointer}
+    .initiative-actions .btn-share-init:hover{background:#f8fafc;color:var(--theme-color-primary,#119A48)}
     @media (max-width:768px){
         .initiative-card{min-width:320px;max-width:360px;display:block !important;flex-direction:unset !important}
         .initiative-cover{height:120px !important;width:120px !important;min-width:120px !important;float:left !important;margin-right:12px !important;margin-bottom:8px !important;margin-left:0 !important;margin-top:0 !important;border-right:none !important;border-bottom:none;shape-outside:margin-box !important}
@@ -68,13 +75,14 @@
                         @if($theme)
                         <span><i class="fa fa-briefcase"></i> {{ Str::limit($theme, 20) }}</span>
                         @endif
-                        @if($visits > 0)
+                    </div>
+                    <div class="initiative-meta">
                         <span><i class="fa fa-eye"></i> {{ $visits }} Visits</span>
-                        @endif
-                        @if($commentsCount > 0)
                         <span><i class="fa fa-comments"></i> {{ $commentsCount }} Comments</span>
-                        @endif
-                                            </div>
+                    </div>
+                    <div class="initiative-actions" onclick="event.stopPropagation();">
+                        <button type="button" class="btn-share-init" title="Share" data-details-url="{{ $detailsUrl }}" data-title="{{ e(Str::limit(strip_tags(clean_unicode($row->title)), 70)) }}"><i class="fa fa-share-alt"></i> Share</button>
+                    </div>
                     @if($description)
                     <div class="initiative-desc">{!! Str::words(strip_tags($description), 30, '...') !!}</div>
                     @endif
@@ -178,6 +186,52 @@
         track.addEventListener('mouseleave', function(){
             startAutoPlay();
 });
+    })();
+
+    (function initiativeShare() {
+        document.addEventListener('click', function(e) {
+            var btn = e.target.closest('.btn-share-init');
+            if (!btn) return;
+            e.preventDefault();
+            e.stopPropagation();
+            var url = btn.getAttribute('data-details-url') || window.location.href;
+            var title = btn.getAttribute('data-title') || '';
+
+            function tryNativeShare() {
+                if (typeof navigator !== 'undefined' && navigator.share) {
+                    return navigator.share({ title: title || 'Resource', url: url }).then(function() { return true; }).catch(function() { return false; });
+                }
+                return Promise.resolve(false);
+            }
+            function openDropdown() {
+                var existing = document.getElementById('initiative-share-dropdown');
+                if (existing) existing.remove();
+                var drop = document.createElement('div');
+                drop.id = 'initiative-share-dropdown';
+                drop.className = 'initiative-share-dropdown';
+                var twitterText = (title ? title + ' ' : '') + url;
+                var twitterUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(twitterText);
+                var linkedInUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+                var facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+                var mailUrl = 'mailto:?subject=' + encodeURIComponent(title || 'Resource') + '&body=' + encodeURIComponent(url);
+                drop.innerHTML = '<a href="' + twitterUrl + '" target="_blank" rel="noopener"><i class="fab fa-twitter"></i> X (Twitter)</a><a href="' + linkedInUrl + '" target="_blank" rel="noopener"><i class="fab fa-linkedin"></i> LinkedIn</a><a href="' + facebookUrl + '" target="_blank" rel="noopener"><i class="fab fa-facebook"></i> Facebook</a><button type="button" class="initiative-share-copy"><i class="fa fa-copy"></i> Copy</button><a href="' + mailUrl + '"><i class="fa fa-envelope"></i> Email</a>';
+                document.body.appendChild(drop);
+                var rect = btn.getBoundingClientRect();
+                drop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 180)) + 'px';
+                drop.style.top = (rect.bottom + 4) + 'px';
+                drop.querySelector('.initiative-share-copy').addEventListener('click', function() {
+                    try {
+                        navigator.clipboard.writeText(url);
+                        var copyBtn = this;
+                        copyBtn.innerHTML = '<i class="fa fa-check"></i> Copied';
+                        setTimeout(function() { copyBtn.innerHTML = '<i class="fa fa-copy"></i> Copy'; }, 1500);
+                    } catch (err) { alert('Copy failed.'); }
+                });
+                function closeMenu() { drop.remove(); document.removeEventListener('click', closeMenu); }
+                setTimeout(function() { document.addEventListener('click', closeMenu); }, 0);
+            }
+            tryNativeShare().then(function(used) { if (!used) openDropdown(); });
+        });
     })();
 </script>
 @endif
