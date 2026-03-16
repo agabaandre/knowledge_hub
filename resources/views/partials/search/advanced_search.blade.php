@@ -9,43 +9,30 @@
                 ? true
                 : false;
 
-        // Determine text color based on context
-        // Check if text_color parameter is passed, otherwise detect context
-        // Home page spotlight = white, regular pages with custom-bg = white, others = light gray
+        // When theme uses header-style for this link (e.g. Theme1), parent CSS sets color
+        $useThemeHeaderStyle = $use_theme_header_style ?? false;
         $textColor = $text_color ?? '#ffffff';
-        
-        // If no explicit parameter, check the context
-        if (!isset($text_color)) {
-            // Check if we're in a spotlight or custom-bg context (home page or page_search)
+        if (!$useThemeHeaderStyle && !isset($text_color)) {
             $requestUri = request()->getRequestUri();
             $isHomePage = request()->is('/');
-            $isSearchPage = strpos($requestUri, '/records') !== false;
-            
-            // If on home page or in spotlight context, use white
-            // Otherwise use light gray for regular pages
-            if ($isHomePage) {
-                $textColor = '#ffffff';
-            } else {
-                // For records/search pages, use white to match home page
-                $textColor = '#ffffff';
-            }
+            $textColor = ($isHomePage || strpos($requestUri, '/records') !== false) ? '#ffffff' : '#475569';
         }
-        
-        // Ensure consistent format
         if ($textColor === 'white') {
             $textColor = '#ffffff';
         }
-        
-        $textShadow = ($textColor === '#ffffff' || $textColor === 'white') ? '0 1px 3px rgba(0,0,0,0.3)' : 'none';
+        $textShadow = ($textColor === '#ffffff') ? '0 1px 3px rgba(0,0,0,0.3)' : 'none';
+        $inlineStyle = $useThemeHeaderStyle ? 'font-size: 0.9375rem; padding: 0.5rem 0; display: block;' : 'color: ' . $textColor . ' !important; font-size:14px; padding: 0.5rem 0; display: block; text-shadow: ' . $textShadow . ';';
+        $spanStyle = $useThemeHeaderStyle ? '' : 'color: ' . $textColor . ' !important; text-shadow: ' . $textShadow . ';';
+        $iconStyle = $useThemeHeaderStyle ? 'transition: transform 0.3s ease;' : 'color: ' . $textColor . ' !important; transition: transform 0.3s ease; text-shadow: ' . $textShadow . ';';
     @endphp
 
-    <a data-toggle="collapse" href="#collapseExample" role="button" id="advanced_search"
-        aria-expanded="false" aria-controls="collapseExample" class="advanced col-12"
-        style="color: {{ $textColor }} !important; font-size:14px; padding: 0.5rem 0; display: block; text-shadow: {{ $textShadow }};">
-        <span class="filter text-bold" style="color: {{ $textColor }} !important; text-shadow: {{ $textShadow }};"> 
+    <a data-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#collapseExample" href="#collapseExample" role="button" id="advanced_search"
+        aria-expanded="false" aria-controls="collapseExample" class="advanced col-12 {{ $useThemeHeaderStyle ? 'advanced-search-theme-header-style' : '' }}"
+        style="{{ $inlineStyle }}">
+        <span class="filter text-bold" style="{{ $spanStyle }}"> 
             <i class="fa fa-sliders-h me-2"></i>Advance your Search With Filters
         </span> 
-        <i class="fa fa-angle-down ms-2" style="color: {{ $textColor }} !important; transition: transform 0.3s ease; text-shadow: {{ $textShadow }};"></i>
+        <i class="fa fa-angle-down ms-2" style="{{ $iconStyle }}"></i>
     </a>
 
     <div class="col-12 collapse mt-2" id="collapseExample" style="padding: 0; width: 100%; max-width: 100%; box-sizing: border-box;">

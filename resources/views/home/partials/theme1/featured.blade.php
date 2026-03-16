@@ -1,49 +1,167 @@
-<section class="middle gray"
-    style="background-image: url('{{ asset('frontend/img/pattern.png') }}'); background-repeat: repeat; background-size: cover;">
-    <div class="container" id="recommendations">
-        <div class="row justify-content-center">
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                <div class="sec_title position-relative text-center mb-5">
-                    <h2 class="ft-bold" style="color: #ecf0f1;">Recommended</h2>
+@php
+    $primary = settings()->primary_color ?? '#119A48';
+@endphp
+<section class="py-5" style="background-color: #f8fafc;">
+    <style>
+        .theme1-featured-card.forum-post-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            transition: box-shadow 0.2s ease;
+        }
+        .theme1-featured-card.forum-post-card:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .theme1-featured-card .forum-header {
+            margin-bottom: 0.75rem;
+        }
+        .theme1-featured-card .forum-author-name-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .theme1-featured-card .forum-author-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9375rem;
+        }
+        .theme1-featured-card .forum-post-time {
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        .theme1-featured-card .forum-content {
+            color: #4a5568;
+            line-height: 1.6;
+            overflow: hidden;
+        }
+        .theme1-featured-card .forum-thread-image {
+            float: left;
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .theme1-featured-card .forum-thread-image:hover {
+            transform: scale(1.03);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+        .theme1-featured-card .forum-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        .theme1-featured-card .forum-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .theme1-featured-card .forum-title a:hover {
+            color: {{ $primary }};
+        }
+        .theme1-featured-card .forum-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .theme1-featured-card .forum-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: {{ $primary }};
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .theme1-featured-card .forum-action-btn:hover {
+            color: #0d5034;
+            text-decoration: underline;
+        }
+        @media (max-width: 575.98px) {
+            .theme1-featured-card .forum-thread-image {
+                width: 100px;
+                height: 100px;
+                margin-right: 0.75rem;
+            }
+        }
+    </style>
+    <div class="container">
+        <div class="row justify-content-center mb-4">
+            <div class="col-12">
+                <div class="sec_title position-relative text-center">
+                    <h2 class="ft-bold mb-0" style="color: #1e293b;">{{ settings()->section_title_recommended ?? 'Recommended' }}</h2>
                 </div>
             </div>
         </div>
-        <div class="row justify-content-center">
-            <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-                <div class="review-slide px-3">
-                    @foreach ($featured as $row)
-                        <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="text-decoration-none">
-                            <div class="single_review px-2" data-aos="fade-in">
-                                <div class="reviews_wrap position-relative bg-white rounded py-4 px-4 shadow-lg"
-                                    style="border-radius: 20px; transition: transform 0.3s;">
-                                    <div class="rw-header d-flex justify-content-start">
-                                        <div class="rv-110-caption pl-0">
-                                            <h4 class="fs-md mb-0 ft-medium" style="color: #e74c3c;">
-                                                {{ truncate($row->title, 30) }}</h4>
-                                            <p class="p-0 m-0" style="color: #7f8c8d;">Source: <i
-                                                    class="fa fa-bank mr-1"></i>{{ truncate(@$row->author->name, 30) }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <span class="d-block theme-cl">
-                                        <i class="lni lni-briefcase mr-1"></i>Theme:
-                                        {{ $row->theme->description ?? '' }}
-                                    </span>
-                                    <span class="muted medium d-block theme-cl"><i class="lni lni-archive mr-1"></i>Sub
-                                        Theme: {{ $row->sub_theme->description }}</span>
-                                    <span class="text-muted medium d-block"><i class="lni lni-calendar mr-1"></i>Last
-                                        updated: {{ time_ago($row->updated_at) }}</span>
-                                    <span class="text-muted d-block mt-1">
-                                        <span class="mr-1"><i class="fa fa-eye mr-1"></i>{{ $row->visits }}
-                                            Views</span>
-                                        <span class="mr-1 ml-1"><i class="fa fa-comments"></i>
-                                            {{ count($row->comments) }} Comments</span>
-                                    </span>
-                                </div>
+        <div class="row g-0" id="featured">
+            @foreach ($featured as $row)
+                @php
+                    $image_link = $row->cover ?? $row->image_url ?? null;
+                    $default_image = asset('assets/images/cover.png');
+                    if (empty($image_link)) { $image_link = $default_image; }
+                    elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
+                        $image_link = (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) ? asset($image_link) : url($image_link);
+                        if (strpos($image_link, 'http') !== 0) { $image_link = $default_image; }
+                    }
+                @endphp
+                <div class="col-12 col-md-6 mb-3 px-2 px-md-3 d-flex">
+                    <div class="theme1-featured-card forum-post-card w-100">
+                        <div class="forum-header">
+                            <div class="forum-author-name-container">
+                                <span class="forum-author-name">{{ $row->author->name ?? '—' }}</span>
+                                <span class="forum-post-time"><i class="fa fa-clock me-1"></i>{{ time_ago($row->updated_at) }}</span>
                             </div>
-                        </a>
-                    @endforeach
+                        </div>
+                        <div class="forum-content">
+                            <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                                <img src="{{ $image_link }}" alt="" class="forum-thread-image" loading="lazy" onerror="this.src='{{ $default_image }}';">
+                            </a>
+                            <h3 class="forum-title">
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}">{{ $row->title }}</a>
+                            </h3>
+                            <p class="mb-0" style="text-align: justify;">{{ Str::words(strip_tags($row->description ?? 'No description.'), 40) }}</p>
+                            <div class="forum-actions">
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    Read More <i class="fa fa-arrow-right"></i>
+                                </a>
+                                @if($row->has_any_pdf ?? false)
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    <i class="fa-solid fa-microchip me-1"></i> Chat with PDF
+                                </a>
+                                @else
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    <i class="fa-solid fa-microchip me-1"></i> Summarise
+                                </a>
+                                @endif
+                                <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
+                                @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
+                                <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            @endforeach
+        </div>
+        <div class="row justify-content-center mt-4">
+            <div class="col-12 text-center">
+                <a href="{{ url('records/search') }}" class="btn btn-outline-primary px-4 py-2 rounded" style="border-color: {{ $primary }}; color: {{ $primary }};">View more</a>
             </div>
         </div>
     </div>

@@ -77,6 +77,23 @@
                         </div>
                         <input type="hidden" name="id" value="{{ $user->id }}" />
                     </div>
+                    @if(\Illuminate\Support\Facades\Schema::hasColumn('users', 'theme_preference'))
+                    <div class="form-group ">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Theme</label>
+                            </div>
+                            <div class="col-md-9">
+                                <select name="theme_preference" class="form-control">
+                                    <option value="light" @if(($user->theme_preference ?? 'light') === 'light') selected @endif>Light</option>
+                                    <option value="dark" @if(($user->theme_preference ?? '') === 'dark') selected @endif>Dark</option>
+                                    <option value="system" @if(($user->theme_preference ?? '') === 'system') selected @endif>System (follow device)</option>
+                                </select>
+                                <small class="text-muted">Choose light or dark theme for the site. Saved with your profile.</small>
+                            </div>
+                        </div>
+                    </div>
+                    @endif
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">

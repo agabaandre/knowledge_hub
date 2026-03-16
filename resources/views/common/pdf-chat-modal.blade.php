@@ -18,6 +18,43 @@
   border-bottom: 1px solid #dee2e6;
   background: #fff;
 }
+#pdf-chat-modal .pdf-chat-doc-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+  margin: 0 0 0.5rem 0;
+  line-height: 1.3;
+}
+#pdf-chat-modal .pdf-chat-export-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.5rem;
+}
+#pdf-chat-modal .pdf-chat-export-toolbar .btn {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.6rem;
+}
+.pdf-chat-msg.assistant .pdf-chat-msg-actions {
+  margin-top: 0.5rem;
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+.pdf-chat-msg.assistant .pdf-chat-msg-actions .btn {
+  font-size: 0.75rem;
+  padding: 0.25rem 0.5rem;
+}
+.pdf-chat-msg.assistant .content {
+  white-space: normal;
+}
+.pdf-chat-msg.assistant .content h3 { font-size: 1rem; margin: 1rem 0 0.5rem; font-weight: 600; }
+.pdf-chat-msg.assistant .content h4 { font-size: 0.95rem; margin: 0.85rem 0 0.4rem; font-weight: 600; }
+.pdf-chat-msg.assistant .content p { margin: 0.5rem 0; }
+.pdf-chat-msg.assistant .content ul { margin: 0.5rem 0; padding-left: 1.25rem; }
+.pdf-chat-msg.assistant .content li { margin: 0.25rem 0; }
+.pdf-chat-msg.assistant .content hr { border: 0; border-top: 1px solid #dee2e6; margin: 0.75rem 0; }
 #pdf-chat-modal .modal-body {
   flex: 1;
   overflow-y: auto;
@@ -52,7 +89,6 @@
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
 }
 .pdf-chat-msg.assistant .content {
-  white-space: pre-wrap;
   word-break: break-word;
 }
 .pdf-chat-msg .role-label {
@@ -84,10 +120,21 @@
   <div class="modal-dialog" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title" id="pdf-chat-modal-label">
-          <i class="fa-solid fa-microchip"></i> Chat with PDF
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <div class="flex-grow-1">
+          <h5 class="modal-title mb-0" id="pdf-chat-modal-label">
+            <i class="fa-solid fa-microchip"></i> Chat with PDF
+          </h5>
+          <p class="pdf-chat-doc-title mb-0" id="pdf-chat-doc-title" aria-hidden="true">—</p>
+          <div class="pdf-chat-export-toolbar">
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-export-all-pdf" title="Export full conversation as PDF">
+              <i class="fa fa-file-pdf"></i> Export all (PDF)
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-export-all-word" title="Export full conversation as Word">
+              <i class="fa fa-file-word"></i> Export all (Word)
+            </button>
+          </div>
+        </div>
+        <button type="button" class="close btn-close-placeholder" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close">
           <span aria-hidden="true">&times;</span>
         </button>
       </div>

@@ -24,6 +24,7 @@ class User extends Authenticatable
         'email',
         'password',
         'langauge',
+        'theme_preference',
         'first_name',
         'last_name',
         'country_id',

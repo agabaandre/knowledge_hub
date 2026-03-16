@@ -133,6 +133,10 @@
 @section('styles')
 {{-- Summernote CSS loaded via partial in scripts to match forums --}}
 <style>
+    /* Title and description: display as normal text, not as links */
+    .publication-page-title { text-decoration: none !important; color: #1e293b !important; }
+    .publication-page-description { color: #334155; }
+    .publication-page-description a { color: var(--theme-color-primary, #119A48); text-decoration: underline; }
     /* Global border-radius override - all elements use 0.25rem */
     * {
         --border-radius-default: 0.25rem;
@@ -484,7 +488,7 @@
                         
                         <!-- Title and Info Content -->
                         <div class="col-md-8">
-                            <h1 itemprop="headline" class="font-weight-bold mb-2" style="font-size: 1.75rem;">{{ clean_unicode($publication->title) }}</h1>
+                            <h1 itemprop="headline" class="font-weight-bold mb-2 publication-page-title" style="font-size: 1.75rem;">{{ clean_unicode($publication->title) }}</h1>
                             <meta itemprop="name" content="{{ clean_unicode($publication->title) }}">
                             <p class="text-muted mb-3" itemprop="about">{{ clean_unicode($publication->theme->description ?? '') }}</p>
                 <div class="d-flex flex-wrap mb-3">
@@ -568,17 +572,30 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons - Floated Right -->
+                    <!-- Action Buttons - Chat with PDF (if PDF) or Summarise (if non-PDF); both require auth -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap">
-                @if($publication->has_any_pdf)
-                <button onclick="openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null))" class="btn btn-au btn-sm">
-                    <i class="fa-solid fa-microchip"></i> Chat with PDF
-                </button>
-                @endif
-                <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
-                    <i class="fa-solid fa-microchip"></i> AI Processing (Summarizer)
-                </button>
+                @auth
+                    @if($publication->has_any_pdf)
+                    <button onclick="openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)))" class="btn btn-au btn-sm">
+                        <i class="fa-solid fa-microchip"></i> Chat with PDF
+                    </button>
+                    @else
+                    <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
+                        <i class="fa-solid fa-microchip"></i> Summarise
+                    </button>
+                    @endif
+                @else
+                    @if($publication->has_any_pdf)
+                    <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
+                        <i class="fa-solid fa-microchip"></i> Chat with PDF <small>(login required)</small>
+                    </a>
+                    @else
+                    <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
+                        <i class="fa-solid fa-microchip"></i> Summarise <small>(login required)</small>
+                    </a>
+                    @endif
+                @endauth
             </div>
                         <div class="d-flex gap-2">
                 @auth
@@ -707,7 +724,7 @@
                         </div>
                     @endif
                     <h2 class="section-heading">Description</h2>
-                    <div itemprop="articleBody">
+                    <div itemprop="articleBody" class="publication-page-description">
                     @php
                         // Process publication description to detect and embed video links and convert URLs to clickable links
                         $processedDescription = detect_and_embed_video_links(clean_unicode(publication_description_for_list($publication->description ?? '')), 180, 180);
@@ -1131,6 +1148,7 @@
 <script>
   var pdfChatPublicationId = {{ $publication->id }};
   var pdfChatAttachmentId = @json($publication->pdf_sources[0]['attachment_id'] ?? null);
+  var pdfChatDocumentTitle = @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200));
 </script>
 @include('common.pdf-chat-js')
 @endif
@@ -1148,7 +1166,7 @@
           </h5>
         </div>
         <div class="header-actions">
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; opacity: 0.9; cursor: pointer; padding: 0.5rem; color: white;">
+          <button type="button" class="close" data-dismiss="modal" data-bs-dismiss="modal" aria-label="Close" style="background: none; border: none; font-size: 1.5rem; opacity: 0.9; cursor: pointer; padding: 0.5rem; color: white;">
             <span aria-hidden="true">&times;</span>
           </button>
         </div>

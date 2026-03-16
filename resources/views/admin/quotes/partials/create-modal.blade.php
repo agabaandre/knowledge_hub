@@ -9,20 +9,32 @@
         </button>
       </div>
       
-      <form action="{{ url('admin/quotes/save') }}" method="post" id='filetypes' class='filetypes'>
+      <form action="{{ url('admin/quotes/save') }}" method="post" id="quote-form" class="filetypes" enctype="multipart/form-data">
         @csrf
       <div class="modal-body">
         <input type="hidden" name="id" id="id" class="newform">
         <div class="row">
           <div class="col-md-12">
             <div class="mb-3">
-              <label class="form-label" for="name">Quote</label>
-              <textarea type="text" placeholder="Enter Quote" rows="8" class="form-control newform" id="quote" name="quote" required></textarea>
+              <label class="form-label" for="quote">Quote</label>
+              <textarea placeholder="Enter Quote" rows="5" class="form-control newform" id="quote" name="quote" required></textarea>
             </div>
           </div>
-
-          <!-- <div  class="col-md-4"> -->
-          <!-- </div> -->
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="quote_image">Image</label>
+              <input type="file" class="form-control" id="quote_image" name="image" accept="image/*">
+              <small class="text-muted">Optional. Shown with the quote on the front.</small>
+              <div id="quote-image-preview" class="mt-2"></div>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="link_url">Link to details page</label>
+              <input type="url" class="form-control" id="link_url" name="link_url" placeholder="https://...">
+              <small class="text-muted">Optional. "Read more" will link here.</small>
+            </div>
+          </div>
         </div>
 
       </div>

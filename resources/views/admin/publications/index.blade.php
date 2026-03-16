@@ -1,4 +1,4 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('styles')
     @include('common.table')
@@ -191,12 +191,12 @@
                                             <td>
                                                 @php
                                                     $name = '-';
-                                                    if ($publication->is_approved && $publication->approved_by) {
-                                                        $u = \App\Models\User::find($publication->approved_by); 
-                                                        $name = $u->name ?? '-';
-                                                    } elseif ($publication->is_rejected && $publication->rejected_by) {
-                                                        $u = \App\Models\User::find($publication->rejected_by); 
-                                                        $name = $u->name ? $u->name.' (Rejected)' : 'Rejected';
+                                                    if (!empty($publication->approved_by)) {
+                                                        $u = \App\Models\User::find($publication->approved_by);
+                                                        $name = $u ? ($u->name ?? '-') : '-';
+                                                    } elseif (!empty($publication->rejected_by)) {
+                                                        $u = \App\Models\User::find($publication->rejected_by);
+                                                        $name = $u ? ($u->name ?? 'Rejected') : 'Rejected';
                                                     }
                                                 @endphp
                                                 <span class="text-muted">{{ $name }}</span>

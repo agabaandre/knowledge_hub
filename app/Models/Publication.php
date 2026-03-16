@@ -165,6 +165,14 @@ class Publication extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function approver(){
+        return $this->belongsTo(User::class, 'approved_by', 'id');
+    }
+
+    public function rejector(){
+        return $this->belongsTo(User::class, 'rejected_by', 'id');
+    }
+
     public function favourited(){
         return $this->hasMany(Favourite::class);
     }

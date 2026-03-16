@@ -19,6 +19,7 @@
     .initiatives-nav.next{right:10px}
     .initiatives-nav i{font-size:18px;color:var(--theme-color-primary, #119A48);transition:color 0.3s}
     .initiatives-nav:hover i{color:#fff}
+    .initiatives-strip .sec_title { padding: 1rem 12px 0; }
     @media (max-width:768px){
         .initiative-card{min-width:320px;max-width:360px;display:block !important;flex-direction:unset !important}
         .initiative-cover{height:120px !important;width:120px !important;min-width:120px !important;float:left !important;margin-right:12px !important;margin-bottom:8px !important;margin-left:0 !important;margin-top:0 !important;border-right:none !important;border-bottom:none;shape-outside:margin-box !important}
@@ -31,14 +32,10 @@
 </style>
 
     <div class="container">
-    <div class="row justify-content-center" data-aos="fade-in">
-        <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
-            <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
-                <h2 class="ft-bold">Flagship Initiatives</h2>
-            </div>
-        </div>
-                                        </div>
     <div class="initiatives-strip">
+        <div class="sec_title position-relative text-center py-3 mb-0" style="margin-bottom: 0 !important;">
+            <h2 class="ft-bold mb-0" style="color: #1e293b;">{{ settings()->section_title_flagship_initiatives ?? 'Flagship Initiatives' }}</h2>
+        </div>
         <button class="initiatives-nav prev" onclick="initSlide(-1)" aria-label="Previous initiatives">
             <i class="fa fa-chevron-left"></i>
         </button>
@@ -72,7 +69,7 @@
                         <span><i class="fa fa-briefcase"></i> {{ Str::limit($theme, 20) }}</span>
                         @endif
                         @if($visits > 0)
-                        <span><i class="fa fa-eye"></i> {{ $visits }} Views</span>
+                        <span><i class="fa fa-eye"></i> {{ $visits }} Visits</span>
                         @endif
                         @if($commentsCount > 0)
                         <span><i class="fa fa-comments"></i> {{ $commentsCount }} Comments</span>

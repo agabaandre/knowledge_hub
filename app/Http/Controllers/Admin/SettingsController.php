@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Models\CustomFont;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
@@ -16,11 +17,24 @@ class SettingsController extends Controller
     }
 
     public function index(Request $request){
-
-        $data['settings'] = (Object) $this->settingsRepo->get($request);
-        // Load badge types for configuration
+        // Use merged settings (per-theme: Theme1 overlay when active)
+        $data['settings'] = settings();
         $data['badgeTypes'] = \App\Models\BadgeType::getAllBadgesInOrder();
-        return view('admin.settings.index',$data);
+        // Config gallery: list image filenames from storage for "browse existing"
+        $configImages = [];
+        $configPath = storage_path('app/public/uploads/config');
+        if (is_dir($configPath)) {
+            foreach (['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico', 'svg'] as $ext) {
+                foreach (glob($configPath . '/*.' . $ext) ?: [] as $path) {
+                    $configImages[] = basename($path);
+                }
+            }
+        }
+        $data['configGalleryImages'] = array_unique($configImages);
+        $data['customFonts'] = \Illuminate\Support\Facades\Schema::hasTable('custom_fonts')
+            ? CustomFont::orderBy('name')->get()
+            : collect();
+        return view('admin.settings.index', $data);
     }
   
     public function store(Request $request){
@@ -104,9 +118,10 @@ class SettingsController extends Controller
                 $allOutput[] = PHP_EOL;
             }
             
-            // Also clear the settings cache specifically
+            // Also clear the settings and theme_settings caches
             try {
                 cache()->forget('settings');
+                cache()->forget('theme_settings_theme1');
                 $allOutput[] = "Clearing settings cache..." . PHP_EOL;
                 $allOutput[] = "✓ Settings cache cleared successfully" . PHP_EOL . PHP_EOL;
             } catch (\Exception $e) {
@@ -152,5 +167,114 @@ class SettingsController extends Controller
         }
     }
 
-  
+    public function storeCustomFont(Request $request)
+    {
+        $request->validate([
+            'font_name' => 'nullable|string|max:120',
+            'font_family' => 'nullable|string|max:120',
+            'font_files' => 'nullable|array',
+            'font_files.*' => 'file|mimes:woff,woff2,ttf,otf|max:5120',
+        ]);
+
+        $baseName = null;
+        if ($request->hasFile('font_files')) {
+            $first = collect($request->file('font_files'))->first();
+            if ($first) {
+                $baseName = pathinfo($first->getClientOriginalName(), PATHINFO_FILENAME);
+            }
+        }
+        $displayName = trim((string) $request->font_name);
+        $fontFamily = trim((string) $request->font_family);
+        if ($displayName === '') {
+            $displayName = $baseName ?: 'Custom font';
+        }
+        if ($fontFamily === '') {
+            $fontFamily = $baseName ? \Illuminate\Support\Str::title(str_replace(['-', '_'], ' ', $baseName)) : 'Custom Font';
+        }
+
+        $font = new CustomFont();
+        $font->name = $displayName;
+        $font->font_family = $fontFamily;
+        $font->font_files = null;
+        $font->save();
+
+        $dir = storage_path('app/public/uploads/fonts');
+        if (!is_dir($dir)) {
+            @mkdir($dir, 0755, true);
+        }
+        $idDir = $dir . '/' . $font->id;
+        $files = [];
+        if ($request->hasFile('font_files')) {
+            if (!is_dir($idDir)) {
+                @mkdir($idDir, 0755, true);
+            }
+            foreach ($request->file('font_files') as $file) {
+                $ext = strtolower($file->getClientOriginalExtension());
+                if (!in_array($ext, ['woff', 'woff2', 'ttf', 'otf'])) {
+                    continue;
+                }
+                $filename = \Illuminate\Support\Str::slug($font->name) . '.' . $ext;
+                $file->move($idDir, $filename);
+                $files[$ext] = $font->id . '/' . $filename;
+            }
+            $font->font_files = $files ?: null;
+            $font->save();
+        }
+        clear_cache();
+        return back()->with('alert-success', 'Custom font added. Select it from the Primary font dropdown and save.');
+    }
+
+    public function deleteCustomFont($id)
+    {
+        $font = CustomFont::findOrFail($id);
+        $dir = storage_path('app/public/uploads/fonts');
+        $fontDir = $dir . '/' . $font->id;
+        if (is_dir($fontDir)) {
+            foreach (glob($fontDir . '/*') ?: [] as $path) {
+                @unlink($path);
+            }
+            @rmdir($fontDir);
+        }
+        $font->delete();
+        clear_cache();
+        return back()->with('alert-success', 'Custom font removed.');
+    }
+
+    /**
+     * Export current active theme configuration as XML (excludes images).
+     */
+    public function exportConfig()
+    {
+        $xml = $this->settingsRepo->exportConfigAsXml();
+        $filename = 'knowledge_hub_config_' . date('Y-m-d_His') . '.xml';
+        return response($xml, 200, [
+            'Content-Type'        => 'application/xml; charset=UTF-8',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ]);
+    }
+
+    /**
+     * Import configuration from XML and overwrite active theme config (images are not imported).
+     */
+    public function importConfig(Request $request)
+    {
+        $request->validate([
+            'config_file' => 'required|file|mimetypes:application/xml,text/xml|max:2048',
+        ], [
+            'config_file.mimetypes' => 'The file must be an XML file (application/xml or text/xml).',
+        ]);
+        $file = $request->file('config_file');
+        $xml = file_get_contents($file->getRealPath());
+        if ($xml === false) {
+            return back()->with('alert-danger', 'Could not read the config file.');
+        }
+        try {
+            $this->settingsRepo->importConfigFromXml($xml);
+        } catch (\InvalidArgumentException $e) {
+            return back()->with('alert-danger', 'Invalid config file: ' . $e->getMessage());
+        } catch (\RuntimeException $e) {
+            return back()->with('alert-danger', 'Import failed: ' . $e->getMessage());
+        }
+        return back()->with('alert-success', 'Configuration imported successfully. Active theme settings have been updated (images were not changed).');
+    }
 }

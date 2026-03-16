@@ -170,7 +170,7 @@
                     <a href="{{ url('admin/commsofpractice') }}" class="sub-icon" style="position: relative;">
                         <i class=""></i>COPs
                         @if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)
-                            <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_cop_approvals_count }}</span>
+                            <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px; background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>
                         @endif
                     </a>
                 </li>

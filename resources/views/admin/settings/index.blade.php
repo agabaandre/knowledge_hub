@@ -1,8 +1,10 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 @section('styles')
-    <!-- Bootstrap Colorpicker CSS -->
+    @if((settings()->site_theme ?? '') !== 'theme1.')
+    <!-- Bootstrap Colorpicker CSS (Bootstrap 4 only; Theme1 uses Bootstrap 5) -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.2.0/css/bootstrap-colorpicker.min.css"
         rel="stylesheet">
+    @endif
     <style>
         .settings-container {
             background: #ffffff;
@@ -52,7 +54,36 @@
         .settings-tabs .nav-link.active {
             color: var(--theme-color-primary, #119A48);
             background: #ffffff;
-            border-bottom-color: var(--theme-color-primary, #119A48);
+        }
+        /* Theme1 (Nifty) admin: unique tab styling */
+        .settings-theme1 .settings-tabs {
+            display: flex;
+            border-bottom: none;
+            background: transparent;
+            padding: 0 1.5rem;
+            gap: 0.25rem;
+            flex-wrap: wrap;
+        }
+        .settings-theme1 .settings-tabs .nav-item {
+            margin-bottom: 0;
+        }
+        .settings-theme1 .settings-tabs .nav-link {
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.65rem 1.25rem;
+            font-weight: 500;
+            color: #64748b;
+            background: transparent;
+            transition: color 0.2s, background 0.2s;
+        }
+        .settings-theme1 .settings-tabs .nav-link:hover {
+            color: var(--theme-color-primary, #119A48);
+            background: rgba(17, 154, 72, 0.08);
+        }
+        .settings-theme1 .settings-tabs .nav-link.active {
+            color: #fff;
+            background: var(--theme-color-primary, #119A48);
+            border-bottom: none;
         }
 
         .settings-content {
@@ -322,7 +353,7 @@
 
     <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data">
             @csrf
-        <div class="settings-container">
+        <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
             <div class="settings-header">
                 <h2><i class="fa fa-cog me-2"></i>System Configuration</h2>
                 <p>Manage your site settings and preferences</p>
@@ -410,27 +441,46 @@
                         <i class="fa fa-images"></i>
                         Branding
                     </div>
+                    <small class="info-text mb-2 d-block">Choose from existing config gallery or upload a new image. Saved per theme when using Theme1.</small>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Site Logo</label>
+                                <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
+                                <select name="logo_existing" id="logo_existing" class="form-control mb-2">
+                                    <option value="">— Keep current / upload new —</option>
+                                    @php $currentLogoFile = settings()->logo ? basename(parse_url(settings()->logo, PHP_URL_PATH)) : ''; @endphp
+                                    @foreach($configGalleryImages ?? [] as $f)
+                                        <option value="{{ $f }}" @if($f === $currentLogoFile) selected @endif>{{ $f }}</option>
+                                    @endforeach
+                                </select>
+                                <label class="small text-muted d-block mb-1">Or upload new file</label>
                                 <input type="file" name="logo" id="logo" class="form-control" accept="image/*">
                                 <small class="info-text">Recommended: 500x230 pixels</small>
                                 @if(settings()->logo)
-                                    <div class="image-preview">
+                                    <div class="image-preview mt-2">
                                         <img src="{{ settings()->logo }}" alt="Logo Preview">
                                     </div>
                                 @endif
-                </div>
-            </div>
+                            </div>
+                        </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Favicon</label>
+                                <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
+                                <select name="favicon_existing" id="favicon_existing" class="form-control mb-2">
+                                    <option value="">— Keep current / upload new —</option>
+                                    @php $currentFaviconFile = settings()->favicon ? basename(parse_url(settings()->favicon, PHP_URL_PATH)) : ''; @endphp
+                                    @foreach($configGalleryImages ?? [] as $f)
+                                        <option value="{{ $f }}" @if($f === $currentFaviconFile) selected @endif>{{ $f }}</option>
+                                    @endforeach
+                                </select>
+                                <label class="small text-muted d-block mb-1">Or upload new file</label>
                                 <input type="file" name="favicon" id="favicon" class="form-control" accept="image/*">
                                 <small class="info-text">Recommended: 350x350 pixels</small>
                                 @if(settings()->favicon)
-                                    <div class="image-preview">
+                                    <div class="image-preview mt-2">
                                         <img src="{{ settings()->favicon }}" alt="Favicon Preview">
                                     </div>
                                 @endif
@@ -442,9 +492,10 @@
                 <!-- Appearance Tab -->
                 <div class="tab-pane fade" id="appearance" role="tabpanel">
                     <div class="form-section-title">
-                        <i class="fa fa-paint-brush"></i>
-                        Color Scheme
+                        <i class="fa fa-palette"></i>
+                        AU (African Union) Color Palette & Scheme
                     </div>
+                    <small class="info-text mb-3 d-block">Primary, secondary, navigation, and official AU colors. Applied to both front and admin. Saved per theme (Default vs Theme1).</small>
 
                     <div class="row">
                         <div class="col-md-6">
@@ -508,6 +559,65 @@
                     </div>
 
                     <div class="row mt-2">
+                        <div class="col-md-12">
+                            <div class="form-section-subtitle mb-2">Navigation bar</div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Front nav style <span class="text-muted">(public site only)</span></label>
+                                <select name="nav_style" class="form-control">
+                                    <option value="colored" @if(($settings->nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary/secondary background)</option>
+                                    <option value="light" @if(($settings->nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
+                                </select>
+                                <small class="info-text">Navigation bar style on the public (front) site only.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Admin nav style <span class="text-muted">(admin panel only)</span></label>
+                                <select name="admin_nav_style" class="form-control">
+                                    <option value="colored" @if(($settings->admin_nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary background)</option>
+                                    <option value="light" @if(($settings->admin_nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
+                                </select>
+                                <small class="info-text">Navigation bar style in the admin panel only. Does not affect the public site.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Nav link color</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="nav_link_color" value="{{ $settings->nav_link_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#fff' }}" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_color ?? (($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#ffffff') }}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Nav link hover</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="nav_link_hover_color" value="{{ $settings->nav_link_hover_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#119A48' : '#e2e8f0' }}" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_hover_color ?? (($settings->nav_style ?? 'colored') === 'light' ? ($settings->primary_color ?? '#119A48') : '#e2e8f0') }}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Nav link active</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="nav_link_active_color" value="{{ $settings->nav_link_active_color ?? '' }}" class="form-control" placeholder="{{ ($settings->primary_color ?? '#119A48') }}" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_active_color ?? ($settings->primary_color ?? '#119A48') }}"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt-2">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Show Icons in Main Menu</label>
@@ -542,6 +652,10 @@
                                     <label class="form-check-label" for="show_quotes">Show Quotes banner</label>
                                 </div>
                                 <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="show_health_themes" name="show_health_themes" value="1" @if($settings->show_health_themes ?? true) checked @endif>
+                                    <label class="form-check-label" for="show_health_themes">Show &quot;Choose a Health Theme to Explore&quot; section</label>
+                                </div>
+                                <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="show_quiz" name="show_quiz" value="1" @if(!empty($settings->show_quiz)) checked @endif>
                                     <label class="form-check-label" for="show_quiz">Show Quiz button on search results</label>
                                 </div>
@@ -560,6 +674,53 @@
                                     <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
                                 </div>
                                 <small class="info-text">When enabled, the main search page will include matching discussions and communities alongside publications.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-heading"></i>
+                        Home page section titles
+                    </div>
+                    <small class="info-text mb-2 d-block">Customise the heading text for homepage sections. Leave blank to use the default text shown in the placeholders.</small>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Health themes section</label>
+                                <input type="text" name="section_title_health_themes" class="form-control" value="{{ $settings->section_title_health_themes ?? '' }}" placeholder="Choose a Health Theme to Explore">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Top Searches section</label>
+                                <input type="text" name="section_title_top_searches" class="form-control" value="{{ $settings->section_title_top_searches ?? '' }}" placeholder="Top Searches">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Recommended / Featured section</label>
+                                <input type="text" name="section_title_recommended" class="form-control" value="{{ $settings->section_title_recommended ?? '' }}" placeholder="Recommended">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Flagship Initiatives section</label>
+                                <input type="text" name="section_title_flagship_initiatives" class="form-control" value="{{ $settings->section_title_flagship_initiatives ?? '' }}" placeholder="Flagship Initiatives">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-2">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Theme cards opacity</label>
+                                <select name="theme_card_opacity" class="form-control">
+                                    @foreach(['0.5' => '50%', '0.6' => '60%', '0.7' => '70%', '0.8' => '80%', '0.9' => '90%', '1' => '100% (no transparency)'] as $val => $label)
+                                        <option value="{{ $val }}" @if(($settings->theme_card_opacity ?? '1') == $val) selected @endif>{{ $label }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="info-text">Opacity of the health theme cards on the homepage (default: 100%).</small>
                             </div>
                         </div>
                     </div>
@@ -603,10 +764,19 @@
 
                     <div class="form-group">
                         <label>Spotlight Banner Image</label>
+                        <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
+                        <select name="spotlight_banner_existing" id="spotlight_banner_existing" class="form-control mb-2">
+                            <option value="">— Keep current / upload new —</option>
+                            @php $currentBannerFile = settings()->spotlight_banner ? basename(parse_url(settings()->spotlight_banner, PHP_URL_PATH)) : ''; @endphp
+                            @foreach($configGalleryImages ?? [] as $f)
+                                <option value="{{ $f }}" @if($f === $currentBannerFile) selected @endif>{{ $f }}</option>
+                            @endforeach
+                        </select>
+                        <label class="small text-muted d-block mb-1">Or upload new file</label>
                         <input type="file" name="spotlight_banner" id="spotlight_banner" class="form-control" accept="image/*">
                         <small class="info-text">Recommended: 1894x658 pixels. This image will be used for the search area background.</small>
                         @if(settings()->spotlight_banner)
-                            <div class="image-preview">
+                            <div class="image-preview mt-2">
                                 <img src="{{ settings()->spotlight_banner }}" alt="Banner Preview">
                             </div>
                         @endif
@@ -645,12 +815,7 @@
                         <small class="info-text">Preview of the gradient (shown when no banner image is set)</small>
                     </div>
 
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-palette"></i>
-                        AU (African Union) Color Palette
-                    </div>
-                    <small class="info-text mb-3 d-block">Official African Union colors for consistent branding across the platform</small>
-
+                    <div class="form-section-subtitle mt-4 mb-2">AU official colors</div>
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
@@ -777,6 +942,172 @@
                             <option value="theme1." @if (settings()->site_theme == 'theme1.') selected @endif>Theme1</option>
                         </select>
                     </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-language"></i>
+                        Translate Button
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="hidden" name="translate_button_filled" value="0">
+                                    <input type="checkbox" class="form-check-input" id="translate_button_filled" name="translate_button_filled" value="1" @if(settings()->translate_button_filled ?? true) checked @endif>
+                                    <label class="form-check-label" for="translate_button_filled">Filled translate button (with background color)</label>
+                                </div>
+                                <small class="info-text">When enabled, the language/translate button uses the primary color as background. When disabled, it appears as outline only.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Translate button text color</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="translate_button_text_color" value="{{ settings()->translate_button_text_color ?? '#ffffff' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ settings()->translate_button_text_color ?? '#ffffff' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">Text color of the translate/language selector button.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-image"></i>
+                        Logo display
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Logo size (px)</label>
+                                <select name="logo_scale" class="form-control">
+                                    @foreach([40, 50, 60, 70, 80, 100, 120] as $px)
+                                    <option value="{{ $px }}" @if((settings()->logo_scale ?? 80) == $px) selected @endif>{{ $px }}px</option>
+                                    @endforeach
+                                </select>
+                                <small class="info-text">Height of the logo in header/footer (both front and admin).</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" class="form-check-input" id="header_logo_inverse" name="header_logo_inverse" value="1" @if(settings()->header_logo_inverse ?? false) checked @endif>
+                                    <label class="form-check-label" for="header_logo_inverse">Use inverse logo in header</label>
+                                </div>
+                                <small class="info-text">When enabled, the header logo is shown in inverse (light) style on both front and admin.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <div class="form-check mt-4">
+                                    <input type="checkbox" class="form-check-input" id="footer_logo_inverse" name="footer_logo_inverse" value="1" @if(settings()->footer_logo_inverse ?? false) checked @endif>
+                                    <label class="form-check-label" for="footer_logo_inverse">Use inverse logo in footer</label>
+                                </div>
+                                <small class="info-text">When enabled, the footer logo is shown in inverse (light) style.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-title mt-4">
+                        <i class="fa fa-font"></i>
+                        Typography
+                    </div>
+                    <small class="info-text mb-3 d-block">Primary font and default text color applied across the site. Saved per theme.</small>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Primary font</label>
+                                <select name="primary_font" id="primary_font" class="form-control">
+                                    <option value="">— Default (system) —</option>
+                                    <option value="univers_45_light" @if((settings()->primary_font ?? '') === 'univers_45_light') selected @endif>Univers 45 Light</option>
+                                    <option value="arial" @if((settings()->primary_font ?? '') === 'arial') selected @endif>Arial</option>
+                                    <option value="times_new_roman" @if((settings()->primary_font ?? '') === 'times_new_roman') selected @endif>Times New Roman</option>
+                                    <option value="montserrat" @if((settings()->primary_font ?? '') === 'montserrat') selected @endif>Montserrat</option>
+                                    <option value="brandon_text" @if((settings()->primary_font ?? '') === 'brandon_text') selected @endif>Brandon Text</option>
+                                    @if(isset($customFonts) && $customFonts->count() > 0)
+                                        <option disabled>— Custom fonts —</option>
+                                        @foreach($customFonts as $cf)
+                                            <option value="custom_{{ $cf->id }}" @if((settings()->primary_font ?? '') === 'custom_' . $cf->id) selected @endif>{{ $cf->name }}</option>
+                                        @endforeach
+                                    @endif
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Default font color</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="default_font_color" value="{{ $settings->default_font_color ?? '#212529' }}" class="form-control" placeholder="#212529" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->default_font_color ?? '#212529' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">Default body text color.</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Front-end body font size (px)</label>
+                                <input type="number" name="front_body_font_size" value="{{ $settings->front_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
+                                <small class="info-text">Default body font size on the public site. Default: 14px.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Admin panel body font size (px)</label>
+                                <input type="number" name="admin_body_font_size" value="{{ $settings->admin_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
+                                <small class="info-text">Default body font size in the admin panel. Default: 14px.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-section-subtitle mt-4 mb-2">Custom fonts (upload your own)</div>
+                    <p class="text-muted small">Upload font files to add them to the Primary font dropdown. Formats: .woff2, .woff, .ttf, .otf</p>
+                    <div class="row mb-3">
+                        <div class="col-md-12">
+                            <form action="{{ route('admin.config.custom-font.store') }}" method="post" enctype="multipart/form-data" class="card card-body bg-light">
+                                @csrf
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="text" name="font_name" class="form-control" placeholder="Display name (optional)">
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="text" name="font_family" class="form-control" placeholder="Font family / CSS name (optional)">
+                                    </div>
+                                    <div class="col-md-4">
+                                        <input type="file" name="font_files[]" class="form-control" accept=".woff,.woff2,.ttf,.otf" multiple>
+                                    </div>
+                                    <div class="col-md-2">
+                                        <button type="submit" class="btn btn-primary btn-sm">Add font</button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    @if(isset($customFonts) && $customFonts->count() > 0)
+                    <div class="table-responsive">
+                        <table class="table table-sm table-bordered">
+                            <thead><tr><th>Name</th><th>Font family</th><th>Files</th><th></th></tr></thead>
+                            <tbody>
+                                @foreach($customFonts as $cf)
+                                <tr>
+                                    <td>{{ $cf->name }}</td>
+                                    <td><code>{{ $cf->font_family }}</code></td>
+                                    <td>{{ $cf->font_files ? implode(', ', array_keys($cf->font_files)) : '—' }}</td>
+                                    <td>
+                                        <form action="{{ route('admin.config.custom-font.delete', $cf->id) }}" method="post" class="d-inline" onsubmit="return confirm('Remove this font?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">Remove</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @endif
                 </div>
 
                 <!-- Contact Tab -->
@@ -1105,13 +1436,23 @@
                 </div>
 
             <div class="settings-content" style="border-top: 2px solid #e2e8f0; padding: 1.5rem 2rem;">
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
                     <div>
                         <button type="submit" class="btn btn-save">
                             <i class="fa fa-save me-2"></i>Save All Changes
                         </button>
                     </div>
-                    <div>
+                    <div class="d-flex flex-wrap align-items-center gap-2">
+                        <a href="{{ route('admin.config.export') }}" class="btn btn-outline-secondary" title="Download current configuration as XML (no images)">
+                            <i class="fa fa-download me-2"></i>Export Config (XML)
+                        </a>
+                        <form action="{{ route('admin.config.import') }}" method="post" enctype="multipart/form-data" class="d-inline-flex align-items-center gap-2" id="import-config-form">
+                            @csrf
+                            <input type="file" name="config_file" accept=".xml,application/xml,text/xml" required class="form-control form-control-sm" style="max-width: 220px;" title="Select a config XML file">
+                            <button type="submit" class="btn btn-outline-secondary" title="Import configuration from XML (overwrites current theme settings; images are not imported)">
+                                <i class="fa fa-upload me-2"></i>Import Config
+                            </button>
+                        </form>
                         <button type="button" 
                            class="btn btn-outline-secondary" 
                            onclick="clearCache()"
@@ -1123,6 +1464,7 @@
                 </div>
                 <small class="text-muted d-block mt-2">
                     <i class="fa fa-info-circle"></i> Settings are cached for 24 hours for better performance. Use "Clear Cache" to refresh settings immediately after making changes.
+                    Export saves the active theme configuration as XML (images excluded). Import overwrites the current active theme configuration from an XML file (images are not changed).
                 </small>
             </div>
         </div>
@@ -1160,7 +1502,9 @@
 @section('scripts')
     @include('common.select2')
     @include('common.attachment_js')
+    @if((settings()->site_theme ?? '') !== 'theme1.')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-colorpicker/3.2.0/js/bootstrap-colorpicker.min.js"></script>
+    @endif
 
     <script>
         function clearCache() {
@@ -1301,29 +1645,52 @@
                 $('#' + targetTab).addClass('show active');
             });
 
-            // Initialize color pickers (including badge color pickers)
+            // Initialize color pickers (Theme1 uses Bootstrap 5 — use native color input; else use bootstrap-colorpicker)
+            var isTheme1 = {{ (settings()->site_theme ?? '') === 'theme1.' ? 'true' : 'false' }};
             $('.colorPicker').each(function() {
                 var $picker = $(this);
                 var $input = $picker.find('input[type="text"]');
                 var $preview = $picker.find('.color-preview');
                 var defaultColor = $input.val() || '#119A48';
 
-                $picker.colorpicker({
-                    format: 'hex',
-                    color: defaultColor
-                }).on('colorpickerChange colorpickerCreate', function(e) {
-                    $preview.css('background-color', e.color.toString());
-                    $input.val(e.color.toString());
-                    
-                    // Update gradient preview if this is a gradient color picker
-                    if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
-                        updateGradientPreview();
-                    }
-                });
-                
-                // Initialize preview color
-                if ($preview.length) {
+                if (isTheme1) {
+                    // Theme1: native color input + sync (no bootstrap-colorpicker — incompatible with Bootstrap 5)
                     $preview.css('background-color', defaultColor);
+                    $input.on('input change', function() {
+                        var v = $(this).val();
+                        if (/^#[0-9A-Fa-f]{6}$/.test(v) || /^#[0-9A-Fa-f]{3}$/.test(v)) {
+                            $preview.css('background-color', v);
+                        }
+                        if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
+                            updateGradientPreview();
+                        }
+                    });
+                    // Add native color input beside preview for easy picking
+                    var $append = $picker.find('.input-group-append');
+                    if ($append.length && !$picker.find('input[type="color"]').length) {
+                        var hex = /^#[0-9A-Fa-f]{6}$/.test(defaultColor) ? defaultColor : '#119A48';
+                        var $native = $('<input type="color" class="form-control form-control-color border-0 p-0" value="' + hex + '" title="Choose color">');
+                        $native.on('input', function() {
+                            $input.val(this.value);
+                            $preview.css('background-color', this.value);
+                            if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') updateGradientPreview();
+                        });
+                        $append.prepend($native);
+                    }
+                } else {
+                    $picker.colorpicker({
+                        format: 'hex',
+                        color: defaultColor
+                    }).on('colorpickerChange colorpickerCreate', function(e) {
+                        $preview.css('background-color', e.color.toString());
+                        $input.val(e.color.toString());
+                        if ($picker.attr('id') === 'gradientStartPicker' || $picker.attr('id') === 'gradientEndPicker') {
+                            updateGradientPreview();
+                        }
+                    });
+                    if ($preview.length) {
+                        $preview.css('background-color', defaultColor);
+                    }
                 }
             });
 

@@ -1,9 +1,18 @@
+@php
+    $userTheme = 'light';
+    if (auth()->check() && \Illuminate\Support\Facades\Schema::hasColumn('users', 'theme_preference')) {
+        $pref = auth()->user()->theme_preference ?? 'light';
+        $userTheme = in_array($pref, ['light','dark','system']) ? $pref : 'light';
+    }
+@endphp
 <!DOCTYPE html>
-<html lang="en" xmlns="https://www.w3.org/1999/xhtml">
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}">
 <head>
 
 @include('layouts.partials.header_resources')
-
+@if($userTheme === 'system')
+<script>(function(){ var pref = document.documentElement.getAttribute('data-theme-preference'); if (pref === 'system') { var dark = window.matchMedia('(prefers-color-scheme: dark)').matches; document.documentElement.setAttribute('data-bs-theme', dark ? 'dark' : 'light'); } })();</script>
+@endif
 </head>
 
 <body onload="">

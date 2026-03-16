@@ -39,11 +39,12 @@
 				<div class="col-xl-3 col-lg-3 col-md-6 col-sm-12 mb-4">
 					<div class="footer_widget">
 						<h4 class="widget_title">Address</h4>
-						@if(settings()->footer_style == 'dark-footer')
-							<img src="{{ settings()->logo }}" class="logo img-footer mb-1" alt="Logo"
-								style="width:220px; filter: brightness(0) invert(1);">
-						@else
-							<img src="{{ settings()->logo }}" class="logo img-footer mb-1" alt="Logo" style="width:220px;">
+						@php
+							$footerLogoPx = (int)(settings()->logo_scale ?? 80);
+							$footerLogoPx = in_array($footerLogoPx, [40,50,60,70,80,100,120]) ? $footerLogoPx : 80;
+						@endphp
+						@if(settings()->logo ?? null)
+							<img src="{{ settings()->logo }}" class="logo img-footer mb-1 {{ (settings()->footer_logo_inverse ?? false) ? 'logo-inverse' : '' }}" alt="Logo" style="max-height:{{ $footerLogoPx }}px; width:auto;">
 						@endif
 
 						<div class="address mt-0">

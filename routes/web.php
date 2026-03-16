@@ -43,6 +43,7 @@ use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\AIController;
 use App\Http\Controllers\PdfChatController;
+use App\Http\Controllers\PdfChatExportController;
 use App\Http\Controllers\DataRecordsController;
 use App\Http\Controllers\FactsController;
 use App\Http\Controllers\GraphController;
@@ -60,6 +61,7 @@ use App\Http\Controllers\CommunitiesController;
 use App\Http\Controllers\Admin\DashboardsController;
 use App\Http\Controllers\Admin\AdminEventsController;
 use App\Http\Controllers\Admin\MailingListController;
+use App\Http\Controllers\Admin\MessagingController;
 use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
@@ -203,6 +205,10 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
     Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');
+    Route::post("/configure/custom-font", [SettingsController::class, 'storeCustomFont'])->name('admin.config.custom-font.store');
+    Route::post("/configure/custom-font/delete/{id}", [SettingsController::class, 'deleteCustomFont'])->name('admin.config.custom-font.delete');
+    Route::get("/configure/export-config", [SettingsController::class, 'exportConfig'])->name('admin.config.export');
+    Route::post("/configure/import-config", [SettingsController::class, 'importConfig'])->name('admin.config.import');
 
     // Notification endpoints
     Route::get("/notifications/pending-counts", [\App\Http\Controllers\Admin\NotificationController::class, 'getPendingCounts'])->name('admin.notifications.counts');
@@ -229,6 +235,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/details", [ResourcesController::class, 'details']);
         Route::post("/save", [ResourcesController::class, 'store']);
         Route::post("/approval", [ResourcesController::class, 'approval']);
+        Route::post("/bulk-approval", [ResourcesController::class, 'bulkApproval'])->name('admin.publications.bulk-approval');
         Route::get("/moderate", [ResourcesController::class, 'moderate']);
         Route::get("/delete", [ResourcesController::class, 'destroy']);
         Route::get("/approve_comment", [ResourcesController::class, 'approve_comment']);
@@ -503,8 +510,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
 // Admin Messaging routes
 Route::prefix('admin/messaging')->name('admin.messaging.')->middleware(['auth'])->group(function () {
-    Route::get('/', [MessagingController::class, 'index'])->name('index');
-    Route::post('/send', [MessagingController::class, 'sendMessage'])->name('send');
+    Route::get('/', [\App\Http\Controllers\Admin\MessagingController::class, 'index'])->name('index');
+    Route::post('/send', [\App\Http\Controllers\Admin\MessagingController::class, 'sendMessage'])->name('send');
 });
 
 // Mailing List route (also accessible at /mailing_list)
@@ -577,15 +584,18 @@ Route::group(["prefix" => "dashboards"], function () {
 });
 
 Route::group(["prefix" => "ai"], function () {
-
-    Route::post("/summarise",  [AIController::class, 'summarise']);
     Route::post("/compare",  [AIController::class, 'compare']);
-    Route::post("/summarise-file",  [AIController::class, 'summariseFile'])->name('ai.summarise.file');
+
+    // Summarise and PDF chat require authentication
+    Route::post("/summarise",  [AIController::class, 'summarise'])->middleware('auth');
+    Route::post("/summarise-file",  [AIController::class, 'summariseFile'])->name('ai.summarise.file')->middleware('auth');
+    Route::post("/summarise-stream",  [AIController::class, 'summariseStream'])->middleware('auth');
 
     // PDF chat (ChatPDF): get/create session, send message (stream or JSON)
-    Route::post("/pdf-chat/session", [PdfChatController::class, 'getOrCreateSession'])->name('ai.pdf-chat.session');
-    Route::post("/pdf-chat/message", [PdfChatController::class, 'sendMessage'])->name('ai.pdf-chat.message');
-
+    Route::post("/pdf-chat/session", [PdfChatController::class, 'getOrCreateSession'])->name('ai.pdf-chat.session')->middleware('auth');
+    Route::post("/pdf-chat/message", [PdfChatController::class, 'sendMessage'])->name('ai.pdf-chat.message')->middleware('auth');
+    Route::post("/pdf-chat/export-pdf", [PdfChatExportController::class, 'exportPdf'])->name('ai.pdf-chat.export-pdf')->middleware('auth');
+    Route::post("/pdf-chat/export-word", [PdfChatExportController::class, 'exportWord'])->name('ai.pdf-chat.export-word')->middleware('auth');
 });
 
 // Summernote image upload

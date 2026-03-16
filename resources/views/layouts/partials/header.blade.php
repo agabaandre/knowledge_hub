@@ -351,10 +351,16 @@
     <div class="p-3 bg-light">
         <div class="container" style="min-width: 90%;">
             <div class="row align-items-center">
+                @php
+                    $logoScale = (int)(settings()->logo_scale ?? 80);
+                    $logoPx = in_array($logoScale, [40,50,60,70,80,100,120]) ? $logoScale : 80;
+                @endphp
                 <div class="col-lg-3 col-md-3 d-none d-md-block">
                     <div><a class="nav-brand" href="{{ url('/') }}">
-                            <img src="{{ settings()->logo }}" class="logo" alt=""
-                                style="height:85px; margin-bottom:-16px;">
+                            @if(settings()->logo ?? null)
+                            <img src="{{ settings()->logo }}" class="logo {{ (settings()->header_logo_inverse ?? false) ? 'logo-inverse' : '' }}" alt=""
+                                style="max-height:{{ $logoPx }}px; width:auto; margin-bottom:-16px;">
+                            @endif
                         </a>
                     </div>
                     <div class="mt-1 text-secondary">
@@ -391,11 +397,11 @@
                         <li>
                             @guest
                                 <a href="{{ route('login') }}" class="theme-cl fs-lg">
-                                    <i class="lni lni-user"></i>
+                                    <i class="fa fa-user"></i>
                                 </a>
                             @else
                                 <a href="{{ route('account.profile') }}" class="theme-cl fs-lg">
-                                    <i class="lni lni-user"></i>
+                                    <i class="fa fa-user"></i>
                                 </a>
                             @endguest
                         </li>

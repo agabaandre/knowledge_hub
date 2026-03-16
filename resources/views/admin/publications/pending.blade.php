@@ -1,4 +1,4 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('styles')
     @include('common.table')
@@ -99,11 +99,30 @@
                         <div class="alert alert-danger">{{ session('error') }}</div>
                     @endif
 
+                    <form id="bulk-approval-form" method="POST" action="{{ route('admin.publications.bulk-approval') }}">
+                        @csrf
+                        <input type="hidden" name="action" id="bulk-approval-action" value="">
+                        <input type="hidden" name="rejected_reason" id="bulkRejectReasonHidden" value="">
+
+                        <!-- Bulk actions toolbar -->
+                        <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
+                            <button type="button" class="btn btn-sm btn-success" id="bulkApproveBtn" disabled title="Select one or more publications first">
+                                <i class="fa fa-check-circle mr-1"></i> Approve selected
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" id="bulkRejectBtn" disabled title="Select one or more publications first">
+                                <i class="fa fa-times-circle mr-1"></i> Reject selected
+                            </button>
+                            <span class="text-muted small" id="bulkSelectionCount"></span>
+                        </div>
+
                     <!-- Datatable -->
                     <div class="table-responsive">
                         <table id="publicationTable" class="table table-striped table-bordered table-hover" style="border-radius: 0;">
                             <thead>
                                 <tr>
+                                    <th style="width:40px;">
+                                        <input type="checkbox" id="selectAllPending" title="Check/uncheck all on this page">
+                                    </th>
                                     <th style="width:60px;">#</th>
                                     <th>Title</th>
                                     <th>Description</th>
@@ -118,6 +137,9 @@
                             <tbody>
                                 @foreach ($publications as $idx => $publication)
                                     <tr>
+                                        <td>
+                                            <input type="checkbox" name="publication_ids[]" value="{{ $publication->id }}" class="pending-pub-cb">
+                                        </td>
                                         <td><span class="text-muted">{{ $publications->firstItem() + $idx }}</span></td>
                                         <td>
                                             <a href="{{ $publication->publication }}" target="_blank">
@@ -173,6 +195,31 @@
                     <div class="mt-3">
                         {{ $publications->links() }}
                     </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk reject reason modal -->
+    <div class="modal fade" id="bulkRejectModal" tabindex="-1" role="dialog" aria-labelledby="bulkRejectModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="bulkRejectModalLabel">Reject selected publications</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p class="text-muted small">Optionally provide a reason (will be sent to submitters).</p>
+                    <textarea name="rejected_reason" id="bulkRejectReason" class="form-control" rows="3" placeholder="Reason for rejection (optional)"></textarea>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-danger btn-sm" id="bulkRejectConfirmBtn">
+                        <i class="fa fa-times-circle mr-1"></i> Reject selected
+                    </button>
                 </div>
             </div>
         </div>
@@ -187,4 +234,84 @@
 @section('scripts')
     @parent
     @include('common.select2')
+    <script>
+(function() {
+    var form = document.getElementById('bulk-approval-form');
+    var selectAll = document.getElementById('selectAllPending');
+    var checkboxes = document.querySelectorAll('.pending-pub-cb');
+    var bulkApproveBtn = document.getElementById('bulkApproveBtn');
+    var bulkRejectBtn = document.getElementById('bulkRejectBtn');
+    var bulkRejectModal = document.getElementById('bulkRejectModal');
+    var bulkRejectReason = document.getElementById('bulkRejectReason');
+    var bulkRejectReasonHidden = document.getElementById('bulkRejectReasonHidden');
+    var bulkRejectConfirmBtn = document.getElementById('bulkRejectConfirmBtn');
+    var actionInput = document.getElementById('bulk-approval-action');
+    var countEl = document.getElementById('bulkSelectionCount');
+
+    function getSelectedIds() {
+        return Array.prototype.slice.call(checkboxes).filter(function(cb) { return cb.checked; }).map(function(cb) { return cb.value; });
+    }
+
+    function updateState() {
+        var ids = getSelectedIds();
+        var n = ids.length;
+        bulkApproveBtn.disabled = n === 0;
+        bulkRejectBtn.disabled = n === 0;
+        if (countEl) {
+            countEl.textContent = n > 0 ? n + ' selected' : '';
+        }
+        if (selectAll) {
+            selectAll.checked = n > 0 && n === checkboxes.length;
+            selectAll.indeterminate = n > 0 && n < checkboxes.length;
+        }
+    }
+
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            Array.prototype.forEach.call(checkboxes, function(cb) { cb.checked = selectAll.checked; });
+            updateState();
+        });
+    }
+
+    Array.prototype.forEach.call(checkboxes, function(cb) {
+        cb.addEventListener('change', updateState);
+    });
+
+    if (bulkApproveBtn) {
+        bulkApproveBtn.addEventListener('click', function() {
+            if (getSelectedIds().length === 0) return;
+            if (!confirm('Approve the selected publication(s)?')) return;
+            actionInput.value = 'approve';
+            form.submit();
+        });
+    }
+
+    if (bulkRejectBtn) {
+        bulkRejectBtn.addEventListener('click', function() {
+            if (getSelectedIds().length === 0) return;
+            if (bulkRejectModal && typeof $ !== 'undefined' && $.fn.modal) {
+                if (bulkRejectReason) bulkRejectReason.value = '';
+                $(bulkRejectModal).modal('show');
+            } else {
+                if (confirm('Reject the selected publication(s)?')) {
+                    actionInput.value = 'reject';
+                    if (bulkRejectReasonHidden) bulkRejectReasonHidden.value = '';
+                    form.submit();
+                }
+            }
+        });
+    }
+
+    if (bulkRejectConfirmBtn && bulkRejectModal) {
+        bulkRejectConfirmBtn.addEventListener('click', function() {
+            actionInput.value = 'reject';
+            if (bulkRejectReasonHidden && bulkRejectReason) bulkRejectReasonHidden.value = bulkRejectReason.value || '';
+            $(bulkRejectModal).modal('hide');
+            form.submit();
+        });
+    }
+
+    updateState();
+})();
+    </script>
 @endsection

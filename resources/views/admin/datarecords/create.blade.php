@@ -1,5 +1,5 @@
 <!--  Extra Large modal example -->
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('content')
 <div class="row">

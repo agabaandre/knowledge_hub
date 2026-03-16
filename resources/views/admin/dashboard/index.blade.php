@@ -1,4 +1,4 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('styles')
     @include('common.table')
@@ -56,6 +56,31 @@
     .card-body {
         padding: 1.5rem;
     }
+    /* Most Recent Resources: ensure STATUS badges are readable (no white text on light) */
+    #resource-table tbody td .badge-success,
+    #resource-table tbody td .badge-warning {
+        color: #1a1a1a !important;
+        background-color: #d4edda;
+    }
+    #resource-table tbody td .badge-warning {
+        background-color: #fff3cd;
+    }
+    #resource-table tbody td .badge-danger {
+        color: #fff !important;
+        background-color: #dc3545;
+    }
+    /* Metrics filters (injected) */
+    .charts .filters-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .charts .filters-toolbar .filter-item { position: relative; }
+    .charts .filters-toolbar .filter-control {
+        height: 36px; padding: 6px 12px 6px 34px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; color: #0f172a; outline: none;
+    }
+    .charts .filters-toolbar .filter-control:focus { border-color: #cbd5e1; background: #fff; }
+    .charts .filters-toolbar .filter-icon { position: absolute; left: 10px; top: 9px; color: #58595B; font-size: 14px; }
+    .charts .btn-apply {
+        height: 36px; border-radius: 10px; background: {{ settings()->au_corporate_green ?? '#1A5632' }}; color: #fff; padding: 6px 14px; border: 1px solid {{ settings()->au_corporate_green ?? '#1A5632' }};
+    }
+    .charts .btn-apply:hover { opacity: 0.9; color: #fff; }
 </style>
 @endsection
 
@@ -293,7 +318,7 @@
                                     <td>{!! Str::limit(strip_tags($row->description ?? ''), 60) !!}</td>
                                     <td>{{ $row->author->name ?? '-' }}</td>
                                     <td>
-                                        <span class="badge badge-{{ $row->is_approved ? 'success' : ($row->is_rejected ? 'danger' : 'warning') }}">
+                                        <span class="badge badge-{{ $row->is_approved ? 'success' : ($row->is_rejected ? 'danger' : 'warning') }}" style="color: inherit;">
                                             {{ $row->is_approved ? 'Approved' : ($row->is_rejected ? 'Rejected' : 'Pending') }}
                                         </span>
                                     </td>
@@ -322,24 +347,44 @@
 
 
 @section('scripts')
+<script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>
+@include('admin.metrics.charts_script')
 <script>
     $(document).ready(function() {
-        // Remove DataTables initialization - we'll use server-side pagination instead
-        // The table now uses Laravel pagination for better performance
-
-        $.ajax({
-            method:'GET',
-            url:'<?php echo url('admin/metrics'); ?>',
-            success:function(response){
-                
-                console.log('Metrics',response)
-                $('.charts').html(response);
-            },
-            error:function(error){
-                console.log(error);
+        var metricsUrl = '{{ url("admin/metrics") }}';
+        function loadMetrics(params) {
+            var url = metricsUrl;
+            if (params && (params.from || params.to || params.country)) {
+                url += (url.indexOf('?') === -1 ? '?' : '&') + $.param(params);
             }
-        })
-    })
+            $.ajax({
+                method: 'GET',
+                url: url,
+                dataType: 'json',
+                success: function(response) {
+                    if (response && response.html) {
+                        $('.charts').html(response.html);
+                    }
+                    if (response && response.chart_data && typeof window.renderMetricsCharts === 'function') {
+                        window.renderMetricsCharts(response.chart_data);
+                    }
+                },
+                error: function(xhr) {
+                    if (xhr.responseJSON) {
+                        $('.charts').html('<div class="col-12 alert alert-danger">Failed to load metrics.</div>');
+                    } else {
+                        $('.charts').html('<div class="col-12 alert alert-warning">Metrics not available (response may be HTML). Refresh the page.</div>');
+                    }
+                }
+            });
+        }
+        loadMetrics();
+        $(document).on('click', '#applyFilters', function() {
+            var from = $('#fromDate').val();
+            var to = $('#toDate').val();
+            var country = $('#countryFilter').val() || '';
+            loadMetrics({ from: from || undefined, to: to || undefined, country: country || undefined });
+        });
+    });
 </script>
-
 @endsection

@@ -1,4 +1,4 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 @section('content')
 <div class="page-header">
     <h1 class="page-title">Moderate Comments</h1>

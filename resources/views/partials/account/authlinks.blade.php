@@ -1,7 +1,7 @@
                        @guest
                            <li class=" {{ $class ?? '' }}">
                                <a href="{{ route('login') }}" class="ft-medium text-bold">
-                                   <i class="lni lni-user mr-2"></i>Account
+                                   <i class="fa fa-user mr-2"></i>Account
                                </a>
                            </li>
 
@@ -26,7 +26,7 @@
                                    @if (is_admin())
                                        <li class=" {{ $class ?? '' }}">
                                            <a href="{{ route('admin.index') }}">
-                                               <i class="fa fa-link mr-1"></i>Admin Panel
+                                               <i class="fa fa-th-large mr-1"></i>Admin Panel
                                            </a>
                                        </li>
                                    @endif
@@ -57,12 +57,12 @@
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.publish') }}">
-                                           <i class="lni lni-circle-plus mr-1"></i>Publish a resource
+                                           <i class="fa fa-plus mr-1"></i>Publish a resource
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ url('logout') }}">
-                                           <i class="fa fa-circle-arrow-right"></i>Log Out
+                                           <i class="fa fa-sign-out-alt"></i> Log Out
                                        </a>
                                    </li>
                                </ul>

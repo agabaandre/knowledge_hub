@@ -49,6 +49,9 @@
 
 	<!-- Animations css -->
 	<link href="{{ asset('assets/css/animate.css') }}" rel="stylesheet">
+	<!-- Font Awesome for profile placeholder and icons -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	@include('partials.theming.admin_body_font_size')
 	<!-- JQuery min js -->
     <script src="{{  asset('assets/plugins/jquery/jquery.min.js') }}"></script>
 	<script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>

@@ -1,4 +1,4 @@
-
+@include('partials.theming.typography')
 <style>
     :root {
     --theme-color-primary: {{settings()->primary_color}};
@@ -32,4 +32,18 @@
     .w-100{
             min-width: 100%!important;
         }
+    .logo-inverse { filter: brightness(0) invert(1); }
+    /* Dark theme (user preference) */
+    html[data-bs-theme="dark"] body { background-color: #1a1d21; color: #e4e6eb; }
+    html[data-bs-theme="dark"] .bg-light { background-color: #242628 !important; }
+    html[data-bs-theme="dark"] .card, html[data-bs-theme="dark"] .form-control { background-color: #242628; border-color: #3e4348; color: #e4e6eb; }
+    /* Dark theme: main nav text visible */
+    html[data-bs-theme="dark"] .header.modern-header { background: #242628 !important; border-color: #3e4348; }
+    html[data-bs-theme="dark"] .navigation .nav-menu > li > a,
+    html[data-bs-theme="dark"] .navigation .nav-dropdown a,
+    html[data-bs-theme="dark"] .navigation a.theme-cl { color: rgba(255,255,255,0.95) !important; }
+    html[data-bs-theme="dark"] .navigation .nav-menu > li:hover > a,
+    html[data-bs-theme="dark"] .navigation .nav-menu > li.active > a,
+    html[data-bs-theme="dark"] .navigation .nav-dropdown li a:hover { color: #fff !important; }
+    html[data-bs-theme="dark"] .navigation .nav-dropdown { background: #2d3136 !important; border-color: #3e4348; }
 </style>

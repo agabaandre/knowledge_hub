@@ -229,9 +229,37 @@ class CommsOfPracticeController extends Controller
     }
 
     public function memberAction(Request $request) {
+        $request->validate([
+            'action' => 'required|in:approve,reject',
+            'member_id' => 'nullable|integer',
+            'member_ids' => 'nullable|array',
+            'member_ids.*' => 'integer',
+        ]);
 
-        $member = $this->commsOfPracticeRepository->updateMemberStatus($request->member_id, $request->action);
+        $ids = [];
+        if ($request->filled('member_ids')) {
+            $ids = array_filter(array_map('intval', $request->member_ids));
+        } elseif ($request->filled('member_id')) {
+            $ids = [(int) $request->member_id];
+        }
 
-        return response()->json(['status' => 'success', 'message' => 'Member status updated successfully.']);
+        if (empty($ids)) {
+            return response()->json(['status' => 'error', 'message' => 'No members selected.'], 422);
+        }
+
+        $communityId = (int) $request->get('community_id');
+        $updated = 0;
+        foreach ($ids as $memberId) {
+            $member = \App\Models\CommunityOfPracticeMembers::find($memberId);
+            if ($member && (!$communityId || (int) $member->community_of_practice_id === $communityId)) {
+                $this->commsOfPracticeRepository->updateMemberStatus($memberId, $request->action);
+                $updated++;
+            }
+        }
+
+        $message = $updated === 1
+            ? 'Member status updated successfully.'
+            : $updated . ' member(s) updated successfully.';
+        return response()->json(['status' => 'success', 'message' => $message, 'updated' => $updated]);
     }
 }

@@ -36,7 +36,8 @@
         }
     }
 </style>
-<div class="main-header main-header-fixed" style="background: var(--theme-color-primary); color:#FFF !important;">
+@php $adminNavStyle = settings()->admin_nav_style ?? 'colored'; @endphp
+<div class="main-header main-header-fixed" style="background: {{ $adminNavStyle === 'light' ? '#f8fafc' : 'var(--theme-color-primary)' }}; color: {{ $adminNavStyle === 'light' ? '#334155' : '#FFF' }} !important;">
     <div class=" container">
         <div class="main-header-left ">
             <a class="animated-arrow hor-toggle horizontal-navtoggle"><span></span></a><!-- sidebar-toggle-->
@@ -45,9 +46,10 @@
    </a> -->
         </div>
         <div class="main-header-center">
-            <div class="">
-                <img src="{{ settings()->logo }}" id="change-image"
-                    style="border-radius:2px; background:#FFF; height:65px;">
+            @php $defaultAdminLogoPx = (int)(settings()->logo_scale ?? 80); $defaultAdminLogoPx = in_array($defaultAdminLogoPx, [40,50,60,70,80,100,120]) ? $defaultAdminLogoPx : 80; @endphp
+            <div class="d-flex align-items-center" style="min-height: {{ $defaultAdminLogoPx }}px;">
+                <img src="{{ settings()->logo }}" id="change-image" alt="Logo"
+                    style="border-radius:2px; background:#FFF; height:{{ $defaultAdminLogoPx }}px; max-height:{{ $defaultAdminLogoPx }}px; width: auto;">
             </div>
         </div>
         <div class="main-header-right">
@@ -81,7 +83,7 @@
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                     </svg>
                     @if ($total_pending_count > 0)
-                        <span class="badge badge-danger badge-pill" id="notification-count-badge" style="position:absolute;top:-4px;right:-6px;min-width:20px;">{{ $total_pending_count }}</span>
+                        <span class="badge badge-danger badge-pill" id="notification-count-badge" style="position:absolute;top:-4px;right:-6px;min-width:20px;background:#dc3545!important;color:#fff!important;">{{ $total_pending_count }}</span>
                     @endif
                 </a>
                 <div class="dropdown-menu animated fadeInUp dropdown-menu-right" style="min-width:380px;max-width:400px;right:0;left:auto;transform:translateX(0);margin-right:0;flex-direction:column;padding:0;max-height:600px;" id="notification-dropdown-menu">
@@ -332,11 +334,11 @@
                         @if(!empty(current_user()->photo))
                             <img class="rounded-circle notranslate user-avatar-img"
                                 src="{{ current_user()->photo }}"
-                                style="width: 45px; height: 45px; border-radius: 50%; background-color: #FFE8; display: inline-block;"
+                                style="width: 45px; height: 45px; border-radius: 50%; background-color: #f1f5f9; display: inline-block; object-fit: cover;"
                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
-                            <span class="user-avatar-fallback" style="display:none; width: 45px; height: 45px; border-radius: 50%; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 18px;"><i class="fa fa-user"></i></span>
+                            <span class="user-avatar-fallback" style="display:none; width: 45px; height: 45px; border-radius: 50%; background-color: #f1f5f9; border: 1px solid #e2e8f0; align-items: center; justify-content: center; color: #334155; font-size: 18px;"><i class="fa fa-user" aria-hidden="true"></i></span>
                         @else
-                            <span class="user-avatar-fallback" style="display:inline-flex; width: 45px; height: 45px; border-radius: 50%; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 18px;"><i class="fa fa-user"></i></span>
+                            <span class="user-avatar-fallback" style="display:inline-flex; width: 45px; height: 45px; border-radius: 50%; background-color: #f1f5f9; border: 1px solid #e2e8f0; align-items: center; justify-content: center; color: #334155; font-size: 18px;"><i class="fa fa-user" aria-hidden="true"></i></span>
                         @endif
                         <span>{{ ' ' . ucwords(@current_user()->name) ?? '' }}</span></a>
                 <div class="dropdown-menu animated fadeInUp">

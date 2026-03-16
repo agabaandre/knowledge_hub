@@ -1,4 +1,28 @@
 <style>
+    /* Ensure card and all links are clickable (override any parent pointer-events) */
+    .publication-list-card,
+    .publication-list-card a,
+    .publication-list-card .publication-image-link { pointer-events: auto !important; }
+    .publication-list-card a { cursor: pointer; }
+    /* Publication listing: links look like content, not default blue/underlined */
+    .publication-list-card .publication-content-col a:not(.btn) {
+        color: var(--default-font-color, #212529) !important;
+        text-decoration: none !important;
+    }
+    .publication-list-card .publication-content-col a:not(.btn):hover {
+        color: var(--theme-color-primary, #119A48) !important;
+        text-decoration: underline !important;
+    }
+    .publication-list-card .publication-title-desktop a,
+    .publication-list-card .publication-title-mobile a {
+        color: var(--default-font-color, #212529) !important;
+        text-decoration: none !important;
+    }
+    .publication-list-card .publication-title-desktop a:hover,
+    .publication-list-card .publication-title-mobile a:hover {
+        color: var(--theme-color-primary, #119A48) !important;
+        text-decoration: underline !important;
+    }
     /* Mobile Styles (phones) - Dropcap images */
     @media (max-width: 767.98px) {
         .publication-card-row {
@@ -153,7 +177,7 @@
          $likes = count($row->favourited);
      @endphp
 
-    <div class="card col-lg-12 single-border mb-2" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
+    <div class="card col-lg-12 single-border mb-2 publication-list-card" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
             <!-- Title for Mobile (shown only on mobile, above image) -->
             <h5 class="text-bold text-lg publication-title-mobile" style="display: none;">
@@ -235,7 +259,7 @@
                          <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated:
                              {{ time_ago($row->updated_at) }} </span>
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}">
-                             <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits }} Views </span>
+                             <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits ?? 0 }} Visits</span>
                              <span class=" mr-1 ml-2 comments{{ $i }}" data-bs-toggle="popover"
                                  data-bs-placement="bottom"><i class="fa fa-comments"></i>
                                  {{ count($row->comments) }} Comments</span>
@@ -243,7 +267,7 @@
                          @include ('home.partials.comments')
                      </span>
                      
-                     <div class="d-flex align-items-center mt-2" style="flex-wrap: wrap; gap: 4px;">
+                     <div class="d-flex align-items-center mt-2 publication-card-actions" style="flex-wrap: wrap; gap: 4px;" onclick="event.stopPropagation();">
                          @php
                              $auGold = settings()->au_gold ?? '#B4A269';
                              $goldTextColor = '#5a4d2e';
@@ -272,8 +296,23 @@
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
                             class="btn btn-sm btn-primary" 
                             style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
-                             <i class="fa fa-eye mr-1"></i> Browse Resource
+                             <i class="fa fa-eye mr-1"></i> Read more
                          </a>
+                         @auth
+                             @if($row->has_any_pdf ?? false)
+                             <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
+                                 <i class="fa-solid fa-microchip"></i> Chat with PDF
+                             </a>
+                             @else
+                             <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
+                                 <i class="fa-solid fa-microchip"></i> Summarise
+                             </a>
+                             @endif
+                         @else
+                             <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="btn btn-sm btn-outline-primary" style="border-color: var(--theme-color-primary, #119A48); color: var(--theme-color-primary, #119A48); text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
+                                 <i class="fa-solid fa-microchip"></i> {{ ($row->has_any_pdf ?? false) ? 'Chat with PDF' : 'Summarise' }} <small>(login)</small>
+                             </a>
+                         @endauth
                      </div>
 
                  </div>

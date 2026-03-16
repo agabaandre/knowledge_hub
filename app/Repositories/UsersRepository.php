@@ -140,6 +140,10 @@ class UsersRepository {
             $user->langauge = $request->langauge;
         }
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'theme_preference') && $request->has('theme_preference')) {
+            $user->theme_preference = in_array($request->theme_preference, ['light', 'dark', 'system']) ? $request->theme_preference : 'light';
+        }
+
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 

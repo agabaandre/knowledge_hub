@@ -1,22 +1,94 @@
-<div class="row justify-content-center custom-row categories" id="themes">
-    @foreach ($themes as $theme)
-        <div class="col-xl-4 col-lg-4 col-md-6 col-sm-6 col-xs-6 mb-4">
-            <div class="cats-wrap text-center spot-item mt-1" style="z-index: 1000!important; opacity:0.8;">
-                <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}"
-                    class="cats-box d-block shadow-sm bg-white px-3 py-3"
-                    style="transition: transform 0.3s, box-shadow 0.3s; border-radius: 0.25rem;">
-                    <div
-                        class="text-center mb-2 mx-auto position-relative d-inline-flex align-items-center justify-content-center p-1 py-2">
-                        <i class="fa {{ $theme->icon }} fa-3x icon-color" style="color: #2980b9;"></i>
-                    </div>
-                    <div class="cats-box-caption">
-                        <h4 class="fs-sm mb-0 ft-sm m-catrio text-color-primary" data-bs-toggle="tooltip"
-                            data-bs-title="{{ truncate($theme->description, 410) }}" style="color: #34495e;">
-                            {{ truncate($theme->description, 25) }}
-                        </h4>
-                    </div>
+@php
+    $primary = settings()->primary_color ?? '#119A48';
+    $healthThemesTitle = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
+    $themeCardOpacity = settings()->theme_card_opacity ?? '1';
+@endphp
+<style>
+.theme1-themes-section {
+    padding: 1.5rem 0 2rem;
+    width: 100%;
+}
+.theme1-themes-section .theme1-themes-title {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: var(--text-color-primary, #1e293b);
+    margin: 0 0 1.25rem;
+    text-align: center;
+    letter-spacing: -0.01em;
+}
+.theme1-themes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 1rem;
+    max-width: 100%;
+    margin: 0 auto;
+}
+.theme1-theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.25rem 1rem;
+    background: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+    transition: box-shadow 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+    text-decoration: none;
+    color: inherit;
+    min-height: 110px;
+}
+.theme1-theme-card:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    border-color: {{ $primary }};
+    color: {{ $primary }};
+    transform: translateY(-2px);
+}
+.theme1-theme-card .theme1-theme-icon {
+    font-size: 1.75rem;
+    color: {{ $primary }};
+    margin-bottom: 0.5rem;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+.theme1-theme-card:hover .theme1-theme-icon {
+    transform: scale(1.08);
+}
+.theme1-theme-card .theme1-theme-title {
+    font-size: 0.8125rem;
+    font-weight: 600;
+    color: #334155;
+    text-align: center;
+    line-height: 1.35;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    transition: color 0.2s ease;
+}
+.theme1-theme-card:hover .theme1-theme-title {
+    color: {{ $primary }};
+}
+@media (min-width: 576px) {
+    .theme1-themes-grid { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 768px) {
+    .theme1-themes-grid { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+}
+@media (min-width: 992px) {
+    .theme1-themes-grid { grid-template-columns: repeat(6, 1fr); }
+}
+</style>
+<section class="theme1-themes-section" id="themes">
+    <div class="container">
+        <h3 class="theme1-themes-title">{{ $healthThemesTitle }}</h3>
+        <div class="theme1-themes-grid">
+            @foreach ($themes as $theme)
+                <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}" class="theme1-theme-card" title="{{ $theme->description }}">
+                    <i class="fa {{ $theme->icon }} theme1-theme-icon" aria-hidden="true"></i>
+                    <p class="theme1-theme-title">{{ truncate($theme->description, 24) }}</p>
                 </a>
-            </div>
+            @endforeach
         </div>
-    @endforeach
-</div>
+    </div>
+</section>

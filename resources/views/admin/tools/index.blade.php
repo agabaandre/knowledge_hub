@@ -1,4 +1,4 @@
-@extends('admin.layouts.tabular')
+@extends(admin_layout('tabular'))
 
 @section('styles')
  @include('common.table')

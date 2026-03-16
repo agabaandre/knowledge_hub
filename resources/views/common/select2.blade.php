@@ -1,7 +1,7 @@
-<script src="{{asset('assets/plugins/select2/js/select2.full.min.js')}}"></script>
-
+@if((settings()->site_theme ?? '') !== 'theme1.')
+{{-- Theme1: Select2 and init are provided by theme1 footer (front) and main_nifty layout (admin) --}}
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
-    // Document ready
     $(document).ready(function() {
         // Standard Select2 - with search enabled for all dropdowns
         $('.select2').select2({
@@ -75,5 +75,6 @@
             width: '100%',
             minimumResultsForSearch: 0
         });
-    })
+    });
 </script>
+@endif

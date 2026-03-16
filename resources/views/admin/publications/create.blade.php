@@ -1,5 +1,5 @@
 <!--  Extra Large modal example -->
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('styles')
   <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/tabs.css') }}">
@@ -28,7 +28,7 @@
         <div class="card-header text-left">
             <h4 class="card-title float-left">{{ $title ?? '' }}</h4>
              @if(current_user()->author_id)
-                <a href="#import-modal" data-toggle="modal" class="btn btn-dark"><i class="fa fa-upload"></i> Import Resources</a>
+                <a href="#import-modal" data-bs-toggle="modal" data-toggle="modal" class="btn btn-dark"><i class="fa fa-upload"></i> Import Resources</a>
                 @include('admin.publications.partials.import-modal',['action'=>url('admin/publications/import')])
              @endif
              
@@ -54,7 +54,7 @@
                 <!-- end toast -->
             </div>
             <div class="container">
-            @if(current_user()->author_id)
+            @if(current_user()->author_id || is_admin())
             
             <form action="{{ url('admin/publications/save') }}" id='publications' class='publications'>
                 @csrf

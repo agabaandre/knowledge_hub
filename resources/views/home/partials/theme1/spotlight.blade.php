@@ -1,78 +1,210 @@
-<!-- Intro Banner
-================================================== -->
-<!-- add class "disable-gradient" to enable consistent background overlay -->
+@php
+    $bannerUrl = null;
+    if (!empty(settings()->spotlight_banner)) {
+        $b = settings()->spotlight_banner;
+        $bannerUrl = (strpos($b, 'http') === 0 || strpos($b, '//') === 0) ? $b : asset($b);
+    }
+    $primary = settings()->primary_color ?? '#119A48';
+@endphp
 <style>
-.intro-banner {
-    opacity: 1 !important;
-    background-color: rgba(255, 255, 255, 0.95) !important;
+.theme1-spotlight {
+    position: relative;
+    padding: 6rem 0 3rem;
+    min-height: 200px;
+    scroll-margin-top: 72px;
+    margin-top: 1.25rem;
+    background-color: #f0f4f8;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Break out of padded layout so background fills full viewport width */
+    width: 100vw;
+    max-width: 100vw;
+    margin-left: calc(-50vw + 50%);
+    margin-right: calc(-50vw + 50%);
+    box-sizing: border-box;
 }
-
-.intro-banner::before {
-    background: rgba(255, 255, 255, 0.7) !important;
-    opacity: 0.9 !important;
+.theme1-spotlight::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%);
+    pointer-events: none;
 }
-
-.intro-banner::after {
-    opacity: 0.3 !important;
-    background: linear-gradient(135deg, rgba(17, 154, 72, 0.1) 0%, rgba(22, 198, 83, 0.1) 100%) !important;
+.theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 1; }
+.theme1-spotlight .banner-headline { color: #1e293b !important; font-size: 1.05rem; line-height: 1.5; }
+.theme1-spotlight .banner-headline p { color: #334155 !important; margin: 0; }
+.theme1-spotlight-search {
+    max-width: 100%;
+    margin: 1.5rem 0 0;
+    width: 100%;
 }
-
-.banner-headline {
-    opacity: 1 !important;
-    color: #333 !important;
+.theme1-spotlight-inner .col-lg-7 .theme1-spotlight-search { max-width: 100%; }
+.theme1-spotlight-search .form-control {
+    height: 52px;
+    font-size: 1rem;
+    border: 2px solid #e2e8f0;
+    border-right: 0;
+    border-radius: 0.5rem 0 0 0.5rem;
+    padding-left: 1rem;
+    color: #1e293b;
+    background: #fff;
 }
-
-.banner-headline * {
-    color: #333 !important;
-    opacity: 1 !important;
+.theme1-spotlight-search .form-control::placeholder {
+    color: #64748b;
+    opacity: 1;
+}
+.theme1-spotlight-search .form-control:focus {
+    border-color: {{ $primary }};
+    box-shadow: 0 0 0 3px rgba(17, 154, 72, 0.15);
+    outline: 0;
+}
+.theme1-spotlight-search .btn-search {
+    height: 52px;
+    padding: 0 1.5rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+    background: {{ $primary }};
+    border: 2px solid {{ $primary }};
+    color: #fff;
+}
+.theme1-spotlight-search .btn-search:hover { background: #0d5034; border-color: #0d5034; color: #fff; }
+.theme1-advanced-link {
+    display: inline-block;
+    margin-top: 1rem;
+    color: #475569 !important;
+    font-size: 0.9rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+.theme1-advanced-link:hover { color: {{ $primary }} !important; }
+.theme1-advanced-link i { margin-right: 0.35rem; }
+/* Advance your Search link: match header nav styling; no hover state */
+.theme1-spotlight .advanced_filters .advanced,
+.theme1-spotlight .advanced_filters .advanced .filter,
+.theme1-spotlight .advanced_filters .advanced .fa-angle-down {
+    color: var(--text-color-primary, #1e293b) !important;
+    font-weight: 500;
+    font-size: 0.9375rem;
+    text-shadow: none;
+    text-decoration: none !important;
+}
+.theme1-spotlight .advanced_filters .advanced:hover,
+.theme1-spotlight .advanced_filters .advanced:hover .filter,
+.theme1-spotlight .advanced_filters .advanced:hover .fa-angle-down {
+    color: var(--text-color-primary, #1e293b) !important;
+    text-decoration: none !important;
+}
+.theme1-spotlight #quotes { scroll-margin-top: 72px; }
+/* Quotes container: fixed min/max height, no white border */
+.theme1-spotlight-quotes,
+.theme1-spotlight-quotes .quotes-slider-wrapper,
+.theme1-spotlight-quotes .quotes-slider,
+.theme1-spotlight-quotes .quotes-slider .reviews_wrap,
+.theme1-spotlight-quotes .quotes-slide {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+}
+.theme1-spotlight-quotes {
+    min-height: 9rem;
+    overflow: visible;
+}
+.theme1-spotlight-quotes .quotes-slider-wrapper {
+    max-width: 100%;
+    margin: 0;
+    min-height: 9rem;
+    max-height: none;
+}
+.theme1-spotlight-quotes .quotes-slider {
+    min-height: 9rem;
+    max-height: none;
+}
+/* Quotes: same structure as top searches card (image left, content right) but transparent; text fills space below image, justified */
+.theme1-spotlight-quotes .reviews_wrap {
+    text-align: left;
+    background: transparent !important;
+    padding: 0.5rem 0 0 !important;
+    overflow: hidden;
+    min-height: 12rem;
+    max-height: none;
+}
+.theme1-spotlight-quotes .quotes-slider .reviews_wrap {
+    max-height: none;
+}
+.theme1-spotlight-quotes .reviews_wrap::after {
+    content: '';
+    display: table;
+    clear: both;
+}
+.theme1-spotlight-quotes .quotes-slide-img {
+    float: left;
+    width: 140px;
+    height: 180px;
+    margin-right: 1rem;
+    margin-bottom: 0.5rem;
+    flex-shrink: 0;
+}
+.theme1-spotlight-quotes .quotes-slide-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+.theme1-spotlight-quotes .quotes-slide-text {
+    margin-bottom: 0.35rem;
+    text-align: justify;
+    -webkit-line-clamp: unset;
+    display: block;
+    overflow: visible;
+}
+.theme1-spotlight-quotes .quotes-slide-link {
+    display: inline-block;
+    margin-top: 0.25rem;
+}
+@media (max-width: 575.98px) {
+    .theme1-spotlight-quotes .quotes-slide-img {
+        width: 110px;
+        height: 140px;
+        margin-right: 0.75rem;
+    }
 }
 </style>
-<div data-background-image="{{ settings()->spotlight_banner }}" class="intro-banner disable-gradient">
-    <div class="container">
-
-        <!-- Intro Headline -->
-        <div class="row">
-            <div class="col-md-12">
-                <div class="banner-headline text-dark">
+<div class="theme1-spotlight" style="{{ $bannerUrl ? 'background-image: url(' . e($bannerUrl) . ');' : '' }}">
+    <div class="container theme1-spotlight-inner">
+        <div class="row align-items-start justify-content-center g-3">
+            <div class="col-12 col-lg-7 col-xl-7">
+                <div class="banner-headline">
+                    <form action="{{ url('records/search') }}" method="get">
+                        <div class="theme1-spotlight-search">
+                            <div class="input-group shadow-sm">
+                                <input type="search"
+                                       name="term"
+                                       id="autocomplete-input"
+                                       class="form-control"
+                                       placeholder="Type keyword to search resources..."
+                                       value="{{ request('term') }}"
+                                       aria-label="Search resources">
+                                <button class="btn btn-search" type="submit">Search</button>
+                            </div>
+                        </div>
+                        @include('partials.search.advanced_search', ['text_color' => null, 'use_theme_header_style' => true])
+                    </form>
+                </div>
+            </div>
+            @if(settings()->show_quotes ?? false)
+            <div class="col-12 col-lg-5 col-xl-4">
+                <div class="theme1-spotlight-quotes">
                     @include('home.partials.quotes')
                 </div>
             </div>
+            @endif
         </div>
-
-        <!-- Search Bar -->
-        <div class="row">
-            <form action="{{ url('records/search') }}" class="col-md-12">
-                <div class="intro-banner-search-form margin-top-50">
-
-                    <!-- Search Field -->
-                    <div class="intro-search-field">
-                        <div class="input-with-icon">
-                            <input id="autocomplete-input" type="search" placeholder="Type Keyword to search">
-                            <i class="icon-material-outline-search"></i>
-                        </div>
-                    </div>
-
-                    <!-- Button -->
-                    <div class="intro-search-button">
-                        <button class="button ripple-effect" type="submit">Search</button>
-                    </div>
-                </div>
-                @include('partials.search.advanced_search')
-
-            </form>
-
-        </div>
-        <!-- Theme Tabs -->
+        @if(settings()->show_health_themes ?? true)
         <div class="row mt-3 px-2 justify-content-center">
-            @include('home.partials.theme_tabs')
+            @include('home.partials.theme1.theme_tabs')
         </div>
-        @if(settings()->show_quotes ?? false)
-            <div class="row mt-2 px-2">
-                @include('home.partials.quotes')
-            </div>
         @endif
-
-        
-
     </div>
 </div>

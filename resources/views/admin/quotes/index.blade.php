@@ -1,4 +1,4 @@
-@extends('admin.layouts.main')
+@extends(admin_layout())
 
 @section('styles')
  @include('common.table')
@@ -79,6 +79,8 @@
                                 <tr>
                                     <th width="60px">#</th>
                                     <th>Quote</th>
+                                    <th width="80px">Image</th>
+                                    <th width="120px">Link</th>
                                     <th width="150px">Actions</th>
                                 </tr>
                             </thead>
@@ -86,7 +88,21 @@
                                 @foreach($quotes as $idx => $row)
                                     <tr>
                                         <td><span class="text-muted">{{ $quotes->firstItem() + $idx }}</span></td>
-                                        <td>{{ $row->quote }}</td>
+                                        <td>{{ Str::limit($row->quote, 80) }}</td>
+                                        <td>
+                                            @if($row->image ?? null)
+                                                <img src="{{ $row->image_url }}" alt="" class="img-thumbnail" style="max-height: 40px; max-width: 60px; object-fit: cover;">
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($row->link_url ?? null)
+                                                <a href="{{ $row->link_url }}" target="_blank" rel="noopener" class="small">View</a>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
                                         <td>
                                             <a href="javascript:void(0);" onclick="openEditModal({{ $row->id }})" class="btn btn-sm btn-outline-primary mr-1" title="Edit">
                                                 <i class="fa fa-edit mr-1"></i> Edit
@@ -170,8 +186,10 @@
             // Set form values
             $('#quote').val(target_row.quote);
             $('#id').val(target_row.id);
-            $('#faqModalLabel').text('Update Quote');
-           
+            $('#link_url').val(target_row.link_url || '');
+            $('#quote_image').val('');
+            $('#quote-image-preview').html(target_row.image ? '<img src="' + (target_row.image_url || ('{{ url("/") }}/storage/uploads/quotes/' + target_row.image)) + '" alt="" class="img-thumbnail" style="max-height:60px;">' : '');
+            $('#title').text('Update Quote');
             $('#create-modal').modal('show');
         }
 

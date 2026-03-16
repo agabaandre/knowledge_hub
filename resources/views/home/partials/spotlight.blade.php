@@ -94,6 +94,14 @@
         </div>
         @endif
         </form>
+
+        @if(settings()->show_quotes ?? false)
+        <div class="row spot-row col-sm-12 mt-3">
+            <div class="col-12">
+                @include('home.partials.quotes')
+            </div>
+        </div>
+        @endif
         
         @if($aiSearchEnabled)
         <style>
@@ -132,7 +140,9 @@
         @endif
     </div>
 
+    @if(settings()->show_health_themes ?? true)
     <div class="row spot-row col-sm-12 d-flex align-items-center" style="margin-top: 1rem;">
         @include('home.partials.theme_tabs')
     </div>
+    @endif
 </div>

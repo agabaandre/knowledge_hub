@@ -1,4 +1,4 @@
-@extends('admin.layouts.tabular')
+@extends(admin_layout('tabular'))
 
 @section('styles')
  @include('common.table')
@@ -9,6 +9,10 @@
     .af-card .card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
     .af-card .card-body{padding:16px}
     
+    /* Ensure red badges show in table and on buttons */
+    #communities-table .badge-danger,
+    .badge.badge-danger.badge-pill { background-color: #dc3545 !important; color: #fff !important; }
+
     /* Table organization improvements */
     #communities-table {
         width: 100% !important;
@@ -137,7 +141,7 @@
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                             </svg>
-                            <span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:20px;">{{ $pending_member_approvals_count }}</span>
+                            <span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:20px;background:#dc3545!important;color:#fff!important;">{{ $pending_member_approvals_count }}</span>
                         </a>
                         <div class="dropdown-menu dropdown-menu-right" style="min-width:320px;max-width:400px;max-height:500px;overflow-y:auto;">
                             <div class="p-3 border-bottom">
@@ -192,7 +196,7 @@
                                     <a href="{{ route('admin.commsofpractice.details', $c->id) }}" class="btn btn-outline-info btn-sm" style="position: relative;">
                                         <i class="fa fa-users mr-1"></i>Group Members
                                         @if(isset($c->pending_members_count) && $c->pending_members_count > 0)
-                                            <span class="badge badge-danger badge-pill" style="position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $c->pending_members_count }}</span>
+                                            <span class="badge badge-danger badge-pill" style="position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px; background:#dc3545!important;color:#fff!important;">{{ $c->pending_members_count }}</span>
                                         @endif
                                     </a>
                                     <button class="btn btn-outline-dark btn-sm" onclick="openEditCommunity({{ $c->id }})"><i class="fa fa-edit mr-1"></i>Edit</button>

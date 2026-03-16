@@ -1,3 +1,8 @@
+@php
+    $healthThemesTitleDefault = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
+    $themeCardOpacityDefault = settings()->theme_card_opacity ?? '1';
+    $themeCardOpacityDefault = is_numeric($themeCardOpacityDefault) ? max(0.5, min(1, (float)$themeCardOpacityDefault)) : 1;
+@endphp
 <style>
     .theme-grid {
         padding: 1.5rem 0 1.5rem 0;
@@ -199,7 +204,7 @@
 <section class="theme-grid">
     <div class="themes-container">
         <h3 class="themes-section-title">
-            Choose a Health Theme to Explore
+            {{ $healthThemesTitleDefault }}
         </h3>
         
         <div class="themes-grid">

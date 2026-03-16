@@ -661,6 +661,16 @@ function updateUSerPushToken($request,$user=null){
     return settings()->site_theme;
   }
 
+  /**
+   * Admin layout to use: Nifty (theme1) or default. Pass 'tabular' for list layouts.
+   */
+  function admin_layout($type = 'main'){
+    if ((settings()->site_theme ?? '') === 'theme1.') {
+      return 'admin.layouts.main_nifty';
+    }
+    return $type === 'tabular' ? 'admin.layouts.tabular' : 'admin.layouts.main';
+  }
+
 function fix_text_encoding($text) {
     // Convert the text from a problematic encoding (ISO-8859-1) to UTF-8
         // Define replacements for a wide range of common misinterpreted characters

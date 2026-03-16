@@ -63,11 +63,11 @@ class ViewComposerServiceProvider extends ServiceProvider
 
         View::composer(['partials/adminunits/*'],AdminUnitsViewComposer::class);
 
-        Facades\View::composer('admin/*',AdminStatsViewComposer::class);
+        Facades\View::composer(['admin/*', 'admin.layouts.main_nifty'], AdminStatsViewComposer::class);
         Facades\View::composer('*',AssetTypesViewComposer::class);
         Facades\View::composer('*',DataCategoriesViewComposer::class);
         Facades\View::composer('*',DashboardCategoriesViewComposer::class);
-        Facades\View::composer(['admin/*', 'admin.layouts.partials.nav'], DashboardsViewComposer::class);
+        Facades\View::composer(['admin/*', 'admin.layouts.partials.nav', 'admin.layouts.main_nifty', 'admin.layouts.partials.nifty_sidebar'], DashboardsViewComposer::class);
      
         View::composer(['partials/publications/*','account/*',],CommunitiesOfPracticeViewComposer::class);
         View::composer(['partials/publications/*','account/*',],AccessGroupsViewComposer::class);

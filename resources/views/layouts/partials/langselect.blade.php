@@ -1,4 +1,6 @@
 @php
+    $translateFilled = (bool)(settings()->translate_button_filled ?? true);
+    $translateTextColor = settings()->translate_button_text_color ?? '#ffffff';
     // Use same logic as footer - check user preference first, then cookie, then default to 'en'
     $currentLang = 'en';
     if (auth()->check() && isset(current_user()->langauge) && !empty(current_user()->langauge)) {
@@ -40,21 +42,33 @@
         align-items: center;
         gap: 8px;
         padding: 8px 16px;
-        background: var(--theme-color-primary, #119A48) !important;
-        border: 1px solid var(--theme-color-primary, #119A48) !important;
         border-radius: 6px;
-        color: #fff !important;
         cursor: pointer;
         font-size: 14px;
         font-weight: 500;
         transition: all 0.3s ease;
         white-space: nowrap;
+        @if($translateFilled)
+        border: 1px solid var(--theme-color-primary, #119A48);
+        background: var(--theme-color-primary, #119A48) !important;
+        color: {{ $translateTextColor }} !important;
+        @else
+        border: none !important;
+        background: transparent !important;
+        color: var(--theme-color-primary, #119A48) !important;
+        @endif
     }
 
     .language-selector-btn:hover {
+        @if($translateFilled)
         background: color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black) !important;
         border-color: color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black) !important;
-        color: #fff !important;
+        color: {{ $translateTextColor }} !important;
+        @else
+        background: rgba(0,0,0,0.06) !important;
+        border: none !important;
+        color: color-mix(in srgb, var(--theme-color-primary, #119A48) 85%, black) !important;
+        @endif
     }
 
     .language-selector-btn .flag-icon {

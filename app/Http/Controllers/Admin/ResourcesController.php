@@ -45,17 +45,16 @@ class ResourcesController extends Controller
     }
 
     public function create(Request $request){
-
         $data['publication'] = null;
-        return view('admin.publications.create',$data);
+        $data['title']       = 'New Public Health Resource';
+        return view('admin.publications.create', $data);
     }
 
     public function edit(Request $request){
-
-        $publication          =  $this->publicationsRepo->find($request->id);
-        //$publication->tag_ids = array_column($publication->tags->toArray(),'tag_id');
+        $publication = $this->publicationsRepo->find($request->id);
         $data['publication'] = $publication;
-        return view('admin.publications.create',$data);
+        $data['title']       = 'Edit: ' . ($publication->title ?? 'Resource');
+        return view('admin.publications.create', $data);
     }
 
     public function details(Request $request){
@@ -80,7 +79,12 @@ class ResourcesController extends Controller
     }
 
     public function store(Request $request){
-
+        if (is_admin() && !auth()->user()->author_id && empty($request->author)) {
+            if ($request->ajax()) {
+                return response()->json(['message' => 'Please select a Corporate Source or Member State (author).', 'status' => 'failure'], 422);
+            }
+            return back()->with(['message' => 'Please select a Corporate Source or Member State (author).', 'status' => 'failure']);
+        }
         $saved = $this->publicationsRepo->save($request);
 
         if($saved):
@@ -106,6 +110,47 @@ class ResourcesController extends Controller
         endif;
 
         return back()->with($data);
+    }
+
+    /**
+     * Bulk approve or reject pending publications (from pending page).
+     */
+    public function bulkApproval(Request $request)
+    {
+        $ids = $request->input('publication_ids', []);
+        $action = $request->input('action');
+        $reason = $request->input('rejected_reason', '');
+
+        if (empty($ids) || !is_array($ids)) {
+            return back()->with('error', 'No publications selected.');
+        }
+        if (!in_array($action, ['approve', 'reject'], true)) {
+            return back()->with('error', 'Invalid action.');
+        }
+
+        $count = 0;
+        foreach ($ids as $id) {
+            $id = (int) $id;
+            if ($id <= 0) {
+                continue;
+            }
+            $req = new Request([
+                'id' => $id,
+                'approved' => $action === 'approve' ? 1 : 0,
+                'rejected' => $action === 'reject' ? 1 : 0,
+                'rejected_reason' => $reason,
+                'is_summary' => 0,
+            ]);
+            $saved = $this->publicationsRepo->change_approval_status($req);
+            if ($saved) {
+                $count++;
+            }
+        }
+
+        $message = $action === 'approve'
+            ? "{$count} publication(s) approved."
+            : "{$count} publication(s) rejected.";
+        return back()->with('success', $message);
     }
 
     public function summary_approval(Request $request){

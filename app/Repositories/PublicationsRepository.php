@@ -35,9 +35,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
 {
     $rows_count = $request->rows ?? 20;
 
-    $pubs = Publication::with([
-        'file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'
-    ])
+    $with = ['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'];
+    if (!empty($request->approved_only)) {
+        $with[] = 'approver';
+        $with[] = 'rejector';
+    }
+    $pubs = Publication::with($with)
     ->where('is_version', 0)
     ->inRandomOrder()
     ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')
@@ -1089,6 +1092,19 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $savedCount = 0;
         $errorCount = 0;
         
+        $titleBase = null;
+        if ($publication_id) {
+            $pub = Publication::find($publication_id);
+            $rawTitle = $pub && !empty($pub->title) ? clean_unicode(strip_tags($pub->title)) : '';
+            $titleBase = $rawTitle !== ''
+                ? \Illuminate\Support\Str::slug(\Illuminate\Support\Str::words($rawTitle, 20))
+                : null;
+        }
+        if (empty($titleBase)) {
+            $titleBase = 'document';
+        }
+
+        $fileIndex = 0;
         foreach ($upfiles as $file) {
             // Skip invalid files
             if (!$file || !$file->isValid()) {
@@ -1102,12 +1118,17 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
             try {
             $description = $file->getClientOriginalName();
-            $file_name   = md5_file($file->getRealPath());
                 $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-            $file_path   = $file_name.'.'.$extension;
+                $extension   = $extension ?: 'bin';
+            // Name file using title (max 20 words), slugged; add suffix for multiple files to avoid overwrite
+            $file_name   = $titleBase . (count($upfiles) > 1 ? '-' . (++$fileIndex) : '');
+            $file_path   = $file_name . '.' . $extension;
+            // Ensure uniqueness if same title+index already exists (e.g. re-upload)
+            $storagePath = storage_path().'/app/public/uploads/publications/';
+                if (file_exists($storagePath . $file_path)) {
+                    $file_path = $file_name . '-' . substr(uniqid(), -6) . '.' . $extension;
+                }
            
-                $storagePath = storage_path().'/app/public/uploads/publications/';
-                
                 // Ensure directory exists
                 if (!is_dir($storagePath)) {
                     mkdir($storagePath, 0755, true);

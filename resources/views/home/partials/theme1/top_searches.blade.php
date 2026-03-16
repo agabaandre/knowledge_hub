@@ -1,179 +1,170 @@
-<section class="middle gray" style="background-color: #f5f8fb;">
+@php
+    $primary = settings()->primary_color ?? '#119A48';
+@endphp
+<section class="py-5" style="background-color: #f8fafc;">
     <style>
-        /* Fix broken cards on theme1 */
-        .task-listing {
-            display: flex;
-            align-items: stretch;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-        
-        .task-listing:hover {
-            box-shadow: 0 4px 16px rgba(0,0,0,0.15);
-            transform: translateY(-2px);
-        }
-        
-        .task-listing-bid {
-            min-width: 240px;
-            width: 240px;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: transparent;
-            flex-shrink: 0;
-            padding: 4px;
-        }
-        
-        .task-listing-details {
-            flex: 1;
-            padding: 16px;
-        }
-        
-        .task-listing-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: #2d3748;
-        }
-        
-        .task-listing-text {
-            color: #4a5568;
-            margin-top: 10px;
-        }
-        
-        .task-tags {
-            margin-top: 15px;
-        }
-        
-        .task-tags span {
-            display: inline-block;
-            padding: 4px 12px;
-            background: #e2e8f0;
+        .theme1-resource-card.forum-post-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
             border-radius: 4px;
-            margin-right: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            transition: box-shadow 0.2s ease;
+        }
+        .theme1-resource-card.forum-post-card:hover {
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+        }
+        .theme1-resource-card .forum-header {
+            margin-bottom: 0.75rem;
+        }
+        .theme1-resource-card .forum-author-name-container {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.25rem;
+        }
+        .theme1-resource-card .forum-author-name {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 0.9375rem;
+        }
+        .theme1-resource-card .forum-post-time {
+            color: #64748b;
             font-size: 0.875rem;
+        }
+        .theme1-resource-card .forum-content {
             color: #4a5568;
+            line-height: 1.6;
+            overflow: hidden;
         }
-        
-        .task-icons {
-            list-style: none;
-            padding: 0;
-            margin: 10px 0;
+        .theme1-resource-card .forum-thread-image {
+            float: left;
+            width: 120px;
+            height: 120px;
+            object-fit: contain;
+            background: #f1f5f9;
+            border: 1px solid #e2e8f0;
+            border-radius: 4px;
+            margin-right: 1rem;
+            margin-bottom: 0.5rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        
-        .task-icons li {
-            display: inline-block;
-            margin-right: 15px;
-            color: #718096;
-            font-size: 0.9rem;
+        .theme1-resource-card .forum-thread-image:hover {
+            transform: scale(1.03);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
-        
-        @media (max-width: 767px) {
-            .task-listing {
-                flex-direction: row;
-                flex-wrap: wrap;
-            }
-            
-            .task-listing-bid {
-                width: 120px !important;
-                height: 120px !important;
-                min-width: 120px !important;
-                float: left !important;
-                margin-right: 12px !important;
-                margin-bottom: 8px !important;
-                margin-left: 2px !important;
-                margin-top: 2px !important;
-                padding: 4px !important;
-                background-size: contain !important;
-            }
-            
-            .task-listing-details {
-                width: 100% !important;
-                overflow: hidden !important;
-                text-align: justify !important;
-            }
-            
-            /* Clear float after content on mobile */
-            .task-listing::after {
-                content: "";
-                display: table;
-                clear: both;
+        .theme1-resource-card .forum-title {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+            line-height: 1.4;
+        }
+        .theme1-resource-card .forum-title a {
+            color: inherit;
+            text-decoration: none;
+        }
+        .theme1-resource-card .forum-title a:hover {
+            color: {{ $primary }};
+        }
+        .theme1-resource-card .forum-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding-top: 1rem;
+            margin-top: 1rem;
+            border-top: 1px solid #e2e8f0;
+            flex-wrap: wrap;
+        }
+        .theme1-resource-card .forum-action-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            color: {{ $primary }};
+            text-decoration: none;
+            font-size: 0.875rem;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+        .theme1-resource-card .forum-action-btn:hover {
+            color: #0d5034;
+            text-decoration: underline;
+        }
+        @media (max-width: 575.98px) {
+            .theme1-resource-card .forum-thread-image {
+                width: 100px;
+                height: 100px;
+                margin-right: 0.75rem;
             }
         }
     </style>
-    <div class="container py-5">
-        <div class="row justify-content-center" data-aos="fade-in">
+    <div class="container">
+        <div class="row justify-content-center mb-4">
             <div class="col-12">
-                <div class="sec_title position-relative text-center mb-5">
-                    <h2 class="ft-bold">Top Searches</h2>
+                <div class="sec_title position-relative text-center">
+                    <h2 class="ft-bold mb-0" style="color: #1e293b;">{{ settings()->section_title_top_searches ?? 'Top Searches' }}</h2>
                 </div>
             </div>
         </div>
-        <div class="row" id="top_searches">
-
-            <div class="listings-container margin-top-35" style="width: 100%;">
-
+        <div class="row g-0" id="top_searches">
+            @foreach ($recent as $row)
                 @php
-                    $i = 0;
+                    $image_link = $row->cover ?? $row->image_url ?? null;
+                    $default_image = asset('assets/images/cover.png');
+                    if (empty($image_link)) {
+                        $image_link = $default_image;
+                    } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
+                        $image_link = (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) ? asset($image_link) : url($image_link);
+                        if (strpos($image_link, 'http') !== 0) {
+                            $image_link = $default_image;
+                        }
+                    }
                 @endphp
-                @foreach ($recent as $row)
-                    @php
-                        $i++;
-                        $likes = count($row->favourited);
-                    @endphp
-
-
-                    <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="task-listing">
-                        <div class="task-listing-bid d-none d-sm-block"
-                            style="background-image: url('{{ $row->cover }}'); background-size: contain; background-repeat: no-repeat; background-position: center; background-color: transparent; min-width: 240px; width: 240px;">
-                        </div>
-                        <div class="task-listing-details">
-
-                            <!-- Details -->
-                            <div class="task-listing-description">
-                                <h3 class="task-listing-title">{!! truncate($row->title, 100) !!}</h3>
-                                <ul class="task-icons">
-                                    <li><i class="icon-material-outline-location-on"></i>{{ $row->author->name }}</li>
-                                    <li><i class="icon-material-outline-access-time"></i>Last updated:
-                                        {{ time_ago($row->updated_at) }}</li>
-                                </ul>
-                                <p class="task-listing-text">{!! truncate($row->description ?? 'N/A', 200) !!}</p>
-                                <div class="task-tags">
-                                    <span>{{ @$row->category->category_name }}</span>
-                                    <span>{{ $row->visits }} Views </span>
-                                    <span>{{ count($row->comments) }} Comments</span>
-                                </div>
-                            </div>
-
-                        </div>
-
-                        <div class="task-listing-bid">
-                            <div class="task-listing-bid-inner row">
-                                <div class="task-offers d-none d-sm-block">
-                                    <strong>{{ $row->theme->description ?? '' }}</strong>
-                                    <span class="text-sm">{{ $row->sub_theme->description ?? '' }}</span>
-                                </div>
-                                <span style="min-width:100%;" class="button button-sliding-icon ripple-effect"
-                                    onclick="window.location.href={{ url('records/resource') }}?id={{ $row->id }}">
-                                    Browse Resource
-                                </span>
+                <div class="col-12 col-md-6 mb-3 px-2 px-md-3 d-flex">
+                    <div class="theme1-resource-card forum-post-card w-100">
+                        <div class="forum-header">
+                            <div class="forum-author-name-container">
+                                <span class="forum-author-name">{{ $row->author->name ?? '—' }}</span>
+                                <span class="forum-post-time"><i class="fa fa-clock me-1"></i>{{ time_ago($row->updated_at) }}</span>
                             </div>
                         </div>
-                    </a>
-                @endforeach
-
-            </div>
+                        <div class="forum-content">
+                            <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                                <img src="{{ $image_link }}" alt="" class="forum-thread-image" loading="lazy" onerror="this.src='{{ $default_image }}';">
+                            </a>
+                            <h3 class="forum-title">
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}">{{ $row->title }}</a>
+                            </h3>
+                            <p class="mb-0" style="text-align: justify;">{{ Str::words(strip_tags($row->description ?? 'No description.'), 40) }}</p>
+                            <div class="forum-actions">
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    Read More <i class="fa fa-arrow-right"></i>
+                                </a>
+                                @if($row->has_any_pdf ?? false)
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    <i class="fa-solid fa-microchip me-1"></i> Chat with PDF
+                                </a>
+                                @else
+                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                    <i class="fa-solid fa-microchip me-1"></i> Summarise
+                                </a>
+                                @endif
+                                <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
+                                @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
+                                <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            @endforeach
         </div>
         <div class="row justify-content-center mt-4">
             <div class="col-12 text-center">
-                <a id="explore" href="{{ url('records') }}"
-                    class="btn btn-md theme-bg rounded text-light hover-theme">
-                    Explore More Resources<i class="lni lni-arrow-right-circle ml-2"></i>
-                </a>
+                <a href="{{ url('records/search') }}" class="btn btn-outline-primary px-4 py-2 rounded" style="border-color: {{ $primary }}; color: {{ $primary }};">View more</a>
             </div>
         </div>
     </div>

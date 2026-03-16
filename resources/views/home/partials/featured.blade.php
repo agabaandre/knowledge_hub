@@ -65,7 +65,7 @@
            <div class="row justify-content-center" data-aos="fade-in">
              <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                   <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
-                     <h2 class="ft-bold">Recommended</span></h2>
+                     <h2 class="ft-bold">{{ settings()->section_title_recommended ?? 'Recommended' }}</h2>
                  </div>
              </div>
          </div>

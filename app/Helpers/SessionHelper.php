@@ -48,29 +48,47 @@ if(!function_exists('current_user')){
 if(!function_exists('settings')){
 	 function settings()
 	 {
-		// Cache settings for 24 hours (1 day)
-		$minutes = 60 * 24; // 1440 minutes = 24 hours
+		$minutes = 60 * 24; // 24 hours
 
-        $settings  = cache()->remember('settings', $minutes, function () {
-            
-			// Always get the active configuration
+        $base = cache()->remember('settings', $minutes, function () {
 			$settings = DB::table("setting")->where('status', 'active')->first();
-			
-			// Fallback to first if no active exists
 			if (!$settings) {
 				$settings = DB::table("setting")->first();
 			}
-			
 			if ($settings) {
 				$settings->logo = !empty($settings->logo) ? asset('storage/uploads/config/'.$settings->logo) : '';
 				$settings->favicon = !empty($settings->favicon) ? asset('storage/uploads/config/' . $settings->favicon) : '';
 				$settings->spotlight_banner = !empty($settings->spotlight_banner) ? asset('storage/uploads/config/' . $settings->spotlight_banner) : '';
 			}
-
 			return $settings;
         });
 
-		return $settings;
+		// Per-theme overlay: Theme1 uses theme_settings; default uses base only
+		if ($base && isset($base->site_theme) && $base->site_theme === 'theme1.') {
+			$overlay = cache()->remember('theme_settings_theme1', $minutes, function () {
+				if (!\Illuminate\Support\Facades\Schema::hasTable('theme_settings')) {
+					return [];
+				}
+				return DB::table('theme_settings')->where('theme', 'theme1')->pluck('value', 'key')->toArray();
+			});
+			$settings = clone $base;
+			foreach ($overlay as $key => $value) {
+				$settings->{$key} = $value;
+			}
+			// Re-apply image URLs for theme1 (values from theme_settings are filenames)
+			if (!empty($settings->logo) && strpos($settings->logo, 'http') !== 0 && strpos($settings->logo, '//') !== 0) {
+				$settings->logo = asset('storage/uploads/config/' . $settings->logo);
+			}
+			if (!empty($settings->favicon) && strpos($settings->favicon, 'http') !== 0 && strpos($settings->favicon, '//') !== 0) {
+				$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
+			}
+			if (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'http') !== 0 && strpos($settings->spotlight_banner, '//') !== 0) {
+				$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+			}
+			return $settings;
+		}
+
+		return $base;
 	 }
 }
 

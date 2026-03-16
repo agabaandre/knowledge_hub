@@ -260,16 +260,17 @@
             </div>
 
             @if (is_admin())
+                @php $adminMustSelectAuthor = !current_user()->author_id; @endphp
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Corporate Source or Member State
-                        @if(($requiredFields['author'] ?? false) == true)
+                        @if(($requiredFields['author'] ?? false) == true || $adminMustSelectAuthor)
                             <span class="text-danger">*</span>
                         @endif
                         <small class="text-muted">(If your source is missing, please contact the system admin)</small>
                     </label>
                             @include('partials.authors.dropdown', [
                                 'field' => 'author',
-                        'required' => ($requiredFields['author'] ?? false) ? 'required' : '',
+                        'required' => (($requiredFields['author'] ?? false) || $adminMustSelectAuthor) ? 'required' : '',
                                 'selected' => @$row->author_id ?? null,
                         'allfield' => 'Select Corporate Source or Member State',
                             ])

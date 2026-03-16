@@ -1,4 +1,4 @@
-@extends('admin.layouts.tabular')
+@extends(admin_layout('tabular'))
 
 @section('styles')
     @include('common.table')
@@ -19,6 +19,8 @@
         .nav-tabs .nav-link{color:#64748b;border:none;border-bottom:2px solid transparent}
         .nav-tabs .nav-link.active{color:#119A48;border-bottom-color:#119A48;font-weight:600}
         .nav-tabs .nav-link:hover{color:#119A48;border-bottom-color:#e2e8f0}
+        /* Ensure red badges show in table */
+        #members-table .badge-danger { background-color: #dc3545 !important; color: #fff !important; }
     </style>
 @endsection
 
@@ -59,6 +61,17 @@
                 <div class="tab-content" id="communityTabsContent">
                     <!-- Members Tab -->
                     <div class="tab-pane fade show active" id="members" role="tabpanel" aria-labelledby="members-tab">
+                        @if($pendingCount > 0)
+                        <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+                            <span class="text-muted small">Select participants to approve or reject:</span>
+                            <button type="button" class="btn btn-success btn-sm" id="bulk-approve-btn" disabled>
+                                <i class="fa fa-check mr-1"></i>Approve selected
+                            </button>
+                            <button type="button" class="btn btn-danger btn-sm" id="bulk-reject-btn" disabled>
+                                <i class="fa fa-times mr-1"></i>Reject selected
+                            </button>
+                        </div>
+                        @endif
                         <div class="row mb-3">
                             <div class="col-lg-6">
                                 <div class="af-card mb-3">
@@ -102,6 +115,11 @@
                         <table id="members-table" class="table table-hover table-bordered">
                     <thead>
                         <tr>
+                                    <th style="width:42px;">
+                                        @if($pendingCount > 0)
+                                        <input type="checkbox" id="select-all-pending" class="form-check-input" title="Select all pending on this page">
+                                        @endif
+                                    </th>
                                     <th style="width:60px;">#</th>
                             <th>Name</th>
                             <th>Email</th>
@@ -111,7 +129,12 @@
                     </thead>
                     <tbody>
                         @foreach ($membership as $member)
-                            <tr>
+                            <tr class="{{ $member->is_approved == 0 ? 'member-row-pending' : '' }}" data-member-id="{{ $member->id }}">
+                                        <td>
+                                            @if ($member->is_approved == 0)
+                                                <input type="checkbox" class="form-check-input member-pending-cb" value="{{ $member->id }}" data-member-id="{{ $member->id }}">
+                                            @endif
+                                        </td>
                                         <td>{{ $loop->iteration }}</td>
                                 <td>{{ $member->user->name }}</td>
                                 <td>{{ $member->user->email }}</td>
@@ -221,7 +244,7 @@
                     </button>
                 </div>
                 <div class="modal-body">
-                    Are you sure you want to <span id="actionType"></span> this member?
+                    <p class="mb-0" id="approvalModalText">Are you sure you want to <span id="actionType"></span> this member?</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -268,9 +291,9 @@
             var membersTable = $('#members-table').DataTable({
                 pageLength: 15,
                 lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
-                order: [[0, 'asc']],
+                order: [[1, 'asc']],
                 columnDefs: [
-                    { orderable: false, targets: [4] }
+                    { orderable: false, targets: [0, 5] }
                 ],
                 language: {
                     search: "",
@@ -314,32 +337,102 @@
         
         let memberId;
         let action;
+        var communityId = {{ $community->id }};
+        var allPendingIds = [{{ $membership->where('is_approved', 0)->pluck('id')->join(',') }}];
+        var bulkSelectAll = false;
 
         function showModal(id, actionType) {
             memberId = id;
             action = actionType;
             $('#actionType').text(actionType);
+            $('#approvalModalText').html('Are you sure you want to <span id="actionType">' + actionType + '</span> this member?');
+            $('#confirmAction').off('click').on('click', confirmSingleAction);
             $('#approvalModal').modal('show');
         }
 
-        $('#confirmAction').on('click', function() {
+        function confirmSingleAction() {
             $.ajax({
                 url: '{{ route('admin.commsofpractice.memberAction') }}',
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
                     member_id: memberId,
-                    action: action
+                    action: action,
+                    community_id: communityId
                 },
                 success: function(response) {
                     $('#approvalModal').modal('hide');
                     location.reload();
                 },
                 error: function(xhr) {
-                    alert('An error occurred. Please try again.');
+                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred. Please try again.');
                 }
             });
+        }
+
+        $('#confirmAction').on('click', confirmSingleAction);
+
+        function getSelectedMemberIds() {
+            if (bulkSelectAll) return allPendingIds.slice();
+            var ids = [];
+            $('.member-pending-cb:checked').each(function() {
+                ids.push(parseInt($(this).val(), 10));
+            });
+            return ids;
+        }
+
+        function updateBulkButtons() {
+            var n = getSelectedMemberIds().length;
+            $('#bulk-approve-btn, #bulk-reject-btn').prop('disabled', n === 0);
+        }
+
+        $(document).on('change', '.member-pending-cb', function() {
+            if (bulkSelectAll) bulkSelectAll = false;
+            updateBulkButtons();
         });
+
+        $('#select-all-pending').on('change', function() {
+            bulkSelectAll = this.checked;
+            $('#members-table .member-pending-cb').each(function() {
+                this.checked = bulkSelectAll;
+            });
+            updateBulkButtons();
+        });
+
+        function doBulkAction(actionType) {
+            var ids = getSelectedMemberIds();
+            if (ids.length === 0) {
+                alert('Please select at least one pending member.');
+                return;
+            }
+            var msg = 'Are you sure you want to ' + actionType + ' ' + ids.length + ' selected member(s)?';
+            $('#approvalModalText').text(msg);
+            $('#actionType').text(actionType);
+            $('#confirmAction').off('click').on('click', function() {
+                $.ajax({
+                    url: '{{ route('admin.commsofpractice.memberAction') }}',
+                    method: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}',
+                        member_ids: ids,
+                        action: actionType,
+                        community_id: communityId
+                    },
+                    success: function(response) {
+                        $('#approvalModal').modal('hide');
+                        alert(response.message || 'Done.');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred. Please try again.');
+                    }
+                });
+            });
+            $('#approvalModal').modal('show');
+        }
+
+        $('#bulk-approve-btn').on('click', function() { doBulkAction('approve'); });
+        $('#bulk-reject-btn').on('click', function() { doBulkAction('reject'); });
 
         // Handle send invitation form
         $('#sendInvitationForm').on('submit', function(e) {
