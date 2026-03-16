@@ -16,6 +16,7 @@ use Kreait\Firebase\Messaging\MessageTarget;
 use App\Notifications\AccountActivated;
 use App\Models\PushNotification;
 use App\Services\ExchangeEmailService;
+use App\Jobs\PushNotificationJob;
 
 if(!function_exists('truncate')){
 	function truncate($str,$limit){
@@ -627,7 +628,7 @@ function cleanUTF8($value){
         }
 
         // Dispatch the job
-        PushNotificationJob::dispatch($title, $message, $fcmTokens, $isTopic);
+        PushNotificationJob::dispatch($title, $message, $fcmTokens, $isTopic)->onQueue('default');
 
         return true; // Indicate success
     } catch (Exception $ex) {

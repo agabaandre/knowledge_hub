@@ -219,15 +219,44 @@ class PublicationsController extends Controller
     }
 
     public function add_favourite(Request $request){
-
-        //logic here
-        $this->publicationsRepo->add_favourite($request->id);
+        $id = $request->input('id');
+        if (!$id) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Publication ID required'], 400);
+            }
+            return back();
+        }
+        if (!auth()->check()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Please login to add favorites'], 401);
+            }
+            return redirect()->guest(route('login'));
+        }
+        $this->publicationsRepo->add_favourite($id);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'favourited' => true]);
+        }
         return back();
     }
 
     public function remove_favourite(Request $request){
-
-        $this->publicationsRepo->remove_favourite($request->id);
+        $id = $request->input('id');
+        if (!$id) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Publication ID required'], 400);
+            }
+            return back();
+        }
+        if (!auth()->check()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'error' => 'Please login to remove favorites'], 401);
+            }
+            return redirect()->guest(route('login'));
+        }
+        $this->publicationsRepo->remove_favourite($id);
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'favourited' => false]);
+        }
         return back();
     }
 

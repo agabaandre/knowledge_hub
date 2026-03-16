@@ -140,6 +140,19 @@
                             </h3>
                             <p class="mb-0" style="text-align: justify;">{{ Str::words(strip_tags($row->description ?? 'No description.'), 40) }}</p>
                             <div class="forum-actions">
+                                @auth
+                                <button type="button"
+                                    class="btn btn-sm btn-outline-danger js-favourite-pub-btn me-2"
+                                    data-publication-id="{{ $row->id }}"
+                                    data-favourited="{{ ($row->is_favourite ?? false) ? '1' : '0' }}"
+                                    style="border-color: #ef4444; color: #ef4444; background: transparent; padding: 0.25rem 0.5rem; font-size: 0.875rem; cursor: pointer;"
+                                    onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
+                                    <i class="fa fa-heart{{ ($row->is_favourite ?? false) ? '' : '-o' }} me-1" style="{{ ($row->is_favourite ?? false) ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
+                                    <span class="js-fav-label">{{ ($row->is_favourite ?? false) ? 'Favorite' : 'Add favorite' }}</span>
+                                </button>
+                                @else
+                                <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="forum-action-btn me-2" style="color: #ef4444;"><i class="fa fa-heart-o me-1"></i> Add favorite</a>
+                                @endauth
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>

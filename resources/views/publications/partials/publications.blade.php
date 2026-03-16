@@ -273,24 +273,20 @@
                              $goldTextColor = '#5a4d2e';
                          @endphp
                          @auth
-                             @if(!$row->is_favourite)
-                                 <a href="{{ url('publications/add_favourite') }}?id={{ $row->id }}" 
-                                    class="btn btn-sm btn-outline-warning" 
-                                    style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
-                                     <i class="fa fa-star mr-1"></i> Add to Favourites
-                                 </a>
-                             @else
-                                 <a href="{{ url('publications/remove_favourite') }}?id={{ $row->id }}" 
-                                    class="btn btn-sm btn-warning" 
-                                    style="background-color: {{ $auGold }}; border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
-                                     <i class="fa fa-star mr-1"></i> Remove favorite
-                                 </a>
-                             @endif
+                             <button type="button"
+                                 class="btn btn-sm btn-outline-danger js-favourite-pub-btn"
+                                 data-publication-id="{{ $row->id }}"
+                                 data-favourited="{{ $row->is_favourite ? '1' : '0' }}"
+                                 style="border-color: #ef4444; color: #ef4444; background-color: transparent; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; cursor: pointer;"
+                                 onclick="if(window.handlePubFavourite){event.preventDefault();event.stopPropagation();window.handlePubFavourite(this);}">
+                                 <i class="fa fa-heart{{ $row->is_favourite ? '' : '-o' }} mr-1" style="{{ $row->is_favourite ? 'color: #ef4444;' : 'color: inherit;' }}"></i>
+                                 <span class="js-fav-label">{{ $row->is_favourite ? 'Favorite' : 'Add favorite' }}</span>
+                             </button>
                          @else
-                             <a href="{{ url('login') }}" 
-                                class="btn btn-sm btn-outline-warning" 
-                                style="border-color: {{ $auGold }}; color: {{ $goldTextColor }}; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
-                                 <i class="fa fa-star mr-1"></i> Add to Favourites
+                             <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}"
+                                class="btn btn-sm btn-outline-danger"
+                                style="border-color: #ef4444; color: #ef4444; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease; background-color: transparent;">
+                                 <i class="fa fa-heart-o mr-1"></i> Add favorite
                              </a>
                          @endauth
                          <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
@@ -333,3 +329,5 @@
         <a href="{{ url('publications/request-content') }}" class="btn btn-dark mt-2">Request Content</a>
     </div>
 @endif
+
+{{-- Favourite script is in layouts/app.blade.php for both default and theme1 --}}
