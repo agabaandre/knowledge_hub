@@ -36,7 +36,13 @@ class SendMailJob implements ShouldQueue
     public function handle()
     {
         $request = (Object) $this->data;
-        send_email($request);
+        $result = send_email($request);
+
+        if (is_array($result) && isset($result['success']) && $result['success'] === false) {
+            $message = $result['message'] ?? 'Email sending failed';
+            \Log::error('SendMailJob: send_email failed', ['email' => $request->email ?? null, 'message' => $message]);
+            throw new \RuntimeException($message);
+        }
 
         $user = User::where('email',$request->email)->first();
         

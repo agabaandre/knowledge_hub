@@ -8,14 +8,14 @@
 
   window.openPdfChat = function (pubId, attId, docTitle) {
     publicationId = pubId;
-    attachmentId = attId === undefined ? null : attId;
+    attachmentId = attId === undefined || attId === '' ? null : attId;
     sessionId = null;
     sourceId = null;
     var titleEl = document.getElementById('pdf-chat-doc-title');
     if (titleEl) titleEl.textContent = (typeof docTitle === 'string' && docTitle) ? docTitle : (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Document');
     var modalEl = document.getElementById('pdf-chat-modal');
     if (!modalEl) {
-      loadPdfChatSession();
+      if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
       return;
     }
     if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
@@ -25,14 +25,40 @@
     } else {
       modalEl.classList.add('show');
       modalEl.style.display = 'block';
+      modalEl.setAttribute('aria-hidden', 'false');
       document.body.classList.add('modal-open');
       var backdrop = document.createElement('div');
       backdrop.className = 'modal-backdrop fade show';
       backdrop.id = 'pdf-chat-modal-backdrop';
       document.body.appendChild(backdrop);
     }
-    loadPdfChatSession();
+    if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
   };
+
+  function initPdfChatDelegate() {
+    document.body.addEventListener('click', function (e) {
+      var btn = e.target.closest('.js-open-pdf-chat');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      var pubId = parseInt(btn.getAttribute('data-publication-id'), 10);
+      if (isNaN(pubId)) return;
+      var attId = btn.getAttribute('data-attachment-id');
+      if (attId === '' || attId === null || attId === undefined) attId = null;
+      else { attId = parseInt(attId, 10); if (isNaN(attId)) attId = null; }
+      var docTitle = btn.getAttribute('data-doc-title') || (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Document');
+      openPdfChat(pubId, attId, docTitle);
+    }, true);
+  }
+  function runPdfChatDelegate() {
+    if (document.body) initPdfChatDelegate();
+    else document.addEventListener('DOMContentLoaded', initPdfChatDelegate);
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', runPdfChatDelegate);
+  } else {
+    runPdfChatDelegate();
+  }
 
   function getToken() {
     var m = document.querySelector('meta[name="csrf-token"]');

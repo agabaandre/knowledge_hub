@@ -381,7 +381,20 @@ class CommsOfPracticeRepository{
             'title' => $subject
         ];
 
-        \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
+        try {
+            \Illuminate\Support\Facades\Bus::dispatchSync(new \App\Jobs\SendMailJob($emailData));
+        } catch (\Throwable $e) {
+            \Log::error('COP invitation email failed', [
+                'community_id' => $communityId,
+                'email' => $email,
+                'error' => $e->getMessage(),
+            ]);
+            return [
+                'status' => 'error',
+                'message' => 'Invitation was created but the email could not be sent: ' . $e->getMessage(),
+                'data' => $invitation,
+            ];
+        }
 
         return ['status' => 'success', 'message' => 'Invitation sent successfully', 'data' => $invitation];
     }

@@ -577,7 +577,11 @@
                         <div class="d-flex gap-2 flex-wrap">
                 @auth
                     @if($publication->has_any_pdf)
-                    <button onclick="openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)))" class="btn btn-au btn-sm">
+                    <button type="button" class="btn btn-au btn-sm js-open-pdf-chat"
+                            data-publication-id="{{ $publication->id }}"
+                            data-attachment-id="{{ $publication->pdf_sources[0]['attachment_id'] ?? '' }}"
+                            data-doc-title="{{ e(Str::limit(strip_tags($publication->title ?? 'Document'), 200)) }}"
+                            onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)))">
                         <i class="fa-solid fa-microchip"></i> Chat with PDF
                     </button>
                     @else

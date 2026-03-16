@@ -229,10 +229,11 @@ function export_excel($records,$heading=false) {
 
 function send_email($request){
 
-    // Check Exchange configuration FIRST - if configured, use it EXCLUSIVELY
-    $config = config('exchange-email');
-    $exchangeConfigured = !empty($config['tenant_id']) && !empty($config['client_id']) && !empty($config['client_secret']);
-    
+    $emailDriver = config('emails.driver', 'smtp');
+    $exchangeConfig = config('exchange-email');
+    $exchangeConfigured = !empty($exchangeConfig['tenant_id']) && !empty($exchangeConfig['client_id']) && !empty($exchangeConfig['client_secret']);
+    $useExchange = ($emailDriver === 'exchange') && $exchangeConfigured;
+
     // Normalize email data - handle both 'title' and 'subject' fields
     $subject = $request->subject ?? $request->title ?? 'Knowledge Resource Center Email';
     $email = $request->email ?? null;
@@ -243,8 +244,8 @@ function send_email($request){
         return array('success'=>false,'message'=>"Email address is required.");
     }
     
-    // If Exchange is configured, ALWAYS use it - NO SMTP fallback
-    if ($exchangeConfigured) {
+    // Use Exchange when driver is 'exchange' and Exchange is configured
+    if ($useExchange) {
         try {
             $result = sendEmailWithExchange(
                 $email, 
@@ -274,8 +275,8 @@ function send_email($request){
         }
     }
 
-    // Only use PHPMailer/SMTP if Exchange is NOT configured
-    \Log::info('Exchange not configured, using PHPMailer/SMTP fallback');
+    // Use PHPMailer/SMTP when driver is 'smtp' or when Exchange is not configured
+    \Log::info('Using SMTP for sending (driver: ' . $emailDriver . ')');
     
     $mail = new PHPMailer(true);     // Passing `true` enables exceptions
 
