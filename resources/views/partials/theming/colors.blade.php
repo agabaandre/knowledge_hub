@@ -35,7 +35,9 @@
         }
     .logo-inverse { filter: brightness(0) invert(1); }
     .navigation .nav-menu > li > a,
-    .navigation .nav-dropdown a { font-weight: var(--nav-font-weight, 500); }
+    .navigation .nav-dropdown a { font-weight: var(--nav-font-weight, 500) !important; }
+    #main-wrapper,
+    body { font-family: var(--font-family-primary) !important; font-size: var(--front-body-font-size) !important; color: var(--default-font-color) !important; }
     /* Dark theme (user preference) */
     html[data-bs-theme="dark"] body { background-color: #1a1d21; color: #e4e6eb; }
     html[data-bs-theme="dark"] .bg-light { background-color: #242628 !important; }
