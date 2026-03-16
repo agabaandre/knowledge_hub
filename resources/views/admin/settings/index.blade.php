@@ -81,9 +81,10 @@
             background: rgba(17, 154, 72, 0.08);
         }
         .settings-theme1 .settings-tabs .nav-link.active {
-            color: #fff;
-            background: var(--theme-color-primary, #119A48);
+            color: var(--theme-color-primary, #119A48);
+            background: #ffffff;
             border-bottom: none;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
         }
 
         .settings-content {

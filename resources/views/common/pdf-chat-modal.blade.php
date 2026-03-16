@@ -110,7 +110,7 @@
 }
 .pdf-chat-msg.user {
   margin-left: auto;
-  background: #0d6efd;
+  background: var(--theme-color-primary, #006239);
   color: #fff;
 }
 .pdf-chat-msg.assistant {
