@@ -616,6 +616,17 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="col-md-2">
+                            <div class="form-group">
+                                <label>Nav font weight</label>
+                                <select name="nav_font_weight" class="form-control">
+                                    @foreach([['400', 'Normal'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] as $opt)
+                                        <option value="{{ $opt[0] }}" @if(($settings->nav_font_weight ?? '500') == $opt[0]) selected @endif>{{ $opt[1] }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="info-text">Applies to front and admin nav links.</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="row mt-2">

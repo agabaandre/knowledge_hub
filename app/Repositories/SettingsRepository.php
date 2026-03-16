@@ -11,7 +11,7 @@ class SettingsRepository
     /** Keys that are stored per-theme (Theme1 in theme_settings, default in setting row) */
     private const APPEARANCE_KEYS = [
         'primary_color', 'secondary_color', 'primary_text_color', 'links_active_color', 'icon_font_color',
-        'banner_text', 'footer_style', 'nav_style', 'admin_nav_style', 'nav_link_color', 'nav_link_hover_color', 'nav_link_active_color',
+        'banner_text', 'footer_style', 'nav_style', 'admin_nav_style', 'nav_link_color', 'nav_link_hover_color', 'nav_link_active_color', 'nav_font_weight',
         'gradient_start_color', 'gradient_end_color', 'translate_button_filled', 'translate_button_text_color',
         'header_logo_inverse', 'footer_logo_inverse', 'logo_scale',
         'au_red', 'au_gold', 'au_corporate_green', 'au_green', 'au_plum', 'au_grey_text', 'au_white',
@@ -163,6 +163,10 @@ class SettingsRepository
             }
             if (Schema::hasColumn('setting', 'nav_link_active_color')) {
                 $settings->nav_link_active_color = $request->input('nav_link_active_color');
+            }
+            if (Schema::hasColumn('setting', 'nav_font_weight')) {
+                $fw = $request->input('nav_font_weight');
+                $settings->nav_font_weight = in_array($fw, ['400', '500', '600', '700'], true) ? $fw : '500';
             }
             if (Schema::hasColumn('setting', 'admin_nav_style')) {
                 $settings->admin_nav_style = $request->input('admin_nav_style', 'colored');
@@ -406,6 +410,7 @@ class SettingsRepository
             'nav_link_color' => $request->input('nav_link_color'),
             'nav_link_hover_color' => $request->input('nav_link_hover_color'),
             'nav_link_active_color' => $request->input('nav_link_active_color'),
+            'nav_font_weight' => in_array($request->input('nav_font_weight'), ['400', '500', '600', '700'], true) ? $request->input('nav_font_weight') : '500',
             'admin_nav_style' => $request->input('admin_nav_style', 'colored'),
             'gradient_start_color' => $request->gradient_start_color,
             'gradient_end_color' => $request->gradient_end_color,

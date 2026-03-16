@@ -11,6 +11,7 @@
     $navLinkColor = settings()->nav_link_color ?? (($navStyle === 'light') ? '#334155' : 'rgba(255,255,255,0.92)');
     $navLinkHover = settings()->nav_link_hover_color ?? (($navStyle === 'light') ? ($primary) : '#fff');
     $navLinkActive = settings()->nav_link_active_color ?? $primary;
+    $navFontWeight = settings()->nav_font_weight ?? '500';
     $h = ltrim($primary, '#');
     $primaryRgb = strlen($h) >= 6 ? hexdec(substr($h,0,2)).','.hexdec(substr($h,2,2)).','.hexdec(substr($h,4,2)) : '0,98,57';
     $h2 = ltrim($secondary, '#');
@@ -35,11 +36,11 @@
     .btn-primary:hover { filter: brightness(1.08); }
     .text-primary, a.text-primary { color: {{ $primary }} !important; }
     .bg-primary { background-color: {{ $primary }} !important; }
-    /* Theme1 front nav: use configured nav colors for all states */
-    #header.nav-light .navbar .nav-link { color: {{ $navLinkColor }} !important; }
+    /* Theme1 front nav: use configured nav colors and font-weight for all states */
+    #header.nav-light .navbar .nav-link { color: {{ $navLinkColor }} !important; font-weight: {{ $navFontWeight }}; }
     #header.nav-light .navbar .nav-link:hover { color: {{ $navLinkHover }} !important; border-bottom-color: {{ $navLinkHover }} !important; }
     #header.nav-light .navbar .nav-link.active { color: {{ $navLinkActive }} !important; font-weight: 600; border-bottom-color: {{ $navLinkActive }} !important; }
-    #header:not(.nav-light) .navbar .nav-link { color: {{ $navLinkColor }} !important; }
+    #header:not(.nav-light) .navbar .nav-link { color: {{ $navLinkColor }} !important; font-weight: {{ $navFontWeight }}; }
     #header:not(.nav-light) .navbar .nav-link:hover { color: {{ $navLinkHover }} !important; border-bottom-color: {{ $navLinkHover }} !important; }
     #header:not(.nav-light) .navbar .nav-link.active { color: {{ $navLinkActive }} !important; font-weight: 600; border-bottom-color: {{ $navLinkActive }} !important; }
     /* Colored nav: primary background; light nav: light background */
@@ -91,7 +92,7 @@
     #mainnav-container .nav-label,
     #mainnav-container .mainnav__menu .nav-link .nav-label,
     #mainnav-container .mainnav__menu .mininav-toggle .nav-label,
-    #mainnav-container .mainnav__menu a { color: rgba(255,255,255,0.92) !important; visibility: visible !important; opacity: 1 !important; }
+    #mainnav-container .mainnav__menu a { color: rgba(255,255,255,0.92) !important; font-weight: {{ $navFontWeight }} !important; visibility: visible !important; opacity: 1 !important; }
     #mainnav-container .mainnav__menu .nav-link:hover,
     #mainnav-container .mainnav__menu a.nav-link:hover,
     #mainnav-container .mainnav__menu .nav-link.active,

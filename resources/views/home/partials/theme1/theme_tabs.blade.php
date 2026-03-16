@@ -2,6 +2,7 @@
     $primary = settings()->primary_color ?? '#119A48';
     $healthThemesTitle = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
     $themeCardOpacity = settings()->theme_card_opacity ?? '1';
+    $themeCardOpacity = is_numeric($themeCardOpacity) ? max(0.5, min(1, (float)$themeCardOpacity)) : 1;
 @endphp
 <style>
 .theme1-themes-section {
@@ -37,6 +38,7 @@
     text-decoration: none;
     color: inherit;
     min-height: 110px;
+    opacity: {{ $themeCardOpacity }};
 }
 .theme1-theme-card:hover {
     box-shadow: 0 4px 12px rgba(0,0,0,0.08);

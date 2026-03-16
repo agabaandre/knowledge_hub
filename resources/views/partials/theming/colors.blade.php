@@ -6,6 +6,7 @@
     --text-color-primary: {{settings()->primary_text_color}};
     --text-color-secondary: {{settings()->links_active_color}};
     --icon-color: {{settings()->icon_font_color}};
+    --nav-font-weight: {{ settings()->nav_font_weight ?? '500' }};
     --banner-text-color: {{settings()->banner_text}};
     --sw-border-color:  #eeeeee;
     --sw-toolbar-btn-color:  #ffffff;
@@ -33,6 +34,8 @@
             min-width: 100%!important;
         }
     .logo-inverse { filter: brightness(0) invert(1); }
+    .navigation .nav-menu > li > a,
+    .navigation .nav-dropdown a { font-weight: var(--nav-font-weight, 500); }
     /* Dark theme (user preference) */
     html[data-bs-theme="dark"] body { background-color: #1a1d21; color: #e4e6eb; }
     html[data-bs-theme="dark"] .bg-light { background-color: #242628 !important; }

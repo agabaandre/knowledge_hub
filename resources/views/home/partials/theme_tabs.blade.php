@@ -58,7 +58,7 @@
         position: relative;
         overflow: hidden;
         width: 100%;
-        opacity: 0.8;
+        opacity: {{ $themeCardOpacityDefault }};
     }
 
     .theme-card::before {
@@ -185,7 +185,7 @@
 
     @keyframes fadeInUp {
         to {
-            opacity: 0.8;
+            opacity: {{ $themeCardOpacityDefault }};
             transform: translateY(0);
         }
     }

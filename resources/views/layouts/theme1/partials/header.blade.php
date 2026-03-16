@@ -58,8 +58,9 @@
                 <ul class="navbar-nav nav-underline gap-1 mx-auto">
                     <li class="nav-item"><a class="nav-link {{ request()->is('/') && !request()->is('records*') && !request()->is('forums*') && !request()->is('communities*') ? 'active' : '' }}" href="{{ url('/') }}">Home</a></li>
                     <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Browse</a>
+                        <a class="nav-link dropdown-toggle {{ (request()->is('records*') && !request()->has('tag')) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Browse</a>
                         <ul class="dropdown-menu dropdown-menu-lg">
+                            <li><a class="dropdown-item" href="{{ url('/health-topics') }}">Health Topics</a></li>
                             @foreach ($data_categories ?? [] as $category)
                                 @if($category->is_special ?? false)
                                     @auth
@@ -82,6 +83,30 @@
                             @else
                                 <li><a class="dropdown-item" href="{{ url('adminunits') }}">Administrative Units</a></li>
                             @endif
+                        </ul>
+                    </li>
+                    @php
+                        $filteredTags = isset($tags) ? $tags->filter(fn($tag) => $tag->is_health_emergency ?? false)->values() : collect();
+                    @endphp
+                    @if($filteredTags->isNotEmpty())
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->has('tag') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Health Emergencies</a>
+                        <ul class="dropdown-menu">
+                            @foreach($filteredTags as $tag)
+                                <li><a class="dropdown-item" href="{{ url('records') }}?tag={{ $tag->id }}">{{ $tag->tag_text }}</a></li>
+                            @endforeach
+                        </ul>
+                    </li>
+                    @endif
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle {{ request()->is('tools') || (isset($staticLinks) && count($staticLinks) > 0 && collect($staticLinks)->pluck('link')->contains(url()->current())) ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Key Links</a>
+                        <ul class="dropdown-menu">
+                            @if(isset($staticLinks) && count($staticLinks) > 0)
+                                @foreach($staticLinks as $link)
+                                    <li><a class="dropdown-item" href="{{ $link->link }}" @if($link->open_in_new_tab ?? false) target="_blank" rel="noopener" @endif>{{ $link->title }}</a></li>
+                                @endforeach
+                            @endif
+                            <li><a class="dropdown-item" href="{{ url('tools') }}">Tools</a></li>
                         </ul>
                     </li>
                     @php $counts = get_menu_counts(auth()->id()); @endphp
