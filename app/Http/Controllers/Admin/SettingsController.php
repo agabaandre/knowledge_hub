@@ -260,14 +260,16 @@ class SettingsController extends Controller
     public function importConfig(Request $request)
     {
         $request->validate([
-            'config_file' => 'required|file|mimes:xml|max:2048',
+            'config_file' => 'required|file|max:2048',
         ], [
-            'config_file.mimes' => 'The file must be an XML file (extension .xml).',
+            'config_file.required' => 'Please select a file to import.',
+            'config_file.file' => 'The uploaded value must be a file.',
+            'config_file.max' => 'The file may not be larger than 2 MB.',
         ]);
         $file = $request->file('config_file');
         $xml = file_get_contents($file->getRealPath());
-        if ($xml === false) {
-            return back()->with('alert-danger', 'Could not read the config file.');
+        if ($xml === false || trim($xml) === '') {
+            return back()->with('alert-danger', 'Could not read the config file or file is empty.');
         }
         try {
             $this->settingsRepo->importConfigFromXml($xml);

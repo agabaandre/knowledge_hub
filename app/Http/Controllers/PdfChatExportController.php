@@ -22,6 +22,10 @@ class PdfChatExportController extends Controller
      */
     private function markdownToHtml(string $text): string
     {
+        $text = trim($text);
+        if ($text === '') {
+            return '<p></p>';
+        }
         $s = htmlspecialchars($text, ENT_QUOTES, 'UTF-8');
         $s = preg_replace('/^### (.+)$/m', '<h3>$1</h3>', $s);
         $s = preg_replace('/^## (.+)$/m', '<h2>$1</h2>', $s);
@@ -54,7 +58,7 @@ class PdfChatExportController extends Controller
             $html .= '<p style="color: #6c757d; font-size: 0.875rem; margin-bottom: 1.5rem;">Full conversation export</p>';
             foreach ($request->all_messages as $msg) {
                 $role = $msg['role'] ?? 'assistant';
-                $content = $msg['content'] ?? '';
+                $content = isset($msg['content']) ? (string) $msg['content'] : '';
                 $label = $role === 'user' ? 'You' : 'Assistant';
                 $bg = $role === 'user' ? '#e7f1ff' : '#f8f9fa';
                 $html .= '<div style="margin-bottom: 1rem; padding: 0.75rem 1rem; background: ' . $bg . '; border-radius: 8px; border-left: 3px solid #0d6efd;">';
@@ -82,20 +86,25 @@ class PdfChatExportController extends Controller
             'title' => 'nullable|string|max:500',
             'content' => 'nullable|string',
             'all_messages' => 'nullable|array',
-            'all_messages.*.role' => 'string|in:user,assistant',
-            'all_messages.*.content' => 'string',
+            'all_messages.*.role' => 'nullable|string|in:user,assistant',
+            'all_messages.*.content' => 'nullable|string',
         ]);
         if (! $request->filled('content') && ! $request->filled('all_messages')) {
             return response()->json(['error' => 'No content to export.'], 422);
         }
 
         $html = $this->buildHtml($request);
-        $title = $request->input('title', 'Chat export');
+        $title = is_string($request->input('title')) ? trim($request->input('title')) : 'Chat export';
+        $title = $title !== '' ? $title : 'Chat export';
         $filename = preg_replace('/[^\pL\pN\s\-]/u', '', $title);
         $filename = preg_replace('/\s+/', '-', trim($filename)) ?: 'chat-export';
         $filename = substr($filename, 0, 80) . '.pdf';
 
         try {
+            $tempDir = storage_path('app/tmp');
+            if (! is_dir($tempDir)) {
+                @mkdir($tempDir, 0755, true);
+            }
             $mpdf = new Mpdf([
                 'mode' => 'utf-8',
                 'format' => 'A4',
@@ -103,13 +112,14 @@ class PdfChatExportController extends Controller
                 'margin_right' => 15,
                 'margin_top' => 16,
                 'margin_bottom' => 16,
+                'tempDir' => $tempDir,
             ]);
             $mpdf->SetTitle($title);
             $mpdf->WriteHTML($html);
-            return response()->streamDownload(function () use ($mpdf) {
-                echo $mpdf->Output('', 'S');
-            }, $filename, [
+            $pdfBlob = $mpdf->Output('', 'S');
+            return response($pdfBlob, 200, [
                 'Content-Type' => 'application/pdf',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]);
         } catch (\Throwable $e) {
             report($e);
@@ -120,20 +130,31 @@ class PdfChatExportController extends Controller
     /**
      * Export as Word (single content or all_messages).
      */
+    /**
+     * Safe HTML for PhpWord: strip problematic tags and ensure valid fragment.
+     */
+    private function safeHtmlForWord(string $html): string
+    {
+        $html = strip_tags($html, '<p><br><strong><em><b><i><ul><ol><li><h1><h2><h3><h4>');
+        $html = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $html);
+        return trim($html) !== '' ? $html : '<p>No content</p>';
+    }
+
     public function exportWord(Request $request)
     {
         $request->validate([
             'title' => 'nullable|string|max:500',
             'content' => 'nullable|string',
             'all_messages' => 'nullable|array',
-            'all_messages.*.role' => 'string|in:user,assistant',
-            'all_messages.*.content' => 'string',
+            'all_messages.*.role' => 'nullable|string|in:user,assistant',
+            'all_messages.*.content' => 'nullable|string',
         ]);
         if (! $request->filled('content') && ! $request->filled('all_messages')) {
             return response()->json(['error' => 'No content to export.'], 422);
         }
 
-        $title = $request->input('title', 'Chat export');
+        $title = is_string($request->input('title')) ? trim($request->input('title')) : 'Chat export';
+        $title = $title !== '' ? $title : 'Chat export';
         $filename = preg_replace('/[^\pL\pN\s\-]/u', '', $title);
         $filename = preg_replace('/\s+/', '-', trim($filename)) ?: 'chat-export';
         $filename = substr($filename, 0, 80) . '.docx';
@@ -142,32 +163,39 @@ class PdfChatExportController extends Controller
             $phpWord = new PhpWord();
             $section = $phpWord->addSection();
 
-            $section->addTitle(htmlspecialchars($title), 1);
+            $section->addTitle($title, 1);
 
             if ($request->has('all_messages') && is_array($request->all_messages)) {
                 foreach ($request->all_messages as $msg) {
                     $role = $msg['role'] ?? 'assistant';
-                    $content = $msg['content'] ?? '';
+                    $content = isset($msg['content']) ? (string) $msg['content'] : '';
                     $label = $role === 'user' ? 'You' : 'Assistant';
-                    $section->addText(htmlspecialchars($label), ['bold' => true, 'size' => 10]);
+                    $section->addText($label, ['bold' => true, 'size' => 10]);
                     $section->addTextBreak(1);
-                    PhpWordHtml::addHtml($section, $this->markdownToHtml($content));
+                    $html = $this->safeHtmlForWord($this->markdownToHtml($content));
+                    PhpWordHtml::addHtml($section, $html);
                     $section->addTextBreak(2);
                 }
             } else {
-                $content = $request->input('content', '');
-                PhpWordHtml::addHtml($section, $this->markdownToHtml($content));
+                $content = (string) $request->input('content', '');
+                $html = $this->safeHtmlForWord($this->markdownToHtml($content));
+                PhpWordHtml::addHtml($section, $html);
             }
 
             $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
-            $tempFile = tempnam(sys_get_temp_dir(), 'phpword');
+            $tempDir = storage_path('app/tmp');
+            if (! is_dir($tempDir)) {
+                @mkdir($tempDir, 0755, true);
+            }
+            $tempFile = $tempDir . '/phpword_' . uniqid('', true) . '.docx';
             $objWriter->save($tempFile);
 
-            return response()->streamDownload(function () use ($tempFile) {
-                echo file_get_contents($tempFile);
-                @unlink($tempFile);
-            }, $filename, [
+            $content = file_get_contents($tempFile);
+            @unlink($tempFile);
+
+            return response($content, 200, [
                 'Content-Type' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
             ]);
         } catch (\Throwable $e) {
             report($e);
