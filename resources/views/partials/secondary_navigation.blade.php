@@ -176,6 +176,13 @@
                 @endif
             </a>
             
+            <a href="{{ route('account.chats') }}" 
+               class="secondary-nav-link {{ request()->routeIs('account.chats') ? 'active' : '' }}"
+               title="My Chats">
+                <i class="fa fa-comment-dots"></i>
+                <span>My Chats</span>
+            </a>
+            
             <a href="{{ route('account.publish') }}" 
                class="secondary-nav-link {{ request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}"
                title="Publish a Resource">

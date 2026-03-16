@@ -39,6 +39,7 @@
                             <a href="{{ route('account.my-forums') }}" class="dropdown-item"><i class="fa fa-comments me-2"></i> My Forums</a>
                             <a href="{{ route('account.my-communities') }}" class="dropdown-item"><i class="fa fa-users me-2"></i> My Communities</a>
                             <a href="{{ route('account.favourites') }}" class="dropdown-item"><i class="fa fa-star me-2"></i> My Favourites</a>
+                            <a href="{{ route('account.chats') }}" class="dropdown-item"><i class="fa fa-comments me-2"></i> My Chats</a>
                             <a href="{{ route('account.publish') }}" class="dropdown-item"><i class="fa fa-plus me-2"></i> Publish resource</a>
                             <hr class="dropdown-divider">
                             <a href="{{ url('logout') }}" class="dropdown-item text-danger"><i class="fa fa-sign-out-alt me-2"></i> Logout</a>

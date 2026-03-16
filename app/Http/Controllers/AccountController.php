@@ -6,6 +6,8 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 use App\Models\AccessLevel;
+use App\Models\PdfChatSession;
+
 class AccountController extends Controller
 {
     private $publicationsRepo,$usersRepo;
@@ -365,6 +367,63 @@ class AccountController extends Controller
         $this->publicationsRepo->delete($request->id);
     }
 
+    /**
+     * List user's PDF chat sessions grouped by document (publication).
+     */
+    public function chats(Request $request)
+    {
+        $userId = auth()->id();
+        $sessions = PdfChatSession::where('user_id', $userId)
+            ->with(['publication:id,title', 'attachment:id,publication_id,file'])
+            ->orderBy('updated_at', 'desc')
+            ->get();
 
+        // Group by publication_id + attachment_id (each doc/attachment = one "document")
+        $grouped = [];
+        foreach ($sessions as $session) {
+            $pub = $session->publication;
+            $key = $session->publication_id . '-' . ($session->attachment_id ?? 'main');
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'publication_id' => $session->publication_id,
+                    'attachment_id'  => $session->attachment_id,
+                    'title'          => $pub ? $pub->title : 'Document #' . $session->publication_id,
+                    'sessions'       => [],
+                ];
+            }
+            $grouped[$key]['sessions'][] = [
+                'id'           => $session->id,
+                'message_count' => $session->messages()->count(),
+                'created_at'   => $session->created_at,
+                'updated_at'   => $session->updated_at,
+            ];
+        }
+
+        $data['chatsByDocument'] = array_values($grouped);
+        return view('account.chats', $data);
+    }
+
+    /**
+     * Delete a PDF chat session (and its messages). User must own the session.
+     */
+    public function deleteChat(Request $request)
+    {
+        $request->validate(['session_id' => 'required|integer']);
+        $session = PdfChatSession::where('id', $request->session_id)
+            ->where('user_id', auth()->id())
+            ->first();
+        if (!$session) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => 'Chat not found or access denied.'], 404);
+            }
+            return redirect()->route('account.chats')->with('alert', 'Chat not found or access denied.')->with('alert_class', 'danger');
+        }
+        $session->messages()->delete();
+        $session->delete();
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true]);
+        }
+        return redirect()->route('account.chats')->with('alert', 'Chat deleted.')->with('alert_class', 'success');
+    }
 
 }

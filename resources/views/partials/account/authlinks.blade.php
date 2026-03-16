@@ -56,6 +56,11 @@
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
+                                       <a href="{{ route('account.chats') }}">
+                                           <i class="fa fa-comments mr-1"></i> My Chats
+                                       </a>
+                                   </li>
+                                   <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.publish') }}">
                                            <i class="fa fa-plus mr-1"></i>Publish a resource
                                        </a>

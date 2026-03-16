@@ -77,7 +77,7 @@
     var assistantCount = messagesEl().querySelectorAll('.pdf-chat-msg.assistant').length;
     var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder && assistantCount >= 1;
     var actionsHtml = showExportOnResponse
-      ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button></div>'
+      ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>'
       : '';
     el.innerHTML = '<div class="role-label">' + escapeHtml(label) + '</div><div class="content">' + contentHtml + '</div>' + actionsHtml;
     if (isStreamingPlaceholder) {
@@ -96,6 +96,12 @@
         var msg = this.closest('.pdf-chat-msg');
         var c = msg && msg.querySelector('.content');
         exportContent(c ? (c.innerText || c.textContent || '') : '', 'word');
+      });
+      el.querySelector('.pdf-chat-share-msg').addEventListener('click', function() {
+        var msg = this.closest('.pdf-chat-msg');
+        var c = msg && msg.querySelector('.content');
+        var text = c ? (c.innerText || c.textContent || '').trim() : '';
+        shareContent(text, getDocumentTitle(), this);
       });
     }
     return contentEl;
@@ -139,19 +145,90 @@
     var assistants = messagesEl().querySelectorAll('.pdf-chat-msg.assistant');
     var isFirstAssistant = msgDiv && Array.prototype.indexOf.call(assistants, msgDiv) === 0;
     if (msgDiv && text && !isFirstAssistant) {
-      var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button></div>';
+      var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>';
       var wrap = document.createElement('div');
       wrap.innerHTML = btn;
       msgDiv.appendChild(wrap.firstChild);
       var contentForExport = text;
+      var docTitle = getDocumentTitle();
       msgDiv.querySelector('.pdf-chat-export-pdf').addEventListener('click', function() { exportContent(contentForExport, 'pdf'); });
       msgDiv.querySelector('.pdf-chat-export-word').addEventListener('click', function() { exportContent(contentForExport, 'word'); });
+      msgDiv.querySelector('.pdf-chat-share-msg').addEventListener('click', function() { shareContent(contentForExport, docTitle, this); });
     }
   }
 
   function getDocumentTitle() {
     var el = document.getElementById('pdf-chat-doc-title');
     return (el && el.textContent) ? el.textContent.trim() : 'Chat export';
+  }
+
+  function shareContent(text, title, anchorEl) {
+    var url = window.location.href;
+    var shareText = (text && text.length > 200) ? text.substring(0, 197) + '...' : (text || '');
+    var fullBody = (title ? title + '\n\n' : '') + shareText + (shareText ? '\n\n' : '') + url;
+
+    function tryNativeShare() {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        return navigator.share({
+          title: title || 'Chat export',
+          text: shareText || title || 'View this chat',
+          url: url
+        }).then(function() { return true; }).catch(function() { return false; });
+      }
+      return Promise.resolve(false);
+    }
+
+    function openShareMenu() {
+      var existing = document.getElementById('pdf-chat-share-dropdown');
+      if (existing) existing.remove();
+
+      var drop = document.createElement('div');
+      drop.id = 'pdf-chat-share-dropdown';
+      drop.className = 'pdf-chat-share-dropdown';
+
+      var twitterText = (title ? title + ' ' : '') + url;
+      if (shareText) twitterText = (shareText.length > 100 ? shareText.substring(0, 97) + '...' : shareText) + ' ' + url;
+      var twitterUrl = 'https://twitter.com/intent/tweet?text=' + encodeURIComponent(twitterText);
+      var linkedInUrl = 'https://www.linkedin.com/sharing/share-offsite/?url=' + encodeURIComponent(url);
+      var facebookUrl = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url);
+      var mailUrl = 'mailto:?subject=' + encodeURIComponent(title || 'Chat export') + '&body=' + encodeURIComponent(fullBody);
+
+      drop.innerHTML =
+        '<a href="' + twitterUrl + '" target="_blank" rel="noopener" title="Share on X (Twitter)"><i class="fab fa-twitter"></i> X (Twitter)</a>' +
+        '<a href="' + linkedInUrl + '" target="_blank" rel="noopener" title="Share on LinkedIn"><i class="fab fa-linkedin"></i> LinkedIn</a>' +
+        '<a href="' + facebookUrl + '" target="_blank" rel="noopener" title="Share on Facebook"><i class="fab fa-facebook"></i> Facebook</a>' +
+        '<button type="button" class="pdf-chat-share-copy" title="Copy link and text"><i class="fa fa-copy"></i> Copy</button>' +
+        '<a href="' + mailUrl + '" title="Email"><i class="fa fa-envelope"></i> Email</a>';
+
+      document.body.appendChild(drop);
+
+      var rect = anchorEl.getBoundingClientRect();
+      drop.style.position = 'fixed';
+      drop.style.left = Math.max(8, Math.min(rect.left, window.innerWidth - 200)) + 'px';
+      drop.style.top = (rect.bottom + 4) + 'px';
+
+      drop.querySelector('.pdf-chat-share-copy').addEventListener('click', function() {
+        try {
+          navigator.clipboard.writeText(fullBody);
+          var t = this.innerHTML; this.innerHTML = '<i class="fa fa-check"></i> Copied'; setTimeout(function() { this.innerHTML = t; }.bind(this), 1500);
+        } catch (e) { alert('Copy failed.'); }
+      });
+
+      function closeMenu() {
+        drop.remove();
+        document.removeEventListener('click', closeMenu);
+      }
+      setTimeout(function() { document.addEventListener('click', closeMenu); }, 0);
+    }
+
+    tryNativeShare().then(function(used) {
+      if (!used) openShareMenu();
+    });
+  }
+
+  function shareConversation() {
+    var title = getDocumentTitle();
+    shareContent('', title, document.getElementById('pdf-chat-share-all'));
   }
 
   function getAllMessagesForExport() {
@@ -333,8 +410,10 @@
     var input = document.getElementById('pdf-chat-input');
     var exportAllPdf = document.getElementById('pdf-chat-export-all-pdf');
     var exportAllWord = document.getElementById('pdf-chat-export-all-word');
+    var shareAllBtn = document.getElementById('pdf-chat-share-all');
     if (exportAllPdf) exportAllPdf.addEventListener('click', function() { exportAll('pdf'); });
     if (exportAllWord) exportAllWord.addEventListener('click', function() { exportAll('word'); });
+    if (shareAllBtn) shareAllBtn.addEventListener('click', function(e) { e.stopPropagation(); shareConversation(); });
     if (sendBtn) sendBtn.addEventListener('click', sendMessage);
     if (input) {
       input.addEventListener('keydown', function (e) {

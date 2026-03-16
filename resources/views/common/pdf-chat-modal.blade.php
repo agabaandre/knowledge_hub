@@ -41,11 +41,42 @@
   display: flex;
   gap: 0.35rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 .pdf-chat-msg.assistant .pdf-chat-msg-actions .btn {
   font-size: 0.75rem;
   padding: 0.25rem 0.5rem;
 }
+.pdf-chat-share-dropdown {
+  position: absolute;
+  z-index: 1060;
+  background: #fff;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  padding: 0.35rem 0;
+  min-width: 180px;
+}
+.pdf-chat-share-dropdown a, .pdf-chat-share-dropdown button {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0.4rem 0.75rem;
+  border: none;
+  background: none;
+  color: #212529;
+  font-size: 0.875rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+.pdf-chat-share-dropdown a:hover, .pdf-chat-share-dropdown button:hover {
+  background: #f8f9fa;
+}
+.pdf-chat-share-dropdown a i, .pdf-chat-share-dropdown button i {
+  margin-right: 0.5rem;
+  width: 1.1em;
+}
+.pdf-chat-msg-actions .dropdown-wrap { position: relative; display: inline-block; }
 .pdf-chat-msg.assistant .content {
   white-space: normal;
 }
@@ -131,6 +162,9 @@
             </button>
             <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-export-all-word" title="Export full conversation as Word">
               <i class="fa fa-file-word"></i> Export all (Word)
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="pdf-chat-share-all" title="Share via social or copy link">
+              <i class="fa fa-share-alt"></i> Share
             </button>
           </div>
         </div>

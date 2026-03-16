@@ -192,6 +192,8 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
     Route::post("/secureme", [AuthController::class, 'update_password'])->name('account.auth_update');
     Route::get("/my-forums", [ForumsController::class, 'myForums'])->name('account.my-forums');
     Route::get("/my-communities", [CommunitiesController::class, 'myCommunities'])->name('account.my-communities');
+    Route::get("/chats", [AccountController::class, 'chats'])->name('account.chats');
+    Route::post("/chats/delete", [AccountController::class, 'deleteChat'])->name('account.chats.delete');
 
 });
 
