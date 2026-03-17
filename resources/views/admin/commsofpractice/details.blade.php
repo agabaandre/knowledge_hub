@@ -537,21 +537,49 @@
             });
         });
 
+        // Pre-fill invitation form and auto-open modal when URL has email (and optionally community_id)
+        (function() {
+            var params = new URLSearchParams(window.location.search);
+            var emailParam = params.get('email');
+            var communityIdParam = params.get('community_id');
+            if (emailParam && emailParam.trim() !== '') {
+                $('#invitationEmail').val(emailParam.trim().replace(/%2C/gi, ', '));
+                if (communityIdParam) {
+                    $('#sendInvitationForm').find('input[name="community_id"]').val(communityIdParam);
+                }
+                $('#sendInvitationModal').modal('show');
+            }
+        })();
+
         // Handle send invitation form
         $('#sendInvitationForm').on('submit', function(e) {
             e.preventDefault();
-            
+            var $form = $(this);
+            var $btn = $form.find('button[type="submit"]');
+            var communityId = $form.find('input[name="community_id"]').val();
+            var emailVal = $('#invitationEmail').val().trim();
+            if (!communityId || !emailVal) {
+                alert('Please enter at least one email address.');
+                return;
+            }
+            $btn.prop('disabled', true).text('Sending...');
             $.ajax({
                 url: '{{ route('admin.commsofpractice.sendInvitation') }}',
                 method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
                 data: {
                     _token: '{{ csrf_token() }}',
-                    community_id: $('#sendInvitationForm').find('input[name="community_id"]').val(),
-                    email: $('#invitationEmail').val().trim()
+                    community_id: communityId,
+                    email: emailVal
                 },
                 success: function(response) {
                     $('#sendInvitationModal').modal('hide');
-                    $('#sendInvitationForm')[0].reset();
+                    $form[0].reset();
+                    $form.find('input[name="community_id"]').val('{{ $community->id }}');
                     alert(response.message || 'Invitation(s) sent.');
                     location.reload();
                 },
@@ -559,8 +587,15 @@
                     var message = 'An error occurred. Please try again.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         message = xhr.responseJSON.message;
+                    } else if (xhr.status === 419) {
+                        message = 'Session expired. Please refresh the page and try again.';
+                    } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        message = Object.values(xhr.responseJSON.errors).flat().join(' ');
                     }
                     alert(message);
+                },
+                complete: function() {
+                    $btn.prop('disabled', false).text('Send Invitation(s)');
                 }
             });
         });
