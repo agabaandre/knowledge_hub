@@ -8,6 +8,9 @@ class AddAttachmentIdToPdfChatSessionsTable extends Migration
 {
     public function up()
     {
+        if (Schema::hasColumn('pdf_chat_sessions', 'attachment_id')) {
+            return;
+        }
         Schema::table('pdf_chat_sessions', function (Blueprint $table) {
             $table->unsignedBigInteger('attachment_id')->nullable()->after('publication_id');
             $table->index(['user_id', 'publication_id', 'attachment_id']);
