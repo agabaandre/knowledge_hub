@@ -54,6 +54,16 @@
         padding: 0.4rem 0.9rem;
         border-radius: 6px;
     }
+    /* Primary buttons use site primary color */
+    .chats-doc-group .btn-primary,
+    .chats-session-actions .btn-primary {
+        background-color: var(--theme-color-primary, #119A48) !important;
+        border-color: var(--theme-color-primary, #119A48) !important;
+    }
+    .chats-doc-group .btn-primary:hover,
+    .chats-session-actions .btn-primary:hover {
+        filter: brightness(1.08);
+    }
     .chats-empty {
         text-align: center;
         padding: 3.5rem 1.5rem;
