@@ -131,13 +131,27 @@ class PdfChatExportController extends Controller
      * Export as Word (single content or all_messages).
      */
     /**
-     * Safe HTML for PhpWord: strip problematic tags and ensure valid fragment.
+     * Safe HTML for PhpWord: strip problematic tags, escape ampersands, ensure valid fragment.
      */
     private function safeHtmlForWord(string $html): string
     {
-        $html = strip_tags($html, '<p><br><strong><em><b><i><ul><ol><li><h1><h2><h3><h4>');
+        $html = strip_tags($html, '<p><br><strong><em><b><i><ul><ol><li><h1><h2><h3><h4><hr>');
         $html = preg_replace('/<script\b[^>]*>.*?<\/script>/is', '', $html);
+        $html = preg_replace('/&(?!amp;|lt;|gt;|quot;|#\d+;)/', '&amp;', $html);
         return trim($html) !== '' ? $html : '<p>No content</p>';
+    }
+
+    /**
+     * Add HTML to PhpWord section with fallback to plain text if addHtml fails.
+     */
+    private function addHtmlToSection($section, string $html): void
+    {
+        try {
+            PhpWordHtml::addHtml($section, $html);
+        } catch (\Throwable $e) {
+            $plain = trim(strip_tags(str_replace(['<br>', '<br/>', '<br />'], "\n", $html)));
+            $section->addText($plain !== '' ? $plain : ' ');
+        }
     }
 
     public function exportWord(Request $request)
@@ -163,7 +177,8 @@ class PdfChatExportController extends Controller
             $phpWord = new PhpWord();
             $section = $phpWord->addSection();
 
-            $section->addTitle($title, 1);
+            $section->addText($title, ['bold' => true, 'size' => 16]);
+            $section->addTextBreak(1);
 
             if ($request->has('all_messages') && is_array($request->all_messages)) {
                 foreach ($request->all_messages as $msg) {
@@ -173,13 +188,13 @@ class PdfChatExportController extends Controller
                     $section->addText($label, ['bold' => true, 'size' => 10]);
                     $section->addTextBreak(1);
                     $html = $this->safeHtmlForWord($this->markdownToHtml($content));
-                    PhpWordHtml::addHtml($section, $html);
+                    $this->addHtmlToSection($section, $html);
                     $section->addTextBreak(2);
                 }
             } else {
                 $content = (string) $request->input('content', '');
                 $html = $this->safeHtmlForWord($this->markdownToHtml($content));
-                PhpWordHtml::addHtml($section, $html);
+                $this->addHtmlToSection($section, $html);
             }
 
             $objWriter = IOFactory::createWriter($phpWord, 'Word2007');
