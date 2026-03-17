@@ -359,6 +359,7 @@ class CommsOfPracticeController extends Controller
     public function memberAction(Request $request) {
         $request->validate([
             'action' => 'required|in:approve,reject',
+            'community_id' => 'required|integer|exists:community_of_practices,id',
             'member_id' => 'nullable|integer',
             'member_ids' => 'nullable|array',
             'member_ids.*' => 'integer',

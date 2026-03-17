@@ -94,7 +94,8 @@
                         <td style="padding: 20px 0; text-align: center;">
                             <p style="margin: 0; font-size: 12px; color: #94a3b8;">
                                 If you have any questions, please contact us at 
-                                <a href="mailto:{{ config('emails.username', 'support@africacdc.org') }}" style="color: #119A48; text-decoration: none;">{{ config('emails.username', 'support@africacdc.org') }}</a>
+                                @php $contactEmail = settings()->email ?? config('emails.username', 'support@africacdc.org'); @endphp
+                                <a href="mailto:{{ $contactEmail }}" style="color: #119A48; text-decoration: none;">{{ $contactEmail }}</a>
                             </p>
                         </td>
                     </tr>

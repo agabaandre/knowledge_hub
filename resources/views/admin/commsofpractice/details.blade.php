@@ -241,7 +241,7 @@
                                         </td>
                                         <td>
                                             @if(!$invitation->responded_at)
-                                                <button type="button" class="btn btn-outline-primary btn-sm js-resend-invitation" data-invitation-id="{{ $invitation->id }}" title="Resend invitation">
+                                                <button type="button" class="btn btn-outline-primary btn-sm js-resend-invitation" data-invitation-id="{{ $invitation->id }}" data-community-id="{{ $community->id }}" title="Resend invitation">
                                                     <i class="fa fa-redo mr-1"></i>Resend
                                                 </button>
                                             @else
@@ -485,7 +485,7 @@
             updateBulkButtons();
         });
 
-        $('#select-all-pending').on('change', function() {
+        $(document).on('change', '#select-all-pending', function() {
             bulkSelectAll = this.checked;
             $('#members-table .member-pending-cb').each(function() {
                 this.checked = bulkSelectAll;
@@ -525,22 +525,29 @@
             $('#approvalModal').modal('show');
         }
 
-        $('#bulk-approve-btn').on('click', function() { doBulkAction('approve'); });
-        $('#bulk-reject-btn').on('click', function() { doBulkAction('reject'); });
+        $(document).on('click', '#bulk-approve-btn', function(e) { e.preventDefault(); doBulkAction('approve'); });
+        $(document).on('click', '#bulk-reject-btn', function(e) { e.preventDefault(); doBulkAction('reject'); });
 
         // Resend invitation
-        $(document).on('click', '.js-resend-invitation', function() {
+        $(document).on('click', '.js-resend-invitation', function(e) {
+            e.preventDefault();
             var btn = $(this);
             var invitationId = btn.data('invitation-id');
-            if (!invitationId) return;
+            var commId = btn.data('community-id') || communityId;
+            if (!invitationId) { alert('Invalid invitation.'); return; }
             if (!confirm('Resend this invitation? A new link will be sent and the previous link will no longer work.')) return;
             btn.prop('disabled', true);
             $.ajax({
                 url: '{{ route('admin.commsofpractice.resendInvitation') }}',
                 method: 'POST',
-                data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: communityId },
+                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: commId },
                 success: function(response) { alert(response.message || 'Invitation resent.'); location.reload(); },
-                error: function(xhr) { alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to resend.'); btn.prop('disabled', false); }
+                error: function(xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (xhr.status === 419 ? 'Session expired. Please refresh and try again.' : 'Failed to resend.');
+                    alert(msg);
+                    btn.prop('disabled', false);
+                }
             });
         });
 
