@@ -68,18 +68,43 @@ class MoodleService
 
     protected function storeCourse($courseData)
     {
+        $fullname = $courseData['displayname'] ?? $courseData['fullname'] ?? '';
+
+        if (config('moodle.exclude_demo_courses', false) && $this->isDemoCourse($fullname)) {
+            $existing = Course::where('moodle_id', $courseData['id'])->first();
+            if ($existing) {
+                $existing->update(['is_active' => false]);
+            }
+            return;
+        }
+
         $coverImage = $this->fetchCourseCoverImage($courseData['id']);
-       
+
         Course::updateOrCreate(
             ['moodle_id' => $courseData['id']],
             [
-                'fullname' => $courseData['displayname'],
-                'shortname' => $courseData['shortname'],
-                'category_id' => $courseData['categoryid'],
+                'fullname' => $fullname,
+                'shortname' => $courseData['shortname'] ?? '',
+                'category_id' => $courseData['categoryid'] ?? 0,
                 'summary' => $courseData['summary'] ?? null,
-                'cover_image' => $coverImage
+                'cover_image' => $coverImage,
+                'is_active' => true,
             ]
         );
+    }
+
+    /**
+     * Check if course fullname matches demo/excluded patterns (e.g. for production).
+     */
+    protected function isDemoCourse(string $fullname): bool
+    {
+        $patterns = config('moodle.exclude_course_name_patterns', []);
+        foreach ($patterns as $pattern) {
+            if (stripos($fullname, $pattern) !== false) {
+                return true;
+            }
+        }
+        return false;
     }
 
     protected function fetchCourseCoverImage($courseId)

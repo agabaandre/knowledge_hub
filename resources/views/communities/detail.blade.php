@@ -157,6 +157,42 @@
         color: #64748b;
         margin-top: 0.5rem;
     }
+
+    /* Dark mode: community detail page */
+    html[data-bs-theme="dark"] .community-tabs { border-bottom-color: #3e4348; }
+    html[data-bs-theme="dark"] .nav-tabs .nav-link { color: #9ca3af; }
+    html[data-bs-theme="dark"] .nav-tabs .nav-link.active { color: var(--theme-color-primary, #119A48); border-bottom-color: var(--theme-color-primary, #119A48); }
+    html[data-bs-theme="dark"] .nav-tabs .nav-link:hover { color: var(--theme-color-primary, #119A48); border-bottom-color: #3e4348; }
+    html[data-bs-theme="dark"] .sidebar-card {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .sidebar-card h5 { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .sidebar-card .text-muted { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .publication-item,
+    html[data-bs-theme="dark"] .forum-item {
+        border-bottom-color: #3e4348 !important;
+    }
+    html[data-bs-theme="dark"] .publication-item a,
+    html[data-bs-theme="dark"] .forum-item a { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .publication-item a:hover,
+    html[data-bs-theme="dark"] .forum-item a:hover { color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .member-item { border-bottom-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .member-name { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .member-title { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .community-summary { border-bottom-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .community-summary h6 a { color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .community-meta { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .community-detail-page .card { background: #242628 !important; border-color: #3e4348 !important; color: #e4e6eb; }
+    html[data-bs-theme="dark"] .community-detail-page .card-title a.text-dark { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .community-detail-page .card-title a.text-dark:hover { color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .community-detail-page .card .text-muted { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .community-detail-page .alert-info { background: #2d3136 !important; border-color: #3e4348 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .community-detail-page .badge-note-block { background: #2d3136 !important; border-radius: 4px; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .community-detail-page .badge-note-block .text-muted { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .community-detail-page .badge-type-block { background: #2d3136 !important; }
+    html[data-bs-theme="dark"] .community-detail-page .badge-type-block .small.text-muted { color: #9ca3af !important; }
 </style>
 @endsection
 
@@ -193,7 +229,7 @@
 {{-- Secondary Navigation Below Banner --}}
 @include('partials.secondary_navigation', ['forceShow' => true])
 
-<div class="container">
+<div class="container community-detail-page">
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8">
@@ -212,7 +248,7 @@
                 <div class="tab-pane fade show active" id="publications" role="tabpanel">
                     @if($publications->count() > 0)
                         @foreach($publications as $publication)
-                            <div class="card mb-3">
+                            <div class="card mb-3 community-detail-card">
                                 <div class="card-body">
                                     <h5 class="card-title">
                                         <a href="{{ url('records/resource') }}?id={{ $publication->id }}" class="text-dark">
@@ -351,9 +387,9 @@
             <div class="sidebar-card">
                 <h5><i class="fa fa-trophy theme-text mr-2"></i>Contribution Badges</h5>
                 <p class="small text-muted mb-3">Earn badges based on your monthly contributions (publications, forum posts, and comments):</p>
-                @if(isset($badgeTypes) && $badgeTypes->count() > 0)
-                    @foreach($badgeTypes as $badgeType)
-                        <div class="mb-3 p-2" style="border-left: 3px solid {{ $badgeType->badge_color }}; background: {{ $badgeType->badge_color }}10; border-radius: 4px;">
+                        @if(isset($badgeTypes) && $badgeTypes->count() > 0)
+                        @foreach($badgeTypes as $badgeType)
+                        <div class="mb-3 p-2 badge-type-block" style="border-left: 3px solid {{ $badgeType->badge_color }}; background: {{ $badgeType->badge_color }}10; border-radius: 4px;">
                             <div class="d-flex align-items-center mb-1">
                                 <span style="font-size: 1.2em; margin-right: 8px;">
                                     @if($badgeType->slug === 'silver')🥈
@@ -375,7 +411,7 @@
                             @endif
                         </div>
                     @endforeach
-                    <div class="mt-3 p-2" style="background: #f8f9fa; border-radius: 4px; font-size: 0.85rem;">
+                    <div class="mt-3 p-2 badge-note-block" style="background: #f8f9fa; border-radius: 4px; font-size: 0.85rem;">
                         <strong>Note:</strong> Badges are awarded monthly based on your contributions. The system automatically calculates and awards badges at the end of each month.
                     </div>
                 @endif

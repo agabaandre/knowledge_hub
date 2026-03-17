@@ -68,6 +68,51 @@
             top: 0 !important;
         }
     }
+
+    /* Dark mode: favourites sidebar – Recommended by Preferences & Related by Favorite Tags */
+    html[data-bs-theme="dark"] .favorites-sidebar .card {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .card-header {
+        background: #2d3136 !important;
+        border-bottom-color: #3e4348 !important;
+        color: #e4e6eb !important;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .card-header h5,
+    html[data-bs-theme="dark"] .favorites-sidebar .card-header .mb-0 { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .favorites-sidebar .card-body {
+        background: #242628 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .card-footer {
+        background: #2d3136 !important;
+        border-top-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb !important;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item:hover {
+        background: #2d3136 !important;
+        border-left-color: var(--theme-color-primary, #119A48) !important;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item h6 { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item:hover h6 { color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item .text-muted,
+    html[data-bs-theme="dark"] .favorites-sidebar .list-group-item small { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .favorites-sidebar .btn-outline-primary {
+        border-color: #3e4348 !important;
+        color: #e4e6eb !important;
+    }
+    html[data-bs-theme="dark"] .favorites-sidebar .btn-outline-primary:hover {
+        background: rgba(17, 154, 72, 0.2) !important;
+        border-color: var(--theme-color-primary, #119A48) !important;
+        color: var(--theme-color-primary, #119A48) !important;
+    }
 </style>
 @endsection
 

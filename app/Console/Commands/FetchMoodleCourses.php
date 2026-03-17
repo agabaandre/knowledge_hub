@@ -20,7 +20,12 @@ class FetchMoodleCourses extends Command
 
     public function handle()
     {
+        if (!config('moodle.sync_enabled', true)) {
+            $this->warn('Moodle course sync is disabled (MOODLE_SYNC_ENABLED=false). Skipping.');
+            return 0;
+        }
         $this->moodleService->fetchAndStoreCourses();
         $this->info('Courses and categories fetched and stored successfully.');
+        return 0;
     }
 }

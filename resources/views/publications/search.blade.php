@@ -133,7 +133,7 @@
                                                     <span class="mr-3"><i class="fa fa-comments mr-1"></i>{{ $forum->total_comments ?? 0 }} Comments</span>
                                                     <span><i class="fa fa-eye mr-1"></i>{{ $forum->views ?? 0 }} Views</span>
                                                 </div>
-                                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-primary mt-2">
                                                     <i class="fa fa-arrow-right mr-1"></i>View Discussion
                                                 </a>
                                             </div>
@@ -142,7 +142,7 @@
                                     @endforeach
                                 </div>
                                 <p class="mb-0 mt-2">
-                                    <a href="{{ url('forums') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-secondary">View all discussions</a>
+                                    <a href="{{ url('forums') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-secondary">View all discussions</a>
                                 </p>
                             </div>
                             @endif
@@ -172,7 +172,7 @@
                                                     <span class="mr-3"><i class="fa fa-globe mr-1"></i>{{ $community->region->name ?? '' }}</span>
                                                     @endif
                                                 </div>
-                                                <a href="{{ url('communities/detail/' . $community->id) }}" class="btn btn-sm btn-outline-primary mt-2">
+                                                <a href="{{ url('communities/detail/' . $community->id) }}" class="btn btn-sm btn-primary mt-2">
                                                     <i class="fa fa-arrow-right mr-1"></i>View Community
                                                 </a>
                                             </div>
@@ -181,7 +181,7 @@
                                     @endforeach
                                 </div>
                                 <p class="mb-0 mt-2">
-                                    <a href="{{ url('communities') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-secondary">View all communities</a>
+                                    <a href="{{ url('communities') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-secondary">View all communities</a>
                                 </p>
                             </div>
                             @endif
@@ -215,10 +215,11 @@
 
                 <div class="col-lg-4">
                     <style>
-                        .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
+                        .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.5rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
                         .sidebar-content h5.popular-tags-title{margin-bottom:10px;font-size:15px;font-weight:500;text-transform:capitalize;color:#2d3748}
-                        .sidebar-content .btn-outline-primary{color:var(--theme-color-primary, #119A48);border-color:var(--theme-color-primary, #119A48)}
-                        .sidebar-content .btn-outline-primary:hover{background:var(--theme-color-primary, #119A48);color:#fff}
+                        .sidebar-content .btn-primary{background-color:var(--theme-color-primary, #119A48);border-color:var(--theme-color-primary, #119A48);font-weight:500;border-radius:0.375rem}
+                        .sidebar-content .btn-primary:hover{background-color:var(--theme-color-primary, #0d7a38);border-color:var(--theme-color-primary, #0d7a38);filter:brightness(1.05)}
+                        .sidebar-content .btn-secondary{font-weight:500;border-radius:0.375rem}
                         .sidebar-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
                         .sidebar-tag-pill{display:inline-block;padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:500;color:#ffffff !important;text-decoration:none;border-radius:0.25rem;transition:all 0.2s ease;white-space:nowrap;background-color:var(--theme-color-primary, #119A48) !important;border:1px solid rgba(17,154,72,0.3)}
                         .sidebar-tag-pill:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(17,154,72,0.3);color:#ffffff !important;text-decoration:none;background-color:var(--theme-color-primary, #119A48) !important}
@@ -286,7 +287,7 @@
                         </div>
                       </div>
                       @endforeach
-                      <a href="{{ url('records') }}" class="btn btn-sm btn-outline-primary btn-block mt-2">View All Resources</a>
+                      <a href="{{ url('records') }}" class="btn btn-sm btn-primary w-100 mt-2">View All Resources</a>
                     </div>
                     @endif
 
@@ -317,7 +318,7 @@
                         </div>
                       </div>
                       @endforeach
-                      <a href="{{ url('records') }}" class="btn btn-sm btn-outline-primary btn-block mt-2">View All Publications</a>
+                      <a href="{{ url('records') }}" class="btn btn-sm btn-primary w-100 mt-2">View All Publications</a>
                     </div>
                     @endif
                 </div>

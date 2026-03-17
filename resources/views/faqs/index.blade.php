@@ -157,6 +157,41 @@
             padding: 1rem;
         }
     }
+
+    /* Dark mode: FAQs page */
+    html[data-bs-theme="dark"] .faq-search-input {
+        background: #2d3136 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb !important;
+    }
+    html[data-bs-theme="dark"] .faq-search-input::placeholder { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .faq-search-input:focus { border-color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .faq-item {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+    }
+    html[data-bs-theme="dark"] .faq-item:hover { border-color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .faq-item.active { border-color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .faq-question {
+        background: #2d3136 !important;
+    }
+    html[data-bs-theme="dark"] .faq-item.active .faq-question {
+        background: rgba(17, 154, 72, 0.15) !important;
+        border-bottom-color: #3e4348 !important;
+    }
+    html[data-bs-theme="dark"] .faq-question:hover { background: rgba(17, 154, 72, 0.12) !important; }
+    html[data-bs-theme="dark"] .faq-question-text { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .faq-answer-content { color: #d1d5db !important; }
+    html[data-bs-theme="dark"] .faq-answer-content a { color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .no-results { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .no-results h3,
+    html[data-bs-theme="dark"] .no-results p { color: #d1d5db !important; }
+    html[data-bs-theme="dark"] .no-results i { color: #6b7280 !important; }
+    html[data-bs-theme="dark"] .faqs-stats { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .faqs-container .pagination,
+    html[data-bs-theme="dark"] .faqs-container .page-link { background: #242628 !important; border-color: #3e4348 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .faqs-container .page-item.active .page-link { background: var(--theme-color-primary, #119A48) !important; border-color: var(--theme-color-primary, #119A48) !important; color: #fff !important; }
+    html[data-bs-theme="dark"] .faqs-container .page-link:hover { background: #3e4348 !important; border-color: #4b5262 !important; color: #e4e6eb !important; }
 </style>
 @endsection
 

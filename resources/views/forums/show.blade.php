@@ -904,6 +904,109 @@
             gap: 0.5rem;
         }
     }
+
+    /* Dark mode: forum thread page */
+    html[data-bs-theme="dark"] .forum-thread-wrapper { background: #1a1d21 !important; }
+    html[data-bs-theme="dark"] .forum-post-card {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .forum-author-name { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .forum-post-time { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .forum-title { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .forum-content { color: #d1d5db !important; }
+    html[data-bs-theme="dark"] .forum-actions { border-top-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-action-btn { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .forum-action-btn:hover { color: var(--theme-color-primary, #119A48) !important; background: rgba(17, 154, 72, 0.15) !important; }
+    html[data-bs-theme="dark"] .forum-author-avatar-inline i { background: #2d3136 !important; color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comments-header { color: #e4e6eb !important; border-bottom-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .comment-item { border-color: transparent; }
+    html[data-bs-theme="dark"] .comment-avatar { border-color: #3e4348 !important; background: #2d3136 !important; }
+    html[data-bs-theme="dark"] .comment-avatar i { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comment-content {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .comment-content:hover { border-color: #4b5262 !important; box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important; }
+    html[data-bs-theme="dark"] .comment-author { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .comment-time { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comment-text { color: #d1d5db !important; }
+    html[data-bs-theme="dark"] .comment-actions { border-top-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .comment-action-btn { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comment-action-btn:hover { color: var(--theme-color-primary, #119A48) !important; background: rgba(17, 154, 72, 0.15) !important; }
+    html[data-bs-theme="dark"] .comment-attachment-file {
+        background: #2d3136 !important;
+        border-color: #3e4348 !important;
+        color: #d1d5db !important;
+    }
+    html[data-bs-theme="dark"] .comment-attachment-file:hover { border-color: var(--theme-color-primary, #119A48) !important; color: var(--theme-color-primary, #119A48) !important; background: rgba(17, 154, 72, 0.1) !important; }
+    html[data-bs-theme="dark"] .comment-attachment-img { border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .comment-form-card {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .comment-form-header { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .comment-input-avatar { border-color: #3e4348 !important; background: #2d3136 !important; }
+    html[data-bs-theme="dark"] .comment-input-avatar i { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comment-textarea {
+        background: #2d3136 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb !important;
+    }
+    html[data-bs-theme="dark"] .comment-textarea::placeholder { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .comment-form-footer { border-top-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .file-upload-area {
+        background: #2d3136 !important;
+        border-color: #3e4348 !important;
+    }
+    html[data-bs-theme="dark"] .file-upload-area:hover { border-color: var(--theme-color-primary, #119A48) !important; background: rgba(17, 154, 72, 0.1) !important; }
+    html[data-bs-theme="dark"] .file-upload-text,
+    html[data-bs-theme="dark"] .file-upload-hint { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .file-preview-img { border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .sidebar-card {
+        background: #242628 !important;
+        border-color: #3e4348 !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .sidebar-card-title { color: #e4e6eb !important; border-bottom-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-sidebar-item { color: inherit; }
+    html[data-bs-theme="dark"] .forum-sidebar-item:hover { background: rgba(17, 154, 72, 0.15) !important; border-color: var(--theme-color-primary, #119A48) !important; }
+    html[data-bs-theme="dark"] .forum-sidebar-title { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .forum-sidebar-time { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .forum-sidebar-img { border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .tag-item {
+        background: rgba(180, 162, 105, 0.2) !important;
+        border-color: {{ $auGold }};
+        color: {{ $auGold }};
+    }
+    html[data-bs-theme="dark"] .tag-item:hover { background: {{ $auGold }} !important; color: #fff !important; }
+    html[data-bs-theme="dark"] .no-comments { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .reply-comment .comment-content { background: #2d3136 !important; border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .reply-comment .comment-content:hover { background: #363b40 !important; border-color: #4b5262 !important; }
+    html[data-bs-theme="dark"] .image-view-modal-close { background: #2d3136 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .image-view-modal-close:hover { background: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .card { background: #242628 !important; border-color: #3e4348 !important; color: #e4e6eb; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .card .text-muted,
+    html[data-bs-theme="dark"] .forum-thread-wrapper .text-muted { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .btn-outline-primary { border-color: #3e4348; color: #e4e6eb; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .btn-outline-primary:hover { background: rgba(17, 154, 72, 0.2); border-color: var(--theme-color-primary); color: var(--theme-color-primary); }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .alert-info { background: #2d3136 !important; border-color: #3e4348 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .comment-form-toggle { background: #2d3136 !important; border-color: #3e4348 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .comment-form-toggle .comment-form-header,
+    html[data-bs-theme="dark"] .comment-form-toggle h5 { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .comment-form-toggle .fa-chevron-down { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] #commentFormContainer { background: #242628 !important; border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .forum-author-avatar-inline { border-color: #3e4348 !important; background: #2d3136 !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper img[style*="background-color: #f1f5f9"] { background-color: #2d3136 !important; border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .reply-form-container { border-top-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .cancel-reply-btn { background: #3e4348 !important; border-color: #4b5262 !important; color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper .comment-char-count { color: #9ca3af !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper h5[style*="color: #2d3748"] { color: #e4e6eb !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper p[style*="color: #64748b"] { color: #d1d5db !important; }
+    html[data-bs-theme="dark"] .forum-thread-wrapper a[style*="color: #374151"] { color: #d1d5db !important; }
 </style>
 @endsection
 

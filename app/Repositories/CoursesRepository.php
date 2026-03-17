@@ -10,7 +10,7 @@ class CoursesRepository{
     public function get(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $qry = Course::orderBy('id','desc');
+        $qry = Course::where('is_active', true)->orderBy('id','desc');
 
         if($request->category)
         $qry->where('category_id',$request->category);
