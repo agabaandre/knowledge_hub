@@ -210,6 +210,23 @@
         margin-bottom: 1rem;
         font-size: 0.95rem;
     }
+    .publication-tags-list {
+        gap: 0.5rem 0.75rem;
+        margin-right: 0.5rem;
+    }
+    .publication-tag-pill {
+        background-color: #6c757d !important;
+        color: #ffffff !important;
+        padding: 0.35em 0.65em;
+        font-size: 0.8em;
+        text-decoration: none;
+        margin-right: 0;
+        margin-bottom: 0;
+    }
+    .publication-tag-pill:hover {
+        color: #ffffff;
+        text-decoration: none;
+    }
     
     /* A4-like PDF Preview Modal Styles */
     #previewModal .modal-dialog {
@@ -991,14 +1008,12 @@
                         @if($publication->tags && $publication->tags->count() > 0)
                         <label class="meta-label">Tags</label>
                         <span class="meta-value">
-                            <div class="d-flex flex-wrap gap-1 mt-1">
+                            <div class="d-flex flex-wrap publication-tags-list mt-1 mb-3">
                                 @foreach($publication->tags as $pubTag)
                                     @if($pubTag->tag)
-                                        <a href="{{ url('records?tag=' . $pubTag->tag_id) }}" class="badge badge-secondary" style="background-color: #6c757d; color: #ffffff; padding: 0.25em 0.5em; font-size: 0.8em; text-decoration: none;">
-                                            {{ $pubTag->tag->tag_text }}
-                                        </a>
-                        @endif
-                    @endforeach
+                                        <a href="{{ url('records?tag=' . $pubTag->tag_id) }}" class="badge badge-secondary publication-tag-pill">{{ $pubTag->tag->tag_text }}</a>
+                                    @endif
+                                @endforeach
                             </div>
                         </span>
                         @endif
