@@ -85,6 +85,14 @@
                                 'selected'=>(@$publication->publication_catgory_id)?$publication->publication_catgory_id:''])
                             </div>
                         </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label" for="publication">Sub Category</label>
+                                @include('partials.publications.subcategory_dropdown',['field'=>'publication_sub_category_id',
+                                'selected'=>@$publication->publication_sub_category_id ? $publication->publication_sub_category_id : ''])
+                            </div>
+                        </div>
                      
                         <div class="col-md-12">
                             <div class="mb-3">

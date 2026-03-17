@@ -79,6 +79,7 @@
                 @can('view_file_types')<li class="nav-item"><a href="{{ url('admin/tools') }}" class="nav-link">Tools</a></li>@endcan
                 @can('view_sources')<li class="nav-item"><a href="{{ url('admin/authors') }}" class="nav-link">Data Sources</a></li>@endcan
                 @can('view_sources')<li class="nav-item"><a href="{{ url('admin/datarecords/categories') }}" class="nav-link">Categories</a></li>@endcan
+                @can('view_sources')<li class="nav-item"><a href="{{ route('admin.subcategories.index') }}" class="nav-link">Sub Categories</a></li>@endcan
                 @can('view_themes')<li class="nav-item"><a href="{{ url('admin/themes') }}" class="nav-link">Security Themes</a></li>@endcan
                 @can('view_sub_themes')<li class="nav-item"><a href="{{ url('admin/subthemes') }}" class="nav-link">Security Sub-Themes</a></li>@endcan
                 @can('view_faqs')<li class="nav-item"><a href="{{ url('admin/faqs') }}" class="nav-link">FAQs</a></li>@endcan

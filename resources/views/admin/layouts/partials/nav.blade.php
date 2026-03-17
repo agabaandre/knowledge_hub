@@ -196,6 +196,7 @@
                     @can('view_sources')
                         <li aria-haspopup="true"><a href=" {{ url('admin/authors') }}">Data Sources</a></li>
                         <li aria-haspopup="true"><a href="{{ url('admin/datarecords/categories') }}">Categories</a></li>
+                        <li aria-haspopup="true"><a href="{{ route('admin.subcategories.index') }}">Sub Categories</a></li>
                     @endcan
 
                     @can('view_themes')

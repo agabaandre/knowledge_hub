@@ -40,6 +40,10 @@ class Publication extends Model
         return $this->belongsTo(PublicationCategory::class,"data_category_id","id");
     }
 
+    public function publication_sub_category(){
+        return $this->belongsTo(PublicationCategory::class, 'publication_sub_category_id', 'id');
+    }
+
     public function data_category(){
         return $this->belongsTo(DataCategory::class, "publication_catgory_id","id");
     }

@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
+use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\LicensesController;
 use App\Http\Controllers\Admin\SettingsController;
@@ -296,6 +297,13 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [SubHealthThemesController::class, 'destroy']);
     });
 
+    // Sub Categories (publication form - after Categories in dropdown lists)
+    Route::group(["prefix" => "subcategories", "as" => "admin.subcategories."], function () {
+        Route::get("/", [PublicationSubCategoryController::class, 'index'])->name('index');
+        Route::post("/", [PublicationSubCategoryController::class, 'store'])->name('store');
+        Route::put("/{id}", [PublicationSubCategoryController::class, 'update'])->name('update');
+        Route::get("/delete", [PublicationSubCategoryController::class, 'destroy'])->name('destroy');
+    });
 
     //tags
     Route::group(["prefix" => "tags", 'as' => 'tags.'], function () {

@@ -289,6 +289,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->publication_catgory_id    = $request->data_category_id;
         $pub->visits                    = ($request->id)?$pub->visits:0;
         $pub->data_category_id          = $request->category_id;
+        $pub->publication_sub_category_id = $request->publication_sub_category_id ?: null;
         $pub->is_embedded               = $request->is_embedded ?? false;
         $pub->is_default_in_category    = $request->is_default ?? false;
         $pub->is_admin_only_access      = $request->admin_only ?? false;
