@@ -664,8 +664,15 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
+                                            $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
+                                            $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
+                                            $titleSlug = Str::limit($titleSlug, 80);
+                                            $titleSlug = $titleSlug ?: 'resource';
+                                            $downloadFilename = count($publication->attachments) > 1
+                                                ? $titleSlug . '-' . ($i + 1) . '.' . $ext
+                                                : $titleSlug . '.' . $ext;
                                             $realFilename = $file->download_filename;
                                             // Display: short label for UI, real filename for title/tooltip
                                             $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
@@ -721,7 +728,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $realFilename }}" download="{{ $realFilename }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $downloadFilename }}" download="{{ $downloadFilename }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>
@@ -898,8 +905,15 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
+                                            $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
+                                            $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
+                                            $titleSlug = Str::limit($titleSlug, 80);
+                                            $titleSlug = $titleSlug ?: 'resource';
+                                            $downloadFilename = count($publication->attachments) > 1
+                                                ? $titleSlug . '-' . ($i + 1) . '.' . $ext
+                                                : $titleSlug . '.' . $ext;
                                             $realFilename = $file->download_filename;
                                             // Format attachment name: replace underscores with spaces and truncate to 20 characters for display
                                             $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
@@ -955,7 +969,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $realFilename }}" download="{{ $realFilename }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $downloadFilename }}" download="{{ $downloadFilename }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>

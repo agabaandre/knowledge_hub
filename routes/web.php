@@ -503,6 +503,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [RssFeedController::class, 'index'])->name('index');
         Route::get("/create", [RssFeedController::class, 'create'])->name('create');
         Route::post("/", [RssFeedController::class, 'store'])->name('store');
+        Route::post("/fetch-now", [RssFeedController::class, 'fetchNow'])->name('fetchNow');
+        Route::get("/fetch-progress/{runId}", [RssFeedController::class, 'fetchProgress'])->name('fetchProgress');
         Route::get("/{id}/edit", [RssFeedController::class, 'edit'])->name('edit');
         Route::put("/{id}", [RssFeedController::class, 'update'])->name('update');
         Route::delete("/{id}", [RssFeedController::class, 'destroy'])->name('destroy');
