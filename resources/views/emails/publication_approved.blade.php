@@ -8,7 +8,7 @@
     
     <p>We are pleased to inform you that your @if($isSummary)summary/abstract @else publication @endif has been approved and is now live on the Knowledge Hub!</p>
     
-    <div style="background: #f8f9fa; border-left: 4px solid #119A48; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <div style="background: #f8f9fa;  padding: 15px; margin: 20px 0; border-radius: 0px;">
         <h3 style="margin-top: 0; color: #119A48;">{{ $publicationTitle }}</h3>
         
         @if($publicationDescription)

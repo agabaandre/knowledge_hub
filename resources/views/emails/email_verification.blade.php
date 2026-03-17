@@ -24,7 +24,7 @@
                 <tr>
                     <td align="center">
                         <a href="{{ route('account_verify') }}?t={{ $token }}" 
-                           style="display: inline-block; padding: 14px 32px; background-color: #119A48; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; line-height: 1.5;">
+                           style="display: inline-block; padding: 14px 32px; background-color: #119A48; color: #ffffff; text-decoration: none; border-radius: 0px; font-weight: 600; font-size: 16px; line-height: 1.5;">
                             Verify Email Address
                         </a>
                     </td>

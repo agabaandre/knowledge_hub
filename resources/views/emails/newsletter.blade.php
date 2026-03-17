@@ -6,7 +6,7 @@
     
     <p>Hello {{ $subscriber->name ?: 'Subscriber' }},</p>
     
-    <div style="background: #f8f9fa; border-left: 4px solid #119A48; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <div style="background: #f8f9fa;  padding: 15px; margin: 20px 0; border-radius: 0px;">
         {!! $content !!}
     </div>
     

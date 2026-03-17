@@ -9,7 +9,7 @@
     <p>We are pleased to inform you that your membership request for the <strong>{{ $communityName }}</strong> community has been approved!</p>
     
     @if($communityDescription)
-    <div style="background: #f8f9fa; border-left: 4px solid #119A48; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <div style="background: #f8f9fa;  padding: 15px; margin: 20px 0; border-radius: 0px;">
         <p style="margin: 0;"><strong>About this community:</strong></p>
         <p style="margin: 10px 0 0 0;">{!! \Illuminate\Support\Str::words(strip_tags($communityDescription), 100, '...') !!}</p>
     </div>

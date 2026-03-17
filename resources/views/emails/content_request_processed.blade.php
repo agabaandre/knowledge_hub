@@ -6,7 +6,7 @@
     
     <p>Thank you for your content request. We're pleased to inform you that your request has been processed and we have identified relevant content that addresses your needs.</p>
     
-    <div style="background-color: #f8f9fa; border-left: 4px solid #119A48; padding: 15px; margin: 20px 0; border-radius: 4px;">
+    <div style="background-color: #f8f9fa;  padding: 15px; margin: 20px 0; border-radius: 0px;">
         <h3 style="margin-top: 0; color: #119A48;">Your Request Details</h3>
         <p><strong>Subject:</strong> {{ $contentRequest->subject }}</p>
         <p><strong>Description:</strong> {{ $contentRequest->description }}</p>

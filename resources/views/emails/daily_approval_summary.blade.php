@@ -8,7 +8,7 @@
     
     <p>Here is a summary of all pending items awaiting your approval:</p>
     
-    <div style="background: #f8f9fa; border-left: 4px solid #119A48; padding: 20px; margin: 20px 0; border-radius: 4px;">
+    <div style="background: #f8f9fa;  padding: 20px; margin: 20px 0; border-radius: 0px;">
         <h3 style="margin-top: 0; color: #119A48;">Pending Items Overview</h3>
         <table style="width: 100%; border-collapse: collapse;">
             @if($totalForums > 0)
