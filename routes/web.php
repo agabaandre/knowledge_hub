@@ -641,6 +641,13 @@ Route::get('auth/microsoft', function () {
         return redirect('/login')->with('alert_class', 'danger')
             ->with('alert', 'Microsoft login is currently disabled.');
     }
+    $clientId = config('services.microsoft.client_id');
+    $clientSecret = config('services.microsoft.client_secret');
+    if (empty($clientId) || empty($clientSecret)) {
+        \Log::warning('Microsoft login: client_id or client_secret missing. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET (or EXCHANGE_CLIENT_ID and EXCHANGE_CLIENT_SECRET) in .env.');
+        return redirect('/login')->with('alert_class', 'danger')
+            ->with('alert', 'Microsoft login is not configured. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET in .env (or use EXCHANGE_* if using the same Azure app).');
+    }
     return Socialite::driver('microsoft')->redirect();
 });
 

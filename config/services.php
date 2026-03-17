@@ -35,10 +35,17 @@ return [
     'secret_key' => env('NOCAPTCHA_SECRET'),
     ],
     
+    /*
+    | Microsoft (Azure AD) - used for "Sign in with Microsoft" on login/register.
+    | If you use the same Azure app for both login and Exchange email, you can
+    | set only EXCHANGE_* in .env and leave MICROSOFT_* unset; they will fall back.
+    | Redirect must match the redirect URI registered in Azure (e.g. .../auth/microsoft/callback).
+    */
     'microsoft' => [
-    'client_id' => env('MICROSOFT_CLIENT_ID'),
-    'client_secret' => env('MICROSOFT_CLIENT_SECRET'),
-    'redirect' => env('MICROSOFT_REDIRECT_URI'),
+        'client_id'     => env('MICROSOFT_CLIENT_ID', env('EXCHANGE_CLIENT_ID')),
+        'client_secret' => env('MICROSOFT_CLIENT_SECRET', env('EXCHANGE_CLIENT_SECRET')),
+        'redirect'      => env('MICROSOFT_REDIRECT_URI', env('APP_URL') . '/auth/microsoft/callback'),
+        'tenant'        => env('MICROSOFT_TENANT_ID', env('EXCHANGE_TENANT_ID', 'common')),
     ],
 
     'google' => [
