@@ -74,8 +74,7 @@
     el.className = 'pdf-chat-msg ' + role;
     var label = role === 'user' ? 'You' : 'Assistant';
     var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? markdownToHtml(content) : escapeHtml(content));
-    var assistantCount = messagesEl().querySelectorAll('.pdf-chat-msg.assistant').length;
-    var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder && assistantCount >= 1;
+    var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder;
     var actionsHtml = showExportOnResponse
       ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>'
       : '';
@@ -142,9 +141,7 @@
     var text = contentEl.textContent || '';
     contentEl.innerHTML = markdownToHtml(text);
     var msgDiv = contentEl.closest('.pdf-chat-msg');
-    var assistants = messagesEl().querySelectorAll('.pdf-chat-msg.assistant');
-    var isFirstAssistant = msgDiv && Array.prototype.indexOf.call(assistants, msgDiv) === 0;
-    if (msgDiv && text && !isFirstAssistant) {
+    if (msgDiv && text) {
       var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>';
       var wrap = document.createElement('div');
       wrap.innerHTML = btn;
