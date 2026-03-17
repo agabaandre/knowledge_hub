@@ -235,15 +235,17 @@ function send_email($request){
     $exchangeConfigured = !empty($exchangeConfig['tenant_id']) && !empty($exchangeConfig['client_id']) && !empty($exchangeConfig['client_secret']);
     $useExchange = ($emailDriver === 'exchange') && $exchangeConfigured;
 
-    // Normalize email data - handle both 'title' and 'subject' fields
+    // Normalize email data - handle both 'title' and 'subject' fields; recipient from 'email' or 'to'
     $subject = $request->subject ?? $request->title ?? 'Knowledge Resource Center Email';
-    $email = $request->email ?? null;
+    $email = $request->email ?? $request->to ?? null;
     $body = $request->body ?? '';
-    
+
     if (!$email) {
         \Log::error('send_email called without email address', ['request' => (array)$request]);
         return array('success'=>false,'message'=>"Email address is required.");
     }
+    $email = is_string($email) ? trim($email) : $email;
+    \Log::info('send_email: sending to recipient', ['to' => $email, 'subject' => $subject]);
 
     // When driver is 'exchange' but Exchange is not configured, do NOT fall back to SMTP
     if ($emailDriver === 'exchange' && !$exchangeConfigured) {

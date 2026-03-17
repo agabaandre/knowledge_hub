@@ -385,15 +385,19 @@ class CommsOfPracticeRepository{
             'acceptUrl' => $acceptUrl,
         ])->render();
 
-        $emailData = (object) [
+        // Use plain array so queue serialization preserves recipient; 'email' and 'to' = invitee
+        $emailData = [
             'email' => $email,
+            'to' => $email,
             'subject' => $subject,
             'body' => $body,
-            'title' => $subject
+            'title' => $subject,
         ];
 
         try {
-            \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
+            // Send invitation email synchronously so it reaches the invitee immediately (no queue worker required)
+            \App\Jobs\SendMailJob::dispatchSync($emailData);
+            \Log::info('COP invitation email sent to invitee', ['to' => $email, 'community_id' => $communityId]);
         } catch (\Throwable $e) {
             \Log::error('COP invitation email failed', [
                 'community_id' => $communityId,
@@ -508,17 +512,20 @@ class CommsOfPracticeRepository{
             'acceptUrl' => $acceptUrl,
         ])->render();
 
-        $emailData = (object) [
-            'email' => $invitation->email,
+        $to = $invitation->email;
+        $emailData = [
+            'email' => $to,
+            'to' => $to,
             'subject' => $subject,
             'body' => $body,
-            'title' => $subject
+            'title' => $subject,
         ];
 
         try {
-            \App\Jobs\SendMailJob::dispatch($emailData)->onQueue('default');
+            \App\Jobs\SendMailJob::dispatchSync($emailData);
+            \Log::info('COP resend invitation email sent to invitee', ['to' => $to, 'invitation_id' => $invitationId]);
         } catch (\Throwable $e) {
-            \Log::error('COP resend invitation email failed', ['invitation_id' => $invitationId, 'error' => $e->getMessage()]);
+            \Log::error('COP resend invitation email failed', ['invitation_id' => $invitationId, 'to' => $to, 'error' => $e->getMessage()]);
             return ['status' => 'error', 'message' => 'Email could not be sent: ' . $e->getMessage()];
         }
 

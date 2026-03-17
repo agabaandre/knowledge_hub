@@ -35,16 +35,22 @@ class SendMailJob implements ShouldQueue
      */
     public function handle()
     {
-        $request = (Object) $this->data;
+        $request = is_array($this->data) ? (object) $this->data : $this->data;
+        $to = $request->email ?? $request->to ?? null;
+        if (!$to) {
+            \Log::error('SendMailJob: no recipient (email/to) in payload', ['data_keys' => array_keys((array) $request)]);
+            throw new \RuntimeException('No recipient email in mail job payload.');
+        }
+        \Log::info('SendMailJob: sending to recipient', ['to' => $to, 'subject' => $request->subject ?? $request->title ?? '']);
         $result = send_email($request);
 
         if (is_array($result) && isset($result['success']) && $result['success'] === false) {
             $message = $result['message'] ?? 'Email sending failed';
-            \Log::error('SendMailJob: send_email failed', ['email' => $request->email ?? null, 'message' => $message]);
+            \Log::error('SendMailJob: send_email failed', ['to' => $to, 'message' => $message]);
             throw new \RuntimeException($message);
         }
 
-        $user = User::where('email',$request->email)->first();
+        $user = User::where('email', $to)->first();
         
         if($user && $user->fcm_token){
             sendPushNotification($request->subject,html_to_text($request->body),$user->fcm_token);

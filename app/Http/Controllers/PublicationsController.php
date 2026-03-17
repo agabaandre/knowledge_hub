@@ -168,18 +168,8 @@ class PublicationsController extends Controller
         $relatedRequest->merge(['rows' => 5]);
         $data['relatedPublications'] = $this->publicationsRepo->get($relatedRequest);
         
-        // Get popular tags for sidebar - tags that have approved publications
-        $tagIds = \DB::table('publication_tags')
-            ->join('publication', 'publication_tags.publication_id', '=', 'publication.id')
-            ->where('publication.is_active', 'Active')
-            ->where('publication.is_approved', 1)
-            ->distinct()
-            ->pluck('publication_tags.tag_id');
-        
-        $data['tags'] = \App\Models\Tag::whereIn('id', $tagIds)
-            ->orderBy('id', 'desc')
-            ->limit(20)
-            ->get();
+        // Popular tags = tags with approved publications, ordered by engagement (views + likes)
+        $data['tags'] = \App\Models\Tag::popularByEngagement(20);
 
         // SEO for records search page
         $term = $request->filled('term') ? trim($request->term) : '';

@@ -1,22 +1,21 @@
 <?php
+
 namespace App\View\Composers;
 
 use App\Models\Tag;
 use Illuminate\View\View;
 
-class TagsViewComposer{
+class TagsViewComposer
+{
+    public function compose(View $view)
+    {
+        $minutes = (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-    public function compose(View $view){
-
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
-
-        $tags = cache()->remember('tags',$minutes, function () {
-            return   Tag::orderBy('tag_text', 'asc')->get();
+        // Popular tags = tags with approved publications, ordered by engagement (views + likes)
+        $tags = cache()->remember('popular_tags_by_engagement', $minutes, function () {
+            return Tag::popularByEngagement(20);
         });
 
-        $view->with('tags',$tags);
+        $view->with('tags', $tags);
     }
-
 }
-
-?>
