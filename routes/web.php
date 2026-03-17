@@ -427,7 +427,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [AccessGroupsController::class, 'destroy']);
     });
 
-    //commsofpractice
+    //commsofpractice (POST routes before GET /{id} so send_invitation etc. are not matched as id)
     Route::group(["prefix" => "commsofpractice"], function () {
 
         Route::any("/", [CommsOfPracticeController::class, 'index']);
@@ -435,12 +435,12 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [CommsOfPracticeController::class, 'store']);
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
         Route::get('/get', [CommsOfPracticeController::class, 'getOne']);
-        Route::get('/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
         Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction');
         Route::post("/delete_member", [CommsOfPracticeController::class, 'deleteMember'])->name('admin.commsofpractice.deleteMember');
         Route::post("/send_invitation", [CommsOfPracticeController::class, 'sendInvitation'])->name('admin.commsofpractice.sendInvitation');
         Route::post("/resend_invitation", [CommsOfPracticeController::class, 'resendInvitation'])->name('admin.commsofpractice.resendInvitation');
         Route::post("/bulk_invite", [CommsOfPracticeController::class, 'bulkInviteFromCsv'])->name('admin.commsofpractice.bulkInvite');
+        Route::get('/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
     });
 
     //AdminUnits

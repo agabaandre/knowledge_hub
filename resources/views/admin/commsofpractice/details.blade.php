@@ -29,6 +29,12 @@
 @endsection
 
 @section('content')
+    @if(session('alert'))
+        <div class="alert alert-{{ session('alert_class', 'info') }} alert-dismissible fade show" role="alert">
+            {{ session('alert') }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        </div>
+    @endif
     <div class="page-header">
         <h1 class="page-title">{{ $community->community_name }}</h1>
     </div>
@@ -283,7 +289,8 @@
                         <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
-                <form id="sendInvitationForm">
+                <form id="sendInvitationForm" method="POST" action="{{ route('admin.commsofpractice.sendInvitation') }}">
+                    @csrf
                     <div class="modal-body">
                         <div class="form-group">
                             <label for="invitationEmail">Email Address(es)</label>
@@ -294,7 +301,7 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Send Invitation(s)</button>
+                        <button type="submit" class="btn btn-primary" id="sendInvitationSubmitBtn">Send Invitation(s)</button>
                     </div>
                 </form>
             </div>
@@ -551,11 +558,11 @@
             }
         })();
 
-        // Handle send invitation form
+        // Handle send invitation form (AJAX; form also has action/method for fallback if JS disabled)
         $('#sendInvitationForm').on('submit', function(e) {
             e.preventDefault();
             var $form = $(this);
-            var $btn = $form.find('button[type="submit"]');
+            var $btn = $form.find('#sendInvitationSubmitBtn');
             var communityId = $form.find('input[name="community_id"]').val();
             var emailVal = $('#invitationEmail').val().trim();
             if (!communityId || !emailVal) {
@@ -563,19 +570,19 @@
                 return;
             }
             $btn.prop('disabled', true).text('Sending...');
+            var formData = new FormData($form[0]);
+            formData.set('email', emailVal);
             $.ajax({
-                url: '{{ route('admin.commsofpractice.sendInvitation') }}',
+                url: $form.attr('action'),
                 method: 'POST',
                 headers: {
-                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'X-CSRF-TOKEN': $form.find('input[name="_token"]').val(),
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json'
                 },
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    community_id: communityId,
-                    email: emailVal
-                },
+                data: formData,
+                processData: false,
+                contentType: false,
                 success: function(response) {
                     $('#sendInvitationModal').modal('hide');
                     $form[0].reset();

@@ -351,14 +351,25 @@ class CommsOfPracticeRepository{
             return ['status' => 'error', 'message' => 'An active invitation already exists for this email'];
         }
 
-        // Create new invitation
-        $invitation = CommunityInvitation::create([
-            'community_of_practice_id' => $communityId,
-            'email' => $email,
-            'token' => CommunityInvitation::generateToken(),
-            'invited_by' => $invitedBy,
-            'expires_at' => now()->addDays(7),
-        ]);
+        try {
+            // Create new invitation
+            $invitation = CommunityInvitation::create([
+                'community_of_practice_id' => $communityId,
+                'email' => $email,
+                'token' => CommunityInvitation::generateToken(),
+                'invited_by' => $invitedBy,
+                'expires_at' => now()->addDays(7),
+            ]);
+        } catch (\Throwable $e) {
+            \Log::error('CommunityInvitation::create failed', [
+                'community_id' => $communityId,
+                'email' => $email,
+                'invited_by' => $invitedBy,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            return ['status' => 'error', 'message' => 'Could not create invitation: ' . $e->getMessage()];
+        }
 
         // Load relationships for email
         $invitation->load(['community', 'inviter']);

@@ -190,7 +190,8 @@ class CommsOfPracticeController extends Controller
         $emailInput = $request->email;
         $emails = array_filter(array_map('trim', preg_split('/[\s,]+/', $emailInput)));
         if (empty($emails)) {
-            return response()->json(['status' => 'error', 'message' => 'Please enter at least one email address.'], 422);
+            $msg = 'Please enter at least one email address.';
+            return $this->sendInvitationResponse($request, $msg, 422, 'error');
         }
 
         $validEmails = [];
@@ -200,14 +201,26 @@ class CommsOfPracticeController extends Controller
             }
         }
         if (empty($validEmails)) {
-            return response()->json(['status' => 'error', 'message' => 'No valid email address found.'], 422);
+            $msg = 'No valid email address found.';
+            return $this->sendInvitationResponse($request, $msg, 422, 'error');
         }
 
-        $result = $this->commsOfPracticeRepository->sendInvitationsBulk(
-            (int) $request->community_id,
-            $validEmails,
-            auth()->id()
-        );
+        try {
+            $result = $this->commsOfPracticeRepository->sendInvitationsBulk(
+                (int) $request->community_id,
+                $validEmails,
+                auth()->id()
+            );
+        } catch (\Throwable $e) {
+            \Log::error('Send invitation failed', [
+                'community_id' => $request->community_id,
+                'emails' => $validEmails,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
+            ]);
+            $msg = 'Failed to create invitations: ' . $e->getMessage();
+            return $this->sendInvitationResponse($request, $msg, 500, 'error');
+        }
 
         $msg = $result['sent'] . ' invitation(s) sent.';
         if ($result['skipped_member'] > 0) {
@@ -226,7 +239,23 @@ class CommsOfPracticeController extends Controller
             }
         }
 
-        return response()->json(['status' => 'success', 'message' => $msg, 'result' => $result]);
+        return $this->sendInvitationResponse($request, $msg, 200, 'success', $result);
+    }
+
+    /**
+     * Return JSON for AJAX or redirect for form POST.
+     */
+    private function sendInvitationResponse(Request $request, string $message, int $code = 200, string $status = 'success', $result = null)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            if ($code >= 400) {
+                return response()->json(['status' => 'error', 'message' => $message], $code);
+            }
+            return response()->json(['status' => $status, 'message' => $message, 'result' => $result]);
+        }
+        $alertClass = $status === 'success' ? 'success' : 'danger';
+        $redirect = redirect()->to(url()->previous() ?: route('admin.commsofpractice.details', $request->community_id));
+        return $redirect->with('alert', $message)->with('alert_class', $alertClass);
     }
 
     public function resendInvitation(Request $request)
