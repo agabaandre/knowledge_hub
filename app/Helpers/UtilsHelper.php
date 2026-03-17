@@ -244,6 +244,12 @@ function send_email($request){
         \Log::error('send_email called without email address', ['request' => (array)$request]);
         return array('success'=>false,'message'=>"Email address is required.");
     }
+
+    // When driver is 'exchange' but Exchange is not configured, do NOT fall back to SMTP
+    if ($emailDriver === 'exchange' && !$exchangeConfigured) {
+        \Log::error('Email driver is exchange but Exchange is not configured. Set EXCHANGE_TENANT_ID, EXCHANGE_CLIENT_ID, EXCHANGE_CLIENT_SECRET in .env or set EMAIL_DRIVER=smtp to use SMTP.');
+        return array('success'=>false,'message'=>"Email is set to Exchange but Exchange credentials are missing. Configure EXCHANGE_TENANT_ID, EXCHANGE_CLIENT_ID, EXCHANGE_CLIENT_SECRET in .env or set EMAIL_DRIVER=smtp (or MAIL_MAILER=smtp) to use SMTP.");
+    }
     
     // Use Exchange when driver is 'exchange' and Exchange is configured
     if ($useExchange) {

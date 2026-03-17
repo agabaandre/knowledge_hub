@@ -1,4 +1,3 @@
-
 <?php
 
 return [
@@ -6,11 +5,14 @@ return [
     |--------------------------------------------------------------------------
     | Email sending driver
     |--------------------------------------------------------------------------
-    | Use 'exchange' for Microsoft Graph / Exchange OAuth, or 'smtp' for
-    | PHPMailer/SMTP. When 'exchange', Exchange must be configured in .env
-    | (EXCHANGE_TENANT_ID, EXCHANGE_CLIENT_ID, EXCHANGE_CLIENT_SECRET).
+    | Single source of truth: set EMAIL_DRIVER or MAIL_MAILER in .env to
+    | 'exchange' or 'smtp'. EMAIL_DRIVER takes precedence over MAIL_MAILER.
+    | - exchange: uses Microsoft Graph (requires EXCHANGE_TENANT_ID, etc.)
+    | - smtp: uses PHPMailer/SMTP (requires MAIL_HOST, MAIL_USERNAME, etc.)
+    | Applies to password reset, queued mail, and all send_email() usage.
+    | After changing .env run: php artisan config:clear
     */
-    'driver'      => env('EMAIL_DRIVER', 'exchange'),
+    'driver'      => env('EMAIL_DRIVER', env('MAIL_MAILER', 'exchange')),
 
     'host'        => env('MAIL_HOST'),
     'username'    => env('MAIL_USERNAME'),
