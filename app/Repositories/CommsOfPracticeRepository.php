@@ -19,12 +19,16 @@ class CommsOfPracticeRepository{
             $query->where('is_public', 1);
         }
 
-        // Add search functionality
+        // Add search functionality (community name, description, or creator name/email)
         if ($request->filled('term')) {
             $term = $request->input('term');
             $query->where(function($q) use ($term) {
                 $q->where('community_name', 'like', '%' . $term . '%')
-                  ->orWhere('description', 'like', '%' . $term . '%');
+                  ->orWhere('description', 'like', '%' . $term . '%')
+                  ->orWhereHas('creator', function($q2) use ($term) {
+                      $q2->where('name', 'like', '%' . $term . '%')
+                         ->orWhere('email', 'like', '%' . $term . '%');
+                  });
             });
         }
 
@@ -530,6 +534,23 @@ class CommsOfPracticeRepository{
         }
 
         return ['status' => 'success', 'message' => 'Invitation resent successfully.', 'data' => $invitation];
+    }
+
+    /**
+     * Delete a community invitation (any status: pending, expired, or responded).
+     */
+    public function deleteInvitation($invitationId, $communityId)
+    {
+        $invitation = CommunityInvitation::where('id', $invitationId)
+            ->where('community_of_practice_id', $communityId)
+            ->first();
+
+        if (!$invitation) {
+            return ['status' => 'error', 'message' => 'Invitation not found.'];
+        }
+
+        $invitation->delete();
+        return ['status' => 'success', 'message' => 'Invitation deleted.'];
     }
 
     /**

@@ -150,7 +150,8 @@ class CommsOfPracticeController extends Controller
     {
         $community = $this->commsOfPracticeRepository->find($id);
 
-        $membership = $community->membership;
+        // Pending first (is_approved=0), then approved (1), then rejected (2) for easier approval
+        $membership = $community->membership()->with('user')->orderBy('is_approved', 'asc')->get();
         // Use relationships to count members
         $totalMembers = $community->membership()->count();
         $approvedCount = $community->approvedMembers()->count();
@@ -269,6 +270,24 @@ class CommsOfPracticeController extends Controller
             (int) $request->invitation_id,
             (int) $request->community_id,
             auth()->id()
+        );
+
+        if ($result['status'] === 'success') {
+            return response()->json(['status' => 'success', 'message' => $result['message']]);
+        }
+        return response()->json(['status' => 'error', 'message' => $result['message']], 400);
+    }
+
+    public function deleteInvitation(Request $request)
+    {
+        $request->validate([
+            'invitation_id' => 'required|integer',
+            'community_id' => 'required|exists:community_of_practices,id',
+        ]);
+
+        $result = $this->commsOfPracticeRepository->deleteInvitation(
+            (int) $request->invitation_id,
+            (int) $request->community_id
         );
 
         if ($result['status'] === 'success') {

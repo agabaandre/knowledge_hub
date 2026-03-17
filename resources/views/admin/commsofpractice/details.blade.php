@@ -25,6 +25,12 @@
         #members-table .badge-warning, #invitations-table .badge-warning { background-color: var(--bs-warning, #ffc107) !important; color: #212529 !important; }
         #members-table .badge-danger, #invitations-table .badge-danger { background-color: var(--bs-danger, #dc3545) !important; color: #fff !important; }
         #invitations-table .badge-info { background-color: var(--bs-info, #0dcaf0) !important; color: #fff !important; }
+        /* Checkbox column alignment in members table */
+        #members-table thead th:first-child,
+        #members-table tbody td:first-child { vertical-align: middle !important; text-align: center; }
+        #members-table .form-check-input.member-pending-cb,
+        #members-table #select-all-pending { margin: 0; vertical-align: middle; }
+        #members-table tbody td { vertical-align: middle !important; }
     </style>
 @endsection
 
@@ -125,9 +131,11 @@
                         <table id="members-table" class="table table-hover table-bordered">
                     <thead>
                         <tr>
-                                    <th style="width:42px;">
+                                    <th style="width:42px;" class="text-center align-middle">
                                         @if($pendingCount > 0)
-                                        <input type="checkbox" id="select-all-pending" class="form-check-input" title="Select all pending on this page">
+                                        <input type="checkbox" id="select-all-pending" class="form-check-input" title="Select all pending on this page" aria-label="Select all pending">
+                                        @else
+                                        <span class="text-muted">—</span>
                                         @endif
                                     </th>
                                     <th style="width:60px;">#</th>
@@ -140,9 +148,11 @@
                     <tbody>
                         @foreach ($membership as $member)
                             <tr class="{{ $member->is_approved == 0 ? 'member-row-pending' : '' }}" data-member-id="{{ $member->id }}">
-                                        <td>
+                                        <td class="text-center align-middle">
                                             @if ($member->is_approved == 0)
-                                                <input type="checkbox" class="form-check-input member-pending-cb" value="{{ $member->id }}" data-member-id="{{ $member->id }}">
+                                                <input type="checkbox" class="form-check-input member-pending-cb" value="{{ $member->id }}" data-member-id="{{ $member->id }}" aria-label="Select member">
+                                            @else
+                                                <span class="text-muted">—</span>
                                             @endif
                                         </td>
                                         <td>{{ $loop->iteration }}</td>
@@ -159,18 +169,13 @@
                                         </td>
                                         <td>
                                             @if ($member->is_approved == 1)
-                                                <button class="btn btn-outline-danger btn-sm"
-                                                    onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Remove</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Remove</button>
                                             @elseif ($member->is_approved == 2)
-                                                <button class="btn btn-outline-success btn-sm mr-1"
-                                                    onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-undo mr-1"></i>Reconsider</button>
-                                                <button class="btn btn-outline-danger btn-sm"
-                                                    onclick="showModal({{ $member->id }}, 'delete')" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>Delete</button>
+                                                <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-undo mr-1"></i>Reconsider</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="delete" title="Permanently remove this rejected request"><i class="fa fa-trash mr-1"></i>Delete</button>
                                             @else
-                                                <button class="btn btn-outline-success btn-sm mr-1"
-                                                    onclick="showModal({{ $member->id }}, 'approve')"><i class="fa fa-check mr-1"></i>Approve</button>
-                                                <button class="btn btn-outline-danger btn-sm"
-                                                    onclick="showModal({{ $member->id }}, 'reject')"><i class="fa fa-times mr-1"></i>Reject</button>
+                                                <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-check mr-1"></i>Approve</button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Reject</button>
                                             @endif
                                         </td>
                                     </tr>
@@ -212,7 +217,7 @@
                                     <th>Expires At</th>
                                     <th>Status</th>
                                     <th>Responded At</th>
-                                    <th style="width:100px;">Action</th>
+                                    <th style="width:160px;">Action</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -241,12 +246,13 @@
                                         </td>
                                         <td>
                                             @if(!$invitation->responded_at)
-                                                <button type="button" class="btn btn-outline-primary btn-sm js-resend-invitation" data-invitation-id="{{ $invitation->id }}" data-community-id="{{ $community->id }}" title="Resend invitation">
+                                                <button type="button" class="btn btn-outline-primary btn-sm js-resend-invitation" data-invitation-id="{{ $invitation->id }}" data-community-id="{{ $community->id }}" data-resend-url="{{ route('admin.commsofpractice.resendInvitation') }}" title="Resend invitation">
                                                     <i class="fa fa-redo mr-1"></i>Resend
                                                 </button>
-                                            @else
-                                                <span class="text-muted">—</span>
                                             @endif
+                                            <button type="button" class="btn btn-outline-danger btn-sm js-delete-invitation" data-invitation-id="{{ $invitation->id }}" data-community-id="{{ $community->id }}" data-delete-url="{{ route('admin.commsofpractice.deleteInvitation') }}" title="Delete invitation">
+                                                <i class="fa fa-trash mr-1"></i>Delete
+                                            </button>
                                         </td>
                                     </tr>
                                 @endforeach
@@ -371,300 +377,283 @@
 @section('scripts')
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
     <script>
-        $(function(){
-            // Initialize DataTable for members table
-            var membersTable = $('#members-table').DataTable({
-                pageLength: 15,
-                lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
-                order: [[1, 'asc']],
-                columnDefs: [
-                    { orderable: false, targets: [0, 5] }
-                ],
-                language: {
-                    search: "",
-                    searchPlaceholder: "Search members by name or email...",
-                    lengthMenu: "Show _MENU_ members per page",
-                    info: "Showing _START_ to _END_ of _TOTAL_ members",
-                    infoEmpty: "No members available",
-                    infoFiltered: "(filtered from _MAX_ total members)",
-                    zeroRecords: "No matching members found"
-                },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
-            });
-            
-            // Initialize DataTable for invitations table
-            var invitationsTable = $('#invitations-table').DataTable({
-                pageLength: 15,
-                lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
-                order: [[3, 'desc']],
-                columnDefs: [
-                    { orderable: false, targets: 7 }
-                ],
-                language: {
-                    search: "",
-                    searchPlaceholder: "Search invitations by email...",
-                    lengthMenu: "Show _MENU_ invitations per page",
-                    info: "Showing _START_ to _END_ of _TOTAL_ invitations",
-                    infoEmpty: "No invitations available",
-                    infoFiltered: "(filtered from _MAX_ total invitations)",
-                    zeroRecords: "No matching invitations found"
-                },
-                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
-            });
-            
-            // Customize search input styling
-            $('.dataTables_filter input').addClass('form-control').css({
-                'width': '300px',
-                'display': 'inline-block',
-                'margin-left': '10px'
-            });
-            
-            // Add search icon to DataTables filter
-            $('.dataTables_filter').prepend('<i class="fa fa-search" style="margin-right: 5px; color: #6c757d;"></i>');
-        });
-        
-        let memberId;
-        let action;
-        var communityId = {{ $community->id }};
-        var allPendingIds = [{{ $membership->where('is_approved', 0)->pluck('id')->join(',') }}];
-        var bulkSelectAll = false;
+        (function() {
+            var communityId = {{ $community->id }};
+            var allPendingIds = [{{ $membership->where('is_approved', 0)->pluck('id')->join(',') }}];
+            var bulkSelectAll = false;
+            var memberId;
+            var action;
 
-        function showModal(id, actionType) {
-            memberId = id;
-            action = actionType;
-            $('#actionType').text(actionType);
-            if (actionType === 'delete') {
-                $('#approvalModalText').html('Permanently remove this rejected request? This cannot be undone.');
-            } else {
-                $('#approvalModalText').html('Are you sure you want to <span id="actionType">' + actionType + '</span> this member?');
-            }
-            $('#confirmAction').off('click').on('click', confirmSingleAction);
-            $('#approvalModal').modal('show');
-        }
-
-        function confirmSingleAction() {
-            var url = action === 'delete' ? '{{ route('admin.commsofpractice.deleteMember') }}' : '{{ route('admin.commsofpractice.memberAction') }}';
-            var data = {
-                _token: '{{ csrf_token() }}',
-                member_id: memberId,
-                community_id: communityId
-            };
-            if (action !== 'delete') data.action = action;
-            $.ajax({
-                url: url,
-                method: 'POST',
-                data: data,
-                success: function(response) {
-                    $('#approvalModal').modal('hide');
-                    location.reload();
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred. Please try again.');
+            function showModal(id, actionType) {
+                memberId = id;
+                action = actionType;
+                jQuery('#actionType').text(actionType);
+                if (actionType === 'delete') {
+                    jQuery('#approvalModalText').html('Permanently remove this rejected request? This cannot be undone.');
+                } else {
+                    jQuery('#approvalModalText').html('Are you sure you want to <span id="actionType">' + actionType + '</span> this member?');
                 }
-            });
-        }
-
-        $('#confirmAction').on('click', confirmSingleAction);
-
-        function getSelectedMemberIds() {
-            if (bulkSelectAll) return allPendingIds.slice();
-            var ids = [];
-            $('.member-pending-cb:checked').each(function() {
-                ids.push(parseInt($(this).val(), 10));
-            });
-            return ids;
-        }
-
-        function updateBulkButtons() {
-            var n = getSelectedMemberIds().length;
-            $('#bulk-approve-btn, #bulk-reject-btn').prop('disabled', n === 0);
-        }
-
-        $(document).on('change', '.member-pending-cb', function() {
-            if (bulkSelectAll) bulkSelectAll = false;
-            updateBulkButtons();
-        });
-
-        $(document).on('change', '#select-all-pending', function() {
-            bulkSelectAll = this.checked;
-            $('#members-table .member-pending-cb').each(function() {
-                this.checked = bulkSelectAll;
-            });
-            updateBulkButtons();
-        });
-
-        function doBulkAction(actionType) {
-            var ids = getSelectedMemberIds();
-            if (ids.length === 0) {
-                alert('Please select at least one pending member.');
-                return;
+                jQuery('#confirmAction').off('click').on('click', confirmSingleAction);
+                jQuery('#approvalModal').modal('show');
             }
-            var msg = 'Are you sure you want to ' + actionType + ' ' + ids.length + ' selected member(s)?';
-            $('#approvalModalText').text(msg);
-            $('#actionType').text(actionType);
-            $('#confirmAction').off('click').on('click', function() {
-                $.ajax({
-                    url: '{{ route('admin.commsofpractice.memberAction') }}',
+
+            function confirmSingleAction() {
+                var url = action === 'delete' ? '{{ route('admin.commsofpractice.deleteMember') }}' : '{{ route('admin.commsofpractice.memberAction') }}';
+                var data = {
+                    _token: '{{ csrf_token() }}',
+                    member_id: memberId,
+                    community_id: communityId
+                };
+                if (action !== 'delete') data.action = action;
+                jQuery.ajax({
+                    url: url,
                     method: 'POST',
-                    data: {
-                        _token: '{{ csrf_token() }}',
-                        member_ids: ids,
-                        action: actionType,
-                        community_id: communityId
-                    },
+                    data: data,
                     success: function(response) {
-                        $('#approvalModal').modal('hide');
-                        alert(response.message || 'Done.');
+                        jQuery('#approvalModal').modal('hide');
                         location.reload();
                     },
                     error: function(xhr) {
                         alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred. Please try again.');
                     }
                 });
-            });
-            $('#approvalModal').modal('show');
-        }
+            }
 
-        $(document).on('click', '#bulk-approve-btn', function(e) { e.preventDefault(); doBulkAction('approve'); });
-        $(document).on('click', '#bulk-reject-btn', function(e) { e.preventDefault(); doBulkAction('reject'); });
+            function getSelectedMemberIds() {
+                if (bulkSelectAll) return allPendingIds.slice();
+                var ids = [];
+                jQuery('.member-pending-cb:checked').each(function() {
+                    ids.push(parseInt(jQuery(this).val(), 10));
+                });
+                return ids;
+            }
 
-        // Resend invitation
-        $(document).on('click', '.js-resend-invitation', function(e) {
-            e.preventDefault();
-            var btn = $(this);
-            var invitationId = btn.data('invitation-id');
-            var commId = btn.data('community-id') || communityId;
-            if (!invitationId) { alert('Invalid invitation.'); return; }
-            if (!confirm('Resend this invitation? A new link will be sent and the previous link will no longer work.')) return;
-            btn.prop('disabled', true);
-            $.ajax({
-                url: '{{ route('admin.commsofpractice.resendInvitation') }}',
-                method: 'POST',
-                headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
-                data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: commId },
-                success: function(response) { alert(response.message || 'Invitation resent.'); location.reload(); },
-                error: function(xhr) {
-                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (xhr.status === 419 ? 'Session expired. Please refresh and try again.' : 'Failed to resend.');
-                    alert(msg);
-                    btn.prop('disabled', false);
+            function updateBulkButtons() {
+                var n = getSelectedMemberIds().length;
+                jQuery('#bulk-approve-btn, #bulk-reject-btn').prop('disabled', n === 0);
+            }
+
+            function doBulkAction(actionType) {
+                var ids = getSelectedMemberIds();
+                if (ids.length === 0) {
+                    alert('Please select at least one pending member.');
+                    return;
                 }
-            });
-        });
+                var msg = 'Are you sure you want to ' + actionType + ' ' + ids.length + ' selected member(s)?';
+                jQuery('#approvalModalText').text(msg);
+                jQuery('#actionType').text(actionType);
+                jQuery('#confirmAction').off('click').on('click', function() {
+                    jQuery.ajax({
+                        url: '{{ route('admin.commsofpractice.memberAction') }}',
+                        method: 'POST',
+                        data: {
+                            _token: '{{ csrf_token() }}',
+                            member_ids: ids,
+                            action: actionType,
+                            community_id: communityId
+                        },
+                        success: function(response) {
+                            jQuery('#approvalModal').modal('hide');
+                            alert(response.message || 'Done.');
+                            location.reload();
+                        },
+                        error: function(xhr) {
+                            alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'An error occurred. Please try again.');
+                        }
+                    });
+                });
+                jQuery('#approvalModal').modal('show');
+            }
 
-        // Pre-fill invitation form and auto-open modal when URL has email (and optionally community_id)
-        (function() {
+            jQuery(function() {
+                // Confirm button for single member action
+                jQuery('#confirmAction').on('click', confirmSingleAction);
+
+                // Inline Approve/Reject/Remove/Delete buttons
+                jQuery(document).on('click', '.js-member-action', function(e) {
+                    e.preventDefault();
+                    var id = jQuery(this).data('member-id');
+                    var actionType = jQuery(this).data('action');
+                    if (id && actionType) showModal(id, actionType);
+                });
+
+                // Row checkbox: update bulk buttons state
+                jQuery(document).on('change', '.member-pending-cb', function() {
+                    bulkSelectAll = false;
+                    updateBulkButtons();
+                });
+
+                // Select-all checkbox: check/uncheck all row checkboxes and update bulk buttons
+                jQuery(document).on('change', '#select-all-pending', function() {
+                    bulkSelectAll = this.checked;
+                    jQuery('#members-table .member-pending-cb').each(function() {
+                        this.checked = bulkSelectAll;
+                    });
+                    updateBulkButtons();
+                });
+
+                // Bulk Approve / Reject buttons
+                jQuery(document).on('click', '#bulk-approve-btn', function(e) { e.preventDefault(); doBulkAction('approve'); });
+                jQuery(document).on('click', '#bulk-reject-btn', function(e) { e.preventDefault(); doBulkAction('reject'); });
+            });
+
+            // Resend invitation (delegated; use data attributes for URL so it works from any context)
+            jQuery(document).on('click', '.js-resend-invitation', function(e) {
+                e.preventDefault();
+                var btn = jQuery(this);
+                var invitationId = btn.data('invitation-id');
+                var commId = btn.data('community-id') || communityId;
+                var url = btn.data('resend-url') || '{{ route('admin.commsofpractice.resendInvitation') }}';
+                if (!invitationId) { alert('Invalid invitation.'); return; }
+                if (!confirm('Resend this invitation? A new link will be sent and the previous link will no longer work.')) return;
+                btn.prop('disabled', true);
+                jQuery.ajax({
+                    url: url,
+                    method: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: commId },
+                    success: function(response) { alert(response.message || 'Invitation resent.'); location.reload(); },
+                    error: function(xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (xhr.status === 419 ? 'Session expired. Please refresh and try again.' : 'Failed to resend.');
+                        alert(msg);
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+
+            // Delete invitation
+            jQuery(document).on('click', '.js-delete-invitation', function(e) {
+                e.preventDefault();
+                var btn = jQuery(this);
+                var invitationId = btn.data('invitation-id');
+                var commId = btn.data('community-id') || communityId;
+                var url = btn.data('delete-url') || '{{ route('admin.commsofpractice.deleteInvitation') }}';
+                if (!invitationId) { alert('Invalid invitation.'); return; }
+                if (!confirm('Delete this invitation? This cannot be undone.')) return;
+                btn.prop('disabled', true);
+                jQuery.ajax({
+                    url: url,
+                    method: 'POST',
+                    contentType: 'application/x-www-form-urlencoded; charset=UTF-8',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    data: { _token: '{{ csrf_token() }}', invitation_id: invitationId, community_id: commId },
+                    success: function(response) { alert(response.message || 'Invitation deleted.'); location.reload(); },
+                    error: function(xhr) {
+                        var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : (xhr.status === 419 ? 'Session expired. Please refresh and try again.' : 'Failed to delete.');
+                        alert(msg);
+                        btn.prop('disabled', false);
+                    }
+                });
+            });
+        })();
+
+        jQuery(function() {
+            // Initialize DataTable for invitations table only (members table left as plain HTML for checkboxes/buttons)
+            if (jQuery('#invitations-table').length) {
+                jQuery('#invitations-table').DataTable({
+                    pageLength: 15,
+                    lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
+                    order: [[3, 'desc']],
+                    columnDefs: [{ orderable: false, targets: 7 }],
+                    language: { search: "", searchPlaceholder: "Search invitations by email...", lengthMenu: "Show _MENU_ invitations per page", info: "Showing _START_ to _END_ of _TOTAL_ invitations", infoEmpty: "No invitations available", infoFiltered: "(filtered from _MAX_ total)", zeroRecords: "No matching invitations found" },
+                    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
+                });
+                jQuery('.dataTables_filter input').addClass('form-control').css({ width: '300px', display: 'inline-block', marginLeft: '10px' });
+                jQuery('.dataTables_filter').prepend('<i class="fa fa-search" style="margin-right: 5px; color: #6c757d;"></i>');
+            }
+
+            // Pre-fill invitation form and auto-open modal when URL has email
             var params = new URLSearchParams(window.location.search);
             var emailParam = params.get('email');
             var communityIdParam = params.get('community_id');
             if (emailParam && emailParam.trim() !== '') {
-                $('#invitationEmail').val(emailParam.trim().replace(/%2C/gi, ', '));
+                jQuery('#invitationEmail').val(emailParam.trim().replace(/%2C/gi, ', '));
                 if (communityIdParam) {
-                    $('#sendInvitationForm').find('input[name="community_id"]').val(communityIdParam);
+                    jQuery('#sendInvitationForm').find('input[name="community_id"]').val(communityIdParam);
                 }
-                $('#sendInvitationModal').modal('show');
+                jQuery('#sendInvitationModal').modal('show');
             }
-        })();
 
-        // Handle send invitation form (AJAX; form also has action/method for fallback if JS disabled)
-        $('#sendInvitationForm').on('submit', function(e) {
-            e.preventDefault();
-            var $form = $(this);
-            var $btn = $form.find('#sendInvitationSubmitBtn');
-            var communityId = $form.find('input[name="community_id"]').val();
-            var emailVal = $('#invitationEmail').val().trim();
-            if (!communityId || !emailVal) {
-                alert('Please enter at least one email address.');
-                return;
-            }
-            $btn.prop('disabled', true).text('Sending...');
-            var formData = new FormData($form[0]);
-            formData.set('email', emailVal);
-            $.ajax({
-                url: $form.attr('action'),
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': $form.find('input[name="_token"]').val(),
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                data: formData,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    $('#sendInvitationModal').modal('hide');
-                    $form[0].reset();
-                    $form.find('input[name="community_id"]').val('{{ $community->id }}');
-                    alert(response.message || 'Invitation(s) sent.');
-                    location.reload();
-                },
-                error: function(xhr) {
-                    var message = 'An error occurred. Please try again.';
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        message = xhr.responseJSON.message;
-                    } else if (xhr.status === 419) {
-                        message = 'Session expired. Please refresh the page and try again.';
-                    } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
-                        message = Object.values(xhr.responseJSON.errors).flat().join(' ');
-                    }
-                    alert(message);
-                },
-                complete: function() {
-                    $btn.prop('disabled', false).text('Send Invitation(s)');
+            // Handle send invitation form (AJAX)
+            jQuery('#sendInvitationForm').on('submit', function(e) {
+                e.preventDefault();
+                var $form = jQuery(this);
+                var $btn = $form.find('#sendInvitationSubmitBtn');
+                var communityId = $form.find('input[name="community_id"]').val();
+                var emailVal = jQuery('#invitationEmail').val().trim();
+                if (!communityId || !emailVal) {
+                    alert('Please enter at least one email address.');
+                    return;
                 }
-            });
-        });
-
-        // Download CSV template (header + one example row)
-        $('#downloadCsvTemplate').on('click', function(e) {
-            e.preventDefault();
-            var csv = 'email\nexample@email.com';
-            var blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            var link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.download = 'invitation_emails_template.csv';
-            link.click();
-            URL.revokeObjectURL(link.href);
-        });
-
-        // Import CSV: show/hide selected communities
-        $('input[name="scope"]').on('change', function() {
-            $('#selectedCommunitiesWrap').toggle($(this).val() === 'selected');
-        });
-        // Import CSV form submit
-        $('#importCsvForm').on('submit', function(e) {
-            e.preventDefault();
-            var fd = new FormData(this);
-            fd.append('_token', '{{ csrf_token() }}');
-            fd.append('scope', $('input[name="scope"]:checked').val());
-            fd.append('community_id', '{{ $community->id }}');
-            if ($('input[name="scope"]:checked').val() === 'selected') {
-                $('#selectedCommunities option:selected').each(function() {
-                    fd.append('community_ids[]', $(this).val());
+                $btn.prop('disabled', true).text('Sending...');
+                var formData = new FormData($form[0]);
+                formData.set('email', emailVal);
+                jQuery.ajax({
+                    url: $form.attr('action'),
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': $form.find('input[name="_token"]').val(), 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        jQuery('#sendInvitationModal').modal('hide');
+                        $form[0].reset();
+                        $form.find('input[name="community_id"]').val('{{ $community->id }}');
+                        alert(response.message || 'Invitation(s) sent.');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : (xhr.status === 419 ? 'Session expired. Please refresh the page.' : 'An error occurred.');
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) message = Object.values(xhr.responseJSON.errors).flat().join(' ');
+                        alert(message);
+                    },
+                    complete: function() { $btn.prop('disabled', false).text('Send Invitation(s)'); }
                 });
-            }
-            var $btn = $('#importCsvSubmitBtn');
-            $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Sending...');
-            $.ajax({
-                url: '{{ route('admin.commsofpractice.bulkInvite') }}',
-                method: 'POST',
-                data: fd,
-                processData: false,
-                contentType: false,
-                success: function(response) {
-                    $('#importCsvModal').modal('hide');
-                    $('#importCsvForm')[0].reset();
-                    $('#selectedCommunitiesWrap').hide();
-                    alert(response.message || 'Done.');
-                    location.reload();
-                },
-                error: function(xhr) {
-                    alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Import failed.');
-                },
-                complete: function() {
-                    $btn.prop('disabled', false).html('<i class="fa fa-upload mr-1"></i>Import and Send');
+            });
+
+            jQuery('#downloadCsvTemplate').on('click', function(e) {
+                e.preventDefault();
+                var blob = new Blob(['email\nexample@email.com'], { type: 'text/csv;charset=utf-8;' });
+                var link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = 'invitation_emails_template.csv';
+                link.click();
+                URL.revokeObjectURL(link.href);
+            });
+
+            jQuery('input[name="scope"]').on('change', function() {
+                jQuery('#selectedCommunitiesWrap').toggle(jQuery(this).val() === 'selected');
+            });
+
+            jQuery('#importCsvForm').on('submit', function(e) {
+                e.preventDefault();
+                var fd = new FormData(this);
+                fd.append('_token', '{{ csrf_token() }}');
+                fd.append('scope', jQuery('input[name="scope"]:checked').val());
+                fd.append('community_id', '{{ $community->id }}');
+                if (jQuery('input[name="scope"]:checked').val() === 'selected') {
+                    jQuery('#selectedCommunities option:selected').each(function() { fd.append('community_ids[]', jQuery(this).val()); });
                 }
+                var $btn = jQuery('#importCsvSubmitBtn');
+                $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin mr-1"></i>Sending...');
+                jQuery.ajax({
+                    url: '{{ route('admin.commsofpractice.bulkInvite') }}',
+                    method: 'POST',
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    success: function(response) {
+                        jQuery('#importCsvModal').modal('hide');
+                        jQuery('#importCsvForm')[0].reset();
+                        jQuery('#selectedCommunitiesWrap').hide();
+                        alert(response.message || 'Done.');
+                        location.reload();
+                    },
+                    error: function(xhr) { alert(xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Import failed.'); },
+                    complete: function() { $btn.prop('disabled', false).html('<i class="fa fa-upload mr-1"></i>Import and Send'); }
+                });
             });
         });
-    });
     </script>
 @endsection

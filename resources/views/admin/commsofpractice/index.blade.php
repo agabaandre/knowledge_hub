@@ -137,7 +137,7 @@
                 @if(isset($pending_member_approvals_count) && $pending_member_approvals_count > 0)
                     <div class="dropdown nav-item mr-2" id="communities-notification-dropdown">
                         <a class="nav-link position-relative" href="#" data-toggle="dropdown" title="Communities with Pending Approvals">
-                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
                                 <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
                                 <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
                             </svg>
@@ -175,6 +175,14 @@
         </div>
         <div class="card-body text-left">
             @include('layouts.partials.alerts')
+            <form method="GET" action="{{ request()->url() }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
+                <label class="mb-0 font-weight-medium">Search:</label>
+                <input type="text" name="term" value="{{ request('term') }}" class="form-control" style="max-width: 280px;" placeholder="By community name or creator email..." aria-label="Search communities">
+                <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-search mr-1"></i>Search</button>
+                @if(request()->filled('term'))
+                    <a href="{{ request()->url() }}" class="btn btn-outline-secondary btn-sm">Clear</a>
+                @endif
+            </form>
             <div class="table-responsive">
                 <table id="communities-table" class="table table-striped table-hover table-bordered">
                     <thead class="thead-light">

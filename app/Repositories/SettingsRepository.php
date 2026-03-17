@@ -69,7 +69,7 @@ class SettingsRepository
         }
         return \Illuminate\Support\Str::title(str_replace(['.', '_', '-'], ' ', $t));
     }
-
+    
     public function save(Request $request){
 
         $rawTheme = $request->input('site_theme');
@@ -133,11 +133,11 @@ class SettingsRepository
         if (!$hasThemeOverlay) {
             $settings->primary_color     = $request->primary_color;
             $settings->secondary_color   = $request->secondary_color;
-            $settings->primary_text_color = $request->primary_text_color;
-            $settings->links_active_color = $request->links_active_color;
-            $settings->icon_font_color = $request->icon_font_color;
-            $settings->banner_text = $request->banner_text;
-            $settings->footer_style = $request->footer_style;
+        $settings->primary_text_color = $request->primary_text_color;
+        $settings->links_active_color = $request->links_active_color;
+        $settings->icon_font_color = $request->icon_font_color;
+        $settings->banner_text = $request->banner_text;
+        $settings->footer_style = $request->footer_style;
             $settings->gradient_start_color = $request->gradient_start_color;
             $settings->gradient_end_color = $request->gradient_end_color;
             if (Schema::hasColumn('setting', 'translate_button_filled')) {
@@ -336,7 +336,7 @@ class SettingsRepository
             if ($request->hasFile('spotlight_banner')) {
                 $banner_filepath = $this->save_attachments($request->file('spotlight_banner'));
                 if (!$hasThemeOverlay) {
-                    $settings->spotlight_banner = $banner_filepath;
+                $settings->spotlight_banner = $banner_filepath;
                 }
                 if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
                     $this->upsertThemeSetting($themeKey, 'spotlight_banner', $banner_filepath);
@@ -385,7 +385,7 @@ class SettingsRepository
             $file_path   = $file_name . '.' . $extension;
             $file->move(storage_path() . '/app/public/uploads/config/', $file_path);
         }
-        return $file_path;
+       return $file_path;
     }
 
     private function upsertThemeSetting(string $theme, string $key, ?string $value): void

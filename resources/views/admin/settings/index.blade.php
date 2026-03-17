@@ -413,7 +413,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Slogan</label>
                                 <input type="text" name="slogan" value="{{ $settings->slogan }}" class="form-control" placeholder="Your site slogan">
                 </div>
@@ -446,7 +446,7 @@
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Site Logo</label>
                                 <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
                                 <select name="logo_existing" id="logo_existing" class="form-control mb-2">
@@ -488,7 +488,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                    </div>
 
                 <!-- Appearance Tab -->
                 <div class="tab-pane fade" id="appearance" role="tabpanel">
@@ -520,8 +520,8 @@
                                     </div>
                     </div>
                 </div>
-                        </div>
-                    </div>
+                </div>
+            </div>
 
                     <div class="row">
                         <div class="col-md-4">
@@ -564,60 +564,60 @@
                             <div class="form-section-subtitle mb-2">Navigation bar</div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Front nav style <span class="text-muted">(public site only)</span></label>
                                 <select name="nav_style" class="form-control">
                                     <option value="colored" @if(($settings->nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary/secondary background)</option>
                                     <option value="light" @if(($settings->nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
                                 </select>
                                 <small class="info-text">Navigation bar style on the public (front) site only.</small>
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Admin nav style <span class="text-muted">(admin panel only)</span></label>
                                 <select name="admin_nav_style" class="form-control">
                                     <option value="colored" @if(($settings->admin_nav_style ?? 'colored') === 'colored') selected @endif>Colored (primary background)</option>
                                     <option value="light" @if(($settings->admin_nav_style ?? '') === 'light') selected @endif>Light (light background, dark text)</option>
                                 </select>
                                 <small class="info-text">Navigation bar style in the admin panel only. Does not affect the public site.</small>
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Nav link color</label>
                                 <div class="input-group colorPicker">
                                     <input type="text" name="nav_link_color" value="{{ $settings->nav_link_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#fff' }}" />
                                     <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_color ?? (($settings->nav_style ?? 'colored') === 'light' ? '#334155' : '#ffffff') }}"></span>
-                                    </div>
+                </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Nav link hover</label>
                                 <div class="input-group colorPicker">
                                     <input type="text" name="nav_link_hover_color" value="{{ $settings->nav_link_hover_color ?? '' }}" class="form-control" placeholder="{{ ($settings->nav_style ?? 'colored') === 'light' ? '#119A48' : '#e2e8f0' }}" />
                                     <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_hover_color ?? (($settings->nav_style ?? 'colored') === 'light' ? ($settings->primary_color ?? '#119A48') : '#e2e8f0') }}"></span>
-                                    </div>
+                </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Nav link active</label>
                                 <div class="input-group colorPicker">
                                     <input type="text" name="nav_link_active_color" value="{{ $settings->nav_link_active_color ?? '' }}" class="form-control" placeholder="{{ ($settings->primary_color ?? '#119A48') }}" />
                                     <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->nav_link_active_color ?? ($settings->primary_color ?? '#119A48') }}"></span>
-                                    </div>
+                </div>
                                 </div>
                             </div>
                         </div>
                         <div class="col-md-2">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Nav font weight</label>
                                 <select name="nav_font_weight" class="form-control">
                                     @foreach([['400', 'Normal'], ['500', 'Medium'], ['600', 'Semibold'], ['700', 'Bold']] as $opt)
@@ -627,11 +627,11 @@
                                 <small class="info-text">Applies to front and admin nav links.</small>
                             </div>
                         </div>
-                    </div>
+                </div>
 
                     <div class="row mt-2">
                         <div class="col-md-6">
-                            <div class="form-group">
+                <div class="form-group">
                                 <label>Show Icons in Main Menu</label>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="menu_icons_enabled" name="menu_icons_enabled" value="1" @if($settings->menu_icons_enabled) checked @endif>
@@ -686,9 +686,9 @@
                                     <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
                                 </div>
                                 <small class="info-text">When enabled, the main search page will include matching discussions and communities alongside publications.</small>
-                            </div>
-                        </div>
                     </div>
+                </div>
+            </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-heading"></i>
@@ -832,11 +832,11 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>AU Red <small class="text-muted">(PANTONE 7420 C)</small></label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_red" value="{{ $settings->au_red ?? '#9F2241' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_red ?? '#9F2241' }}"></span>
-                                    </div>
+                        </div>
                                 </div>
                                 <small class="info-text">RGB: 159, 34, 65 | CMYK: 27, 98, 66, 18</small>
                             </div>
@@ -852,33 +852,33 @@
                                 </div>
                                 <small class="info-text">RGB: 180, 162, 105 | CMYK: 31, 31, 69, 2</small>
                             </div>
-                        </div>
                     </div>
+                </div>
 
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>AU Corporate Green <small class="text-muted">(PANTONE 3415 C)</small></label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_corporate_green" value="{{ $settings->au_corporate_green ?? '#1A5632' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_corporate_green ?? '#1A5632' }}"></span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                                 <small class="info-text">RGB: 26, 86, 50 | CMYK: 86, 40, 91, 39</small>
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>AU Green <small class="text-muted">(PANTONE 7740 C)</small></label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_green" value="{{ $settings->au_green ?? '#1A5632' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_green ?? '#1A5632' }}"></span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                                 <small class="info-text">Official AU Green color</small>
-                            </div>
+                </div>
                         </div>
                     </div>
 
@@ -886,26 +886,26 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Agenda 2063 Plum <small class="text-muted">(PANTONE 3415 C)</small></label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_plum" value="{{ $settings->au_plum ?? '#522B39' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_plum ?? '#522B39' }}"></span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                                 <small class="info-text">RGB: 82, 43, 57 | CMYK: 54, 86, 50, 48</small>
-                            </div>
+                </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Grey Text <small class="text-muted">(PANTONE 425 C)</small></label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_grey_text" value="{{ $settings->au_grey_text ?? '#58595B' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_grey_text ?? '#58595B' }}"></span>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
                                 <small class="info-text">RGB: 83, 87, 90 | CMYK: 65, 56, 53, 29</small>
-                            </div>
+                </div>
                         </div>
                     </div>
 
@@ -913,28 +913,28 @@
                         <div class="col-md-6">
                             <div class="form-group">
                                 <label>Bright White</label>
-                                <div class="input-group colorPicker">
+                    <div class="input-group colorPicker">
                                     <input type="text" name="au_white" value="{{ $settings->au_white ?? '#FFFFFF' }}" class="form-control" />
-                                    <div class="input-group-append">
+                        <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->au_white ?? '#FFFFFF' }}; border: 1px solid #ddd;"></span>
-                                    </div>
+                        </div>
                                 </div>
                                 <small class="info-text">RGB: 255, 255, 255 | CMYK: 0, 0, 0, 0</small>
                             </div>
-                        </div>
                     </div>
+                </div>
 
                     <div class="row">
                         <div class="col-md-6">
-                            <div class="form-group">
+                    <div class="form-group">
                                 <label>Banner Text Color</label>
                                 <div class="input-group colorPicker">
                                     <input type="text" name="banner_text" value="{{ $settings->banner_text ?? '#FFFFFF' }}" class="form-control" />
                                     <div class="input-group-append">
                                         <span class="input-group-text color-preview" style="background-color: {{ $settings->banner_text ?? '#FFFFFF' }}"></span>
-                                    </div>
                         </div>
                     </div>
+                </div>
                 </div>
                         <div class="col-md-6">
                     <div class="form-group">
@@ -988,8 +988,8 @@
                                 </div>
                                 <small class="info-text">Text color of the translate/language selector button.</small>
                             </div>
-                        </div>
                     </div>
+                </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-image"></i>
@@ -1309,10 +1309,10 @@
                         <small class="info-text">Paste the complete Google Analytics tracking code.</small>
                     </div>
 
-                    <div class="form-group">
-                        <label>Content Disclaimer</label>
+                <div class="form-group">
+                    <label>Content Disclaimer</label>
                         <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
-                    </div>
+                </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-file-alt"></i>
@@ -1323,7 +1323,7 @@
                         <label>Minimum Publication Description Words</label>
                         <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
                         <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
-                    </div>
+                </div>
 
                     <div class="form-group">
                         <label>Required Fields on Publication Form</label>
@@ -1405,8 +1405,8 @@
                                     <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
                                 </div>
                             </div>
-                        </div>
-                    </div>
+            </div>
+        </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-sign-in-alt"></i>
@@ -1471,7 +1471,7 @@
                             <button type="submit" class="btn btn-outline-secondary" title="Import configuration from XML (overwrites current theme settings; images are not imported)">
                                 <i class="fa fa-upload me-2"></i>Import Config
                             </button>
-                        </form>
+    </form>
                         <button type="button" 
                            class="btn btn-outline-secondary" 
                            onclick="clearCache()"
