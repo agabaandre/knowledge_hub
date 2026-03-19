@@ -1,4 +1,4 @@
-<div class="horizontal-main hor-menu clearfix side-header">
+<div class="horizontal-main hor-menu clearfix side-header notranslate" translate="no">
     <div class="horizontal-mainwrapper container clearfix">
         <!--Nav-->
         <nav class="horizontalMenu clearfix">

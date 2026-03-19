@@ -1,4 +1,4 @@
-<div class="mainnav__categoriy py-3">
+<div class="mainnav__categoriy py-3 notranslate" translate="no">
     <h6 class="mainnav__caption mt-0 fw-bold">{{ __('admin_nav.menu_caption') }}</h6>
     <ul class="mainnav__menu nav flex-column">
         <li class="nav-item has-sub">

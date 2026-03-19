@@ -162,7 +162,7 @@ class ChatGPTService implements AIModel{
      * Large groups are split into chunks to reduce truncation risk.
      *
      * @param  array<string, string>  $englishKeyed  key => English text
-     * @return array{ok: bool, translations?: array<string, string>, error?: string}
+     * @return array{ok: bool, translations?: array<string, string>, error?: string, warnings?: array<int, string>}
      */
     public function translateUiStringBatch(string $targetLanguageLabel, array $englishKeyed): array
     {
@@ -171,6 +171,7 @@ class ChatGPTService implements AIModel{
         }
 
         $merged = [];
+        $warnings = [];
         // Smaller chunks + same transport as forum summaries reduces truncation / invalid JSON
         $chunks = array_chunk($englishKeyed, 12, true);
 
@@ -192,13 +193,20 @@ class ChatGPTService implements AIModel{
                 }
             }
 
-            foreach (array_keys($chunk) as $key) {
-                if (! array_key_exists($key, $part)) {
-                    return [
-                        'ok' => false,
-                        'error' => 'OpenAI did not return usable translations for batch '.((int) $index + 1).' (missing key: '.$key.'). Check model output length (OPENAI_MODEL) and logs.',
-                    ];
+            $chunkMissing = [];
+            foreach ($chunk as $key => $englishSource) {
+                if (! array_key_exists($key, $part) || trim((string) $part[$key]) === '') {
+                    // Do not fail the whole request; keep workflow moving by pre-filling with English.
+                    $part[$key] = (string) $englishSource;
+                    $chunkMissing[] = (string) $key;
                 }
+            }
+            if ($chunkMissing !== []) {
+                $warnings[] = 'Batch '.((int) $index + 1).' had missing AI values for keys: '.implode(', ', $chunkMissing).'. Filled from English fallback.';
+                Log::warning('translateUiStringBatch: missing keys filled from English fallback', [
+                    'batch' => (int) $index + 1,
+                    'keys' => $chunkMissing,
+                ]);
             }
 
             foreach ($part as $k => $v) {
@@ -209,7 +217,7 @@ class ChatGPTService implements AIModel{
             }
         }
 
-        return ['ok' => true, 'translations' => $merged];
+        return ['ok' => true, 'translations' => $merged, 'warnings' => $warnings];
     }
 
     /**
@@ -251,18 +259,10 @@ class ChatGPTService implements AIModel{
             ."\n\nRequired keys (exact spelling, all of them): ".$requiredKeys
             ."\n\n".json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-        // Match forum summarization: stacked user messages + model from config (see promptStream)
-        $payload = [
-            'messages' => [
-                ['role' => 'user', 'content' => $guide],
-                ['role' => 'user', 'content' => $userTask],
-            ],
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'max_tokens' => 4096,
-            'temperature' => 0.2,
-        ];
-
-        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $response = $this->sendTranslateCompletionRequest($endpoint, $headers, [
+            ['role' => 'user', 'content' => $guide],
+            ['role' => 'user', 'content' => $userTask],
+        ], 4096);
         $this->logTranslateFinishReason($response);
 
         $content = $this->extractOpenAiMessageContent($response);
@@ -308,17 +308,10 @@ class ChatGPTService implements AIModel{
         $userTask = 'Context key (do not translate this word, it is only context): '.$key."\n"
             .'English label to translate: '.$englishSource;
 
-        $payload = [
-            'messages' => [
-                ['role' => 'user', 'content' => $guide],
-                ['role' => 'user', 'content' => $userTask],
-            ],
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'max_tokens' => 256,
-            'temperature' => 0.2,
-        ];
-
-        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $response = $this->sendTranslateCompletionRequest($endpoint, $headers, [
+            ['role' => 'user', 'content' => $guide],
+            ['role' => 'user', 'content' => $userTask],
+        ], 256);
         $content = $this->extractOpenAiMessageContent($response);
         if ($content === null) {
             return null;
@@ -329,6 +322,40 @@ class ChatGPTService implements AIModel{
         $line = trim($line, " \t\"'");
 
         return $line !== '' ? $line : null;
+    }
+
+    /**
+     * Translation-specific completion call with automatic model fallback.
+     *
+     * @param  list<array{role: string, content: string}>  $messages
+     * @return object|null
+     */
+    private function sendTranslateCompletionRequest(string $endpoint, array $headers, array $messages, int $maxTokens)
+    {
+        $configuredModel = (string) config('ai.openai_model', 'gpt-3.5-turbo');
+        $payload = [
+            'messages' => $messages,
+            'model' => $configuredModel,
+            'max_tokens' => $maxTokens,
+            'temperature' => 0.2,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        if ($this->hasOpenAiError($response) && $configuredModel !== 'gpt-3.5-turbo') {
+            Log::warning('translate request failed with configured model; retrying fallback model', [
+                'configured_model' => $configuredModel,
+                'fallback_model' => 'gpt-3.5-turbo',
+            ]);
+            $payload['model'] = 'gpt-3.5-turbo';
+            $response = $this->sendRequest($endpoint, $headers, $payload);
+        }
+
+        return $response;
+    }
+
+    private function hasOpenAiError($response): bool
+    {
+        return is_object($response) && isset($response->error);
     }
 
     private function logTranslateFinishReason($response): void

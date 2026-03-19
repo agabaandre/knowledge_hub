@@ -149,6 +149,7 @@ class LanguageManagementController extends Controller
         return response()->json([
             'ok' => true,
             'translations' => $result['translations'] ?? [],
+            'warnings' => $result['warnings'] ?? [],
         ]);
     }
 
