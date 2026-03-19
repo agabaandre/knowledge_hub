@@ -182,6 +182,16 @@ class ChatGPTService implements AIModel{
                 $part = array_merge($part, $retry);
             }
 
+            $stillMissing = array_diff_key($chunk, $part);
+            if ($stillMissing !== []) {
+                foreach ($stillMissing as $key => $englishSource) {
+                    $one = $this->translateSingleUiLabel($targetLanguageLabel, (string) $key, (string) $englishSource);
+                    if ($one !== null && $one !== '') {
+                        $part[$key] = $one;
+                    }
+                }
+            }
+
             foreach (array_keys($chunk) as $key) {
                 if (! array_key_exists($key, $part)) {
                     return [
@@ -222,11 +232,14 @@ class ChatGPTService implements AIModel{
             'Authorization: Bearer '.$api_key,
         ];
 
+        $requiredKeys = implode(', ', array_keys($chunk));
+
         $guide = 'You translate short UI strings for a public health knowledge hub (navigation labels, buttons, footer links). '
             .'Target language: '.$targetLanguageLabel.'. '
             .'Preserve placeholders exactly: :name, :attribute, :year, %s, {0}, etc. Keep labels concise. '
+            .'You MUST include every key listed below — do not omit any key (including the first one). '
             .'Reply using ONE of these formats only (prefer the first): '
-            .'(1) A single JSON object whose keys are exactly the input keys and values are translations. '
+            .'(1) A single JSON object whose keys match the input exactly (same spelling and snake_case) and values are translations. '
             .'(2) If JSON is awkward, one line per key: KEY<TAB>translated text (real tab character). '
             .'No markdown code fences, no explanation, no HTML.';
 
@@ -235,6 +248,7 @@ class ChatGPTService implements AIModel{
         }
 
         $userTask = ($retryPass ? 'Translate only these remaining keys.' : 'Translate all string values from English.')
+            ."\n\nRequired keys (exact spelling, all of them): ".$requiredKeys
             ."\n\n".json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
         // Match forum summarization: stacked user messages + model from config (see promptStream)
@@ -249,6 +263,8 @@ class ChatGPTService implements AIModel{
         ];
 
         $response = $this->sendRequest($endpoint, $headers, $payload);
+        $this->logTranslateFinishReason($response);
+
         $content = $this->extractOpenAiMessageContent($response);
         if ($content === null || $content === '') {
             Log::warning('translateUiStringChunk: empty OpenAI content', [
@@ -260,10 +276,13 @@ class ChatGPTService implements AIModel{
         }
 
         $parsed = $this->parseTranslationMap($content, array_keys($chunk));
-        if ($parsed === []) {
-            Log::warning('translateUiStringChunk: could not parse response', [
+        if (count($parsed) < count($chunk)) {
+            Log::warning('translateUiStringChunk: incomplete parse', [
                 'retry' => $retryPass,
-                'snippet' => mb_substr($content, 0, 1200),
+                'expected' => count($chunk),
+                'got' => count($parsed),
+                'missing' => array_values(array_diff(array_keys($chunk), array_keys($parsed))),
+                'snippet' => mb_substr($content, 0, 1500),
             ]);
         }
 
@@ -271,9 +290,66 @@ class ChatGPTService implements AIModel{
     }
 
     /**
+     * One label, plain-text reply — reliable fallback when batch JSON omits keys (e.g. "home").
+     */
+    private function translateSingleUiLabel(string $targetLanguageLabel, string $key, string $englishSource): ?string
+    {
+        $api_key = config('ai.open_api_key');
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$api_key,
+        ];
+
+        $guide = 'You translate one short UI label for a public health website. '
+            .'Target language: '.$targetLanguageLabel.'. '
+            .'Output ONLY the translated label text on one line. No quotes, no JSON, no key name, no explanation.';
+
+        $userTask = 'Context key (do not translate this word, it is only context): '.$key."\n"
+            .'English label to translate: '.$englishSource;
+
+        $payload = [
+            'messages' => [
+                ['role' => 'user', 'content' => $guide],
+                ['role' => 'user', 'content' => $userTask],
+            ],
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'max_tokens' => 256,
+            'temperature' => 0.2,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null) {
+            return null;
+        }
+
+        $parts = preg_split("/\R/u", trim($content), 2);
+        $line = isset($parts[0]) ? trim($parts[0]) : '';
+        $line = trim($line, " \t\"'");
+
+        return $line !== '' ? $line : null;
+    }
+
+    private function logTranslateFinishReason($response): void
+    {
+        if (! is_object($response)) {
+            return;
+        }
+        $choice = $response->choices[0] ?? null;
+        if (! is_object($choice)) {
+            return;
+        }
+        $reason = $choice->finish_reason ?? null;
+        if ($reason !== null && $reason !== 'stop') {
+            Log::notice('OpenAI translate finish_reason: '.(string) $reason);
+        }
+    }
+
+    /**
      * Extract assistant text the same way as {@see AIService::formatResponse()}.
      */
-    private function extractOpenAiMessageContent(mixed $response): ?string
+    private function extractOpenAiMessageContent($response): ?string
     {
         if (! is_object($response)) {
             return null;
@@ -303,6 +379,7 @@ class ChatGPTService implements AIModel{
         $text = trim($text);
 
         $expected = array_fill_keys($expectedKeys, true);
+        $merged = [];
 
         // Full JSON
         $decoded = json_decode($text, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
@@ -310,10 +387,7 @@ class ChatGPTService implements AIModel{
             if (isset($decoded['translations']) && is_array($decoded['translations'])) {
                 $decoded = $decoded['translations'];
             }
-            $out = $this->pickExpectedTranslations($decoded, $expected);
-            if ($out !== []) {
-                return $out;
-            }
+            $merged = array_merge($merged, $this->pickExpectedTranslations($decoded, $expected));
         }
 
         // Shallow JSON object match (same idea as AIService::parseMetadata)
@@ -323,10 +397,7 @@ class ChatGPTService implements AIModel{
                 if (isset($decoded['translations']) && is_array($decoded['translations'])) {
                     $decoded = $decoded['translations'];
                 }
-                $out = $this->pickExpectedTranslations($decoded, $expected);
-                if ($out !== []) {
-                    return $out;
-                }
+                $merged = array_merge($merged, $this->pickExpectedTranslations($decoded, $expected));
             }
         }
 
@@ -340,15 +411,12 @@ class ChatGPTService implements AIModel{
                 if (isset($decoded['translations']) && is_array($decoded['translations'])) {
                     $decoded = $decoded['translations'];
                 }
-                $out = $this->pickExpectedTranslations($decoded, $expected);
-                if ($out !== []) {
-                    return $out;
-                }
+                $merged = array_merge($merged, $this->pickExpectedTranslations($decoded, $expected));
             }
         }
 
-        // TAB lines: KEY<TAB>value
-        $out = [];
+        // TAB lines: KEY<TAB>value (case-insensitive key match)
+        $lowerToCanonical = $this->expectedKeyLowerMap($expectedKeys);
         foreach (preg_split("/\R/u", $text) as $line) {
             $line = trim($line);
             if ($line === '' || (strpos($line, '#') === 0)) {
@@ -359,12 +427,35 @@ class ChatGPTService implements AIModel{
             }
             [$k, $v] = explode("\t", $line, 2);
             $k = trim($k);
-            if ($k !== '' && isset($expected[$k])) {
-                $out[$k] = trim($v);
+            $canonical = $lowerToCanonical[strtolower($k)] ?? null;
+            if ($canonical !== null) {
+                $merged[$canonical] = trim($v);
+            }
+        }
+
+        // Final pass: only expected keys, last writer wins
+        $out = [];
+        foreach ($expectedKeys as $ek) {
+            if (array_key_exists($ek, $merged)) {
+                $out[$ek] = $merged[$ek];
             }
         }
 
         return $out;
+    }
+
+    /**
+     * @param  list<string>  $expectedKeys
+     * @return array<string, string> lower => canonical
+     */
+    private function expectedKeyLowerMap(array $expectedKeys): array
+    {
+        $map = [];
+        foreach ($expectedKeys as $ek) {
+            $map[strtolower($ek)] = $ek;
+        }
+
+        return $map;
     }
 
     /**
@@ -374,12 +465,27 @@ class ChatGPTService implements AIModel{
      */
     private function pickExpectedTranslations(array $decoded, array $expected): array
     {
+        $lowerToCanonical = $this->expectedKeyLowerMap(array_keys($expected));
+
         $out = [];
         foreach ($decoded as $k => $v) {
-            if (! is_string($k) || ! isset($expected[$k])) {
+            $keyStr = is_string($k) ? $k : (is_int($k) ? (string) $k : null);
+            if ($keyStr === null) {
                 continue;
             }
-            $out[$k] = is_string($v) ? $v : (is_scalar($v) ? (string) $v : json_encode($v));
+            $canonical = null;
+            if (isset($expected[$keyStr])) {
+                $canonical = $keyStr;
+            } else {
+                $canonical = $lowerToCanonical[strtolower(trim($keyStr))] ?? null;
+            }
+            if ($canonical === null) {
+                continue;
+            }
+            if ($v === null) {
+                continue;
+            }
+            $out[$canonical] = is_string($v) ? $v : (is_scalar($v) ? (string) $v : json_encode($v));
         }
 
         return $out;
