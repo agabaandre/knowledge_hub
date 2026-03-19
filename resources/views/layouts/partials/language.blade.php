@@ -22,35 +22,15 @@
 
   
   <script type="text/javascript">
-    var khubLangMetaFromServer = @json(\App\Models\SiteLanguage::selectorMap());
-
-    function normalizeSupportedGoogleCode(code, fallbackLocale) {
-      var meta = khubLangMetaFromServer || {};
-      var fb = fallbackLocale || 'en';
-      var fbGoogle = (meta[fb] && meta[fb].google_code) ? meta[fb].google_code : fb;
-      if (!code) return fbGoogle;
-      var raw = String(code).trim().toLowerCase();
-      if (!raw) return fbGoogle;
-      for (var loc in meta) {
-        if (!Object.prototype.hasOwnProperty.call(meta, loc)) continue;
-        var g = String((meta[loc].google_code || loc)).toLowerCase();
-        if (g === raw || String(loc).toLowerCase() === raw) {
-          return (meta[loc].google_code || loc);
-        }
-      }
-      return fbGoogle;
-    }
-
      // Define helper function first
      function GTranslateGetCurrentLang() { 
        var keyValue = document['cookie'].match('(^|;) ?googtrans=([^;]*)(;|$)'); 
-       var raw = keyValue ? keyValue[2].split('/')[2] : null;
-       return normalizeSupportedGoogleCode(raw, 'en');
+       return keyValue ? keyValue[2].split('/')[2] : null; 
      }
      
      $(document).ready(function () {
-        var userLang = normalizeSupportedGoogleCode('{{$langauge}}', 'en');
-        var cookieLang = normalizeSupportedGoogleCode(GTranslateGetCurrentLang(), userLang || 'en');
+        var cookieLang = GTranslateGetCurrentLang();
+        var userLang = '{{$langauge}}';
         
         // Priority: User's saved preference > Cookie > Default (en)
         @auth
@@ -90,7 +70,7 @@
     function GTranslateFireEvent(element, event) { try { if (document.createEventObject) { var evt = document.createEventObject(); element.fireEvent('on' + event, evt) } else { var evt = document.createEvent('HTMLEvents'); evt.initEvent(event, true, true); element.dispatchEvent(evt) } } catch (e) { } }
 
     function doGTranslate(lang_code) {
-      var lang = normalizeSupportedGoogleCode(lang_code, 'en'); // translate to a supported target only
+      var lang = lang_code || 'en'; // translate to provided language
       
       // Special handling for English - remove translation and reload
       if (lang === 'en') {

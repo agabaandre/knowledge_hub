@@ -477,39 +477,10 @@
 
     window.khubLangMeta = @json($languages);
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
-    var khubLangMeta = window.khubLangMeta || {};
 
     function readCookie(name) {
         var m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
         return m ? decodeURIComponent(m[2]) : null;
-    }
-
-    function normalizeLocaleCode(localeCode) {
-        if (!localeCode) return null;
-        var code = String(localeCode).trim();
-        if (!code) return null;
-        if (Object.prototype.hasOwnProperty.call(khubLangMeta, code)) return code;
-        var lower = code.toLowerCase();
-        for (var loc in khubLangMeta) {
-            if (!Object.prototype.hasOwnProperty.call(khubLangMeta, loc)) continue;
-            if (String(loc).toLowerCase() === lower) return loc;
-        }
-        return null;
-    }
-
-    function normalizeGoogleCode(googleCode, localeCode) {
-        var locale = normalizeLocaleCode(localeCode) || 'en';
-        var fallback = (khubLangMeta[locale] && khubLangMeta[locale].google_code) ? khubLangMeta[locale].google_code : locale;
-        if (!googleCode) return fallback;
-        var raw = String(googleCode).trim();
-        if (!raw) return fallback;
-        for (var loc in khubLangMeta) {
-            if (!Object.prototype.hasOwnProperty.call(khubLangMeta, loc)) continue;
-            var gc = (khubLangMeta[loc].google_code || loc);
-            if (String(gc).toLowerCase() === raw.toLowerCase()) return gc;
-        }
-        // Reject unknown target codes to avoid random translations (e.g. hy)
-        return fallback;
     }
 
     function resolveLocaleFromGoogleCookie() {
@@ -517,12 +488,13 @@
         if (!raw) return null;
         var g = raw.split('/')[2] || '';
         if (!g) return null;
-        for (var loc in khubLangMeta) {
-            if (!Object.prototype.hasOwnProperty.call(khubLangMeta, loc)) continue;
-            var gc = (khubLangMeta[loc].google_code || loc);
+        var meta = window.khubLangMeta || {};
+        for (var loc in meta) {
+            if (!Object.prototype.hasOwnProperty.call(meta, loc)) continue;
+            var gc = (meta[loc].google_code || loc);
             if (gc === g || loc === g) return loc;
         }
-        return null;
+        return g;
     }
 
     function getCurrentLang() {
@@ -597,17 +569,14 @@
 
     // Global changeLanguage function (localeCode = Laravel/users.langauge; googleCode = Google Translate widget)
     window.changeLanguage = function(localeCode, googleCode) {
-        var safeLocale = normalizeLocaleCode(localeCode) || 'en';
-        var safeGoogleCode = normalizeGoogleCode(googleCode, safeLocale);
+        googleCode = googleCode || localeCode;
         // Laravel UI locale (nav/footer/account chrome) — complements Google Translate on page body
         try {
             var localeMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
-            document.cookie = khubLocaleCookieName + '=' + encodeURIComponent(safeLocale) + ';path=/;max-age=' + localeMaxAgeSec + ';SameSite=Lax';
-            // Keep Google cookie aligned to selected locale to prevent accidental wrong-language carry-over.
-            document.cookie = 'googtrans=/auto/' + encodeURIComponent(safeGoogleCode) + ';path=/;max-age=' + localeMaxAgeSec + ';SameSite=Lax';
+            document.cookie = khubLocaleCookieName + '=' + encodeURIComponent(localeCode) + ';path=/;max-age=' + localeMaxAgeSec + ';SameSite=Lax';
         } catch (e) { /* non-fatal */ }
 
-        updateLanguageUI(safeLocale);
+        updateLanguageUI(localeCode);
         
         // Close all dropdowns
         var selectors = document.querySelectorAll('#languageSelector');
@@ -654,7 +623,7 @@
         @endauth
         
         // Special handling for English - remove translation without reload
-        if (safeLocale === 'en') {
+        if (localeCode === 'en') {
             // Clear the translation cookie
             var date = new Date();
             date.setTime(date.getTime() - 1); // Expire immediately
@@ -729,14 +698,14 @@
                 }
                 
                 try {
-                    console.log('Calling doGTranslate with language:', safeGoogleCode);
-                    doGTranslate(safeGoogleCode);
+                    console.log('Calling doGTranslate with language:', googleCode);
+                    doGTranslate(googleCode);
                 } catch (e) {
                     console.error('Translation error:', e);
                     // Fallback: set cookie and reload page (only for non-English)
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + safeGoogleCode + "; expires=" + date.toUTCString() + "; path=/";
+                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             } else {
@@ -748,7 +717,7 @@
                     console.log('doGTranslate not available after ' + maxAttempts + ' attempts, using cookie fallback');
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + safeGoogleCode + "; expires=" + date.toUTCString() + "; path=/";
+                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             }
