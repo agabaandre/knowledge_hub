@@ -95,15 +95,17 @@
                                 <td>{{ $lang->sort_order }}</td>
                                 <td>{{ $lang->is_active ? 'Yes' : 'No' }}</td>
                                 <td class="text-end">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary"
-                                            data-bs-toggle="modal" data-bs-target="#editLangModal"
-                                            data-url="{{ route('admin.site-languages.update', $lang) }}"
-                                            data-name="{{ e($lang->name) }}"
-                                            data-google="{{ e($lang->google_translate_code ?? '') }}"
-                                            data-flag="{{ e($lang->flag_emoji ?? '') }}"
-                                            data-sort="{{ $lang->sort_order }}"
-                                            data-active="{{ $lang->is_active ? '1' : '0' }}"
-                                            data-locale="{{ e($lang->locale_code) }}">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-secondary js-edit-site-lang"
+                                            data-edit="{{ e(json_encode([
+                                                'url' => route('admin.site-languages.update', $lang),
+                                                'locale' => $lang->locale_code,
+                                                'name' => $lang->name,
+                                                'google' => $lang->google_translate_code ?? '',
+                                                'flag' => $lang->flag_emoji ?? '',
+                                                'sort' => (int) $lang->sort_order,
+                                                'active' => $lang->is_active ? 1 : 0,
+                                            ], JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT | JSON_UNESCAPED_UNICODE)) }}">
                                         {{ __('general.edit') }}
                                     </button>
                                     @if (strtolower($lang->locale_code) !== 'en')
@@ -123,14 +125,14 @@
         </div>
     </div>
 
-    <div class="modal fade" id="editLangModal" tabindex="-1" aria-hidden="true">
+    <div class="modal fade" id="editLangModal" tabindex="-1" aria-hidden="true" role="dialog">
         <div class="modal-dialog">
-            <form method="post" id="editLangForm" class="modal-content">
+            <form method="post" id="editLangForm" class="modal-content" action="#">
                 @csrf
                 @method('PUT')
                 <div class="modal-header">
                     <h5 class="modal-title">Edit language <code id="editLocaleLabel"></code></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" data-dismiss="modal" aria-label="{{ __('general.close') }}"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
@@ -155,7 +157,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ __('general.close') }}</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-dismiss="modal">{{ __('general.close') }}</button>
                     <button type="submit" class="btn btn-primary">{{ __('general.update') }}</button>
                 </div>
             </form>
@@ -166,18 +168,48 @@
 @section('scripts')
 <script>
 (function() {
-    var modal = document.getElementById('editLangModal');
-    if (!modal) return;
-    modal.addEventListener('show.bs.modal', function(ev) {
-        var btn = ev.relatedTarget;
+    var modalEl = document.getElementById('editLangModal');
+    var form = document.getElementById('editLangForm');
+    if (!modalEl || !form) return;
+
+    function showModal() {
+        if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+            bootstrap.Modal.getOrCreateInstance(modalEl).show();
+        } else if (typeof window.jQuery !== 'undefined' && window.jQuery.fn.modal) {
+            window.jQuery(modalEl).modal('show');
+        } else {
+            modalEl.classList.add('show');
+            modalEl.style.display = 'block';
+            document.body.classList.add('modal-open');
+        }
+    }
+
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('.js-edit-site-lang');
         if (!btn) return;
-        document.getElementById('editLangForm').action = btn.getAttribute('data-url');
-        document.getElementById('editLocaleLabel').textContent = btn.getAttribute('data-locale') || '';
-        document.getElementById('edit_name').value = btn.getAttribute('data-name') || '';
-        document.getElementById('edit_google').value = btn.getAttribute('data-google') || '';
-        document.getElementById('edit_flag').value = btn.getAttribute('data-flag') || '';
-        document.getElementById('edit_sort').value = btn.getAttribute('data-sort') || '0';
-        document.getElementById('edit_active').checked = btn.getAttribute('data-active') === '1';
+        e.preventDefault();
+
+        var raw = btn.getAttribute('data-edit');
+        if (!raw) return;
+
+        var data;
+        try {
+            data = JSON.parse(raw);
+        } catch (err) {
+            console.error('Invalid edit payload', err);
+            return;
+        }
+
+        form.action = data.url;
+        var locEl = document.getElementById('editLocaleLabel');
+        if (locEl) locEl.textContent = data.locale || '';
+        document.getElementById('edit_name').value = data.name || '';
+        document.getElementById('edit_google').value = data.google || '';
+        document.getElementById('edit_flag').value = data.flag || '';
+        document.getElementById('edit_sort').value = String(data.sort != null ? data.sort : 0);
+        document.getElementById('edit_active').checked = !!data.active;
+
+        showModal();
     });
 })();
 </script>
