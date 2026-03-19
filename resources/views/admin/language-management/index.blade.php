@@ -29,12 +29,12 @@
         </div>
     </div>
 
-    <form method="get" action="{{ route('admin.language-management.index') }}" class="row g-2 mb-3">
+    <div class="row g-2 mb-3 align-items-end" id="lm-filters">
         <div class="col-md-4">
-            <label class="form-label">{{ __('general.select') }} locale</label>
-            <select name="locale" class="form-select" onchange="this.form.submit()">
+            <label class="form-label" for="lm-locale">{{ __('general.select') }} locale</label>
+            <select id="lm-locale" name="locale" class="form-select no-select2" autocomplete="off">
                 @foreach ($locales as $code)
-                    <option value="{{ $code }}" @selected($code === $currentLocale)>
+                    <option value="{{ $code }}" @selected((string) $code === (string) $currentLocale)>
                         {{ $localeLabels[$code]['flag'] ?? '' }} {{ strtoupper($code) }}
                         — {{ $localeLabels[$code]['name'] ?? $code }}
                     </option>
@@ -42,62 +42,93 @@
             </select>
         </div>
         <div class="col-md-6">
-            <label class="form-label">Section</label>
-            <select name="group" class="form-select" onchange="this.form.submit()">
+            <label class="form-label" for="lm-group">Section</label>
+            <select id="lm-group" name="group" class="form-select no-select2" autocomplete="off">
                 @foreach ($groups as $key => $label)
-                    <option value="{{ $key }}" @selected($key === $currentGroup)>{{ $label }}</option>
+                    <option value="{{ $key }}" @selected((string) $key === (string) $currentGroup)>{{ $label }}</option>
                 @endforeach
             </select>
         </div>
-    </form>
+        <div class="col-md-2">
+            <span id="lm-loading" class="text-muted small d-none"><i class="fa fa-spinner fa-spin me-1"></i>Loading…</span>
+        </div>
+    </div>
 
-    <form method="post" action="{{ route('admin.language-management.update') }}">
+    <form method="post" action="{{ route('admin.language-management.update') }}" id="lm-save-form">
         @csrf
-        <input type="hidden" name="locale" value="{{ $currentLocale }}">
-        <input type="hidden" name="group" value="{{ $currentGroup }}">
-
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <span>{{ $groups[$currentGroup] ?? $currentGroup }}</span>
-                <button type="submit" class="btn btn-primary btn-sm">
-                    <i class="fa fa-save me-1"></i>{{ __('general.save') }}
-                </button>
+        <div id="lm-translation-shell" class="position-relative">
+            <div id="lm-panel-overlay" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center" style="z-index: 5; min-height: 120px;">
+                <span class="text-muted"><i class="fa fa-spinner fa-spin me-2"></i>Loading translations…</span>
             </div>
-            <div class="card-body p-0">
-                <div class="table-responsive">
-                    <table class="table table-striped table-hover mb-0 align-middle">
-                        <thead class="table-light">
-                            <tr>
-                                <th class="text-center text-muted" style="width:3.5rem">#</th>
-                                <th style="width:20%">Key</th>
-                                <th style="width:38%">English (reference)</th>
-                                <th style="width:38%">{{ strtoupper($currentLocale) }} translation</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach ($lines as $key => $value)
-                                <tr>
-                                    <td class="text-center text-muted small">{{ $loop->iteration }}</td>
-                                    <td><code class="small">{{ $key }}</code></td>
-                                    <td class="small text-muted">{{ $english[$key] ?? '' }}</td>
-                                    <td>
-                                        <input type="text"
-                                               name="translations[{{ $key }}]"
-                                               value="{{ old('translations.'.$key, $value) }}"
-                                               class="form-control form-control-sm"
-                                               autocomplete="off">
-                                    </td>
-                                </tr>
-                            @endforeach
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="card-footer text-end">
-                <button type="submit" class="btn btn-primary">
-                    <i class="fa fa-save me-1"></i>{{ __('general.save') }}
-                </button>
+            <div id="lm-translation-inner">
+                @include('admin.language-management.partials.translation-panel')
             </div>
         </div>
     </form>
+@endsection
+
+@section('scripts')
+<script>
+(function() {
+    var gridUrl = @json(route('admin.language-management.grid'));
+    var localeEl = document.getElementById('lm-locale');
+    var groupEl = document.getElementById('lm-group');
+    var inner = document.getElementById('lm-translation-inner');
+    var overlay = document.getElementById('lm-panel-overlay');
+    var loadingBadge = document.getElementById('lm-loading');
+
+    if (!localeEl || !groupEl || !inner) return;
+
+    function showLoading(show) {
+        if (overlay) overlay.classList.toggle('d-none', !show);
+        if (loadingBadge) loadingBadge.classList.toggle('d-none', !show);
+    }
+
+    function syncUrl(locale, group) {
+        try {
+            var url = new URL(window.location.href);
+            url.searchParams.set('locale', locale);
+            url.searchParams.set('group', group);
+            window.history.replaceState({}, '', url.toString());
+        } catch (e) { /* ignore */ }
+    }
+
+    function loadGrid() {
+        var locale = localeEl.value;
+        var group = groupEl.value;
+        var url = gridUrl + '?locale=' + encodeURIComponent(locale) + '&group=' + encodeURIComponent(group);
+
+        showLoading(true);
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json'
+            },
+            credentials: 'same-origin'
+        })
+        .then(function(res) {
+            if (!res.ok) throw new Error('Request failed');
+            return res.json();
+        })
+        .then(function(data) {
+            if (!data || !data.ok || !data.html) throw new Error('Invalid response');
+            inner.innerHTML = data.html;
+            localeEl.value = data.locale;
+            groupEl.value = data.group;
+            syncUrl(data.locale, data.group);
+        })
+        .catch(function() {
+            alert('Could not load translations for this locale/section. Please refresh the page.');
+        })
+        .finally(function() {
+            showLoading(false);
+        });
+    }
+
+    localeEl.addEventListener('change', loadGrid);
+    groupEl.addEventListener('change', loadGrid);
+})();
+</script>
 @endsection
