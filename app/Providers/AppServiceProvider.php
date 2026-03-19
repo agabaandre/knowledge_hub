@@ -48,6 +48,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->app->extend('translation.loader', function ($loader, $app) {
+            return new \App\Translation\MergingTranslationLoader(
+                $app['files'],
+                $app['path.lang'],
+                storage_path('app/ui_translations')
+            );
+        });
 
         define('PHPGRID_LIBPATH', 'libs/phpgrid/');
         Paginator::useBootstrap();

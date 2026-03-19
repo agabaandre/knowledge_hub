@@ -3,11 +3,19 @@
 <input type="hidden" name="group" id="lm-input-group" value="{{ $currentGroup }}">
 
 <div class="card">
-    <div class="card-header d-flex justify-content-between align-items-center">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
         <span id="lm-panel-title">{{ $groups[$currentGroup] ?? $currentGroup }}</span>
-        <button type="submit" class="btn btn-primary btn-sm">
-            <i class="fa fa-save me-1"></i>{{ __('general.save') }}
-        </button>
+        <div class="d-flex align-items-center flex-wrap gap-1">
+            @if ($currentLocale !== 'en')
+                <button type="button" class="btn btn-outline-secondary btn-sm" id="lm-ai-translate-btn"
+                        title="Use OpenAI to translate English into this locale. Review and click Save.">
+                    <i class="fa fa-magic me-1"></i> AI translate
+                </button>
+            @endif
+            <button type="submit" class="btn btn-primary btn-sm">
+                <i class="fa fa-save me-1"></i>{{ __('general.save') }}
+            </button>
+        </div>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">

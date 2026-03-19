@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\SiteLanguage;
+use App\Services\ChatGPTService;
 use App\Services\UiTranslationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -98,6 +99,67 @@ class LanguageManagementController extends Controller
                 'group' => $validated['group'],
             ])
             ->with('alert-success', 'Translations saved. Clear application cache if you use config/view caching.');
+    }
+
+    /**
+     * AI-assisted fill: translate English source strings into the selected locale (review then Save).
+     */
+    public function aiTranslate(Request $request, ChatGPTService $chatGpt)
+    {
+        $groups = array_keys($this->uiTranslations->groups());
+        $locales = $this->uiTranslations->supportedLocales();
+
+        $validated = $request->validate([
+            'locale' => ['required', 'string', Rule::in($locales)],
+            'group' => ['required', 'string', Rule::in($groups)],
+        ]);
+
+        if ($validated['locale'] === 'en') {
+            return response()->json([
+                'ok' => false,
+                'message' => 'Select a locale other than English to translate into.',
+            ], 422);
+        }
+
+        if (trim((string) config('ai.open_api_key')) === '') {
+            return response()->json([
+                'ok' => false,
+                'message' => 'OpenAI API key is not configured. Set OPEN_API_KEY in your environment.',
+            ], 503);
+        }
+
+        $english = $this->uiTranslations->loadEnglishGroup($validated['group']);
+        if ($english === []) {
+            return response()->json([
+                'ok' => false,
+                'message' => 'No English strings found for this section.',
+            ], 404);
+        }
+
+        $label = $this->localeDisplayName($validated['locale']);
+        $result = $chatGpt->translateUiStringBatch($label, $english);
+
+        if (! ($result['ok'] ?? false)) {
+            return response()->json([
+                'ok' => false,
+                'message' => $result['error'] ?? 'Translation failed.',
+            ], 502);
+        }
+
+        return response()->json([
+            'ok' => true,
+            'translations' => $result['translations'] ?? [],
+        ]);
+    }
+
+    private function localeDisplayName(string $locale): string
+    {
+        $map = SiteLanguage::selectorMap();
+        if (isset($map[$locale]['name']) && $map[$locale]['name'] !== '') {
+            return (string) $map[$locale]['name'];
+        }
+
+        return strtoupper($locale);
     }
 
     /**

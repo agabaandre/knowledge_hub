@@ -25,7 +25,18 @@ class UiTranslationService
         return resource_path('lang/en/'.$group.'.php');
     }
 
-    public function localePath(string $locale, string $group): string
+    /**
+     * Admin-saved overrides (writable). Same path the translator merges via MergingTranslationLoader.
+     */
+    public function storageLocalePath(string $locale, string $group): string
+    {
+        return storage_path('app/ui_translations/'.$locale.'/'.$group.'.php');
+    }
+
+    /**
+     * Legacy path under resources (read-only on many servers).
+     */
+    public function resourceLocalePath(string $locale, string $group): string
     {
         return resource_path('lang/'.$locale.'/'.$group.'.php');
     }
@@ -53,13 +64,23 @@ class UiTranslationService
     public function loadMergedGroup(string $locale, string $group): array
     {
         $en = $this->loadEnglishGroup($group);
-        if ($locale === 'en') {
-            return $en;
+        if ($en === []) {
+            return [];
         }
 
-        $path = $this->localePath($locale, $group);
-        $loc = File::exists($path) ? require $path : [];
-        $loc = is_array($loc) ? $loc : [];
+        $loc = [];
+
+        $storagePath = $this->storageLocalePath($locale, $group);
+        if (File::exists($storagePath)) {
+            $loaded = require $storagePath;
+            $loc = is_array($loaded) ? $loaded : [];
+        } elseif ($locale !== 'en') {
+            $legacy = $this->resourceLocalePath($locale, $group);
+            if (File::exists($legacy)) {
+                $loaded = require $legacy;
+                $loc = is_array($loaded) ? $loaded : [];
+            }
+        }
 
         $out = [];
         foreach ($en as $key => $default) {
@@ -95,13 +116,15 @@ class UiTranslationService
             $out[$key] = is_string($val) ? $val : (string) $val;
         }
 
-        $dir = resource_path('lang/'.$locale);
+        $path = $this->storageLocalePath($locale, $group);
+        $dir = dirname($path);
         if (! File::isDirectory($dir)) {
             File::makeDirectory($dir, 0755, true);
         }
 
-        $path = $this->localePath($locale, $group);
         $export = "<?php\n\nreturn ".var_export($out, true).";\n";
-        File::put($path, $export);
+        if (File::put($path, $export) === false) {
+            throw new \RuntimeException('Could not write translation file: '.$path);
+        }
     }
 }

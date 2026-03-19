@@ -57,8 +57,11 @@
     <form method="post" action="{{ route('admin.language-management.update') }}" id="lm-save-form">
         @csrf
         <div id="lm-translation-shell" class="position-relative">
-            <div id="lm-panel-overlay" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75 d-flex align-items-center justify-content-center" style="z-index: 5; min-height: 120px;">
-                <span class="text-muted"><i class="fa fa-spinner fa-spin me-2"></i>Loading translations…</span>
+            {{-- Do not mix d-none and d-flex on the same node — both use display:!important and the overlay can stay visible forever. --}}
+            <div id="lm-panel-overlay" class="d-none position-absolute top-0 start-0 w-100 h-100 bg-white bg-opacity-75" style="z-index: 5; min-height: 120px;">
+                <div class="d-flex align-items-center justify-content-center w-100 h-100">
+                    <span class="text-muted"><i class="fa fa-spinner fa-spin me-2"></i>Loading translations…</span>
+                </div>
             </div>
             <div id="lm-translation-inner">
                 @include('admin.language-management.partials.translation-panel')
@@ -71,6 +74,8 @@
 <script>
 (function() {
     var gridUrl = @json(route('admin.language-management.grid'));
+    var aiTranslateUrl = @json(route('admin.language-management.ai-translate'));
+    var csrfToken = @json(csrf_token());
     var localeEl = document.getElementById('lm-locale');
     var groupEl = document.getElementById('lm-group');
     var inner = document.getElementById('lm-translation-inner');
@@ -80,8 +85,14 @@
     if (!localeEl || !groupEl || !inner) return;
 
     function showLoading(show) {
-        if (overlay) overlay.classList.toggle('d-none', !show);
-        if (loadingBadge) loadingBadge.classList.toggle('d-none', !show);
+        if (overlay) {
+            if (show) overlay.classList.remove('d-none');
+            else overlay.classList.add('d-none');
+        }
+        if (loadingBadge) {
+            if (show) loadingBadge.classList.remove('d-none');
+            else loadingBadge.classList.add('d-none');
+        }
     }
 
     function syncUrl(locale, group) {
@@ -129,6 +140,77 @@
 
     localeEl.addEventListener('change', loadGrid);
     groupEl.addEventListener('change', loadGrid);
+
+    document.addEventListener('click', function(e) {
+        var btn = e.target && e.target.closest ? e.target.closest('#lm-ai-translate-btn') : null;
+        if (!btn) return;
+
+        var locInput = document.getElementById('lm-input-locale');
+        var grpInput = document.getElementById('lm-input-group');
+        if (!locInput || !grpInput) return;
+
+        var locale = locInput.value;
+        var group = grpInput.value;
+        if (!locale || locale === 'en') {
+            alert('Select a non-English locale to use AI translate.');
+            return;
+        }
+
+        if (!confirm('Fill all translation fields from English using OpenAI? You can edit before saving.')) {
+            return;
+        }
+
+        btn.disabled = true;
+        var icon = btn.querySelector('i');
+        var prevClass = icon ? icon.className : '';
+        if (icon) {
+            icon.className = 'fa fa-spinner fa-spin me-1';
+        }
+
+        fetch(aiTranslateUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({ locale: locale, group: group })
+        })
+        .then(function(res) {
+            return res.json().then(function(data) {
+                return { ok: res.ok, status: res.status, data: data };
+            });
+        })
+        .then(function(wrapped) {
+            var data = wrapped.data;
+            if (!wrapped.ok || !data || !data.ok) {
+                var msg = (data && data.message) ? data.message : ('Request failed (' + wrapped.status + ')');
+                throw new Error(msg);
+            }
+            var map = data.translations || {};
+            var inputs = document.querySelectorAll('.lm-translation-input');
+            var filled = 0;
+            inputs.forEach(function(inp) {
+                var key = inp.getAttribute('data-key');
+                if (key && Object.prototype.hasOwnProperty.call(map, key)) {
+                    inp.value = map[key];
+                    filled++;
+                }
+            });
+            if (filled === 0) {
+                alert('No fields were updated. Try again or check the browser console.');
+            }
+        })
+        .catch(function(err) {
+            alert(err.message || 'AI translate failed.');
+        })
+        .finally(function() {
+            btn.disabled = false;
+            if (icon) icon.className = prevClass;
+        });
+    });
 })();
 </script>
 @endsection
