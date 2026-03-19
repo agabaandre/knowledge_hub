@@ -80,6 +80,58 @@ if(!function_exists('strip_leading_overview_heading_from_summary_html')){
 	}
 }
 
+if(!function_exists('strip_leading_subheadings_before_main_paragraph')){
+	/**
+	 * Remove leading h3/h4/h5 blocks and faux-title paragraphs (bold-only / short teal-styled lines)
+	 * so the summary starts with a real body paragraph. Headings later in the HTML are unchanged.
+	 */
+	function strip_leading_subheadings_before_main_paragraph($html){
+		if (empty($html) || !is_string($html)) {
+			return $html;
+		}
+		$out = $html;
+		for ($i = 0; $i < 25; $i++) {
+			$prev = $out;
+			$out = preg_replace('#^\s*(?:<br\s*/?>\s*|&nbsp;\s*|\xc2\xa0\s*)+#i', '', $out);
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<h[345]\b[^>]*>.*?</h[345]>\s*#is',
+				'',
+				$out,
+				1
+			);
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<p\b[^>]*>\s*(?:<span\b[^>]*>\s*)?<(?:strong|b)\b[^>]*>\s*[^<]{1,180}\s*</(?:strong|b)>\s*(?:</span>\s*)?</p>\s*#is',
+				'',
+				$out,
+				1
+			);
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<p\b[^>]*style\s*=\s*["\'][^"\']*teal[^"\']*["\'][^>]*>\s*(?:<(?:strong|b)\b[^>]*>\s*)?[^<]{1,180}\s*(?:</(?:strong|b)>\s*)?</p>\s*#is',
+				'',
+				$out,
+				1
+			);
+			if ($out === $prev) {
+				break;
+			}
+		}
+		return $out;
+	}
+}
+
+if(!function_exists('normalize_ai_publication_summary_html')){
+	/**
+	 * Post-process AI HTML for publication descriptions: overview heading strip, then leading subheading strip.
+	 */
+	function normalize_ai_publication_summary_html($html){
+		if (empty($html) || !is_string($html)) {
+			return $html;
+		}
+		$out = strip_leading_overview_heading_from_summary_html($html);
+		return strip_leading_subheadings_before_main_paragraph($out);
+	}
+}
+
 if(!function_exists('clean_unicode')){
 	/**
 	 * Remove hidden Unicode characters and control characters from text

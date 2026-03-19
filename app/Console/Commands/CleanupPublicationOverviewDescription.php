@@ -60,53 +60,14 @@ class CleanupPublicationOverviewDescription extends Command
     }
 
     /**
-     * Remove leading Overview blocks (shared helper + teal-styled &lt;p&gt; variants).
+     * Same post-processing as live AI extraction (overview strip + leading subheading strip).
      */
     private function cleanupDescription(string $html): string
     {
-        $out = $html;
-
-        for ($i = 0; $i < 15; $i++) {
-            $prev = $out;
-            if (function_exists('strip_leading_overview_heading_from_summary_html')) {
-                $out = strip_leading_overview_heading_from_summary_html($out);
-            }
-
-            // <p style="color: teal; font-weight: bold;">Overview</p> (and attribute order / quote variants)
-            $out = preg_replace(
-                '#^\s*(?:<br\s*/?>\s*|&nbsp;\s*|\xc2\xa0\s*)*(?:<div\b[^>]*>\s*)*' .
-                '<p\b[^>]*style\s*=\s*["\'][^"\']*teal[^"\']*["\'][^>]*>\s*' .
-                'Overview(?:\s+of\s+the\s+Document)?\s*</p>\s*#iu',
-                '',
-                $out,
-                1
-            );
-
-            // <p><strong style="...teal...">Overview</strong></p> at start
-            $out = preg_replace(
-                '#^\s*(?:<br\s*/?>\s*|&nbsp;\s*|\xc2\xa0\s*)*(?:<div\b[^>]*>\s*)*' .
-                '<p\b[^>]*>\s*<(?:strong|b)\b[^>]*style\s*=\s*["\'][^"\']*teal[^"\']*["\'][^>]*>\s*' .
-                'Overview(?:\s+of\s+the\s+Document)?\s*</(?:strong|b)>\s*</p>\s*#iu',
-                '',
-                $out,
-                1
-            );
-
-            // Teal on <p> with bold inside (no style on strong)
-            $out = preg_replace(
-                '#^\s*(?:<br\s*/?>\s*|&nbsp;\s*|\xc2\xa0\s*)*(?:<div\b[^>]*>\s*)*' .
-                '<p\b[^>]*style\s*=\s*["\'][^"\']*teal[^"\']*["\'][^>]*>\s*' .
-                '<(?:strong|b)\b[^>]*>\s*Overview(?:\s+of\s+the\s+Document)?\s*</(?:strong|b)>\s*</p>\s*#iu',
-                '',
-                $out,
-                1
-            );
-
-            if ($out === $prev) {
-                break;
-            }
+        if (!function_exists('normalize_ai_publication_summary_html')) {
+            return $html;
         }
 
-        return $out;
+        return normalize_ai_publication_summary_html($html);
     }
 }

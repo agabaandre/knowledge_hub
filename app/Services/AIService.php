@@ -87,7 +87,7 @@ Please summarize this forum discussion, including:
         $formatted = $this->formatResponse($response);
         // Publication summaries: drop leading "Overview" heading so description starts with real content
         if (intval($type) !== 1 && !empty($formatted['content'])) {
-            $formatted['content'] = strip_leading_overview_heading_from_summary_html($formatted['content']);
+            $formatted['content'] = normalize_ai_publication_summary_html($formatted['content']);
         }
         return $formatted;
     }
@@ -135,13 +135,13 @@ Please summarize this forum discussion, including:
             $aiModel = app('chatpdf');
             $response = $aiModel->summarize($resource, $language, $additional_prompt);
             $formatted = $this->formatResponse($response);
-            $onChunk(strip_leading_overview_heading_from_summary_html($formatted['content'] ?? ''));
+            $onChunk(normalize_ai_publication_summary_html($formatted['content'] ?? ''));
             return;
         }
 
         // Non-PDF publication: GPT streaming
         $prompt = "Use summary language: $language, title: {$resource->title}, body: " . ($resource->description ?? '') . ", attached_content: " . truncate(pdfToText($resource->publication ?? ''), 100000) . ", comments: " . json_encode($resource->comments->toArray());
-        $prompt .= " Summarise for me this. Don't forget to translate to $language if provided.";
+        $prompt .= " Summarise for me this as raw HTML in a div. CRITICAL: Start with normal <p> paragraph(s)—no h3/h4/h5 or no title paragraph before the first real paragraph; subheadings only after the opening paragraphs. Don't forget to translate to $language if provided.";
         if ($additional_prompt) {
             $prompt .= " Pay attention to this: " . $additional_prompt;
         }
@@ -198,7 +198,7 @@ Please summarize this forum discussion, including:
                 // Extract description/summary
                 $summaryResponse = $this->aiModel->summarizeFile($file_path, $language, $additional_prompt);
                 $formattedContent = $this->formatResponse($summaryResponse);
-                $response['content'] = clean_unicode(strip_leading_overview_heading_from_summary_html($formattedContent['content'] ?? ''));
+                $response['content'] = clean_unicode(normalize_ai_publication_summary_html($formattedContent['content'] ?? ''));
                 
                 // Extract metadata (authors and affiliation)
                 $metadataPrompt = "Extract the following information from this document and return ONLY a valid JSON object with these exact keys: 
@@ -224,18 +224,18 @@ Please summarize this forum discussion, including:
                     $file_content = substr($file_content, 0, 100000);
                 }
                 
-                // Extract description/summary
-                $prompt = "Summarize this document content: " . $file_content;
+                // Extract description/summary (HTML for publication description field)
+                $prompt = "Summarize this document content as raw HTML inside a single div (no html/head/body). CRITICAL: The first content must be normal <p> paragraph(s) with full sentences—no h3/h4/h5 before them, and no opening <p> that is only a short bold title line. Use h3/h4 only for later sections after the opening paragraphs. Document content follows:\n\n" . $file_content;
                 if ($additional_prompt) {
-                    $prompt .= ". Pay attention to: " . $additional_prompt;
+                    $prompt .= "\n\nPay attention to: " . $additional_prompt;
                 }
                 if ($language && $language !== 'en') {
-                    $prompt .= ". Translate summary to: $language";
+                    $prompt .= "\n\nTranslate summary to: $language";
                 }
                 
                 $summaryResponse = $this->aiModel->summarize($prompt, $additional_prompt);
                 $formattedContent = $this->formatResponse($summaryResponse);
-                $response['content'] = clean_unicode(strip_leading_overview_heading_from_summary_html($formattedContent['content'] ?? ''));
+                $response['content'] = clean_unicode(normalize_ai_publication_summary_html($formattedContent['content'] ?? ''));
                 
                 // Extract metadata
                 $metadataPrompt = "From this document content: " . substr($file_content, 0, 50000) . "
