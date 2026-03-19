@@ -1,7 +1,7 @@
                        @guest
-                           <li class=" {{ $class ?? '' }}">
+                           <li class=" {{ $class ?? '' }} notranslate">
                                <a href="{{ route('login') }}" class="ft-medium text-bold">
-                                   <i class="fa fa-user mr-2"></i>Account
+                                   <i class="fa fa-user mr-2"></i>{{ __('ui_body.account') }}
                                </a>
                            </li>
 
@@ -11,7 +11,7 @@
                 </a>
                </li> -->
                        @else
-                           <li class="{{ $class ?? '' }}"><a href="#">
+                           <li class="{{ $class ?? '' }} notranslate"><a href="#">
                                        @if(!empty(current_user()->photo))
                                            <img class="rounded-circle notranslate user-avatar-img"
                                                src="{{ current_user()->photo }}"
@@ -26,48 +26,48 @@
                                    @if (is_admin())
                                        <li class=" {{ $class ?? '' }}">
                                            <a href="{{ route('admin.index') }}">
-                                               <i class="fa fa-th-large mr-1"></i>Admin Panel
+                                               <i class="fa fa-th-large mr-1"></i>{{ __('ui_body.admin_panel') }}
                                            </a>
                                        </li>
                                    @endif
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.profile') }}">
-                                           <i class="fa fa-user mr-1"></i> My Profile
+                                           <i class="fa fa-user mr-1"></i> {{ __('ui_body.my_profile') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.publications') }}">
-                                           <i class="fa fa-list mr-1"></i> Publications
+                                           <i class="fa fa-list mr-1"></i> {{ __('ui_body.publications') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.my-forums') }}">
-                                           <i class="fa fa-comments mr-1"></i> My Forums
+                                           <i class="fa fa-comments mr-1"></i> {{ __('ui_body.my_forums') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.my-communities') }}">
-                                           <i class="fa fa-users mr-1"></i> My Communities
+                                           <i class="fa fa-users mr-1"></i> {{ __('ui_body.my_communities') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.favourites') }}">
-                                           <i class="fa fa-star mr-1"></i> My Favourites
+                                           <i class="fa fa-star mr-1"></i> {{ __('ui_body.my_favourites') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.chats') }}">
-                                           <i class="fa fa-comments mr-1"></i> My Chats
+                                           <i class="fa fa-comments mr-1"></i> {{ __('ui_body.my_chats') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ route('account.publish') }}">
-                                           <i class="fa fa-plus mr-1"></i>Publish a resource
+                                           <i class="fa fa-plus mr-1"></i>{{ __('ui_body.publish_a_resource') }}
                                        </a>
                                    </li>
                                    <li class=" {{ $class ?? '' }}">
                                        <a href="{{ url('logout') }}">
-                                           <i class="fa fa-sign-out-alt"></i> Log Out
+                                           <i class="fa fa-sign-out-alt"></i> {{ __('ui_body.log_out') }}
                                        </a>
                                    </li>
                                </ul>

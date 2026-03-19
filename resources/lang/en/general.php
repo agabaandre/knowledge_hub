@@ -26,6 +26,8 @@ return [
     'name'   => 'Name',
     'details'=> "Details",
     "change" => "Change",
-    "select" => "Select"
+    "select" => "Select",
+    'cancel' => 'Cancel',
+    'delete' => 'Delete',
 
 ];

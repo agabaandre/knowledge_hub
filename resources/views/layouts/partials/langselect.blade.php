@@ -1,25 +1,20 @@
 @php
+    use App\Models\SiteLanguage;
     $translateFilled = (bool)(settings()->translate_button_filled ?? true);
     $translateTextColor = settings()->translate_button_text_color ?? '#ffffff';
-    // Use same logic as footer - check user preference first, then cookie, then default to 'en'
-    $currentLang = 'en';
-    if (auth()->check() && isset(current_user()->langauge) && !empty(current_user()->langauge)) {
-        $currentLang = current_user()->langauge;
-    } elseif (isset($_COOKIE['googtrans']) && !empty($_COOKIE['googtrans'])) {
-        $cookieLang = explode('/', $_COOKIE['googtrans']);
-        if (isset($cookieLang[2]) && !empty($cookieLang[2])) {
-            $currentLang = $cookieLang[2];
-        }
+    $languages = SiteLanguage::selectorMap();
+    $googCookie = $_COOKIE['googtrans'] ?? null;
+    $khubCookie = request()->cookie(config('supported_locales.locale_cookie')) ?? null;
+    $userLocalePref = auth()->check() ? (current_user()->langauge ?? null) : null;
+    $currentLang = SiteLanguage::resolveActiveLocale($userLocalePref, $googCookie, $khubCookie);
+    if (! isset($languages[$currentLang])) {
+        $currentLang = array_key_first($languages) ?: 'en';
     }
-    $languages = [
-        'en' => ['name' => 'English', 'flag' => '🇺🇸', 'code' => 'en'],
-        'fr' => ['name' => 'Français', 'flag' => '🇫🇷', 'code' => 'fr'],
-        'ar' => ['name' => 'العربية', 'flag' => '🇸🇦', 'code' => 'ar'],
-        'es' => ['name' => 'Español', 'flag' => '🇪🇸', 'code' => 'es'],
-        'pt' => ['name' => 'Português', 'flag' => '🇵🇹', 'code' => 'pt'],
-        'sw' => ['name' => 'Kiswahili', 'flag' => '🇰🇪', 'code' => 'sw'],
-    ];
-    $currentLanguage = $languages[$currentLang] ?? $languages['en'];
+    $currentLanguage = $languages[$currentLang] ?? null;
+    if ($currentLanguage === null) {
+        $first = reset($languages);
+        $currentLanguage = is_array($first) ? $first : ['name' => 'English', 'flag' => '', 'code' => 'en', 'google_code' => 'en'];
+    }
 @endphp
 
 <style>
@@ -231,7 +226,7 @@
     <div class="language-selector-wrapper" id="languageSelector">
         <button type="button" class="language-selector-btn notranslate" id="languageSelectorBtn">
             <span class="flag-icon">{{ $currentLanguage['flag'] }}</span>
-            <span class="lang-code">{{ strtoupper($currentLanguage['code']) }}</span>
+            <span class="lang-code">{{ strtoupper($currentLanguage['code'] ?? $currentLang) }}</span>
             <i class="fa fa-chevron-down chevron"></i>
         </button>
         <div class="language-dropdown" id="languageDropdown">
@@ -240,7 +235,8 @@
                     <li class="language-dropdown-item">
                         <a href="#" class="language-dropdown-link notranslate {{ $code === $currentLang ? 'active' : '' }}" 
                            data-lang="{{ $code }}" 
-                           onclick="changeLanguage('{{ $code }}'); return false;">
+                           data-google="{{ $lang['google_code'] ?? $code }}"
+                           onclick="changeLanguage({{ json_encode($code) }}, {{ json_encode($lang['google_code'] ?? $code) }}); return false;">
                             <span class="flag">{{ $lang['flag'] }}</span>
                             <span class="lang-name">{{ $lang['name'] }}</span>
                         </a>
@@ -478,44 +474,56 @@
 // Language management functions - No jQuery required
 (function() {
     'use strict';
-    
-    function getCurrentLang() {
-        // First priority: Use server-provided language (from user's saved preference or cookie)
-        var serverLang = '{{ $currentLang }}';
-        
-        // Second priority: Check cookie
-        var keyValue = document.cookie.match('(^|;) ?googtrans=([^;]*)(;|$)');
-        var cookieLang = null;
-        if (keyValue) {
-            cookieLang = keyValue[2].split('/')[2];
+
+    window.khubLangMeta = @json($languages);
+    var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
+
+    function readCookie(name) {
+        var m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return m ? decodeURIComponent(m[2]) : null;
+    }
+
+    function resolveLocaleFromGoogleCookie() {
+        var raw = readCookie('googtrans');
+        if (!raw) return null;
+        var g = raw.split('/')[2] || '';
+        if (!g) return null;
+        var meta = window.khubLangMeta || {};
+        for (var loc in meta) {
+            if (!Object.prototype.hasOwnProperty.call(meta, loc)) continue;
+            var gc = (meta[loc].google_code || loc);
+            if (gc === g || loc === g) return loc;
         }
-        
+        return g;
+    }
+
+    function getCurrentLang() {
+        var serverLang = '{{ $currentLang }}';
+
         @auth
-        // For logged-in users, always use server-provided language first (their saved preference)
-        // The server-side logic in langselect.blade.php already checks user preference first
-        // So serverLang should reflect the user's saved preference if they have one
         if (serverLang) {
             return serverLang;
         }
-        // Fallback to cookie if serverLang is somehow empty
-        return cookieLang || 'en';
+        var khub = readCookie(khubLocaleCookieName);
+        if (khub && window.khubLangMeta && window.khubLangMeta[khub]) return khub;
+        return resolveLocaleFromGoogleCookie() || serverLang || 'en';
         @else
-        // Guest users: use cookie if available, otherwise default to 'en'
-        return cookieLang || serverLang || 'en';
+        var khubG = readCookie(khubLocaleCookieName);
+        if (khubG && window.khubLangMeta && window.khubLangMeta[khubG]) return khubG;
+        var fromGoog = resolveLocaleFromGoogleCookie();
+        return fromGoog || serverLang || 'en';
         @endauth
     }
 
     function updateLanguageUI(langCode) {
-        var langMap = {
-            'en': {flag: '🇺🇸', code: 'EN'},
-            'fr': {flag: '🇫🇷', code: 'FR'},
-            'ar': {flag: '🇸🇦', code: 'AR'},
-            'es': {flag: '🇪🇸', code: 'ES'},
-            'pt': {flag: '🇵🇹', code: 'PT'},
-            'sw': {flag: '🇰🇪', code: 'SW'}
+        var meta = (window.khubLangMeta && window.khubLangMeta[langCode]) || {};
+        var current = {
+            flag: meta.flag || '',
+            code: (langCode || 'en').toString().substring(0, 2).toUpperCase()
         };
-
-        var current = langMap[langCode] || langMap['en'];
+        if (langCode && langCode.length > 2) {
+            current.code = langCode.toUpperCase().replace(/[^A-Z0-9]/g, '').substring(0, 6) || 'EN';
+        }
         
         // Update button (all instances)
         var buttons = document.querySelectorAll('#languageSelectorBtn');
@@ -559,9 +567,16 @@
     // Also update after a short delay to catch any late changes from cookie/translation
     setTimeout(initializeLanguageUI, 500);
 
-    // Global changeLanguage function
-    window.changeLanguage = function(langCode) {
-        updateLanguageUI(langCode);
+    // Global changeLanguage function (localeCode = Laravel/users.langauge; googleCode = Google Translate widget)
+    window.changeLanguage = function(localeCode, googleCode) {
+        googleCode = googleCode || localeCode;
+        // Laravel UI locale (nav/footer/account chrome) — complements Google Translate on page body
+        try {
+            var localeMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
+            document.cookie = khubLocaleCookieName + '=' + encodeURIComponent(localeCode) + ';path=/;max-age=' + localeMaxAgeSec + ';SameSite=Lax';
+        } catch (e) { /* non-fatal */ }
+
+        updateLanguageUI(localeCode);
         
         // Close all dropdowns
         var selectors = document.querySelectorAll('#languageSelector');
@@ -589,7 +604,7 @@
                 method: 'POST',
                 data: {
                     _token: '{{ csrf_token() }}',
-                    langauge: langCode,
+                    langauge: localeCode,
                     id: {{ current_user()->id ?? 0 }},
                     first_name: '{{ current_user()->first_name ?? "" }}',
                     last_name: '{{ current_user()->last_name ?? "" }}',
@@ -608,7 +623,7 @@
         @endauth
         
         // Special handling for English - remove translation without reload
-        if (langCode === 'en') {
+        if (localeCode === 'en') {
             // Clear the translation cookie
             var date = new Date();
             date.setTime(date.getTime() - 1); // Expire immediately
@@ -683,14 +698,14 @@
                 }
                 
                 try {
-                    console.log('Calling doGTranslate with language:', langCode);
-                    doGTranslate(langCode);
+                    console.log('Calling doGTranslate with language:', googleCode);
+                    doGTranslate(googleCode);
                 } catch (e) {
                     console.error('Translation error:', e);
                     // Fallback: set cookie and reload page (only for non-English)
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
+                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             } else {
@@ -702,7 +717,7 @@
                     console.log('doGTranslate not available after ' + maxAttempts + ' attempts, using cookie fallback');
                     var date = new Date();
                     date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + langCode + "; expires=" + date.toUTCString() + "; path=/";
+                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
                     window.location.reload();
                 }
             }

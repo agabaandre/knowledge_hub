@@ -12,6 +12,7 @@ class EncryptCookies extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-        //
+        // Set from frontend language selector (plain cookie; not sensitive)
+        'khub_locale',
     ];
 }

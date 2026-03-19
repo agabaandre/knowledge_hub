@@ -41,6 +41,8 @@ use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\LicensesController;
 use App\Http\Controllers\Admin\SettingsController;
+use App\Http\Controllers\Admin\LanguageManagementController;
+use App\Http\Controllers\Admin\SiteLanguageController;
 use App\Http\Controllers\Admin\ToolsAdminController;
 use App\Http\Controllers\AdminUnitFrontEndController;
 use App\Http\Controllers\AIController;
@@ -215,6 +217,14 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::post("/configure/custom-font/delete/{id}", [SettingsController::class, 'deleteCustomFont'])->name('admin.config.custom-font.delete');
     Route::get("/configure/export-config", [SettingsController::class, 'exportConfig'])->name('admin.config.export');
     Route::post("/configure/import-config", [SettingsController::class, 'importConfig'])->name('admin.config.import');
+
+    Route::get('/language-management', [LanguageManagementController::class, 'index'])->name('admin.language-management.index');
+    Route::post('/language-management', [LanguageManagementController::class, 'update'])->name('admin.language-management.update');
+
+    Route::get('/site-languages', [SiteLanguageController::class, 'index'])->name('admin.site-languages.index');
+    Route::post('/site-languages', [SiteLanguageController::class, 'store'])->name('admin.site-languages.store');
+    Route::put('/site-languages/{siteLanguage}', [SiteLanguageController::class, 'update'])->name('admin.site-languages.update');
+    Route::delete('/site-languages/{siteLanguage}', [SiteLanguageController::class, 'destroy'])->name('admin.site-languages.destroy');
 
     // Notification endpoints
     Route::get("/notifications/pending-counts", [\App\Http\Controllers\Admin\NotificationController::class, 'getPendingCounts'])->name('admin.notifications.counts');

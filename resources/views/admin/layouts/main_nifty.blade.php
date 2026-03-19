@@ -206,7 +206,7 @@
    </header>
 
    <!-- MAIN NAVIGATION (Sidebar) -->
-   <nav id="mainnav-container" class="mainnav">
+   <nav id="mainnav-container" class="mainnav notranslate">
       <div class="mainnav__inner">
          <div class="mainnav__top-content scrollable-content pb-5">
             @include('admin.layouts.partials.nifty_sidebar')

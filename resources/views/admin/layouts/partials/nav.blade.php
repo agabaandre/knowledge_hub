@@ -263,19 +263,19 @@
             <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Settings <i
                         class="fe fe-chevron-down horizontal-icon"></i></a>
                 <ul class="sub-menu">
-                    <li class=""><a href="{{ url('admin/configure') }}" class="">System
-                            Configurations</a></li>
-                    <li class=""><a href="{{ url('admin/accessgroups') }}" class="">Content Access
-                            Groups</a></li>
-                    <li class=""><a href="{{ url('permissions/users') }}" class="">Manage Users</a></li>
-                    <li class=""><a href="{{ url('permissions/roles') }}" class="">Roles</a></li>
-                    <li class=""><a href="{{ url('permissions') }}" class="">Permissions</a></li>
-                    <li class=""><a href="{{ url('admin/logs/user') }}" class="">User Logs</a></li>
-                    <li class=""><a href="{{ url('admin/logs/access') }}" class="">Site Access Logs</a>
+                    <li class=""><a href="{{ url('admin/configure') }}" class="">{{ __('admin_nav.system_configurations') }}</a></li>
+                    <li class=""><a href="{{ route('admin.site-languages.index') }}" class="">{{ __('admin_nav.site_languages') }}</a></li>
+                    <li class=""><a href="{{ route('admin.language-management.index') }}" class="">{{ __('admin_nav.language_management') }}</a></li>
+                    <li class=""><a href="{{ url('admin/accessgroups') }}" class="">{{ __('admin_nav.content_access_groups') }}</a></li>
+                    <li class=""><a href="{{ url('permissions/users') }}" class="">{{ __('admin_nav.manage_users') }}</a></li>
+                    <li class=""><a href="{{ url('permissions/roles') }}" class="">{{ __('admin_nav.roles') }}</a></li>
+                    <li class=""><a href="{{ url('permissions') }}" class="">{{ __('admin_nav.permissions') }}</a></li>
+                    <li class=""><a href="{{ url('admin/logs/user') }}" class="">{{ __('admin_nav.user_logs') }}</a></li>
+                    <li class=""><a href="{{ url('admin/logs/access') }}" class="">{{ __('admin_nav.site_access_logs') }}</a>
                     </li>
-                    <li class=""><a href="{{ url('admin/metrics') }}" class="">System Metrics</a></li>
+                    <li class=""><a href="{{ url('admin/metrics') }}" class="">{{ __('admin_nav.system_metrics') }}</a></li>
                     @can('view_mailing_list')
-                        <li class=""><a href="{{ url('mailing_list') }}" class="">Mailing List</a></li>
+                        <li class=""><a href="{{ url('mailing_list') }}" class="">{{ __('admin_nav.mailing_list') }}</a></li>
                     @endcan
                 </ul>
             </li>

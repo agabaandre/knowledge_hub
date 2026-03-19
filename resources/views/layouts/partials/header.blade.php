@@ -410,17 +410,17 @@
             </div>
             
             @php $menuIconsEnabled = settings()->menu_icons_enabled ?? 0; @endphp
-            <div class="nav-menus-wrapper" style="transition-property: none;">
+            <div class="nav-menus-wrapper notranslate" style="transition-property: none;">
                 <ul class="nav-menu">
-                    <li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">@if($menuIconsEnabled)<i class="fa fa-home mr-1"></i> @endif Home</a></li>
+                    <li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">@if($menuIconsEnabled)<i class="fa fa-home mr-1"></i> @endif {{ __('frontend_nav.home') }}</a></li>
                     
-                     <li class="categories {{ ( ((request()->is('records*') && !request()->has('tag'))) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*') ) ? 'active' : '' }}"><a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-compass mr-1"></i> @endif Browse<span
+                     <li class="categories {{ ( ((request()->is('records*') && !request()->has('tag'))) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*') ) ? 'active' : '' }}"><a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-compass mr-1"></i> @endif {{ __('frontend_nav.browse') }}<span
                                 class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu" style="right: auto; display: none;">
 
                             <li>
                                 <a
-                                    href="{{ url('/health-topics') }}">Health Topics</a>
+                                    href="{{ url('/health-topics') }}">{{ __('frontend_nav.health_topics') }}</a>
                             </li>
 
                             @foreach ($data_categories as $category)
@@ -451,9 +451,9 @@
                             @endforeach
 
                             @if (states_enabled())
-                                <li><a href="{{ url('countries') }}">Member States</a></li>
+                                <li><a href="{{ url('countries') }}">{{ __('frontend_nav.member_states') }}</a></li>
                             @else
-                                <li><a href="{{ url('adminunits') }}">Administrative Units</a></li>
+                                <li><a href="{{ url('adminunits') }}">{{ __('frontend_nav.administrative_units') }}</a></li>
                             @endif
 
                         </ul>
@@ -465,14 +465,14 @@
                         @endphp
 
                     <li class="categories has-mega-menu {{ request()->has('tag') ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-briefcase-medical mr-1"></i> @endif Health Emergencies <span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-briefcase-medical mr-1"></i> @endif {{ __('frontend_nav.health_emergencies') }} <span class="submenu-indicator"></span></a>
 
                         @include('layouts.partials.tags_menu')
                         
                     </li>
 
                     <li class="categories health_emergencies" style="display: none;">
-                        <a href="javascript:void(0);">Health Emergencies <span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">{{ __('frontend_nav.health_emergencies') }} <span class="submenu-indicator"></span></a>
 
                         <ul class="nav-dropdown nav-submenu">
                             @foreach($filteredTags as $tag)
@@ -489,7 +489,7 @@
                         
                     </li>
                     <li class="categories {{ (request()->is('tools')|| (isset($staticLinks) && collect($staticLinks)->pluck('link')->contains(url()->current()))) ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i>@endif Key Links @if($menuIconsEnabled)<i class="fa fa-angle-right ml-1"></i>@endif<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-book mr-1"></i>@endif {{ __('frontend_nav.key_links') }} @if($menuIconsEnabled)<i class="fa fa-angle-right ml-1"></i>@endif<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
                             
                             @if(isset($staticLinks) && count($staticLinks))
@@ -497,7 +497,7 @@
                                     <li><a href="{{ $link->link }}" @if($link->open_in_new_tab) target="_blank" @endif>{{ $link->title }}</a></li>
                                 @endforeach
                             @endif
-                            <li><a href="{{ url('tools') }}">Tools</a></li>
+                            <li><a href="{{ url('tools') }}">{{ __('frontend_nav.tools') }}</a></li>
                         </ul>
                     </li>
 
@@ -515,7 +515,7 @@
                     <li class="categories {{ (request()->is('forums*') || request()->is('communities*')) ? 'active' : '' }}">
                         <a href="javascript:void(0);">
                             @if($menuIconsEnabled)<i class="fa fa-comments mr-1"></i> @endif 
-                            Discussions
+                            {{ __('frontend_nav.discussions') }}
                             @if($discussionsBadgeCount > 0)
                                 <span class="menu-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px;">{{ $discussionsBadgeCount }}</span>
                             @endif
@@ -524,7 +524,7 @@
                         <ul class="nav-dropdown nav-submenu">
                              <li>
                                  <a href="{{ url('forums') }}">
-                                     Forums
+                                     {{ __('frontend_nav.forums') }}
                                      @if($forumsBadgeCount > 0)
                                          <span class="menu-item-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px; float: right;">{{ $forumsBadgeCount }}</span>
                                      @endif
@@ -532,7 +532,7 @@
                              </li>
                             <li>
                                 <a href="{{ url('communities') }}">
-                                    Communities
+                                    {{ __('frontend_nav.communities') }}
                                     @if($communitiesBadgeCount > 0)
                                         <span class="menu-item-badge" style="background: #ef4444; color: white; border-radius: 10px; padding: 2px 6px; font-size: 0.75rem; font-weight: bold; margin-left: 4px; float: right;">{{ $communitiesBadgeCount }}</span>
                                     @endif
@@ -544,17 +544,17 @@
 
 
                     <li class="categories {{ request()->is('courses*') ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-graduation-cap mr-1"></i> @endif Learning<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-graduation-cap mr-1"></i> @endif {{ __('frontend_nav.learning') }}<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
-                            <li><a href="{{ url('courses') }}">Courses</a></li>  
+                            <li><a href="{{ url('courses') }}">{{ __('frontend_nav.courses') }}</a></li>  
                         </ul>
                     </li>
 
                     <li class="categories {{ (request()->is('faqs') || request()->is('publications/content*')) ? 'active' : '' }}">
-                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-life-ring mr-1"></i> @endif Support<span class="submenu-indicator"></span></a>
+                        <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-life-ring mr-1"></i> @endif {{ __('frontend_nav.support') }}<span class="submenu-indicator"></span></a>
                         <ul class="nav-dropdown nav-submenu">
-                            <li><a href="{{ url('faqs') }}">FAQs</a></li> 
-                            <li><a href="{{ url('publications/request-content') }}">Content Request</a></li>
+                            <li><a href="{{ url('faqs') }}">{{ __('frontend_nav.faqs') }}</a></li> 
+                            <li><a href="{{ url('publications/request-content') }}">{{ __('frontend_nav.content_request') }}</a></li>
                         </ul>
                     </li>
 
@@ -562,18 +562,18 @@
                     <li class="categories {{ (request()->routeIs('account.publish') || request()->routeIs('account.publication') || request()->routeIs('forums.create')) ? 'active' : '' }}">
                         <a href="javascript:void(0);">
                             @if($menuIconsEnabled)<i class="fa fa-plus-circle mr-1"></i> @endif 
-                            Create
+                            {{ __('frontend_nav.create') }}
                             <span class="submenu-indicator"></span>
                         </a>
                         <ul class="nav-dropdown nav-submenu">
                             <li>
                                 <a href="{{ route('forums.create') }}">
-                                    Forum Discussion
+                                    {{ __('frontend_nav.forum_discussion') }}
                                 </a>
                             </li>
                             <li>
                                 <a href="{{ route('account.publish') }}">
-                                    Resource Publication
+                                    {{ __('frontend_nav.resource_publication') }}
                                 </a>
                             </li>
                         </ul>

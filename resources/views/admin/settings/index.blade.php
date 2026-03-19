@@ -352,6 +352,14 @@
         </div>
     @endif
 
+    <div class="alert alert-info d-flex flex-column flex-md-row align-items-md-center justify-content-between flex-wrap gap-2 mb-3">
+        <span><i class="fa fa-language me-2"></i><strong>{{ __('admin_nav.site_languages') }}</strong> — add locales, display names, and Google Translate codes (stored in the database). <strong>{{ __('admin_nav.language_management') }}</strong> — edit UI strings per locale.</span>
+        <span class="d-flex gap-2 flex-shrink-0">
+            <a href="{{ route('admin.site-languages.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.site_languages') }}</a>
+            <a href="{{ route('admin.language-management.index') }}" class="btn btn-sm btn-outline-primary text-nowrap">{{ __('admin_nav.language_management') }}</a>
+        </span>
+    </div>
+
     <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data">
             @csrf
         <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
