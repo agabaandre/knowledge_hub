@@ -84,7 +84,12 @@ Please summarize this forum discussion, including:
 
         Log::info("RESPONSE: " . json_encode($response));
 
-        return $this->formatResponse($response);
+        $formatted = $this->formatResponse($response);
+        // Publication summaries: drop leading "Overview" heading so description starts with real content
+        if (intval($type) !== 1 && !empty($formatted['content'])) {
+            $formatted['content'] = strip_leading_overview_heading_from_summary_html($formatted['content']);
+        }
+        return $formatted;
     }
 
     /**
@@ -130,7 +135,7 @@ Please summarize this forum discussion, including:
             $aiModel = app('chatpdf');
             $response = $aiModel->summarize($resource, $language, $additional_prompt);
             $formatted = $this->formatResponse($response);
-            $onChunk($formatted['content'] ?? '');
+            $onChunk(strip_leading_overview_heading_from_summary_html($formatted['content'] ?? ''));
             return;
         }
 
@@ -193,7 +198,7 @@ Please summarize this forum discussion, including:
                 // Extract description/summary
                 $summaryResponse = $this->aiModel->summarizeFile($file_path, $language, $additional_prompt);
                 $formattedContent = $this->formatResponse($summaryResponse);
-                $response['content'] = clean_unicode($formattedContent['content'] ?? '');
+                $response['content'] = clean_unicode(strip_leading_overview_heading_from_summary_html($formattedContent['content'] ?? ''));
                 
                 // Extract metadata (authors and affiliation)
                 $metadataPrompt = "Extract the following information from this document and return ONLY a valid JSON object with these exact keys: 
@@ -230,7 +235,7 @@ Please summarize this forum discussion, including:
                 
                 $summaryResponse = $this->aiModel->summarize($prompt, $additional_prompt);
                 $formattedContent = $this->formatResponse($summaryResponse);
-                $response['content'] = clean_unicode($formattedContent['content'] ?? '');
+                $response['content'] = clean_unicode(strip_leading_overview_heading_from_summary_html($formattedContent['content'] ?? ''));
                 
                 // Extract metadata
                 $metadataPrompt = "From this document content: " . substr($file_content, 0, 50000) . "

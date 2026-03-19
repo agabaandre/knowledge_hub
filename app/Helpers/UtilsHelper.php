@@ -38,6 +38,48 @@ if(!function_exists('publication_description_for_list')){
 	}
 }
 
+if(!function_exists('strip_leading_overview_heading_from_summary_html')){
+	/**
+	 * Remove a leading "Overview" / "Overview of the Document" heading from AI summary HTML so the description
+	 * starts with substantive content. Other section headings later in the HTML are left unchanged.
+	 */
+	function strip_leading_overview_heading_from_summary_html($html){
+		if (empty($html) || !is_string($html)) {
+			return $html;
+		}
+		$overview = 'Overview(?:\s+of\s+the\s+Document)?';
+		$out = $html;
+		for ($i = 0; $i < 8; $i++) {
+			$prev = $out;
+			// Optional opening div(s), then h3/h4 with Overview
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<h[34]\b[^>]*>\s*' . $overview . '\s*</h[34]>\s*#iu',
+				'',
+				$out,
+				1
+			);
+			// Paragraph with optional strong/b
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<p\b[^>]*>\s*(?:<(?:strong|b)\b[^>]*>\s*)?' . $overview . '\s*(?:</(?:strong|b)>)?\s*</p>\s*#iu',
+				'',
+				$out,
+				1
+			);
+			// Standalone strong/b line
+			$out = preg_replace(
+				'#^\s*(?:<div\b[^>]*>\s*)*<(?:strong|b)\b[^>]*>\s*' . $overview . '\s*</(?:strong|b)>\s*#iu',
+				'',
+				$out,
+				1
+			);
+			if ($out === $prev) {
+				break;
+			}
+		}
+		return $out;
+	}
+}
+
 if(!function_exists('clean_unicode')){
 	/**
 	 * Remove hidden Unicode characters and control characters from text
