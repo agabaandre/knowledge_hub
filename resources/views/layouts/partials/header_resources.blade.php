@@ -38,7 +38,7 @@
 {{-- Theme (typography + colors) after frontend CSS so body/nav font settings override styles.css --}}
 @include('partials.theming.colors')
 <script src="{{ asset('frontend/js/jquery.min.js') }}"></script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
+<script type="text/javascript" src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
 </script>
 
 <style>
