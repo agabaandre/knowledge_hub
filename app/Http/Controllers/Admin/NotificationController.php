@@ -9,6 +9,7 @@ use App\Models\Publication;
 use App\Models\ForumComment;
 use App\Models\PublicationComment;
 use App\Models\CommunityOfPracticeMembers;
+use App\Models\ContentRequest;
 
 class NotificationController extends Controller
 {
@@ -45,10 +46,15 @@ class NotificationController extends Controller
         $pending_cop_approvals_count = CommunityOfPracticeMembers::where('is_approved', 0)
             ->count();
 
+        $pending_content_requests_count = 0;
+        if ($request->user() && $request->user()->can('view_content_requests')) {
+            $pending_content_requests_count = ContentRequest::whereNull('processed_at')->count();
+        }
+
         // Calculate total pending count
         $total_pending_count = $pending_forums_count + $pending_publications_count + 
                               $pending_forum_comments_count + $pending_publication_comments_count +
-                              $pending_cop_approvals_count;
+                              $pending_cop_approvals_count + $pending_content_requests_count;
 
         return response()->json([
             'success' => true,
@@ -58,6 +64,7 @@ class NotificationController extends Controller
                 'forum_comments' => $pending_forum_comments_count,
                 'publication_comments' => $pending_publication_comments_count,
                 'cop_approvals' => $pending_cop_approvals_count,
+                'content_requests' => $pending_content_requests_count,
                 'total' => $total_pending_count,
             ],
         ]);
@@ -157,6 +164,25 @@ class NotificationController extends Controller
                     'author' => $comment->user->name ?? 'Anonymous',
                     'created_at' => $comment->created_at ? $comment->created_at->diffForHumans() : 'N/A',
                     'url' => url('admin/publications/moderate'),
+                ];
+            }
+        }
+
+        if (($type === 'all' || $type === 'content_requests') && $request->user() && $request->user()->can('view_content_requests')) {
+            $contentRequests = ContentRequest::whereNull('processed_at')
+                ->orderBy('created_at', 'desc')
+                ->limit($limit)
+                ->get();
+
+            foreach ($contentRequests as $cr) {
+                $items[] = [
+                    'type' => 'content_request',
+                    'id' => $cr->id,
+                    'title' => $cr->subject ?? 'Content request',
+                    'description' => \Illuminate\Support\Str::limit(strip_tags($cr->description ?? ''), 100),
+                    'author' => $cr->email ?? '—',
+                    'created_at' => $cr->created_at ? $cr->created_at->diffForHumans() : 'N/A',
+                    'url' => route('admin.content-requests.index'),
                 ];
             }
         }

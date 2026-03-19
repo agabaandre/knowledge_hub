@@ -35,7 +35,10 @@
         @endcan
         @can('view_publications')
         <li class="nav-item has-sub">
-            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-publish"><i class="fa fa-file-alt fs-5 me-2"></i><span class="nav-label ms-1">Publish</span>@if(isset($pending_publications_count) && $pending_publications_count > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $pending_publications_count }}</span>@endif</a>
+            @php
+                $publishMenuPending = (int)($pending_publications_count ?? 0) + (int)($pending_content_requests_count ?? 0);
+            @endphp
+            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-publish"><i class="fa fa-file-alt fs-5 me-2"></i><span class="nav-label ms-1">Publish</span>@if($publishMenuPending > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $publishMenuPending > 99 ? '99+' : $publishMenuPending }}</span>@endif</a>
             <ul class="mininav-content nav collapse" id="nav-publish">
                 <li class="nav-item"><a href="{{ url('admin/publications/create') }}" class="nav-link">Publish a Resource</a></li>
                 <li class="nav-item"><a href="{{ url('admin/publications') }}" class="nav-link">Manage Resources</a></li>
@@ -45,7 +48,7 @@
                 <li class="nav-item"><a href="{{ route('admin.rss_feeds.index') }}" class="nav-link">RSS Feeds</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rss_staging.index') }}" class="nav-link">RSS Staging</a></li>
                 <li class="nav-item"><a href="{{ route('admin.participant-badges.index') }}" class="nav-link">Participant badge management</a></li>
-                @can('view_content_requests')<li class="nav-item"><a href="{{ route('admin.content-requests.index') }}" class="nav-link">Content Requests</a></li>@endcan
+                @can('view_content_requests')<li class="nav-item"><a href="{{ route('admin.content-requests.index') }}" class="nav-link"><i class="fa fa-bell me-1 {{ (isset($pending_content_requests_count) && $pending_content_requests_count > 0) ? 'text-warning' : '' }}"></i>Content Requests @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)<span class="badge bg-danger ms-1 rounded-pill">{{ $pending_content_requests_count > 99 ? '99+' : $pending_content_requests_count }}</span>@endif</a></li>@endcan
                 @can('manage_experts')<li class="nav-item"><a href="{{ url('admin/experts') }}" class="nav-link">Roster of Experts</a></li>@endcan
                 @can('manage_facts')<li class="nav-item"><a href="{{ url('admin/facts') }}" class="nav-link">Facts</a></li>@endcan
                 @can('view_quotes')<li class="nav-item"><a href="{{ url('admin/quotes') }}" class="nav-link">Quotes</a></li>@endcan

@@ -103,6 +103,17 @@
                               </div>
                            </a>
                         @endif
+                        @can('view_content_requests')
+                        @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)
+                           <a href="{{ route('admin.content-requests.index') }}" class="list-group-item list-group-item-action d-flex align-items-center mb-2">
+                              <div class="flex-shrink-0 me-3"><i class="pli-envelope text-warning fs-2"></i></div>
+                              <div class="flex-grow-1">
+                                 <span class="h6 fw-normal d-block mb-0">Content requests</span>
+                                 <small class="text-body-secondary">{{ $pending_content_requests_count }} pending</small>
+                              </div>
+                           </a>
+                        @endif
+                        @endcan
                         @if(isset($pending_forums_count) && $pending_forums_count > 0)
                            <a href="{{ url('admin/forums') }}" class="list-group-item list-group-item-action d-flex align-items-center mb-2">
                               <div class="flex-shrink-0 me-3"><i class="pli-speech-bubble-3 text-info fs-2"></i></div>

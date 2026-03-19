@@ -8,6 +8,7 @@ use App\Models\ForumComment;
 use App\Models\PublicationComment;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityOfPractice;
+use App\Models\ContentRequest;
 
 class AdminStatsViewComposer{
 
@@ -40,6 +41,17 @@ class AdminStatsViewComposer{
         // Count pending COP member approvals
         $pending_cop_approvals_count = CommunityOfPracticeMembers::where('is_approved', 0)
             ->count();
+
+        // Unprocessed content requests (user-facing support queue)
+        $pending_content_requests_count = 0;
+        $pending_content_requests = collect();
+        if (auth()->check() && auth()->user()->can('view_content_requests')) {
+            $pending_content_requests_count = ContentRequest::whereNull('processed_at')->count();
+            $pending_content_requests = ContentRequest::whereNull('processed_at')
+                ->orderByDesc('created_at')
+                ->limit(5)
+                ->get();
+        }
 
         // Get recent pending forum comments (not approved - for dropdown)
         // Note: ForumComment uses 'created_by' for user relationship
@@ -154,6 +166,15 @@ class AdminStatsViewComposer{
                 'created_at' => $approval['created_at'],
             ]);
         }
+
+        // Content requests (pending / not processed)
+        foreach ($pending_content_requests as $cr) {
+            $allNotifications->push([
+                'type' => 'content_request',
+                'item' => $cr,
+                'created_at' => $cr->created_at,
+            ]);
+        }
         
         // Sort by created_at descending (most recent first) and take top 10
         $sortedNotifications = $allNotifications->sortByDesc('created_at')->take(10)->values();
@@ -161,7 +182,7 @@ class AdminStatsViewComposer{
         // Calculate total pending count
         $total_pending_count = $pending_forums_count + $pending_publications_count + 
                               $pending_forum_comments_count + $pending_publication_comments_count +
-                              $pending_cop_approvals_count;
+                              $pending_cop_approvals_count + $pending_content_requests_count;
 
         $data = [
             // Old variables for backward compatibility (can be removed later)
@@ -174,6 +195,7 @@ class AdminStatsViewComposer{
             'pending_forums_count' => $pending_forums_count,
             'pending_publications_count' => $pending_publications_count,
             'pending_cop_approvals_count' => $pending_cop_approvals_count,
+            'pending_content_requests_count' => $pending_content_requests_count,
             'total_pending_count' => $total_pending_count,
             'pending_forums' => $pending_forums,
             'pending_publications' => $pending_publications,

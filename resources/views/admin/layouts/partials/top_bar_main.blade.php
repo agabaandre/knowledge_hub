@@ -111,6 +111,14 @@
                                     <span>COP Approvals:</span>
                                     <strong>{{ $pending_cop_approvals_count ?? 0 }}</strong>
                                 </div>
+                                @can('view_content_requests')
+                                @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)
+                                <div class="d-flex justify-content-between mt-1">
+                                    <span>Content requests:</span>
+                                    <strong>{{ $pending_content_requests_count }}</strong>
+                                </div>
+                                @endif
+                                @endcan
                             @else
                                 <p class="text-muted mb-0">No pending approvals</p>
                             @endif
@@ -236,6 +244,24 @@
                                                 </div>
                                                 <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ $communityName }}</p>
                                                 <small class="text-muted">User: {{ $approval['user']->name ?? 'Unknown' }}</small>
+                                            </div>
+                                        </a>
+                                    @elseif($type === 'content_request')
+                                        <a href="{{ route('admin.content-requests.index') }}" class="p-3 d-flex border-bottom notification-item">
+                                            <div class="drop-img cover-image mr-3" style="width:40px;height:40px;background:#e2e8f0;border-radius:50%;display:flex;align-items:center;justify-content:center;">
+                                                <i class="fa fa-bell text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex justify-content-between">
+                                                    <h6 class="mb-1" style="font-size:0.875rem;">Content request</h6>
+                                                    <small class="text-muted">
+                                                        @if($createdAt)
+                                                            {{ \Carbon\Carbon::parse($createdAt)->diffForHumans() }}
+                                                        @endif
+                                                    </small>
+                                                </div>
+                                                <p class="mb-0 text-muted" style="font-size:0.8rem;">{{ \Illuminate\Support\Str::limit($item->subject ?? 'No subject', 50) }}</p>
+                                                <small class="text-muted">{{ $item->email ?? '' }}</small>
                                             </div>
                                         </a>
                                     @endif

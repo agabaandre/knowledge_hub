@@ -56,11 +56,14 @@
                 </li>
 
                 @can('view_publications')
+                    @php
+                        $publishMenuPendingNav = (int)($pending_publications_count ?? 0) + (int)($pending_content_requests_count ?? 0);
+                    @endphp
                     <li aria-haspopup="true">
                         <a href="#" class="sub-icon" style="position: relative;">
                             <i class=""></i>Publish
-                            @if(isset($pending_publications_count) && $pending_publications_count > 0)
-                                <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_publications_count }}</span>
+                            @if($publishMenuPendingNav > 0)
+                                <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $publishMenuPendingNav > 99 ? '99+' : $publishMenuPendingNav }}</span>
                             @endif
                             <i class="fe fe-chevron-down horizontal-icon"></i>
                         </a>
@@ -91,8 +94,14 @@
                             <li aria-haspopup="true"><a href="{{ route('admin.rss_staging.index') }}" class="slide-item">RSS Staging</a></li>
                             <li aria-haspopup="true"><a href="{{ route('admin.participant-badges.index') }}" class="slide-item">Participant badge management</a></li>
                             @can('view_content_requests')
-                            <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="slide-item">
-                                <i class="fa fa-file-alt mr-1"></i>Content Requests</a></li>
+                            <li aria-haspopup="true">
+                                <a href="{{ route('admin.content-requests.index') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    <i class="fa fa-bell mr-1 {{ (isset($pending_content_requests_count) && $pending_content_requests_count > 0) ? 'text-warning' : '' }}"></i>Content Requests
+                                    @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)
+                                        <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_content_requests_count > 99 ? '99+' : $pending_content_requests_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             @endcan
                             @can('manage_experts')
                                 <li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
