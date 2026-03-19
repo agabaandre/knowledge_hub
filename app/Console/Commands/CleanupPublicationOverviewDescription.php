@@ -29,7 +29,7 @@ class CleanupPublicationOverviewDescription extends Command
 
         Publication::query()
             ->whereNotNull('description')
-            ->where('description', 'like', '%Overview:%')
+            ->where('description', 'like', '%Overview%')
             ->orderBy('id')
             ->chunkById(100, function ($publications) use ($dryRun, &$updated, &$checked) {
                 foreach ($publications as $pub) {
