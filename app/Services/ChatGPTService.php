@@ -141,16 +141,19 @@ class ChatGPTService implements AIModel{
     
         // Check for cURL errors
         if ($response === false) {
-            $error = curl_error($ch);
-            echo 'cURL Error: ' . $error;
+            Log::error('OpenAI cURL error: '.curl_error($ch));
             $response = null;
         }
-    
+
         // Close cURL session
         curl_close($ch);
 
-        Log::info("====RESPONSE::====/n ".$response);
-    
+        Log::info('====RESPONSE::==== '.$response);
+
+        if ($response === null || $response === '') {
+            return null;
+        }
+
         return json_decode($response);
     }
 
@@ -168,22 +171,22 @@ class ChatGPTService implements AIModel{
         }
 
         $merged = [];
-        $chunks = array_chunk($englishKeyed, 30, true);
+        // Smaller chunks + same transport as forum summaries reduces truncation / invalid JSON
+        $chunks = array_chunk($englishKeyed, 12, true);
 
         foreach ($chunks as $index => $chunk) {
             $part = $this->translateUiStringChunk($targetLanguageLabel, $chunk);
-            if ($part === null) {
-                return [
-                    'ok' => false,
-                    'error' => 'OpenAI did not return valid JSON for batch '.((int) $index + 1).'. Check the API key, model, and application logs.',
-                ];
+            $missing = array_diff_key($chunk, $part);
+            if ($missing !== []) {
+                $retry = $this->translateUiStringChunk($targetLanguageLabel, $missing, true);
+                $part = array_merge($part, $retry);
             }
 
             foreach (array_keys($chunk) as $key) {
                 if (! array_key_exists($key, $part)) {
                     return [
                         'ok' => false,
-                        'error' => 'AI response missing key: '.$key,
+                        'error' => 'OpenAI did not return usable translations for batch '.((int) $index + 1).' (missing key: '.$key.'). Check model output length (OPENAI_MODEL) and logs.',
                     ];
                 }
             }
@@ -200,145 +203,186 @@ class ChatGPTService implements AIModel{
     }
 
     /**
+     * Same Chat Completions request shape as {@see prompt()}: two "user" messages + sendRequest + message content.
+     * Parsing follows {@see AIService::parseMetadata()} (clean_unicode, strip fences) with JSON and TAB fallbacks.
+     *
      * @param  array<string, string>  $chunk
-     * @return array<string, string>|null
+     * @return array<string, string>
      */
-    private function translateUiStringChunk(string $targetLanguageLabel, array $chunk): ?array
+    private function translateUiStringChunk(string $targetLanguageLabel, array $chunk, bool $retryPass = false): array
     {
-        $system = 'You are a professional UI translator for a public health knowledge hub web application. '
-            .'You MUST respond with a single JSON object only. No markdown code fences, no commentary, no text before or after the JSON. '
-            .'The JSON object keys must be exactly the same as in the input (same spelling). '
-            .'Each value is the translation of the English UI string into this language: '.$targetLanguageLabel.'. '
-            .'Preserve placeholders and tokens exactly (examples: :name, :attribute, :year, %s, {0}). Do not translate brand names if they appear as proper nouns. '
-            .'Keep menu labels and buttons concise and natural in the target language.';
-
-        $user = "Translate the string values from English to {$targetLanguageLabel}. Keep keys identical.\n\n"
-            .json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
-
-        $data = $this->postChatCompletion([
-            ['role' => 'system', 'content' => $system],
-            ['role' => 'user', 'content' => $user],
-        ], 8192);
-
-        if ($data === null) {
-            return null;
+        if ($chunk === []) {
+            return [];
         }
 
-        $content = $data['choices'][0]['message']['content'] ?? null;
-        if (! is_string($content) || $content === '') {
-            return null;
-        }
-
-        $obj = $this->decodeJsonObjectFromAssistant($content);
-        if (! is_array($obj)) {
-            Log::warning('translateUiStringChunk: could not parse JSON', [
-                'snippet' => mb_substr($content, 0, 800),
-            ]);
-
-            return null;
-        }
-
-        /** @var array<string, mixed> $obj */
-        $out = [];
-        foreach ($obj as $k => $v) {
-            if (! is_string($k)) {
-                continue;
-            }
-            $out[$k] = is_string($v) ? $v : (is_scalar($v) ? (string) $v : json_encode($v));
-        }
-
-        return $out;
-    }
-
-    /**
-     * @param  list<array{role: string, content: string}>  $messages
-     * @return array<string, mixed>|null
-     */
-    private function postChatCompletion(array $messages, int $maxTokens = 4096): ?array
-    {
         $api_key = config('ai.open_api_key');
-        if ($api_key === '' || $api_key === null) {
-            return null;
-        }
-
         $endpoint = 'https://api.openai.com/v1/chat/completions';
         $headers = [
             'Content-Type: application/json',
             'Authorization: Bearer '.$api_key,
         ];
 
-        $body = [
+        $guide = 'You translate short UI strings for a public health knowledge hub (navigation labels, buttons, footer links). '
+            .'Target language: '.$targetLanguageLabel.'. '
+            .'Preserve placeholders exactly: :name, :attribute, :year, %s, {0}, etc. Keep labels concise. '
+            .'Reply using ONE of these formats only (prefer the first): '
+            .'(1) A single JSON object whose keys are exactly the input keys and values are translations. '
+            .'(2) If JSON is awkward, one line per key: KEY<TAB>translated text (real tab character). '
+            .'No markdown code fences, no explanation, no HTML.';
+
+        if ($retryPass) {
+            $guide .= ' This is a second pass: include every listed key exactly once.';
+        }
+
+        $userTask = ($retryPass ? 'Translate only these remaining keys.' : 'Translate all string values from English.')
+            ."\n\n".json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
+
+        // Match forum summarization: stacked user messages + model from config (see promptStream)
+        $payload = [
+            'messages' => [
+                ['role' => 'user', 'content' => $guide],
+                ['role' => 'user', 'content' => $userTask],
+            ],
             'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => $messages,
-            'max_tokens' => $maxTokens,
+            'max_tokens' => 4096,
             'temperature' => 0.2,
         ];
 
-        $ch = curl_init($endpoint);
-        $jsonData = json_encode($body);
-        $headers[] = 'Content-Length: '.strlen($jsonData);
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null || $content === '') {
+            Log::warning('translateUiStringChunk: empty OpenAI content', [
+                'retry' => $retryPass,
+                'keys' => array_keys($chunk),
+            ]);
 
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
-
-        $response = curl_exec($ch);
-
-        if ($response === false) {
-            Log::error('OpenAI translate: cURL error: '.curl_error($ch));
-            curl_close($ch);
-
-            return null;
+            return [];
         }
 
-        $http = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        curl_close($ch);
-
-        $decoded = json_decode($response, true);
-        if (! is_array($decoded)) {
-            Log::error('OpenAI translate: invalid response JSON');
-
-            return null;
+        $parsed = $this->parseTranslationMap($content, array_keys($chunk));
+        if ($parsed === []) {
+            Log::warning('translateUiStringChunk: could not parse response', [
+                'retry' => $retryPass,
+                'snippet' => mb_substr($content, 0, 1200),
+            ]);
         }
 
-        if ($http >= 400) {
-            $msg = $decoded['error']['message'] ?? ('HTTP '.$http);
-            Log::error('OpenAI translate API error: '.$msg);
-
-            return null;
-        }
-
-        return $decoded;
+        return $parsed;
     }
 
     /**
-     * @return array<string, mixed>|null
+     * Extract assistant text the same way as {@see AIService::formatResponse()}.
      */
-    private function decodeJsonObjectFromAssistant(string $text): ?array
+    private function extractOpenAiMessageContent(mixed $response): ?string
     {
+        if (! is_object($response)) {
+            return null;
+        }
+        if (isset($response->choices[0]->message->content)) {
+            return (string) $response->choices[0]->message->content;
+        }
+        if (isset($response->error)) {
+            $msg = is_object($response->error)
+                ? (string) ($response->error->message ?? 'API error')
+                : (string) $response->error;
+            Log::warning('OpenAI translate response error field: '.$msg);
+        }
+
+        return null;
+    }
+
+    /**
+     * @param  list<string>  $expectedKeys
+     * @return array<string, string>
+     */
+    private function parseTranslationMap(string $raw, array $expectedKeys): array
+    {
+        $text = function_exists('clean_unicode') ? clean_unicode($raw) : $raw;
+        $text = preg_replace('/```json\s*/i', '', (string) $text);
+        $text = preg_replace('/```\s*/', '', $text);
         $text = trim($text);
-        if (preg_match('/^```(?:json)?\s*\R(.*)\R```$/su', $text, $m)) {
-            $text = trim($m[1]);
+
+        $expected = array_fill_keys($expectedKeys, true);
+
+        // Full JSON
+        $decoded = json_decode($text, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+        if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+            if (isset($decoded['translations']) && is_array($decoded['translations'])) {
+                $decoded = $decoded['translations'];
+            }
+            $out = $this->pickExpectedTranslations($decoded, $expected);
+            if ($out !== []) {
+                return $out;
+            }
         }
 
-        $decoded = json_decode($text, true);
-        if (is_array($decoded)) {
-            return $decoded;
+        // Shallow JSON object match (same idea as AIService::parseMetadata)
+        if (preg_match('/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/s', $text, $matches)) {
+            $decoded = json_decode($matches[0], true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                if (isset($decoded['translations']) && is_array($decoded['translations'])) {
+                    $decoded = $decoded['translations'];
+                }
+                $out = $this->pickExpectedTranslations($decoded, $expected);
+                if ($out !== []) {
+                    return $out;
+                }
+            }
         }
 
+        // Brace slice fallback
         $start = strpos($text, '{');
         $end = strrpos($text, '}');
         if ($start !== false && $end !== false && $end > $start) {
             $slice = substr($text, $start, $end - $start + 1);
-            $decoded = json_decode($slice, true);
-            if (is_array($decoded)) {
-                return $decoded;
+            $decoded = json_decode($slice, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+            if (is_array($decoded) && json_last_error() === JSON_ERROR_NONE) {
+                if (isset($decoded['translations']) && is_array($decoded['translations'])) {
+                    $decoded = $decoded['translations'];
+                }
+                $out = $this->pickExpectedTranslations($decoded, $expected);
+                if ($out !== []) {
+                    return $out;
+                }
             }
         }
 
-        return null;
+        // TAB lines: KEY<TAB>value
+        $out = [];
+        foreach (preg_split("/\R/u", $text) as $line) {
+            $line = trim($line);
+            if ($line === '' || (strpos($line, '#') === 0)) {
+                continue;
+            }
+            if (strpos($line, "\t") === false) {
+                continue;
+            }
+            [$k, $v] = explode("\t", $line, 2);
+            $k = trim($k);
+            if ($k !== '' && isset($expected[$k])) {
+                $out[$k] = trim($v);
+            }
+        }
+
+        return $out;
+    }
+
+    /**
+     * @param  array<string, mixed>  $decoded
+     * @param  array<string, true>  $expected
+     * @return array<string, string>
+     */
+    private function pickExpectedTranslations(array $decoded, array $expected): array
+    {
+        $out = [];
+        foreach ($decoded as $k => $v) {
+            if (! is_string($k) || ! isset($expected[$k])) {
+                continue;
+            }
+            $out[$k] = is_string($v) ? $v : (is_scalar($v) ? (string) $v : json_encode($v));
+        }
+
+        return $out;
     }
 
 }
