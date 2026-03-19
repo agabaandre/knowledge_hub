@@ -93,23 +93,23 @@ class ExpertsRepository extends SharedRepo{
         $expert->phone_number    = $request->phone_number;
         $expert->expert_type_id  = $request->type_id;
         $expert->country_id      = $request->country_id;
-        
-        // Add ISCO classification and job title relationships
-        if($request->isco_classification_id) {
-            $expert->isco_classification_id = $request->isco_classification_id;
-        }
-        if($request->job_title_id) {
-            $expert->job_title_id = $request->job_title_id;
-        }
-        
-        // If occupation/field is provided, save it
-        if($request->has('field')) {
+
+        // Nullable FKs: empty string from selects must be null (avoids SQL / FK errors)
+        $expert->isco_classification_id = $request->filled('isco_classification_id')
+            ? (int) $request->isco_classification_id
+            : null;
+        $expert->job_title_id = $request->filled('job_title_id')
+            ? (int) $request->job_title_id
+            : null;
+
+        if ($request->has('field')) {
             $expert->occupation = $request->field;
         }
 
-        $saved= ($request->id)?$expert->update():$expert->save();
+        // Always use save() — update() with no attributes only runs fill([]) then save; save() is clearer
+        $saved = $expert->save();
 
-        return $expert;
+        return $saved ? $expert : false;
     }
 
     public function find($id){

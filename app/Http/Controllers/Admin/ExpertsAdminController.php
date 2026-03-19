@@ -41,19 +41,37 @@ class ExpertsAdminController extends Controller
             'country_id'=>'required',
         ]);
 
-        $saved = $this->expertsRepo->save($request);
-
-        if($saved):
-            $data = ['message'=>'Expert saved successfully','status'=>'success','data'=>$saved];
-        else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
-        endif;
-
-        if($request->ajax()){
-            return response($data,200);
+        try {
+            $saved = $this->expertsRepo->save($request);
+        } catch (\Throwable $e) {
+            \Log::error('Expert save failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            if ($request->ajax()) {
+                return response()->json([
+                    'message' => 'Save failed: ' . $e->getMessage(),
+                    'status' => 'failure',
+                ], 500);
+            }
+            return back()
+                ->withInput()
+                ->with('message', 'Save failed. Please check required fields and try again.')
+                ->with('status', 'failure');
         }
-        
-        return back()->with($data);
+
+        $message = $saved ? 'Expert saved successfully' : 'Operation failed, try again';
+        $status = $saved ? 'success' : 'failure';
+
+        if ($request->ajax()) {
+            return response()->json([
+                'message' => $message,
+                'status' => $status,
+                'data' => $saved ? $saved->only(['id', 'first_name', 'last_name', 'email']) : null,
+            ], 200);
+        }
+
+        // Do not flash Eloquent models (breaks session serialization → HTTP 500)
+        return back()
+            ->with('message', $message)
+            ->with('status', $status);
     }
 
 
@@ -80,17 +98,14 @@ class ExpertsAdminController extends Controller
 
         $saved = $this->expertsRepo->save_type($request);
 
-        if($saved):
-            $data = ['message'=>'Expert Type successfully','status'=>'success','data'=>$saved];
-        else:
-            $data = ['message'=>'Operation failed, try again','status'=>'failure','data'=>$saved];   
-        endif;
+        $message = $saved ? 'Expert type saved successfully' : 'Operation failed, try again';
+        $status = $saved ? 'success' : 'failure';
 
-        if($request->ajax()){
-            return response($data,200);
+        if ($request->ajax()) {
+            return response()->json(['message' => $message, 'status' => $status], 200);
         }
-        
-        return back()->with($data);
+
+        return back()->with('message', $message)->with('status', $status);
     }
 
 
