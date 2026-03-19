@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
+use App\Http\Controllers\Admin\ParticipantBadgeManagementController;
 use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\LicensesController;
@@ -253,6 +254,13 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/bulk-action", [ResourcesController::class, 'bulkAction'])->name('admin.publications.bulk-action');
 
     });
+
+    Route::get('/participant-badges', [ParticipantBadgeManagementController::class, 'index'])
+        ->name('admin.participant-badges.index');
+    Route::post('/participant-badges/award', [ParticipantBadgeManagementController::class, 'award'])
+        ->name('admin.participant-badges.award');
+    Route::delete('/participant-badges/{userBadge}', [ParticipantBadgeManagementController::class, 'revoke'])
+        ->name('admin.participant-badges.revoke');
 
     //geo areas
     Route::group(["prefix" => "areas", "as" => "areas."], function () {

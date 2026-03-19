@@ -89,6 +89,7 @@
                             </li>
                             <li aria-haspopup="true"><a href="{{ route('admin.rss_feeds.index') }}" class="slide-item">RSS Feeds</a></li>
                             <li aria-haspopup="true"><a href="{{ route('admin.rss_staging.index') }}" class="slide-item">RSS Staging</a></li>
+                            <li aria-haspopup="true"><a href="{{ route('admin.participant-badges.index') }}" class="slide-item">Participant badge management</a></li>
                             @can('view_content_requests')
                             <li aria-haspopup="true"><a href="{{ route('admin.content-requests.index') }}" class="slide-item">
                                 <i class="fa fa-file-alt mr-1"></i>Content Requests</a></li>

@@ -44,6 +44,7 @@
                 <li class="nav-item"><a href="{{ url('admin/publications/moderate') }}" class="nav-link">Moderate Comments @if(isset($pending_publication_comments_count) && $pending_publication_comments_count > 0)<span class="badge bg-danger ms-1">{{ $pending_publication_comments_count }}</span>@endif</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rss_feeds.index') }}" class="nav-link">RSS Feeds</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rss_staging.index') }}" class="nav-link">RSS Staging</a></li>
+                <li class="nav-item"><a href="{{ route('admin.participant-badges.index') }}" class="nav-link">Participant badge management</a></li>
                 @can('view_content_requests')<li class="nav-item"><a href="{{ route('admin.content-requests.index') }}" class="nav-link">Content Requests</a></li>@endcan
                 @can('manage_experts')<li class="nav-item"><a href="{{ url('admin/experts') }}" class="nav-link">Roster of Experts</a></li>@endcan
                 @can('manage_facts')<li class="nav-item"><a href="{{ url('admin/facts') }}" class="nav-link">Facts</a></li>@endcan
