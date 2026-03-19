@@ -11,6 +11,9 @@ class Expert extends Model
 
     public $timestamps = false;
 
+    /** Allow persisting attributes set directly in ExpertsRepository (avoids guarded issues on some setups). */
+    protected $guarded = [];
+
     public function country(){
         return $this->belongsTo(Country::class);
     }

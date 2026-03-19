@@ -185,46 +185,74 @@ function openDeleteModal (row = 0) {
     $('#delete-modal').modal('show');
 }
 
+function refreshJobTitleSelect2($select) {
+    if ($select.hasClass('select2-hidden-accessible')) {
+        try {
+            $select.select2('destroy');
+        } catch (e) { /* ignore */ }
+    }
+    if ($select.hasClass('js-example-basic-single')) {
+        $select.select2();
+    }
+}
+
 function loadJobTitles(selectElement) {
     var iscoSelect = $(selectElement);
+    var modal = iscoSelect.closest('.modal');
     var selectedOption = iscoSelect.find('option:selected');
     var iscoId = selectedOption.data('isco-id');
     var classificationId = iscoSelect.val();
-    var jobTitleSelect = iscoSelect.closest('.modal').find('#job_title_id');
-    
-    // Clear existing options
+    var jobTitleSelect = modal.find('#job_title_id');
+    var hint = modal.find('#job_titles_isco_hint');
+
+    // Tear down Select2 before changing options (avoids stale linked value)
+    if (jobTitleSelect.hasClass('select2-hidden-accessible')) {
+        try {
+            jobTitleSelect.select2('destroy');
+        } catch (e) { /* ignore */ }
+    }
+
     jobTitleSelect.empty();
     jobTitleSelect.append('<option value="">Select Job Title</option>');
-    
+    jobTitleSelect.val('');
+
     if (!iscoId && !classificationId) {
-        // Reinitialize Select2
-        if (jobTitleSelect.hasClass('js-example-basic-single')) {
-            jobTitleSelect.select2();
+        if (hint.length) {
+            hint.text('Select an ISCO classification first to load job titles').removeClass('text-warning').addClass('text-muted');
         }
+        refreshJobTitleSelect2(jobTitleSelect);
         return;
     }
-    
-    // Fetch job titles for the selected ISCO classification
+
     $.ajax({
         url: '{{ url("admin/experts/job-titles-by-isco") }}',
         method: 'GET',
-        data: { 
+        data: {
             isco_id: iscoId,
             classification_id: classificationId
         },
         success: function(response) {
-            if (response && response.length > 0) {
-                $.each(response, function(index, job) {
-                    jobTitleSelect.append('<option value="' + job.id + '">' + job.name + '</option>');
+            var list = response && Array.isArray(response) ? response : [];
+            if (list.length > 0) {
+                $.each(list, function(index, job) {
+                    jobTitleSelect.append('<option value="' + job.id + '">' + $('<div>').text(job.name).html() + '</option>');
                 });
+                if (hint.length) {
+                    hint.text('Select an ISCO classification first to load job titles').removeClass('text-warning').addClass('text-muted');
+                }
+            } else {
+                // No job titles for this classification — unlink job from classification in the form
+                jobTitleSelect.val('');
+                if (hint.length) {
+                    hint.text('No standard job titles for this classification — use “Job Title (Free Text)” below, or choose another classification.').removeClass('text-muted').addClass('text-warning');
+                }
             }
-            // Reinitialize Select2
-            if (jobTitleSelect.hasClass('js-example-basic-single')) {
-                jobTitleSelect.select2();
-            }
+            refreshJobTitleSelect2(jobTitleSelect);
         },
         error: function(xhr, status, error) {
             console.error('Error loading job titles:', error);
+            jobTitleSelect.val('');
+            refreshJobTitleSelect2(jobTitleSelect);
         }
     });
 }

@@ -4,10 +4,58 @@ namespace App\Repositories;
 use App\Models\Country;
 use App\Models\Expert;
 use App\Models\ExpertType;
+use App\Models\IscoClassification;
 use App\Models\JobTitle;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Schema;
 
 class ExpertsRepository extends SharedRepo{
+
+    /** @var string Cache key shared with OccupationsViewComposer and API lookups */
+    public const CACHE_KEY_JOB_TITLES_ALL = 'occupations';
+
+    private const CACHE_KEY_PREFIX_JOB_TITLES_BY_ISCO = 'job_titles_by_isco_';
+
+    private function jobTitlesCacheTtlMinutes(): int
+    {
+        return (int) env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
+    }
+
+    public static function jobTitlesByIscoCacheKey(string $iscoId): string
+    {
+        return self::CACHE_KEY_PREFIX_JOB_TITLES_BY_ISCO.md5((string) $iscoId);
+    }
+
+    /**
+     * All job titles (cached). Used by experts index, occupations views, and lookup API.
+     */
+    public function getAllJobTitlesCached()
+    {
+        return Cache::remember(
+            self::CACHE_KEY_JOB_TITLES_ALL,
+            $this->jobTitlesCacheTtlMinutes(),
+            static function () {
+                return JobTitle::orderBy('name')->get();
+            }
+        );
+    }
+
+    /**
+     * Job titles for one ISCO code (cached) — avoids repeated heavy queries on admin experts AJAX.
+     */
+    public function getJobTitlesForIscoCached(string $iscoId)
+    {
+        $key = self::jobTitlesByIscoCacheKey($iscoId);
+
+        return Cache::remember(
+            $key,
+            $this->jobTitlesCacheTtlMinutes(),
+            static function () use ($iscoId) {
+                return JobTitle::where('isco_id', $iscoId)->orderBy('name')->get();
+            }
+        );
+    }
 
     public function get(Request $request,$return_array=false){
 
@@ -84,32 +132,82 @@ class ExpertsRepository extends SharedRepo{
     
     public function save(Request $request){
 
-        $expert = ($request->id)?Expert::find($request->id):new Expert();
+        // Avoid null model: invalid id (e.g. "0", deleted row) made Expert::find() return null → fatal error on assign
+        $expert = new Expert();
+        if ($request->filled('id')) {
+            $existing = Expert::find($request->id);
+            if (!$existing) {
+                throw new \InvalidArgumentException('Expert not found for the given ID. Refresh the page and try again.');
+            }
+            $expert = $existing;
+        }
 
         $expert->first_name = $request->first_name;
         $expert->last_name  = $request->last_name;
-        $expert->job_title  = $request->job_title;
+        $expert->job_title  = $request->job_title ?: null;
         $expert->email      = $request->email;
-        $expert->phone_number    = $request->phone_number;
-        $expert->expert_type_id  = $request->type_id;
-        $expert->country_id      = $request->country_id;
+        $expert->phone_number = $request->phone_number ?: null;
+        $expert->expert_type_id = (int) $request->type_id;
+        $expert->country_id = (int) $request->country_id;
 
-        // Nullable FKs: empty string from selects must be null (avoids SQL / FK errors)
-        $expert->isco_classification_id = $request->filled('isco_classification_id')
-            ? (int) $request->isco_classification_id
-            : null;
-        $expert->job_title_id = $request->filled('job_title_id')
-            ? (int) $request->job_title_id
-            : null;
+        // These columns exist only after migration 2025_11_01_204914 — skip if DB not migrated yet
+        if (Schema::hasColumn('experts', 'isco_classification_id')) {
+            $expert->isco_classification_id = $request->filled('isco_classification_id')
+                ? (int) $request->isco_classification_id
+                : null;
+        }
+        if (Schema::hasColumn('experts', 'job_title_id')) {
+            $expert->job_title_id = $request->filled('job_title_id')
+                ? (int) $request->job_title_id
+                : null;
+        }
 
         if ($request->has('field')) {
             $expert->occupation = $request->field;
         }
 
-        // Always use save() — update() with no attributes only runs fill([]) then save; save() is clearer
+        // Unlink job title when classification has no linked job titles, or job doesn't match ISCO
+        if (Schema::hasColumn('experts', 'job_title_id') && Schema::hasColumn('experts', 'isco_classification_id')) {
+            $expert->job_title_id = $this->resolveExpertJobTitleId(
+                $expert->isco_classification_id,
+                $expert->job_title_id
+            );
+        }
+
         $saved = $expert->save();
 
         return $saved ? $expert : false;
+    }
+
+    /**
+     * Keep job_title_id only when it belongs to the selected classification's ISCO.
+     * If the classification has no job titles, force null (unlink).
+     */
+    private function resolveExpertJobTitleId(?int $iscoClassificationId, ?int $jobTitleId): ?int
+    {
+        if (!$jobTitleId) {
+            return null;
+        }
+        if (!$iscoClassificationId) {
+            return $jobTitleId;
+        }
+
+        $classification = IscoClassification::find($iscoClassificationId);
+        if (!$classification) {
+            return null;
+        }
+
+        $jobsForIsco = JobTitle::where('isco_id', $classification->isco_id)->count();
+        if ($jobsForIsco === 0) {
+            return null;
+        }
+
+        $job = JobTitle::find($jobTitleId);
+        if (!$job || (string) $job->isco_id !== (string) $classification->isco_id) {
+            return null;
+        }
+
+        return $jobTitleId;
     }
 
     public function find($id){
@@ -148,13 +246,9 @@ class ExpertsRepository extends SharedRepo{
         return ExpertType::find($id)->delete();
     }
 
-    public function get_jobs(Request $request){
-
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
-
-       return cache()->remember( 'occupations',$minutes, function () {
-            return   JobTitle::all();
-        });
+    public function get_jobs(Request $request)
+    {
+        return $this->getAllJobTitlesCached();
     }
 
 

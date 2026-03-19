@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Models\Country;
-use App\Models\JobTitle;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\ExpertType;
@@ -23,7 +22,7 @@ class ExpertsAdminController extends Controller
         $data['experts'] = $this->expertsRepo->get($request);
         $data['types'] = ExpertType::all();
         $data['countries'] = Country::all();
-        $data['jobs'] = JobTitle::all();
+        $data['jobs'] = $this->expertsRepo->getAllJobTitlesCached();
         // Get unique ISCO classifications (removes duplicates by isco_id)
         $data['isco_classifications'] = \App\Models\IscoClassification::uniqueByIscoId()->get();
         $data['search']  = (Object) $request->all();
@@ -45,15 +44,18 @@ class ExpertsAdminController extends Controller
             $saved = $this->expertsRepo->save($request);
         } catch (\Throwable $e) {
             \Log::error('Expert save failed: ' . $e->getMessage(), ['trace' => $e->getTraceAsString()]);
+            $userMessage = config('app.debug')
+                ? ('Save failed: ' . $e->getMessage())
+                : 'Save failed. Please check required fields and try again.';
             if ($request->ajax()) {
                 return response()->json([
-                    'message' => 'Save failed: ' . $e->getMessage(),
+                    'message' => config('app.debug') ? $e->getMessage() : 'Save failed.',
                     'status' => 'failure',
                 ], 500);
             }
             return back()
                 ->withInput()
-                ->with('message', 'Save failed. Please check required fields and try again.')
+                ->with('message', $userMessage)
                 ->with('status', 'failure');
         }
 
@@ -125,8 +127,8 @@ class ExpertsAdminController extends Controller
         }
         
         if ($iscoId) {
-            // Find job titles where isco_id matches
-            $jobTitles = JobTitle::where('isco_id', $iscoId)->orderBy('name')->get();
+            $jobTitles = $this->expertsRepo->getJobTitlesForIscoCached((string) $iscoId);
+
             return response()->json($jobTitles);
         }
         

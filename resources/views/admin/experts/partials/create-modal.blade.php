@@ -65,7 +65,7 @@
                       @endforeach
                   @endif
               </select>
-              <small class="form-text text-muted">Select an ISCO classification first to load job titles</small>
+              <small class="form-text text-muted" id="job_titles_isco_hint">Select an ISCO classification first to load job titles</small>
           </div>
 
           <div class="form-group col-md-6">
