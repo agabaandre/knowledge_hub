@@ -441,57 +441,17 @@
             <!-- Community Members -->
             <div class="sidebar-card">
                 <h5><i class="fa fa-users theme-text mr-2"></i>Community Members</h5>
-                <form method="GET" action="{{ url()->current() }}" class="mb-2">
+                <form id="memberSearchForm" class="mb-2" onsubmit="return false;">
                     <div class="input-group input-group-sm">
-                        <input type="text" name="member_search" class="form-control" placeholder="Search members..." value="{{ request('member_search') }}">
-                        <button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
+                        <input type="text" id="memberSearchInput" class="form-control" placeholder="Search members...">
+                        <button type="button" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
                     </div>
                 </form>
-                @if(isset($members) && $members->count() > 0)
-                    <ul class="list-unstyled mb-2">
-                        @foreach($members as $idx => $member)
-                            <li class="member-item">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <div class="flex-grow-1">
-                                        <div class="member-name">
-                                            <span class="badge badge-secondary mr-1">{{ ($members->firstItem() ?? 1) + $idx }}</span>
-                                            {{ $member->name }}
-                                        </div>
-                                        <div class="member-title"><i class="fa fa-briefcase mr-1"></i>{{ $member->job_title ?: 'Not specified' }}</div>
-                                        <div class="small text-muted mt-1"><i class="fa fa-envelope mr-1"></i>{{ $member->email }}</div>
-                                        <div class="mt-1">
-                                            @if((int)($member->is_admin ?? 0) === 1)
-                                                <span class="badge text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }};">Admin</span>
-                                            @else
-                                                <span class="badge badge-secondary">Member</span>
-                                            @endif
-                                            @if((int)($member->is_active ?? 1) === 1)
-                                                <span class="badge badge-success">Active</span>
-                                            @else
-                                                <span class="badge badge-danger">Inactive</span>
-                                            @endif
-                                            <span class="badge badge-info">{{ (int)($member->publication_count ?? 0) }} Publications</span>
-                                        </div>
-                                        @if(!empty($isCommunityAdmin) && ((int)($member->user_id ?? 0) !== (int)(auth()->id() ?? 0)))
-                                            <div class="mt-2">
-                                                @if((int)($member->is_active ?? 1) === 1)
-                                                    <button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="{{ $member->membership_id }}" data-action="deactivate" type="button">Mark inactive</button>
-                                                @else
-                                                    <button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="{{ $member->membership_id }}" data-action="activate" type="button">Mark active</button>
-                                                @endif
-                                            </div>
-                                        @endif
-                                    </div>
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
-                    <div class="mt-2">
-                        {{ $members->links() }}
-                    </div>
-                @else
-                    <p class="text-muted mb-0">No members found.</p>
-                @endif
+                <ul id="communityMembersList" class="list-unstyled mb-2"></ul>
+                <div id="communityMembersEmpty" class="text-muted mb-0" style="display:none;">No members found.</div>
+                <div id="communityMembersLoader" class="text-center text-muted small py-2" style="display:none;">Loading members...</div>
+                <div id="communityMembersEnd" class="text-center text-muted small py-2" style="display:none;">End of members list.</div>
+                <div id="communityMembersSentinel"></div>
             </div>
 
             <!-- Badge Requirements Info -->
@@ -589,6 +549,95 @@
 @section('scripts')
 <script>
     (function () {
+        var membersState = {
+            page: 1,
+            perPage: 20,
+            hasMore: true,
+            loading: false,
+            query: '',
+            isCommunityAdmin: {{ !empty($isCommunityAdmin) ? 'true' : 'false' }}
+        };
+
+        function escapeHtml(v) {
+            return String(v || '').replace(/[&<>"']/g, function (m) {
+                return ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'})[m];
+            });
+        }
+
+        function memberItemHtml(item) {
+            var adminBadge = item.is_admin
+                ? '<span class="badge text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }};">Admin</span>'
+                : '<span class="badge badge-secondary">Member</span>';
+            var activeBadge = item.is_active
+                ? '<span class="badge badge-success">Active</span>'
+                : '<span class="badge badge-danger">Inactive</span>';
+            var actionHtml = '';
+            if (membersState.isCommunityAdmin && parseInt(item.user_id, 10) !== {{ (int)(auth()->id() ?? 0) }}) {
+                if (item.is_active) {
+                    actionHtml = '<div class="mt-2"><button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="' + item.membership_id + '" data-action="deactivate" type="button">Mark inactive</button></div>';
+                } else {
+                    actionHtml = '<div class="mt-2"><button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="' + item.membership_id + '" data-action="activate" type="button">Mark active</button></div>';
+                }
+            }
+            return '' +
+                '<li class="member-item">' +
+                '  <div class="d-flex justify-content-between align-items-start">' +
+                '    <div class="flex-grow-1">' +
+                '      <div class="member-name"><span class="badge badge-secondary mr-1">' + item.rank + '</span>' + escapeHtml(item.name) + '</div>' +
+                '      <div class="member-title"><i class="fa fa-briefcase mr-1"></i>' + escapeHtml(item.job_title || 'Not specified') + '</div>' +
+                '      <div class="small text-muted mt-1"><i class="fa fa-envelope mr-1"></i>' + escapeHtml(item.email) + '</div>' +
+                '      <div class="mt-1">' + adminBadge + ' ' + activeBadge + ' <span class="badge badge-info">' + parseInt(item.publication_count, 10) + ' Publications</span></div>' +
+                actionHtml +
+                '    </div>' +
+                '  </div>' +
+                '</li>';
+        }
+
+        function setMembersUiState() {
+            var listCount = jQuery('#communityMembersList').children().length;
+            jQuery('#communityMembersEmpty').toggle(!membersState.loading && listCount === 0);
+            jQuery('#communityMembersLoader').toggle(membersState.loading);
+            jQuery('#communityMembersEnd').toggle(!membersState.loading && !membersState.hasMore && listCount > 0);
+        }
+
+        function fetchMembers(reset) {
+            if (membersState.loading) return;
+            if (!membersState.hasMore && !reset) return;
+
+            if (reset) {
+                membersState.page = 1;
+                membersState.hasMore = true;
+                jQuery('#communityMembersList').empty();
+            }
+
+            membersState.loading = true;
+            setMembersUiState();
+
+            jQuery.get('{{ route('community.members-data', $community->id) }}', {
+                page: membersState.page,
+                per_page: membersState.perPage,
+                q: membersState.query
+            }).done(function (res) {
+                var items = Array.isArray(res.items) ? res.items : [];
+                membersState.hasMore = !!res.has_more;
+                if (typeof res.is_community_admin !== 'undefined') {
+                    membersState.isCommunityAdmin = !!res.is_community_admin;
+                }
+                if (items.length > 0) {
+                    var html = items.map(memberItemHtml).join('');
+                    jQuery('#communityMembersList').append(html);
+                }
+                if (membersState.hasMore) {
+                    membersState.page += 1;
+                }
+            }).fail(function () {
+                // keep current items on failure
+            }).always(function () {
+                membersState.loading = false;
+                setMembersUiState();
+            });
+        }
+
         var inviteForm = document.getElementById('inviteColleaguesForm');
         if (inviteForm) {
             inviteForm.addEventListener('submit', function (e) {
@@ -634,6 +683,30 @@
                 }).catch(function () { alert('Failed to create event.'); });
             });
         }
+
+        var searchTimer = null;
+        jQuery('#memberSearchInput').on('input', function () {
+            var val = jQuery(this).val() || '';
+            clearTimeout(searchTimer);
+            searchTimer = setTimeout(function () {
+                membersState.query = val.trim();
+                fetchMembers(true);
+            }, 300);
+        });
+
+        var sentinel = document.getElementById('communityMembersSentinel');
+        if (sentinel && 'IntersectionObserver' in window) {
+            var observer = new IntersectionObserver(function (entries) {
+                entries.forEach(function (entry) {
+                    if (entry.isIntersecting) {
+                        fetchMembers(false);
+                    }
+                });
+            }, { root: null, rootMargin: '120px 0px', threshold: 0.01 });
+            observer.observe(sentinel);
+        }
+
+        fetchMembers(true);
 
     })();
 </script>

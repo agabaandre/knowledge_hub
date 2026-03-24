@@ -201,45 +201,6 @@ class CommunitiesController extends Controller
             ->limit(10)
             ->get();
 
-        // Members list: ranked by highest publications in this community first, paginated (20/page)
-        $memberSearch = trim((string) request('member_search', ''));
-        $membersQuery = DB::table('community_of_practice_members as m')
-            ->join('users as u', 'u.id', '=', 'm.user_id')
-            ->leftJoin('publication_community_of_practices as pcp', function ($join) {
-                $join->on('pcp.community_of_practice_id', '=', 'm.community_of_practice_id');
-            })
-            ->leftJoin('publication as p', function ($join) {
-                $join->on('p.id', '=', 'pcp.publication_id')
-                     ->on('p.user_id', '=', 'm.user_id');
-            })
-            ->where('m.community_of_practice_id', (int) $id)
-            ->where('m.is_approved', 1)
-            ->select(
-                'm.id as membership_id',
-                'm.user_id',
-                'm.is_active',
-                'm.is_admin',
-                'u.name',
-                'u.email',
-                'u.job_title',
-                DB::raw('COUNT(DISTINCT p.id) as publication_count')
-            )
-            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title');
-
-        if ($memberSearch !== '') {
-            $membersQuery->where(function ($q) use ($memberSearch) {
-                $q->where('u.name', 'like', '%' . $memberSearch . '%')
-                    ->orWhere('u.email', 'like', '%' . $memberSearch . '%')
-                    ->orWhere('u.job_title', 'like', '%' . $memberSearch . '%');
-            });
-        }
-
-        $members = $membersQuery
-            ->orderBy('publication_count', 'desc')
-            ->orderBy('u.name', 'asc')
-            ->paginate(20, ['*'], 'members_page')
-            ->appends(request()->only(['member_search']));
-
         // Get all badge types for displaying requirements
         $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
 
@@ -250,8 +211,7 @@ class CommunitiesController extends Controller
             'otherCommunities',
             'badgeTypes',
             'isCommunityAdmin',
-            'communityEvents',
-            'members'
+            'communityEvents'
         ));
     }
 
@@ -276,15 +236,12 @@ class CommunitiesController extends Controller
             ->where('user_id', $userId)
             ->where('is_approved', 1)
             ->first();
-        $isCommunityAdmin = (bool) ($currentMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
+        $isSystemAdmin = is_admin() || (auth()->user() && method_exists(auth()->user(), 'can') && auth()->user()->can('view_publications'));
+        $isCommunityAdmin = $isSystemAdmin || (bool) ($currentMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
 
-        $draw = (int) $request->input('draw', 1);
-        $start = (int) $request->input('start', 0);
-        $length = (int) $request->input('length', 20);
-        if ($length <= 0) {
-            $length = 20;
-        }
-        $search = trim((string) $request->input('search.value', ''));
+        $page = max((int) $request->input('page', 1), 1);
+        $perPage = max((int) $request->input('per_page', 20), 1);
+        $search = trim((string) $request->input('q', ''));
 
         $base = DB::table('community_of_practice_members as m')
             ->join('users as u', 'u.id', '=', 'm.user_id')
@@ -307,11 +264,6 @@ class CommunitiesController extends Controller
                 DB::raw('COUNT(DISTINCT pcp.publication_id) as publication_count')
             );
 
-        $recordsTotal = DB::table('community_of_practice_members as m')
-            ->where('m.community_of_practice_id', (int) $id)
-            ->where('m.is_approved', 1)
-            ->count();
-
         if ($search !== '') {
             $base->where(function ($q) use ($search) {
                 $q->where('u.name', 'like', '%' . $search . '%')
@@ -327,41 +279,36 @@ class CommunitiesController extends Controller
         $rows = $base
             ->orderBy('publication_count', 'desc')
             ->orderBy('name', 'asc')
-            ->offset($start)
-            ->limit($length)
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
             ->get();
 
-        $data = [];
-        foreach ($rows as $row) {
-            $status = ((int) $row->is_active === 1) ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>';
-            $role = ((int) $row->is_admin === 1)
-                ? '<span class="badge text-light" style="background-color: ' . e((string) (settings()->primary_color ?? '#119A48')) . ';">Admin</span>'
-                : '<span class="badge badge-secondary">Member</span>';
-            $actions = '-';
-            if ($isCommunityAdmin && (int) $row->user_id !== (int) $userId) {
-                if ((int) $row->is_active === 1) {
-                    $actions = '<button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="' . (int) $row->membership_id . '" data-action="deactivate">Mark inactive</button>';
-                } else {
-                    $actions = '<button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="' . (int) $row->membership_id . '" data-action="activate">Mark active</button>';
-                }
-            }
-
-            $data[] = [
-                'name' => e((string) $row->name),
-                'job_title' => e((string) ($row->job_title ?: 'Not specified')),
-                'email' => e((string) $row->email),
-                'publications' => (int) $row->publication_count,
-                'role' => $role,
-                'status' => $status,
-                'actions' => $actions,
+        $rankStart = (($page - 1) * $perPage) + 1;
+        $items = [];
+        foreach ($rows as $index => $row) {
+            $items[] = [
+                'rank' => $rankStart + $index,
+                'membership_id' => (int) $row->membership_id,
+                'user_id' => (int) $row->user_id,
+                'name' => (string) $row->name,
+                'job_title' => (string) ($row->job_title ?: 'Not specified'),
+                'email' => (string) $row->email,
+                'publication_count' => (int) $row->publication_count,
+                'is_admin' => (bool) $row->is_admin,
+                'is_active' => (bool) $row->is_active,
             ];
         }
 
+        $loadedCount = (($page - 1) * $perPage) + count($items);
+        $hasMore = $loadedCount < $recordsFiltered;
+
         return response()->json([
-            'draw' => $draw,
-            'recordsTotal' => $recordsTotal,
-            'recordsFiltered' => $recordsFiltered,
-            'data' => $data,
+            'items' => $items,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $recordsFiltered,
+            'has_more' => $hasMore,
+            'is_community_admin' => $isCommunityAdmin,
         ]);
     }
 
@@ -414,7 +361,8 @@ class CommunitiesController extends Controller
             ->where('is_approved', 1)
             ->first();
         $community = $this->commsOfPracticeRepository->find($id);
-        $canManage = ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
+        $isSystemAdmin = is_admin() || (auth()->user() && method_exists(auth()->user(), 'can') && auth()->user()->can('view_publications'));
+        $canManage = $isSystemAdmin || ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
         if (!$canManage) {
             return response()->json(['status' => 'error', 'message' => 'Only community admins can update member status.'], 403);
         }
