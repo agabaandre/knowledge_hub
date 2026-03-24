@@ -812,6 +812,31 @@ if (!function_exists('sanitize_rich_text_for_display_fallback')) {
     }
 }
 
+if (!function_exists('sanitize_rich_text_for_storage')) {
+    /**
+     * Sanitize rich text before saving to DB (API/web inputs).
+     * Keeps meaningful HTML while removing unstable Summernote artifacts.
+     */
+    function sanitize_rich_text_for_storage($html)
+    {
+        $html = trim_rich_text_input($html);
+        if ($html === '') {
+            return '';
+        }
+
+        $renderSafe = sanitize_rich_text_for_display($html);
+        if ($renderSafe === '') {
+            return '';
+        }
+
+        // Remove the outer wrapper injected by sanitize_rich_text_for_display().
+        $inner = preg_replace('/^<div\b[^>]*>/', '', $renderSafe);
+        $inner = preg_replace('/<\/div>\s*$/', '', (string) $inner);
+
+        return trim((string) $inner);
+    }
+}
+
 function cleanHtmlContent($htmlContent)
 {
     // Backward-compatible alias used widely in views

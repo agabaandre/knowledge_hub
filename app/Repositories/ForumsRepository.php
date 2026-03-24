@@ -241,7 +241,7 @@ class ForumsRepository extends SharedRepo{
 
         $forum = new Forum();
         $forum->forum_title = clean_unicode($request->title ?? '');
-        $forum->forum_description = clean_unicode($request->description ?? '');
+        $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $forum->created_by = current_user()->id;
         $forum->status = 0;
 
@@ -342,7 +342,7 @@ class ForumsRepository extends SharedRepo{
 
         $comment->created_by = current_user()->id;
         $comment->forum_id = $request->id;
-        $comment->comment  = clean_unicode($request->comment ?? '');
+        $comment->comment  = sanitize_rich_text_for_storage(clean_unicode($request->comment ?? ''));
         $comment->parent_id = $request->parent_id ?? null;
         
         // Check if auto-approve comments is enabled (defaults to true)

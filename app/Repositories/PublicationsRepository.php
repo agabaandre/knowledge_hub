@@ -282,7 +282,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         
         // Clean Unicode characters from text fields before saving
         $pub->title                     = clean_unicode($request->title ?? '');
-        $pub->description               = clean_unicode($request->description ?? '');
+        $pub->description               = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $pub->associated_authors        = clean_unicode($request->associated_authors ?? '');
         $pub->author_affiliation        = clean_unicode($request->author_affiliation ?? '');
         $pub->publication               = clean_unicode($request->link ?? '');
@@ -1249,7 +1249,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     $comment->user_id = current_user() ? current_user()->id : ($request->user_id ?? null);
     $comment->publication_id = $request->publication_id;
-    $comment->comment = clean_unicode($raw);
+    $comment->comment = sanitize_rich_text_for_storage(clean_unicode($raw));
     
     // Check if auto-approve comments is enabled (defaults to true)
     $autoApprove = settings()->auto_approve_comments ?? true;
