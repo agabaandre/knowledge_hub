@@ -43,7 +43,6 @@ public function get(Request $request, $return_array = false, $featured = false,$
     }
     $pubs = Publication::with($with)
     ->where('is_version', 0)
-    ->inRandomOrder()
     ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')
     ->searchTerm($request->term);
 
@@ -83,10 +82,15 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
         });
 
-        // Featured publications should appear first.
+        // Featured publications should always appear first.
         $pubs->orderByRaw('CASE WHEN is_featured = 1 THEN 0 ELSE 1 END');
     } elseif ($featured) {
         $pubs->where('is_featured', 1);
+    }
+
+    // Keep randomization for non-featured browsing only.
+    if (!$featured) {
+        $pubs->inRandomOrder();
     }
 
     if (!$featured) {
