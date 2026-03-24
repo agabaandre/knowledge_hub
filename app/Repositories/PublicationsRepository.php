@@ -547,9 +547,36 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $attachment_path = ($attachment_path)?storage_path('/app/public/uploads/publications/'.$attachment_path):null;
         $file_type = get_file_type($attachment_path,$request->link);
 
-        //check if it's video type
-        if(strpos(strtolower($file_type->name),'video')>-1)
-         $pub->is_video = 1;
+        // Detect video from file type name, mime types, link platform, or direct file extensions.
+        $isVideoType = false;
+        if ($file_type) {
+            $typeName = strtolower((string) ($file_type->name ?? ''));
+            $mimeList = strtolower((string) ($file_type->mime_types ?? ''));
+            $isVideoType = (strpos($typeName, 'video') !== false) || (strpos($mimeList, 'video') !== false);
+        }
+        $isVideoLink = is_video_platform_url((string) ($request->link ?? ''));
+        $isVideo = $isVideoType || $isVideoLink;
+
+        $pub->is_video = $isVideo ? 1 : 0;
+        // Video links/files should embed by default for better UX.
+        if ($isVideo) {
+            $pub->is_embedded = 1;
+        }
+
+        // Auto-generate video cover (platform thumbnail or first frame around 2s)
+        // when user did not explicitly provide a cover.
+        $hasManualCover = $request->hasFile('cover') || ($request->has('cover_url') && !empty($request->cover_url));
+        if ($isVideo && !$hasManualCover) {
+            $rawExistingCover = (string) ($pub->getRawOriginal('cover') ?? '');
+            $isDefaultCover = ($rawExistingCover === '' || $rawExistingCover === 'cover.jpg');
+            if (!$request->id || $isDefaultCover) {
+                $videoCover = get_video_cover_source((string) ($request->link ?? ''), $attachment_path, 'publication-' . $id);
+                if ($videoCover && !empty($videoCover['cover'])) {
+                    $pub->cover = $videoCover['cover'];
+                    $pub->cover_is_exteranl = !empty($videoCover['is_external']);
+                }
+            }
+        }
          
         $pub->file_type_id =$file_type->id; //$request->file_type;
         $pub->update();

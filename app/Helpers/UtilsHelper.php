@@ -544,25 +544,267 @@ function getFileMimeType($file_path)
 }
 
 function get_file_type($file_path=null,$pub_url=null){
+    $mime_type = null;
 
-
-   $mime_type = getFileMimeType($file_path);
-
-   if($mime_type){
-        $mime_type = str_replace('application/','',$mime_type);
-        $mime_type = str_replace('images/','',$mime_type);
+    if (!empty($file_path) && is_string($file_path) && file_exists($file_path)) {
+        $mime_type = getFileMimeType($file_path);
+        if ($mime_type && strtolower($mime_type) !== 'file not found') {
+            $mime_type = strtolower($mime_type);
+            $mime_type = str_replace('application/', '', $mime_type);
+            $mime_type = str_replace('images/', '', $mime_type);
+        } else {
+            $mime_type = null;
+        }
     }
 
-   //sdd($mime_type);
-  
-    $mime_type = ($mime_type)?$mime_type: $pub_url;
+    if (!$mime_type && !empty($pub_url) && is_string($pub_url)) {
+        $url = strtolower(trim($pub_url));
+        if (is_video_platform_url($url)) {
+            $mime_type = 'video';
+        } else {
+            $path = parse_url($url, PHP_URL_PATH) ?: $url;
+            $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+            if ($ext !== '') {
+                $mime_type = $ext;
+            } else {
+                $mime_type = $url;
+            }
+        }
+    }
 
-    $type = PublicationType::where('mime_types','like','%'.strtolower($mime_type).'%')->first();
-    
-    if(!$type)
+    if (!$mime_type) {
+        $mime_type = 'other';
+    }
+
+    $type = PublicationType::where('mime_types', 'like', '%' . strtolower($mime_type) . '%')->first();
+    if (!$type && strpos((string) $mime_type, 'video') !== false) {
+        $type = PublicationType::where('name', 'like', '%video%')->first();
+    }
+    if (!$type)
         $type = PublicationType::where('name','like','%other%')->first();
- 
+
     return $type;
+}
+
+if (!function_exists('is_video_platform_url')) {
+    /**
+     * Detect common video platform links and direct video files.
+     */
+    function is_video_platform_url($url)
+    {
+        if (!$url || !is_string($url)) {
+            return false;
+        }
+
+        $u = strtolower(trim($url));
+        $host = parse_url($u, PHP_URL_HOST) ?: '';
+        $path = parse_url($u, PHP_URL_PATH) ?: '';
+
+        $videoHosts = [
+            'youtube.com', 'www.youtube.com', 'youtu.be',
+            'vimeo.com', 'www.vimeo.com', 'player.vimeo.com',
+            'dailymotion.com', 'www.dailymotion.com', 'dai.ly',
+            'wistia.com', 'www.wistia.com', 'fast.wistia.net',
+            'loom.com', 'www.loom.com',
+        ];
+        foreach ($videoHosts as $vh) {
+            if ($host === $vh || (substr($host, -strlen('.'.$vh)) === '.'.$vh)) {
+                return true;
+            }
+        }
+
+        $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+        $directVideoExt = ['mp4', 'm4v', 'mov', 'webm', 'ogg', 'ogv', 'mpeg', 'mpg', 'avi'];
+        return in_array($ext, $directVideoExt, true);
+    }
+}
+
+if (!function_exists('is_direct_video_file_url')) {
+    function is_direct_video_file_url($url)
+    {
+        if (!$url || !is_string($url)) {
+            return false;
+        }
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+        return in_array($ext, ['mp4', 'm4v', 'mov', 'webm', 'ogg', 'ogv', 'mpeg', 'mpg', 'avi'], true);
+    }
+}
+
+if (!function_exists('get_video_embed_url')) {
+    /**
+     * Convert known video platform links to embeddable URLs.
+     */
+    function get_video_embed_url($url)
+    {
+        if (!$url || !is_string($url)) {
+            return null;
+        }
+
+        $trimmed = trim($url);
+        $parts = parse_url($trimmed);
+        $host = strtolower($parts['host'] ?? '');
+        $path = $parts['path'] ?? '';
+        parse_str($parts['query'] ?? '', $query);
+
+        if ($host === 'youtu.be') {
+            $id = trim($path, '/');
+            return $id ? 'https://www.youtube.com/embed/' . $id : null;
+        }
+
+        if ($host === 'youtube.com' || $host === 'www.youtube.com' || $host === 'm.youtube.com') {
+            if (!empty($query['v'])) {
+                return 'https://www.youtube.com/embed/' . $query['v'];
+            }
+            if (strpos($path, '/embed/') === 0) {
+                return 'https://www.youtube.com' . $path;
+            }
+            if (strpos($path, '/shorts/') === 0) {
+                $id = trim(substr($path, strlen('/shorts/')), '/');
+                return $id ? 'https://www.youtube.com/embed/' . $id : null;
+            }
+        }
+
+        if ($host === 'vimeo.com' || $host === 'www.vimeo.com') {
+            $id = trim($path, '/');
+            if ($id && preg_match('/^\d+$/', $id)) {
+                return 'https://player.vimeo.com/video/' . $id;
+            }
+        }
+        if ($host === 'player.vimeo.com') {
+            return $trimmed;
+        }
+
+        if (($host === 'dailymotion.com' || $host === 'www.dailymotion.com') && strpos($path, '/video/') === 0) {
+            $id = trim(substr($path, strlen('/video/')), '/');
+            return $id ? 'https://www.dailymotion.com/embed/video/' . $id : null;
+        }
+        if ($host === 'dai.ly') {
+            $id = trim($path, '/');
+            return $id ? 'https://www.dailymotion.com/embed/video/' . $id : null;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('get_video_platform_thumbnail_url')) {
+    /**
+     * Resolve thumbnail URL for known video platforms.
+     */
+    function get_video_platform_thumbnail_url($url)
+    {
+        if (!$url || !is_string($url)) {
+            return null;
+        }
+
+        $trimmed = trim($url);
+        $parts = parse_url($trimmed);
+        $host = strtolower($parts['host'] ?? '');
+
+        $embed = get_video_embed_url($trimmed);
+        if ($embed && (strpos($embed, 'youtube.com/embed/') !== false)) {
+            $id = basename(parse_url($embed, PHP_URL_PATH));
+            return $id ? 'https://img.youtube.com/vi/' . $id . '/hqdefault.jpg' : null;
+        }
+
+        // Vimeo / Dailymotion via oEmbed
+        if (strpos($host, 'vimeo.com') !== false || strpos($host, 'dailymotion.com') !== false || $host === 'dai.ly') {
+            $oembed = null;
+            if (strpos($host, 'vimeo.com') !== false) {
+                $oembed = 'https://vimeo.com/api/oembed.json?url=' . urlencode($trimmed);
+            } else {
+                $oembed = 'https://www.dailymotion.com/services/oembed?url=' . urlencode($trimmed);
+            }
+
+            $ctx = stream_context_create([
+                'http' => [
+                    'timeout' => 5,
+                    'ignore_errors' => true,
+                    'header' => "User-Agent: KHUB/1.0\r\n",
+                ],
+            ]);
+            $raw = @file_get_contents($oembed, false, $ctx);
+            if ($raw) {
+                $json = json_decode($raw, true);
+                $thumb = $json['thumbnail_url'] ?? null;
+                if (is_string($thumb) && $thumb !== '') {
+                    return $thumb;
+                }
+            }
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('extract_video_frame_cover')) {
+    /**
+     * Extract frame at ~2s from local video using ffmpeg.
+     * Returns stored filename (relative in uploads/publications) or null.
+     */
+    function extract_video_frame_cover($localVideoPath, $seed = 'video')
+    {
+        if (empty($localVideoPath) || !is_string($localVideoPath) || !file_exists($localVideoPath)) {
+            return null;
+        }
+
+        $outputDir = storage_path('app/public/uploads/publications/');
+        if (!is_dir($outputDir)) {
+            @mkdir($outputDir, 0755, true);
+        }
+        if (!is_dir($outputDir)) {
+            return null;
+        }
+
+        $hash = md5($seed . '|' . $localVideoPath . '|' . @filemtime($localVideoPath));
+        $filename = $hash . '_frame.jpg';
+        $outputPath = rtrim($outputDir, '/\\') . DIRECTORY_SEPARATOR . $filename;
+
+        // If already generated, reuse it.
+        if (file_exists($outputPath) && filesize($outputPath) > 0) {
+            return $filename;
+        }
+
+        $ffmpeg = trim((string) @shell_exec('command -v ffmpeg'));
+        if ($ffmpeg === '') {
+            return null;
+        }
+
+        $cmd = escapeshellcmd($ffmpeg)
+            . ' -y -ss 00:00:02 -i ' . escapeshellarg($localVideoPath)
+            . ' -frames:v 1 -q:v 2 ' . escapeshellarg($outputPath)
+            . ' 2>&1';
+        @exec($cmd, $out, $exitCode);
+
+        if ($exitCode === 0 && file_exists($outputPath) && filesize($outputPath) > 0) {
+            return $filename;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('get_video_cover_source')) {
+    /**
+     * Pick best cover source for videos: platform thumbnail first, else local frame extraction.
+     *
+     * @return array{cover: string, is_external: bool}|null
+     */
+    function get_video_cover_source($videoUrl = null, $localVideoPath = null, $seed = 'video')
+    {
+        $platformThumb = get_video_platform_thumbnail_url($videoUrl);
+        if ($platformThumb) {
+            return ['cover' => $platformThumb, 'is_external' => true];
+        }
+
+        $frameFile = extract_video_frame_cover($localVideoPath, $seed);
+        if ($frameFile) {
+            return ['cover' => $frameFile, 'is_external' => false];
+        }
+
+        return null;
+    }
 }
 
 function html_to_text($html) {

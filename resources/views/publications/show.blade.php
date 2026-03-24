@@ -761,14 +761,35 @@
 
                 <!-- Description Card -->
                 <div class="card-md">
-                    @if ($publication->is_embedded)
-                        <div class="responsive-iframe-container mb-4">
-                            <iframe src="{{ $publication->publication }}" allowfullscreen></iframe>
-                        </div>
-                    @elseif ($publication->is_video)
-                        <div class="mb-4">
-                            <iframe width="100%" height="400" src="{{ $publication->publication }}"></iframe>
-                        </div>
+                    @php
+                        $pubUrl = trim((string) ($publication->publication ?? ''));
+                        $embedUrl = get_video_embed_url($pubUrl);
+                        $directVideo = is_direct_video_file_url($pubUrl);
+                        $isVideoLink = is_video_platform_url($pubUrl);
+                    @endphp
+                    @if ($pubUrl !== '')
+                        @if (($publication->is_video || $isVideoLink) && $embedUrl)
+                            <div class="responsive-iframe-container mb-4">
+                                <iframe
+                                    src="{{ $embedUrl }}"
+                                    title="Video player"
+                                    frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                    referrerpolicy="strict-origin-when-cross-origin"
+                                    allowfullscreen></iframe>
+                            </div>
+                        @elseif (($publication->is_video || $isVideoLink) && $directVideo)
+                            <div class="mb-4">
+                                <video controls preload="metadata" style="width:100%; max-height:460px; background:#000; border-radius:0.25rem;">
+                                    <source src="{{ $pubUrl }}">
+                                    Your browser does not support HTML5 video.
+                                </video>
+                            </div>
+                        @elseif ($publication->is_embedded)
+                            <div class="responsive-iframe-container mb-4">
+                                <iframe src="{{ $pubUrl }}" allowfullscreen></iframe>
+                            </div>
+                        @endif
                     @endif
                     <h2 class="section-heading">Description</h2>
                     <div itemprop="articleBody" class="publication-page-description">
