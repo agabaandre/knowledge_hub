@@ -157,6 +157,26 @@
         color: #64748b;
         margin-top: 0.5rem;
     }
+    #memberSearchForm .input-group {
+        align-items: stretch;
+    }
+    #memberSearchForm .form-control {
+        height: 40px;
+        border-right: 0;
+    }
+    #memberSearchForm .btn {
+        height: 40px;
+        min-width: 44px;
+        padding: 0 12px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-left: 1px solid #ced4da;
+    }
+    #memberSearchForm .btn i {
+        font-size: 20px;
+        line-height: 1;
+    }
     .community-featured-card {
         background: #ffffff;
         border: 1px solid #e2e8f0;
