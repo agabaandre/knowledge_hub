@@ -510,12 +510,14 @@
                             <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 8px;">
                                 <p class="text-muted mb-0" itemprop="about">{{ clean_unicode($publication->theme->description ?? '') }}</p>
                                 @auth
-                                    @if (is_admin() || auth()->user()->can('view_publications'))
-                                        <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}#step-1"
+                                    @if ($publication->user_id == current_user()->id || is_admin())
+                                        <a href="{{ route('account.publications.edit') }}?id={{ $publication->id }}"
                                            class="btn btn-sm btn-outline-secondary"
-                                           title="Edit this publication in Admin">
+                                           title="Edit this publication">
                                             <i class="fa fa-edit mr-1"></i>Edit publication
                                         </a>
+                                    @endif
+                                    @if (is_admin() || auth()->user()->can('view_publications'))
                                         <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}"
                                            class="btn btn-sm btn-outline-secondary"
                                            title="View this publication in Admin">

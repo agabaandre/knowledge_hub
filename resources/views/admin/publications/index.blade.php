@@ -202,6 +202,13 @@
                                                 <span class="text-muted">{{ $name }}</span>
                                             </td>
                                             <td>
+                                                <a href="{{ url('records/resource') }}?id={{ $publication->id }}"
+                                                   target="_blank"
+                                                   rel="noopener noreferrer"
+                                                   class="btn btn-sm btn-outline-success mr-1"
+                                                   title="Public view">
+                                                    <i class="fa fa-external-link-alt"></i>
+                                                </a>
                                                 <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}" class="btn btn-sm btn-outline-primary mr-1">
                                                     <i class="fa fa-eye"></i>
                                                 </a>
