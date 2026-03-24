@@ -13,6 +13,13 @@
         .card { border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem; }
         .card-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
         .card-body { padding: 1.5rem; }
+        /* Publication state row highlights */
+        .pub-row-featured { background-color: #ecfdf3 !important; }
+        .pub-row-inactive { background-color: #fef2f2 !important; }
+        .pub-state-key { display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border:1px solid #e2e8f0; border-radius:16px; font-size:12px; color:#334155; background:#fff; }
+        .pub-state-swatch { width:14px; height:14px; border-radius:3px; border:1px solid #cbd5e1; }
+        .pub-state-swatch-featured { background:#ecfdf3; }
+        .pub-state-swatch-inactive { background:#fef2f2; }
     </style>
 @endsection
 
@@ -114,6 +121,18 @@
                         @csrf
                         <input type="hidden" name="action" id="bulk-action-type" value="">
 
+                        <div class="mb-3 d-flex align-items-center flex-wrap" style="gap:8px;">
+                            <span class="text-muted small">Row color key:</span>
+                            <span class="pub-state-key">
+                                <span class="pub-state-swatch pub-state-swatch-featured"></span>
+                                Featured
+                            </span>
+                            <span class="pub-state-key">
+                                <span class="pub-state-swatch pub-state-swatch-inactive"></span>
+                                Inactive / Unpublished
+                            </span>
+                        </div>
+
                         @if(session('success'))
                             <div class="alert alert-success">{{ session('success') }}</div>
                         @endif
@@ -156,7 +175,12 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($publications as $idx => $publication)
-                                        <tr>
+                                        @php
+                                            $isInactive = strtolower((string)($publication->is_active ?? '')) !== 'active';
+                                            $isFeatured = (int)($publication->is_featured ?? 0) === 1;
+                                            $rowClass = $isInactive ? 'pub-row-inactive' : ($isFeatured ? 'pub-row-featured' : '');
+                                        @endphp
+                                        <tr class="{{ $rowClass }}">
                                             <td><input type="checkbox" name="selected_ids[]" value="{{ $publication->id }}" class="publication-checkbox"></td>
                                             <td><span class="text-muted">{{ $publications->firstItem() + $idx }}</span></td>
                                             <td>
