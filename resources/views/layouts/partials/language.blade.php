@@ -8,46 +8,15 @@
     @endphp
     <script type="text/javascript">
     function googleTranslateElementInit() {
-      if (window.__khubGoogleWidgetInitialized) return;
-      if (!window.google || !google.translate || !google.translate.TranslateElement) return;
       new google.translate.TranslateElement({
         pageLanguage: 'en',
         autoDisplay: false,
         disableAutoHover: true,
         showBanner: false
-      }, 'google_translate_element');
-      window.__khubGoogleWidgetInitialized = true;
-    }
-    window.googleTranslateElementInit = googleTranslateElementInit;
+      },
+        'google_translate_element');
 
-    // If callback fired before this template script loaded, initialize now.
-    if (window.__khubGoogleTranslateCallbackHit) {
-      googleTranslateElementInit();
     }
-
-    // Fallback for localhost timing/network hiccups: request script if widget is still unavailable.
-    function ensureGoogleTranslateReady() {
-      if (window.__khubGoogleWidgetInitialized) return;
-      if (window.google && google.translate && google.translate.TranslateElement) {
-        googleTranslateElementInit();
-        return;
-      }
-      if (window.__khubGoogleScriptRequested) return;
-      window.__khubGoogleScriptRequested = true;
-      var s = document.createElement('script');
-      s.type = 'text/javascript';
-      s.src = 'https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit';
-      s.async = true;
-      s.onerror = function() { window.__khubGoogleScriptRequested = false; };
-      (document.head || document.documentElement).appendChild(s);
-    }
-
-    if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', ensureGoogleTranslateReady);
-    } else {
-      ensureGoogleTranslateReady();
-    }
-    setTimeout(ensureGoogleTranslateReady, 1200);
   </script>
 
 

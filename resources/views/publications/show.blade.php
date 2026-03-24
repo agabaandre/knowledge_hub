@@ -507,7 +507,23 @@
                         <div class="col-md-8">
                             <h1 itemprop="headline" class="font-weight-bold mb-2 publication-page-title" style="font-size: 1.75rem;">{{ clean_unicode($publication->title) }}</h1>
                             <meta itemprop="name" content="{{ clean_unicode($publication->title) }}">
-                            <p class="text-muted mb-3" itemprop="about">{{ clean_unicode($publication->theme->description ?? '') }}</p>
+                            <div class="d-flex align-items-center flex-wrap mb-3" style="gap: 8px;">
+                                <p class="text-muted mb-0" itemprop="about">{{ clean_unicode($publication->theme->description ?? '') }}</p>
+                                @auth
+                                    @if (is_admin() || auth()->user()->can('view_publications'))
+                                        <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}#step-1"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="Edit this publication in Admin">
+                                            <i class="fa fa-edit mr-1"></i>Edit publication
+                                        </a>
+                                        <a href="{{ url('admin/publications/details') }}?id={{ $publication->id }}"
+                                           class="btn btn-sm btn-outline-secondary"
+                                           title="View this publication in Admin">
+                                            <i class="fa fa-eye mr-1"></i>View as admin
+                                        </a>
+                                    @endif
+                                @endauth
+                            </div>
                 <div class="d-flex flex-wrap mb-3">
                     <span class="badge badge-au">
                         {{ !$publication->is_version ? clean_unicode($publication->sub_theme->description ?? '') : 'Version ' . $publication->version_no }}

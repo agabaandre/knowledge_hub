@@ -16,17 +16,20 @@ class SetApplicationLocale
         $defaultCfg = config('supported_locales.default', config('app.locale', 'en'));
         $locale = in_array($defaultCfg, $supported, true) ? $defaultCfg : (in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en'));
 
-        $cookieName = config('supported_locales.locale_cookie');
-        if ($cookieName && ($cookieLocale = $request->cookie($cookieName))) {
-            if (is_string($cookieLocale) && in_array($cookieLocale, $supported, true)) {
-                // Locale selector writes this cookie on every language change; honor it first.
-                $locale = $cookieLocale;
-            }
-        } elseif ($request->user()) {
-            // Fallback for logged-in users when no locale cookie exists.
+        if ($request->user()) {
             $userLang = $request->user()->langauge ?? null;
             if (is_string($userLang) && in_array($userLang, $supported, true)) {
                 $locale = $userLang;
+            }
+        }
+
+        $cookieName = config('supported_locales.locale_cookie');
+        if ($cookieName && ($cookieLocale = $request->cookie($cookieName))) {
+            if (is_string($cookieLocale) && in_array($cookieLocale, $supported, true)) {
+                // Guest or preference before login: cookie applies when user has no DB preference
+                if (! $request->user() || empty($request->user()->langauge)) {
+                    $locale = $cookieLocale;
+                }
             }
         }
 
