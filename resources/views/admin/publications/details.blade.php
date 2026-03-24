@@ -84,6 +84,16 @@
                         $statusClass = $publication->is_approved ? 'badge-success' : ($publication->is_rejected ? 'badge-danger' : 'badge-secondary');
                     @endphp
                     <span class="badge {{ $statusClass }} mr-2">{{ $statusText }}</span>
+                    <a href="{{ url('admin/publications/edit') }}?id={{ $publication->id }}"
+                       class="btn btn-outline-dark btn-sm ml-1">
+                        <i class="fa fa-edit mr-1"></i>Edit
+                    </a>
+                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="btn btn-outline-success btn-sm ml-1">
+                        <i class="fa fa-external-link-alt mr-1"></i>Preview Public
+                    </a>
                     {{-- External link moved to Resources & Attachments card below --}}
                     @if ($publication->is_approved == 0)
                         <a href="#approval-modal" data-toggle="modal" class="btn btn-success btn-sm ml-2"><i class="fa fa-check-circle mr-1"></i>{{ $publication->is_rejected == 0 ? 'Approve' : 'Reconsider' }}</a>
@@ -111,32 +121,34 @@
                             <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Cover Image</h5>
                         </div>
                         <div class="ap-card-body text-center">
-                            <div class="ap-cover" style="max-height:400px;overflow:hidden;">
-                                <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
-                            </div>
                             @if (($publication->is_video || $isVideoLink) && !empty($pubUrl))
-                                <div class="mt-3 text-left">
-                                    <small class="text-muted d-block mb-2">Embedded Preview</small>
-                                    @if ($embedUrl)
-                                        <div class="ap-cover">
-                                            <iframe
-                                                width="100%"
-                                                height="240"
-                                                src="{{ $embedUrl }}"
-                                                title="Video preview"
-                                                frameborder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                                referrerpolicy="strict-origin-when-cross-origin"
-                                                allowfullscreen></iframe>
-                                        </div>
-                                    @elseif ($directVideo)
-                                        <div class="ap-cover" style="padding: 8px;">
-                                            <video controls preload="metadata" style="width:100%;max-height:240px;background:#000;border-radius:8px;">
-                                                <source src="{{ $pubUrl }}">
-                                                Your browser does not support HTML5 video.
-                                            </video>
-                                        </div>
-                                    @endif
+                                @if ($embedUrl)
+                                    <div class="ap-cover">
+                                        <iframe
+                                            width="100%"
+                                            height="240"
+                                            src="{{ $embedUrl }}"
+                                            title="Video preview"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            referrerpolicy="strict-origin-when-cross-origin"
+                                            allowfullscreen></iframe>
+                                    </div>
+                                @elseif ($directVideo)
+                                    <div class="ap-cover" style="padding: 8px;">
+                                        <video controls preload="metadata" style="width:100%;max-height:240px;background:#000;border-radius:8px;">
+                                            <source src="{{ $pubUrl }}">
+                                            Your browser does not support HTML5 video.
+                                        </video>
+                                    </div>
+                                @else
+                                    <div class="ap-cover" style="max-height:400px;overflow:hidden;">
+                                        <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
+                                    </div>
+                                @endif
+                            @else
+                                <div class="ap-cover" style="max-height:400px;overflow:hidden;">
+                                    <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
                                 </div>
                             @endif
                         </div>

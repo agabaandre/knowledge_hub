@@ -479,7 +479,35 @@
                                     }
                                 }
                             @endphp
-                            <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                            @php
+                                $pubUrl = trim((string) ($publication->publication ?? ''));
+                                $embedUrl = get_video_embed_url($pubUrl);
+                                $directVideo = is_direct_video_file_url($pubUrl);
+                                $isVideoLink = is_video_platform_url($pubUrl);
+                            @endphp
+                            @if (($publication->is_video || $isVideoLink) && !empty($pubUrl))
+                                @if ($embedUrl)
+                                    <div class="w-100 shadow rounded" style="overflow: hidden; background: #000;">
+                                        <iframe
+                                            src="{{ $embedUrl }}"
+                                            title="{{ $publication->title }} - Video Preview"
+                                            frameborder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            referrerpolicy="strict-origin-when-cross-origin"
+                                            allowfullscreen
+                                            style="width:100%; height:250px;"></iframe>
+                                    </div>
+                                @elseif ($directVideo)
+                                    <video controls preload="metadata" class="img-fluid shadow rounded" style="max-height: 250px; width: 100%; background:#000;">
+                                        <source src="{{ $pubUrl }}">
+                                        Your browser does not support HTML5 video.
+                                    </video>
+                                @else
+                                    <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                                @endif
+                            @else
+                                <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                            @endif
                             
                             <!-- Source, Visits, Year, Comments below image -->
                             <div class="mt-3 text-left" style="font-size: 0.9rem;">
@@ -761,31 +789,8 @@
 
                 <!-- Description Card -->
                 <div class="card-md">
-                    @php
-                        $pubUrl = trim((string) ($publication->publication ?? ''));
-                        $embedUrl = get_video_embed_url($pubUrl);
-                        $directVideo = is_direct_video_file_url($pubUrl);
-                        $isVideoLink = is_video_platform_url($pubUrl);
-                    @endphp
                     @if ($pubUrl !== '')
-                        @if (($publication->is_video || $isVideoLink) && $embedUrl)
-                            <div class="responsive-iframe-container mb-4">
-                                <iframe
-                                    src="{{ $embedUrl }}"
-                                    title="Video player"
-                                    frameborder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                                    referrerpolicy="strict-origin-when-cross-origin"
-                                    allowfullscreen></iframe>
-                            </div>
-                        @elseif (($publication->is_video || $isVideoLink) && $directVideo)
-                            <div class="mb-4">
-                                <video controls preload="metadata" style="width:100%; max-height:460px; background:#000; border-radius:0.25rem;">
-                                    <source src="{{ $pubUrl }}">
-                                    Your browser does not support HTML5 video.
-                                </video>
-                            </div>
-                        @elseif ($publication->is_embedded)
+                        @if (!($publication->is_video || $isVideoLink) && $publication->is_embedded)
                             <div class="responsive-iframe-container mb-4">
                                 <iframe src="{{ $pubUrl }}" allowfullscreen></iframe>
                             </div>
