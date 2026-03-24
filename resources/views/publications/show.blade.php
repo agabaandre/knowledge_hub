@@ -812,16 +812,8 @@
                     <div id="relatedResourcesTrack" class="related-resources-track">
                         @foreach($related_publications as $relatedPub)
                         @php
-                            $coverImage = $relatedPub->cover ?? null;
-                            if ($coverImage) {
-                                if ($relatedPub->cover_is_exteranl && filter_var($coverImage, FILTER_VALIDATE_URL)) {
-                                    $cover = $coverImage;
-                                } else {
-                                    $cover = storage_link('uploads/publications/' . $coverImage);
-                                }
-                            } else {
-                                $cover = asset('assets/images/cover.png');
-                            }
+                            // Publication::getCoverAttribute already resolves local covers to full URLs.
+                            $cover = $relatedPub->cover ?? $relatedPub->image_url ?? asset('assets/images/cover.png');
                             $detailsUrl = url('records/resource?id=' . $relatedPub->id);
                         @endphp
                         <div class="related-resource-card" onclick="window.open('{{ $detailsUrl }}','_blank')">
