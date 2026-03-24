@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
 use App\Models\Event;
+use Illuminate\Support\Facades\DB;
 
 class CommunitiesController extends Controller
 {
@@ -187,32 +188,12 @@ class CommunitiesController extends Controller
             ->limit(5)
             ->get();
 
-        // Get community members with job titles and badges
-        $members = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $id)
-            ->where('is_approved', 1)
-            ->with('user')
-            ->get()
-            ->map(function($member) use ($id) {
-                // Get user's badges for this community
-                $badges = \App\Models\UserBadge::getUserBadgesForCommunity($member->user_id, $id);
-                
-                return [
-                    'membership_id' => $member->id,
-                    'id' => $member->user_id,
-                    'name' => $member->user->name ?? 'Unknown',
-                    'job_title' => $member->user->job_title ?? 'Not specified',
-                    'email' => $member->user->email ?? '',
-                    'is_active' => (bool) ($member->is_active ?? true),
-                    'is_admin' => (bool) ($member->is_admin ?? false),
-                    'badges' => $badges,
-                ];
-            });
-
         $myMembership = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
             ->where('user_id', $userId)
             ->where('is_approved', 1)
             ->first();
-        $isCommunityAdmin = (bool) ($myMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
+        $isSystemAdmin = is_admin() || (auth()->user() && method_exists(auth()->user(), 'can') && auth()->user()->can('view_publications'));
+        $isCommunityAdmin = $isSystemAdmin || (bool) ($myMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
 
         $communityEvents = Event::where('community_of_practice_id', $id)
             ->where('status', '!=', 'cancelled')
@@ -228,11 +209,120 @@ class CommunitiesController extends Controller
             'publications',
             'forums',
             'otherCommunities',
-            'members',
             'badgeTypes',
             'isCommunityAdmin',
             'communityEvents'
         ));
+    }
+
+    public function membersData(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['message' => 'Unauthenticated'], 401);
+        }
+
+        $userId = Auth::id();
+        $isMember = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->where('is_active', 1)
+            ->exists();
+        if (!$isMember) {
+            return response()->json(['message' => 'Forbidden'], 403);
+        }
+
+        $community = $this->commsOfPracticeRepository->find($id);
+        $currentMembership = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->first();
+        $isCommunityAdmin = (bool) ($currentMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
+
+        $draw = (int) $request->input('draw', 1);
+        $start = (int) $request->input('start', 0);
+        $length = (int) $request->input('length', 20);
+        if ($length <= 0) {
+            $length = 20;
+        }
+        $search = trim((string) $request->input('search.value', ''));
+
+        $base = DB::table('community_of_practice_members as m')
+            ->join('users as u', 'u.id', '=', 'm.user_id')
+            ->leftJoin('publication as p', 'p.user_id', '=', 'u.id')
+            ->leftJoin('publication_community_of_practices as pcp', function ($join) {
+                $join->on('pcp.publication_id', '=', 'p.id');
+                $join->on('pcp.community_of_practice_id', '=', 'm.community_of_practice_id');
+            })
+            ->where('m.community_of_practice_id', (int) $id)
+            ->where('m.is_approved', 1)
+            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title')
+            ->select(
+                'm.id as membership_id',
+                'm.user_id',
+                'm.is_active',
+                'm.is_admin',
+                'u.name',
+                'u.email',
+                'u.job_title',
+                DB::raw('COUNT(DISTINCT pcp.publication_id) as publication_count')
+            );
+
+        $recordsTotal = DB::table('community_of_practice_members as m')
+            ->where('m.community_of_practice_id', (int) $id)
+            ->where('m.is_approved', 1)
+            ->count();
+
+        if ($search !== '') {
+            $base->where(function ($q) use ($search) {
+                $q->where('u.name', 'like', '%' . $search . '%')
+                    ->orWhere('u.email', 'like', '%' . $search . '%')
+                    ->orWhere('u.job_title', 'like', '%' . $search . '%');
+            });
+        }
+
+        $recordsFiltered = DB::table(DB::raw('(' . $base->toSql() . ') as x'))
+            ->mergeBindings($base)
+            ->count();
+
+        $rows = $base
+            ->orderBy('publication_count', 'desc')
+            ->orderBy('name', 'asc')
+            ->offset($start)
+            ->limit($length)
+            ->get();
+
+        $data = [];
+        foreach ($rows as $row) {
+            $status = ((int) $row->is_active === 1) ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>';
+            $role = ((int) $row->is_admin === 1)
+                ? '<span class="badge text-light" style="background-color: ' . e((string) (settings()->primary_color ?? '#119A48')) . ';">Admin</span>'
+                : '<span class="badge badge-secondary">Member</span>';
+            $actions = '-';
+            if ($isCommunityAdmin && (int) $row->user_id !== (int) $userId) {
+                if ((int) $row->is_active === 1) {
+                    $actions = '<button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="' . (int) $row->membership_id . '" data-action="deactivate">Mark inactive</button>';
+                } else {
+                    $actions = '<button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="' . (int) $row->membership_id . '" data-action="activate">Mark active</button>';
+                }
+            }
+
+            $data[] = [
+                'name' => e((string) $row->name),
+                'job_title' => e((string) ($row->job_title ?: 'Not specified')),
+                'email' => e((string) $row->email),
+                'publications' => (int) $row->publication_count,
+                'role' => $role,
+                'status' => $status,
+                'actions' => $actions,
+            ];
+        }
+
+        return response()->json([
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ]);
     }
 
     public function inviteColleagues(Request $request, $id)
@@ -312,7 +402,8 @@ class CommunitiesController extends Controller
             ->where('is_approved', 1)
             ->first();
         $community = $this->commsOfPracticeRepository->find($id);
-        $canManage = ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
+        $isSystemAdmin = is_admin() || (auth()->user() && method_exists(auth()->user(), 'can') && auth()->user()->can('view_publications'));
+        $canManage = $isSystemAdmin || ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
         if (!$canManage) {
             return response()->json(['status' => 'error', 'message' => 'Only community admins can create events.'], 403);
         }

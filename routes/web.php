@@ -666,6 +666,7 @@ Route::group(["prefix" => "communities"], function () {
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
     Route::post('/detail/{id}/invite', [CommunitiesController::class, 'inviteColleagues'])->middleware('auth')->name('community.invite');
     Route::post('/detail/{id}/member-status', [CommunitiesController::class, 'updateMemberStatus'])->middleware('auth')->name('community.member-status');
+    Route::get('/detail/{id}/members-data', [CommunitiesController::class, 'membersData'])->middleware('auth')->name('community.members-data');
     Route::post('/detail/{id}/events', [CommunitiesController::class, 'createCommunityEvent'])->middleware('auth')->name('community.events.create');
     Route::get('/accept-invitation/{token}', [CommunitiesController::class, 'acceptInvitation'])->name('community.accept-invitation');
     Route::get('/detail/{id}', [CommunitiesController::class, 'detail'])->name('community.detail');

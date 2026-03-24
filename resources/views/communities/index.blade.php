@@ -216,6 +216,26 @@
         .btn-group > * {
             margin: 0.25rem;
         }
+
+        /* Ensure filter select fields always show visible borders */
+        #filterForm .form-control {
+            border: 1px solid #ced4da !important;
+            border-radius: 0.25rem !important;
+            background-color: #fff;
+        }
+        #filterForm .select2-container--default .select2-selection--single,
+        #filterForm .select2-container--bootstrap4 .select2-selection {
+            border: 1px solid #ced4da !important;
+            border-radius: 0.25rem !important;
+            min-height: calc(1.5em + 0.75rem + 2px);
+            background-color: #fff !important;
+        }
+        #filterForm .select2-container .select2-selection__rendered {
+            line-height: calc(1.5em + 0.75rem) !important;
+        }
+        #filterForm .select2-container .select2-selection__arrow {
+            height: calc(1.5em + 0.75rem + 2px) !important;
+        }
     </style>
 @endsection
 
@@ -500,6 +520,7 @@
 @section('scripts')
     <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
     <script>
         $(document).ready(function() {
             // Initialize Select2

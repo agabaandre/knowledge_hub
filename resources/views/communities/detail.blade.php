@@ -63,6 +63,7 @@
 @endsection
 
 @section('styles')
+<link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 <style>
     .theme-text {
         color: {{ settings()->primary_color ?? '#119A48' }};
@@ -285,7 +286,7 @@
                             <i class="fa fa-envelope mr-1"></i>Invite colleagues (max 5)
                         </button>
                         @if(!empty($isCommunityAdmin))
-                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#createCommunityEventModal">
+                        <button type="button" class="btn btn-sm text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; border-color: {{ settings()->primary_color ?? '#119A48' }};" data-toggle="modal" data-target="#createCommunityEventModal">
                             <i class="fa fa-calendar-plus-o mr-1"></i>Create community event
                         </button>
                         @endif
@@ -441,57 +442,17 @@
             <!-- Community Members -->
             <div class="sidebar-card">
                 <h5><i class="fa fa-users theme-text mr-2"></i>Community Members</h5>
-                @if($members->count() > 0)
-                    @foreach($members as $member)
-                        <div class="member-item">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div class="flex-grow-1">
-                                    <div class="member-name">{{ $member['name'] }}</div>
-                                    <div class="member-title">
-                                        <i class="fa fa-briefcase mr-1"></i>{{ $member['job_title'] }}
-                                    </div>
-                                    <div class="mt-1">
-                                        @if($member['is_admin'])
-                                            <span class="badge badge-primary">Admin</span>
-                                        @endif
-                                        @if(!$member['is_active'])
-                                            <span class="badge badge-danger">Inactive</span>
-                                        @endif
-                                    </div>
-                                    @if(!empty($isCommunityAdmin) && ($member['id'] ?? 0) !== (auth()->id() ?? 0))
-                                        <div class="mt-2">
-                                            @if($member['is_active'])
-                                                <button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="{{ $member['membership_id'] }}" data-action="deactivate">Mark inactive</button>
-                                            @else
-                                                <button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="{{ $member['membership_id'] }}" data-action="activate">Mark active</button>
-                                            @endif
-                                        </div>
-                                    @endif
-                                    @if(isset($member['badges']) && $member['badges']->count() > 0)
-                                        <div class="mt-2">
-                                            @foreach($member['badges']->take(3) as $userBadge)
-                                                <span class="badge mr-1" style="background-color: {{ $userBadge->badgeType->badge_color ?? '#C0C0C0' }}; color: white; font-size: 0.75rem; padding: 4px 8px;" title="{{ $userBadge->badgeType->name }} - {{ Carbon\Carbon::create($userBadge->year, $userBadge->month, 1)->format('M Y') }}">
-                                                    @if($userBadge->badgeType->slug === 'silver')🥈
-                                                    @elseif($userBadge->badgeType->slug === 'gold')🥇
-                                                    @elseif($userBadge->badgeType->slug === 'platinum')💎
-                                                    @elseif($userBadge->badgeType->slug === 'diamond')💠
-                                                    @else🏅
-                                                    @endif
-                                                    {{ $userBadge->badgeType->name }}
-                                                </span>
-                                            @endforeach
-                                            @if($member['badges']->count() > 3)
-                                                <span class="badge badge-secondary" style="font-size: 0.75rem;">+{{ $member['badges']->count() - 3 }} more</span>
-                                            @endif
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                        </div>
-                    @endforeach
-                @else
-                    <p class="text-muted">No members found.</p>
-                @endif
+                <table id="communityMembersTable" class="table table-sm table-bordered table-hover mb-0" style="width:100%;">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Publications</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
 
             <!-- Badge Requirements Info -->
@@ -577,7 +538,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-warning">Create event</button>
+                    <button type="submit" class="btn text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; border-color: {{ settings()->primary_color ?? '#119A48' }};">Create event</button>
                 </div>
             </form>
         </div>
@@ -587,6 +548,7 @@
 @endsection
 
 @section('scripts')
+<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
 <script>
     (function () {
         var inviteForm = document.getElementById('inviteColleaguesForm');
@@ -605,20 +567,20 @@
             });
         }
 
-        document.querySelectorAll('.js-member-toggle').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                var fd = new FormData();
-                fd.append('member_id', this.dataset.memberId);
-                fd.append('action', this.dataset.action);
-                fetch('{{ route('community.member-status', $community->id) }}', {
-                    method: 'POST',
-                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'},
-                    body: fd
-                }).then(r => r.json()).then(function (res) {
-                    alert(res.message || 'Done');
-                    if (res.status === 'success') location.reload();
-                }).catch(function () { alert('Failed to update member status.'); });
-            });
+        jQuery(document).on('click', '.js-member-toggle', function () {
+            var fd = new FormData();
+            fd.append('member_id', this.dataset.memberId);
+            fd.append('action', this.dataset.action);
+            fetch('{{ route('community.member-status', $community->id) }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'},
+                body: fd
+            }).then(r => r.json()).then(function (res) {
+                alert(res.message || 'Done');
+                if (res.status === 'success' && window.communityMembersDt) {
+                    window.communityMembersDt.ajax.reload(null, false);
+                }
+            }).catch(function () { alert('Failed to update member status.'); });
         });
 
         var eventForm = document.getElementById('createCommunityEventForm');
@@ -636,6 +598,32 @@
                 }).catch(function () { alert('Failed to create event.'); });
             });
         }
+
+        window.communityMembersDt = jQuery('#communityMembersTable').DataTable({
+            processing: true,
+            serverSide: true,
+            pageLength: 20,
+            lengthMenu: [[20, 50, 100], [20, 50, 100]],
+            ajax: {
+                url: '{{ route('community.members-data', $community->id) }}',
+                type: 'GET'
+            },
+            order: [[3, 'desc']],
+            columns: [
+                { data: 'name', name: 'name' },
+                { data: 'role', name: 'role', orderable: false, searchable: false },
+                { data: 'status', name: 'status', orderable: false, searchable: false },
+                { data: 'publications', name: 'publications' },
+                { data: 'actions', name: 'actions', orderable: false, searchable: false }
+            ],
+            language: {
+                search: '',
+                searchPlaceholder: 'Search members...',
+                lengthMenu: 'Show _MENU_ members',
+                info: 'Showing _START_ to _END_ of _TOTAL_ members'
+            },
+            dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rtip'
+        });
     })();
 </script>
 @endsection
