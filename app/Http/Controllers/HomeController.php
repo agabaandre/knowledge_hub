@@ -28,22 +28,39 @@ class HomeController extends Controller
     }
     
     public function index(Request $request){
-
-        
-     
         $data['publications']  = $this->publicationsRepo->get($request);
         $data['recent']        = collect($data['publications']->items())->take(6);
         $data['authors']       = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
-		$request['is_featured'] = 1;
-        $data['featured']      = collect($this->publicationsRepo->get($request, false, true)->items())->take(6);
+        $featuredRequest = clone $request;
+        $featuredRequest['is_featured'] = 1;
+        $featuredPublications = collect($this->publicationsRepo->get($featuredRequest, false, true)->items());
+
+        // Recommended feed:
+        // - Logged in: featured first, then publications related to favorite tags
+        //   and "Your Interests" (profile preferences/subthemes)
+        // - Logged out: featured only
+        if (auth()->check()) {
+            $relatedByTags = $this->publicationsRepo->relatedByFavoriteTags(auth()->id(), 20);
+            $recommendedByPreferences = $this->publicationsRepo->recommendedByPreferences(auth()->id(), 20);
+            $data['featured'] = $featuredPublications
+                ->concat($recommendedByPreferences)
+                ->concat($relatedByTags)
+                ->unique('id')
+                ->take(6)
+                ->values();
+        } else {
+            $data['featured'] = $featuredPublications->take(6)->values();
+        }
+
         $data['tags']	      = $this->publicationsRepo->get_tags();
 		$data['types']        = $this->publicationsRepo->get_types();
         $data['quotes']       = $this->quotesRepo->get($request);
 		$data['subthemes']	  = $this->publicationsRepo->get_subthemes();
 		$data['themes']		  = $this->themesRepo->get($request);
-		$request['category']  = 10;
-        $data['initiatives'] = $this->publicationsRepo->get($request);
+        $initiativesRequest = clone $request;
+		$initiativesRequest['category']  = 10;
+        $data['initiatives'] = $this->publicationsRepo->get($initiativesRequest);
         // Active events only: events where enddate has not passed
         $today = \Carbon\Carbon::today()->startOfDay();
         $data['events'] = Event::query()

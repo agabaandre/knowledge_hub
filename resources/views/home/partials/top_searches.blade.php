@@ -89,25 +89,10 @@
                       <div class="jbr-wrap text-left border rounded">
                           <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-2 py-2 top-searches-card">
                                <div class="cats-box rounded bg-white d-flex align-items-center top-searches-card" style="min-width:100%;">
-                                   @php
-                                       $image_link = $row->cover ?? $row->image_url ?? null;
-                                       // Default image is cover.png from public assets/images
-                                       $default_image = asset('assets/images/cover.png');
-                                       
-                                       // Check if image_link is valid URL or path
-                                       if (empty($image_link) || $image_link === null) {
-                                           $image_link = $default_image;
-                                       } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
-                                           // If it's a relative path, try to make it full URL
-                                           if (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) {
-                                               $image_link = asset($image_link);
-                                           } elseif (strpos($image_link, '/') === 0) {
-                                               $image_link = url($image_link);
-                                           } else {
-                                               $image_link = $default_image;
-                                           }
-                                       }
-                                   @endphp
+                                  @php
+                                      $default_image = asset('assets/images/cover.png');
+                                      $image_link = resolve_publication_card_cover($row);
+                                  @endphp
 
                                    <!-- Image Section -->
                                    <div class="cats-box-image top-searches-image" style="width: 180px; height: 180px; flex-shrink: 0; margin-right: 0.5rem; border: none; overflow: hidden; background: transparent; display: flex; align-items: center; justify-content: center; padding: 4px;">

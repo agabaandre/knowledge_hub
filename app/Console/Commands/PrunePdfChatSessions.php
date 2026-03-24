@@ -13,6 +13,11 @@ class PrunePdfChatSessions extends Command
 
     public function handle()
     {
+        if (!(settings()->enable_ai_chat_prune ?? true)) {
+            $this->info('AI chat cleanup is disabled in admin settings. Skipping prune.');
+            return Command::SUCCESS;
+        }
+
         $days = (int) $this->option('days');
         $cutoff = now()->subDays($days);
 

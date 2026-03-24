@@ -776,6 +776,17 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enable_ai_chat_prune" name="enable_ai_chat_prune" value="1" @if($settings->enable_ai_chat_prune ?? 1) checked @endif>
+                                    <label class="form-check-label" for="enable_ai_chat_prune">Enable scheduled AI chat cleanup</label>
+                                </div>
+                                <small class="info-text">When enabled, old AI chats are automatically deleted by the daily cleanup task. Disable this to retain chat history for further synthesis and user understanding.</small>
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-image"></i>

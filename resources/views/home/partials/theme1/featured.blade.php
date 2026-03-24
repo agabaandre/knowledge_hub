@@ -112,13 +112,8 @@
         <div class="row g-0" id="featured">
             @foreach ($featured as $row)
                 @php
-                    $image_link = $row->cover ?? $row->image_url ?? null;
                     $default_image = asset('assets/images/cover.png');
-                    if (empty($image_link)) { $image_link = $default_image; }
-                    elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
-                        $image_link = (strpos($image_link, 'storage/') !== false || strpos($image_link, 'uploads/') !== false) ? asset($image_link) : url($image_link);
-                        if (strpos($image_link, 'http') !== 0) { $image_link = $default_image; }
-                    }
+                    $image_link = resolve_publication_card_cover($row);
                 @endphp
                 <div class="col-12 col-md-6 mb-3 px-2 px-md-3 d-flex">
                     <div class="theme1-featured-card forum-post-card w-100">

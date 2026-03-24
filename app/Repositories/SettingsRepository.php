@@ -301,6 +301,15 @@ class SettingsRepository
             }
         }
 
+        if (Schema::hasColumn('setting', 'enable_ai_chat_prune')) {
+            if ($request->has('enable_ai_chat_prune')) {
+                $settings->enable_ai_chat_prune = (bool)$request->boolean('enable_ai_chat_prune', true);
+            } else {
+                // unchecked checkbox doesn't submit; set false
+                $settings->enable_ai_chat_prune = false;
+            }
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings
@@ -541,7 +550,7 @@ class SettingsRepository
                     continue;
                 }
                 $value = $item->textContent;
-                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search') {
+                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search' || $key === 'enable_ai_chat_prune') {
                     $setting->{$key} = in_array(strtolower($value), ['1', 'true', 'yes'], true);
                 } else {
                     $setting->{$key} = $value;

@@ -52,7 +52,7 @@
         <div id="initiativesTrack" class="initiatives-track">
             @foreach($initiatives as $row)
             @php
-                $imageUrl = $row->image_url ?? asset('assets/images/cover.png');
+                $imageUrl = resolve_publication_card_cover($row);
                 $authorName = @$row->author->name ?: 'Unknown Author';
                 // Description is HTML content, will be displayed directly with CSS truncation
                 $description = !empty($row->description) ? $row->description : '';

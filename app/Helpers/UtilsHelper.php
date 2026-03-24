@@ -807,6 +807,58 @@ if (!function_exists('get_video_cover_source')) {
     }
 }
 
+if (!function_exists('resolve_publication_card_cover')) {
+    /**
+     * Resolve a safe card image URL for publication cards.
+     * Supports image covers and video platform thumbnails.
+     */
+    function resolve_publication_card_cover($publication)
+    {
+        $default = asset('assets/images/cover.png');
+        if (!$publication) {
+            return $default;
+        }
+
+        $publicationUrl = isset($publication->publication) ? (string) $publication->publication : '';
+        $isVideo = !empty($publication->is_video)
+            || is_video_platform_url($publicationUrl)
+            || is_direct_video_file_url($publicationUrl);
+
+        // For videos, platform thumbnail can be more reliable if cover is missing.
+        if ($isVideo) {
+            $thumb = get_video_platform_thumbnail_url($publicationUrl);
+            if ($thumb && filter_var($thumb, FILTER_VALIDATE_URL)) {
+                return $thumb;
+            }
+        }
+
+        $candidate = null;
+        if (!empty($publication->cover)) {
+            $candidate = (string) $publication->cover;
+        } elseif (!empty($publication->image_url)) {
+            $candidate = (string) $publication->image_url;
+        }
+
+        if (!$candidate) {
+            return $default;
+        }
+
+        if (filter_var($candidate, FILTER_VALIDATE_URL)) {
+            return $candidate;
+        }
+
+        if (strpos($candidate, 'storage/') !== false || strpos($candidate, 'uploads/') !== false) {
+            return asset($candidate);
+        }
+
+        if (strpos($candidate, '/') === 0) {
+            return url($candidate);
+        }
+
+        return $default;
+    }
+}
+
 function html_to_text($html) {
     // Remove HTML tags
     $text = strip_tags($html);

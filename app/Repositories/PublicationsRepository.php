@@ -48,15 +48,44 @@ public function get(Request $request, $return_array = false, $featured = false,$
     ->searchTerm($request->term);
 
     if ($featured && current_user()) {
-        // Optimized: Cache user preferences
         $user = current_user();
-        $cacheKey = "user_preferences_{$user->id}";
-        $subthemes = cache()->remember($cacheKey, 3600, function() use ($user) {
+
+        // "Your Interests" from profile preferences
+        $preferencesCacheKey = "user_preferences_{$user->id}";
+        $subthemes = cache()->remember($preferencesCacheKey, 3600, function() use ($user) {
             return $user->preferences()->pluck('subtheme_id');
         });
-        $pubs->featured($subthemes);
-    } 
-    elseif ($featured) {
+
+        // Favorite-tag affinity for recommendation expansion
+        $favoriteTagsCacheKey = "user_favorite_tag_ids_{$user->id}";
+        $favoriteTagIds = cache()->remember($favoriteTagsCacheKey, 1800, function () use ($user) {
+            return DB::table('favourites')
+                ->join('publication_tags', 'favourites.publication_id', '=', 'publication_tags.publication_id')
+                ->where('favourites.user_id', $user->id)
+                ->distinct()
+                ->pluck('publication_tags.tag_id');
+        });
+
+        // Recommendation set for API/web featured feeds:
+        // featured OR matching profile interests OR matching favorite tags.
+        // Keep featured first in ordering.
+        $pubs->where(function ($q) use ($subthemes, $favoriteTagIds) {
+            $q->where('is_featured', 1);
+
+            if ($subthemes && count($subthemes) > 0) {
+                $q->orWhereIn('sub_thematic_area_id', $subthemes);
+            }
+
+            if ($favoriteTagIds && count($favoriteTagIds) > 0) {
+                $q->orWhereHas('tags', function ($tq) use ($favoriteTagIds) {
+                    $tq->whereIn('tag_id', $favoriteTagIds);
+                });
+            }
+        });
+
+        // Featured publications should appear first.
+        $pubs->orderByRaw('CASE WHEN is_featured = 1 THEN 0 ELSE 1 END');
+    } elseif ($featured) {
         $pubs->where('is_featured', 1);
     }
 
