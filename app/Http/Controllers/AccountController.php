@@ -183,8 +183,25 @@ class AccountController extends Controller
     }
 
     public function edit_publication(Request $request){
+        // Support both legacy ?ref= and newer ?id= links.
+        $publicationId = $request->input('id', $request->input('ref'));
+        if (!$publicationId) {
+            abort(404);
+        }
 
-        $data['publication'] = $this->publicationsRepo->find($request->ref);
+        $publication = $this->publicationsRepo->find($publicationId, false);
+        if (!$publication) {
+            abort(404);
+        }
+
+        // Security: only owner or admin can edit.
+        $user = current_user();
+        $canAdminEdit = is_admin() || ($user && method_exists($user, 'can') && $user->can('view_publications'));
+        if (!$canAdminEdit && (int)$publication->user_id !== (int)($user->id ?? 0)) {
+            abort(403);
+        }
+
+        $data['publication'] = $publication;
         return view('account.editpub',$data);
     }
 
