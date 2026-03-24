@@ -12,11 +12,16 @@ class Event extends Model
     protected $fillable = [
         'title','description','venue','startdate','enddate','organized_by','fee','status',
         'event_link','registration_link','is_online','contact_person','orcid','banner_image','country_id',
-        'created_by','updated_by'
+        'created_by','updated_by','community_of_practice_id','event_category'
     ];
 
     public function tags()
     {
         return $this->hasMany(EventTag::class);
+    }
+
+    public function community()
+    {
+        return $this->belongsTo(CommunityOfPractice::class, 'community_of_practice_id');
     }
 }

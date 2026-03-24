@@ -9,7 +9,7 @@ class CommunityOfPracticeMembers extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['community_of_practice_id', 'user_id', 'is_approved'];
+    protected $fillable = ['community_of_practice_id', 'user_id', 'is_approved', 'is_admin', 'is_active'];
 
     public function user()
     {

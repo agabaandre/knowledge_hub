@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Repositories\AreasRepository;
 use Illuminate\Support\Facades\Auth;
+use App\Models\CommunityOfPracticeMembers;
+use App\Models\CommunityInvitation;
+use App\Models\Event;
 
 class CommunitiesController extends Controller
 {
@@ -142,6 +145,7 @@ class CommunitiesController extends Controller
         $isMember = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $id)
             ->where('user_id', $userId)
             ->where('is_approved', 1)
+            ->where('is_active', 1)
             ->exists();
 
         if (!$isMember) {
@@ -193,13 +197,28 @@ class CommunitiesController extends Controller
                 $badges = \App\Models\UserBadge::getUserBadgesForCommunity($member->user_id, $id);
                 
                 return [
+                    'membership_id' => $member->id,
                     'id' => $member->user_id,
                     'name' => $member->user->name ?? 'Unknown',
                     'job_title' => $member->user->job_title ?? 'Not specified',
                     'email' => $member->user->email ?? '',
+                    'is_active' => (bool) ($member->is_active ?? true),
+                    'is_admin' => (bool) ($member->is_admin ?? false),
                     'badges' => $badges,
                 ];
             });
+
+        $myMembership = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', $userId)
+            ->where('is_approved', 1)
+            ->first();
+        $isCommunityAdmin = (bool) ($myMembership->is_admin ?? false) || ((int) ($community->created_by ?? 0) === (int) $userId);
+
+        $communityEvents = Event::where('community_of_practice_id', $id)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('startdate', 'asc')
+            ->limit(10)
+            ->get();
 
         // Get all badge types for displaying requirements
         $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
@@ -210,7 +229,123 @@ class CommunitiesController extends Controller
             'forums',
             'otherCommunities',
             'members',
-            'badgeTypes'
+            'badgeTypes',
+            'isCommunityAdmin',
+            'communityEvents'
         ));
+    }
+
+    public function inviteColleagues(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['status' => 'error', 'message' => 'Please login first.'], 401);
+        }
+
+        $member = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', Auth::id())
+            ->where('is_approved', 1)
+            ->where('is_active', 1)
+            ->first();
+        if (!$member) {
+            return response()->json(['status' => 'error', 'message' => 'Only active community members can invite colleagues.'], 403);
+        }
+
+        $emailsInput = (string) $request->input('emails', '');
+        $emails = array_values(array_unique(array_filter(array_map('trim', preg_split('/[\s,;]+/', $emailsInput)))));
+        if (count($emails) === 0) {
+            return response()->json(['status' => 'error', 'message' => 'Please provide at least one email.'], 422);
+        }
+        if (count($emails) > 5) {
+            return response()->json(['status' => 'error', 'message' => 'You can invite up to 5 colleagues at a time.'], 422);
+        }
+        foreach ($emails as $email) {
+            if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                return response()->json(['status' => 'error', 'message' => "Invalid email: {$email}"], 422);
+            }
+        }
+
+        $result = $this->commsOfPracticeRepository->sendInvitationsBulk((int) $id, $emails, Auth::id());
+        return response()->json(['status' => 'success', 'message' => ($result['sent'] ?? 0) . ' invitation(s) sent.', 'result' => $result]);
+    }
+
+    public function updateMemberStatus(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['status' => 'error', 'message' => 'Please login first.'], 401);
+        }
+
+        $request->validate([
+            'member_id' => 'required|integer|exists:community_of_practice_members,id',
+            'action' => 'required|in:activate,deactivate',
+        ]);
+
+        $current = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', Auth::id())
+            ->where('is_approved', 1)
+            ->first();
+        $community = $this->commsOfPracticeRepository->find($id);
+        $canManage = ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
+        if (!$canManage) {
+            return response()->json(['status' => 'error', 'message' => 'Only community admins can update member status.'], 403);
+        }
+
+        $target = CommunityOfPracticeMembers::where('id', (int) $request->member_id)
+            ->where('community_of_practice_id', (int) $id)
+            ->where('is_approved', 1)
+            ->firstOrFail();
+        if ((int) $target->user_id === (int) Auth::id() && $request->action === 'deactivate') {
+            return response()->json(['status' => 'error', 'message' => 'You cannot deactivate yourself.'], 422);
+        }
+
+        $this->commsOfPracticeRepository->updateMemberStatus($target->id, $request->action);
+        return response()->json(['status' => 'success', 'message' => 'Member status updated.']);
+    }
+
+    public function createCommunityEvent(Request $request, $id)
+    {
+        if (!Auth::check()) {
+            return response()->json(['status' => 'error', 'message' => 'Please login first.'], 401);
+        }
+
+        $current = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+            ->where('user_id', Auth::id())
+            ->where('is_approved', 1)
+            ->first();
+        $community = $this->commsOfPracticeRepository->find($id);
+        $canManage = ($current && ($current->is_admin ?? false)) || ((int) ($community->created_by ?? 0) === (int) Auth::id());
+        if (!$canManage) {
+            return response()->json(['status' => 'error', 'message' => 'Only community admins can create events.'], 403);
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:255',
+            'description' => 'required|string',
+            'event_category' => 'required|string|max:100',
+            'startdate' => 'required|date',
+            'enddate' => 'nullable|date|after_or_equal:startdate',
+            'venue' => 'nullable|string|max:255',
+            'event_link' => 'nullable|url|max:255',
+        ]);
+
+        Event::create([
+            'title' => $request->title,
+            'description' => $request->description,
+            'event_category' => $request->event_category,
+            'startdate' => $request->startdate,
+            'enddate' => $request->enddate,
+            'venue' => $request->venue,
+            'organized_by' => $community->community_name ?? 'Community',
+            'status' => 'active',
+            'event_link' => $request->event_link,
+            'registration_link' => $request->event_link,
+            'is_online' => !empty($request->event_link) ? 1 : 0,
+            'contact_person' => Auth::user()->name ?? null,
+            'country_id' => $community->country_id ?? null,
+            'community_of_practice_id' => (int) $id,
+            'created_by' => (string) Auth::id(),
+            'updated_by' => (string) Auth::id(),
+        ]);
+
+        return response()->json(['status' => 'success', 'message' => 'Community event created successfully.']);
     }
 }

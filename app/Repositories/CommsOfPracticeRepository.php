@@ -114,6 +114,7 @@ class CommsOfPracticeRepository{
         // Get communities where user is an approved member
         $memberCommunityIds = CommunityOfPracticeMembers::where('user_id', $userId)
             ->where('is_approved', 1)
+            ->where('is_active', 1)
             ->pluck('community_of_practice_id');
 
         $query = CommunityOfPractice::whereIn('id', $memberCommunityIds);
@@ -222,6 +223,7 @@ class CommsOfPracticeRepository{
         
         if ($action === 'approve') {
             $member->is_approved = 1;
+            $member->is_active = 1;
             $member->save();
             
             // Send approval email notification to the member
@@ -247,6 +249,18 @@ class CommsOfPracticeRepository{
         } elseif ($action === 'reject') {
             $member->is_approved = 2; // Set to 2 for rejected
             $member->save();
+        } elseif ($action === 'activate') {
+            $member->is_active = 1;
+            $member->save();
+        } elseif ($action === 'deactivate') {
+            $member->is_active = 0;
+            $member->save();
+        } elseif ($action === 'make_admin') {
+            $member->is_admin = 1;
+            $member->save();
+        } elseif ($action === 'remove_admin') {
+            $member->is_admin = 0;
+            $member->save();
         }
 
         return $member;
@@ -254,10 +268,19 @@ class CommsOfPracticeRepository{
 
     public function addMember($communityId, $userId) {
        
+        $existing = CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
+            ->where('user_id', $userId)
+            ->first();
+        if ($existing) {
+            return $existing;
+        }
+
         CommunityOfPracticeMembers::create([
             'community_of_practice_id' => $communityId,
             'user_id' => $userId,
             'is_approved' => 0,
+            'is_active' => 1,
+            'is_admin' => 0,
         ]);
 
         return true; // or any relevant response
@@ -461,6 +484,8 @@ class CommsOfPracticeRepository{
                 'community_of_practice_id' => $invitation->community_of_practice_id,
                 'user_id' => $user->id,
                 'is_approved' => 1, // Auto-approve invited members
+                'is_active' => 1,
+                'is_admin' => 0,
             ]);
 
             // Mark invitation as responded

@@ -201,6 +201,10 @@ class CommsOfPracticeController extends Controller
                 $validEmails[] = $e;
             }
         }
+        if (count($validEmails) > 5) {
+            $msg = 'You can invite up to 5 users at a time.';
+            return $this->sendInvitationResponse($request, $msg, 422, 'error');
+        }
         if (empty($validEmails)) {
             $msg = 'No valid email address found.';
             return $this->sendInvitationResponse($request, $msg, 422, 'error');
@@ -377,7 +381,7 @@ class CommsOfPracticeController extends Controller
 
     public function memberAction(Request $request) {
         $request->validate([
-            'action' => 'required|in:approve,reject',
+            'action' => 'required|in:approve,reject,activate,deactivate,make_admin,remove_admin',
             'community_id' => 'required|integer|exists:community_of_practices,id',
             'member_id' => 'nullable|integer',
             'member_ids' => 'nullable|array',
@@ -409,6 +413,31 @@ class CommsOfPracticeController extends Controller
             ? 'Member status updated successfully.'
             : $updated . ' member(s) updated successfully.';
         return response()->json(['status' => 'success', 'message' => $message, 'updated' => $updated]);
+    }
+
+    public function addMember(Request $request)
+    {
+        $request->validate([
+            'community_id' => 'required|integer|exists:community_of_practices,id',
+            'user_email' => 'required|email',
+            'is_admin' => 'nullable|boolean',
+        ]);
+
+        $user = User::where('email', trim((string) $request->user_email))->first();
+        if (!$user) {
+            return response()->json(['status' => 'error', 'message' => 'User with this email was not found.'], 404);
+        }
+
+        $member = \App\Models\CommunityOfPracticeMembers::firstOrNew([
+            'community_of_practice_id' => (int) $request->community_id,
+            'user_id' => (int) $user->id,
+        ]);
+        $member->is_approved = 1;
+        $member->is_active = 1;
+        $member->is_admin = (bool) $request->boolean('is_admin', false);
+        $member->save();
+
+        return response()->json(['status' => 'success', 'message' => 'Member added successfully.']);
     }
 
     /**

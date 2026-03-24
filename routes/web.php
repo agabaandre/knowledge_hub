@@ -464,6 +464,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [CommsOfPracticeController::class, 'destroy']);
         Route::get('/get', [CommsOfPracticeController::class, 'getOne']);
         Route::post("/member_action", [CommsOfPracticeController::class, 'memberAction'])->name('admin.commsofpractice.memberAction');
+        Route::post("/add_member", [CommsOfPracticeController::class, 'addMember'])->name('admin.commsofpractice.addMember');
         Route::post("/delete_member", [CommsOfPracticeController::class, 'deleteMember'])->name('admin.commsofpractice.deleteMember');
         Route::post("/send_invitation", [CommsOfPracticeController::class, 'sendInvitation'])->name('admin.commsofpractice.sendInvitation');
         Route::post("/resend_invitation", [CommsOfPracticeController::class, 'resendInvitation'])->name('admin.commsofpractice.resendInvitation');
@@ -663,6 +664,9 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
+    Route::post('/detail/{id}/invite', [CommunitiesController::class, 'inviteColleagues'])->middleware('auth')->name('community.invite');
+    Route::post('/detail/{id}/member-status', [CommunitiesController::class, 'updateMemberStatus'])->middleware('auth')->name('community.member-status');
+    Route::post('/detail/{id}/events', [CommunitiesController::class, 'createCommunityEvent'])->middleware('auth')->name('community.events.create');
     Route::get('/accept-invitation/{token}', [CommunitiesController::class, 'acceptInvitation'])->name('community.accept-invitation');
     Route::get('/detail/{id}', [CommunitiesController::class, 'detail'])->name('community.detail');
 });

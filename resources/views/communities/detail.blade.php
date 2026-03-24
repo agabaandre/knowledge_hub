@@ -157,6 +157,66 @@
         color: #64748b;
         margin-top: 0.5rem;
     }
+    .community-featured-card {
+        background: #ffffff;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        transition: box-shadow 0.2s ease;
+    }
+    .community-featured-card:hover {
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+    .community-featured-image {
+        float: left;
+        width: 120px;
+        height: 120px;
+        object-fit: contain;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        border-radius: 4px;
+        margin-right: 1rem;
+        margin-bottom: 0.5rem;
+    }
+    .community-featured-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+        line-height: 1.4;
+    }
+    .community-featured-title a {
+        color: inherit;
+        text-decoration: none;
+    }
+    .community-featured-title a:hover {
+        color: {{ settings()->primary_color ?? '#119A48' }};
+    }
+    .community-featured-meta {
+        color: #64748b;
+        font-size: 0.875rem;
+        margin-bottom: 0.5rem;
+    }
+    .community-featured-actions {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 0.75rem;
+        margin-top: 0.75rem;
+        border-top: 1px solid #e2e8f0;
+        flex-wrap: wrap;
+    }
+    .community-featured-actions a {
+        color: {{ settings()->primary_color ?? '#119A48' }};
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 600;
+    }
+    .community-featured-actions a:hover {
+        text-decoration: underline;
+    }
 
     /* Dark mode: community detail page */
     html[data-bs-theme="dark"] .community-tabs { border-bottom-color: #3e4348; }
@@ -220,6 +280,16 @@
                             <i class="fa fa-book mr-1"></i>{{ $community->community_publications_count ?? $community->publications_count ?? 0 }} Publications
                         </span>
                     </div>
+                    <div class="mt-3 d-flex justify-content-center flex-wrap" style="gap: 8px;">
+                        <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#inviteColleaguesModal">
+                            <i class="fa fa-envelope mr-1"></i>Invite colleagues (max 5)
+                        </button>
+                        @if(!empty($isCommunityAdmin))
+                        <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#createCommunityEventModal">
+                            <i class="fa fa-calendar-plus-o mr-1"></i>Create community event
+                        </button>
+                        @endif
+                    </div>
                 </div>
             </div>
         </div>
@@ -248,34 +318,35 @@
                 <div class="tab-pane fade show active" id="publications" role="tabpanel">
                     @if($publications->count() > 0)
                         @foreach($publications as $publication)
-                            <div class="card mb-3 community-detail-card">
-                                <div class="card-body">
-                                    <h5 class="card-title">
-                                        <a href="{{ url('records/resource') }}?id={{ $publication->id }}" class="text-dark">
-                                            {{ $publication->title }}
-                                        </a>
-                                    </h5>
+                            @php
+                                $defaultImage = asset('assets/images/cover.png');
+                                $imageLink = resolve_publication_card_cover($publication);
+                            @endphp
+                            <div class="community-featured-card community-detail-card">
+                                <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                                    <img src="{{ $imageLink }}" alt="{{ $publication->title }}" class="community-featured-image" onerror="this.onerror=null;this.src='{{ $defaultImage }}';">
+                                </a>
+                                <h5 class="community-featured-title">
+                                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                                        {{ $publication->title }}
+                                    </a>
+                                </h5>
+                                <div class="community-featured-meta">
                                     @if($publication->author)
-                                        <p class="card-text text-muted small mb-2">
-                                            <i class="fa fa-user mr-1"></i>Author: {{ $publication->author->name ?? 'Unknown' }}
-                                        </p>
+                                        <span><i class="fa fa-user mr-1"></i>{{ $publication->author->name ?? 'Unknown' }}</span>
                                     @endif
-                                    @if($publication->description)
-                                        <p class="card-text">
-                                            {!! \Illuminate\Support\Str::words(strip_tags($publication->description), 40, '...') !!}
-                                        </p>
-                                    @endif
-                                    <div class="mt-2">
-                                        <span class="badge badge-secondary">
-                                            <i class="fa fa-calendar mr-1"></i>{{ $publication->created_at->format('M d, Y') }}
-                                        </span>
-                                        @if($publication->visits)
-                                            <span class="badge badge-info ml-2">
-                                                <i class="fa fa-eye mr-1"></i>{{ $publication->visits }} Views
-                                            </span>
-                                        @endif
-                                    </div>
+                                    <span class="ml-2"><i class="fa fa-clock-o mr-1"></i>{{ time_ago($publication->updated_at ?? $publication->created_at) }}</span>
                                 </div>
+                                @if($publication->description)
+                                    <p class="mb-0" style="text-align: justify;">
+                                        {!! \Illuminate\Support\Str::words(strip_tags($publication->description), 40, '...') !!}
+                                    </p>
+                                @endif
+                                <div class="community-featured-actions">
+                                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}">Read More <i class="fa fa-arrow-right"></i></a>
+                                    <span class="text-muted small"><i class="fa fa-eye mr-1"></i>{{ $publication->visits ?? 0 }} Visits</span>
+                                </div>
+                                <div style="clear: both;"></div>
                             </div>
                         @endforeach
                         <div class="mt-4">
@@ -288,6 +359,29 @@
                     @endif
                 </div>
             </div>
+            @if(isset($communityEvents) && $communityEvents->count() > 0)
+            <div class="card mt-3">
+                <div class="card-body">
+                    <h5 class="card-title mb-3"><i class="fa fa-calendar theme-text mr-2"></i>Community Events</h5>
+                    @foreach($communityEvents as $event)
+                        <div class="border rounded p-2 mb-2">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <strong>{{ $event->title }}</strong>
+                                <span class="badge badge-info">{{ $event->event_category ?? 'Event' }}</span>
+                            </div>
+                            <div class="small text-muted mt-1">
+                                <i class="fa fa-clock-o mr-1"></i>{{ \Carbon\Carbon::parse($event->startdate)->format('M d, Y H:i') }}
+                                @if($event->enddate)
+                                    - {{ \Carbon\Carbon::parse($event->enddate)->format('M d, Y H:i') }}
+                                @endif
+                            </div>
+                            @if($event->venue)<div class="small"><i class="fa fa-map-marker mr-1"></i>{{ $event->venue }}</div>@endif
+                            @if($event->event_link)<div class="small"><a href="{{ $event->event_link }}" target="_blank" rel="noopener">Open event link</a></div>@endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
         </div>
 
         <!-- Sidebar -->
@@ -356,6 +450,23 @@
                                     <div class="member-title">
                                         <i class="fa fa-briefcase mr-1"></i>{{ $member['job_title'] }}
                                     </div>
+                                    <div class="mt-1">
+                                        @if($member['is_admin'])
+                                            <span class="badge badge-primary">Admin</span>
+                                        @endif
+                                        @if(!$member['is_active'])
+                                            <span class="badge badge-danger">Inactive</span>
+                                        @endif
+                                    </div>
+                                    @if(!empty($isCommunityAdmin) && ($member['id'] ?? 0) !== (auth()->id() ?? 0))
+                                        <div class="mt-2">
+                                            @if($member['is_active'])
+                                                <button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="{{ $member['membership_id'] }}" data-action="deactivate">Mark inactive</button>
+                                            @else
+                                                <button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="{{ $member['membership_id'] }}" data-action="activate">Mark active</button>
+                                            @endif
+                                        </div>
+                                    @endif
                                     @if(isset($member['badges']) && $member['badges']->count() > 0)
                                         <div class="mt-2">
                                             @foreach($member['badges']->take(3) as $userBadge)
@@ -419,11 +530,113 @@
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="inviteColleaguesModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Invite colleagues</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+            <form id="inviteColleaguesForm">
+                @csrf
+                <div class="modal-body">
+                    <label>Emails (max 5)</label>
+                    <textarea class="form-control" name="emails" rows="3" placeholder="name1@example.com, name2@example.com" required></textarea>
+                    <small class="text-muted">Separate by comma, space, or new line.</small>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send invitations</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@if(!empty($isCommunityAdmin))
+<div class="modal fade" id="createCommunityEventModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header"><h5 class="modal-title">Create community event</h5><button type="button" class="close" data-dismiss="modal"><span>&times;</span></button></div>
+            <form id="createCommunityEventForm">
+                @csrf
+                <div class="modal-body">
+                    <div class="form-group"><label>Title</label><input class="form-control" name="title" required></div>
+                    <div class="form-group"><label>Type</label>
+                        <select class="form-control" name="event_category" required>
+                            <option value="Meeting">Meeting</option>
+                            <option value="Webinar">Webinar</option>
+                            <option value="Workshop">Workshop</option>
+                            <option value="Training">Training</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group"><label>Description</label><textarea class="form-control" name="description" rows="3" required></textarea></div>
+                    <div class="form-group"><label>Start date/time</label><input type="datetime-local" class="form-control" name="startdate" required></div>
+                    <div class="form-group"><label>End date/time</label><input type="datetime-local" class="form-control" name="enddate"></div>
+                    <div class="form-group"><label>Venue</label><input class="form-control" name="venue"></div>
+                    <div class="form-group"><label>Event link (optional)</label><input type="url" class="form-control" name="event_link"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-warning">Create event</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @section('scripts')
 <script>
-    // Tab functionality is handled by Bootstrap
+    (function () {
+        var inviteForm = document.getElementById('inviteColleaguesForm');
+        if (inviteForm) {
+            inviteForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var fd = new FormData(inviteForm);
+                fetch('{{ route('community.invite', $community->id) }}', {
+                    method: 'POST',
+                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'},
+                    body: fd
+                }).then(r => r.json()).then(function (res) {
+                    alert(res.message || 'Done');
+                    if (res.status === 'success') location.reload();
+                }).catch(function () { alert('Failed to send invitations.'); });
+            });
+        }
+
+        document.querySelectorAll('.js-member-toggle').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                var fd = new FormData();
+                fd.append('member_id', this.dataset.memberId);
+                fd.append('action', this.dataset.action);
+                fetch('{{ route('community.member-status', $community->id) }}', {
+                    method: 'POST',
+                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'},
+                    body: fd
+                }).then(r => r.json()).then(function (res) {
+                    alert(res.message || 'Done');
+                    if (res.status === 'success') location.reload();
+                }).catch(function () { alert('Failed to update member status.'); });
+            });
+        });
+
+        var eventForm = document.getElementById('createCommunityEventForm');
+        if (eventForm) {
+            eventForm.addEventListener('submit', function (e) {
+                e.preventDefault();
+                var fd = new FormData(eventForm);
+                fetch('{{ route('community.events.create', $community->id) }}', {
+                    method: 'POST',
+                    headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'},
+                    body: fd
+                }).then(r => r.json()).then(function (res) {
+                    alert(res.message || 'Done');
+                    if (res.status === 'success') location.reload();
+                }).catch(function () { alert('Failed to create event.'); });
+            });
+        }
+    })();
 </script>
 @endsection
 

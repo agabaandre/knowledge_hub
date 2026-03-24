@@ -77,6 +77,11 @@
                 <div class="tab-content" id="communityTabsContent">
                     <!-- Members Tab -->
                     <div class="tab-pane fade show active" id="members" role="tabpanel" aria-labelledby="members-tab">
+                        <div class="mb-3">
+                            <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addMemberModal">
+                                <i class="fa fa-user-plus mr-1"></i>Add member
+                            </button>
+                        </div>
                         @if($pendingCount > 0)
                         <div class="d-flex flex-wrap align-items-center gap-2 mb-3">
                             <span class="text-muted small">Select participants to approve or reject:</span>
@@ -159,8 +164,14 @@
                                 <td>{{ $member->user->name }}</td>
                                 <td>{{ $member->user->email }}</td>
                                 <td>
+                                    @if(($member->is_admin ?? false) && $member->is_approved == 1)
+                                        <span class="badge badge-primary mr-1">Admin</span>
+                                    @endif
                                     @if ($member->is_approved == 1)
                                         <span class="badge badge-success">Approved</span>
+                                        @if(($member->is_active ?? true) == false)
+                                            <span class="badge badge-danger ml-1">Inactive</span>
+                                        @endif
                                     @elseif ($member->is_approved == 2)
                                         <span class="badge badge-danger">Rejected</span>
                                             @else
@@ -169,6 +180,16 @@
                                         </td>
                                         <td>
                                             @if ($member->is_approved == 1)
+                                                @if(($member->is_admin ?? false))
+                                                    <button type="button" class="btn btn-outline-secondary btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="remove_admin"><i class="fa fa-user-times mr-1"></i>Remove admin</button>
+                                                @else
+                                                    <button type="button" class="btn btn-outline-primary btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="make_admin"><i class="fa fa-user-secret mr-1"></i>Make admin</button>
+                                                @endif
+                                                @if(($member->is_active ?? true))
+                                                    <button type="button" class="btn btn-outline-warning btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="deactivate"><i class="fa fa-pause mr-1"></i>Mark inactive</button>
+                                                @else
+                                                    <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="activate"><i class="fa fa-play mr-1"></i>Mark active</button>
+                                                @endif
                                                 <button type="button" class="btn btn-outline-danger btn-sm js-member-action" data-member-id="{{ $member->id }}" data-action="reject"><i class="fa fa-times mr-1"></i>Remove</button>
                                             @elseif ($member->is_approved == 2)
                                                 <button type="button" class="btn btn-outline-success btn-sm mr-1 js-member-action" data-member-id="{{ $member->id }}" data-action="approve"><i class="fa fa-undo mr-1"></i>Reconsider</button>
@@ -302,6 +323,7 @@
                             <label for="invitationEmail">Email Address(es)</label>
                             <textarea class="form-control" id="invitationEmail" name="email" rows="3" required placeholder="Enter one or more email addresses, separated by commas"></textarea>
                             <small class="form-text text-muted">Enter multiple emails separated by commas. Existing members and pending invitations for this community are skipped. Invitations expire in 7 days.</small>
+                            <small class="form-text text-muted d-block">Maximum 5 users per request.</small>
                         </div>
                         <input type="hidden" name="community_id" value="{{ $community->id }}">
                     </div>
@@ -367,6 +389,35 @@
                         <button type="submit" class="btn btn-primary" id="importCsvSubmitBtn">
                             <i class="fa fa-upload mr-1"></i>Import and Send
                         </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addMemberModal" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add member</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <form id="addMemberForm">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>User email</label>
+                            <input type="email" class="form-control" name="user_email" required placeholder="user@example.com">
+                        </div>
+                        <div class="form-check">
+                            <input type="checkbox" class="form-check-input" id="addMemberIsAdmin" name="is_admin" value="1">
+                            <label class="form-check-label" for="addMemberIsAdmin">Make community admin</label>
+                        </div>
+                        <input type="hidden" name="community_id" value="{{ $community->id }}">
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="addMemberSubmitBtn">Add member</button>
                     </div>
                 </form>
             </div>
@@ -609,6 +660,28 @@
                         alert(message);
                     },
                     complete: function() { $btn.prop('disabled', false).text('Send Invitation(s)'); }
+                });
+            });
+
+            jQuery('#addMemberForm').on('submit', function(e) {
+                e.preventDefault();
+                var $form = jQuery(this);
+                var $btn = jQuery('#addMemberSubmitBtn');
+                $btn.prop('disabled', true).text('Adding...');
+                jQuery.ajax({
+                    url: '{{ route('admin.commsofpractice.addMember') }}',
+                    method: 'POST',
+                    headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json' },
+                    data: $form.serialize(),
+                    success: function(response) {
+                        alert(response.message || 'Member added.');
+                        location.reload();
+                    },
+                    error: function(xhr) {
+                        var message = xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Failed to add member.';
+                        alert(message);
+                    },
+                    complete: function() { $btn.prop('disabled', false).text('Add member'); }
                 });
             });
 
