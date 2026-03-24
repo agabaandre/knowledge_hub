@@ -879,12 +879,15 @@ if (!function_exists('extract_first_page_as_image')) {
 }
 
 function cleanUTF8($value){
+    if ($value === null) {
+        return '';
+    }
 
-    $value = mb_convert_encoding($value, 'UTF-8', 'UTF-8');
-    $value = preg_replace('/[^\x20-\x7E\xA0-\xFF]/', '', $value);
-    $value = filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH);
+    $value = mb_convert_encoding((string) $value, 'UTF-8', 'UTF-8');
+    // Remove only problematic control chars; preserve multilingual letters.
+    $value = preg_replace('/[\x{0000}-\x{0008}\x{000B}\x{000C}\x{000E}-\x{001F}\x{007F}]/u', '', $value);
 
-    return $value;
+    return trim($value);
 }
 
 
