@@ -631,6 +631,18 @@ if (!function_exists('is_direct_video_file_url')) {
     }
 }
 
+if (!function_exists('is_direct_audio_file_url')) {
+    function is_direct_audio_file_url($url)
+    {
+        if (!$url || !is_string($url)) {
+            return false;
+        }
+        $path = parse_url($url, PHP_URL_PATH) ?: $url;
+        $ext = strtolower(pathinfo((string) $path, PATHINFO_EXTENSION));
+        return in_array($ext, ['mp3', 'wav', 'ogg', 'm4a', 'aac', 'flac'], true);
+    }
+}
+
 if (!function_exists('get_video_embed_url')) {
     /**
      * Convert known video platform links to embeddable URLs.

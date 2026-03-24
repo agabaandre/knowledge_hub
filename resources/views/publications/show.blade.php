@@ -635,12 +635,22 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons - Favorite, Chat with PDF (if PDF) or Summarise (if non-PDF); both require auth -->
+                    @php
+                        $publicationLink = trim((string) ($publication->publication ?? ''));
+                        $publicationFileType = strtolower((string) ($publication->file_type->name ?? ''));
+                        $isMediaChatEligible = ($publication->has_any_pdf ?? false)
+                            || (($publication->is_video ?? 0) == 1)
+                            || is_video_platform_url($publicationLink)
+                            || is_direct_video_file_url($publicationLink)
+                            || is_direct_audio_file_url($publicationLink)
+                            || strpos($publicationFileType, 'audio') !== false;
+                    @endphp
+                    <!-- Action Buttons - Favorite, Chat with PDF for PDF/media; Summarise for non-media -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('common.favourites_btn',['row'=>$publication])
                 @auth
-                    @if($publication->has_any_pdf)
+                    @if($isMediaChatEligible)
                     <button type="button" class="btn btn-au btn-sm js-open-pdf-chat"
                             data-publication-id="{{ $publication->id }}"
                             data-attachment-id="{{ $publication->pdf_sources[0]['attachment_id'] ?? '' }}"
@@ -654,7 +664,7 @@
                     </button>
                     @endif
                 @else
-                    @if($publication->has_any_pdf)
+                    @if($isMediaChatEligible)
                     <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
                         <i class="fa-solid fa-microchip"></i> Chat with PDF <small>(login required)</small>
                     </a>
@@ -1213,7 +1223,7 @@
 </section>
 </article>
 @include('common.ai-summary')
-@if($publication->has_any_pdf ?? false)
+@if($isMediaChatEligible ?? false)
 @include('common.pdf-chat-modal')
 <script>
   var pdfChatPublicationId = {{ $publication->id }};

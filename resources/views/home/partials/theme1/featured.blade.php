@@ -153,7 +153,17 @@
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>
-                                @if($row->has_any_pdf ?? false)
+                                @php
+                                    $rowLink = trim((string) ($row->publication ?? ''));
+                                    $rowFileTypeName = strtolower((string) ($row->file_type->name ?? ''));
+                                    $rowMediaChatEligible = ($row->has_any_pdf ?? false)
+                                        || (($row->is_video ?? 0) == 1)
+                                        || is_video_platform_url($rowLink)
+                                        || is_direct_video_file_url($rowLink)
+                                        || is_direct_audio_file_url($rowLink)
+                                        || strpos($rowFileTypeName, 'audio') !== false;
+                                @endphp
+                                @if($rowMediaChatEligible)
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
                                     <i class="fa-solid fa-microchip me-1"></i> Chat with PDF
                                 </a>
