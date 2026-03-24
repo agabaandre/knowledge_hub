@@ -201,6 +201,45 @@ class CommunitiesController extends Controller
             ->limit(10)
             ->get();
 
+        // Members list: ranked by highest publications in this community first, paginated (20/page)
+        $memberSearch = trim((string) request('member_search', ''));
+        $membersQuery = DB::table('community_of_practice_members as m')
+            ->join('users as u', 'u.id', '=', 'm.user_id')
+            ->leftJoin('publication_community_of_practices as pcp', function ($join) {
+                $join->on('pcp.community_of_practice_id', '=', 'm.community_of_practice_id');
+            })
+            ->leftJoin('publication as p', function ($join) {
+                $join->on('p.id', '=', 'pcp.publication_id')
+                     ->on('p.user_id', '=', 'm.user_id');
+            })
+            ->where('m.community_of_practice_id', (int) $id)
+            ->where('m.is_approved', 1)
+            ->select(
+                'm.id as membership_id',
+                'm.user_id',
+                'm.is_active',
+                'm.is_admin',
+                'u.name',
+                'u.email',
+                'u.job_title',
+                DB::raw('COUNT(DISTINCT p.id) as publication_count')
+            )
+            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title');
+
+        if ($memberSearch !== '') {
+            $membersQuery->where(function ($q) use ($memberSearch) {
+                $q->where('u.name', 'like', '%' . $memberSearch . '%')
+                    ->orWhere('u.email', 'like', '%' . $memberSearch . '%')
+                    ->orWhere('u.job_title', 'like', '%' . $memberSearch . '%');
+            });
+        }
+
+        $members = $membersQuery
+            ->orderBy('publication_count', 'desc')
+            ->orderBy('u.name', 'asc')
+            ->paginate(20, ['*'], 'members_page')
+            ->appends(request()->only(['member_search']));
+
         // Get all badge types for displaying requirements
         $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
 
@@ -211,7 +250,8 @@ class CommunitiesController extends Controller
             'otherCommunities',
             'badgeTypes',
             'isCommunityAdmin',
-            'communityEvents'
+            'communityEvents',
+            'members'
         ));
     }
 

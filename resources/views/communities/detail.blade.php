@@ -63,7 +63,6 @@
 @endsection
 
 @section('styles')
-<link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
 <style>
     .theme-text {
         color: {{ settings()->primary_color ?? '#119A48' }};
@@ -442,17 +441,57 @@
             <!-- Community Members -->
             <div class="sidebar-card">
                 <h5><i class="fa fa-users theme-text mr-2"></i>Community Members</h5>
-                <table id="communityMembersTable" class="table table-sm table-bordered table-hover mb-0" style="width:100%;">
-                    <thead>
-                        <tr>
-                            <th>Name</th>
-                            <th>Role</th>
-                            <th>Status</th>
-                            <th>Publications</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                </table>
+                <form method="GET" action="{{ url()->current() }}" class="mb-2">
+                    <div class="input-group input-group-sm">
+                        <input type="text" name="member_search" class="form-control" placeholder="Search members..." value="{{ request('member_search') }}">
+                        <button type="submit" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
+                    </div>
+                </form>
+                @if(isset($members) && $members->count() > 0)
+                    <ul class="list-unstyled mb-2">
+                        @foreach($members as $idx => $member)
+                            <li class="member-item">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <div class="member-name">
+                                            <span class="badge badge-secondary mr-1">{{ ($members->firstItem() ?? 1) + $idx }}</span>
+                                            {{ $member->name }}
+                                        </div>
+                                        <div class="member-title"><i class="fa fa-briefcase mr-1"></i>{{ $member->job_title ?: 'Not specified' }}</div>
+                                        <div class="small text-muted mt-1"><i class="fa fa-envelope mr-1"></i>{{ $member->email }}</div>
+                                        <div class="mt-1">
+                                            @if((int)($member->is_admin ?? 0) === 1)
+                                                <span class="badge text-light" style="background-color: {{ settings()->primary_color ?? '#119A48' }};">Admin</span>
+                                            @else
+                                                <span class="badge badge-secondary">Member</span>
+                                            @endif
+                                            @if((int)($member->is_active ?? 1) === 1)
+                                                <span class="badge badge-success">Active</span>
+                                            @else
+                                                <span class="badge badge-danger">Inactive</span>
+                                            @endif
+                                            <span class="badge badge-info">{{ (int)($member->publication_count ?? 0) }} Publications</span>
+                                        </div>
+                                        @if(!empty($isCommunityAdmin) && ((int)($member->user_id ?? 0) !== (int)(auth()->id() ?? 0)))
+                                            <div class="mt-2">
+                                                @if((int)($member->is_active ?? 1) === 1)
+                                                    <button class="btn btn-sm btn-outline-danger js-member-toggle" data-member-id="{{ $member->membership_id }}" data-action="deactivate" type="button">Mark inactive</button>
+                                                @else
+                                                    <button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="{{ $member->membership_id }}" data-action="activate" type="button">Mark active</button>
+                                                @endif
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            </li>
+                        @endforeach
+                    </ul>
+                    <div class="mt-2">
+                        {{ $members->links() }}
+                    </div>
+                @else
+                    <p class="text-muted mb-0">No members found.</p>
+                @endif
             </div>
 
             <!-- Badge Requirements Info -->
@@ -548,7 +587,6 @@
 @endsection
 
 @section('scripts')
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
 <script>
     (function () {
         var inviteForm = document.getElementById('inviteColleaguesForm');
@@ -577,9 +615,7 @@
                 body: fd
             }).then(r => r.json()).then(function (res) {
                 alert(res.message || 'Done');
-                if (res.status === 'success' && window.communityMembersDt) {
-                    window.communityMembersDt.ajax.reload(null, false);
-                }
+                if (res.status === 'success') location.reload();
             }).catch(function () { alert('Failed to update member status.'); });
         });
 
@@ -599,31 +635,6 @@
             });
         }
 
-        window.communityMembersDt = jQuery('#communityMembersTable').DataTable({
-            processing: true,
-            serverSide: true,
-            pageLength: 20,
-            lengthMenu: [[20, 50, 100], [20, 50, 100]],
-            ajax: {
-                url: '{{ route('community.members-data', $community->id) }}',
-                type: 'GET'
-            },
-            order: [[3, 'desc']],
-            columns: [
-                { data: 'name', name: 'name' },
-                { data: 'role', name: 'role', orderable: false, searchable: false },
-                { data: 'status', name: 'status', orderable: false, searchable: false },
-                { data: 'publications', name: 'publications' },
-                { data: 'actions', name: 'actions', orderable: false, searchable: false }
-            ],
-            language: {
-                search: '',
-                searchPlaceholder: 'Search members...',
-                lengthMenu: 'Show _MENU_ members',
-                info: 'Showing _START_ to _END_ of _TOTAL_ members'
-            },
-            dom: '<"d-flex justify-content-between align-items-center mb-2"lf>rtip'
-        });
     })();
 </script>
 @endsection
