@@ -653,7 +653,7 @@ if (!function_exists('trim_rich_text_input')) {
             return '';
         }
 
-        return \Illuminate\Support\Str::trim((string) $html);
+        return trim((string) $html);
     }
 }
 
@@ -765,7 +765,7 @@ if (!function_exists('sanitize_rich_text_for_display')) {
             $inner .= $dom->saveHTML($child);
         }
 
-        $inner = \Illuminate\Support\Str::trim($inner);
+        $inner = trim($inner);
         if ($inner === '') {
             return '';
         }
@@ -780,7 +780,7 @@ if (!function_exists('sanitize_rich_text_for_display_fallback')) {
      */
     function sanitize_rich_text_for_display_fallback($html)
     {
-        $html = \Illuminate\Support\Str::trim((string) $html);
+        $html = trim((string) $html);
         if ($html === '') {
             return '';
         }
@@ -803,7 +803,7 @@ if (!function_exists('sanitize_rich_text_for_display_fallback')) {
             $out
         );
 
-        $out = \Illuminate\Support\Str::trim($out);
+        $out = trim($out);
         if ($out === '') {
             return '';
         }
