@@ -29,6 +29,10 @@
         // Derive image link with robust fallback like Top Searches
         $image_link = $publication->cover ?? $publication->image_url ?? null;
         $default_image = asset('assets/images/cover.png');
+        $pubUrl = trim((string) ($publication->publication ?? ''));
+        $embedUrl = get_video_embed_url($pubUrl);
+        $directVideo = is_direct_video_file_url($pubUrl);
+        $isVideoLink = is_video_platform_url($pubUrl);
         if (empty($image_link)) {
             $image_link = $default_image;
         } elseif (!filter_var($image_link, FILTER_VALIDATE_URL)) {
@@ -107,11 +111,32 @@
                             <h5 class="mb-0" style="font-weight:600;color:#0f172a;">Cover Image</h5>
                         </div>
                         <div class="ap-card-body text-center">
-                            @if ($publication->is_video)
-                                <div class="ap-cover"><iframe width="100%" height="240" src="{{ $publication->publication }}" style="border-radius:8px;"></iframe></div>
-                            @else
-                                <div class="ap-cover" style="max-height:400px;overflow:hidden;">
-                                    <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
+                            <div class="ap-cover" style="max-height:400px;overflow:hidden;">
+                                <img src="{{ $image_link }}" alt="Cover" style="width:100%;height:auto;max-height:400px;object-fit:contain;border-radius:8px;" onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';">
+                            </div>
+                            @if (($publication->is_video || $isVideoLink) && !empty($pubUrl))
+                                <div class="mt-3 text-left">
+                                    <small class="text-muted d-block mb-2">Embedded Preview</small>
+                                    @if ($embedUrl)
+                                        <div class="ap-cover">
+                                            <iframe
+                                                width="100%"
+                                                height="240"
+                                                src="{{ $embedUrl }}"
+                                                title="Video preview"
+                                                frameborder="0"
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                                referrerpolicy="strict-origin-when-cross-origin"
+                                                allowfullscreen></iframe>
+                                        </div>
+                                    @elseif ($directVideo)
+                                        <div class="ap-cover" style="padding: 8px;">
+                                            <video controls preload="metadata" style="width:100%;max-height:240px;background:#000;border-radius:8px;">
+                                                <source src="{{ $pubUrl }}">
+                                                Your browser does not support HTML5 video.
+                                            </video>
+                                        </div>
+                                    @endif
                                 </div>
                             @endif
                         </div>
