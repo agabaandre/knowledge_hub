@@ -16,8 +16,6 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
 class PdfChatController extends Controller
 {
     private const MAX_MESSAGES_FOR_API = 6;
-    private const MAX_COMMENT_CONTEXT_CHARS = 2500;
-    private const MAX_COMMENT_ITEMS = 20;
 
     public function __construct(private ChatPDFService $chatPdf)
     {
@@ -67,19 +65,7 @@ class PdfChatController extends Controller
             }
 
             if (!$pdfUrl && !$pdfPath) {
-                $pubLink = trim((string) ($publication->publication ?? ''));
-                $fileTypeName = strtolower((string) ($publication->file_type->name ?? ''));
-                $mediaEligible = $pubLink !== '' && (
-                    is_video_platform_url($pubLink) ||
-                    is_direct_video_file_url($pubLink) ||
-                    is_direct_audio_file_url($pubLink) ||
-                    strpos($fileTypeName, 'audio') !== false
-                );
-                if ($mediaEligible) {
-                    $pdfUrl = $pubLink; // ChatPDF add-url fallback for media links
-                } else {
-                    return response()->json(['error' => 'This publication has no PDF or supported media URL available for chat.'], 422);
-                }
+                return response()->json(['error' => 'This publication has no PDF available for chat.'], 422);
             }
 
             $sessionQuery = PdfChatSession::where('publication_id', $publicationId)
@@ -270,19 +256,7 @@ class PdfChatController extends Controller
         }
 
         if (!$pdfUrl && !$pdfPath) {
-            $pubLink = trim((string) ($publication->publication ?? ''));
-            $fileTypeName = strtolower((string) ($publication->file_type->name ?? ''));
-            $mediaEligible = $pubLink !== '' && (
-                is_video_platform_url($pubLink) ||
-                is_direct_video_file_url($pubLink) ||
-                is_direct_audio_file_url($pubLink) ||
-                strpos($fileTypeName, 'audio') !== false
-            );
-            if ($mediaEligible) {
-                $pdfUrl = $pubLink;
-            } else {
-                return null;
-            }
+            return null;
         }
 
         $sourceId = $pdfUrl ? $this->chatPdf->getSourceIdFromUrl($pdfUrl) : null;
@@ -314,56 +288,8 @@ class PdfChatController extends Controller
                 ->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
                 ->toArray();
         }
-        $liveCommentsContext = $this->buildLiveCommentsContext((int) $session->publication_id);
-        if ($liveCommentsContext !== null) {
-            $list[] = ['role' => 'user', 'content' => $liveCommentsContext];
-        }
         $list[] = ['role' => 'user', 'content' => $newUserMessage];
         return array_slice($list, -self::MAX_MESSAGES_FOR_API);
-    }
-
-    private function buildLiveCommentsContext(int $publicationId): ?string
-    {
-        $publication = Publication::with(['comments' => function ($q) {
-            $q->latest()->take(self::MAX_COMMENT_ITEMS);
-        }])->find($publicationId);
-
-        if (!$publication || !$publication->comments || $publication->comments->isEmpty()) {
-            return null;
-        }
-
-        $lines = [];
-        foreach ($publication->comments as $comment) {
-            $body = trim(strip_tags((string) ($comment->comment ?? '')));
-            if ($body === '') {
-                continue;
-            }
-
-            $author = trim((string) ($comment->commentor_name ?? $comment->author ?? 'Anonymous'));
-            $date = '';
-            if (!empty($comment->created_at)) {
-                try {
-                    $date = $comment->created_at->format('Y-m-d');
-                } catch (\Throwable $e) {
-                    $date = '';
-                }
-            }
-            $prefix = '- ' . ($author !== '' ? $author : 'Anonymous');
-            if ($date !== '') {
-                $prefix .= ' (' . $date . ')';
-            }
-            $lines[] = $prefix . ': ' . $body;
-        }
-
-        if (empty($lines)) {
-            return null;
-        }
-
-        $context = "Live community comments for sentiment/context (latest first). Use these as additional signals alongside the document content:\n" . implode("\n", $lines);
-        if (strlen($context) > self::MAX_COMMENT_CONTEXT_CHARS) {
-            $context = substr($context, 0, self::MAX_COMMENT_CONTEXT_CHARS) . "\n[Truncated due to length]";
-        }
-        return $context;
     }
 
     private function savePair(PdfChatSession $session, string $userContent, string $assistantContent): void

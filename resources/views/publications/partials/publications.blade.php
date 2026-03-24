@@ -271,14 +271,6 @@
                          @php
                              $auGold = settings()->au_gold ?? '#B4A269';
                              $goldTextColor = '#5a4d2e';
-                            $rowLink = trim((string) ($row->publication ?? ''));
-                            $rowFileTypeName = strtolower((string) ($row->file_type->name ?? ''));
-                            $rowMediaChatEligible = ($row->has_any_pdf ?? false)
-                                || (($row->is_video ?? 0) == 1)
-                                || is_video_platform_url($rowLink)
-                                || is_direct_video_file_url($rowLink)
-                                || is_direct_audio_file_url($rowLink)
-                                || strpos($rowFileTypeName, 'audio') !== false;
                          @endphp
                          @auth
                              <button type="button"
@@ -303,7 +295,7 @@
                              <i class="fa fa-eye mr-1"></i> Read more
                          </a>
                          @auth
-                            @if($rowMediaChatEligible)
+                             @if($row->has_any_pdf ?? false)
                              <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
                                  <i class="fa-solid fa-microchip"></i> Chat with PDF
                              </a>
@@ -314,7 +306,7 @@
                              @endif
                          @else
                              <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="btn btn-sm btn-outline-primary" style="border-color: var(--theme-color-primary, #119A48); color: var(--theme-color-primary, #119A48); text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                                <i class="fa-solid fa-microchip"></i> {{ $rowMediaChatEligible ? 'Chat with PDF' : 'Summarise' }} <small>(login)</small>
+                                 <i class="fa-solid fa-microchip"></i> {{ ($row->has_any_pdf ?? false) ? 'Chat with PDF' : 'Summarise' }} <small>(login)</small>
                              </a>
                          @endauth
                      </div>
