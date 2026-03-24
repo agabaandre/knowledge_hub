@@ -775,6 +775,7 @@
                     @php
                         // Process publication description to detect and embed video links and convert URLs to clickable links
                         $processedDescription = detect_and_embed_video_links(clean_unicode(publication_description_for_list($publication->description ?? '')), 180, 180);
+                        $processedDescription = sanitize_rich_text_for_display($processedDescription);
                     @endphp
                     <p>{!! $processedDescription !!}</p>
                     </div>

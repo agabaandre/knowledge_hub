@@ -314,7 +314,7 @@
                             <div class="jbd-details mb-4">
                                 <h5 class="ft-medium fs-md text-success">Description</h5>
                                 <div class="other-details">
-                                    <p>{!! $publication->description !!}</p>
+                                    <p>{!! sanitize_rich_text_for_display($publication->description) !!}</p>
                                 </div>
                             </div>
 

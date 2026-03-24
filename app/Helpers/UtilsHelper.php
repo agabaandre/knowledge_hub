@@ -643,37 +643,179 @@ $text = $pdf->getText();
 return htmlspecialchars($text);
 
 }
-function cleanHtmlContent($htmlContent)
-{
-    // Use DOMDocument to parse and clean the HTML content
-    $dom = new \DOMDocument();
+if (!function_exists('trim_rich_text_input')) {
+    /**
+     * Trim rich text input before sanitization/rendering.
+     */
+    function trim_rich_text_input($html)
+    {
+        if ($html === null) {
+            return '';
+        }
 
-    // Suppress errors due to invalid HTML
-    libxml_use_internal_errors(true);
+        return \Illuminate\Support\Str::trim((string) $html);
+    }
+}
 
-    // Load the HTML content
-    $dom->loadHTML(mb_convert_encoding($htmlContent, 'HTML-ENTITIES', 'UTF-8'));
+if (!function_exists('sanitize_rich_text_for_display')) {
+    /**
+     * Sanitize Summernote/rich HTML for safe on-site rendering.
+     * Keeps intended rich text but removes risky/unstable styling and classes.
+     */
+    function sanitize_rich_text_for_display($html)
+    {
+        $html = trim_rich_text_input($html);
+        if ($html === '') {
+            return '';
+        }
 
-    // Get all the div elements
-    $divs = $dom->getElementsByTagName('div');
+        $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-    // Loop through each div
-    foreach ($divs as $div) {
-        // Check if the div has the style attribute you want to remove
-        if ($div->hasAttribute('style')) {
-            $style = $div->getAttribute('style');
-            if (strpos($style, 'position: absolute') !== false) {
-                // Remove the style attribute or modify it as needed
-                $div->removeAttribute('style');
+        libxml_use_internal_errors(true);
+        $dom = new \DOMDocument('1.0', 'UTF-8');
+        $wrapper = '<div id="rich-root">' . $decoded . '</div>';
+        $loaded = @$dom->loadHTML('<?xml encoding="UTF-8">' . $wrapper);
+        libxml_clear_errors();
+
+        if (! $loaded) {
+            return sanitize_rich_text_for_display_fallback($decoded);
+        }
+
+        $root = $dom->getElementById('rich-root');
+        if (! $root) {
+            return sanitize_rich_text_for_display_fallback($decoded);
+        }
+
+        $xpath = new \DOMXPath($dom);
+
+        foreach ($xpath->query('//comment()') as $comment) {
+            if ($comment->parentNode) {
+                $comment->parentNode->removeChild($comment);
             }
         }
+
+        foreach ($xpath->query('//*[@class]') as $el) {
+            /** @var \DOMElement $el */
+            $class = $el->getAttribute('class');
+            if ($class === '') {
+                continue;
+            }
+            $parts = preg_split('/\s+/', trim($class), -1, PREG_SPLIT_NO_EMPTY);
+            if (! $parts) {
+                $el->removeAttribute('class');
+                continue;
+            }
+
+            $filtered = array_values(array_filter($parts, function ($c) {
+                return stripos($c, 'note-float') === false
+                    && stripos($c, 'note-image') === false;
+            }));
+
+            if (count($filtered) === 0) {
+                $el->removeAttribute('class');
+            } else {
+                $el->setAttribute('class', implode(' ', $filtered));
+            }
+        }
+
+        foreach ($xpath->query('//*[@style]') as $el) {
+            /** @var \DOMElement $el */
+            $style = $el->getAttribute('style');
+            $style = preg_replace('/\b(float|clear|text-wrap-mode)\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/\bposition\s*:\s*(absolute|fixed|sticky)\s*;?/i', '', $style);
+            $style = preg_replace('/\b(z-index|transform)\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/\bbackground(?:-color)?\s*:\s*rgba\([^)]+\)\s*;?/i', '', $style);
+            $style = trim(preg_replace('/\s*;\s*/', ';', $style), " ;\t\n\r\0\x0B");
+
+            if ($style === '') {
+                $el->removeAttribute('style');
+            } else {
+                $el->setAttribute('style', $style);
+            }
+        }
+
+        foreach ($xpath->query('//img') as $img) {
+            /** @var \DOMElement $img */
+            $img->removeAttribute('class');
+            $style = $img->getAttribute('style');
+            $style = preg_replace('/\b(float|clear|vertical-align)\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/\bwidth\s*:\s*[^;]+;?/i', '', $style);
+            $style = preg_replace('/\bheight\s*:\s*[^;]+;?/i', '', $style);
+            $style = trim($style . ' max-width:100%; height:auto; display:block; margin:8px 0;');
+            $style = preg_replace('/\s*;\s*/', '; ', trim($style));
+            $img->setAttribute('style', $style);
+
+            $src = $img->getAttribute('src');
+            if ($src !== '' && !preg_match('#^https?://#i', $src)) {
+                $base = rtrim((string) (config('app.url') ?: ''), '/');
+                if ($base !== '') {
+                    if (strpos($src, '//') === 0) {
+                        $img->setAttribute('src', (strpos($base, 'https') === 0 ? 'https:' : 'http:') . $src);
+                    } elseif (strpos($src, '/') === 0) {
+                        $img->setAttribute('src', $base . $src);
+                    } else {
+                        $img->setAttribute('src', $base . '/' . ltrim($src, '/'));
+                    }
+                }
+            }
+        }
+
+        $inner = '';
+        foreach ($root->childNodes as $child) {
+            $inner .= $dom->saveHTML($child);
+        }
+
+        $inner = \Illuminate\Support\Str::trim($inner);
+        if ($inner === '') {
+            return '';
+        }
+
+        return '<div class="rich-text-content html-content" style="margin:8px 0;text-align:left;overflow:visible;">' . $inner . '</div>';
     }
+}
 
-    // Save the cleaned HTML content
-    $cleanedHtmlContent = $dom->saveHTML();
+if (!function_exists('sanitize_rich_text_for_display_fallback')) {
+    /**
+     * Regex fallback for malformed HTML fragments.
+     */
+    function sanitize_rich_text_for_display_fallback($html)
+    {
+        $html = \Illuminate\Support\Str::trim((string) $html);
+        if ($html === '') {
+            return '';
+        }
 
-    // Return the cleaned content
-    return $cleanedHtmlContent;
+        $out = preg_replace('/<!--.*?-->/s', '', $html);
+        $out = preg_replace('/\bclass\s*=\s*"(?:[^"]*\bnote-float[^"]*)"/i', '', $out);
+        $out = preg_replace('/\bclass\s*=\s*\'(?:[^\']*\bnote-float[^\']*)\'/i', '', $out);
+        $out = preg_replace_callback(
+            '/<img\b[^>]*(?:\/)?>/i',
+            function ($m) {
+                $tag = $m[0];
+                $tag = preg_replace('/\sstyle\s*=\s*"[^"]*"/i', '', $tag);
+                $tag = preg_replace("/\sstyle\s*=\s*'[^']*'/i", '', $tag);
+                $tag = preg_replace('/\sclass\s*=\s*"[^"]*"/i', '', $tag);
+                if (preg_match('/\/\s*>$/', $tag)) {
+                    return preg_replace('/\/\s*>$/', ' style="max-width:100%;height:auto;display:block;margin:8px 0;" />', $tag);
+                }
+                return preg_replace('/>$/', ' style="max-width:100%;height:auto;display:block;margin:8px 0;">', $tag);
+            },
+            $out
+        );
+
+        $out = \Illuminate\Support\Str::trim($out);
+        if ($out === '') {
+            return '';
+        }
+
+        return '<div class="rich-text-content html-content" style="margin:8px 0;text-align:left;">' . $out . '</div>';
+    }
+}
+
+function cleanHtmlContent($htmlContent)
+{
+    // Backward-compatible alias used widely in views
+    return sanitize_rich_text_for_display($htmlContent);
 }
 
 

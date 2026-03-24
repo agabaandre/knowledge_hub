@@ -187,7 +187,7 @@
                         @endif
                         <div class="mb-4">
                             <div class="af-section-title">Description</div>
-                            <div class="text-body">{!! $forum->forum_description !!}</div>
+                            <div class="text-body">{!! sanitize_rich_text_for_display($forum->forum_description) !!}</div>
                         </div>
 
                         @if(isset($forum->attachments) && count($forum->attachments))
@@ -222,7 +222,7 @@
                                                         </div>
                                                         <span class="af-badge af-badge-muted">{{ ucwords($comment->status) }}</span>
                                                     </div>
-                                                    <div class="mt-2">{!! $comment->comment !!}</div>
+                                                    <div class="mt-2">{!! sanitize_rich_text_for_display($comment->comment) !!}</div>
                                                 </div>
                                             </li>
                                         @endforeach
