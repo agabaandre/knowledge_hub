@@ -11,7 +11,17 @@ class PublicationAttachment extends Model
 
     public function getFileAttribute($value)
     {
-        return storage_link('uploads/publications/' . $value);
+        $raw = $value ?? '';
+        if ($raw === '') {
+            return storage_link('uploads/publications/');
+        }
+        $resolved = resolve_publication_upload_disk_path($raw);
+        if ($resolved) {
+            return storage_link('uploads/publications/' . basename($resolved));
+        }
+        $forUrl = normalize_publication_stored_filename_for_public_url($raw) ?? $raw;
+
+        return storage_link('uploads/publications/' . $forUrl);
     }
 
     /** Full URL for this attachment (for ChatPDF add-url). */
@@ -27,8 +37,8 @@ class PublicationAttachment extends Model
         if (empty($raw)) {
             return null;
         }
-        $path = storage_path('app/public/uploads/publications/' . $raw);
-        return file_exists($path) ? $path : null;
+
+        return resolve_publication_upload_disk_path($raw);
     }
 
     /** True if this attachment is a PDF. */

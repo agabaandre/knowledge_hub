@@ -892,6 +892,51 @@ if (!function_exists('publication_filename_is_pdf')) {
     }
 }
 
+if (!function_exists('normalize_publication_stored_filename_for_public_url')) {
+    /**
+     * Use .pdf in public storage URLs when the DB has a mis-saved .pd filename so preview/download match the real file.
+     */
+    function normalize_publication_stored_filename_for_public_url(?string $storedRelativePath): ?string
+    {
+        if ($storedRelativePath === null || $storedRelativePath === '') {
+            return $storedRelativePath;
+        }
+        if (preg_match('/\.pd$/i', $storedRelativePath)) {
+            return preg_replace('/\.pd$/i', '.pdf', $storedRelativePath);
+        }
+
+        return $storedRelativePath;
+    }
+}
+
+if (!function_exists('resolve_publication_upload_disk_path')) {
+    /**
+     * Resolve a file under uploads/publications when DB has .pd but disk has .pdf (or the reverse).
+     */
+    function resolve_publication_upload_disk_path(string $rawRelativeFilename): ?string
+    {
+        if ($rawRelativeFilename === '') {
+            return null;
+        }
+        $baseDir = storage_path('app/public/uploads/publications/');
+        $candidates = [$rawRelativeFilename];
+        if (preg_match('/\.pd$/i', $rawRelativeFilename)) {
+            $candidates[] = preg_replace('/\.pd$/i', '.pdf', $rawRelativeFilename);
+        }
+        if (preg_match('/\.pdf$/i', $rawRelativeFilename)) {
+            $candidates[] = preg_replace('/\.pdf$/i', '.pd', $rawRelativeFilename);
+        }
+        foreach (array_unique($candidates) as $name) {
+            $path = $baseDir . $name;
+            if (file_exists($path)) {
+                return $path;
+            }
+        }
+
+        return null;
+    }
+}
+
 function html_to_text($html) {
     // Remove HTML tags
     $text = strip_tags($html);

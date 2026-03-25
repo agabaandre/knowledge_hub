@@ -246,7 +246,13 @@ class Publication extends Model
         if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {
             return $raw;
         }
-        return storage_link('uploads/publications/' . $raw);
+        $resolved = resolve_publication_upload_disk_path($raw);
+        if ($resolved) {
+            return storage_link('uploads/publications/' . basename($resolved));
+        }
+        $forUrl = normalize_publication_stored_filename_for_public_url($raw) ?? $raw;
+
+        return storage_link('uploads/publications/' . $forUrl);
     }
 
     /**
@@ -261,8 +267,8 @@ class Publication extends Model
         if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {
             return null; // external URL, no local path
         }
-        $path = storage_path('app/public/uploads/publications/' . $raw);
-        return file_exists($path) ? $path : null;
+
+        return resolve_publication_upload_disk_path($raw);
     }
 
     /**
