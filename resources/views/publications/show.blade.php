@@ -771,7 +771,7 @@
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
-                                                            data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
+                                                            data-file-url="{{ $url }}" data-file-ext=".{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
@@ -1005,7 +1005,7 @@
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
-                                                            data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
+                                                            data-file-url="{{ $url }}" data-file-ext=".{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
@@ -1265,7 +1265,8 @@ window.previewAttachmentClick = function(event, button) {
     event.stopPropagation();
     
     var fileUrl = button.getAttribute('data-file-url');
-    var ext = (button.getAttribute('data-file-ext') || '').toLowerCase();
+    var ext = (button.getAttribute('data-file-ext') || '').toLowerCase().replace(/^\./, '');
+    if (ext === 'pd') ext = 'pdf';
     var isOffice = (button.getAttribute('data-file-office') || '0') === '1';
     
     if (!fileUrl) {
@@ -1624,7 +1625,8 @@ function downloadFile(url, filename) {
                 alert('Preview button clicked! (Method 1: addEventListener)');
                 
                 var fileUrl = this.getAttribute('data-file-url');
-                var ext = (this.getAttribute('data-file-ext') || '').toLowerCase();
+                var ext = (this.getAttribute('data-file-ext') || '').toLowerCase().replace(/^\./, '');
+                if (ext === 'pd') ext = 'pdf';
                 var isOffice = (this.getAttribute('data-file-office') || '0') === '1';
                 
                 console.log('Click handler fired:', {fileUrl: fileUrl, ext: ext, isOffice: isOffice});
@@ -1723,7 +1725,8 @@ function downloadFile(url, filename) {
             
             var $button = $(this);
             var fileUrl = $button.data('file-url');
-            var ext = ($button.data('file-ext') || '').toString().toLowerCase();
+            var ext = ($button.data('file-ext') || '').toString().toLowerCase().replace(/^\./, '');
+            if (ext === 'pd') ext = 'pdf';
             var isOffice = ($button.data('file-office') || '0').toString() === '1';
             
             console.log('jQuery handler fired:', {fileUrl: fileUrl, ext: ext, isOffice: isOffice});
