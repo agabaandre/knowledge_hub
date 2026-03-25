@@ -710,7 +710,9 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
+                                            $extRaw = strtolower((string) pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                            // Normalize historical ".pd" uploads to PDF for UI label/preview.
+                                            $ext = ($extRaw === 'pd' || $extRaw === 'pdf') ? 'pdf' : ($extRaw ?: 'pdf');
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
                                             $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
@@ -942,7 +944,9 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
+                                            $extRaw = strtolower((string) pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
+                                            // Normalize historical ".pd" uploads to PDF for UI label/preview.
+                                            $ext = ($extRaw === 'pd' || $extRaw === 'pdf') ? 'pdf' : ($extRaw ?: 'pdf');
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
                                             $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
