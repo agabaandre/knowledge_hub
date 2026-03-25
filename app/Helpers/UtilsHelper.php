@@ -859,6 +859,39 @@ if (!function_exists('resolve_publication_card_cover')) {
     }
 }
 
+if (!function_exists('normalize_publication_attachment_extension')) {
+    /**
+     * Normalize extension for display/preview. ".pd" is treated as a truncated ".pdf" (common upload mistake).
+     */
+    function normalize_publication_attachment_extension(string $extension): string
+    {
+        $ext = strtolower(trim($extension));
+
+        return $ext === 'pd' ? 'pdf' : $ext;
+    }
+}
+
+if (!function_exists('publication_filename_is_pdf')) {
+    /**
+     * Whether a stored filename/path refers to a PDF, including mis-saved ".pd" extensions.
+     */
+    function publication_filename_is_pdf(?string $rawFilename): bool
+    {
+        if ($rawFilename === null || $rawFilename === '') {
+            return false;
+        }
+        $lower = strtolower($rawFilename);
+        if (strpos($lower, '.pdf') !== false) {
+            return true;
+        }
+        if (preg_match('/\.pd$/i', $rawFilename)) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
 function html_to_text($html) {
     // Remove HTML tags
     $text = strip_tags($html);

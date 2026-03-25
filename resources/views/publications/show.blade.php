@@ -710,9 +710,8 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $extRaw = strtolower((string) pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
-                                            // Normalize historical ".pd" uploads to PDF for UI label/preview.
-                                            $ext = ($extRaw === 'pd' || $extRaw === 'pdf') ? 'pdf' : ($extRaw ?: 'pdf');
+                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
+                                            $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
                                             $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
@@ -771,7 +770,7 @@
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
-                                                            data-file-url="{{ $url }}" data-file-ext=".{{ $ext }}" data-file-office="{{ $office }}"
+                                                            data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
@@ -944,9 +943,8 @@
                             @foreach ($publication->attachments as $i => $file)
                                         @php
                                             $url = $file->file;
-                                            $extRaw = strtolower((string) pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION));
-                                            // Normalize historical ".pd" uploads to PDF for UI label/preview.
-                                            $ext = ($extRaw === 'pd' || $extRaw === 'pdf') ? 'pdf' : ($extRaw ?: 'pdf');
+                                            $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
+                                            $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
                                             $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
@@ -1005,7 +1003,7 @@
                                                 </div>
                                                 <div class="d-flex gap-2 flex-wrap">
                                                     <button type="button" class="btn btn-au btn-sm preview-attachment"
-                                                            data-file-url="{{ $url }}" data-file-ext=".{{ $ext }}" data-file-office="{{ $office }}"
+                                                            data-file-url="{{ $url }}" data-file-ext="{{ $ext }}" data-file-office="{{ $office }}"
                                                             title="Preview file"
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
@@ -1265,8 +1263,7 @@ window.previewAttachmentClick = function(event, button) {
     event.stopPropagation();
     
     var fileUrl = button.getAttribute('data-file-url');
-    var ext = (button.getAttribute('data-file-ext') || '').toLowerCase().replace(/^\./, '');
-    if (ext === 'pd') ext = 'pdf';
+    var ext = (button.getAttribute('data-file-ext') || '').toLowerCase();
     var isOffice = (button.getAttribute('data-file-office') || '0') === '1';
     
     if (!fileUrl) {
@@ -1625,8 +1622,7 @@ function downloadFile(url, filename) {
                 alert('Preview button clicked! (Method 1: addEventListener)');
                 
                 var fileUrl = this.getAttribute('data-file-url');
-                var ext = (this.getAttribute('data-file-ext') || '').toLowerCase().replace(/^\./, '');
-                if (ext === 'pd') ext = 'pdf';
+                var ext = (this.getAttribute('data-file-ext') || '').toLowerCase();
                 var isOffice = (this.getAttribute('data-file-office') || '0') === '1';
                 
                 console.log('Click handler fired:', {fileUrl: fileUrl, ext: ext, isOffice: isOffice});
@@ -1725,8 +1721,7 @@ function downloadFile(url, filename) {
             
             var $button = $(this);
             var fileUrl = $button.data('file-url');
-            var ext = ($button.data('file-ext') || '').toString().toLowerCase().replace(/^\./, '');
-            if (ext === 'pd') ext = 'pdf';
+            var ext = ($button.data('file-ext') || '').toString().toLowerCase();
             var isOffice = ($button.data('file-office') || '0').toString() === '1';
             
             console.log('jQuery handler fired:', {fileUrl: fileUrl, ext: ext, isOffice: isOffice});

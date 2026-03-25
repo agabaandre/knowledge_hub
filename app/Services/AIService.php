@@ -24,7 +24,7 @@ class AIService
                 return $this->formatResponse((Object)['message' => 'Publication not found']);
             }
 
-            if (strpos($resource->publication, '.pdf') > -1) {
+            if (publication_filename_is_pdf($resource->publication ?? '')) {
                 $this->aiModel = app('chatpdf');
                 $response = $this->aiModel->summarize($resource, $language, $additional_prompt);
             } else {
@@ -130,7 +130,7 @@ Please summarize this forum discussion, including:
             return;
         }
 
-        if (strpos($resource->publication ?? '', '.pdf') > -1) {
+        if (publication_filename_is_pdf($resource->publication ?? '')) {
             // PDF: ChatPDF does not support streaming for summarize; get full response and send as one chunk
             $aiModel = app('chatpdf');
             $response = $aiModel->summarize($resource, $language, $additional_prompt);
@@ -159,7 +159,7 @@ Please summarize this forum discussion, including:
         return $this->formatResponse((Object)['message' => 'Publication not found']);
 
 
-        if (strpos($resource->publication, '.pdf') > -1 && strpos($resource2->publication, '.pdf') > -1) {
+        if (publication_filename_is_pdf($resource->publication ?? '') && publication_filename_is_pdf($resource2->publication ?? '')) {
             $this->aiModel = app('chatpdf');
             $response = $this->aiModel->compare($resource, $resource2,$additional_prompt);
         } else {

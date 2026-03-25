@@ -35,7 +35,8 @@ class PublicationAttachment extends Model
     public function getIsPdfAttribute()
     {
         $raw = $this->getRawOriginal('file');
-        return $raw && strpos(strtolower($raw), '.pdf') !== false;
+
+        return $raw && publication_filename_is_pdf($raw);
     }
 
     /** Real filename for download (basename of stored file). */
@@ -45,6 +46,11 @@ class PublicationAttachment extends Model
         if (empty($raw)) {
             return 'download';
         }
-        return basename($raw);
+        $base = basename($raw);
+        if (preg_match('/\.pd$/i', $base)) {
+            return preg_replace('/\.pd$/i', '.pdf', $base);
+        }
+
+        return $base;
     }
 }

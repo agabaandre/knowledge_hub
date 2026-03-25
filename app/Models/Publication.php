@@ -240,7 +240,7 @@ class Publication extends Model
     public function getPublicationPdfUrlAttribute()
     {
         $raw = $this->getRawOriginal('publication');
-        if (empty($raw) || strpos(strtolower($raw), '.pdf') === false) {
+        if (empty($raw) || !publication_filename_is_pdf($raw)) {
             return null;
         }
         if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {
@@ -255,7 +255,7 @@ class Publication extends Model
     public function getPublicationPdfPathAttribute()
     {
         $raw = $this->getRawOriginal('publication');
-        if (empty($raw) || strpos(strtolower($raw), '.pdf') === false) {
+        if (empty($raw) || !publication_filename_is_pdf($raw)) {
             return null;
         }
         if (strpos($raw, 'http://') === 0 || strpos($raw, 'https://') === 0) {

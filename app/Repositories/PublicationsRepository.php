@@ -386,12 +386,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 try {
                     $description = $file->getClientOriginalName();
                     $file_name   = md5_file($file->getRealPath());
-                    $extension   = strtolower((string) ($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION)));
-                    // Some environments report PDF as "pd" from mime sniffing; normalize it.
-                    if ($extension === 'pd') {
-                        $extension = 'pdf';
-                    }
-                    $extension = $extension ?: 'bin';
+                    $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
                     $cover_filepath = $file_name.'.'.$extension;
                     
                     $storagePath = storage_path().'/app/public/uploads/publications/';
@@ -1200,11 +1195,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
             try {
             $description = $file->getClientOriginalName();
-                $extension   = strtolower((string) ($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION)));
-                // Some environments report PDF as "pd" from mime sniffing; normalize it.
-                if ($extension === 'pd') {
-                    $extension = 'pdf';
-                }
+                $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
                 $extension   = $extension ?: 'bin';
             // Name file using title (max 20 words), slugged; add suffix for multiple files to avoid overwrite
             $file_name   = $titleBase . (count($upfiles) > 1 ? '-' . (++$fileIndex) : '');
