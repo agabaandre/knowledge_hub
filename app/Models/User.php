@@ -153,7 +153,10 @@ class User extends Authenticatable
     {
         // Send password reset email via queue system (which uses Exchange)
         try {
-            $resetUrl = url('password/reset?token=' . $token);
+            $resetUrl = route('password.reset', [
+                'token' => $token,
+                'email' => $this->email,
+            ]);
             
             $mailData = [
                 'email' => $this->email,
@@ -161,6 +164,7 @@ class User extends Authenticatable
                 'body' => view('emails.password_reset', [
                     'name' => $this->name,
                     'token' => $token,
+                    'email' => $this->email,
                     'resetUrl' => $resetUrl,
                 ])->render(),
                 'title' => 'Reset Your Password'

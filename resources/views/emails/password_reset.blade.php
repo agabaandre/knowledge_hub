@@ -31,7 +31,7 @@
             <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%">
                 <tr>
                     <td align="center">
-                        <a href="{{ $resetUrl ?? url('password/reset?token=' . ($token ?? '')) }}" 
+                        <a href="{{ $resetUrl ?? route('password.reset', array_filter(['token' => $token ?? '', 'email' => $email ?? null])) }}" 
                            style="display: inline-block; padding: 14px 32px; background-color: #119A48; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px; line-height: 1.5;">
                             Reset Password
                         </a>
@@ -52,9 +52,9 @@
     <tr>
         <td style="padding-bottom: 30px;">
             <p style="margin: 0; padding: 12px; background-color: #f1f5f9; border-radius: 4px; border-left: 3px solid #119A48;">
-                <a href="{{ $resetUrl ?? url('password/reset?token=' . ($token ?? '')) }}" 
+                <a href="{{ $resetUrl ?? route('password.reset', array_filter(['token' => $token ?? '', 'email' => $email ?? null])) }}" 
                    style="color: #119A48; text-decoration: none; word-break: break-all; font-size: 13px; line-height: 1.5;">
-                    {{ $resetUrl ?? url('password/reset?token=' . ($token ?? '')) }}
+                    {{ $resetUrl ?? route('password.reset', array_filter(['token' => $token ?? '', 'email' => $email ?? null])) }}
                 </a>
             </p>
         </td>

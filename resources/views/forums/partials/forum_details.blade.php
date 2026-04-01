@@ -3,6 +3,50 @@
     $auGold = settings()->au_gold ?? '#B4A269';
     $currentUser = current_user();
 @endphp
+@once('forum_details_author_avatar')
+<style>
+    /* Thread + admin modal: author avatar size (show.blade.php adds hover/dark tweaks) */
+    .forum-post-card .forum-author-avatar-inline {
+        position: relative;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 4.5rem;
+        height: 4.5rem;
+        min-width: 4.5rem;
+        min-height: 4.5rem;
+        border-radius: 50%;
+        flex-shrink: 0;
+        border: 2px solid #e2e8f0;
+        background: #f8f9fa;
+        margin-right: 0.25rem;
+        transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+    .forum-post-card .forum-author-avatar-inline img {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        z-index: 1;
+    }
+    .forum-post-card .forum-author-avatar-inline i {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 0;
+        font-size: 2rem;
+        color: {{ $primaryColor }};
+        opacity: 0.85;
+        line-height: 1;
+        background: transparent;
+    }
+</style>
+@endonce
 
 <div class="forum-post-card">
     <div class="forum-header">
@@ -26,17 +70,16 @@
                             $photoUrl = $baseUrl . '/' . $photoUrl;
                         }
                     @endphp
-                    <div class="forum-author-avatar-inline" style="position: relative; display: inline-flex; vertical-align: middle; margin-right: 0.5rem; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; cursor: pointer; align-items: center; justify-content: center; background: #f8f9fa;" 
+                    <div class="forum-author-avatar-inline" style="cursor: pointer;"
                          onclick="openImageModal('{{ $photoUrl }}', '{{ $forum->user->name ?? 'Unknown' }}')">
                         <img src="{{ $photoUrl }}" alt="{{ $forum->user->name }}"
-                             style="width: 100%; height: 100%; object-fit: cover; object-position: center; position: absolute; top: 0; left: 0; z-index: 1;"
-                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='flex';">
-                        <i class="fa fa-user" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #64748b; font-size: 1rem; z-index: 0;"></i>
+                             onerror="this.style.display='none'; if(this.nextElementSibling) this.nextElementSibling.style.display='block';">
+                        <i class="fa fa-user" style="display: none;"></i>
                     </div>
                 @else
-                    <div class="forum-author-avatar-inline" style="position: relative; display: inline-flex; vertical-align: middle; margin-right: 0.5rem; width: 32px; height: 32px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; align-items: center; justify-content: center;">
-                        <i class="fa fa-user" style="color: #64748b; font-size: 1rem;"></i>
-        </div>
+                    <div class="forum-author-avatar-inline">
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                    </div>
                 @endif
                 <span class="forum-author-name">{{ $forum->user->name ?? 'Unknown' }}</span>
                 <span class="forum-post-time" style="margin-left: 4px; color: #64748b; font-size: 0.875rem;">

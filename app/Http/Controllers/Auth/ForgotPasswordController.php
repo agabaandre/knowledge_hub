@@ -61,7 +61,10 @@ class ForgotPasswordController extends Controller
     protected function sendResetLinkViaExchange($user, $token)
     {
         try {
-            $resetUrl = url('password/reset?token=' . $token);
+            $resetUrl = route('password.reset', [
+                'token' => $token,
+                'email' => $user->email,
+            ]);
             
             $mailData = [
                 'email' => $user->email,
@@ -69,6 +72,7 @@ class ForgotPasswordController extends Controller
                 'body' => view('emails.password_reset', [
                     'name' => $user->name,
                     'token' => $token,
+                    'email' => $user->email,
                     'resetUrl' => $resetUrl,
                 ])->render(),
                 'title' => 'Reset Your Password'

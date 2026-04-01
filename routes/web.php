@@ -74,6 +74,8 @@ use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\Admin\ContentRequestAdminController;
 use App\Http\Controllers\HealthTopicsController;
 use App\Http\Controllers\EventsController as PublicEventsController;
+use App\Http\Controllers\Auth\ForgotPasswordController;
+use App\Http\Controllers\Auth\ResetPasswordController;
 
 
 /*
@@ -87,8 +89,29 @@ use App\Http\Controllers\EventsController as PublicEventsController;
 |
 */
 
+Auth::routes(['verify' => true, 'reset' => false]);
 
-Auth::routes(['verify' => true]);
+/*
+| Password reset: Laravel expects the token in the path (/password/reset/{token}).
+| Legacy emails used ?token= which hit the "forgot email" route. We register
+| password.request manually so ?token= redirects to the real reset form.
+*/
+Route::get('password/reset', function (\Illuminate\Http\Request $request) {
+    if ($request->filled('token')) {
+        $params = ['token' => $request->query('token')];
+        if ($request->filled('email')) {
+            $params['email'] = $request->query('email');
+        }
+
+        return redirect()->route('password.reset', $params);
+    }
+
+    return app(ForgotPasswordController::class)->showLinkRequestForm($request);
+})->name('password.request');
+
+Route::post('password/email', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('password/reset/{token}', [ResetPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/', [HomeController::class, 'index'])->name('home');

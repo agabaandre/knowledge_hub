@@ -153,41 +153,12 @@
     .forum-author-name-container {
         display: flex;
         align-items: center;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
         margin-bottom: 0.25rem;
     }
 
-    .forum-author-avatar-inline {
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-    }
-
-    .forum-author-avatar-inline img {
-        position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
-        z-index: 1;
-    }
-
-    .forum-author-avatar-inline i {
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        z-index: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        background: #f8f9fa;
-    }
-
+    /* Avatar size/layout: forums/partials/forum_details.blade.php @once('forum_details_author_avatar') */
     .forum-thread-image {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
@@ -200,22 +171,11 @@
     .forum-author-name {
         font-weight: 600;
         color: #2d3748;
-        font-size: 1rem;
-    }
-
-    .forum-author-avatar-inline {
-        transition: transform 0.2s ease;
+        font-size: 1.05rem;
     }
 
     .forum-author-avatar-inline:hover {
-        transform: scale(1.1);
-    }
-
-    .forum-author-avatar-inline img {
-        transition: border-color 0.2s ease;
-    }
-
-    .forum-author-avatar-inline:hover img {
+        transform: scale(1.04);
         border-color: {{ $primaryColor }};
     }
 
