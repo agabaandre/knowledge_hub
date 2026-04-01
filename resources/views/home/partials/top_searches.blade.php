@@ -86,7 +86,8 @@
                    <!-- Single -->
 
                   <div class="col-xl-6 col-lg-6 col-md-12 col-sm-12 col-xs-12" data-aos="zoom-in">
-                      <div class="jbr-wrap text-left border rounded">
+                      <div class="jbr-wrap text-left border rounded pub-card-file-type-corner-wrap">
+                          @include('partials.publications.file_type_corner_badge', ['row' => $row])
                           <div class="cats-box mlb-res rounded bg-white d-flex align-items-center px-2 py-2 top-searches-card">
                                <div class="cats-box rounded bg-white d-flex align-items-center top-searches-card" style="min-width:100%;">
                                   @php

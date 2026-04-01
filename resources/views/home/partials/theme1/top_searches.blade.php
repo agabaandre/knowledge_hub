@@ -12,6 +12,7 @@
             box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
             height: 100%;
             transition: box-shadow 0.2s ease;
+            position: relative;
         }
         .theme1-resource-card.forum-post-card:hover {
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
@@ -116,7 +117,8 @@
                     $image_link = resolve_publication_card_cover($row);
                 @endphp
                 <div class="col-12 col-md-6 mb-3 px-2 px-md-3 d-flex">
-                    <div class="theme1-resource-card forum-post-card w-100">
+                    <div class="theme1-resource-card forum-post-card w-100 pub-card-file-type-corner-wrap">
+                        @include('partials.publications.file_type_corner_badge', ['row' => $row])
                         <div class="forum-header">
                             <div class="forum-author-name-container">
                                 <span class="forum-author-name">{{ $row->author->name ?? '—' }}</span>
