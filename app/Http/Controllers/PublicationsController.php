@@ -153,7 +153,7 @@ class PublicationsController extends Controller
 
         // Combined search: forums and communities (when config allows and term is provided)
         $data['searchForums'] = (settings()->search_show_forums ?? true)
-            ? $this->forumsRepo->searchForRecords($request, 5)
+            ? $this->forumsRepo->searchForRecords($request, 5, false)
             : collect();
         $data['searchCommunities'] = (settings()->search_show_communities ?? true)
             ? $this->commsRepo->searchForRecords($request, 5)

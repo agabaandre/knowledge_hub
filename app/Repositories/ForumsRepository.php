@@ -65,7 +65,7 @@ class ForumsRepository extends SharedRepo{
         });
     }
 
-    public function get(Request $request, $approved = 1, ?string $adminQueue = null){
+    public function get(Request $request, $approved = 1, ?string $adminQueue = null, bool $applyAccessFilter = true){
 
         $rows_count = ($request->rows)?$request->rows:20;
         $forums = Forum::with([
@@ -159,8 +159,9 @@ class ForumsRepository extends SharedRepo{
             }
         }
 
-        if (! $adminForumQueue) {
-            //Access levels effect to query results
+        if (! $adminForumQueue && $applyAccessFilter) {
+            // Access filter restricts by creator country (Viewer / Country / RCC). Skip for public
+            // directory/API so logged-in users see the same open discussions as guests.
             $this->access_filter($forums);
         }
 
@@ -177,7 +178,7 @@ class ForumsRepository extends SharedRepo{
      * Search forums by term for the records search page (publications + forums combined).
      * Returns approved forums only, with same community/access rules as get().
      */
-    public function searchForRecords(Request $request, $limit = 5)
+    public function searchForRecords(Request $request, $limit = 5, bool $applyAccessFilter = true)
     {
         $forums = Forum::with(['user'])
             ->withCount([
@@ -215,7 +216,9 @@ class ForumsRepository extends SharedRepo{
             $forums->whereDoesntHave('communities');
         }
 
-        $this->access_filter($forums);
+        if ($applyAccessFilter) {
+            $this->access_filter($forums);
+        }
 
         return $forums->limit($limit)->get();
     }

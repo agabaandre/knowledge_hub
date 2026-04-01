@@ -60,7 +60,7 @@ class ForumsApiController extends ApiController
     public function index(Request $request)
     {
         $request['rows'] = $request->page_size ?? 20;
-        $data = $this->forumsRepo->get($request)->toArray() ?? [];
+        $data = $this->forumsRepo->get($request, 1, null, false)->toArray() ?? [];
         $data['status'] = 200;
         $data['page_size'] = $request->rows;
         unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);

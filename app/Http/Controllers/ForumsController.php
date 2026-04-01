@@ -21,7 +21,7 @@ class ForumsController extends Controller
 
     public function index(Request $request)
     {
-        $data['forums']    = $this->forumsRepo->get($request);
+        $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         $data['search']    = (object) $request->all();
 
@@ -168,7 +168,7 @@ class ForumsController extends Controller
         }
         $request['rows']   = 6;
         $data['search']    = (object) $request->all();
-        $data['forums']    = $this->forumsRepo->get($request);
+        $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
 
         return view('forums.show', $data);
     }
