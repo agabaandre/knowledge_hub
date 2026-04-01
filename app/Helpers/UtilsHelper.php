@@ -1547,7 +1547,7 @@ if (!function_exists('detect_and_embed_video_links')) {
                         <iframe width="' . $width . '" height="' . $height . '" 
                                 src="https://www.youtube.com/embed/' . $videoId . $startTime . '" 
                                 frameborder="0" 
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" 
                                 allowfullscreen
                                 style="border-radius: 4px; max-width: 100%;">
                         </iframe>
@@ -1573,7 +1573,7 @@ if (!function_exists('detect_and_embed_video_links')) {
             $videoUrl = $matches[1];
             return '<div class="video-preview-inline" style="display: inline-block; margin: 4px; vertical-align: middle;">
                         <video width="' . $width . '" height="' . $height . '" 
-                               controls 
+                               controls playsinline webkit-playsinline
                                preload="metadata"
                                style="border-radius: 4px; max-width: 100%;">
                             <source src="' . htmlspecialchars($videoUrl) . '" type="video/' . $matches[2] . '">

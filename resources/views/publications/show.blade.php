@@ -492,13 +492,13 @@
                                             src="{{ $embedUrl }}"
                                             title="{{ $publication->title }} - Video Preview"
                                             frameborder="0"
-                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                                             referrerpolicy="strict-origin-when-cross-origin"
                                             allowfullscreen
                                             style="width:100%; height:250px;"></iframe>
                                     </div>
                                 @elseif ($directVideo)
-                                    <video controls preload="metadata" class="img-fluid shadow rounded" style="max-height: 250px; width: 100%; background:#000;">
+                                    <video controls playsinline webkit-playsinline preload="metadata" class="img-fluid shadow rounded" style="max-height: 250px; width: 100%; background:#000;">
                                         <source src="{{ $pubUrl }}">
                                         Your browser does not support HTML5 video.
                                     </video>
