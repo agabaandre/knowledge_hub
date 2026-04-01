@@ -20,6 +20,11 @@ class ForumComment extends Model
         return $this->belongsTo(User::class,"created_by","id");
     }
 
+    public function forum()
+    {
+        return $this->belongsTo(Forum::class, 'forum_id');
+    }
+
     /**
      * Get attachments for this comment from custom_attachments table
      * 

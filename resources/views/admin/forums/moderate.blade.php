@@ -129,7 +129,10 @@
                 <div class="list-group-item d-flex flex-column">
                     <div class="row">
                         <div class="col-md-9">
-                            <h5 class="mb-1">{{ $forum->forum_title }}</h5>
+                            <h5 class="mb-1">
+                                {{ $forum->forum_title }}
+                                @include('admin.forums.partials.resubmission-badge', ['forum' => $forum, 'class' => 'ml-2 align-middle'])
+                            </h5>
                             <div class="description-short" id="forumDescriptionShort{{ $forum->id }}">
                                 <p class="mb-1">{{ Str::limit($forum->forum_description, 100) }}</p>
                             </div>

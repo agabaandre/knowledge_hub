@@ -58,7 +58,10 @@
 					@foreach($forums as $idx => $row)
 						<tr>
 							<td><span class="text-muted">{{ $forums->firstItem() + $idx }}</span></td>
-							<td>{{ $row->forum_title }}</td>
+							<td>
+								{{ $row->forum_title }}
+								@include('admin.forums.partials.resubmission-badge', ['forum' => $row, 'class' => 'ml-1 align-middle'])
+							</td>
 							<td>{!! truncate(strip_tags($row->forum_description), 100) !!}</td>
 							<td>{!! truncate($row->user->name,100) !!}</td>
 							<td>{!! time_ago($row->created_at) !!}</td>

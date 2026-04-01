@@ -157,8 +157,16 @@
             <div class="af-card-header d-flex align-items-center justify-content-between">
                 <div>
                     <div class="text-muted mb-1" style="font-size:.8rem;">Forum</div>
-                    <h4 class="mb-0" style="font-weight:700; color:#0f172a;">{!! $forum->forum_title !!}</h4>
+                    <h4 class="mb-0" style="font-weight:700; color:#0f172a;">
+                        {!! $forum->forum_title !!}
+                        @include('admin.forums.partials.resubmission-badge', ['forum' => $forum, 'class' => 'align-middle ml-2'])
+                    </h4>
                     <div class="text-muted" style="font-size:.9rem;">By {{ $forum->user->name }} · {{ time_ago($forum->created_at) }}</div>
+                    @if((int) ($forum->is_resubmission_pending ?? 0) === 1 && ! $forum->is_rejected && (int) $forum->is_approved === 0)
+                    <div class="alert alert-warning py-2 px-3 small mb-0 mt-2" style="max-width:40rem;">
+                        <strong>Resubmission.</strong> This discussion was rejected earlier; the author resubmitted it and it is awaiting your review.
+                    </div>
+                    @endif
                 </div>
                 <div class="af-actions">
                     @php
@@ -213,14 +221,26 @@
                                 <div class="comment-list">
                                     <ul class="af-list">
                                         @foreach ($forum->comments as $comment)
+                                            @php
+                                                $commentStatus = strtolower((string) ($comment->status ?? ''));
+                                                $commentNeedsModeration = ! in_array($commentStatus, ['approved', 'rejected'], true);
+                                            @endphp
                                             <li>
                                                 <div class="app-comment">
-                                                    <div class="d-flex align-items-center justify-content-between">
+                                                    <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap:8px;">
                                                         <div>
                                                             <div style="font-weight:600;">{{ ($comment->user) ? $comment->user->name : 'Anonymous'}}</div>
                                                             <div class="text-muted" style="font-size:.85rem;">{{ time_ago($comment->created_at)}}</div>
                                                         </div>
-                                                        <span class="af-badge af-badge-muted">{{ ucwords($comment->status) }}</span>
+                                                        <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+                                                            <span class="af-badge af-badge-muted">{{ $comment->status ? ucwords($comment->status) : 'Pending' }}</span>
+                                                            @can('moderate_forum')
+                                                                @if($commentNeedsModeration)
+                                                                    <a href="{{ url('admin/forums/approve-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-success">Approve</a>
+                                                                    <a href="{{ url('admin/forums/reject-comment') }}?id={{ $comment->id }}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Reject this comment? The author will receive an email if their account has an email address.');">Reject</a>
+                                                                @endif
+                                                            @endcan
+                                                        </div>
                                                     </div>
                                                     <div class="mt-2">{!! sanitize_rich_text_for_display($comment->comment) !!}</div>
                                                 </div>

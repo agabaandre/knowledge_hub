@@ -18,6 +18,12 @@
                     <p class="mb-0 small">{{ e($forum->rejected_reason) }}</p>
                 </div>
                 @endif
+                @if($forumPendingModeration && (int) ($forum->is_resubmission_pending ?? 0) === 1)
+                <div class="alert alert-warning border-warning mb-3">
+                    <strong><i class="fa fa-redo mr-1"></i>Resubmission</strong>
+                    <p class="mb-0 small">This thread was previously rejected. The author revised it and submitted it again for review.</p>
+                </div>
+                @endif
                 @if($forumPendingModeration)
                 <div class="card border mb-3" style="background:#f8fafc;">
                     <div class="card-body py-3">

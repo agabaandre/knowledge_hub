@@ -89,7 +89,11 @@ class ForumsRepository extends SharedRepo{
             if ($adminQueue === 'pending') {
                 $forums->pendingApproval();
             } elseif ($adminQueue === 'approved') {
-                $forums->where('status', 1)->where('is_approved', 1);
+                $forums->where('status', 1)
+                    ->where('is_approved', 1)
+                    ->where(function ($q) {
+                        $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                    });
             } elseif ($adminQueue === 'rejected') {
                 $forums->where('is_rejected', 1);
             }
@@ -110,31 +114,35 @@ class ForumsRepository extends SharedRepo{
             $forums->whereIn('id',$tagged_forums);
         }
 
-        if(current_user() && current_user()->id){
+        // Admin pending / approved / rejected lists must see all forums site-wide — do not apply
+        // community targeting or country/access filters (those use OR clauses and break queue filters).
+        $adminForumQueue = $adminQueue !== null && $adminQueue !== '';
 
-            //Protect Forums from non target audiences if targte audience was defined
-            
-            if(!$request->community_id):
+        if (! $adminForumQueue) {
+            if (current_user() && current_user()->id) {
 
-                $communties = CommunityOfPracticeMembers::where("user_id",current_user()->id)
-                ->pluck("community_of_practice_id");
-            
-                //forums for user communities
-                $commForums = ForumCommunityOfPractice::whereIn("community_of_practice_id",$communties)->pluck('forum_id');
+                //Protect Forums from non target audiences if targte audience was defined
 
-                $forums->whereIn('id',$commForums)
-                ->orWhere('created_by',current_user()->id)
-                ->orWhereDoesntHave("communities");
-            else:
-                $forums->whereHas("communities",function($query) use($request){
-                    $query->where("community_of_practice_id",$request->community_id);
-                });
-            endif;
+                if (! $request->community_id) {
 
-        }else
-        {
-            //only those without targets
-            $forums->whereDoesntHave("communities");
+                    $communties = CommunityOfPracticeMembers::where('user_id', current_user()->id)
+                        ->pluck('community_of_practice_id');
+
+                    //forums for user communities
+                    $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communties)->pluck('forum_id');
+
+                    $forums->whereIn('id', $commForums)
+                        ->orWhere('created_by', current_user()->id)
+                        ->orWhereDoesntHave('communities');
+                } else {
+                    $forums->whereHas('communities', function ($query) use ($request) {
+                        $query->where('community_of_practice_id', $request->community_id);
+                    });
+                }
+            } else {
+                //only those without targets
+                $forums->whereDoesntHave('communities');
+            }
         }
 
         if ($adminQueue === null || $adminQueue === '') {
@@ -143,8 +151,10 @@ class ForumsRepository extends SharedRepo{
             }
         }
 
-         //Access levels effect to query results
-         $this->access_filter($forums);
+        if (! $adminForumQueue) {
+            //Access levels effect to query results
+            $this->access_filter($forums);
+        }
 
         if ($adminQueue !== null && $adminQueue !== '') {
             $forums->orderBy('created_at', 'desc');
@@ -389,8 +399,10 @@ class ForumsRepository extends SharedRepo{
         $autoApprove = settings()->auto_approve_comments ?? true;
         if ($autoApprove) {
             $comment->status = 'approved';
+        } else {
+            $comment->status = 'pending';
         }
-        
+
         $comment->save();
 
         // Track forum comment engagement
@@ -684,7 +696,10 @@ class ForumsRepository extends SharedRepo{
 
     public function approve($id){
 
-        $forum = Forum::find($id);
+        $forum = Forum::with('user')->find($id);
+        if (! $forum) {
+            return null;
+        }
         $forum->status =1;
         $forum->is_approved =1;
         $forum->is_rejected =0;
@@ -694,15 +709,16 @@ class ForumsRepository extends SharedRepo{
         if (DBSchema::hasColumn('forums', 'rejected_by')) {
             $forum->rejected_by = null;
         }
+        if (DBSchema::hasColumn('forums', 'is_resubmission_pending')) {
+            $forum->is_resubmission_pending = 0;
+        }
         $forum->update();
 
-        $alert = array(
-            'title' => 'Forum post approved: '.($forum->forum_title ?? 'Your discussion'),
-            'body' => 'We are happy to inform you that your forum post has been approved and is live now.',
-            'email' => $forum->user->email,
+        $this->dispatchForumAuthorEmailIfPossible(
+            optional($forum->user)->email,
+            'Forum post approved: '.($forum->forum_title ?? 'Your discussion'),
+            'We are happy to inform you that your forum post has been approved and is live now.'
         );
-
-        SendMailJob::dispatch( $alert)->onQueue('default');
 
         return $forum;
     }
@@ -761,6 +777,9 @@ class ForumsRepository extends SharedRepo{
             }
             if (DBSchema::hasColumn('forums', 'approved_by')) {
                 $forum->approved_by = null;
+            }
+            if (DBSchema::hasColumn('forums', 'is_resubmission_pending')) {
+                $forum->is_resubmission_pending = 1;
             }
         }
 
@@ -825,7 +844,7 @@ class ForumsRepository extends SharedRepo{
 
     public function reject($id, string $rejectedReason = ''): ?Forum
     {
-        $forum = Forum::find($id);
+        $forum = Forum::with('user')->find($id);
         if (! $forum) {
             return null;
         }
@@ -844,6 +863,9 @@ class ForumsRepository extends SharedRepo{
         if (DBSchema::hasColumn('forums', 'rejected_reason')) {
             $forum->rejected_reason = $reason !== '' ? $reason : null;
         }
+        if (DBSchema::hasColumn('forums', 'is_resubmission_pending')) {
+            $forum->is_resubmission_pending = 0;
+        }
         $forum->update();
 
         $body = 'We are sorry to inform you that your forum post was not approved.';
@@ -851,15 +873,88 @@ class ForumsRepository extends SharedRepo{
             $body .= "\n\nReason provided by the moderator:\n".$reason;
         }
 
-        $alert = [
-            'title' => 'Forum post not approved: '.($forum->forum_title ?? 'Your discussion'),
-            'body' => $body,
-            'email' => $forum->user->email,
-        ];
-
-        SendMailJob::dispatch($alert)->onQueue('default');
+        $this->dispatchForumAuthorEmailIfPossible(
+            optional($forum->user)->email,
+            'Forum post not approved: '.($forum->forum_title ?? 'Your discussion'),
+            $body
+        );
 
         return $forum;
+    }
+
+    /**
+     * Queue email to the forum / forum-comment author when an address exists (skips quietly otherwise).
+     */
+    private function dispatchForumAuthorEmailIfPossible(?string $email, string $title, string $body): void
+    {
+        $email = $email ? trim($email) : '';
+        if ($email === '') {
+            \Log::warning('Forum author email notification skipped: no recipient address', [
+                'title' => $title,
+            ]);
+
+            return;
+        }
+
+        SendMailJob::dispatch([
+            'title' => $title,
+            'body' => $body,
+            'email' => $email,
+        ])->onQueue('default');
+    }
+
+    /**
+     * Approve a pending forum comment and notify the author by email.
+     */
+    public function approveForumComment(int $id): ?ForumComment
+    {
+        $comment = ForumComment::with(['user', 'forum'])->find($id);
+        if (! $comment) {
+            return null;
+        }
+
+        if (strtolower((string) $comment->status) === 'approved') {
+            return $comment;
+        }
+
+        $comment->status = 'approved';
+        $comment->update();
+
+        $threadTitle = $comment->forum->forum_title ?? 'a discussion';
+        $this->dispatchForumAuthorEmailIfPossible(
+            optional($comment->user)->email,
+            'Your forum comment was approved',
+            'We are happy to inform you that your comment on the discussion "'.$threadTitle.'" has been approved and is now visible.'
+        );
+
+        return $comment;
+    }
+
+    /**
+     * Reject a forum comment and notify the author by email.
+     */
+    public function rejectForumComment(int $id): ?ForumComment
+    {
+        $comment = ForumComment::with(['user', 'forum'])->find($id);
+        if (! $comment) {
+            return null;
+        }
+
+        if (strtolower((string) $comment->status) === 'rejected') {
+            return $comment;
+        }
+
+        $comment->status = 'rejected';
+        $comment->update();
+
+        $threadTitle = $comment->forum->forum_title ?? 'a discussion';
+        $this->dispatchForumAuthorEmailIfPossible(
+            optional($comment->user)->email,
+            'Your forum comment was not approved',
+            'We are sorry to inform you that your comment on the discussion "'.$threadTitle.'" was not approved and will not be shown.'
+        );
+
+        return $comment;
     }
 
     public function getJoinedForums(Request $request){

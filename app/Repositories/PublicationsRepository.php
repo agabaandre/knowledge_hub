@@ -1422,13 +1422,18 @@ public function approve_comment($id){
     $comment->status = 'approved';
     $comment->update();
 
-    $alert = array(
-        'title' => "Comment  $comment->comment has been Approved",
-        'body'=>'We are happy to inform you that your comment has been approved',
-        'email'=>$comment->user->email
-    );
+    $email = optional($comment->user)->email;
+    if ($email && trim($email) !== '') {
+        $alert = array(
+            'title' => "Comment  $comment->comment has been Approved",
+            'body'=>'We are happy to inform you that your comment has been approved',
+            'email'=>$email
+        );
 
-    SendMailJob::dispatch( $alert)->onQueue('default');
+        SendMailJob::dispatch( $alert)->onQueue('default');
+    } else {
+        \Log::warning('Publication comment approve: no author email, notification skipped', ['comment_id' => $id]);
+    }
 
 }
 
@@ -1438,13 +1443,18 @@ public function reject_comment($id){
     $comment->status='rejected';
     $comment->update();
 
-    $alert = array(
-        'title' => "Comment  $comment->comment has been Rejected",
-        'body'=>'We are sorry to inform you that your comment has been rejected',
-        'email'=>$comment->user->email
-    );
+    $email = optional($comment->user)->email;
+    if ($email && trim($email) !== '') {
+        $alert = array(
+            'title' => "Comment  $comment->comment has been Rejected",
+            'body'=>'We are sorry to inform you that your comment has been rejected',
+            'email'=>$email
+        );
 
-    SendMailJob::dispatch( $alert)->onQueue('default');
+        SendMailJob::dispatch( $alert)->onQueue('default');
+    } else {
+        \Log::warning('Publication comment reject: no author email, notification skipped', ['comment_id' => $id]);
+    }
 
 }
 

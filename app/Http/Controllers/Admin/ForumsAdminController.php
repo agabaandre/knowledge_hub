@@ -116,6 +116,30 @@ class ForumsAdminController extends Controller
         return back();
     }
 
+    public function approveComment(Request $request)
+    {
+        $request->validate(['id' => 'required|integer']);
+
+        $comment = $this->forumsRepo->approveForumComment((int) $request->id);
+        if (! $comment) {
+            return back()->with('error', 'Comment not found.');
+        }
+
+        return back()->with('success', 'The forum comment was approved and the author was notified by email when an address is on file.');
+    }
+
+    public function rejectComment(Request $request)
+    {
+        $request->validate(['id' => 'required|integer']);
+
+        $comment = $this->forumsRepo->rejectForumComment((int) $request->id);
+        if (! $comment) {
+            return back()->with('error', 'Comment not found.');
+        }
+
+        return back()->with('success', 'The forum comment was rejected and the author was notified by email when an address is on file.');
+    }
+
     public function reject(Request $request)
     {
         $validated = $request->validate([

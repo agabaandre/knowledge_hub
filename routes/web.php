@@ -369,6 +369,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
         Route::any("/approve",[ForumsAdminController::class,'approve']);
         Route::post("/reject",[ForumsAdminController::class,'reject']);
+        Route::get("/approve-comment", [ForumsAdminController::class, 'approveComment'])->name('admin.forums.approve-comment');
+        Route::get("/reject-comment", [ForumsAdminController::class, 'rejectComment'])->name('admin.forums.reject-comment');
         Route::get("/details", [ForumsAdminController::class, 'details']);
         Route::post("/moderation/update-pending", [ForumsAdminController::class, 'updatePending'])->name('admin.forums.moderation.update-pending');
         Route::post("/moderation/grammar-assist", [ForumsAdminController::class, 'grammarAssist'])->name('admin.forums.moderation.grammar-assist');
