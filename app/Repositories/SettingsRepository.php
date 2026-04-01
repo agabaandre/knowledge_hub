@@ -254,6 +254,9 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'search_show_communities')) {
             $settings->search_show_communities = (bool)$request->boolean('search_show_communities', true);
         }
+        if (Schema::hasColumn('setting', 'show_publication_card_file_type_badge')) {
+            $settings->show_publication_card_file_type_badge = $request->boolean('show_publication_card_file_type_badge');
+        }
 
         // Social login toggles (default false when unchecked)
         // Only set if columns exist to avoid errors on production
@@ -550,7 +553,7 @@ class SettingsRepository
                     continue;
                 }
                 $value = $item->textContent;
-                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search' || $key === 'enable_ai_chat_prune') {
+                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'show_publication_card_file_type_badge' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search' || $key === 'enable_ai_chat_prune') {
                     $setting->{$key} = in_array(strtolower($value), ['1', 'true', 'yes'], true);
                 } else {
                     $setting->{$key} = $value;

@@ -1,10 +1,11 @@
-{{-- Top-right file type icon + short label; AU Gold from settings (au_gold). Parent needs .pub-card-file-type-corner-wrap (position: relative). --}}
+{{-- Top-right file type icon + short label; color from Icon Font Color (icon_font_color). Toggle: show_publication_card_file_type_badge (default on). Parent: .pub-card-file-type-corner-wrap --}}
 @php
     $pub = $row ?? $publication ?? null;
+    $showFileTypeBadge = settings()->show_publication_card_file_type_badge ?? true;
 @endphp
-@if($pub && $pub->file_type)
+@if($showFileTypeBadge && $pub && $pub->file_type)
 @php
-    $auGold = settings()->au_gold ?? '#B4A269';
+    $iconColor = settings()->icon_font_color ?? '#64748b';
     $t = strtolower((string) ($pub->file_type->name ?? ''));
     $icon = 'fa-file-o';
     $short = strtoupper(\Illuminate\Support\Str::limit(trim((string) $pub->file_type->name), 7, ''));
@@ -69,9 +70,9 @@
 </style>
 @endonce
 <div class="pub-card-file-type-corner" role="img" aria-label="File type: {{ e($typeTitle) }}">
-    <i class="fa {{ $icon }} pub-card-file-type-corner__icon" style="color: {{ e($auGold) }};" aria-hidden="true"></i>
+    <i class="fa {{ $icon }} pub-card-file-type-corner__icon" style="color: {{ e($iconColor) }};" aria-hidden="true"></i>
     @if(strlen($short) >= 2 && strlen($short) <= 10)
-        <span class="pub-card-file-type-corner__label" style="color: {{ e($auGold) }};">{{ $short }}</span>
+        <span class="pub-card-file-type-corner__label" style="color: {{ e($iconColor) }};">{{ $short }}</span>
     @endif
 </div>
 @endif

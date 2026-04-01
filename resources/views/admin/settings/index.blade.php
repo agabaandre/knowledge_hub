@@ -693,7 +693,17 @@
                                     <input type="checkbox" class="form-check-input" id="search_show_communities" name="search_show_communities" value="1" @if($settings->search_show_communities ?? true) checked @endif>
                                     <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
                                 </div>
-                                <small class="info-text">When enabled, the main search page will include matching discussions and communities alongside publications.</small>
+                                @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
+                                <div class="form-check mt-2">
+                                    <input type="hidden" name="show_publication_card_file_type_badge" value="0">
+                                    <input type="checkbox" class="form-check-input" id="show_publication_card_file_type_badge" name="show_publication_card_file_type_badge" value="1" @if($settings->show_publication_card_file_type_badge ?? true) checked @endif>
+                                    <label class="form-check-label" for="show_publication_card_file_type_badge">Show file type icon on publication cards</label>
+                                </div>
+                                @endif
+                                <small class="info-text d-block mt-1">When enabled, forums and communities appear on the main search page alongside publications.</small>
+                                @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
+                                <small class="text-muted d-block mt-1">File type badges use <strong>Icon Font Color</strong> (Appearance).</small>
+                                @endif
                     </div>
                 </div>
             </div>

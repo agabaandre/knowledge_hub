@@ -177,8 +177,9 @@
          $likes = count($row->favourited);
      @endphp
 
-    <div class="card col-lg-12 single-border mb-2 publication-list-card" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
+    <div class="card col-lg-12 single-border mb-2 publication-list-card pub-card-file-type-corner-wrap" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
+            @include('partials.publications.file_type_corner_badge', ['row' => $row])
             <!-- Title for Mobile (shown only on mobile, above image) -->
             <h5 class="text-bold text-lg publication-title-mobile" style="display: none;">
                 <a href="{{ url('records/resource') }}?id={{ $row->id }}">
