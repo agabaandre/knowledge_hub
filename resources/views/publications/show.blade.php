@@ -927,7 +927,6 @@
                                         </a>
                 </div>
                 </div>
-                </div>
                         @endif
 
                 @if ($publication->has_attachments)
