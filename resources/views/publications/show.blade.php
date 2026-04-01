@@ -714,10 +714,13 @@
                                             $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $downloadFilename = $file->download_filename;
-                                            $fullLabel = $file->original_filename ?? $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
-                                            $displayStem = pathinfo($fullLabel, PATHINFO_FILENAME);
-                                            $displayStem = $displayStem !== '' ? $displayStem : $fullLabel;
-                                            $displayName = Str::limit(str_replace('_', ' ', $displayStem), 90);
+                                            $humanReadable = trim((string) ($file->original_filename ?? $file->description ?? ''));
+                                            if ($humanReadable === '') {
+                                                $humanReadable = (string) $downloadFilename;
+                                            }
+                                            $humanReadable = str_replace('_', ' ', $humanReadable);
+                                            $attachmentNameMax = 70;
+                                            $displayName = Str::limit($humanReadable, $attachmentNameMax);
                                             
                                             // Determine icon based on file extension
                                             $fileIcon = 'fa-file';
@@ -756,7 +759,7 @@
                                             <div class="d-flex flex-column">
                                                 <div class="mb-2">
                                                     <i class="fa {{ $fileIcon }} {{ $iconColor }} mr-2" style="font-size: 1.1rem;"></i> 
-                                                    <strong title="{{ e($fullLabel) }}">{{ $displayName }}</strong>
+                                                    <strong class="d-inline-block" style="max-width: 100%; word-break: break-word;" title="{{ e($humanReadable) }}">{{ $displayName }}</strong>
                                                     <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
                                                         {{ strtoupper($ext) }} file
                                                     </small>
@@ -768,7 +771,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ e($downloadFilename) }}" download="{{ e($downloadFilename) }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download: {{ e($humanReadable) }}" download="{{ e($downloadFilename) }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>
@@ -940,10 +943,13 @@
                                             $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
                                             $downloadFilename = $file->download_filename;
-                                            $fullLabel = $file->original_filename ?? $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
-                                            $displayStem = pathinfo($fullLabel, PATHINFO_FILENAME);
-                                            $displayStem = $displayStem !== '' ? $displayStem : $fullLabel;
-                                            $displayName = Str::limit(str_replace('_', ' ', $displayStem), 90);
+                                            $humanReadable = trim((string) ($file->original_filename ?? $file->description ?? ''));
+                                            if ($humanReadable === '') {
+                                                $humanReadable = (string) $downloadFilename;
+                                            }
+                                            $humanReadable = str_replace('_', ' ', $humanReadable);
+                                            $attachmentNameMax = 70;
+                                            $displayName = Str::limit($humanReadable, $attachmentNameMax);
                                             
                                             // Determine icon based on file extension
                                             $fileIcon = 'fa-file';
@@ -982,7 +988,7 @@
                                             <div class="d-flex flex-column">
                                                 <div class="mb-2">
                                                     <i class="fa {{ $fileIcon }} {{ $iconColor }} mr-2" style="font-size: 1.1rem;"></i> 
-                                                    <strong title="{{ e($fullLabel) }}">{{ $displayName }}</strong>
+                                                    <strong class="d-inline-block" style="max-width: 100%; word-break: break-word;" title="{{ e($humanReadable) }}">{{ $displayName }}</strong>
                                                     <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
                                                         {{ strtoupper($ext) }} file
                                                     </small>
@@ -994,7 +1000,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ e($downloadFilename) }}" download="{{ e($downloadFilename) }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download: {{ e($humanReadable) }}" download="{{ e($downloadFilename) }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>
