@@ -1,6 +1,7 @@
 @extends(admin_layout())
 
 @section('styles')
+<link href="{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}" rel="stylesheet">
  @include('common.table')
  <style>
     .filter-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; }
@@ -89,6 +90,12 @@
 								<span class="text-muted">{{ $name }}</span>
 							</td>
 							<td>
+							    @php
+							        $rowPendingEdit = (int) ($row->is_rejected ?? 0) === 0 && (int) ($row->is_approved ?? 0) === 0 && (int) ($row->status ?? 0) === 0;
+							    @endphp
+							    @if($rowPendingEdit)
+							        <a class="btn btn-sm btn-outline-primary mr-1" href="#details{{ $row->id }}" data-toggle="modal"><i class="fa fa-edit mr-1"></i> Review / Edit</a>
+							    @endif
 							    <a class="btn btn-sm btn-outline-dark mr-1" href="{{ url('admin/forums/details')}}?id={{$row->id}}"><i class="fa fa-info-circle mr-1"></i> Details</a>
 								<a class="btn btn-sm btn-outline-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')"><i class="fa fa-trash mr-1"></i> Delete</a>
 								<a class="btn btn-sm btn-outline-secondary ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"><i class="fa fa-external-link mr-1"></i> View Website</a>
@@ -109,3 +116,7 @@
 	@include('admin.forums.partials.delete-modal')
 
     @endsection
+
+@section('scripts')
+    @include('admin.forums.partials.moderation-forum-editor-scripts')
+@endsection

@@ -1,6 +1,12 @@
 @extends(admin_layout())
 
+@php
+    $forumIsRejected = (int) ($forum->is_rejected ?? 0) === 1;
+    $forumPendingModeration = ! $forumIsRejected && (int) ($forum->is_approved ?? 0) === 0 && (int) ($forum->status ?? 0) === 0;
+@endphp
+
 @section('styles')
+<link href="{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}" rel="stylesheet">
 @php
     $primaryColor = settings()->primary_color ?? '#119A48';
     $secondaryColor = settings()->secondary_color ?? '#0e7a3a';
@@ -162,7 +168,13 @@
                         @include('admin.forums.partials.resubmission-badge', ['forum' => $forum, 'class' => 'align-middle ml-2'])
                     </h4>
                     <div class="text-muted" style="font-size:.9rem;">By {{ $forum->user->name }} · {{ time_ago($forum->created_at) }}</div>
-                    @if((int) ($forum->is_resubmission_pending ?? 0) === 1 && ! $forum->is_rejected && (int) $forum->is_approved === 0)
+                    @if($forumIsRejected && !empty($forum->rejected_reason))
+                    <div class="alert alert-light border py-2 px-3 small mb-0 mt-2" style="max-width:40rem;">
+                        <strong class="text-uppercase text-muted" style="font-size:.7rem;">Rejection reason</strong>
+                        <p class="mb-0 mt-1">{{ e($forum->rejected_reason) }}</p>
+                    </div>
+                    @endif
+                    @if((int) ($forum->is_resubmission_pending ?? 0) === 1 && ! $forumIsRejected && (int) ($forum->is_approved ?? 0) === 0)
                     <div class="alert alert-warning py-2 px-3 small mb-0 mt-2" style="max-width:40rem;">
                         <strong>Resubmission.</strong> This discussion was rejected earlier; the author resubmitted it and it is awaiting your review.
                     </div>
@@ -182,6 +194,14 @@
                     @endif
                 </div>
             </div>
+            @if($forumPendingModeration)
+            <div class="px-3 pt-3 border-bottom" style="background:#fafbfc;">
+                <p class="small text-muted mb-2 mb-md-3"><strong>Edit forum</strong> — update title and body before approving (same as Review / Edit on the pending list).</p>
+                <div id="details{{ $forum->id }}">
+                    @include('admin.forums.partials.forum-pending-edit-panel', ['forum' => $forum])
+                </div>
+            </div>
+            @endif
             <div class="af-card-body">
                 <div class="row">
                     <div class="col-lg-8">
@@ -347,3 +367,16 @@
     <section class="py-2 bg-transparent"></section>
 
     @endsection
+
+@if($forumPendingModeration)
+@section('scripts')
+    @include('admin.forums.partials.moderation-forum-editor-scripts')
+    <script>
+        $(function () {
+            if (window.forumAdminInitPendingEditor) {
+                window.forumAdminInitPendingEditor($('#details{{ $forum->id }}'));
+            }
+        });
+    </script>
+@endsection
+@endif
