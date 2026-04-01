@@ -4,8 +4,15 @@
             @$search->rcc ||
             @$search->country_id ||
             @$search->author_id ||
+            @$search->author ||
             @$search->file_type_id ||
-            @$search->thematic_area_id
+            @$search->file_type ||
+            @$search->file_category_id ||
+            @$search->data_category_id ||
+            @$search->category ||
+            @$search->thematic_area_id ||
+            @$search->sub_thematic_area_id ||
+            @$search->subtheme
                 ? true
                 : false;
 

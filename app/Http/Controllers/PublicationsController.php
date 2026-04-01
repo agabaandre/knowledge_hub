@@ -132,8 +132,14 @@ class PublicationsController extends Controller
             'term' => 'nullable|string|max:255',
             'thematic_area_id' => 'nullable|integer',
             'subtheme' => 'nullable|integer',
+            'sub_thematic_area_id' => 'nullable|integer',
             'author' => 'nullable|integer',
+            'author_id' => 'nullable|integer',
             'country_id' => 'nullable|integer',
+            'data_category_id' => 'nullable|integer',
+            'file_category_id' => 'nullable|integer',
+            'file_type_id' => 'nullable|integer',
+            'file_type' => 'nullable|integer',
         ]);
 
         // Track search execution time
@@ -180,7 +186,10 @@ class PublicationsController extends Controller
             ? 'Search results for "' . \Illuminate\Support\Str::limit($term, 60) . '" – publications, communities and discussion forums from ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub') . '.'
             : 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
         $data['pageKeywords'] = ($term ? $term . ', ' : '') . 'search, publications, communities, discussions, forums, ' . (settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
-        $data['canonicalUrl'] = url('records/search?' . http_build_query(array_filter($request->only(['term', 'rcc', 'country_id', 'author_id', 'thematic_area_id', 'sub_thematic_area_id', 'tag']))));
+        $data['canonicalUrl'] = url('records/search?' . http_build_query(array_filter($request->only([
+            'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id', 'sub_thematic_area_id', 'subtheme',
+            'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag',
+        ]))));
         $data['ogType'] = 'website';
 
         return view('publications.search', $data);

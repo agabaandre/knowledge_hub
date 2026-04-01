@@ -1584,6 +1584,9 @@ private function applyFilters($query, $request) {
         'category' => function ($q, $value) {
             $q->where('publication_catgory_id', $value);
         },
+        'file_category_id' => function ($q, $value) {
+            $q->where('data_category_id', $value);
+        },
         'tag' => function ($q, $value) {
             $taggedpubs = PublicationTag::where('tag_id', $value)->pluck('publication_id');
             $q->whereIn('id', $taggedpubs);
@@ -1591,9 +1594,28 @@ private function applyFilters($query, $request) {
 
     ];
 
+    $aliases = [
+        'author' => ['author', 'author_id'],
+        'subtheme' => ['subtheme', 'sub_thematic_area_id'],
+        'category' => ['category', 'data_category_id'],
+        'file_type' => ['file_type', 'file_type_id'],
+    ];
+
     foreach ($filters as $key => $callback) {
-        if ($request->filled($key)) {
-            $callback($query, $request->$key);
+        $value = null;
+        if (isset($aliases[$key])) {
+            foreach ($aliases[$key] as $param) {
+                $v = $request->input($param);
+                if ($v !== null && $v !== '' && $v !== 'all') {
+                    $value = $v;
+                    break;
+                }
+            }
+        } else {
+            $value = $request->input($key);
+        }
+        if ($value !== null && $value !== '' && $value !== 'all') {
+            $callback($query, $value);
         }
     }
 }
