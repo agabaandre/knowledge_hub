@@ -169,8 +169,8 @@
 }
 
 .forum-meta-author-avatar {
-    width: calc(32px * 1.15);
-    height: calc(32px * 1.15);
+    width: calc(35px * 1.15);
+    height: calc(35px * 1.15);
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
