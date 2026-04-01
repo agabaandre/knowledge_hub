@@ -156,15 +156,6 @@
     margin-bottom: 1rem;
 }
 
-.forum-user-avatar {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.forum-user-avatar:hover {
-    transform: scale(1.1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
 .forum-image {
     width: 180px;
     height: 180px;
@@ -175,7 +166,26 @@
 
 .forum-content {
     flex: 1;
-    padding-right: 60px; /* Make room for user avatar on the right */
+}
+
+.forum-meta-author-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    border: 2px solid #e2e8f0;
+    background: #f8f9fa;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.forum-meta-author-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
 }
 
 .forum-title {
@@ -509,31 +519,22 @@
                         @endif
 
                         <div class="forum-content">
-                            @if($forum->user && $forum->user->photo)
-                                @php
-                                    $photoUrl = $forum->user->photo;
+                            @php
+                                $authorPhotoUrl = null;
+                                if ($forum->user && !empty($forum->user->photo)) {
+                                    $authorPhotoUrl = $forum->user->photo;
                                     $baseUrl = url('/');
-                                    if (strpos($photoUrl, 'http://') === 0 || strpos($photoUrl, 'https://') === 0) {
-                                        // Already a full URL
-                                    } elseif (strpos($photoUrl, $baseUrl) !== false) {
-                                        // Already contains base URL
-                                    } elseif (strpos($photoUrl, '/storage/') === 0) {
-                                        $photoUrl = $baseUrl . $photoUrl;
-                                    } elseif (strpos($photoUrl, 'storage/') === 0) {
-                                        $photoUrl = $baseUrl . '/' . $photoUrl;
+                                    if (strpos($authorPhotoUrl, 'http://') === 0 || strpos($authorPhotoUrl, 'https://') === 0) {
+                                        // full URL
+                                    } elseif (strpos($authorPhotoUrl, $baseUrl) !== false) {
+                                        // already absolute
+                                    } elseif (strpos($authorPhotoUrl, '/storage/') === 0) {
+                                        $authorPhotoUrl = $baseUrl . $authorPhotoUrl;
+                                    } elseif (strpos($authorPhotoUrl, 'storage/') === 0) {
+                                        $authorPhotoUrl = $baseUrl . '/' . $authorPhotoUrl;
                                     }
-                                @endphp
-                                <div class="forum-user-avatar" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; cursor: pointer; z-index: 10;"
-                                     onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $photoUrl }}', '{{ $forum->user->name ?? 'Unknown' }}'); }">
-                                    <img src="{{ $photoUrl }}" alt="Avatar for {{ $forum->user->name ?? 'User' }}"
-                                         style="width: 100%; height: 100%; object-fit: cover; object-position: center;"
-                                         onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' style=\'font-size: 1.5rem; color: #64748b;\'></i>';">
-                                </div>
-                            @else
-                                <div class="forum-user-avatar" style="position: absolute; top: 1.5rem; right: 1.5rem; width: 48px; height: 48px; border-radius: 50%; overflow: hidden; border: 2px solid #e2e8f0; background: #f8f9fa; display: flex; align-items: center; justify-content: center; z-index: 10;">
-                                    <i class="fa fa-user" style="font-size: 1.5rem; color: #64748b;"></i>
-                                </div>
-                            @endif
+                                }
+                            @endphp
                             <h2 class="forum-title" itemprop="headline">
                                 @if(in_array($forum->id, $my_forums))
                                     <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
@@ -564,7 +565,14 @@
                             @endphp
                             <div class="forum-meta">
                                 <div class="meta-item">
-                                    <i class="fa fa-user"></i>
+                                    @if($authorPhotoUrl)
+                                        <span class="forum-meta-author-avatar">
+                                            <img src="{{ $authorPhotoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
+                                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' aria-hidden=\'true\'></i>';">
+                                        </span>
+                                    @else
+                                        <i class="fa fa-user" aria-hidden="true"></i>
+                                    @endif
                                     <span>{{ $forum->user->name ?? 'Unknown' }}</span>
                                 </div>
                                 <div class="meta-item">
