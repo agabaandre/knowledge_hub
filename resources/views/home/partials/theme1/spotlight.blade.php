@@ -40,7 +40,8 @@
     width: 100%;
 }
 .theme1-spotlight-inner .col-lg-7 .theme1-spotlight-search { max-width: 100%; }
-.theme1-spotlight-search .form-control {
+/* Hero keyword field only — do not target .advanced_filters (matches records / browse sizing) */
+.theme1-spotlight-search > .input-group .form-control {
     height: 52px;
     font-size: 1rem;
     border: 2px solid #e2e8f0;
@@ -50,14 +51,45 @@
     color: #1e293b;
     background: #fff;
 }
-.theme1-spotlight-search .form-control::placeholder {
+.theme1-spotlight-search > .input-group .form-control::placeholder {
     color: #64748b;
     opacity: 1;
 }
-.theme1-spotlight-search .form-control:focus {
+.theme1-spotlight-search > .input-group .form-control:focus {
     border-color: {{ $primary }};
     box-shadow: 0 0 0 3px rgba(17, 154, 72, 0.15);
     outline: 0;
+}
+/* Advanced filters: align with standard hub controls (e.g. /records?category=…) */
+.theme1-spotlight-search .advanced_filters .form-group .form-control,
+.theme1-spotlight-search .advanced_filters select.form-control {
+    height: auto;
+    min-height: 38px;
+    font-size: 0.875rem;
+    padding: 0.375rem 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+}
+.theme1-spotlight-search .advanced_filters .form-label-sm,
+.theme1-spotlight-search .advanced_filters label.form-label-sm {
+    font-size: 0.8125rem;
+}
+.theme1-spotlight-search .advanced_filters .select2-container--default .select2-selection--single {
+    min-height: 38px !important;
+    height: 38px !important;
+    padding: 0.125rem 0.5rem;
+    font-size: 0.875rem;
+    border: 1px solid #ced4da !important;
+    border-radius: 0.25rem !important;
+}
+.theme1-spotlight-search .advanced_filters .select2-container--default .select2-selection--single .select2-selection__rendered {
+    line-height: 2.125rem;
+    padding-left: 0.25rem;
+    font-size: 0.875rem;
+    color: #495057;
+}
+.theme1-spotlight-search .advanced_filters .select2-container--default .select2-selection--single .select2-selection__arrow {
+    height: 36px;
 }
 .theme1-spotlight-search .btn-search {
     height: 52px;
