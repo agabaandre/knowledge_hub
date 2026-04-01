@@ -158,7 +158,7 @@
         margin-bottom: 0.25rem;
     }
 
-    /* Avatar size/layout: forums/partials/forum_details.blade.php @once('forum_details_author_avatar') */
+    /* Avatar size/layout: forums/partials/forum_details.blade.php (once block for author avatar) */
     .forum-thread-image {
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
