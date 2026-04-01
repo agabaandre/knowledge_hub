@@ -165,9 +165,9 @@
                     </div>
                     <div class="comment-form-controls">
                         <textarea name="comment" id="forumCommentTextarea" class="comment-textarea" 
-                                  placeholder="What are your thoughts?" rows="2" maxlength="600" required></textarea>
+                                  placeholder="What are your thoughts?" rows="3" maxlength="20000" required></textarea>
                         <div class="comment-char-count" style="font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 0.25rem;">
-                            <span class="char-count">0</span>/100 words (max 600 characters)
+                            <span class="char-count">0</span> / 300 words max
                         </div>
                         
                         <div class="file-upload-area" id="fileUploadArea" style="cursor: pointer;">
@@ -185,21 +185,7 @@
                     </div>
                 </div>
 
-                <div class="comment-form-footer">
-                    <div>
-                        @php
-                            $recaptchaSiteKey = config('recaptcha.api_site_key');
-                            $isLocalhost = in_array(request()->getHost(), ['localhost', '127.0.0.1']) || 
-                                          app()->environment('local', 'testing');
-                            $showRecaptcha = $recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost;
-                        @endphp
-                        @if($showRecaptcha)
-                            {!! \Biscolab\ReCaptcha\Facades\ReCaptcha::htmlFormSnippet() !!}
-                            @error('g-recaptcha-response')
-                                <span class="text-danger small d-block mt-1">{{ $message }}</span>
-                            @enderror
-                        @endif
-                    </div>
+                <div class="comment-form-footer" style="justify-content: flex-end;">
                     <button type="submit" class="comment-submit-btn">
                         <i class="fa fa-paper-plane"></i>
                         Post Comment
@@ -314,7 +300,7 @@
                                 $imageAttachments = [];
                                 $fileAttachments = [];
                                 foreach ($comment->attachments as $attachment) {
-                                    $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
+                                    $extension = forum_comment_attachment_raw_extension($attachment);
                                     $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                     if ($isImage) {
                                         $imageAttachments[] = $attachment;
@@ -342,7 +328,7 @@
                         
                         @php
                             // First limit to 100 words and strip tags for length calculation
-                            $limitedText = Str::words(strip_tags($comment->comment), 100, '...');
+                            $limitedText = Str::words(strip_tags($comment->comment), 300, '...');
                             // Then detect and embed video links with 180px previews
                             $processedText = detect_and_embed_video_links($limitedText, 180, 180);
                         @endphp
@@ -353,52 +339,20 @@
 
                     @if ($comment->attachments && $comment->attachments->count() > 0 && count($fileAttachments) > 0)
                     @php
-                        $fileAttachments = [];
+                        $fileAttachmentsList = [];
                         foreach ($comment->attachments as $attachment) {
-                            $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                            if (!$isImage) {
-                                $fileAttachments[] = $attachment;
+                            $extension = forum_comment_attachment_raw_extension($attachment);
+                            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                $fileAttachmentsList[] = $attachment;
                             }
                         }
                     @endphp
                     <div class="comment-attachments" style="clear: left; margin-top: 1rem;">
-                        @if(count($fileAttachments) > 0)
+                        @if(count($fileAttachmentsList) > 0)
                             <div class="comment-file-attachments-summary">
-                                @foreach ($fileAttachments as $attachment)
-                                    @php
-                                        $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                                        $isVideo = in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'ogg', 'ogv']);
-                                        $isPdf = $extension === 'pdf';
-                                        $isWord = in_array($extension, ['doc', 'docx']);
-                                        $isExcel = in_array($extension, ['xls', 'xlsx']);
-                                        $isPowerpoint = in_array($extension, ['ppt', 'pptx']);
-                                        $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
-                                        // Use the saved human-readable name, fallback to basename if not available
-                                        $fileName = $attachment->name ?? basename($attachment->path);
-                                        $canPreview = $isPdf || $isImage || $isVideo;
-                                        
-                                        // Determine icon class
-                                        $iconClass = 'fa-file-o';
-                                        if ($isPdf) $iconClass = 'fa-file-pdf-o';
-                                        elseif ($isVideo) $iconClass = 'fa-file-video-o';
-                                        elseif ($isWord) $iconClass = 'fa-file-word-o';
-                                        elseif ($isExcel) $iconClass = 'fa-file-excel-o';
-                                        elseif ($isPowerpoint) $iconClass = 'fa-file-powerpoint-o';
-                                        elseif ($isImage) $iconClass = 'fa-file-image-o';
-                                    @endphp
-                                    <a href="{{ $attachment->path }}" target="_blank" class="comment-attachment-file" 
-                                       style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; text-decoration: none; color: #374151; font-size: 0.8125rem; transition: background 0.2s;"
-                                       onmouseover="this.style.background='#f3f4f6'" 
-                                       onmouseout="this.style.background='transparent'"
-                                       @if($canPreview) onclick="event.preventDefault(); previewFile('{{ $attachment->path }}', '{{ $extension }}'); return false;" @endif>
-                                        <i class="fa {{ $iconClass }}" style="font-size: 0.875rem; color: {{ $isPdf ? '#dc2626' : ($isVideo ? '#3b82f6' : ($isWord ? '#2563eb' : ($isExcel ? '#16a34a' : ($isPowerpoint ? '#ea580c' : '#6b7280')))) }};"></i>
-                                        <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fileName }}</span>
-                                        @if($canPreview)
-                                        <i class="fa fa-eye ms-1" style="font-size: 0.75rem; opacity: 0.7;" title="Click to preview"></i>
-                                                    @endif
-                                    </a>
-                                                @endforeach
+                                @foreach ($fileAttachmentsList as $attachment)
+                                    @include('forums.partials.comment_file_attachment_link', ['attachment' => $attachment])
+                                @endforeach
                             </div>
                         @endif
                     </div>
@@ -439,9 +393,9 @@
                                             @endif
                         </div>
                                 <div class="comment-form-controls">
-                                    <textarea name="comment" class="comment-textarea" placeholder="Write a reply..." rows="2" maxlength="600" required></textarea>
+                                    <textarea name="comment" class="comment-textarea" placeholder="Write a reply..." rows="3" maxlength="20000" required></textarea>
                                     <div class="comment-char-count" style="font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 0.25rem;">
-                                        <span class="char-count">0</span>/100 words (max 600 characters)
+                                        <span class="char-count">0</span> / 300 words max
                                     </div>
                                     <button type="submit" class="comment-submit-btn" style="margin-top: 0.5rem; padding: 0.5rem 1rem; font-size: 0.875rem;">
                                         <i class="fa fa-paper-plane"></i>
@@ -528,7 +482,7 @@
                                         $replyImageAttachments = [];
                                         $replyFileAttachments = [];
                                         foreach ($reply->attachments as $attachment) {
-                                            $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
+                                            $extension = forum_comment_attachment_raw_extension($attachment);
                                             $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
                                             if ($isImage) {
                                                 $replyImageAttachments[] = $attachment;
@@ -556,7 +510,7 @@
                                 
                                 @php
                                     // First limit to 100 words and strip tags for length calculation
-                                    $replyLimitedText = Str::words(strip_tags($reply->comment), 100, '...');
+                                    $replyLimitedText = Str::words(strip_tags($reply->comment), 300, '...');
                                     // Then detect and embed video links with 180px previews
                                     $replyProcessedText = detect_and_embed_video_links($replyLimitedText, 180, 180);
                                 @endphp
@@ -567,94 +521,21 @@
 
                             @if ($reply->attachments && $reply->attachments->count() > 0 && count($replyFileAttachments) > 0)
                             @php
-                                $replyFileAttachments = [];
+                                $replyFileAttachmentsList = [];
                                 foreach ($reply->attachments as $attachment) {
-                                    $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                                    $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp']);
-                                    if (!$isImage) {
-                                        $replyFileAttachments[] = $attachment;
+                                    $extension = forum_comment_attachment_raw_extension($attachment);
+                                    if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) {
+                                        $replyFileAttachmentsList[] = $attachment;
                                     }
                                 }
                             @endphp
                             <div class="comment-attachments" style="clear: left; margin-top: 1rem;">
-                                @if(count($replyFileAttachments) > 0)
+                                @if(count($replyFileAttachmentsList) > 0)
                                     <div class="comment-file-attachments-summary">
-                                    @if(count($replyFileAttachments) > 0)
-                                    <div class="comment-file-attachments-summary">
-                                        @foreach ($replyFileAttachments as $attachment)
-                                            @php
-                                                $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                                                $isVideo = in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'ogg', 'ogv']);
-                                                $isPdf = $extension === 'pdf';
-                                                $isWord = in_array($extension, ['doc', 'docx']);
-                                                $isExcel = in_array($extension, ['xls', 'xlsx']);
-                                                $isPowerpoint = in_array($extension, ['ppt', 'pptx']);
-                                                $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
-                                                // Use the saved human-readable name, fallback to basename if not available
-                                                $fileName = $attachment->name ?? basename($attachment->path);
-                                                $canPreview = $isPdf || $isVideo;
-                                                
-                                                // Determine icon class
-                                                $iconClass = 'fa-file-o';
-                                                if ($isPdf) $iconClass = 'fa-file-pdf-o';
-                                                elseif ($isVideo) $iconClass = 'fa-file-video-o';
-                                                elseif ($isWord) $iconClass = 'fa-file-word-o';
-                                                elseif ($isExcel) $iconClass = 'fa-file-excel-o';
-                                                elseif ($isPowerpoint) $iconClass = 'fa-file-powerpoint-o';
-                                                elseif ($isImage) $iconClass = 'fa-file-image-o';
-                                            @endphp
-                                            <a href="{{ $attachment->path }}" target="_blank" class="comment-attachment-file"
-                                               style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; text-decoration: none; color: #374151; font-size: 0.8125rem; transition: background 0.2s;"
-                                               onmouseover="this.style.background='#f3f4f6'" 
-                                               onmouseout="this.style.background='transparent'"
-                                               @if($canPreview) onclick="event.preventDefault(); previewFile('{{ $attachment->path }}', '{{ $extension }}'); return false;" @endif>
-                                                <i class="fa {{ $iconClass }}" style="font-size: 0.875rem; color: {{ $isPdf ? '#dc2626' : ($isVideo ? '#3b82f6' : ($isWord ? '#2563eb' : ($isExcel ? '#16a34a' : ($isPowerpoint ? '#ea580c' : '#6b7280')))) }};"></i>
-                                                <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fileName }}</span>
-                                                @if($canPreview)
-                                                <i class="fa fa-eye ms-1" style="font-size: 0.75rem; opacity: 0.7;" title="Click to preview"></i>
-                                                @endif
-                                            </a>
+                                        @foreach ($replyFileAttachmentsList as $attachment)
+                                            @include('forums.partials.comment_file_attachment_link', ['attachment' => $attachment])
                                         @endforeach
                                     </div>
-                                    @endif
-                                </div>
-                                @elseif(count($replyFileAttachments) > 0)
-                                <div class="comment-file-attachments-only">
-                                    @foreach ($replyFileAttachments as $attachment)
-                                        @php
-                                            $extension = strtolower(pathinfo($attachment->path, PATHINFO_EXTENSION));
-                                            $isVideo = in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'm4v', 'ogg', 'ogv']);
-                                            $isPdf = $extension === 'pdf';
-                                            $isWord = in_array($extension, ['doc', 'docx']);
-                                            $isExcel = in_array($extension, ['xls', 'xlsx']);
-                                            $isPowerpoint = in_array($extension, ['ppt', 'pptx']);
-                                            $isImage = in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
-                                            // Use the saved human-readable name, fallback to basename if not available
-                                            $fileName = $attachment->name ?? basename($attachment->path);
-                                            $canPreview = $isPdf || $isVideo;
-                                            
-                                            // Determine icon class
-                                            $iconClass = 'fa-file-o';
-                                            if ($isPdf) $iconClass = 'fa-file-pdf-o';
-                                            elseif ($isVideo) $iconClass = 'fa-file-video-o';
-                                            elseif ($isWord) $iconClass = 'fa-file-word-o';
-                                            elseif ($isExcel) $iconClass = 'fa-file-excel-o';
-                                            elseif ($isPowerpoint) $iconClass = 'fa-file-powerpoint-o';
-                                            elseif ($isImage) $iconClass = 'fa-file-image-o';
-                                        @endphp
-                                        <a href="{{ $attachment->path }}" target="_blank" class="comment-attachment-file"
-                                           style="display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px; text-decoration: none; color: #374151; font-size: 0.8125rem; transition: background 0.2s;"
-                                           onmouseover="this.style.background='#f3f4f6'" 
-                                           onmouseout="this.style.background='transparent'"
-                                           @if($canPreview) onclick="event.preventDefault(); previewFile('{{ $attachment->path }}', '{{ $extension }}'); return false;" @endif>
-                                            <i class="fa {{ $iconClass }}" style="font-size: 0.875rem; color: {{ $isPdf ? '#dc2626' : ($isVideo ? '#3b82f6' : ($isWord ? '#2563eb' : ($isExcel ? '#16a34a' : ($isPowerpoint ? '#ea580c' : '#6b7280')))) }};"></i>
-                                            <span style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">{{ $fileName }}</span>
-                                            @if($canPreview)
-                                            <i class="fa fa-eye ms-1" style="font-size: 0.75rem; opacity: 0.7;" title="Click to preview"></i>
-                                            @endif
-                                        </a>
-                                    @endforeach
-                                </div>
                                 @endif
                             </div>
                             @endif

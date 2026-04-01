@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\CustomAttachment;
 use App\Repositories\ForumsRepository;
+use App\Services\OfficeDocumentToPdfService;
 use Illuminate\Http\Request;
-use Biscolab\ReCaptcha\Facades\ReCaptcha;
 
 class ForumsController extends Controller
 {
@@ -199,39 +200,30 @@ class ForumsController extends Controller
 
     public function comment(Request $request)
     {
-        // Validate reCAPTCHA if not on localhost
-        $recaptchaSiteKey = config('recaptcha.api_site_key');
-        $isLocalhost = in_array($request->getHost(), ['localhost', '127.0.0.1']) || 
-                       app()->environment('local', 'testing');
-        
-        if ($recaptchaSiteKey && !empty($recaptchaSiteKey) && !$isLocalhost) {
-            // Check if reCAPTCHA response is provided
-            if (!$request->filled('g-recaptcha-response')) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'Please complete the CAPTCHA to proceed.'
-                    ], 400);
-                }
-                return back()->withErrors([
-                    'g-recaptcha-response' => 'Please complete the CAPTCHA to proceed.',
-                ])->withInput();
-            }
-            
-            // Validate the reCAPTCHA response
-            $recaptchaResponse = $request->input('g-recaptcha-response');
-            if (!ReCaptcha::validate($recaptchaResponse)) {
-                if ($request->ajax() || $request->wantsJson()) {
-                    return response()->json([
-                        'success' => false,
-                        'error' => 'CAPTCHA verification failed. Please try again.'
-                    ], 400);
-                }
-                return back()->withErrors([
-                    'g-recaptcha-response' => 'CAPTCHA verification failed. Please try again.',
-                ])->withInput();
-            }
+        if (!auth()->check()) {
+            abort(403, 'You must be logged in to comment.');
         }
+
+        $request->validate([
+            'id' => 'required|integer',
+            'comment' => 'required|string|max:20000',
+            'parent_id' => 'nullable|integer',
+        ]);
+
+        $commentText = trim((string) $request->input('comment'));
+        $wordCount = count(preg_split('/\s+/u', $commentText, -1, PREG_SPLIT_NO_EMPTY));
+        if ($wordCount > 300) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'error' => 'Comments are limited to 300 words.',
+                ], 422);
+            }
+
+            return back()->withErrors(['comment' => 'Comments are limited to 300 words.'])->withInput();
+        }
+
+        $request->merge(['comment' => $commentText]);
 
         // Log request details for debugging
         \Log::info('Forum comment request received', [
@@ -322,6 +314,56 @@ class ForumsController extends Controller
 
         $result = $this->forumsRepo->toggleCommentLike($request->comment_id);
         return response()->json($result);
+    }
+
+    /**
+     * Resolve forum comment attachment as PDF: converts legacy office files once, then redirects to storage URL.
+     */
+    public function commentAttachmentPdf(CustomAttachment $attachment, OfficeDocumentToPdfService $converter)
+    {
+        abort_unless($attachment->getAttribute('model') === 'forum_comments', 404);
+
+        $relative = $attachment->getRawOriginal('path') ?: $attachment->getAttribute('path');
+        if ($relative === null || $relative === '') {
+            abort(404);
+        }
+
+        $absolute = storage_path('app/public/uploads/' . $relative);
+        if (!is_file($absolute)) {
+            abort(404);
+        }
+
+        $ext = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
+        if ($ext === 'pdf') {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        if (!$converter->isConvertibleExtension($ext)) {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        $stem = pathinfo($relative, PATHINFO_FILENAME);
+        $dir = str_replace('\\', '/', dirname($relative));
+        $pdfRelative = ($dir === '.' || $dir === '') ? $stem . '.pdf' : $dir . '/' . $stem . '.pdf';
+        $pdfAbs = storage_path('app/public/uploads/' . $pdfRelative);
+
+        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
+            $converter->convertToPdf($absolute);
+        }
+
+        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        if ($relative !== $pdfRelative) {
+            @unlink($absolute);
+            $attachment->path = $pdfRelative;
+            $baseName = pathinfo($attachment->name ?? pathinfo($relative, PATHINFO_FILENAME), PATHINFO_FILENAME);
+            $attachment->name = $baseName . '.pdf';
+            $attachment->save();
+        }
+
+        return redirect()->away(storage_link('uploads/' . $pdfRelative));
     }
 
 }

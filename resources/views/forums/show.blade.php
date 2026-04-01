@@ -1108,8 +1108,8 @@
     <script>
         // Word count and character limit for comment textareas
         function updateCharCount(textarea) {
-            const maxWords = 100;
-            const maxChars = 600;
+            const maxWords = 300;
+            const maxChars = 20000;
             const text = textarea.value.trim();
             const words = text.split(/\s+/).filter(word => word.length > 0);
             const wordCount = words.length;
@@ -1137,7 +1137,7 @@
                 updateCharCount(textarea);
             }
             
-            // Limit characters
+            // Hard character ceiling (unicode-safe upper bound for 300 words)
             if (charCount > maxChars) {
                 textarea.value = text.substring(0, maxChars);
                 updateCharCount(textarea);

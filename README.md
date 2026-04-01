@@ -17,6 +17,7 @@ Ensure you have the following installed:
 - Composer: PHP dependency manager
 - Git: Version control
 - Redis (Optional but recommended for caching)
+- **(Recommended for production forums)** [LibreOffice](https://www.libreoffice.org/) (headless) — converts forum comment attachments (Word, Excel, PowerPoint, etc.) to PDF for storage and preview. PHP libraries alone cover only part of this; see [Forum attachments: Office to PDF](#forum-attachments-office-to-pdf).
 
 ---
 
@@ -118,6 +119,9 @@ DB_PASSWORD=
 STATES_ENABLED=TRUE
 ADMIN_UNITS_ENABLED=FALSE
 APP_URL=http://localhost/knowledge_hub
+
+# Optional: full path to LibreOffice "soffice" if not found on PATH (forum PDF conversion)
+# LIBREOFFICE_BINARY=/usr/bin/soffice
 ```
 
 ---
@@ -225,6 +229,49 @@ For Linux, ensure the correct folder permissions:
    ```bash
    http://{server_ip}/knowledge_hub
    ```
+
+---
+
+## Forum attachments: Office to PDF
+
+Discussion **forum comments** can include file attachments. The application **normalises convertible office documents to PDF** when possible (upload path and on first access for older rows), so previews and downloads behave like PDFs.
+
+### Required (already part of Composer install)
+
+| Area | Role |
+|------|------|
+| **PHP 8.x** | Application runtime |
+| **phpoffice/phpword** | Reads `.docx`; can export PDF via MPDF when LibreOffice is absent |
+| **mpdf/mpdf** | PDF engine used by PhpWord’s PDF writer |
+| **symfony/process** | Runs LibreOffice as a subprocess with timeouts (pulled in via Laravel) |
+
+Run `composer install` as documented below; no extra Composer packages are required for this feature.
+
+### Recommended server software
+
+| Software | Purpose | Without it |
+|----------|---------|------------|
+| **LibreOffice** (`soffice`, headless) | Reliable conversion for **.doc**, **.docx**, **.xls**, **.xlsx**, **.ppt**, **.pptx**, **OpenDocument**, **.rtf** | `.docx` may still convert via PhpWord+MPDF (layout can differ). Other formats usually stay as originals until LibreOffice is installed. |
+
+**Install examples**
+
+- **Ubuntu / Debian:** `sudo apt update && sudo apt install -y libreoffice-writer libreoffice-calc libreoffice-impress` (or package `libreoffice`)
+- **RHEL / Alma / Rocky:** `sudo dnf install -y libreoffice-headless`
+- **macOS (development):** `brew install --cask libreoffice` — binary is often `/Applications/LibreOffice.app/Contents/MacOS/soffice`
+- **Windows:** Install LibreOffice from [libreoffice.org](https://www.libreoffice.org/download/download/) and set `LIBREOFFICE_BINARY` to the full path of `soffice.exe`
+
+**Configuration**
+
+- Set `LIBREOFFICE_BINARY` in `.env` to the absolute path of `soffice` if auto-detection fails (`config/services.php` → `services.libreoffice.binary`).
+- The **PHP / web-server user** must be allowed to **execute** that binary and **write** under `storage/app/public/uploads/forum/`.
+- Conversion is capped at about **120 seconds** per file; increase PHP `max_execution_time` and proxy timeouts if needed for very large documents.
+
+**Behaviour summary**
+
+- **On upload:** Convertible types are written as `.pdf` in storage when conversion succeeds; the `custom_attachments` row points at the PDF.
+- **Legacy rows:** Opening a preview/link hits `GET /forums/comment-attachment/{id}/pdf`, which converts once, updates the row, then redirects to the public PDF URL. If conversion fails, users still get the original file.
+
+For a longer deployment checklist, see [docs/FORUM_ATTACHMENTS_PDF.md](docs/FORUM_ATTACHMENTS_PDF.md).
 
 ---
 

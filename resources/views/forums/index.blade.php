@@ -380,6 +380,10 @@
     border-color: var(--theme-color-primary, #119A48);
 }
 
+.inline-comment-field {
+    width: 100%;
+}
+
 .inline-comment-actions {
     display: flex;
     gap: 0.5rem;
@@ -599,20 +603,31 @@
                                 <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-outline-secondary">
                                     <i class="fa fa-info-circle"></i> Details
                                 </a>
-                                @if(in_array($forum->id, $my_forums))
-                                    <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
-                                        <i class="fa fa-comments"></i> View Discussion
-                                    </a>
-                                    <button type="button" class="btn btn-sm theme-bg text-white" 
-                                            onclick="showInlineCommentForm({{ $forum->id }})"
-                                            id="show-comment-btn-{{ $forum->id }}">
-                                        <i class="fa fa-plus-circle me-1"></i> Add Comment
-                                    </button>
+                                @auth
+                                    @if(in_array($forum->id, $my_forums))
+                                        <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
+                                            <i class="fa fa-comments"></i> View Discussion
+                                        </a>
+                                        <button type="button" class="btn btn-sm theme-bg text-white" 
+                                                onclick="showInlineCommentForm({{ $forum->id }})"
+                                                id="show-comment-btn-{{ $forum->id }}">
+                                            <i class="fa fa-plus-circle me-1"></i> Add Comment
+                                        </button>
+                                    @else
+                                        <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
+                                            <i class="fa fa-link"></i> Join Discussion
+                                        </a>
+                                        <button type="button" class="btn btn-sm theme-bg text-white" 
+                                                onclick="showInlineCommentJoinPanel({{ $forum->id }})"
+                                                id="show-comment-btn-join-{{ $forum->id }}">
+                                            <i class="fa fa-plus-circle me-1"></i> Add Comment
+                                        </button>
+                                    @endif
                                 @else
                                     <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm btn-dark" id="join{{ $forum->id }}">
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
-                                @endif
+                                @endauth
                             </div>
 
                             @php
@@ -621,7 +636,7 @@
                                 $commentsToShow = max(2, min(5, min($totalComments ?? 0, 5)));
                             @endphp
 
-                            @if($totalComments > 0 || (in_array($forum->id, $my_forums) && auth()->check()))
+                            @if($totalComments > 0 || auth()->check())
                             <div class="comments-panel">
                                 <div class="comments-list" id="comments-list-{{ $forum->id }}" style="display: none;">
                                     @if($totalComments > 0)
@@ -667,11 +682,18 @@
                                     @endif
                                 </div>
 
+                                @auth
                                 @if(in_array($forum->id, $my_forums))
                                 <div class="inline-comment-form" id="comment-form-{{ $forum->id }}" style="display: none;">
                                     <form onsubmit="submitInlineComment(event, {{ $forum->id }})">
-                                        <textarea name="comment" id="inline-comment-{{ $forum->id }}" 
-                                                  placeholder="Add a comment..." required></textarea>
+                                        <div class="inline-comment-field">
+                                            <textarea name="comment" id="inline-comment-{{ $forum->id }}"
+                                                      class="comment-textarea"
+                                                      placeholder="Add a comment..." required maxlength="20000" rows="3"></textarea>
+                                            <div class="comment-char-count" style="font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 0.25rem;">
+                                                <span class="char-count">0</span> / 300 words max
+                                            </div>
+                                        </div>
                                         <div class="inline-comment-actions">
                                             <button type="button" class="btn btn-sm btn-outline-secondary" 
                                                     onclick="cancelInlineComment({{ $forum->id }})">Cancel</button>
@@ -682,7 +704,16 @@
                                         @csrf
                                     </form>
                                 </div>
-                                    @endif
+                                @else
+                                <div class="inline-comment-form" id="comment-form-join-{{ $forum->id }}" style="display: none;">
+                                    <p class="mb-2 text-muted small">Join this discussion to post a comment from the listing.</p>
+                                    <a href="{{ url('forums/join') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
+                                        <i class="fa fa-link me-1"></i>Join discussion
+                                    </a>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary ms-1" onclick="cancelInlineCommentJoin({{ $forum->id }})">Cancel</button>
+                                </div>
+                                @endif
+                                @endauth
                             </div>
                             @endif
                         </div>
@@ -926,6 +957,57 @@ if (typeof openImageModal === 'undefined') {
     window.closeImageModal = closeImageModal;
 }
 
+// Word / character limits for inline “Add comment” on listing (same rules as thread page)
+function updateForumListingCommentCharCount(textarea) {
+    const maxWords = 300;
+    const maxChars = 20000;
+    const text = textarea.value.trim();
+    const words = text.split(/\s+/).filter(function (word) { return word.length > 0; });
+    const wordCount = words.length;
+    const charCount = text.length;
+
+    const parent = textarea.parentElement;
+    const charCountSpan = parent ? parent.querySelector('.comment-char-count .char-count') : null;
+    if (charCountSpan) {
+        charCountSpan.textContent = wordCount;
+        const charCountDiv = parent.querySelector('.comment-char-count');
+        if (charCountDiv) {
+            if (wordCount >= maxWords || charCount >= maxChars) {
+                charCountDiv.style.color = '#ef4444';
+            } else if (wordCount >= maxWords * 0.8 || charCount >= maxChars * 0.8) {
+                charCountDiv.style.color = '#f59e0b';
+            } else {
+                charCountDiv.style.color = '#94a3b8';
+            }
+        }
+    }
+
+    if (wordCount > maxWords) {
+        textarea.value = words.slice(0, maxWords).join(' ');
+        updateForumListingCommentCharCount(textarea);
+        return;
+    }
+
+    if (charCount > maxChars) {
+        textarea.value = text.substring(0, maxChars);
+        updateForumListingCommentCharCount(textarea);
+    }
+}
+
+function initForumListingInlineCommentCounters() {
+    document.querySelectorAll('.inline-comment-form textarea.comment-textarea').forEach(function (textarea) {
+        if (textarea.dataset.forumListingCountBound) return;
+        textarea.dataset.forumListingCountBound = '1';
+        textarea.addEventListener('input', function () {
+            updateForumListingCommentCharCount(this);
+        });
+        textarea.addEventListener('paste', function () {
+            setTimeout(function () { updateForumListingCommentCharCount(textarea); }, 10);
+        });
+        updateForumListingCommentCharCount(textarea);
+    });
+}
+
 function toggleComments(forumId) {
     const inlineToggle = document.querySelector(`.comments-toggle-inline[data-forum-id="${forumId}"]`);
     const commentsList = document.getElementById(`comments-list-${forumId}`);
@@ -1000,11 +1082,37 @@ function likeForum(forumId) {
 function showInlineCommentForm(forumId) {
     const form = document.getElementById(`comment-form-${forumId}`);
     const btn = document.getElementById(`show-comment-btn-${forumId}`);
-    
+    const joinPanel = document.getElementById(`comment-form-join-${forumId}`);
+    const joinBtn = document.getElementById(`show-comment-btn-join-${forumId}`);
+    if (joinPanel) joinPanel.style.display = 'none';
+    if (joinBtn) joinBtn.style.display = '';
+
     if (form && btn) {
         form.style.display = 'block';
         btn.style.display = 'none';
-        form.querySelector('textarea').focus();
+        const ta = form.querySelector('textarea');
+        if (ta) {
+            ta.focus();
+            updateForumListingCommentCharCount(ta);
+        }
+    }
+}
+
+function showInlineCommentJoinPanel(forumId) {
+    const panel = document.getElementById(`comment-form-join-${forumId}`);
+    const btn = document.getElementById(`show-comment-btn-join-${forumId}`);
+    if (panel && btn) {
+        panel.style.display = 'block';
+        btn.style.display = 'none';
+    }
+}
+
+function cancelInlineCommentJoin(forumId) {
+    const panel = document.getElementById(`comment-form-join-${forumId}`);
+    const btn = document.getElementById(`show-comment-btn-join-${forumId}`);
+    if (panel && btn) {
+        panel.style.display = 'none';
+        btn.style.display = '';
     }
 }
 
@@ -1013,10 +1121,13 @@ function cancelInlineComment(forumId) {
     const btn = document.getElementById(`show-comment-btn-${forumId}`);
     const textarea = document.getElementById(`inline-comment-${forumId}`);
     
-    if (form && btn && textarea) {
+    if (form && btn) {
         form.style.display = 'none';
-        btn.style.display = 'block';
-        textarea.value = '';
+        btn.style.display = '';
+        if (textarea) {
+            textarea.value = '';
+            updateForumListingCommentCharCount(textarea);
+        }
     }
 }
 
@@ -1025,16 +1136,26 @@ function submitInlineComment(event, forumId) {
     
     const form = event.target;
     const textarea = form.querySelector('textarea');
-    const commentText = textarea.value.trim();
+    const commentText = textarea ? textarea.value.trim() : '';
     
     if (!commentText) {
         alert('Please enter a comment');
         return;
     }
+
+    const wordCount = commentText.split(/\s+/).filter(function(w) { return w.length > 0; }).length;
+    if (wordCount > 300) {
+        alert('Comments are limited to 300 words.');
+        return;
+    }
+    if (commentText.length > 20000) {
+        alert('Comment is too long.');
+        return;
+    }
     
     const formData = new FormData(form);
-    formData.append('forum_id', forumId);
-    formData.append('comment', commentText);
+    formData.set('id', String(forumId));
+    formData.set('comment', commentText);
     
     // Show loading state
     const submitBtn = form.querySelector('button[type="submit"]');
@@ -1046,29 +1167,53 @@ function submitInlineComment(event, forumId) {
         method: 'POST',
         body: formData,
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(function (response) {
+        if (!response.ok) {
+            return response.json().then(
+                function (j) {
+                    j._httpStatus = response.status;
+                    return Promise.reject(j);
+                },
+                function () {
+                    return Promise.reject({ error: 'Request failed.', _httpStatus: response.status });
+                }
+            );
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.status === 200 || data.success) {
-            // Reload page to show new comment
             window.location.reload();
         } else {
-            alert(data.message || 'Error posting comment. Please try again.');
+            alert(data.message || data.error || 'Error posting comment. Please try again.');
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.');
+    .catch(err => {
+        console.error('Error:', err);
+        var msg = 'An error occurred. Please try again.';
+        if (err && err.error) {
+            msg = err.error;
+        } else if (err && err.errors && err.errors.comment) {
+            var c = err.errors.comment;
+            msg = Array.isArray(c) ? c[0] : c;
+        } else if (err && err.message) {
+            msg = err.message;
+        }
+        alert(msg);
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     });
 }
 
 document.addEventListener('DOMContentLoaded', function() {
+    initForumListingInlineCommentCounters();
+
     const searchInput = document.getElementById('forum-search');
     const filterButtons = document.querySelectorAll('.filter-btn');
     const forumCards = document.querySelectorAll('.forum-card');

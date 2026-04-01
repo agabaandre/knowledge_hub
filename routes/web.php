@@ -601,6 +601,7 @@ Route::group(["prefix" => "forums"], function () {
     Route::get("/create", [ForumsController::class, 'create'])->name('forums.create');
     Route::get("/thread", [ForumsController::class, 'thread'])->name('forums.thread');
     Route::get("/join", [ForumsController::class, 'join'])->name('forums.join');
+    Route::get('/comment-attachment/{attachment}/pdf', [ForumsController::class, 'commentAttachmentPdf'])->name('forums.comment-attachment.pdf');
     Route::post("/comment", [ForumsController::class, 'comment'])->name('forums.comment');
     Route::post("/publish", [ForumsController::class, 'publish'])->name('forums.publish');
     Route::post("/like", [ForumsController::class, 'like'])->name('forums.like');

@@ -67,4 +67,12 @@ return [
     'redirect' => env('LINKEDIN_REDIRECT_URI'),
     ],
 
+    /*
+    | Path to LibreOffice "soffice" for converting forum comment attachments (doc, ppt, xlsx, …) to PDF.
+    | Leave null to auto-detect (common Linux paths and macOS app bundle).
+    */
+    'libreoffice' => [
+        'binary' => env('LIBREOFFICE_BINARY'),
+    ],
+
 ];

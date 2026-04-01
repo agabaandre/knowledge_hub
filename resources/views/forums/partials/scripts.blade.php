@@ -382,6 +382,17 @@ try {
                 return false;
             }
 
+            const commentTrimmed = textarea.value.trim();
+            const wc = commentTrimmed.split(/\s+/).filter(function (w) { return w.length > 0; }).length;
+            if (wc > 300) {
+                showLobiboxNotification('error', 'Comments are limited to 300 words.');
+                return false;
+            }
+            if (commentTrimmed.length > 20000) {
+                showLobiboxNotification('error', 'Comment is too long.');
+                return false;
+            }
+
             // Validate file sizes one more time
             for (let i = 0; i < selectedFiles.length; i++) {
                 if (selectedFiles[i].size > maxFileSize) {
@@ -527,6 +538,12 @@ try {
                     let errorMsg = 'Failed to post comment. Please try again.';
                     if (xhr.responseJSON && xhr.responseJSON.error) {
                         errorMsg = xhr.responseJSON.error;
+                    } else if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors) {
+                        const errs = xhr.responseJSON.errors;
+                        const firstKey = Object.keys(errs)[0];
+                        if (firstKey && errs[firstKey] && errs[firstKey][0]) {
+                            errorMsg = errs[firstKey][0];
+                        }
                     } else if (xhr.responseText) {
                         try {
                             const errorResponse = JSON.parse(xhr.responseText);
@@ -547,6 +564,27 @@ try {
             });
 
             return false;
+        });
+
+        $(document).off('submit', 'form.reply-form').on('submit', 'form.reply-form', function(e) {
+            const $ta = $(this).find('textarea[name="comment"]');
+            const commentTrimmed = ($ta.val() || '').trim();
+            if (!commentTrimmed) {
+                e.preventDefault();
+                showLobiboxNotification('error', 'Please enter a reply.');
+                return false;
+            }
+            const wc = commentTrimmed.split(/\s+/).filter(function (w) { return w.length > 0; }).length;
+            if (wc > 300) {
+                e.preventDefault();
+                showLobiboxNotification('error', 'Comments are limited to 300 words.');
+                return false;
+            }
+            if (commentTrimmed.length > 20000) {
+                e.preventDefault();
+                showLobiboxNotification('error', 'Comment is too long.');
+                return false;
+            }
         });
 
         // Helper function to initialize comment handlers for dynamically added comments

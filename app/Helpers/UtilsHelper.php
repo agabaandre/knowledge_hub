@@ -892,6 +892,58 @@ if (!function_exists('publication_filename_is_pdf')) {
     }
 }
 
+if (!function_exists('forum_comment_attachment_raw_extension')) {
+    function forum_comment_attachment_raw_extension($attachment): string
+    {
+        if (!$attachment instanceof \App\Models\CustomAttachment) {
+            return '';
+        }
+        $raw = $attachment->getRawOriginal('path');
+        if ($raw === null || $raw === '') {
+            $raw = $attachment->getAttributes()['path'] ?? '';
+        }
+
+        return strtolower(pathinfo((string) $raw, PATHINFO_EXTENSION));
+    }
+}
+
+if (!function_exists('forum_comment_attachment_is_convertible_office')) {
+    function forum_comment_attachment_is_convertible_office($attachment): bool
+    {
+        $ext = forum_comment_attachment_raw_extension($attachment);
+
+        return $ext !== '' && app(\App\Services\OfficeDocumentToPdfService::class)->isConvertibleExtension($ext);
+    }
+}
+
+if (!function_exists('forum_comment_attachment_effective_href')) {
+    /**
+     * Public URL for download/preview: office types go through on-demand PDF conversion route first.
+     */
+    function forum_comment_attachment_effective_href($attachment): string
+    {
+        if (!$attachment instanceof \App\Models\CustomAttachment) {
+            return '';
+        }
+        if (forum_comment_attachment_is_convertible_office($attachment)) {
+            return route('forums.comment-attachment.pdf', ['attachment' => $attachment->id], true);
+        }
+
+        return $attachment->path;
+    }
+}
+
+if (!function_exists('forum_comment_attachment_preview_extension')) {
+    function forum_comment_attachment_preview_extension($attachment): string
+    {
+        if (forum_comment_attachment_is_convertible_office($attachment)) {
+            return 'pdf';
+        }
+
+        return forum_comment_attachment_raw_extension($attachment);
+    }
+}
+
 if (!function_exists('normalize_publication_stored_filename_for_public_url')) {
     /**
      * Use .pdf in public storage URLs when the DB has a mis-saved .pd filename so preview/download match the real file.
