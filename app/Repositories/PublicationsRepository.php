@@ -1168,20 +1168,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $attachmentData = [];
         $savedCount = 0;
         $errorCount = 0;
-        
-        $titleBase = null;
-        if ($publication_id) {
-            $pub = Publication::find($publication_id);
-            $rawTitle = $pub && !empty($pub->title) ? clean_unicode(strip_tags($pub->title)) : '';
-            $titleBase = $rawTitle !== ''
-                ? \Illuminate\Support\Str::slug(\Illuminate\Support\Str::words($rawTitle, 20))
-                : null;
-        }
-        if (empty($titleBase)) {
-            $titleBase = 'document';
-        }
 
-        $fileIndex = 0;
         foreach ($upfiles as $file) {
             // Skip invalid files
             if (!$file || !$file->isValid()) {
@@ -1194,31 +1181,35 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
 
             try {
-            $description = $file->getClientOriginalName();
-                $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
-                $extension   = $extension ?: 'bin';
-            // Name file using title (max 20 words), slugged; add suffix for multiple files to avoid overwrite
-            $file_name   = $titleBase . (count($upfiles) > 1 ? '-' . (++$fileIndex) : '');
-            $file_path   = $file_name . '.' . $extension;
-            // Ensure uniqueness if same title+index already exists (e.g. re-upload)
-            $storagePath = storage_path().'/app/public/uploads/publications/';
-                if (file_exists($storagePath . $file_path)) {
-                    $file_path = $file_name . '-' . substr(uniqid(), -6) . '.' . $extension;
-                }
-           
-                // Ensure directory exists
+                $storagePath = storage_path().'/app/public/uploads/publications/';
                 if (!is_dir($storagePath)) {
                     mkdir($storagePath, 0755, true);
                 }
-               
+
+                $clientOriginal = basename((string) $file->getClientOriginalName());
+                $clientOriginal = trim(preg_replace('/\s+/u', ' ', $clientOriginal));
+                if ($clientOriginal === '' || $clientOriginal === '.') {
+                    $clientOriginal = 'attachment.' . ($file->guessExtension() ?: 'bin');
+                }
+                $clientOriginal = \Illuminate\Support\Str::limit($clientOriginal, 255, '');
+
+                $file_path = $file->hashName();
+                if (file_exists($storagePath . $file_path)) {
+                    $ext = pathinfo($file_path, PATHINFO_EXTENSION);
+                    $file_path = \Illuminate\Support\Str::uuid()->toString() . ($ext !== '' ? '.' . $ext : '');
+                }
+
                 $file->move($storagePath, $file_path);
+
+                $displayLabel = \Illuminate\Support\Str::limit($clientOriginal, 120);
 
             // Optimized: Collect attachment data for bulk insert
             if($publication_id) {
                 $attachmentData[] = [
-                    "description" => $description,
-                    "file" => $file_path,
-                    "publication_id" => $publication_id
+                    'description' => $displayLabel,
+                    'original_filename' => $clientOriginal,
+                    'file' => $file_path,
+                    'publication_id' => $publication_id,
                 ];
                     $savedCount++;
                 }

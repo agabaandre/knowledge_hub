@@ -327,7 +327,7 @@
                                         <li>
                                             <a href="{{ $pub_file->file }}" target="_blank" style="color: #119A48; text-decoration: none; font-weight: 500;">
                                                 <i class="fa fa-download mr-2"></i>
-                                                {{ $pub_file->description ?? 'Attachment ' . $count }}
+                                                {{ Str::limit($pub_file->original_filename ?? $pub_file->description ?? ('Attachment ' . $count), 90) }}
                                             </a>
                                         </li>
                                         @php

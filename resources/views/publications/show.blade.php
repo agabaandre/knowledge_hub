@@ -713,18 +713,11 @@
                                             $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
                                             $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
-                                            $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
-                                            $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
-                                            $titleSlug = Str::limit($titleSlug, 80);
-                                            $titleSlug = $titleSlug ?: 'resource';
-                                            $downloadFilename = count($publication->attachments) > 1
-                                                ? $titleSlug . '-' . ($i + 1) . '.' . $ext
-                                                : $titleSlug . '.' . $ext;
-                                            $realFilename = $file->download_filename;
-                                            // Display: short label for UI, real filename for title/tooltip
-                                            $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
-                                            $displayName = str_replace('_', ' ', $displayName);
-                                            $displayName = Str::limit($displayName, 20);
+                                            $downloadFilename = $file->download_filename;
+                                            $fullLabel = $file->original_filename ?? $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
+                                            $displayStem = pathinfo($fullLabel, PATHINFO_FILENAME);
+                                            $displayStem = $displayStem !== '' ? $displayStem : $fullLabel;
+                                            $displayName = Str::limit(str_replace('_', ' ', $displayStem), 90);
                                             
                                             // Determine icon based on file extension
                                             $fileIcon = 'fa-file';
@@ -763,7 +756,7 @@
                                             <div class="d-flex flex-column">
                                                 <div class="mb-2">
                                                     <i class="fa {{ $fileIcon }} {{ $iconColor }} mr-2" style="font-size: 1.1rem;"></i> 
-                                                    <strong>{{ $displayName }}</strong>
+                                                    <strong title="{{ e($fullLabel) }}">{{ $displayName }}</strong>
                                                     <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
                                                         {{ strtoupper($ext) }} file
                                                     </small>
@@ -775,7 +768,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $downloadFilename }}" download="{{ $downloadFilename }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ e($downloadFilename) }}" download="{{ e($downloadFilename) }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>
@@ -946,18 +939,11 @@
                                             $ext = strtolower(pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_EXTENSION)) ?: 'pdf';
                                             $ext = normalize_publication_attachment_extension($ext);
                                             $office = in_array($ext, ['ppt','pptx','doc','docx','xls','xlsx']) ? 1 : 0;
-                                            $titleSlug = preg_replace('/[^\pL\pN\s\-]/u', '', strip_tags($publication->title ?? 'resource'));
-                                            $titleSlug = preg_replace('/\s+/', '-', trim($titleSlug));
-                                            $titleSlug = Str::limit($titleSlug, 80);
-                                            $titleSlug = $titleSlug ?: 'resource';
-                                            $downloadFilename = count($publication->attachments) > 1
-                                                ? $titleSlug . '-' . ($i + 1) . '.' . $ext
-                                                : $titleSlug . '.' . $ext;
-                                            $realFilename = $file->download_filename;
-                                            // Format attachment name: replace underscores with spaces and truncate to 20 characters for display
-                                            $displayName = $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
-                                            $displayName = str_replace('_', ' ', $displayName);
-                                            $displayName = Str::limit($displayName, 20);
+                                            $downloadFilename = $file->download_filename;
+                                            $fullLabel = $file->original_filename ?? $file->description ?? pathinfo(parse_url($url, PHP_URL_PATH), PATHINFO_FILENAME);
+                                            $displayStem = pathinfo($fullLabel, PATHINFO_FILENAME);
+                                            $displayStem = $displayStem !== '' ? $displayStem : $fullLabel;
+                                            $displayName = Str::limit(str_replace('_', ' ', $displayStem), 90);
                                             
                                             // Determine icon based on file extension
                                             $fileIcon = 'fa-file';
@@ -996,7 +982,7 @@
                                             <div class="d-flex flex-column">
                                                 <div class="mb-2">
                                                     <i class="fa {{ $fileIcon }} {{ $iconColor }} mr-2" style="font-size: 1.1rem;"></i> 
-                                                    <strong>{{ $displayName }}</strong>
+                                                    <strong title="{{ e($fullLabel) }}">{{ $displayName }}</strong>
                                                     <small class="text-muted d-block mt-1" style="font-size: 0.8rem;">
                                                         {{ strtoupper($ext) }} file
                                                     </small>
@@ -1008,7 +994,7 @@
                                                             onclick="window.previewAttachmentClick(event, this); return false;">
                                                         <i class="fa fa-eye mr-1"></i> Preview
                                                     </button>
-                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ $downloadFilename }}" download="{{ $downloadFilename }}">
+                                                    <a href="{{ $url }}" target="_blank" class="btn btn-au btn-sm" title="Download {{ e($downloadFilename) }}" download="{{ e($downloadFilename) }}">
                                                         <i class="fa fa-download mr-1"></i> Download
                                                     </a>
                                                 </div>

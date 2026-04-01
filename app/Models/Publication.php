@@ -299,8 +299,8 @@ class Publication extends Model
         }
         foreach ($this->attachments ?? [] as $att) {
             if ($att->is_pdf) {
-                $label = $att->description ?? pathinfo($att->getRawOriginal('file'), PATHINFO_FILENAME);
-                $label = \Illuminate\Support\Str::limit(str_replace('_', ' ', $label), 40);
+                $label = $att->original_filename ?? $att->description ?? pathinfo($att->getRawOriginal('file'), PATHINFO_FILENAME);
+                $label = \Illuminate\Support\Str::limit(str_replace('_', ' ', $label), 80);
                 $sources[] = ['type' => 'attachment', 'label' => $label, 'attachment_id' => $att->id];
             }
         }

@@ -303,7 +303,7 @@
                                 <ul class="list-group">
                                     @foreach ($row->attachments as $pub_file)
                                         <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <a href="{{ $pub_file->file }}" target="_blank"><i class="fa fa-paperclip text-muted"></i> {{ $pub_file->description ?? 'Attachment' }}</a>
+                                            <a href="{{ $pub_file->file }}" target="_blank" title="{{ e($pub_file->original_filename ?? $pub_file->description ?? '') }}"><i class="fa fa-paperclip text-muted"></i> {{ Str::limit($pub_file->original_filename ?? $pub_file->description ?? 'Attachment', 90) }}</a>
                                             <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
                                         </li>
                             @endforeach
@@ -837,6 +837,18 @@
             }
         });
 
+        function escapeHtml(str) {
+            if (str == null) return '';
+            return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes == null || isNaN(bytes)) return '';
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / 1048576).toFixed(1) + ' MB';
+        }
+
         // File input with ability to add multiple files incrementally
         var $input = $('#attachments');
         var existingFiles = []; // Store existing files
@@ -888,10 +900,11 @@
                 if (files && files.length > 0) {
                     var fileList = '<div class="mt-2"><small class="text-success"><strong>Selected files (' + files.length + '):</strong></small><ul class="list-unstyled mt-1">';
                     Array.from(files).forEach(function(file, index) {
+                        var label = (file.name && String(file.name).trim() !== '') ? file.name : ('File ' + (index + 1));
                         fileList += '<li class="mb-1">';
                         fileList += '<i class="fa fa-file text-muted"></i> ';
-                        fileList += '<span>' + file.name + '</span> ';
-                        fileList += '<small class="text-muted">(' + (file.size / 1024).toFixed(2) + ' KB)</small> ';
+                        fileList += '<span>' + escapeHtml(label) + '</span> ';
+                        fileList += '<small class="text-muted">(' + formatFileSize(file.size) + ')</small> ';
                         fileList += '<button type="button" class="btn btn-sm btn-link text-danger p-0 ml-2" onclick="removeFile(' + index + ')"><i class="fa fa-times"></i></button>';
                         fileList += '</li>';
                     });

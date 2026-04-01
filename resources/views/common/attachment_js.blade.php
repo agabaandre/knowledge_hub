@@ -48,7 +48,8 @@ async function extractPDFCover(pdfFile) {
             canvas.toBlob(function(blob) {
                 if (blob) {
                     // Create a File object from the blob
-                    const file = new File([blob], pdfFile.name.replace('.pdf', '_cover.png'), { type: 'image/png' });
+                    const coverName = pdfFile.name.replace(/\.pdf$/i, '_cover.png');
+                    const file = new File([blob], coverName || 'cover.png', { type: 'image/png' });
                     resolve(file);
                 } else {
                     reject(new Error('Failed to convert canvas to blob'));

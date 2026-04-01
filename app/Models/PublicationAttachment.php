@@ -4,10 +4,18 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Str;
 
 class PublicationAttachment extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'publication_id',
+        'file',
+        'description',
+        'original_filename',
+    ];
 
     public function getFileAttribute($value)
     {
@@ -49,13 +57,35 @@ class PublicationAttachment extends Model
         return $raw && publication_filename_is_pdf($raw);
     }
 
-    /** Real filename for download (basename of stored file). */
+    /** Suggested download name: human label + stored extension (stored disk name stays Laravel hash). */
     public function getDownloadFilenameAttribute()
     {
-        $raw = $this->getRawOriginal('file');
-        if (empty($raw)) {
+        $raw = $this->getRawOriginal('file') ?? '';
+        if ($raw === '') {
             return 'download';
         }
+
+        $storedExt = strtolower(pathinfo($raw, PATHINFO_EXTENSION) ?: 'bin');
+        if (preg_match('/\.pd$/i', $raw)) {
+            $storedExt = 'pdf';
+        }
+
+        $friendly = $this->getRawOriginal('original_filename')
+            ?: $this->getRawOriginal('description');
+
+        if ($friendly !== null && $friendly !== '') {
+            $friendly = basename(str_replace(["\0", "\r", "\n"], '', $friendly));
+            $stem = pathinfo($friendly, PATHINFO_FILENAME);
+            $stem = trim($stem) !== '' ? $stem : 'document';
+            $stem = preg_replace('/[^\pL\pN\s\-_().\[\]]+/u', '_', $stem);
+            $stem = trim(preg_replace('/_+/', '_', $stem), '._ ');
+            if ($stem === '') {
+                $stem = 'document';
+            }
+
+            return Str::limit($stem, 180, '') . '.' . $storedExt;
+        }
+
         $base = basename($raw);
         if (preg_match('/\.pd$/i', $base)) {
             return preg_replace('/\.pd$/i', '.pdf', $base);

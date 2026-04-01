@@ -58,7 +58,7 @@
                                      @if(@$publication && count(@$publication->attachments)>0)
                                      <h4 class="mt-3">Attachment(s): </h4>
                                         @foreach($publication->attachments as $attachment)
-                                             <div class="py-2 mt-1"><a target="_blank" href="{{ storage_link('uploads/publications/') }}{{$attachment->file}}"><i class="fa fa-file fa-2x"></i> {{$attachment->description}}</a></div>
+                                             <div class="py-2 mt-1"><a target="_blank" href="{{ storage_link('uploads/publications/') }}{{$attachment->file}}" title="{{ e($attachment->original_filename ?? $attachment->description ?? '') }}"><i class="fa fa-file fa-2x"></i> {{ Str::limit($attachment->original_filename ?? $attachment->description ?? 'Attachment', 90) }}</a></div>
                                         @endforeach
                                     @endif
                                 </div>
