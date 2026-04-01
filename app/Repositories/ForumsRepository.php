@@ -65,35 +65,6 @@ class ForumsRepository extends SharedRepo{
         });
     }
 
-    /**
-     * Forums visible on the main list for a logged-in user:
-     * - linked to a community they belong to, OR
-     * - they created, OR
-     * - not tied to any community (public / open to browse and join).
-     *
-     * When the user belongs to no communities, avoid whereIn('id', []) (always false) so public forums still show.
-     */
-    protected function scopeForumListForLoggedInUser($query, int $userId): void
-    {
-        $communityIds = CommunityOfPracticeMembers::where('user_id', $userId)
-            ->pluck('community_of_practice_id');
-        $forumIdsInCops = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communityIds)
-            ->pluck('forum_id');
-
-        $query->where(function ($q) use ($forumIdsInCops, $userId) {
-            if ($forumIdsInCops->isNotEmpty()) {
-                $q->where(function ($q2) use ($forumIdsInCops, $userId) {
-                    $q2->whereIn('id', $forumIdsInCops)
-                        ->orWhere('created_by', $userId)
-                        ->orWhereDoesntHave('communities');
-                });
-            } else {
-                $q->where('created_by', $userId)
-                    ->orWhereDoesntHave('communities');
-            }
-        });
-    }
-
     public function get(Request $request, $approved = 1, ?string $adminQueue = null){
 
         $rows_count = ($request->rows)?$request->rows:20;
@@ -149,16 +120,35 @@ class ForumsRepository extends SharedRepo{
 
         if (! $adminForumQueue) {
             if (current_user() && current_user()->id) {
-                // Protect forums by community targeting; always allow public (no COP) + own + COP-linked
+
+                //Protect Forums from non target audiences if targte audience was defined
+
                 if (! $request->community_id) {
-                    $this->scopeForumListForLoggedInUser($forums, (int) current_user()->id);
+
+                    $userId = (int) current_user()->id;
+                    $communties = CommunityOfPracticeMembers::where('user_id', $userId)
+                        ->pluck('community_of_practice_id');
+
+                    // Forums linked to communities the user belongs to
+                    $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communties)->pluck('forum_id');
+
+                    // Logged-in users must still see the same open (non–community-targeted) forums as guests,
+                    // plus forums they created and forums for COPs they joined. Never use whereIn(id, [])
+                    // (Laravel compiles that to "0 = 1"), which breaks the OR logic and can hide every thread.
+                    $forums->where(function ($q) use ($commForums, $userId) {
+                        $q->where('created_by', $userId)
+                            ->orWhereDoesntHave('communities');
+                        if ($commForums->isNotEmpty()) {
+                            $q->orWhereIn('id', $commForums);
+                        }
+                    });
                 } else {
                     $forums->whereHas('communities', function ($query) use ($request) {
                         $query->where('community_of_practice_id', $request->community_id);
                     });
                 }
             } else {
-                // Guests: only forums not tied to a community
+                //only those without targets
                 $forums->whereDoesntHave('communities');
             }
         }
@@ -205,8 +195,17 @@ class ForumsRepository extends SharedRepo{
         }
 
         if (current_user() && current_user()->id) {
-            if (! $request->community_id) {
-                $this->scopeForumListForLoggedInUser($forums, (int) current_user()->id);
+            if (!$request->community_id) {
+                $userId = (int) current_user()->id;
+                $communities = CommunityOfPracticeMembers::where('user_id', $userId)->pluck('community_of_practice_id');
+                $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communities)->pluck('forum_id');
+                $forums->where(function ($q) use ($commForums, $userId) {
+                    $q->where('created_by', $userId)
+                        ->orWhereDoesntHave('communities');
+                    if ($commForums->isNotEmpty()) {
+                        $q->orWhereIn('id', $commForums);
+                    }
+                });
             } else {
                 $forums->whereHas('communities', function ($q) use ($request) {
                     $q->where('community_of_practice_id', $request->community_id);
