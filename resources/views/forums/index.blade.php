@@ -168,24 +168,49 @@
     flex: 1;
 }
 
-.forum-meta-author-avatar {
-    width: calc(35px * 1.15);
-    height: calc(35px * 1.15);
+/* Author column: tall enough to read beside meta + actions */
+.forum-meta-actions-wrap {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.forum-meta-actions-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.forum-meta-actions-wrap .forum-meta {
+    border-top: none;
+    padding-top: 0.125rem;
+}
+
+.forum-author-avatar-large {
+    width: 4.5rem;
+    height: 4.5rem;
     border-radius: 50%;
     overflow: hidden;
     flex-shrink: 0;
     border: 2px solid #e2e8f0;
     background: #f8f9fa;
-    display: inline-flex;
+    display: flex;
     align-items: center;
     justify-content: center;
 }
 
-.forum-meta-author-avatar img {
+.forum-author-avatar-large img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
+}
+
+.forum-author-avatar-large > i {
+    font-size: 2rem;
+    color: var(--theme-color-primary, #119A48);
+    opacity: 0.85;
 }
 
 .forum-title {
@@ -563,17 +588,19 @@
                             @php
                                 $totalComments = $forum->total_comments ?? count($forum->comments);
                             @endphp
-                            <div class="forum-meta">
-                                <div class="meta-item">
+                            <div class="forum-meta-actions-wrap">
+                                <div class="forum-author-avatar-large">
                                     @if($authorPhotoUrl)
-                                        <span class="forum-meta-author-avatar">
-                                            <img src="{{ $authorPhotoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
-                                                 onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' aria-hidden=\'true\'></i>';">
-                                        </span>
+                                        <img src="{{ $authorPhotoUrl }}" alt="{{ $forum->user->name ?? 'User' }}"
+                                             onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fa fa-user\' aria-hidden=\'true\'></i>';">
                                     @else
                                         <i class="fa fa-user" aria-hidden="true"></i>
                                     @endif
-                                    <span>{{ $forum->user->name ?? 'Unknown' }}</span>
+                                </div>
+                                <div class="forum-meta-actions-body">
+                            <div class="forum-meta">
+                                <div class="meta-item">
+                                    <span class="fw-semibold" style="color: #334155;">{{ $forum->user->name ?? 'Unknown' }}</span>
                                 </div>
                                 <div class="meta-item">
                                     <i class="fa fa-clock"></i>
@@ -636,6 +663,8 @@
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
                                 @endauth
+                            </div>
+                                </div>
                             </div>
 
                             @php
