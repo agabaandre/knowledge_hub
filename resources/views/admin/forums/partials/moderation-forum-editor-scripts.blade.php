@@ -11,6 +11,7 @@
             if ($ta.data('forumModSummernote')) {
                 return;
             }
+            var initialHtml = $ta.val() || '';
             $ta.summernote({
                 placeholder: 'Post body',
                 tabsize: 2,
@@ -23,6 +24,9 @@
                     ['view', ['fullscreen', 'codeview']]
                 ]
             });
+            if (initialHtml) {
+                $ta.summernote('code', initialHtml);
+            }
             $ta.data('forumModSummernote', true);
         });
     }

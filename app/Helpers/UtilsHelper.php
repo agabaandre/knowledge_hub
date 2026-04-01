@@ -1261,6 +1261,31 @@ if (!function_exists('sanitize_rich_text_for_storage')) {
     }
 }
 
+if (! function_exists('forum_body_for_wysiwyg_editor')) {
+    /**
+     * Prepare stored forum HTML for a WYSIWYG (Summernote, etc.).
+     * Decodes HTML entities so real markup is edited visually (handles double-encoded paste).
+     */
+    function forum_body_for_wysiwyg_editor(?string $html): string
+    {
+        $html = (string) $html;
+        if ($html === '') {
+            return '';
+        }
+
+        $decoded = $html;
+        for ($i = 0; $i < 3; $i++) {
+            $prev = $decoded;
+            $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $prev) {
+                break;
+            }
+        }
+
+        return $decoded;
+    }
+}
+
 function cleanHtmlContent($htmlContent)
 {
     // Backward-compatible alias used widely in views
