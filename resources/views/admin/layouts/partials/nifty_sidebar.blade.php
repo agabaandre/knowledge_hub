@@ -61,7 +61,9 @@
         <li class="nav-item has-sub">
             <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-forums"><i class="fa fa-comments fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.forums') }}</span>@if(isset($pending_forums_count) && $pending_forums_count > 0)<span class="badge bg-danger rounded-pill ms-1">{{ $pending_forums_count }}</span>@endif</a>
             <ul class="mininav-content nav collapse" id="nav-forums">
-                <li class="nav-item"><a href="{{ url('admin/forums') }}" class="nav-link">{{ __('admin_nav.forums') }}</a></li>
+                <li class="nav-item"><a href="{{ url('admin/forums') }}" class="nav-link">{{ __('admin_nav.pending_approval_forums') }}</a></li>
+                <li class="nav-item"><a href="{{ url('admin/forums/approved') }}" class="nav-link">{{ __('admin_nav.approved_forums') }}</a></li>
+                <li class="nav-item"><a href="{{ url('admin/forums/rejected') }}" class="nav-link">{{ __('admin_nav.rejected_forums') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/forums/moderate') }}" class="nav-link">{{ __('admin_nav.moderate_forums') }}</a></li>
             </ul>
         </li>

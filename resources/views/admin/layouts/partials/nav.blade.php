@@ -148,11 +148,17 @@
                         <ul class="sub-menu">
                             <li aria-haspopup="true">
                                 <a href="{{ url('admin/forums') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
-                                    Forums
+                                    Pending approval
                                     @if(isset($pending_forums_count) && $pending_forums_count > 0)
                                         <span class="badge badge-danger badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $pending_forums_count }}</span>
                                     @endif
                                 </a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/forums/approved') }}" class="slide-item">Approved forums</a>
+                            </li>
+                            <li aria-haspopup="true">
+                                <a href="{{ url('admin/forums/rejected') }}" class="slide-item">Rejected forums</a>
                             </li>
                             <li aria-haspopup="true">
                                 <a href="{{ url('admin/forums/moderate') }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">

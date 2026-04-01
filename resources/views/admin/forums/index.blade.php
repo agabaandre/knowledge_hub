@@ -15,10 +15,15 @@
 <div class="row">
 	<div class="card col-lg-12">
 		<div class="filter-card">
-			<div class="card-header d-flex align-items-center justify-content-between">
-				<div>
+			<div class="card-header d-flex align-items-center justify-content-between flex-wrap" style="gap:12px;">
+				<div class="flex-grow-1">
 					<strong>{{ $title ?? 'Forums' }}</strong>
-					<small class="text-muted d-block">Search and manage discussion threads</small>
+					<small class="text-muted d-block">{{ $forum_list_subtitle ?? 'Search and manage discussion threads' }}</small>
+				</div>
+				<div class="btn-group btn-group-sm" role="group" aria-label="Forum queues">
+					<a href="{{ url('admin/forums') }}" class="btn {{ ($forum_admin_queue ?? '') === 'pending' ? 'btn-dark' : 'btn-outline-secondary' }}">Pending</a>
+					<a href="{{ url('admin/forums/approved') }}" class="btn {{ ($forum_admin_queue ?? '') === 'approved' ? 'btn-dark' : 'btn-outline-secondary' }}">Approved</a>
+					<a href="{{ url('admin/forums/rejected') }}" class="btn {{ ($forum_admin_queue ?? '') === 'rejected' ? 'btn-dark' : 'btn-outline-secondary' }}">Rejected</a>
 				</div>
 				@if(isset($pending_forums_count) && $pending_forums_count > 0)
 					<div class="dropdown nav-item">

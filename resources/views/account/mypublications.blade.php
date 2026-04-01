@@ -172,6 +172,9 @@
 			<div class="row mb-4">
 				<div class="col-12">
 					<div class="d-flex flex-wrap" style="gap: 0.5rem;">
+						<a href="{{ route('account.my-discussions') }}" class="btn btn-au btn-sm">
+							<i class="fa fa-comment-dots mr-1"></i> My forum posts
+						</a>
 						<a href="{{ route('account.my-forums') }}" class="btn btn-au btn-sm">
 							<i class="fa fa-comments mr-1"></i> My Forums
 						</a>

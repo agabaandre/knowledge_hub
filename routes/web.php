@@ -195,6 +195,9 @@ Route::group(["prefix" => "account", 'middleware' => ['auth', 'web']], function 
     Route::post("/update", [AuthController::class, 'update_profile'])->name('account.update');
     Route::post("/secureme", [AuthController::class, 'update_password'])->name('account.auth_update');
     Route::get("/my-forums", [ForumsController::class, 'myForums'])->name('account.my-forums');
+    Route::get("/my-discussions", [ForumsController::class, 'myDiscussions'])->name('account.my-discussions');
+    Route::get("/my-discussions/{forum}/edit", [ForumsController::class, 'editMyDiscussion'])->name('account.my-discussions.edit');
+    Route::post("/my-discussions/{forum}/resubmit", [ForumsController::class, 'saveMyDiscussion'])->name('account.my-discussions.resubmit');
     Route::get("/my-communities", [CommunitiesController::class, 'myCommunities'])->name('account.my-communities');
     Route::get("/chats", [AccountController::class, 'chats'])->name('account.chats');
     Route::post("/chats/delete", [AccountController::class, 'deleteChat'])->name('account.chats.delete');
@@ -360,11 +363,15 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix"=>"forums"],function(){
 
         Route::get("/",[ForumsAdminController::class,'index']);
+        Route::get("/approved",[ForumsAdminController::class,'approved']);
+        Route::get("/rejected",[ForumsAdminController::class,'rejected']);
         Route::get("/delete",[ForumsAdminController::class,'destroy']);
         Route::get("/moderate",[ForumsAdminController::class,'moderation']);
         Route::any("/approve",[ForumsAdminController::class,'approve']);
-        Route::any("/reject",[ForumsAdminController::class,'reject']);
+        Route::post("/reject",[ForumsAdminController::class,'reject']);
         Route::get("/details", [ForumsAdminController::class, 'details']);
+        Route::post("/moderation/update-pending", [ForumsAdminController::class, 'updatePending'])->name('admin.forums.moderation.update-pending');
+        Route::post("/moderation/grammar-assist", [ForumsAdminController::class, 'grammarAssist'])->name('admin.forums.moderation.grammar-assist');
 
     });
 

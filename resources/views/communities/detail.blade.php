@@ -348,20 +348,20 @@
                                 </a>
                                 <h5 class="community-featured-title">
                                     <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
-                                        {{ $publication->title }}
-                                    </a>
-                                </h5>
+                                            {{ $publication->title }}
+                                        </a>
+                                    </h5>
                                 <div class="community-featured-meta">
                                     @if($publication->author)
                                         <span><i class="fa fa-user mr-1"></i>{{ $publication->author->name ?? 'Unknown' }}</span>
                                     @endif
                                     <span class="ml-2"><i class="fa fa-clock-o mr-1"></i>{{ time_ago($publication->updated_at ?? $publication->created_at) }}</span>
                                 </div>
-                                @if($publication->description)
+                                    @if($publication->description)
                                     <p class="mb-0" style="text-align: justify;">
-                                        {!! \Illuminate\Support\Str::words(strip_tags($publication->description), 40, '...') !!}
-                                    </p>
-                                @endif
+                                            {!! \Illuminate\Support\Str::words(strip_tags($publication->description), 40, '...') !!}
+                                        </p>
+                                    @endif
                                 <div class="community-featured-actions">
                                     <a href="{{ url('records/resource') }}?id={{ $publication->id }}">Read More <i class="fa fa-arrow-right"></i></a>
                                     <span class="text-muted small"><i class="fa fa-eye mr-1"></i>{{ $publication->visits ?? 0 }} Visits</span>
@@ -465,7 +465,7 @@
                     <div class="input-group input-group-sm">
                         <input type="text" id="memberSearchInput" class="form-control" placeholder="Search members...">
                         <button type="button" class="btn btn-outline-secondary"><i class="fa fa-search"></i></button>
-                    </div>
+                                    </div>
                 </form>
                 <ul id="communityMembersList" class="list-unstyled mb-2"></ul>
                 <div id="communityMembersEmpty" class="text-muted mb-0" style="display:none;">No members found.</div>

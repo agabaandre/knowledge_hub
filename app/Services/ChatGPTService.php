@@ -491,4 +491,62 @@ class ChatGPTService implements AIModel{
         return $out;
     }
 
+    /**
+     * Grammar / spelling / punctuation only; preserve HTML structure and meaning.
+     *
+     * @return array{ok: true, html: string}|array{ok: false, error: string}
+     */
+    public function proofreadHtmlForGrammar(string $html): array
+    {
+        $key = config('ai.open_api_key');
+        if (empty($key)) {
+            return ['ok' => false, 'error' => 'OpenAI API key is not configured.'];
+        }
+
+        $html = $html ?? '';
+        if (mb_strlen($html) > 120000) {
+            return ['ok' => false, 'error' => 'Content is too long for AI proofreading (max 120,000 characters).'];
+        }
+
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$key,
+        ];
+
+        $system = 'You are a careful copy-editor for a public health discussion forum. '
+            .'Fix only grammar, spelling, punctuation, and obvious typos. '
+            .'Do not change meaning, facts, opinions, numbers, dates, names, or the author\'s tone. '
+            .'Do not add, remove, or reorder ideas; do not summarize or expand. '
+            .'Preserve ALL HTML tags, attributes, link URLs (href), lists, and block structure—only change visible text inside elements when needed for correctness. '
+            .'Keep the same language as the source. '
+            .'Output only the corrected HTML fragment with no markdown code fences and no explanation before or after.';
+
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => "Proofread this HTML:\n\n".$html],
+            ],
+            'max_tokens' => 8192,
+            'temperature' => 0.15,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null || $content === '') {
+            Log::warning('proofreadHtmlForGrammar: empty OpenAI response');
+
+            return ['ok' => false, 'error' => 'No usable response from the AI. Check the API key, model, and logs.'];
+        }
+
+        $out = trim($content);
+        $out = preg_replace('/^```html\s*/i', '', $out);
+        $out = preg_replace('/^```\s*/', '', $out);
+        $out = preg_replace('/```\s*$/', '', $out);
+        $out = trim($out);
+
+        return ['ok' => true, 'html' => $out];
+    }
+
 }

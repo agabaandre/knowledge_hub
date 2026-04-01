@@ -1,6 +1,7 @@
 <?php
 namespace App\Repositories;
 
+use App\Jobs\NotifyApprovers;
 use App\Jobs\SendMailJob;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CustomAttachment;
@@ -64,7 +65,7 @@ class ForumsRepository extends SharedRepo{
         });
     }
 
-    public function get(Request $request,$approved=1){
+    public function get(Request $request, $approved = 1, ?string $adminQueue = null){
 
         $rows_count = ($request->rows)?$request->rows:20;
         $forums = Forum::with([
@@ -83,13 +84,21 @@ class ForumsRepository extends SharedRepo{
             },
             'likes as total_likes'
         ]);
-        
-        // If approved=3 (all forums), prioritize pending approvals at the top
-        if($approved === 3) {
+
+        if ($adminQueue !== null && $adminQueue !== '') {
+            if ($adminQueue === 'pending') {
+                $forums->pendingApproval();
+            } elseif ($adminQueue === 'approved') {
+                $forums->where('status', 1)->where('is_approved', 1);
+            } elseif ($adminQueue === 'rejected') {
+                $forums->where('is_rejected', 1);
+            }
+        } elseif ($approved === 3) {
+            // All forums: pending first, then by date
             $forums->orderByRaw('CASE WHEN is_approved = 0 AND status = 0 THEN 0 ELSE 1 END')
-                   ->orderBy('created_at','desc');
+                   ->orderBy('created_at', 'desc');
         } else {
-            $forums->orderBy('created_at','desc');
+            $forums->orderBy('created_at', 'desc');
         }
 
         if ($request->filled('term') && strlen(trim($request->term)) > 0) {
@@ -128,13 +137,20 @@ class ForumsRepository extends SharedRepo{
             $forums->whereDoesntHave("communities");
         }
 
-        if($approved !== 3)
-        $forums->where('status',$approved);
+        if ($adminQueue === null || $adminQueue === '') {
+            if ($approved !== 3) {
+                $forums->where('status', $approved);
+            }
+        }
 
          //Access levels effect to query results
          $this->access_filter($forums);
 
-        $results =  $forums->paginate($rows_count);
+        if ($adminQueue !== null && $adminQueue !== '') {
+            $forums->orderBy('created_at', 'desc');
+        }
+
+        $results = $forums->paginate($rows_count)->withQueryString();
 
         return $results;
     }
@@ -237,6 +253,30 @@ class ForumsRepository extends SharedRepo{
         return $forums->paginate($rows_count);
     }
 
+    /**
+     * Forum threads created by the user (all moderation states), for account "My posts" list.
+     */
+    public function getAuthoredForumThreads(int $userId, Request $request)
+    {
+        $rows_count = $request->rows ? (int) $request->rows : 20;
+
+        $forums = Forum::with(['tags'])
+            ->where('created_by', $userId)
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            if ($term !== '') {
+                $forums->where(function ($q) use ($term) {
+                    $q->where('forum_title', 'like', '%' . $term . '%')
+                        ->orWhere('forum_description', 'like', '%' . $term . '%');
+                });
+            }
+        }
+
+        return $forums->paginate($rows_count)->withQueryString();
+    }
+
     public function save(Request $request){
 
         $forum = new Forum();
@@ -323,7 +363,7 @@ class ForumsRepository extends SharedRepo{
             $approveUrl = url('admin/forums/moderate') . '?id=' . $forum->id;
             
             // Dispatch notification to approvers
-            \App\Jobs\NotifyApprovers::dispatch(
+            NotifyApprovers::dispatch(
                 'forum',
                 $forum->id,
                 $forum->forum_title ?? 'Untitled Forum',
@@ -657,9 +697,9 @@ class ForumsRepository extends SharedRepo{
         $forum->update();
 
         $alert = array(
-            'title' => "Forum Post $forum->title Approved",
-            'body'=>'We are happy to inform you that your forum post has been approved and is live now',
-            'email'=>$forum->user->email
+            'title' => 'Forum post approved: '.($forum->forum_title ?? 'Your discussion'),
+            'body' => 'We are happy to inform you that your forum post has been approved and is live now.',
+            'email' => $forum->user->email,
         );
 
         SendMailJob::dispatch( $alert)->onQueue('default');
@@ -667,27 +707,157 @@ class ForumsRepository extends SharedRepo{
         return $forum;
     }
 
-    public function reject($id){
-
+    /**
+     * Update title/body for a forum still awaiting approval (moderation queue).
+     */
+    public function updatePendingModeration(int $id, string $title, string $descriptionHtml): bool
+    {
         $forum = Forum::find($id);
-        $forum->status =0;
-        $forum->is_approved =0;
-        $forum->is_rejected =1;
+        if (! $forum) {
+            return false;
+        }
+        if ((int) $forum->is_approved !== 0 || (int) $forum->status !== 0) {
+            return false;
+        }
+
+        $forum->forum_title = clean_unicode(strip_tags($title));
+        $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($descriptionHtml));
+        $forum->save();
+
+        return true;
+    }
+
+    /**
+     * Author updates a forum that is not yet published: pending approval or rejected (same fields as create).
+     * Clears rejection and notifies approvers only when the post was rejected.
+     */
+    public function updateUnpublishedForumByAuthor(Request $request, Forum $forum): bool
+    {
+        if (! current_user() || ! current_user()->id) {
+            return false;
+        }
+        if ((int) $forum->created_by !== (int) current_user()->id) {
+            return false;
+        }
+        // Published / live — authors cannot use this path
+        if ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
+            return false;
+        }
+
+        $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
+
+        $forum->forum_title = clean_unicode($request->title ?? '');
+        $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
+
+        if ($wasRejected) {
+            $forum->status = 0;
+            $forum->is_approved = 0;
+            $forum->is_rejected = 0;
+            if (DBSchema::hasColumn('forums', 'rejected_reason')) {
+                $forum->rejected_reason = null;
+            }
+            if (DBSchema::hasColumn('forums', 'rejected_by')) {
+                $forum->rejected_by = null;
+            }
+            if (DBSchema::hasColumn('forums', 'approved_by')) {
+                $forum->approved_by = null;
+            }
+        }
+
+        if ($request->hasFile('image')) {
+            $file = $request->file('image');
+            $file_name = md5_file($file->getRealPath());
+            $extension = $file->guessExtension();
+            $file_path = $file_name . '.' . $extension;
+            $file->move(storage_path() . '/app/public/uploads/forums/', $file_path);
+            $forum->forum_image = $file_path;
+        }
+
+        $forum->save();
+
+        ForumCommunityOfPractice::where('forum_id', $forum->id)->delete();
+
+        $copIds = array_values(array_filter($request->communities ?? [], function ($val) {
+            return ! is_null($val) && $val !== '' && (int) $val > 0;
+        }));
+        foreach ($copIds as $copId) {
+            $forumComm = new ForumCommunityOfPractice();
+            $forumComm->forum_id = $forum->id;
+            $forumComm->community_of_practice_id = (int) $copId;
+            $forumComm->save();
+        }
+
+        ForumTag::where('forum_id', $forum->id)->delete();
+
+        if ($request->tags) {
+            $tagIds = is_array($request->tags) ? $request->tags : (json_decode($request->tags, true) ?? []);
+            if (count($tagIds)) {
+                $tagTexts = Tag::whereIn('id', $tagIds)->pluck('tag_text')->toArray();
+                foreach ($tagTexts as $text) {
+                    $ft = new ForumTag();
+                    $ft->forum_id = $forum->id;
+                    $ft->tag = $text;
+                    $ft->save();
+                }
+            }
+        }
+
+        if ($request->hasFile('attachments') && $forum->id) {
+            $files = $request->file('attachments');
+            $this->save_attachments($files, $forum->id, 'forums');
+        }
+
+        if ($wasRejected && $forum->id && (int) $forum->status === 0 && (int) $forum->is_approved === 0) {
+            $forum->load('user');
+            $approveUrl = url('admin/forums/moderate') . '?id=' . $forum->id;
+            NotifyApprovers::dispatch(
+                'forum',
+                $forum->id,
+                $forum->forum_title ?? 'Untitled Forum',
+                $forum->forum_description ?? '',
+                $forum->user->name ?? current_user()->name ?? 'Unknown',
+                $approveUrl
+            )->onQueue('default');
+        }
+
+        return true;
+    }
+
+    public function reject($id, string $rejectedReason = ''): ?Forum
+    {
+        $forum = Forum::find($id);
+        if (! $forum) {
+            return null;
+        }
+
+        $reason = trim(clean_unicode(strip_tags($rejectedReason)));
+
+        $forum->status = 0;
+        $forum->is_approved = 0;
+        $forum->is_rejected = 1;
         if (DBSchema::hasColumn('forums', 'rejected_by')) {
-        $forum->rejected_by = current_user()->id;
+            $forum->rejected_by = current_user()->id;
         }
         if (DBSchema::hasColumn('forums', 'approved_by')) {
             $forum->approved_by = null;
         }
+        if (DBSchema::hasColumn('forums', 'rejected_reason')) {
+            $forum->rejected_reason = $reason !== '' ? $reason : null;
+        }
         $forum->update();
 
-        $alert = array(
-            'title' => "Forum Post $forum->title Rejected",
-            'body'=>'We are sorry to inform you that your forum post has been rejected',
-            'email'=>$forum->user->email
-        );
+        $body = 'We are sorry to inform you that your forum post was not approved.';
+        if ($reason !== '') {
+            $body .= "\n\nReason provided by the moderator:\n".$reason;
+        }
 
-        SendMailJob::dispatch( $alert)->onQueue('default');
+        $alert = [
+            'title' => 'Forum post not approved: '.($forum->forum_title ?? 'Your discussion'),
+            'body' => $body,
+            'email' => $forum->user->email,
+        ];
+
+        SendMailJob::dispatch($alert)->onQueue('default');
 
         return $forum;
     }

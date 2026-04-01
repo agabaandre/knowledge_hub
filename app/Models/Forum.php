@@ -36,6 +36,18 @@ class Forum extends Model
         return $userId ? $this->likes()->where('user_id', $userId)->exists() : false;
     }
 
+    /**
+     * Forums awaiting moderator approval (not rejected).
+     */
+    public function scopePendingApproval($query)
+    {
+        return $query->where('is_approved', 0)
+            ->where('status', 0)
+            ->where(function ($q) {
+                $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+            });
+    }
+
     public function communities(){
        
         return $this->hasManyThrough(

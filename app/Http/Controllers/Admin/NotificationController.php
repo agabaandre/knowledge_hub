@@ -18,10 +18,8 @@ class NotificationController extends Controller
      */
     public function getPendingCounts(Request $request)
     {
-        // Count pending forums (not approved, status = 0)
-        $pending_forums_count = Forum::where('is_approved', 0)
-            ->where('status', 0)
-            ->count();
+        // Count forums awaiting approval (excludes rejected)
+        $pending_forums_count = Forum::pendingApproval()->count();
 
         // Count pending publications (not approved)
         $pending_publications_count = Publication::where('is_approved', 0)

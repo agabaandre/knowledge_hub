@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\CustomAttachment;
+use App\Models\Forum;
+use App\Models\ForumCommunityOfPractice;
+use App\Models\Tag;
 use App\Repositories\ForumsRepository;
 use App\Services\OfficeDocumentToPdfService;
 use Illuminate\Http\Request;
@@ -183,6 +186,82 @@ class ForumsController extends Controller
     public function create(Request $request)
     {
         return view('forums.create');
+    }
+
+    public function myDiscussions(Request $request)
+    {
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $data['threads'] = $this->forumsRepo->getAuthoredForumThreads((int) auth()->id(), $request);
+
+        return view('account.my_discussions', $data);
+    }
+
+    public function editMyDiscussion(Forum $forum)
+    {
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
+        if ((int) $forum->created_by !== (int) auth()->id()) {
+            abort(403);
+        }
+        if ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
+            abort(403, 'Published posts cannot be edited here.');
+        }
+
+        $forum->load(['tags']);
+        $selectedCommunityIds = ForumCommunityOfPractice::where('forum_id', $forum->id)
+            ->pluck('community_of_practice_id')
+            ->map(function ($id) {
+                return (int) $id;
+            })
+            ->toArray();
+
+        $tagTexts = $forum->tags->pluck('tag')->filter()->values()->toArray();
+        $selectedTagIds = [];
+        if (count($tagTexts)) {
+            $selectedTagIds = Tag::whereIn('tag_text', $tagTexts)->pluck('id')->map(function ($id) {
+                return (int) $id;
+            })->toArray();
+        }
+
+        return view('account.edit_forum_post', [
+            'forum' => $forum,
+            'selectedCommunityIds' => $selectedCommunityIds,
+            'selectedTagIds' => $selectedTagIds,
+        ]);
+    }
+
+    public function saveMyDiscussion(Request $request, Forum $forum)
+    {
+        if (! auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        $request->validate([
+            'title' => 'required|string|max:500',
+            'description' => 'required|string|max:200000',
+        ]);
+
+        $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
+
+        $ok = $this->forumsRepo->updateUnpublishedForumByAuthor($request, $forum);
+        if (! $ok) {
+            return back()
+                ->withErrors(['form' => 'Could not update this post. You may not be the author, or it may already be published.'])
+                ->withInput();
+        }
+
+        $message = $wasRejected
+            ? 'Your discussion was resubmitted for approval.'
+            : 'Your changes were saved. Your post is still awaiting approval.';
+
+        return redirect()
+            ->route('account.my-discussions')
+            ->with('message', $message)
+            ->with('alert_class', 'success');
     }
 
     

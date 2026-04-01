@@ -5,6 +5,8 @@
     $isForumsPage = request()->is('forums*') || request()->routeIs('forums.*');
     $isCommunitiesDetailPage = request()->is('communities/detail*') || request()->routeIs('community.detail');
     $isPublishPage = request()->routeIs('account.publish') || request()->routeIs('account.publication') || request()->is('account/publish*');
+    $isMyDiscussionsPage = request()->routeIs('account.my-discussions') || request()->routeIs('account.my-discussions.edit');
+    $isPublicationsAccountPage = request()->routeIs('account.publications') || request()->routeIs('account.publications.edit');
     $isAuthenticated = auth()->check();
     // If $forceShow is set to true, bypass the page check (used when explicitly included in content)
     $forceShow = $forceShow ?? false;
@@ -212,16 +214,16 @@
                 <span>My Chats</span>
             </a>
             
-            <a href="{{ route('account.publish') }}" 
-               class="secondary-nav-link {{ request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}"
-               title="Publish a Resource">
+            <a href="{{ route('account.publications') }}" 
+               class="secondary-nav-link {{ $isPublicationsAccountPage || request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}"
+               title="My publications">
                 <i class="fa fa-plus-circle"></i>
                 <span>Publish Resource</span>
             </a>
             
-            <a href="{{ route('forums.create') }}" 
-               class="secondary-nav-link {{ request()->routeIs('forums.create') ? 'active' : '' }}"
-               title="Start Discussion">
+            <a href="{{ route('account.my-discussions') }}" 
+               class="secondary-nav-link {{ $isMyDiscussionsPage || request()->routeIs('forums.create') ? 'active' : '' }}"
+               title="My forum posts">
                 <i class="fa fa-comments"></i>
                 <span>Start Discussion</span>
             </a>
