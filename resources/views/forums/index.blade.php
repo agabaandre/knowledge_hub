@@ -263,6 +263,27 @@
     color: var(--theme-color-primary, #119A48);
 }
 
+.forum-meta .meta-item.forum-meta-author-text {
+    align-items: flex-start;
+    max-width: min(100%, 22rem);
+}
+
+.forum-meta-author-name {
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 0.95rem;
+    line-height: 1.25;
+}
+
+.forum-meta-author-title {
+    display: block;
+    font-size: 0.8125rem;
+    font-weight: 400;
+    color: #64748b;
+    line-height: 1.35;
+    margin-top: 0.15rem;
+}
+
 .forum-tags {
     display: flex;
     flex-wrap: wrap;
@@ -599,8 +620,13 @@
                                 </div>
                                 <div class="forum-meta-actions-body">
                             <div class="forum-meta">
-                                <div class="meta-item">
-                                    <span class="fw-semibold" style="color: #334155;">{{ $forum->user->name ?? 'Unknown' }}</span>
+                                <div class="meta-item forum-meta-author-text">
+                                    <div>
+                                        <span class="forum-meta-author-name">{{ $forum->user->name ?? 'Unknown' }}</span>
+                                        @if($forum->user && trim((string) ($forum->user->job_title ?? '')) !== '')
+                                            <span class="forum-meta-author-title">{{ $forum->user->job_title }}</span>
+                                        @endif
+                                    </div>
                                 </div>
                                 <div class="meta-item">
                                     <i class="fa fa-clock"></i>
