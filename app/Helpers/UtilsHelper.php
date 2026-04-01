@@ -547,7 +547,7 @@ function get_file_type($file_path=null,$pub_url=null){
     $mime_type = null;
 
     if (!empty($file_path) && is_string($file_path) && file_exists($file_path)) {
-        $mime_type = getFileMimeType($file_path);
+   $mime_type = getFileMimeType($file_path);
         if ($mime_type && strtolower($mime_type) !== 'file not found') {
             $mime_type = strtolower($mime_type);
             $mime_type = str_replace('application/', '', $mime_type);
@@ -582,7 +582,7 @@ function get_file_type($file_path=null,$pub_url=null){
     }
     if (!$type)
         $type = PublicationType::where('name','like','%other%')->first();
-
+ 
     return $type;
 }
 
@@ -1095,7 +1095,7 @@ if (!function_exists('sanitize_rich_text_for_display')) {
 
         $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
 
-        libxml_use_internal_errors(true);
+    libxml_use_internal_errors(true);
         $dom = new \DOMDocument('1.0', 'UTF-8');
         $wrapper = '<div id="rich-root">' . $decoded . '</div>';
         $loaded = @$dom->loadHTML('<?xml encoding="UTF-8">' . $wrapper);

@@ -227,6 +227,22 @@
         color: #ffffff;
         text-decoration: none;
     }
+    /* Full-width hero video inside the title card (16:9) */
+    .publication-hero-video {
+        width: 100%;
+        aspect-ratio: 16 / 9;
+        background: #000;
+    }
+    .publication-hero-video iframe,
+    .publication-hero-video video {
+        width: 100%;
+        height: 100%;
+        border: 0;
+        display: block;
+    }
+    .publication-hero-video video {
+        object-fit: contain;
+    }
     
     /* A4-like PDF Preview Modal Styles */
     #previewModal .modal-dialog {
@@ -456,9 +472,6 @@
             <div class="col-lg-8">
                 <!-- Title and Info Section with Cover Image -->
                 <div class="card-md mb-3">
-                    <div class="row">
-                        <!-- Cover Image - Inside Card -->
-                        <div class="col-md-4 text-center mb-3 mb-md-0">
                             @php
                                 // Get image with proper fallback logic like top_searches
                                 $image_link = $publication->cover ?? $publication->image_url ?? null;
@@ -484,30 +497,34 @@
                                 $embedUrl = get_video_embed_url($pubUrl);
                                 $directVideo = is_direct_video_file_url($pubUrl);
                                 $isVideoLink = is_video_platform_url($pubUrl);
+                                $showFullWidthVideo = ($publication->is_video || $isVideoLink) && $pubUrl !== '' && ($embedUrl || $directVideo);
                             @endphp
-                            @if (($publication->is_video || $isVideoLink) && !empty($pubUrl))
+                            @if ($showFullWidthVideo)
                                 @if ($embedUrl)
-                                    <div class="w-100 shadow rounded" style="overflow: hidden; background: #000;">
+                                    <div class="publication-hero-video shadow rounded overflow-hidden mb-3">
                                         <iframe
                                             src="{{ $embedUrl }}"
                                             title="{{ $publication->title }} - Video Preview"
                                             frameborder="0"
                                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
                                             referrerpolicy="strict-origin-when-cross-origin"
-                                            allowfullscreen
-                                            style="width:100%; height:250px;"></iframe>
+                                            allowfullscreen></iframe>
                                     </div>
                                 @elseif ($directVideo)
-                                    <video controls playsinline webkit-playsinline preload="metadata" class="img-fluid shadow rounded" style="max-height: 250px; width: 100%; background:#000;">
-                                        <source src="{{ $pubUrl }}">
-                                        Your browser does not support HTML5 video.
-                                    </video>
-                                @else
-                                    <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                                    <div class="publication-hero-video shadow rounded overflow-hidden mb-3">
+                                        <video controls playsinline webkit-playsinline preload="metadata">
+                                            <source src="{{ $pubUrl }}">
+                                            Your browser does not support HTML5 video.
+                                        </video>
+                                    </div>
                                 @endif
-                            @else
-                                <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
                             @endif
+                    <div class="row">
+                        <!-- Cover Image - Inside Card -->
+                        <div class="col-md-4 text-center mb-3 mb-md-0">
+                            @unless ($showFullWidthVideo)
+                                <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                            @endunless
                             
                             <!-- Source, Visits, Year, Comments below image -->
                             <div class="mt-3 text-left" style="font-size: 0.9rem;">

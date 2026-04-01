@@ -108,6 +108,24 @@
                 <strong>Please Note:</strong> All fields marked with a <span class="text-danger">*</span> (red asterisk) are <strong>required</strong>. Please ensure you fill in all required fields before proceeding to Step 2.
                 </div>
 
+            <div class="alert mb-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #119A48; padding: 14px 18px; border-radius: 4px;">
+                <div class="mb-3">
+                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-file-pdf-o text-danger mr-1"></i>Documents</strong>
+                    <p class="mb-0 text-muted small" style="line-height: 1.55;">
+                        <strong class="text-body">PDF is the recommended format</strong> for reports, strategies, manuals, and similar materials. It gives the most reliable in-browser preview, downloads, accessibility, and text tools on the Hub. You can still upload Word, Excel, PowerPoint, or images when needed.
+                    </p>
+                </div>
+                <div class="mb-0">
+                    <strong class="d-block mb-1" style="color: #0f172a;"><i class="fa fa-youtube-play text-danger mr-1"></i>Videos (e.g. YouTube, Vimeo)</strong>
+                    <ol class="mb-0 text-muted small pl-3" style="line-height: 1.55;">
+                        <li class="mb-1">Choose <strong class="text-body">External Link</strong> — do not use Attachment for a video that is already hosted online.</li>
+                        <li class="mb-1">Paste the <strong class="text-body">full video URL</strong> from your browser’s address bar, for example <code class="small">https://www.youtube.com/watch?v=…</code> or a <code class="small">youtu.be/…</code> short link.</li>
+                        <li class="mb-1">Turn on <strong class="text-body">Embedded On Page</strong> so visitors can play the video on the resource page.</li>
+                        <li class="mb-0">Add a clear title and description (and the rest of the metadata) so the resource is easy to find and understand.</li>
+                    </ol>
+                </div>
+            </div>
+
             <div class="row" style="margin-top:12px;">
                 <div class="col-lg-12 mb-2" style="margin-left:12px !important;">
                     <div class="d-flex flex-wrap align-items-center" style="gap:20px;">
@@ -135,9 +153,9 @@
                         <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file (PDF, Word, images, etc.). We’ll extract a summary from PDFs where possible.</small>
-                                    <small class="text-muted d-block"><strong>External Link</strong>: Provide a URL to content hosted elsewhere.</small>
-                                    <small class="text-muted d-block"><strong>Embedded On Page</strong>: Display the resource directly on the page (use for embeddable content like videos or interactive views).</small>
+                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file from your device. <strong>PDF is recommended</strong> for documents; Word, Excel, PowerPoint, images, audio, and video files are also supported.</small>
+                                    <small class="text-muted d-block"><strong>External Link</strong>: Paste a URL to content hosted elsewhere (e.g. a YouTube or Vimeo page). Required when you are not uploading a file.</small>
+                                    <small class="text-muted d-block"><strong>Embedded On Page</strong>: Show the linked content inside the resource page — use this for videos and other embeddable content so users can view it without leaving the Hub.</small>
                                 </div>
                                 <div class="col-md-6">
                                     @if (is_admin())
@@ -364,7 +382,7 @@
                     </div>
                     <div>
                         <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description and extracting metadata...</strong>
-                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation from your uploaded document.</p>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation from your uploaded document. This is only a draft to help you publish faster—always review and edit before you submit.</p>
                 </div>
             </div>
         </div>
@@ -377,6 +395,10 @@
                                 <span class="text-danger">*</span>
                             @endif
                         </label>
+                        <div class="alert alert-warning py-2 px-3 mb-2 small" role="alert" style="border-left: 4px solid #f0ad4e;">
+                            <strong><i class="fa fa-exclamation-triangle mr-1"></i>AI-assisted summary:</strong>
+                            If you use automatically generated text, it is only there to help you publish faster. You are responsible for the final content—<strong>please read it carefully, correct any errors, and add anything missing</strong>. Inaccurate, incomplete, or generic descriptions are a common reason resources are <strong>rejected</strong> during review.
+                        </div>
                         <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" {{ ($requiredFields['description'] ?? true) ? 'required=""' : '' }}>{!! $row->description ?? old('description') !!}</textarea>
                         @php
                             $minWords = settings()->publication_min_words ?? 150;
