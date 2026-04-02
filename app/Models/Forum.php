@@ -11,6 +11,16 @@ class Forum extends Model
     use HasFactory;
 
     public $timestamps = false;
+
+    /**
+     * Timestamps are manual ($timestamps = false) but columns exist; cast so views and APIs
+     * can use Carbon helpers (e.g. diffForHumans()) on created_at / updated_at.
+     */
+    protected $casts = [
+        'created_at' => 'datetime',
+        'updated_at' => 'datetime',
+    ];
+
     protected $appends = ['attachments'];
 
     public function comments(){
