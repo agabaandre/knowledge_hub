@@ -1,7 +1,21 @@
 @php
-    $categorySelected = old('data_category_id', @$search->data_category_id ?? @$search->category ?? '');
-    $fileCategorySelected = old('file_category_id', @$search->file_category_id ?? '');
-    $fileTypeSelected = old('file_type_id', @$search->file_type_id ?? @$search->file_type ?? '');
+    $facetScalarForSelect = function ($value) {
+        if ($value === null || $value === '' || $value === 'all') {
+            return '';
+        }
+        if (is_array($value)) {
+            $ids = array_values(array_filter(array_map('intval', $value), function ($id) {
+                return $id > 0;
+            }));
+
+            return $ids !== [] ? $ids[0] : '';
+        }
+
+        return $value;
+    };
+    $categorySelected = $facetScalarForSelect(old('data_category_id', @$search->data_category_id ?? @$search->category ?? ''));
+    $fileCategorySelected = $facetScalarForSelect(old('file_category_id', @$search->file_category_id ?? ''));
+    $fileTypeSelected = $facetScalarForSelect(old('file_type_id', @$search->file_type_id ?? @$search->file_type ?? ''));
     // Desktop: 4 filters per row (col-lg-3). Tablet: 2 per row. Mobile: full width.
     $advCol = 'col-12 col-sm-6 col-lg-3 mb-3';
 @endphp
