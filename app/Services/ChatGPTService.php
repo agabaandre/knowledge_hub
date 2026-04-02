@@ -620,17 +620,33 @@ class ChatGPTService implements AIModel{
             'Authorization: Bearer '.$apiKey,
         ];
 
-        $system = 'You are a careful public health writer for the Africa CDC Knowledge Hub. '
-            .'Write accurate, educational facts about health in Africa: disease prevention, health systems, UHC, immunization, '
-            .'maternal and child health, NCDs, mental health, WASH, climate and health, outbreaks, research, and regional cooperation. '
-            .'Do not invent precise statistics or dates; use cautious wording (“many countries”, “often”, “remains a challenge”) when a single number is not widely published. '
-            .'Each fact must be distinct. Tone: professional, hopeful, evidence-minded.';
+        $system = 'You are an evidence-focused public health editor for the Africa CDC Knowledge Hub. '
+            .'Your job is to write short “Did you know?” facts about **real health issues, programmes, and research in Africa**. '
+            .'Every fact must be grounded in information that is **actually reported or published** by reputable institutions—never invent numbers. '
+            .'**Prioritize statistics and quantitative claims** (coverage rates, mortality reductions, people on treatment, programme scale, budgets, survey findings, DALYs, etc.) when you can attribute them to a credible source type below. '
+            .'**Draw themes and figures from these kinds of sources (by name in the text where appropriate):** '
+            .'WHO and **WHO Regional Office for Africa (WHO AFRO)**; **World Bank** (e.g. health expenditure, development indicators); **USAID** health and global health security programmes; **PEPFAR** (HIV treatment, prevention, lab support); '
+            .'**national and sub-national Ministry of Health** initiatives across African countries; **Africa CDC** and AU-aligned health initiatives; '
+            .'**African universities and research institutions** (e.g. national medical schools, INDEPTH Network sites, African-led clinical and public health studies) and partners such as **IHME/GBD** where they report Africa-relevant estimates. '
+            .'**Rules:** (1) Include **at least one specific number, percentage, ratio, or count** in the summary or description whenever a well-cited figure exists in the public record; if only a **range or order of magnitude** is consistently reported, state it carefully and name the source type. '
+            .'(2) **Name the institution or programme family** (e.g. “WHO AFRO”, “World Bank”, “PEPFAR”, “USAID”, “national Ministry of Health”, a named university or survey such as DHS/MICS) so readers see where the knowledge comes from. '
+            .'(3) **Do not fabricate** exact statistics, years, or study names. If you cannot recall a defensible figure, use a **qualitative fact** still tied to a real programme or report type, or a **broad documented trend** without a fake number. '
+            .'(4) Cover **diverse topics**: HIV/TB/malaria, immunization, maternal-newborn-child health, NCDs, mental health, WASH, health financing, human resources, labs, surveillance, outbreak response, and **Africa-led research**. '
+            .'(5) Each fact must be **distinct** and **Africa-focused** (region, subregion, or named African countries). Tone: professional, precise, and hopeful. '
+            .'(6) The **detail text (description)** is the main read: it must be **substantive and informative**—not a thin repeat of the summary. Pack in **several statistics or quantitative comparisons** where the public record supports them (e.g. coverage vs target, change over a documented period, regional vs global contrast, burden in DALYs or deaths, cohort sizes from major surveys). '
+            .'Add **brief context** (who benefits, which countries or populations, programme mechanism or policy lever) so a general reader understands **why the numbers matter**.';
 
         $user = 'Return a single JSON object with key "facts" whose value is an array of exactly '.$count.' objects. '
-            .'Each object must have: "title" (short headline, max 90 characters), '
-            .'"summary" (1–2 sentences for a card teaser, max 320 characters), '
-            .'"description" (3–5 sentences for a detail page, max 1500 characters). '
-            .'Output only valid JSON, no markdown fences.';
+            .'Each object must have: '
+            .'"title" (short headline, max 90 characters; may include a key number if it fits); '
+            .'"summary" (1–2 sentences for a card teaser, max 380 characters; **must include at least one statistic or quantitative comparison** when a supportable figure exists, plus a **source cue** such as WHO, World Bank, USAID, PEPFAR, Ministry of Health, Africa CDC, or an African university/research body); '
+            .'"description" (the **full detail view**): write **8–12 sentences**, max **4500 characters**. '
+            .'Requirements for description: (a) include **at least three distinct quantitative elements** when supportable—e.g. percentages, counts, rates, ratios, years of comparison, or survey-based estimates—not the same number repeated; '
+            .'(b) weave in **why it matters** for health equity, systems, or outcomes in Africa; '
+            .'(c) name **geographic scope** (region, multiple countries, or one country if the fact is national); '
+            .'(d) mention **relevant programmes, data types, or institution families** (WHO AFRO, World Bank WDI, DHS/MICS, PEPFAR, USAID, MoH, Africa CDC, university or research network) without inventing specific report titles; '
+            .'(e) where useful, add **one line of policy or programme implication** (scale-up, financing, integration)—still factual, not advocacy slogans. '
+            .'Do not pad with filler; every sentence should add information. Output only valid JSON, no markdown fences.';
 
         $payload = [
             'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
@@ -639,7 +655,7 @@ class ChatGPTService implements AIModel{
                 ['role' => 'user', 'content' => $user],
             ],
             'max_tokens' => 8192,
-            'temperature' => 0.65,
+            'temperature' => 0.45,
         ];
 
         $response = $this->sendRequest($endpoint, $headers, $payload);
@@ -658,7 +674,7 @@ class ChatGPTService implements AIModel{
             $title = Str::limit(trim((string) ($row['title'] ?? '')), 255, '');
             $summary = Str::limit(trim((string) ($row['summary'] ?? '')), 2000, '');
             $description = trim((string) ($row['description'] ?? $row['summary'] ?? ''));
-            $description = Str::limit($description, 6000, '');
+            $description = Str::limit($description, 8000, '');
             if ($title === '' || $summary === '') {
                 continue;
             }
