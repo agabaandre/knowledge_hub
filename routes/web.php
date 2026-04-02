@@ -521,6 +521,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/resend_invitation", [CommsOfPracticeController::class, 'resendInvitation'])->name('admin.commsofpractice.resendInvitation');
         Route::post("/delete_invitation", [CommsOfPracticeController::class, 'deleteInvitation'])->name('admin.commsofpractice.deleteInvitation');
         Route::post("/bulk_invite", [CommsOfPracticeController::class, 'bulkInviteFromCsv'])->name('admin.commsofpractice.bulkInvite');
+        Route::get("/participants", [CommsOfPracticeController::class, 'participants'])->name('admin.commsofpractice.participants');
         Route::get('/{id}', [CommsOfPracticeController::class, 'show'])->name('admin.commsofpractice.details');
     });
 

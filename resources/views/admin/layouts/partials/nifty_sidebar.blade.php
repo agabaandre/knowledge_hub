@@ -48,7 +48,10 @@
                 <li class="nav-item"><a href="{{ route('admin.rss_feeds.index') }}" class="nav-link">{{ __('admin_nav.rss_feeds') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.rss_staging.index') }}" class="nav-link">{{ __('admin_nav.rss_staging') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.participant-badges.index') }}" class="nav-link">{{ __('admin_nav.participant_badge_management') }}</a></li>
-                @can('view_content_requests')<li class="nav-item"><a href="{{ route('admin.content-requests.index') }}" class="nav-link"><i class="fa fa-bell me-1 {{ (isset($pending_content_requests_count) && $pending_content_requests_count > 0) ? 'text-warning' : '' }}"></i>{{ __('admin_nav.content_requests') }} @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)<span class="badge bg-danger ms-1 rounded-pill">{{ $pending_content_requests_count > 99 ? '99+' : $pending_content_requests_count }}</span>@endif</a></li>@endcan
+                @can('view_content_requests')
+                <li class="nav-item"><a href="{{ route('admin.content-requests.index') }}" class="nav-link"><i class="fa fa-bell me-1 {{ (isset($pending_content_requests_count) && $pending_content_requests_count > 0) ? 'text-warning' : '' }}"></i>{{ __('admin_nav.content_requests') }} @if(isset($pending_content_requests_count) && $pending_content_requests_count > 0)<span class="badge bg-danger ms-1 rounded-pill">{{ $pending_content_requests_count > 99 ? '99+' : $pending_content_requests_count }}</span>@endif</a></li>
+                <li class="nav-item"><a href="{{ route('admin.content-requests.index', ['status' => 'processed']) }}" class="nav-link"><i class="fa fa-check-circle me-1 text-success"></i>{{ __('admin_nav.processed_content_requests') }} @if(isset($processed_content_requests_count) && $processed_content_requests_count > 0)<span class="badge bg-success ms-1 rounded-pill">{{ $processed_content_requests_count > 99 ? '99+' : $processed_content_requests_count }}</span>@endif</a></li>
+                @endcan
                 @can('manage_experts')<li class="nav-item"><a href="{{ url('admin/experts') }}" class="nav-link">{{ __('admin_nav.roster_of_experts') }}</a></li>@endcan
                 @can('manage_facts')<li class="nav-item"><a href="{{ url('admin/facts') }}" class="nav-link">{{ __('admin_nav.facts') }}</a></li>@endcan
                 @can('view_quotes')<li class="nav-item"><a href="{{ url('admin/quotes') }}" class="nav-link">{{ __('admin_nav.quotes') }}</a></li>@endcan
@@ -73,7 +76,13 @@
                 <li class="nav-item"><a href="{{ url('admin/courses') }}" class="nav-link">{{ __('admin_nav.courses') }}</a></li>
             </ul>
         </li>
-        <li class="nav-item"><a href="{{ url('admin/commsofpractice') }}" class="nav-link mininav-toggle"><i class="fa fa-users fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.cops') }}</span>@if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)<span class="badge bg-danger rounded-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>@endif</a></li>
+        <li class="nav-item has-sub">
+            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-cops"><i class="fa fa-users fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.cops') }}</span>@if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)<span class="badge bg-danger rounded-pill ms-1" style="background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>@endif</a>
+            <ul class="mininav-content nav collapse" id="nav-cops">
+                <li class="nav-item"><a href="{{ url('admin/commsofpractice') }}" class="nav-link">{{ __('admin_nav.manage_cops') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.commsofpractice.participants') }}" class="nav-link">{{ __('admin_nav.cop_participants_directory') }}</a></li>
+            </ul>
+        </li>
         @endcan
         @can('view_events')
         <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link mininav-toggle"><i class="pli-calendar-4 fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.events') }}</span></a></li>

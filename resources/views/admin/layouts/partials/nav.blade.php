@@ -102,6 +102,14 @@
                                     @endif
                                 </a>
                             </li>
+                            <li aria-haspopup="true">
+                                <a href="{{ route('admin.content-requests.index', ['status' => 'processed']) }}" class="slide-item" style="position: relative; display: inline-block; width: 100%;">
+                                    <i class="fa fa-check-circle mr-1 text-success"></i>Processed Content Requests
+                                    @if(isset($processed_content_requests_count) && $processed_content_requests_count > 0)
+                                        <span class="badge badge-success badge-pill" style="position: absolute; top: 50%; right: 10px; transform: translateY(-50%); min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px;">{{ $processed_content_requests_count > 99 ? '99+' : $processed_content_requests_count }}</span>
+                                    @endif
+                                </a>
+                            </li>
                             @endcan
                             @can('manage_experts')
                                 <li aria-haspopup="true"><a href="{{ url('admin/experts') }}">Roster of Experts</a></li>
@@ -185,12 +193,17 @@
 
             @can('view_forumns')
                 <li aria-haspopup="true">
-                    <a href="{{ url('admin/commsofpractice') }}" class="sub-icon" style="position: relative;">
+                    <a href="#" class="sub-icon" style="position: relative;">
                         <i class=""></i>COPs
                         @if(isset($pending_cop_approvals_count) && $pending_cop_approvals_count > 0)
                             <span class="badge badge-danger badge-pill" style="position: absolute; top: 0px; right: -8px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px; background:#dc3545!important;color:#fff!important;">{{ $pending_cop_approvals_count }}</span>
                         @endif
+                        <i class="fe fe-chevron-down horizontal-icon"></i>
                     </a>
+                    <ul class="sub-menu">
+                        <li aria-haspopup="true"><a href="{{ url('admin/commsofpractice') }}" class="slide-item">Manage COPs</a></li>
+                        <li aria-haspopup="true"><a href="{{ route('admin.commsofpractice.participants') }}" class="slide-item">COP Participants Directory</a></li>
+                    </ul>
                 </li>
             @endcan
 

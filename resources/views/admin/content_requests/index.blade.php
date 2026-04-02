@@ -122,6 +122,7 @@
                                                 <span class="badge badge-success">
                                                     <i class="fa fa-check-circle mr-1"></i>Processed
                                                 </span>
+                                                <br><small class="text-muted">Method: {{ $request->processingMethodLabel() }}</small>
                                                 @if($request->processedBy)
                                                     <br><small class="text-muted">By: {{ $request->processedBy->name }}</small>
                                                 @endif
@@ -172,6 +173,9 @@
                                                             data-subject="{{ $request->subject }}"
                                                             data-links="{{ $request->content_links }}"
                                                             data-comments="{{ $request->admin_comments }}"
+                                                            data-processed-by="{{ $request->processedBy->name ?? 'Unknown' }}"
+                                                            data-processed-at="{{ $request->processed_at ? $request->processed_at->format('M d, Y H:i') : '' }}"
+                                                            data-process-method="{{ $request->processingMethodLabel() }}"
                                                             title="View Processed Details">
                                                         <i class="fa fa-eye mr-1"></i>View
                                                     </button>
@@ -334,6 +338,18 @@
                     <label><strong>Admin Comments:</strong></label>
                     <div id="viewComments" class="border p-3 bg-light" style="border-radius: 0.25rem; white-space: pre-wrap;"></div>
                 </div>
+                <div class="form-group">
+                    <label><strong>Process method:</strong></label>
+                    <div id="viewProcessMethod" class="border p-3 bg-light" style="border-radius: 0.25rem; white-space: pre-wrap;"></div>
+                </div>
+                <div class="form-group">
+                    <label><strong>Processed by:</strong></label>
+                    <div id="viewProcessedBy" class="border p-3 bg-light" style="border-radius: 0.25rem; white-space: pre-wrap;"></div>
+                </div>
+                <div class="form-group">
+                    <label><strong>Processed at:</strong></label>
+                    <div id="viewProcessedAt" class="border p-3 bg-light" style="border-radius: 0.25rem; white-space: pre-wrap;"></div>
+                </div>
             </div>
             <div class="modal-footer" style="border-top: 1px solid #e2e8f0;">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal" style="border-radius: 0.25rem;">
@@ -433,10 +449,16 @@ $(document).ready(function() {
         var subject = $(this).data('subject');
         var links = $(this).data('links') || 'No links provided';
         var comments = $(this).data('comments') || 'No comments provided';
+        var processMethod = $(this).data('process-method') || 'Processed by admin';
+        var processedBy = $(this).data('processed-by') || 'Unknown';
+        var processedAt = $(this).data('processed-at') || 'Unknown';
         
         $('#viewSubject').text(subject);
         $('#viewLinks').text(links);
         $('#viewComments').text(comments);
+        $('#viewProcessMethod').text(processMethod);
+        $('#viewProcessedBy').text(processedBy);
+        $('#viewProcessedAt').text(processedAt);
         
         $('#viewProcessedModal').modal('show');
     });

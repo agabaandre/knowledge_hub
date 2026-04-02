@@ -40,11 +40,13 @@ class AdminStatsViewComposer{
         $pending_cop_approvals_count = CommunityOfPracticeMembers::where('is_approved', 0)
             ->count();
 
-        // Unprocessed content requests (user-facing support queue)
+        // Content requests: unprocessed and processed counters for admin navigation
         $pending_content_requests_count = 0;
+        $processed_content_requests_count = 0;
         $pending_content_requests = collect();
         if (auth()->check() && auth()->user()->can('view_content_requests')) {
             $pending_content_requests_count = ContentRequest::whereNull('processed_at')->count();
+            $processed_content_requests_count = ContentRequest::whereNotNull('processed_at')->count();
             $pending_content_requests = ContentRequest::whereNull('processed_at')
                 ->orderByDesc('created_at')
                 ->limit(5)
@@ -194,6 +196,7 @@ class AdminStatsViewComposer{
             'pending_publications_count' => $pending_publications_count,
             'pending_cop_approvals_count' => $pending_cop_approvals_count,
             'pending_content_requests_count' => $pending_content_requests_count,
+            'processed_content_requests_count' => $processed_content_requests_count,
             'total_pending_count' => $total_pending_count,
             'pending_forums' => $pending_forums,
             'pending_publications' => $pending_publications,

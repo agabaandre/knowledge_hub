@@ -137,6 +137,29 @@ class ContentRequest extends Model
         return ! empty($this->referral_type) && ! is_null($this->referred_at);
     }
 
+    public function processingMethodLabel(): string
+    {
+        $this->loadMissing('referralTargets');
+
+        $hasCommunityTarget = $this->referralTargets->whereNotNull('community_of_practice_id')->isNotEmpty()
+            || ! empty($this->referred_to_community_id)
+            || in_array((string) $this->referral_type, ['community', 'mixed'], true);
+
+        if ($hasCommunityTarget) {
+            return 'Sent to community';
+        }
+
+        $hasUserTarget = $this->referralTargets->whereNotNull('user_id')->isNotEmpty()
+            || ! empty($this->referred_to_user_id)
+            || (string) $this->referral_type === 'user';
+
+        if ($hasUserTarget) {
+            return 'Sent to subject matter expert user';
+        }
+
+        return 'Processed by admin';
+    }
+
     public function trackUrl(): string
     {
         if (empty($this->requestor_track_token)) {
