@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers\Admin;
 
-use Illuminate\Http\Request;
-use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Controller;
+use App\Jobs\RefreshAfricaHealthFactsJob;
 use App\Repositories\FactsRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class FactsAdminController extends Controller
 {
@@ -16,11 +17,25 @@ class FactsAdminController extends Controller
         $this->factsRepo = $factsRepo;
     }
 
-    public function index(Request $request){
+    public function index(Request $request)
+    {
+        $data['facts'] = $this->factsRepo->get($request);
+        $data['search'] = (object) $request->all();
+        $data['facts_ai_meta'] = Cache::get('facts_last_ai_refresh');
 
-        $data['facts']    = $this->factsRepo->get($request);
-        $data['search']  = (Object) $request->all();
-        return view('admin.facts.index',$data);
+        return view('admin.facts.index', $data);
+    }
+
+    public function refreshOpenAi(Request $request)
+    {
+        abort_unless($request->user() && $request->user()->can('manage_facts'), 403);
+
+        RefreshAfricaHealthFactsJob::dispatch();
+
+        return back()->with([
+            'message' => __('A refresh job has been queued. AI-managed facts update when the queue worker runs (usually within a few minutes). Ensure OPEN_API_KEY is set for OpenAI; otherwise curated fallback facts are used.'),
+            'status' => 'success',
+        ]);
     }
 
     public function store(Request $request){

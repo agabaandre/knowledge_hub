@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ChatGPTService implements AIModel{
 
@@ -598,6 +599,127 @@ class ChatGPTService implements AIModel{
         $out = trim($out);
 
         return ['ok' => true, 'html' => $out];
+    }
+
+    /**
+     * Generate Africa-focused public health facts for the site “Did you know?” module.
+     *
+     * @return array{ok: true, facts: list<array{title: string, summary: string, description: string}>}|array{ok: false, error: string}
+     */
+    public function generateAfricaHealthFacts(int $count = 24): array
+    {
+        $count = max(20, min(35, $count));
+        $apiKey = config('ai.open_api_key');
+        if (empty($apiKey)) {
+            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        }
+
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$apiKey,
+        ];
+
+        $system = 'You are a careful public health writer for the Africa CDC Knowledge Hub. '
+            .'Write accurate, educational facts about health in Africa: disease prevention, health systems, UHC, immunization, '
+            .'maternal and child health, NCDs, mental health, WASH, climate and health, outbreaks, research, and regional cooperation. '
+            .'Do not invent precise statistics or dates; use cautious wording (“many countries”, “often”, “remains a challenge”) when a single number is not widely published. '
+            .'Each fact must be distinct. Tone: professional, hopeful, evidence-minded.';
+
+        $user = 'Return a single JSON object with key "facts" whose value is an array of exactly '.$count.' objects. '
+            .'Each object must have: "title" (short headline, max 90 characters), '
+            .'"summary" (1–2 sentences for a card teaser, max 320 characters), '
+            .'"description" (3–5 sentences for a detail page, max 1500 characters). '
+            .'Output only valid JSON, no markdown fences.';
+
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $user],
+            ],
+            'max_tokens' => 8192,
+            'temperature' => 0.65,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null || trim($content) === '') {
+            return ['ok' => false, 'error' => 'Empty response from OpenAI.'];
+        }
+
+        $facts = $this->parseAfricaHealthFactsJson($content);
+        if (count($facts) < 20) {
+            return ['ok' => false, 'error' => 'OpenAI returned too few usable facts ('.count($facts).').'];
+        }
+
+        $normalized = [];
+        foreach (array_slice($facts, 0, $count) as $row) {
+            $title = Str::limit(trim((string) ($row['title'] ?? '')), 255, '');
+            $summary = Str::limit(trim((string) ($row['summary'] ?? '')), 2000, '');
+            $description = trim((string) ($row['description'] ?? $row['summary'] ?? ''));
+            $description = Str::limit($description, 6000, '');
+            if ($title === '' || $summary === '') {
+                continue;
+            }
+            if ($description === '') {
+                $description = $summary;
+            }
+            $normalized[] = [
+                'title' => $title,
+                'summary' => $summary,
+                'description' => $description,
+            ];
+        }
+
+        if (count($normalized) < 20) {
+            return ['ok' => false, 'error' => 'Too few facts after normalization ('.count($normalized).').'];
+        }
+
+        return ['ok' => true, 'facts' => array_slice($normalized, 0, $count)];
+    }
+
+    /**
+     * @return list<array{title?: string, summary?: string, description?: string}>
+     */
+    private function parseAfricaHealthFactsJson(string $raw): array
+    {
+        $text = function_exists('clean_unicode') ? clean_unicode($raw) : $raw;
+        $text = preg_replace('/```json\s*/i', '', (string) $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
+
+        $decoded = json_decode($text, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+        if (! is_array($decoded) || json_last_error() !== JSON_ERROR_NONE) {
+            $start = strpos($text, '{');
+            $end = strrpos($text, '}');
+            if ($start !== false && $end !== false && $end > $start) {
+                $decoded = json_decode(substr($text, $start, $end - $start + 1), true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+            }
+        }
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $list = $decoded['facts'] ?? null;
+        if (! is_array($list)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($list as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $out[] = [
+                'title' => $item['title'] ?? '',
+                'summary' => $item['summary'] ?? '',
+                'description' => $item['description'] ?? '',
+            ];
+        }
+
+        return $out;
     }
 
 }

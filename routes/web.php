@@ -461,6 +461,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [FactsAdminController::class, 'index']);
         Route::post("/save", [FactsAdminController::class, 'store'])->name('store');
+        Route::post('/refresh-openai', [FactsAdminController::class, 'refreshOpenAi'])->name('refresh-openai');
         Route::get("/delete", [FactsAdminController::class, 'destroy']);
     });
 

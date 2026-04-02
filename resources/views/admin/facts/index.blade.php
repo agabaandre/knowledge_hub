@@ -11,12 +11,52 @@
 
 @section('content')
 <div class="page-header">
-    <h1 class="page-title">Facts Management</h1>
+    <h1 class="page-title">Facts — Health in Africa</h1>
     <div>
         <ol class="breadcrumb">
             <li class="breadcrumb-item"><a href="javascript:void(0)">Home</a></li>
             <li class="breadcrumb-item active" aria-current="page">Facts</li>
         </ol>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card border-info">
+            <div class="card-header bg-light">
+                <h3 class="card-title mb-0"><i class="fa fa-robot text-info"></i> Weekly AI refresh</h3>
+            </div>
+            <div class="card-body">
+                <p class="mb-2">
+                    At least <strong>20</strong> curated facts about health in Africa are maintained for the public “Did you know?” blocks.
+                    Each <strong>Monday at 05:30</strong> (server time) the scheduler runs <code>facts:refresh-ai</code>, which replaces only facts marked
+                    <span class="badge badge-secondary">AI-managed</span>. Facts you add manually are kept.
+                </p>
+                <p class="mb-2 text-muted small">
+                    OpenAI is used when <code>OPEN_API_KEY</code> is set (see <code>config/ai.php</code>). If the API fails, the job stores a built-in set of Africa public-health facts so the site never stays empty.
+                </p>
+                @if(!empty($facts_ai_meta['completed_at']))
+                    <p class="mb-2 small">
+                        <strong>Last AI refresh:</strong>
+                        {{ \Carbon\Carbon::parse($facts_ai_meta['completed_at'])->timezone(config('app.timezone'))->format('Y-m-d H:i') }}
+                        — {{ $facts_ai_meta['facts_count'] ?? '?' }} facts
+                        @if(!empty($facts_ai_meta['source']))
+                            ({{ $facts_ai_meta['source'] === 'openai' ? 'OpenAI' : 'Curated fallback' }})
+                        @endif
+                    </p>
+                @else
+                    <p class="mb-2 small text-muted">No automated refresh has completed yet. Run once below or use <code>php artisan facts:refresh-ai --sync</code> on the server.</p>
+                @endif
+                @can('manage_facts')
+                    <form action="{{ route('facts.refresh-openai') }}" method="post" class="d-inline" onsubmit="return confirm('This will replace all AI-managed facts (manual facts stay). Queue a refresh now?');">
+                        @csrf
+                        <button type="submit" class="btn btn-info btn-sm">
+                            <i class="fa fa-sync"></i> Queue refresh now
+                        </button>
+                    </form>
+                @endcan
+            </div>
+        </div>
     </div>
 </div>
 
@@ -78,6 +118,7 @@
                             <thead>
                                 <tr>
                                     <th width="60px">#</th>
+                                    <th width="100px">Source</th>
                                     <th>Title</th>
                                     <th>Summary</th>
                                     <th width="180px">Actions</th>
@@ -87,6 +128,13 @@
                                 @foreach($facts as $idx => $row)
                                     <tr>
                                         <td><span class="text-muted">{{ $facts->firstItem() + $idx }}</span></td>
+                                        <td>
+                                            @if($row->is_ai_managed ?? false)
+                                                <span class="badge badge-info">AI</span>
+                                            @else
+                                                <span class="badge badge-secondary">Manual</span>
+                                            @endif
+                                        </td>
                                         <td><strong>{{ $row->fact_title }}</strong></td>
                                         <td>{!! Str::limit(strip_tags($row->fact_summary), 100) !!}</td>
                                         <td>
