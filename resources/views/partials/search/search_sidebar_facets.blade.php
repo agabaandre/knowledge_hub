@@ -25,7 +25,7 @@
 
     @if ($facetVisibleCategories->isNotEmpty())
     <h6 class="facet-group-title">{{ __('Category') }}</h6>
-    <div class="facet-checkbox-column mb-3" data-facet-group="data_category_id">
+    <div class="facet-checkbox-column facet-checkbox-column--2col mb-3" data-facet-group="data_category_id">
         @foreach ($facetVisibleCategories as $category)
             <label class="facet-checkbox-label">
                 <input type="checkbox" class="search-facet-cb" value="{{ $category->id }}" data-param="data_category_id">
@@ -37,7 +37,7 @@
 
     @if ($facetFileCategories->isNotEmpty())
     <h6 class="facet-group-title">{{ __('Sub category') }}</h6>
-    <div class="facet-checkbox-column mb-3" data-facet-group="file_category_id">
+    <div class="facet-checkbox-column facet-checkbox-column--2col mb-3" data-facet-group="file_category_id">
         @foreach ($facetFileCategories as $pubCategory)
             <label class="facet-checkbox-label">
                 <input type="checkbox" class="search-facet-cb" value="{{ $pubCategory->id }}" data-param="file_category_id">
