@@ -83,6 +83,14 @@ class CommsOfPracticeController extends Controller
         // Count pending member approvals for notification bell
         $data['pending_member_approvals_count'] = \App\Models\CommunityOfPracticeMembers::where('is_approved', 0)
             ->count();
+
+        // Simple overview stats for admin communities page
+        $data['total_communities_count'] = \App\Models\CommunityOfPractice::count();
+        $data['active_communities_count'] = \App\Models\CommunityOfPractice::where('is_active', 1)->count();
+        $data['public_communities_count'] = \App\Models\CommunityOfPractice::where('is_public', 1)->count();
+        $data['approved_memberships_count'] = \App\Models\CommunityOfPracticeMembers::where('is_approved', 1)
+            ->where('is_active', 1)
+            ->count();
         
         // Get communities with pending member approvals
         $pendingMembers = \App\Models\CommunityOfPracticeMembers::where('is_approved', 0)

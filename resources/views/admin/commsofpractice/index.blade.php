@@ -175,6 +175,35 @@
         </div>
         <div class="card-body text-left">
             @include('layouts.partials.alerts')
+
+            <div class="row mb-3">
+                <div class="col-md-3 mb-2">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <div class="small text-muted text-uppercase">Total Communities</div>
+                        <div class="h4 mb-0 font-weight-bold">{{ number_format((int) ($total_communities_count ?? 0)) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <div class="small text-muted text-uppercase">Active Communities</div>
+                        <div class="h4 mb-0 font-weight-bold">{{ number_format((int) ($active_communities_count ?? 0)) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <div class="small text-muted text-uppercase">Approved Memberships</div>
+                        <div class="h4 mb-0 font-weight-bold">{{ number_format((int) ($approved_memberships_count ?? 0)) }}</div>
+                    </div>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <div class="p-3 border rounded bg-light h-100">
+                        <div class="small text-muted text-uppercase">Pending Approvals</div>
+                        <div class="h4 mb-0 font-weight-bold">{{ number_format((int) ($pending_member_approvals_count ?? 0)) }}</div>
+                        <div class="small text-muted">Public communities: {{ number_format((int) ($public_communities_count ?? 0)) }}</div>
+                    </div>
+                </div>
+            </div>
+
             <form method="GET" action="{{ request()->url() }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
                 <label class="mb-0 font-weight-medium">Search:</label>
                 <input type="text" name="term" value="{{ request('term') }}" class="form-control" style="max-width: 280px;" placeholder="By community name or creator email..." aria-label="Search communities">
