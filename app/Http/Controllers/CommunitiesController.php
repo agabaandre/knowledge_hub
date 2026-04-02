@@ -8,6 +8,7 @@ use App\Repositories\AreasRepository;
 use Illuminate\Support\Facades\Auth;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
+use App\Models\ContentRequest;
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
 
@@ -160,6 +161,24 @@ class CommunitiesController extends Controller
             ->with('author')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
+
+        // Content requests referred to this community (hub workflow)
+        $pendingCommunityContentRequests = ContentRequest::query()
+            ->where('referral_type', 'community')
+            ->where('referred_to_community_id', $id)
+            ->whereNull('processed_at')
+            ->with(['country', 'referredByUser'])
+            ->orderByDesc('referred_at')
+            ->orderByDesc('created_at')
+            ->get();
+
+        $processedCommunityContentRequests = ContentRequest::query()
+            ->where('referral_type', 'community')
+            ->where('referred_to_community_id', $id)
+            ->whereNotNull('processed_at')
+            ->with(['country', 'processedBy'])
+            ->orderByDesc('processed_at')
+            ->paginate(10, ['*'], 'pcr_page');
         
         // SEO variables
         $pageTitle = ($community->community_name ?? 'Community') . ' - Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
@@ -207,6 +226,8 @@ class CommunitiesController extends Controller
         return view('communities.detail', compact(
             'community',
             'publications',
+            'pendingCommunityContentRequests',
+            'processedCommunityContentRequests',
             'forums',
             'otherCommunities',
             'badgeTypes',

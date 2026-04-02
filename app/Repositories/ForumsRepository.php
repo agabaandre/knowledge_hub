@@ -4,6 +4,7 @@ namespace App\Repositories;
 use App\Jobs\NotifyApprovers;
 use App\Jobs\SendMailJob;
 use App\Models\CommunityOfPracticeMembers;
+use App\Models\ContentRequest;
 use App\Models\CustomAttachment;
 use App\Models\Faq;
 use App\Models\Forum;
@@ -16,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
+use App\Services\ContentRequestReferralNotifier;
 
 class ForumsRepository extends SharedRepo{
 
@@ -481,6 +483,14 @@ class ForumsRepository extends SharedRepo{
             $comment->refresh();
             // Trigger attachments accessor to verify they're loaded
             $comment->attachments;
+        }
+
+        if ($comment && $comment->id && ($comment->status ?? '') === 'approved') {
+            $linkedRequest = ContentRequest::query()->where('referral_forum_id', $comment->forum_id)->first();
+            if ($linkedRequest) {
+                $comment->loadMissing('user');
+                ContentRequestReferralNotifier::notifyRequestorNewForumComment($linkedRequest, $comment);
+            }
         }
 
         return $comment;

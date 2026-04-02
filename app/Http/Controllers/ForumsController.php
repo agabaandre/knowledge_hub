@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ContentRequest;
 use App\Models\CustomAttachment;
 use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
@@ -148,13 +149,21 @@ class ForumsController extends Controller
     public function thread(Request $request)
     {
         $data['forum']     = $this->forumsRepo->find($request->id);
+        $data['linkedContentRequest'] = ContentRequest::query()
+            ->where('referral_forum_id', (int) $request->id)
+            ->with(['country', 'referredToCommunity'])
+            ->first();
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         
-        // SEO variables
+        // SEO variables (linked content-request forums use privacy-safe copy in the view’s @php as well)
         if ($data['forum']) {
             $forum = $data['forum'];
             $data['pageTitle'] = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-            $data['pageDescription'] = \Illuminate\Support\Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
+            if (! empty($data['linkedContentRequest'])) {
+                $data['pageDescription'] = 'Community discussion for a Knowledge Hub content request. Requester contact details are not shown on this page.';
+            } else {
+                $data['pageDescription'] = \Illuminate\Support\Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
+            }
             $data['pageKeywords'] = 'forum discussion, ' . ($forum->forum_title ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
             
             // Use forum image if available, otherwise default

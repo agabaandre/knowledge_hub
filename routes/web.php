@@ -72,6 +72,8 @@ use App\Models\User;
 use App\Jobs\SendMailJob;
 use Laravel\Socialite\Facades\Socialite;
 use App\Http\Controllers\Admin\ContentRequestAdminController;
+use App\Http\Controllers\ContentRequestReferralController;
+use App\Http\Controllers\ContentRequestTrackController;
 use App\Http\Controllers\HealthTopicsController;
 use App\Http\Controllers\EventsController as PublicEventsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
@@ -186,6 +188,23 @@ Route::group(["prefix" => "publications"], function () {
     Route::any("/request-content", [PublicationsController::class, 'request_content'])->name('content-request');
     Route::match(['get', 'post'], "/add_favourite", [PublicationsController::class, 'add_favourite']);
     Route::match(['get', 'post'], "/remove_favourite", [PublicationsController::class, 'remove_favourite']);
+});
+
+// Content request referral: requester tracking (token link) and hub user / CoP discussion
+Route::get('/content-request/track/{token}', [ContentRequestTrackController::class, 'show'])->name('content-request.track');
+Route::post('/content-request/track/{token}', [ContentRequestTrackController::class, 'storeMessage'])
+    ->middleware('throttle:30,1')
+    ->name('content-request.track.message');
+
+Route::middleware(['auth', 'web'])->group(function () {
+    Route::get('/content-request/referral/{contentRequest}/discuss', [ContentRequestReferralController::class, 'discuss'])
+        ->name('content-request.referral.discuss');
+    Route::post('/content-request/referral/{contentRequest}/discuss', [ContentRequestReferralController::class, 'storeMessage'])
+        ->middleware('throttle:60,1')
+        ->name('content-request.referral.discuss.message');
+    Route::post('/content-request/referral/{contentRequest}/mark-processed', [ContentRequestReferralController::class, 'markProcessed'])
+        ->middleware('throttle:20,1')
+        ->name('content-request.referral.mark-processed');
 });
 
 // Health Topics routes
@@ -769,6 +788,7 @@ Route::group(['prefix' => 'admin/content-requests', 'as' => 'admin.content-reque
     Route::get('/{id}/edit', [ContentRequestAdminController::class, 'edit'])->middleware('permission:manage_content_requests')->name('edit');
     Route::put('/{id}', [ContentRequestAdminController::class, 'update'])->middleware('permission:manage_content_requests')->name('update');
     Route::post('/{id}/process', [ContentRequestAdminController::class, 'process'])->middleware('permission:manage_content_requests')->name('process');
+    Route::post('/{id}/refer', [ContentRequestAdminController::class, 'refer'])->middleware('permission:manage_content_requests')->name('refer');
     Route::delete('/{id}', [ContentRequestAdminController::class, 'destroy'])->middleware('permission:manage_content_requests')->name('destroy');
 });
 

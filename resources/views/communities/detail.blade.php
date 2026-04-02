@@ -273,8 +273,23 @@
     html[data-bs-theme="dark"] .community-detail-page .badge-note-block .text-muted { color: #9ca3af !important; }
     html[data-bs-theme="dark"] .community-detail-page .badge-type-block { background: #2d3136 !important; }
     html[data-bs-theme="dark"] .community-detail-page .badge-type-block .small.text-muted { color: #9ca3af !important; }
+    .community-content-request-card {
+        border-left: 4px solid {{ settings()->primary_color ?? '#119A48' }};
+    }
+    html[data-bs-theme="dark"] .community-content-request-card {
+        background: #2d3136 !important;
+        border-color: #3e4348 !important;
+        border-left-color: var(--theme-color-primary, #119A48) !important;
+        color: #e4e6eb;
+    }
+    html[data-bs-theme="dark"] .community-detail-page .card.border-warning .border-top { border-color: #3e4348 !important; }
+    html[data-bs-theme="dark"] .community-detail-page .open-cr-row { background: #2d3136 !important; }
 </style>
 @endsection
+
+@php
+    $processedContentRequestsTabActive = request()->filled('pcr_page');
+@endphp
 
 @section('content')
 {{-- Custom Header Section (replaces search bar) --}}
@@ -323,11 +338,60 @@
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8">
+            @if(isset($pendingCommunityContentRequests) && $pendingCommunityContentRequests->isNotEmpty())
+            <div class="card mb-4 border-warning" style="border-width: 2px;">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center flex-wrap">
+                    <h5 class="mb-0">
+                        <i class="fa fa-inbox theme-text mr-2"></i>Open content requests
+                    </h5>
+                    <span class="badge badge-warning text-dark">{{ $pendingCommunityContentRequests->count() }} pending</span>
+                </div>
+                <div class="card-body p-0">
+                    <p class="text-muted small px-3 pt-3 mb-2">These requests were referred to this community for discussion. They are not yet marked as fully processed in the hub.</p>
+                    @foreach($pendingCommunityContentRequests as $cr)
+                        <div class="border-top px-3 py-3 community-content-request-card open-cr-row" style="background: #fffbeb;">
+                            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                <div>
+                                    <h6 class="mb-1 font-weight-bold">{{ $cr->subject }}</h6>
+                                    <div class="small text-muted">
+                                        @if($cr->country)<span class="mr-2"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
+                                        @if($cr->referred_at)<span><i class="fa fa-share mr-1"></i>Referred {{ $cr->referred_at->format('M j, Y') }}</span>@endif
+                                        @if($cr->referredByUser)<span class="ml-2">by {{ $cr->referredByUser->name }}</span>@endif
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-wrap shrink-0" style="gap: 6px;">
+                                    <a href="{{ $cr->discussionUrl() }}" class="btn btn-sm btn-primary">
+                                        <i class="fa fa-comments mr-1"></i>Forum thread
+                                    </a>
+                                    @if($cr->userMayMarkReferralAsProcessed(auth()->user()))
+                                        <a href="{{ $cr->discussionUrl() }}#mark-processed" class="btn btn-sm btn-success">
+                                            <i class="fa fa-check mr-1"></i>Mark processed
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                            @if($cr->referral_notes)
+                                <p class="small mb-0 mt-2 text-muted"><strong>Note:</strong> {{ Str::limit(strip_tags($cr->referral_notes), 200) }}</p>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             <!-- Tabs -->
             <ul class="nav nav-tabs community-tabs" id="communityTabs" role="tablist">
                 <li class="nav-item" role="presentation">
-                    <a class="nav-link active" id="publications-tab" data-toggle="tab" href="#publications" role="tab">
+                    <a class="nav-link {{ $processedContentRequestsTabActive ? '' : 'active' }}" id="publications-tab" data-toggle="tab" href="#publications" role="tab">
                         <i class="fa fa-book mr-1"></i>Publications
+                    </a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link {{ $processedContentRequestsTabActive ? 'active' : '' }}" id="processed-requests-tab" data-toggle="tab" href="#processed-content-requests" role="tab">
+                        <i class="fa fa-check-circle mr-1"></i>Processed requests
+                        @if(isset($processedCommunityContentRequests) && $processedCommunityContentRequests->total() > 0)
+                            <span class="badge badge-secondary ml-1">{{ $processedCommunityContentRequests->total() }}</span>
+                        @endif
                     </a>
                 </li>
             </ul>
@@ -335,7 +399,7 @@
             <!-- Tab Content -->
             <div class="tab-content" id="communityTabsContent">
                 <!-- Publications Tab -->
-                <div class="tab-pane fade show active" id="publications" role="tabpanel">
+                <div class="tab-pane fade {{ $processedContentRequestsTabActive ? '' : 'show active' }}" id="publications" role="tabpanel">
                     @if($publications->count() > 0)
                         @foreach($publications as $publication)
                             @php
@@ -375,6 +439,43 @@
                     @else
                         <div class="alert alert-info">
                             <i class="fa fa-info-circle mr-2"></i>No publications found in this community.
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Processed content requests (referred to this community, hub workflow complete) -->
+                <div class="tab-pane fade {{ $processedContentRequestsTabActive ? 'show active' : '' }}" id="processed-content-requests" role="tabpanel">
+                    @if(isset($processedCommunityContentRequests) && $processedCommunityContentRequests->total() > 0)
+                        <p class="text-muted small mb-3">Requests that were referred to this community and later completed through the Knowledge Hub (resources shared with the requester).</p>
+                        @foreach($processedCommunityContentRequests as $cr)
+                            <div class="community-featured-card community-content-request-card mb-3">
+                                <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
+                                    <div>
+                                        <h5 class="community-featured-title mb-1">{{ $cr->subject }}</h5>
+                                        <div class="community-featured-meta">
+                                            @if($cr->country)<span class="mr-2"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
+                                            <span><i class="fa fa-check mr-1"></i>Processed {{ $cr->processed_at ? $cr->processed_at->format('M j, Y') : '—' }}</span>
+                                            @if($cr->processedBy)<span class="ml-2"><i class="fa fa-user mr-1"></i>{{ $cr->processedBy->name }}</span>@endif
+                                        </div>
+                                    </div>
+                                    <a href="{{ route('content-request.referral.discuss', $cr) }}" class="btn btn-sm btn-outline-primary shrink-0">
+                                        <i class="fa fa-comments mr-1"></i>Thread
+                                    </a>
+                                </div>
+                                @if($cr->content_links)
+                                    <div class="small mt-2 p-2 bg-light rounded" style="white-space: pre-wrap; max-height: 120px; overflow-y: auto;">{{ Str::limit(strip_tags($cr->content_links), 400) }}</div>
+                                @endif
+                                @if($cr->admin_comments)
+                                    <p class="small text-muted mb-0 mt-2"><strong>Admin comments:</strong> {{ Str::limit(strip_tags($cr->admin_comments), 200) }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                        <div class="mt-3">
+                            {{ $processedCommunityContentRequests->links() }}
+                        </div>
+                    @else
+                        <div class="alert alert-info mb-0">
+                            <i class="fa fa-info-circle mr-2"></i>No processed content requests yet for this community. When referred requests are completed in the hub, they will appear here.
                         </div>
                     @endif
                 </div>

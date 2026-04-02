@@ -53,7 +53,7 @@
                         @endif
                     @endif
 
-                    <form action="{{ route('admin.content-requests.update', $contentRequest->id) }}" method="POST">
+                    <form id="content-request-edit-form" action="{{ route('admin.content-requests.update', $contentRequest->id) }}" method="POST">
                         @csrf
                         @method('PUT')
 
@@ -72,15 +72,16 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="description">Description <span class="text-danger">*</span></label>
-                            <textarea class="form-control @error('description') is-invalid @enderror"
-                                      id="description"
+                            <label for="content_request_description">Description <span class="text-danger">*</span></label>
+                            <textarea class="form-control summernote-lg @error('description') is-invalid @enderror"
+                                      id="content_request_description"
                                       name="description"
-                                      rows="8"
-                                      required>{{ old('description', $contentRequest->description) }}</textarea>
+                                      rows="10"
+                                      required>{!! old('description', $contentRequest->description) !!}</textarea>
                             @error('description')
-                                <div class="invalid-feedback">{{ $message }}</div>
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
                             @enderror
+                            <small class="form-text text-muted">Rich text (HTML). Use the toolbar to format; source HTML is preserved when saved.</small>
                         </div>
 
                         <div class="form-group">
@@ -128,4 +129,18 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+@include('partials.general.summernote')
+<script>
+$(document).ready(function() {
+    $('#content-request-edit-form').on('submit', function() {
+        var $ta = $('#content_request_description');
+        if ($ta.length && $ta.data('summernote')) {
+            $ta.val($ta.summernote('code'));
+        }
+    });
+});
+</script>
 @endsection

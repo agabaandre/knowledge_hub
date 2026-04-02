@@ -19,6 +19,7 @@
                                     <option value="">All Status</option>
                                     <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                                     <option value="processed" {{ request('status') == 'processed' ? 'selected' : '' }}>Processed</option>
+                                    <option value="referred" {{ request('status') == 'referred' ? 'selected' : '' }}>Referred</option>
                                 </select>
                             </div>
                             <div class="col-md-2">
@@ -79,6 +80,14 @@
                             </button>
                         </div>
                     @endif
+                    @if(Session::has('error'))
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            {{ Session::get('error') }}
+                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                    @endif
 
                     <div class="table-responsive">
                         <table class="table table-bordered table-striped table-hover">
@@ -89,9 +98,9 @@
                                     <th width="25%">Description</th>
                                     <th width="10%">Country</th>
                                     <th width="15%">Email</th>
-                                    <th width="10%">Status</th>
+                                    <th width="12%">Status</th>
                                     <th width="10%">Date</th>
-                                    <th width="15%">Actions</th>
+                                    <th width="18%">Actions</th>
             </tr>
         </thead>
         <tbody>
@@ -121,6 +130,16 @@
                                                     <i class="fa fa-clock mr-1"></i>Pending
                                                 </span>
                                             @endif
+                                            @if($request->isReferred())
+                                                <br><span class="badge badge-info mt-1">
+                                                    <i class="fa fa-share mr-1"></i>Referred
+                                                </span>
+                                                @if($request->referral_type === 'user' && $request->referredToUser)
+                                                    <br><small class="text-muted">To: {{ $request->referredToUser->name }}</small>
+                                                @elseif($request->referral_type === 'community' && $request->referredToCommunity)
+                                                    <br><small class="text-muted">CoP: {{ Str::limit($request->referredToCommunity->community_name, 28) }}</small>
+                                                @endif
+                                            @endif
                                         </td>
                                         <td>
                                             <small>{{ $request->created_at->format('M d, Y') }}</small>
@@ -129,7 +148,7 @@
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="btn-group btn-group-sm" role="group">
+                                            <div class="btn-group btn-group-sm flex-wrap" role="group" style="gap: 2px;">
                                                 @if(!$request->isProcessed())
                                                     <button type="button" 
                                                             class="btn btn-success btn-sm process-request-btn" 
@@ -150,6 +169,31 @@
                                                         <i class="fa fa-eye mr-1"></i>View
                                                     </button>
                                                 @endif
+                                                @can('manage_content_requests')
+                                                    @if(!$request->isReferred())
+                                                        <button type="button"
+                                                                class="btn btn-primary btn-sm refer-request-btn"
+                                                                data-id="{{ $request->id }}"
+                                                                data-subject="{{ $request->subject }}"
+                                                                title="Refer to user or community">
+                                                            <i class="fa fa-share mr-1"></i>Refer
+                                                        </button>
+                                                    @else
+                                                        <a href="{{ $request->discussionUrl() }}"
+                                                           class="btn btn-secondary btn-sm"
+                                                           title="Open discussion (forum or hub thread)">
+                                                            <i class="fa fa-comments mr-1"></i>Discuss
+                                                        </a>
+                                                        @if($request->trackUrl() !== '')
+                                                        <button type="button"
+                                                                class="btn btn-outline-secondary btn-sm copy-track-btn"
+                                                                data-url="{{ $request->trackUrl() }}"
+                                                                title="Copy requester tracking link">
+                                                            <i class="fa fa-link"></i>
+                                                        </button>
+                                                        @endif
+                                                    @endif
+                                                @endcan
                                                 <a href="{{ route('admin.content-requests.edit', $request->id) }}" 
                                                    class="btn btn-warning btn-sm" 
                                                    title="Edit">
@@ -292,6 +336,75 @@
         </div>
     </div>
 </div>
+
+@can('manage_content_requests')
+<!-- Refer to hub user or community -->
+<div class="modal fade" id="referRequestModal" tabindex="-1" role="dialog" aria-labelledby="referRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 0.25rem;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #119A48 0%, #0e7a3a 100%); color: white;">
+                <h5 class="modal-title" id="referRequestModalLabel">
+                    <i class="fa fa-share mr-2"></i>Refer content request
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="referRequestForm" method="POST" action="#">
+                @csrf
+                <div class="modal-body">
+                    <p class="text-muted small mb-3" id="referRequestSubjectSummary"></p>
+                    <p class="small">The requester receives a private link to follow the thread. Assigned hub users or community members are emailed to join the discussion on the Knowledge Hub.</p>
+
+                    <div class="form-group">
+                        <label class="d-block font-weight-bold">Refer to</label>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" id="refTypeUser" name="referral_type" value="user" checked>
+                            <label class="custom-control-label" for="refTypeUser">An individual (hub user)</label>
+                        </div>
+                        <div class="custom-control custom-radio">
+                            <input type="radio" class="custom-control-input" id="refTypeCommunity" name="referral_type" value="community">
+                            <label class="custom-control-label" for="refTypeCommunity">A community of practice (discussion with members)</label>
+                        </div>
+                    </div>
+
+                    <div class="form-group" id="referUserWrap">
+                        <label for="referred_to_user_id">Hub user</label>
+                        <select class="form-control" name="referred_to_user_id" id="referred_to_user_id">
+                            <option value="">— Select user —</option>
+                            @foreach($referUsers as $u)
+                                <option value="{{ $u->id }}">{{ $u->name }} &lt;{{ $u->email }}&gt;</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group" id="referCommunityWrap" style="display: none;">
+                        <label for="referred_to_community_id">Community</label>
+                        <select class="form-control" name="referred_to_community_id" id="referred_to_community_id">
+                            <option value="">— Select community —</option>
+                            @foreach($referCommunities as $c)
+                                <option value="{{ $c->id }}">{{ $c->community_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="referral_notes">Instructions / context (optional)</label>
+                        <textarea class="form-control" name="referral_notes" id="referral_notes" rows="4" placeholder="What should the assignee or community focus on?"></textarea>
+                        <small class="form-text text-muted">Shown in the first thread message and in assignee emails.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fa fa-paper-plane mr-1"></i>Refer &amp; notify
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endcan
 @endsection
 
 @section('scripts')
@@ -331,6 +444,53 @@ $(document).ready(function() {
         $('#viewComments').text(comments);
         
         $('#viewProcessedModal').modal('show');
+    });
+
+    function toggleReferForm() {
+        var t = $('input[name="referral_type"]:checked').val();
+        if (t === 'community') {
+            $('#referUserWrap').hide();
+            $('#referCommunityWrap').show();
+            $('#referred_to_user_id').prop('disabled', true);
+            $('#referred_to_community_id').prop('disabled', false);
+        } else {
+            $('#referUserWrap').show();
+            $('#referCommunityWrap').hide();
+            $('#referred_to_user_id').prop('disabled', false);
+            $('#referred_to_community_id').prop('disabled', true);
+        }
+    }
+    $('input[name="referral_type"]').on('change', toggleReferForm);
+    toggleReferForm();
+
+    $('.refer-request-btn').on('click', function() {
+        var requestId = $(this).data('id');
+        var subject = $(this).data('subject');
+        $('#referRequestForm').attr('action', {!! json_encode(url('admin/content-requests')) !!} + '/' + requestId + '/refer');
+        $('#referRequestSubjectSummary').html('<strong>Subject:</strong> ' + $('<div/>').text(subject).html());
+        $('#referral_notes').val('');
+        $('#referred_to_user_id').val('');
+        $('#referred_to_community_id').val('');
+        $('#refTypeUser').prop('checked', true);
+        toggleReferForm();
+        $('#referRequestModal').modal('show');
+    });
+
+    $('.copy-track-btn').on('click', function() {
+        var url = $(this).data('url');
+        if (!url) return;
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(url).then(function() {
+                alert('Requester tracking link copied to clipboard.');
+            });
+        } else {
+            var ta = document.createElement('textarea');
+            ta.value = url;
+            document.body.appendChild(ta);
+            ta.select();
+            try { document.execCommand('copy'); alert('Link copied.'); } catch (e) { prompt('Copy this link:', url); }
+            document.body.removeChild(ta);
+        }
     });
 });
 </script>

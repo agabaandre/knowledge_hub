@@ -2,10 +2,24 @@
     $hide_search = true;
     $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
     $forumAuthorName = $forum->user->name ?? 'Anonymous';
-    // SEO Meta Tags for Forum Thread Page – author-optimised
+    $linkedCr = $linkedContentRequest ?? null;
+    $isLinkedContentRequestForum = !empty($linkedCr);
+
+    // SEO / hero: linked content-request threads must not expose requester details via meta or banner snippet
+    if ($isLinkedContentRequestForum) {
+        $pageDescription = 'Community discussion for a Knowledge Hub content request. Requester contact details are not shown on this page; the topic is described in the thread below.';
+        $pageKeywords = 'community forum, content request, knowledge exchange, public health, ' . (settings()->seo_keywords ?? '');
+        $schemaDescription = 'Community forum thread for a Knowledge Hub content request. The requester is not identified on this page.';
+        $forumDescriptionShort = 'This thread is for your community to discuss a referred content request. Full topic details are in the first post below; the requester is not identified here.';
+    } else {
+        $pageDescription = Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
+        $pageKeywords = 'forum discussion, ' . ($forum->forum_title ?? '') . ', ' . $forumAuthorName . ', public health, ' . (settings()->seo_keywords ?? '');
+        $schemaDescription = Str::limit(strip_tags($forum->forum_description ?? ''), 300);
+        $forumDescriptionPlain = strip_tags($forum->forum_description ?? '');
+        $forumDescriptionShort = \Illuminate\Support\Str::words($forumDescriptionPlain, 40, '...');
+    }
+
     $pageTitle = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . $siteName;
-    $pageDescription = Str::limit(strip_tags($forum->forum_description ?? ''), 160) ?: ($forum->forum_title . ' - Join the discussion on this public health forum topic.');
-    $pageKeywords = 'forum discussion, ' . ($forum->forum_title ?? '') . ', ' . $forumAuthorName . ', public health, ' . (settings()->seo_keywords ?? '');
     $pageAuthor = $forumAuthorName;
 
     // Use forum image if available, otherwise default
@@ -37,7 +51,7 @@
     "@context": "https://schema.org",
     "@type": "DiscussionForumPosting",
     "headline": "{{ addslashes($forum->forum_title ?? 'Forum Discussion') }}",
-    "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 300)) }}",
+    "description": "{{ addslashes($schemaDescription) }}",
     "image": "{{ $pageImage }}",
     "datePublished": "{{ $publishDate }}",
     "dateModified": "{{ $modifiedDate }}",
@@ -108,8 +122,10 @@
     $primaryColor = settings()->primary_color ?? '#119A48';
     $secondaryColor = settings()->secondary_color ?? '#0e7a3a';
     $auGold = settings()->au_gold ?? '#B4A269';
-    $forumDescription = strip_tags($forum->forum_description ?? '');
-    $forumDescriptionShort = \Illuminate\Support\Str::words($forumDescription, 40, '...');
+    if (! isset($forumDescriptionShort)) {
+        $forumDescriptionPlain = strip_tags($forum->forum_description ?? '');
+        $forumDescriptionShort = \Illuminate\Support\Str::words($forumDescriptionPlain, 40, '...');
+    }
     $bannerImage = is_image($forum->forum_image) ? $forum->forum_image : null;
     $gradientStart = settings()->gradient_start_color ?? '#119A48';
     $gradientEnd = settings()->gradient_end_color ?? '#16c653';
@@ -1003,6 +1019,7 @@
             <div class="row">
             <!-- Main Content -->
                 <div class="col-lg-8 col-md-12 col-sm-12 col-12">
+                    @include('forums.partials.content_request_referral_banner', ['linkedContentRequest' => $linkedContentRequest ?? null])
                     @include('forums.partials.forum_details')
                 </div>
 
