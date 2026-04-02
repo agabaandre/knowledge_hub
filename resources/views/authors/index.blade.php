@@ -4,6 +4,13 @@
 
 @extends('layouts.app')
 
+@section('structured_data')
+@if(!empty($authorsIndexJsonLd) && !empty($authorsBreadcrumbJsonLd))
+<script type="application/ld+json">{!! json_encode($authorsIndexJsonLd, $jsonLdFlags) !!}</script>
+<script type="application/ld+json">{!! json_encode($authorsBreadcrumbJsonLd, $jsonLdFlags) !!}</script>
+@endif
+@endsection
+
 @section('styles')
 <style>
     .authors-wrapper {

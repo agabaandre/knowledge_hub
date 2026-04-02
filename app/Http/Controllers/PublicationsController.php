@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
+use App\Models\Tag;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
@@ -123,11 +125,46 @@ class PublicationsController extends Controller
         return view('publications.abstract',$data);
     }
 
-    public function search(Request $request){
-        // Basic input hardening for search
+    public function search(Request $request)
+    {
+        $this->prepareRecordsSearchRequest($request);
+        $this->validateRecordsSearchRequest($request);
+        $data = $this->buildRecordsSearchData($request);
+
+        return view('publications.search', $data);
+    }
+
+    /**
+     * JSON + HTML fragments for AJAX filtering on the records search page (same query semantics as {@see search}).
+     */
+    public function searchFragment(Request $request)
+    {
+        if (! $request->ajax()) {
+            abort(404);
+        }
+
+        $this->prepareRecordsSearchRequest($request);
+        $this->validateRecordsSearchRequest($request);
+        $data = $this->buildRecordsSearchData($request);
+
+        return response()->json([
+            'main_html' => view('publications.partials.search_main_column', $data)->render(),
+            'sidebar_html' => view('publications.partials.search_sidebar_dynamic', $data)->render(),
+            'page_title' => $data['pageTitle'],
+            'meta_description' => strip_tags($data['pageDescription']),
+            'canonical_url' => $data['canonicalUrl'],
+        ]);
+    }
+
+    protected function prepareRecordsSearchRequest(Request $request): void
+    {
         $request->merge([
             'term' => is_string($request->term) ? strip_tags(trim($request->term)) : null,
         ]);
+    }
+
+    protected function validateRecordsSearchRequest(Request $request): void
+    {
         $request->validate([
             'term' => 'nullable|string|max:255',
             'thematic_area_id' => 'nullable|integer',
@@ -136,6 +173,8 @@ class PublicationsController extends Controller
             'author' => 'nullable|integer',
             'author_id' => 'nullable|integer',
             'country_id' => 'nullable|integer',
+            'tag' => 'nullable|integer|min:1',
+            'page' => 'nullable|integer|min:1|max:10000',
             'data_category_id' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
                 if (is_array($value)) {
                     foreach ($value as $id) {
@@ -185,17 +224,21 @@ class PublicationsController extends Controller
                 }
             }],
         ]);
+    }
 
-        // Track search execution time
+    protected function buildRecordsSearchData(Request $request): array
+    {
+        $request->merge([
+            'thematic_area_id' => $request->theme ?? $request->thematic_area_id,
+        ]);
+
         $startTime = microtime(true);
 
-        $request['thematic_area_id'] = $request->theme ?? $request->thematic_area_id;
         $data['sub_themes'] = ($request->thematic_area_id) ? $this->publicationsRepo->get_subthemes($request) : [];
 
         $data['publications'] = $this->publicationsRepo->get($request);
-        $data['search']       = (Object) $request->all();
+        $data['search'] = (object) $request->all();
 
-        // Combined search: forums and communities (when config allows and term is provided)
         $data['searchForums'] = (settings()->search_show_forums ?? true)
             ? $this->forumsRepo->searchForRecords($request, 5, false)
             : collect();
@@ -203,41 +246,50 @@ class PublicationsController extends Controller
             ? $this->commsRepo->searchForRecords($request, 5)
             : collect();
 
-        // Calculate execution time
         $endTime = microtime(true);
-        $data['search_time'] = round(($endTime - $startTime) * 1000, 2); // Convert to milliseconds
+        $data['search_time'] = round(($endTime - $startTime) * 1000, 2);
         $data['results_count'] = $data['publications']->total() + $data['searchForums']->count() + $data['searchCommunities']->count();
 
-        // Get latest publications for sidebar
         $latestRequest = clone $request;
         $latestRequest->merge(['rows' => 5]);
         $data['latestPublications'] = $this->publicationsRepo->get($latestRequest);
-        
-        // Get related publications for sidebar
+
         $relatedRequest = clone $request;
         $relatedRequest->merge(['rows' => 5]);
         $data['relatedPublications'] = $this->publicationsRepo->get($relatedRequest);
-        
-        // Popular tags = tags with approved publications, ordered by engagement (views + likes)
-        $data['tags'] = \App\Models\Tag::popularByEngagement(20);
 
-        // SEO for records search page
-        $term = $request->filled('term') ? trim($request->term) : '';
-        $data['pageTitle'] = $term
-            ? 'Search: ' . \Illuminate\Support\Str::limit($term, 50) . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub')
-            : 'Search Resources & Discussions - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-        $data['pageDescription'] = $term
-            ? 'Search results for "' . \Illuminate\Support\Str::limit($term, 60) . '" – publications, communities and discussion forums from ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub') . '.'
-            : 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
-        $data['pageKeywords'] = ($term ? $term . ', ' : '') . 'search, publications, communities, discussions, forums, ' . (settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
+        $data['tags'] = Tag::popularByEngagement(20);
+
+        $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+        $term = $request->filled('term') ? trim((string) $request->term) : '';
+        $tagModel = null;
+        if ($request->filled('tag')) {
+            $tagModel = Tag::find((int) $request->tag);
+        }
+
+        if ($tagModel) {
+            $tagTitle = Str::limit($tagModel->tag_text, 50);
+            $data['pageTitle'] = $tagTitle.' — Resources — '.$siteName;
+            $data['pageDescription'] = 'Resources tagged "'.Str::limit($tagModel->tag_text, 80).'" on '.$siteName.'.';
+            $data['pageKeywords'] = $tagModel->tag_text.', tag, search, publications, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
+        } elseif ($term !== '') {
+            $data['pageTitle'] = 'Search: '.Str::limit($term, 50).' - '.$siteName;
+            $data['pageDescription'] = 'Search results for "'.Str::limit($term, 60).'" – publications, communities and discussion forums from '.$siteName.'.';
+            $data['pageKeywords'] = $term.', search, publications, communities, discussions, forums, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
+        } else {
+            $data['pageTitle'] = 'Search Resources & Discussions - '.$siteName;
+            $data['pageDescription'] = 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
+            $data['pageKeywords'] = 'search, publications, communities, discussions, forums, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
+        }
+
         $canonicalQuery = array_filter($request->only([
             'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id', 'sub_thematic_area_id', 'subtheme',
-            'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag',
+            'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag', 'page',
         ]));
-        $data['canonicalUrl'] = url('records/search?' . http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
+        $data['canonicalUrl'] = url('records/search?'.http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
         $data['ogType'] = 'website';
 
-        return view('publications.search', $data);
+        return $data;
     }
 
     public function author_pubs(Request $request){

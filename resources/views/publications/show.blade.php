@@ -1,133 +1,197 @@
 @extends('layouts.app')
 
 @php
-    // SEO Meta Tags for Publication Page
-    $pageTitle = clean_unicode($publication->title) . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-    $pageDescription = Str::limit(strip_tags(clean_unicode($publication->description ?? '')), 160) ?: (clean_unicode($publication->title) . ' - Published by ' . (clean_unicode($publication->author->name ?? 'Africa CDC')));
-    $pageKeywords = $publication->tags->pluck('tag_text')->map(function($tag) { return clean_unicode($tag); })->implode(', ') . ', ' . clean_unicode($publication->theme->description ?? '') . ', ' . clean_unicode($publication->sub_theme->description ?? '');
-    $pageImage = $publication->cover ?? $publication->image_url ?? asset('assets/images/cover.png');
-    $pageImage = filter_var($pageImage, FILTER_VALIDATE_URL) ? $pageImage : asset($pageImage);
-    $canonicalUrl = url('records/resource?id=' . $publication->id);
+    $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+    $siteUrl = rtrim((string) config('app.url'), '/');
+    $pubTitle = clean_unicode($publication->title);
+
+    $seoTagLabels = $publication->tags
+        ->map(fn ($pt) => clean_unicode(optional($pt->tag)->tag_text ?? ''))
+        ->filter()
+        ->unique()
+        ->values();
+
+    $themeDesc = clean_unicode(optional($publication->theme)->description ?? '');
+    $subThemeDesc = clean_unicode(optional($publication->sub_theme)->description ?? '');
+    $categoryName = clean_unicode(optional($publication->data_category)->category_name ?? optional($publication->category)->category_name ?? '');
+
+    $pageKeywords = collect([
+        $seoTagLabels->implode(', '),
+        $themeDesc,
+        $subThemeDesc,
+        $categoryName,
+        'public health',
+        'Africa CDC',
+        settings()->seo_keywords ?? '',
+    ])->filter()->implode(', ');
+    $pageKeywords = Str::limit(trim(preg_replace('/\s*,\s*,+/', ', ', preg_replace('/\s+/', ' ', $pageKeywords))), 300);
+
+    $descPlain = trim(preg_replace('/\s+/u', ' ', strip_tags(clean_unicode($publication->description ?? ''))));
+    $pageDescription = Str::limit($descPlain, 160);
+    if ($pageDescription === '') {
+        $by = clean_unicode(optional($publication->author)->name ?? '');
+        $fallbackBits = array_filter([
+            $categoryName ?: null,
+            $subThemeDesc ?: null,
+            $publication->year_published ? 'Year '.$publication->year_published : null,
+            $by ? 'Source: '.$by : null,
+        ]);
+        $pageDescription = Str::limit(
+            $pubTitle.' — '.($fallbackBits ? implode(' — ', $fallbackBits).' — ' : '').$siteName,
+            160
+        );
+    }
+
+    $pageTitle = $pubTitle.' — '.$siteName;
+
+    $rawCover = $publication->cover ?? $publication->image_url ?? null;
+    $pageImage = $rawCover
+        ? (filter_var($rawCover, FILTER_VALIDATE_URL) ? $rawCover : asset(ltrim($rawCover, '/')))
+        : asset('assets/images/cover.png');
+    if (! filter_var($pageImage, FILTER_VALIDATE_URL)) {
+        $pageImage = asset('assets/images/cover.png');
+    }
+
+    $canonicalUrl = url('records/resource?id='.$publication->id);
     $ogType = 'article';
-    
-    // Get publication date
+
     $publishDate = $publication->created_at ? $publication->created_at->toIso8601String() : now()->toIso8601String();
     $modifiedDate = $publication->updated_at ? $publication->updated_at->toIso8601String() : $publishDate;
-    
-    // Get authors
+    $articlePublishedTime = $publishDate;
+    $articleModifiedTime = $modifiedDate;
+
     $authors = [];
-    if (!empty($publication->associated_authors)) {
-        $authors = array_map('trim', explode(',', $publication->associated_authors));
+    if (! empty($publication->associated_authors)) {
+        $authors = array_map('trim', explode(',', (string) $publication->associated_authors));
     }
     if ($publication->author) {
         $authors[] = $publication->author->name;
     }
-    $authors = array_unique($authors);
-    
-    // Get tags for article meta
-    $tags = $publication->tags->pluck('tag_text')->toArray();
+    $authors = array_values(array_unique(array_filter($authors)));
+
+    $pageAuthor = $authors[0] ?? clean_unicode(optional($publication->author)->name ?? $siteName);
+
+    $logoRaw = settings()->logo ?? '';
+    $logoAbsolute = $logoRaw && filter_var($logoRaw, FILTER_VALIDATE_URL)
+        ? $logoRaw
+        : ($logoRaw ? asset(ltrim($logoRaw, '/')) : asset('assets/images/logo.png'));
+
+    $authorLd = [];
+    foreach ($authors as $name) {
+        if ($name !== '' && $name !== null) {
+            $authorLd[] = ['@type' => 'Person', 'name' => $name];
+        }
+    }
+    if ($authorLd === []) {
+        $authorLd[] = ['@type' => 'Organization', 'name' => $siteName];
+    }
+
+    $scholarlyArticle = [
+        '@context' => 'https://schema.org',
+        '@type' => 'ScholarlyArticle',
+        'headline' => $pubTitle,
+        'description' => Str::limit($descPlain !== '' ? $descPlain : $pageDescription, 320),
+        'image' => $pageImage,
+        'datePublished' => $publishDate,
+        'dateModified' => $modifiedDate,
+        'author' => count($authorLd) === 1 ? $authorLd[0] : $authorLd,
+        'publisher' => [
+            '@type' => 'Organization',
+            'name' => $siteName,
+            'url' => $siteUrl ?: url('/'),
+            'logo' => [
+                '@type' => 'ImageObject',
+                'url' => $logoAbsolute,
+            ],
+        ],
+        'mainEntityOfPage' => [
+            '@type' => 'WebPage',
+            '@id' => $canonicalUrl,
+        ],
+        'inLanguage' => 'en',
+        'url' => $canonicalUrl,
+        'isAccessibleForFree' => true,
+    ];
+
+    if ($pageKeywords !== '') {
+        $scholarlyArticle['keywords'] = $pageKeywords;
+    }
+    if ($categoryName !== '') {
+        $scholarlyArticle['articleSection'] = $categoryName;
+    }
+    if (! empty($publication->doi)) {
+        $scholarlyArticle['identifier'] = [
+            '@type' => 'PropertyValue',
+            'propertyID' => 'DOI',
+            'value' => $publication->doi,
+        ];
+    }
+    if (! empty($publication->issn)) {
+        $scholarlyArticle['issn'] = $publication->issn;
+    }
+    if (! empty($publication->isbn)) {
+        $scholarlyArticle['isbn'] = $publication->isbn;
+    }
+    if ($publication->license && ! empty($publication->license->url ?? null)) {
+        $scholarlyArticle['license'] = $publication->license->url;
+    }
+    if (! empty($publication->year_published)) {
+        $scholarlyArticle['copyrightYear'] = (int) $publication->year_published;
+    }
+    if (! empty($publication->funder)) {
+        $scholarlyArticle['funder'] = [
+            '@type' => 'Organization',
+            'name' => $publication->funder,
+        ];
+    }
+    if (! empty($publication->journal_name)) {
+        $isPartOf = [
+            '@type' => 'Periodical',
+            'name' => $publication->journal_name,
+        ];
+        if (! empty($publication->journal_volume)) {
+            $isPartOf['volumeNumber'] = $publication->journal_volume;
+        }
+        if (! empty($publication->journal_issue)) {
+            $isPartOf['issueNumber'] = $publication->journal_issue;
+        }
+        if (! empty($publication->journal_pages)) {
+            $isPartOf['pagination'] = $publication->journal_pages;
+        }
+        $scholarlyArticle['isPartOf'] = $isPartOf;
+    }
+
+    $breadcrumbList = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            [
+                '@type' => 'ListItem',
+                'position' => 1,
+                'name' => 'Home',
+                'item' => url('/'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 2,
+                'name' => 'Resources',
+                'item' => url('records'),
+            ],
+            [
+                '@type' => 'ListItem',
+                'position' => 3,
+                'name' => Str::limit($pubTitle, 70),
+                'item' => $canonicalUrl,
+            ],
+        ],
+    ];
+
+    $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 @endphp
 
 @section('structured_data')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ScholarlyArticle",
-    "headline": "{{ addslashes(clean_unicode($publication->title)) }}",
-    "description": "{{ addslashes(Str::limit(strip_tags(clean_unicode($publication->description ?? '')), 300)) }}",
-    "image": "{{ $pageImage }}",
-    "datePublished": "{{ $publishDate }}",
-    "dateModified": "{{ $modifiedDate }}",
-    "author": [
-        @foreach($authors as $index => $author)
-        {
-            "@type": "Person",
-            "name": "{{ addslashes($author) }}"
-        }@if(!$loop->last),@endif
-        @endforeach
-    ],
-    @if($publication->author)
-    "publisher": {
-        "@type": "Organization",
-        "name": "{{ addslashes($publication->author->name) }}",
-        "logo": {
-            "@type": "ImageObject",
-            "url": "{{ settings()->logo ?? asset('assets/images/logo.png') }}"
-        }
-    },
-    @endif
-    "mainEntityOfPage": {
-        "@type": "WebPage",
-        "@id": "{{ $canonicalUrl }}"
-    },
-    @if($publication->doi)
-    "identifier": {
-        "@type": "PropertyValue",
-        "propertyID": "DOI",
-        "value": "{{ $publication->doi }}"
-    },
-    @endif
-    @if($publication->issn)
-    "issn": "{{ $publication->issn }}",
-    @endif
-    @if($publication->isbn)
-    "isbn": "{{ $publication->isbn }}",
-    @endif
-    @if($publication->license)
-    "license": "{{ $publication->license->url ?? '' }}",
-    @endif
-    @if($publication->year_published)
-    "copyrightYear": "{{ $publication->year_published }}",
-    @endif
-    @if($publication->funder)
-    "funder": {
-        "@type": "Organization",
-        "name": "{{ addslashes($publication->funder) }}"
-    },
-    @endif
-    @if($publication->journal_name)
-    "isPartOf": {
-        "@type": "Periodical",
-        "name": "{{ addslashes($publication->journal_name) }}",
-        @if($publication->journal_volume)
-        "volumeNumber": "{{ $publication->journal_volume }}",
-        @endif
-        @if($publication->journal_issue)
-        "issueNumber": "{{ $publication->journal_issue }}",
-        @endif
-        @if($publication->journal_pages)
-        "pagination": "{{ $publication->journal_pages }}"
-        @endif
-    },
-    @endif
-    "keywords": "{{ $pageKeywords }}",
-    "inLanguage": "en",
-    "url": "{{ $canonicalUrl }}",
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "{{ url('/') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Publications",
-                "item": "{{ url('records') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "{{ addslashes(Str::limit($publication->title, 50)) }}",
-                "item": "{{ $canonicalUrl }}"
-            }
-        ]
-    }
-}
-</script>
+<script type="application/ld+json">{!! json_encode($scholarlyArticle, $jsonLdFlags) !!}</script>
+<script type="application/ld+json">{!! json_encode($breadcrumbList, $jsonLdFlags) !!}</script>
 @endsection
 
 @section('styles')

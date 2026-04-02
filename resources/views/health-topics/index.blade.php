@@ -1,10 +1,11 @@
-@php 
-$primary = settings()->primary_color ?? '#119A48';
-$totalTopics = $groupedTags->flatten()->count();
-@endphp
 @extends('layouts.app')
 
-@section('title', 'Health Topics')
+@section('structured_data')
+@if(!empty($healthTopicsJsonLd) && !empty($healthBreadcrumbLd))
+<script type="application/ld+json">{!! json_encode($healthTopicsJsonLd, $jsonLdFlags) !!}</script>
+<script type="application/ld+json">{!! json_encode($healthBreadcrumbLd, $jsonLdFlags) !!}</script>
+@endif
+@endsection
 
 @section('content')
 <div class="health-topics-wrapper">

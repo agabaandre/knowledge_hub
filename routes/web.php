@@ -148,7 +148,7 @@ Route::group(["prefix" => "browse"], function () {
     Route::get("themes", [ThemesController::class, 'index']);
     Route::get("subthemes", [ThemesController::class, 'subthemes']);
     Route::put('subthemes/update', [ThemesController::class, 'subthemes/update'])->name('subthemes.update');
-    Route::get("authors", [AuthorsController::class, 'index']);
+    Route::get("authors", [AuthorsController::class, 'index'])->name('browse.authors');
     // Redirect legacy areas route to countries page
     Route::get("areas", function(){ return redirect('countries'); });
 
@@ -158,6 +158,7 @@ Route::group(["prefix" => "records"], function () {
 
     Route::get("/", [PublicationsController::class, 'search']);
     Route::get("/resource", [PublicationsController::class, 'show']);
+    Route::get("/search/fragment", [PublicationsController::class, 'searchFragment']);
     Route::get("/search", [PublicationsController::class, 'search']);
     Route::get("/subtheme", [PublicationsController::class, 'subtheme_pubs']);
     Route::get("/autocomplete", [PublicationsController::class, 'autocomplete']);

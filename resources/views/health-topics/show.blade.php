@@ -1,10 +1,49 @@
-@php 
+@php
     $primary = settings()->primary_color ?? '#119A48';
     $textColor = settings()->links_active_color ?? settings()->primary_text_color ?? $primary;
+    $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
+    $pageTitle = clean_unicode($tag->tag_text).' — Health Topics — '.$siteName;
+    $overviewPlain = trim(preg_replace('/\s+/u', ' ', strip_tags(clean_unicode($tag->overview ?? ''))));
+    $pageDescription = $overviewPlain !== ''
+        ? Str::limit($overviewPlain, 160)
+        : Str::limit('Resources, publications, and discussions for '.clean_unicode($tag->tag_text).' on '.$siteName.'.', 160);
+    $pageKeywords = trim(clean_unicode($tag->tag_text).', health topic, public health, '.(settings()->seo_keywords ?? ''));
+    $canonicalUrl = route('health-topics.show', $tag->id);
+    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+    $ogType = 'website';
+
+    $topicJsonLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'CollectionPage',
+        'name' => clean_unicode($tag->tag_text),
+        'description' => Str::limit($overviewPlain !== '' ? $overviewPlain : $pageDescription, 320),
+        'url' => $canonicalUrl,
+        'isPartOf' => [
+            '@type' => 'WebSite',
+            'name' => $siteName,
+            'url' => rtrim((string) config('app.url'), '/') ?: url('/'),
+        ],
+        'about' => ['@type' => 'Thing', 'name' => clean_unicode($tag->tag_text)],
+    ];
+    $topicBreadcrumbLd = [
+        '@context' => 'https://schema.org',
+        '@type' => 'BreadcrumbList',
+        'itemListElement' => [
+            ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+            ['@type' => 'ListItem', 'position' => 2, 'name' => 'Health Topics', 'item' => url('/health-topics')],
+            ['@type' => 'ListItem', 'position' => 3, 'name' => clean_unicode($tag->tag_text), 'item' => $canonicalUrl],
+        ],
+    ];
+    $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 @endphp
 @extends('layouts.app')
 
-@section('title', $tag->tag_text . ' - Health Topics')
+@section('title', $pageTitle)
+
+@section('structured_data')
+<script type="application/ld+json">{!! json_encode($topicJsonLd, $jsonLdFlags) !!}</script>
+<script type="application/ld+json">{!! json_encode($topicBreadcrumbLd, $jsonLdFlags) !!}</script>
+@endsection
 
 @section('styles')
 <style>

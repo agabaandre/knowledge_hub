@@ -21,7 +21,7 @@
 
 {{-- Open Graph / Facebook --}}
 <meta property="og:type" content="{{ $ogType ?? 'website' }}">
-<meta property="og:url" content="{{ $currentUrl }}">
+<meta property="og:url" content="{{ $canonicalUrl }}">
 <meta property="og:title" content="{{ strip_tags($pageTitle) }}">
 <meta property="og:description" content="{{ strip_tags($pageDescription) }}">
 <meta property="og:image" content="{{ $pageImage }}">
@@ -42,7 +42,7 @@
 
 {{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:url" content="{{ $currentUrl }}">
+<meta name="twitter:url" content="{{ $canonicalUrl }}">
 <meta name="twitter:title" content="{{ strip_tags($pageTitle) }}">
 <meta name="twitter:description" content="{{ strip_tags($pageDescription) }}">
 <meta name="twitter:image" content="{{ $pageImage }}">
