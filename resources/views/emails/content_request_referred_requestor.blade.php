@@ -16,12 +16,15 @@
         <a href="{{ $trackUrl }}" style="display: inline-block; background-color: #119A48; color: #ffffff !important; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">View updates &amp; private notes</a>
     </p>
 
-    @if(!empty($contentRequest->referral_forum_id))
-    <p>Your request is also being discussed in a <strong>dedicated community forum thread</strong> on the Knowledge Hub (members comment there; you may need to sign in to read everything).</p>
-    <p style="margin: 16px 0;">
-        <a href="{{ url('forums/thread?id='.$contentRequest->referral_forum_id) }}" style="display: inline-block; background-color: #0d7a3a; color: #ffffff !important; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Open forum thread</a>
+    @php $forumIds = $contentRequest->referralForumIds(); @endphp
+    @if($forumIds->isNotEmpty())
+    <p>Your request is also being discussed in <strong>dedicated community forum thread(s)</strong> on the Knowledge Hub (members comment there; you may need to sign in to read everything).</p>
+    @foreach($forumIds as $fid)
+    <p style="margin: 12px 0;">
+        <a href="{{ url('forums/thread?id='.$fid) }}" style="display: inline-block; background-color: #0d7a3a; color: #ffffff !important; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Open forum thread @if($forumIds->count() > 1)#{{ $loop->iteration }}@endif</a>
     </p>
-    <p style="font-size: 13px; color: #666;">You may receive a separate email with an AI-generated overview of the discussion.</p>
+    @endforeach
+    <p style="font-size: 13px; color: #666;">You may receive separate email(s) with an AI-generated overview of each discussion.</p>
     @endif
 
     <p style="font-size: 13px; color: #666;">Keep your tracking link private. You will receive email notifications when there are new messages from the team and when there are new forum comments.</p>

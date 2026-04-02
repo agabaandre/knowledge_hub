@@ -486,7 +486,13 @@ class ForumsRepository extends SharedRepo{
         }
 
         if ($comment && $comment->id && ($comment->status ?? '') === 'approved') {
-            $linkedRequest = ContentRequest::query()->where('referral_forum_id', $comment->forum_id)->first();
+            $fid = (int) $comment->forum_id;
+            $linkedRequest = ContentRequest::query()
+                ->where(function ($q) use ($fid) {
+                    $q->where('referral_forum_id', $fid)
+                        ->orWhereHas('referralTargets', fn ($t) => $t->where('referral_forum_id', $fid));
+                })
+                ->first();
             if ($linkedRequest) {
                 $comment->loadMissing('user');
                 ContentRequestReferralNotifier::notifyRequestorNewForumComment($linkedRequest, $comment);

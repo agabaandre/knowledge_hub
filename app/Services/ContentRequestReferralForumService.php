@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Jobs\NotifyCommunityMembers;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\ContentRequest;
+use App\Models\CommunityOfPractice;
 use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\ForumEngagement;
@@ -49,9 +50,13 @@ class ContentRequestReferralForumService
      * Create an approved community-scoped forum thread for a content request referred to a CoP.
      * Subscribes all approved community members so they can comment without manually joining.
      */
-    public static function createForCommunityReferral(ContentRequest $contentRequest, int $actorUserId): ?Forum
+    public static function createForCommunityReferral(ContentRequest $contentRequest, int $communityId, int $actorUserId): ?Forum
     {
-        if ($contentRequest->referral_type !== 'community' || ! $contentRequest->referred_to_community_id) {
+        if ($communityId < 1) {
+            return null;
+        }
+
+        if (! CommunityOfPractice::query()->whereKey($communityId)->exists()) {
             return null;
         }
 
@@ -60,8 +65,9 @@ class ContentRequestReferralForumService
         }
 
         try {
-            return DB::transaction(function () use ($contentRequest, $actorUserId) {
-                $contentRequest->loadMissing(['referredToCommunity', 'country']);
+            return DB::transaction(function () use ($contentRequest, $communityId, $actorUserId) {
+                $contentRequest->loadMissing(['country']);
+                $community = CommunityOfPractice::query()->find($communityId);
 
                 $now = now();
 
@@ -73,9 +79,12 @@ class ContentRequestReferralForumService
                 if (! Str::startsWith(Str::lower($title), 'community content request')) {
                     $title = 'Community content request: '.$title;
                 }
+                if ($community) {
+                    $title .= ' — '.Str::limit($community->community_name, 60);
+                }
                 $title = clean_unicode(Str::limit($title, 500));
 
-                $communityName = $contentRequest->referredToCommunity->community_name ?? 'your community';
+                $communityName = $community->community_name ?? 'your community';
 
                 $intro = '<div class="referral-forum-intro border rounded p-3 mb-3 bg-light">';
                 $intro .= '<p class="mb-2"><strong>Community-linked content request</strong></p>';
@@ -126,13 +135,13 @@ class ContentRequestReferralForumService
 
                 $link = new ForumCommunityOfPractice;
                 $link->forum_id = $forum->id;
-                $link->community_of_practice_id = (int) $contentRequest->referred_to_community_id;
+                $link->community_of_practice_id = $communityId;
                 $link->save();
 
                 ForumEngagement::incrementForumPost($actorUserId);
 
                 $memberIds = CommunityOfPracticeMembers::query()
-                    ->where('community_of_practice_id', $contentRequest->referred_to_community_id)
+                    ->where('community_of_practice_id', $communityId)
                     ->where('is_approved', 1)
                     ->pluck('user_id')
                     ->unique()
@@ -147,7 +156,7 @@ class ContentRequestReferralForumService
 
                 $forum->load('user');
                 NotifyCommunityMembers::dispatch(
-                    [(int) $contentRequest->referred_to_community_id],
+                    [$communityId],
                     'forum',
                     $forum->id,
                     $forum->forum_title ?? 'Community discussion',

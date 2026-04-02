@@ -360,11 +360,11 @@
                                     </div>
                                 </div>
                                 <div class="d-flex flex-wrap shrink-0" style="gap: 6px;">
-                                    <a href="{{ $cr->discussionUrl() }}" class="btn btn-sm btn-primary">
+                                    <a href="{{ $cr->discussionUrlForCommunity($community->id) }}" class="btn btn-sm btn-primary">
                                         <i class="fa fa-comments mr-1"></i>Forum thread
                                     </a>
                                     @if($cr->userMayMarkReferralAsProcessed(auth()->user()))
-                                        <a href="{{ $cr->discussionUrl() }}#mark-processed" class="btn btn-sm btn-success">
+                                        <a href="{{ $cr->discussionUrlForCommunity($community->id) }}#mark-processed" class="btn btn-sm btn-success">
                                             <i class="fa fa-check mr-1"></i>Mark processed
                                         </a>
                                     @endif
@@ -458,7 +458,7 @@
                                             @if($cr->processedBy)<span class="ml-2"><i class="fa fa-user mr-1"></i>{{ $cr->processedBy->name }}</span>@endif
                                         </div>
                                     </div>
-                                    <a href="{{ route('content-request.referral.discuss', $cr) }}" class="btn btn-sm btn-outline-primary shrink-0">
+                                    <a href="{{ $cr->discussionUrlForCommunity($community->id) }}" class="btn btn-sm btn-outline-primary shrink-0">
                                         <i class="fa fa-comments mr-1"></i>Thread
                                     </a>
                                 </div>

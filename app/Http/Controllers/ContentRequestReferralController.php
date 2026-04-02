@@ -23,8 +23,9 @@ class ContentRequestReferralController extends Controller
             abort(403, 'You are not assigned to this referral discussion.');
         }
 
-        if ($contentRequest->referral_forum_id) {
-            return redirect()->to(ContentRequestReferralForumService::forumThreadUrl((int) $contentRequest->referral_forum_id));
+        $firstForumId = $contentRequest->referralForumIds()->first();
+        if ($firstForumId) {
+            return redirect()->to(ContentRequestReferralForumService::forumThreadUrl((int) $firstForumId));
         }
 
         $contentRequest->load(['referralMessages.user', 'country', 'referredToCommunity', 'referredToUser', 'referredByUser']);
@@ -45,9 +46,10 @@ class ContentRequestReferralController extends Controller
             abort(403);
         }
 
-        if ($contentRequest->referral_forum_id) {
+        $firstForumId = $contentRequest->referralForumIds()->first();
+        if ($firstForumId) {
             return redirect()
-                ->to(ContentRequestReferralForumService::forumThreadUrl((int) $contentRequest->referral_forum_id))
+                ->to(ContentRequestReferralForumService::forumThreadUrl((int) $firstForumId))
                 ->with('info', 'This request is discussed in the community forum thread. Please post your comment there.');
         }
 
@@ -117,8 +119,9 @@ class ContentRequestReferralController extends Controller
             ])->onQueue('default');
         }
 
-        $redirect = $contentRequest->referral_forum_id
-            ? redirect()->to(ContentRequestReferralForumService::forumThreadUrl((int) $contentRequest->referral_forum_id))
+        $firstForumId = $contentRequest->referralForumIds()->first();
+        $redirect = $firstForumId
+            ? redirect()->to(ContentRequestReferralForumService::forumThreadUrl((int) $firstForumId))
             : redirect()->route('content-request.referral.discuss', $contentRequest);
 
         return $redirect->with('success', 'Request marked as processed. The requester has been emailed if an address is on file.');

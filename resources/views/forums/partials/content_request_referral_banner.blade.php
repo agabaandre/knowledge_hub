@@ -4,7 +4,12 @@
     <div class="d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
             <h5 class="alert-heading mb-2"><i class="fa fa-link mr-2"></i>Community-linked content request</h5>
-            <p class="mb-1 small">This forum thread was opened so <strong>{{ $linkedContentRequest->referredToCommunity->community_name ?? 'this community' }}</strong> can discuss a Knowledge Hub <strong>content request</strong>. The requester’s identity and contact details are <strong>not</strong> shown here for privacy—the full topic (with contact details removed where possible) is in the first post below.</p>
+            @php
+                $forumCommunityName = optional($linkedForumCommunity ?? null)->community_name
+                    ?? optional($linkedContentRequest->referredToCommunity)->community_name
+                    ?? 'this community';
+            @endphp
+            <p class="mb-1 small">This forum thread was opened so <strong>{{ $forumCommunityName }}</strong> can discuss a Knowledge Hub <strong>content request</strong>. The requester’s identity and contact details are <strong>not</strong> shown here for privacy—the full topic (with contact details removed where possible) is in the first post below.</p>
             <p class="mb-0 small text-muted">Please keep comments focused on the subject matter and useful resources; do not ask for or share personal information about the requester.</p>
         </div>
     </div>

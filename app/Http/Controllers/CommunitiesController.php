@@ -162,21 +162,32 @@ class CommunitiesController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        // Content requests referred to this community (hub workflow)
+        // Content requests referred to this community (hub workflow), including multi-community referrals
         $pendingCommunityContentRequests = ContentRequest::query()
-            ->where('referral_type', 'community')
-            ->where('referred_to_community_id', $id)
             ->whereNull('processed_at')
-            ->with(['country', 'referredByUser'])
+            ->whereNotNull('referred_at')
+            ->where(function ($q) use ($id) {
+                $q->whereHas('referralTargets', fn ($t) => $t->where('community_of_practice_id', $id))
+                    ->orWhere(function ($q2) use ($id) {
+                        $q2->whereIn('referral_type', ['community', 'mixed'])
+                            ->where('referred_to_community_id', $id);
+                    });
+            })
+            ->with(['country', 'referredByUser', 'referralTargets'])
             ->orderByDesc('referred_at')
             ->orderByDesc('created_at')
             ->get();
 
         $processedCommunityContentRequests = ContentRequest::query()
-            ->where('referral_type', 'community')
-            ->where('referred_to_community_id', $id)
             ->whereNotNull('processed_at')
-            ->with(['country', 'processedBy'])
+            ->where(function ($q) use ($id) {
+                $q->whereHas('referralTargets', fn ($t) => $t->where('community_of_practice_id', $id))
+                    ->orWhere(function ($q2) use ($id) {
+                        $q2->whereIn('referral_type', ['community', 'mixed'])
+                            ->where('referred_to_community_id', $id);
+                    });
+            })
+            ->with(['country', 'processedBy', 'referralTargets'])
             ->orderByDesc('processed_at')
             ->paginate(10, ['*'], 'pcr_page');
         

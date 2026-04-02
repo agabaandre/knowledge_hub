@@ -1019,7 +1019,10 @@
             <div class="row">
             <!-- Main Content -->
                 <div class="col-lg-8 col-md-12 col-sm-12 col-12">
-                    @include('forums.partials.content_request_referral_banner', ['linkedContentRequest' => $linkedContentRequest ?? null])
+                    @include('forums.partials.content_request_referral_banner', [
+                        'linkedContentRequest' => $linkedContentRequest ?? null,
+                        'linkedForumCommunity' => $linkedReferralForumCommunity ?? null,
+                    ])
                     @include('forums.partials.forum_details')
                 </div>
 

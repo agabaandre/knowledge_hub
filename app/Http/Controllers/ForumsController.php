@@ -149,10 +149,17 @@ class ForumsController extends Controller
     public function thread(Request $request)
     {
         $data['forum']     = $this->forumsRepo->find($request->id);
+        $forumId = (int) $request->id;
         $data['linkedContentRequest'] = ContentRequest::query()
-            ->where('referral_forum_id', (int) $request->id)
-            ->with(['country', 'referredToCommunity'])
+            ->where(function ($q) use ($forumId) {
+                $q->where('referral_forum_id', $forumId)
+                    ->orWhereHas('referralTargets', fn ($t) => $t->where('referral_forum_id', $forumId));
+            })
+            ->with(['country', 'referredToCommunity', 'referralTargets.community'])
             ->first();
+        $data['linkedReferralForumCommunity'] = $data['linkedContentRequest']
+            ? $data['linkedContentRequest']->communityForReferralForum($forumId)
+            : null;
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         
         // SEO variables (linked content-request forums use privacy-safe copy in the view’s @php as well)

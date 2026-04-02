@@ -16,7 +16,7 @@ class SendContentRequestForumAiSummaryJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public function __construct(public int $contentRequestId)
+    public function __construct(public int $contentRequestId, public ?int $forumId = null)
     {
         $this->onQueue('default');
     }
@@ -24,13 +24,14 @@ class SendContentRequestForumAiSummaryJob implements ShouldQueue
     public function handle(): void
     {
         $cr = ContentRequest::query()->find($this->contentRequestId);
-        if (! $cr || ! $cr->email || ! $cr->referral_forum_id) {
+        $forumId = $this->forumId ?? ($cr ? (int) $cr->referral_forum_id : 0);
+        if (! $cr || ! $cr->email || $forumId < 1) {
             return;
         }
 
         try {
             $ai = app(AIService::class);
-            $result = $ai->summarise((int) $cr->referral_forum_id, 1, 'en', 'Focus on what the requester needs to know; keep the tone helpful and concise.');
+            $result = $ai->summarise($forumId, 1, 'en', 'Focus on what the requester needs to know; keep the tone helpful and concise.');
             $html = $result['content'] ?? '';
             if (trim(strip_tags($html)) === '') {
                 return;
@@ -42,7 +43,7 @@ class SendContentRequestForumAiSummaryJob implements ShouldQueue
                 'title' => 'Discussion overview',
                 'body' => view('emails.content_request_forum_ai_summary', [
                     'contentRequest' => $cr,
-                    'forumUrl' => url('forums/thread?id='.$cr->referral_forum_id),
+                    'forumUrl' => url('forums/thread?id='.$forumId),
                     'summaryHtml' => $html,
                 ])->render(),
             ])->onQueue('default');

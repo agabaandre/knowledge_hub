@@ -7,6 +7,7 @@ use App\Jobs\SendMailJob;
 use App\Models\CommunityOfPractice;
 use App\Models\ContentRequest;
 use App\Models\ContentRequestReferralMessage;
+use App\Models\ContentRequestReferralTarget;
 use App\Models\User;
 use App\Jobs\SendContentRequestForumAiSummaryJob;
 use App\Services\ContentRequestReferralForumService;
@@ -20,7 +21,14 @@ class ContentRequestAdminController extends Controller
     public function index(Request $request)
     {
         // Start building the query
-        $query = ContentRequest::with(['country', 'processedBy', 'referredToUser', 'referredToCommunity']);
+        $query = ContentRequest::with([
+            'country',
+            'processedBy',
+            'referredToUser',
+            'referredToCommunity',
+            'referralTargets.user',
+            'referralTargets.community',
+        ]);
 
         // Filter by status (processed/pending/referred)
         if ($request->filled('status')) {
@@ -174,11 +182,20 @@ class ContentRequestAdminController extends Controller
     public function refer(Request $request, $id)
     {
         $request->validate([
-            'referral_type' => 'required|in:user,community',
-            'referred_to_user_id' => 'required_if:referral_type,user|nullable|exists:users,id',
-            'referred_to_community_id' => 'required_if:referral_type,community|nullable|exists:community_of_practices,id',
+            'referred_user_ids' => 'nullable|array',
+            'referred_user_ids.*' => 'integer|exists:users,id',
+            'referred_community_ids' => 'nullable|array',
+            'referred_community_ids.*' => 'integer|exists:community_of_practices,id',
             'referral_notes' => 'nullable|string|max:5000',
         ]);
+
+        $userIds = array_values(array_unique(array_filter(array_map('intval', $request->input('referred_user_ids', [])))));
+        $communityIds = array_values(array_unique(array_filter(array_map('intval', $request->input('referred_community_ids', [])))));
+
+        if (count($userIds) + count($communityIds) < 2) {
+            return redirect()->route('admin.content-requests.index')
+                ->with('error', 'Select at least two assignees in total (hub users and/or communities).');
+        }
 
         $contentRequest = ContentRequest::findOrFail($id);
 
@@ -187,34 +204,74 @@ class ContentRequestAdminController extends Controller
                 ->with('error', 'This request has already been referred. Open the hub discussion to add messages.');
         }
 
+        $referralType = count($communityIds) > 0 && count($userIds) > 0
+            ? 'mixed'
+            : (count($communityIds) > 0 ? 'community' : 'user');
+
         $token = $contentRequest->requestor_track_token ?: Str::random(48);
 
         $contentRequest->update([
-            'referral_type' => $request->referral_type,
-            'referred_to_user_id' => $request->referral_type === 'user' ? $request->referred_to_user_id : null,
-            'referred_to_community_id' => $request->referral_type === 'community' ? $request->referred_to_community_id : null,
+            'referral_type' => $referralType,
+            'referred_to_user_id' => $userIds[0] ?? null,
+            'referred_to_community_id' => $communityIds[0] ?? null,
             'referred_at' => now(),
             'referred_by' => Auth::id(),
             'referral_notes' => $request->referral_notes,
             'requestor_track_token' => $token,
+            'referral_forum_id' => null,
         ]);
 
         $contentRequest->refresh();
 
-        $forum = null;
-        if ($request->referral_type === 'community') {
-            $forum = ContentRequestReferralForumService::createForCommunityReferral($contentRequest->fresh(), (int) Auth::id());
+        $firstForumId = null;
+
+        foreach ($communityIds as $cid) {
+            $target = ContentRequestReferralTarget::create([
+                'content_request_id' => $contentRequest->id,
+                'user_id' => null,
+                'community_of_practice_id' => $cid,
+                'referral_forum_id' => null,
+            ]);
+
+            $forum = ContentRequestReferralForumService::createForCommunityReferral(
+                $contentRequest->fresh(),
+                $cid,
+                (int) Auth::id()
+            );
             if ($forum) {
-                $contentRequest->update(['referral_forum_id' => $forum->id]);
-                $contentRequest->refresh();
+                $target->update(['referral_forum_id' => $forum->id]);
+                if ($firstForumId === null) {
+                    $firstForumId = $forum->id;
+                }
             }
         }
+
+        foreach ($userIds as $uid) {
+            ContentRequestReferralTarget::create([
+                'content_request_id' => $contentRequest->id,
+                'user_id' => $uid,
+                'community_of_practice_id' => null,
+                'referral_forum_id' => null,
+            ]);
+        }
+
+        if ($firstForumId !== null) {
+            $contentRequest->update(['referral_forum_id' => $firstForumId]);
+        }
+
+        $contentRequest->refresh();
+
+        $forumLines = [];
+        foreach ($contentRequest->referralTargets()->whereNotNull('referral_forum_id')->get() as $t) {
+            $forumLines[] = ContentRequestReferralForumService::forumThreadUrl((int) $t->referral_forum_id);
+        }
+        $forumLines = array_values(array_unique(array_filter($forumLines)));
 
         $intro = trim((string) $request->referral_notes) !== ''
             ? strip_tags($request->referral_notes)
             : 'This request has been referred on the Knowledge Hub for follow-up and discussion.';
-        if ($forum) {
-            $intro .= "\n\nCommunity forum thread: ".ContentRequestReferralForumService::forumThreadUrl($forum->id);
+        if (count($forumLines) > 0) {
+            $intro .= "\n\nCommunity forum thread(s):\n".implode("\n", $forumLines);
         }
 
         ContentRequestReferralMessage::create([
@@ -225,11 +282,21 @@ class ContentRequestAdminController extends Controller
         ]);
 
         ContentRequestReferralNotifier::notifyReferralCreated(
-            $contentRequest->fresh(['referredToUser', 'referredToCommunity', 'referredByUser', 'country'])
+            $contentRequest->fresh([
+                'referredToUser',
+                'referredToCommunity',
+                'referredByUser',
+                'country',
+                'referralTargets.user',
+                'referralTargets.community',
+            ])
         );
 
-        if ($forum && $contentRequest->email) {
-            SendContentRequestForumAiSummaryJob::dispatch($contentRequest->id)->delay(now()->addSeconds(20));
+        if ($contentRequest->email) {
+            foreach ($contentRequest->referralForumIds()->values()->all() as $i => $fid) {
+                SendContentRequestForumAiSummaryJob::dispatch($contentRequest->id, (int) $fid)
+                    ->delay(now()->addSeconds(20 + ($i * 15)));
+            }
         }
 
         return redirect()->route('admin.content-requests.index')

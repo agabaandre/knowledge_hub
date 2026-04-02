@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+
 class ContentRequest extends Model
 {
     use HasFactory;
@@ -65,6 +67,66 @@ class ContentRequest extends Model
         return $this->hasMany(ContentRequestReferralMessage::class)->orderBy('created_at')->orderBy('id');
     }
 
+    public function referralTargets(): HasMany
+    {
+        return $this->hasMany(ContentRequestReferralTarget::class);
+    }
+
+    /**
+     * Distinct forum IDs linked to this referral (targets + legacy column).
+     *
+     * @return Collection<int, int>
+     */
+    public function referralForumIds(): Collection
+    {
+        $ids = $this->referralTargets()
+            ->whereNotNull('referral_forum_id')
+            ->pluck('referral_forum_id')
+            ->map(fn ($id) => (int) $id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        if (! empty($this->referral_forum_id) && ! $ids->contains((int) $this->referral_forum_id)) {
+            $ids->push((int) $this->referral_forum_id);
+        }
+
+        return $ids->unique()->values();
+    }
+
+    public function communityForReferralForum(int $forumId): ?CommunityOfPractice
+    {
+        $target = $this->referralTargets
+            ->firstWhere('referral_forum_id', $forumId);
+        if ($target && $target->community_of_practice_id) {
+            return $target->community ?? CommunityOfPractice::query()->find($target->community_of_practice_id);
+        }
+        if ((int) $this->referral_forum_id === $forumId && $this->referred_to_community_id) {
+            return $this->referredToCommunity ?? CommunityOfPractice::query()->find($this->referred_to_community_id);
+        }
+
+        return null;
+    }
+
+    /**
+     * Forum thread URL for a given community when this request was referred to multiple CoPs.
+     */
+    public function discussionUrlForCommunity(int $communityId): string
+    {
+        $target = $this->referralTargets()
+            ->where('community_of_practice_id', $communityId)
+            ->whereNotNull('referral_forum_id')
+            ->first();
+        if ($target) {
+            return ContentRequestReferralForumService::forumThreadUrl((int) $target->referral_forum_id);
+        }
+        if ((int) $this->referred_to_community_id === $communityId && $this->referral_forum_id) {
+            return ContentRequestReferralForumService::forumThreadUrl((int) $this->referral_forum_id);
+        }
+
+        return $this->discussionUrl();
+    }
+
     public function isProcessed(): bool
     {
         return ! is_null($this->processed_at);
@@ -86,8 +148,16 @@ class ContentRequest extends Model
 
     public function discussionUrl(): string
     {
-        if (! empty($this->referral_forum_id)) {
-            return ContentRequestReferralForumService::forumThreadUrl((int) $this->referral_forum_id);
+        $forumId = $this->referralTargets()
+            ->whereNotNull('referral_forum_id')
+            ->value('referral_forum_id');
+
+        if (empty($forumId) && ! empty($this->referral_forum_id)) {
+            $forumId = $this->referral_forum_id;
+        }
+
+        if (! empty($forumId)) {
+            return ContentRequestReferralForumService::forumThreadUrl((int) $forumId);
         }
 
         return url('/content-request/referral/'.$this->id.'/discuss');
@@ -104,6 +174,32 @@ class ContentRequest extends Model
 
         if ($user->can('manage_content_requests')) {
             return true;
+        }
+
+        $this->loadMissing('referralTargets');
+
+        if ($this->referralTargets->contains(fn ($t) => (int) $t->user_id === (int) $user->id)) {
+            return true;
+        }
+
+        $communityIds = $this->referralTargets
+            ->pluck('community_of_practice_id')
+            ->filter()
+            ->unique()
+            ->all();
+
+        if ($this->referred_to_community_id && ! in_array((int) $this->referred_to_community_id, array_map('intval', $communityIds), true)) {
+            $communityIds[] = (int) $this->referred_to_community_id;
+        }
+
+        foreach ($communityIds as $cid) {
+            if (CommunityOfPracticeMembers::query()
+                ->where('community_of_practice_id', $cid)
+                ->where('user_id', $user->id)
+                ->where('is_approved', 1)
+                ->exists()) {
+                return true;
+            }
         }
 
         if ($this->referral_type === 'user' && (int) $this->referred_to_user_id === (int) $user->id) {
@@ -139,28 +235,36 @@ class ContentRequest extends Model
             return true;
         }
 
-        if ($this->referral_type !== 'community' || ! $this->referred_to_community_id) {
-            return false;
+        $this->loadMissing('referralTargets');
+
+        $communityIds = $this->referralTargets
+            ->pluck('community_of_practice_id')
+            ->filter()
+            ->unique()
+            ->all();
+
+        if ($this->referred_to_community_id && ! in_array((int) $this->referred_to_community_id, array_map('intval', $communityIds), true)) {
+            $communityIds[] = (int) $this->referred_to_community_id;
         }
 
-        $community = $this->referredToCommunity;
-        if (! $community) {
-            $community = CommunityOfPractice::query()->find($this->referred_to_community_id);
-        }
-        if (! $community) {
-            return false;
+        foreach ($communityIds as $cid) {
+            $community = CommunityOfPractice::query()->find($cid);
+            if (! $community) {
+                continue;
+            }
+            if ((int) $community->created_by === (int) $user->id) {
+                return true;
+            }
+            $membership = CommunityOfPracticeMembers::query()
+                ->where('community_of_practice_id', $cid)
+                ->where('user_id', $user->id)
+                ->where('is_approved', 1)
+                ->first();
+            if ($membership && ! empty($membership->is_admin)) {
+                return true;
+            }
         }
 
-        if ((int) $community->created_by === (int) $user->id) {
-            return true;
-        }
-
-        $membership = CommunityOfPracticeMembers::query()
-            ->where('community_of_practice_id', $this->referred_to_community_id)
-            ->where('user_id', $user->id)
-            ->where('is_approved', 1)
-            ->first();
-
-        return $membership && ! empty($membership->is_admin);
+        return false;
     }
 }

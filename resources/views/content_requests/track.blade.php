@@ -10,12 +10,19 @@
         <div class="alert alert-success">{{ session('success') }}</div>
     @endif
 
-    @if($contentRequest->referral_forum_id)
+    @php $forumIds = $contentRequest->referralForumIds(); @endphp
+    @if($forumIds->isNotEmpty())
     <div class="card mb-4 border-primary" style="border-width: 2px;">
         <div class="card-body">
             <h2 class="h6 card-title"><i class="fa fa-comments mr-2"></i>Community forum discussion</h2>
-            <p class="small mb-2">Experts are discussing your request in a thread scoped to the community. Sign in to read all comments and follow the conversation in one place.</p>
-            <a href="{{ url('forums/thread?id='.$contentRequest->referral_forum_id) }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Open forum thread</a>
+            <p class="small mb-2">Experts are discussing your request in {{ $forumIds->count() === 1 ? 'a thread' : 'threads' }} scoped to {{ $forumIds->count() === 1 ? 'a community' : 'the listed communities' }}. Sign in to read comments and follow the conversation.</p>
+            <ul class="list-unstyled small mb-0">
+                @foreach($forumIds as $fid)
+                    <li class="mb-2">
+                        <a href="{{ url('forums/thread?id='.$fid) }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Open forum thread #{{ $loop->iteration }}</a>
+                    </li>
+                @endforeach
+            </ul>
         </div>
     </div>
     @endif

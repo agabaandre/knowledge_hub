@@ -134,7 +134,14 @@
                                                 <br><span class="badge badge-info mt-1">
                                                     <i class="fa fa-share mr-1"></i>Referred
                                                 </span>
-                                                @if($request->referral_type === 'user' && $request->referredToUser)
+                                                @php
+                                                    $rt = $request->referralTargets;
+                                                    $nUsers = $rt->whereNotNull('user_id')->count();
+                                                    $nComms = $rt->whereNotNull('community_of_practice_id')->count();
+                                                @endphp
+                                                @if($nUsers + $nComms > 0)
+                                                    <br><small class="text-muted">{{ $nUsers }} user(s), {{ $nComms }} comm.</small>
+                                                @elseif($request->referral_type === 'user' && $request->referredToUser)
                                                     <br><small class="text-muted">To: {{ $request->referredToUser->name }}</small>
                                                 @elseif($request->referral_type === 'community' && $request->referredToCommunity)
                                                     <br><small class="text-muted">CoP: {{ Str::limit($request->referredToCommunity->community_name, 28) }}</small>
@@ -354,36 +361,22 @@
                 @csrf
                 <div class="modal-body">
                     <p class="text-muted small mb-3" id="referRequestSubjectSummary"></p>
-                    <p class="small">The requester receives a private link to follow the thread. Assigned hub users or community members are emailed to join the discussion on the Knowledge Hub.</p>
+                    <p class="small">The requester receives a private link. Choose <strong>at least two</strong> assignees in total (any mix of hub users and communities). Each community gets its own forum thread; users use the hub discussion.</p>
 
                     <div class="form-group">
-                        <label class="d-block font-weight-bold">Refer to</label>
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" id="refTypeUser" name="referral_type" value="user" checked>
-                            <label class="custom-control-label" for="refTypeUser">An individual (hub user)</label>
-                        </div>
-                        <div class="custom-control custom-radio">
-                            <input type="radio" class="custom-control-input" id="refTypeCommunity" name="referral_type" value="community">
-                            <label class="custom-control-label" for="refTypeCommunity">A community of practice (discussion with members)</label>
-                        </div>
-                    </div>
-
-                    <div class="form-group" id="referUserWrap">
-                        <label for="referred_to_user_id">Hub user</label>
-                        <select class="form-control no-select2" name="referred_to_user_id" id="referred_to_user_id"
-                                data-placeholder="Search hub user by name or email…">
-                            <option value=""></option>
+                        <label for="referred_user_ids" class="font-weight-bold">Hub users <span class="text-muted font-weight-normal">(multi-select)</span></label>
+                        <select class="form-control no-select2" name="referred_user_ids[]" id="referred_user_ids" multiple
+                                data-placeholder="Search and select hub users…">
                             @foreach($referUsers ?? [] as $u)
                                 <option value="{{ $u->id }}">{{ $u->name }} &lt;{{ $u->email }}&gt;</option>
                             @endforeach
                         </select>
                     </div>
 
-                    <div class="form-group" id="referCommunityWrap" style="display: none;">
-                        <label for="referred_to_community_id">Community</label>
-                        <select class="form-control no-select2" name="referred_to_community_id" id="referred_to_community_id"
-                                data-placeholder="Search community…">
-                            <option value=""></option>
+                    <div class="form-group">
+                        <label for="referred_community_ids" class="font-weight-bold">Communities of practice <span class="text-muted font-weight-normal">(multi-select)</span></label>
+                        <select class="form-control no-select2" name="referred_community_ids[]" id="referred_community_ids" multiple
+                                data-placeholder="Search and select communities…">
                             @foreach($referCommunities ?? [] as $c)
                                 <option value="{{ $c->id }}">{{ $c->community_name }}</option>
                             @endforeach
@@ -459,8 +452,8 @@ $(document).ready(function() {
             return;
         }
         var $modal = $('#referRequestModal');
-        var $user = $('#referred_to_user_id');
-        var $community = $('#referred_to_community_id');
+        var $user = $('#referred_user_ids');
+        var $community = $('#referred_community_ids');
         referSelect2Destroy($user);
         referSelect2Destroy($community);
         $user.select2({
@@ -468,52 +461,40 @@ $(document).ready(function() {
             dir: 'ltr',
             dropdownParent: $modal,
             minimumResultsForSearch: 0,
-            placeholder: $user.data('placeholder') || 'Search hub user…',
-            allowClear: true
+            placeholder: $user.data('placeholder') || 'Select hub users…',
+            allowClear: true,
+            closeOnSelect: false
         });
         $community.select2({
             width: '100%',
             dir: 'ltr',
             dropdownParent: $modal,
             minimumResultsForSearch: 0,
-            placeholder: $community.data('placeholder') || 'Search community…',
-            allowClear: true
+            placeholder: $community.data('placeholder') || 'Select communities…',
+            allowClear: true,
+            closeOnSelect: false
         });
     }
 
-    function toggleReferForm() {
-        var t = $('input[name="referral_type"]:checked').val();
-        if (t === 'community') {
-            $('#referUserWrap').hide();
-            $('#referCommunityWrap').show();
-            $('#referred_to_user_id').prop('disabled', true);
-            $('#referred_to_community_id').prop('disabled', false);
-        } else {
-            $('#referUserWrap').show();
-            $('#referCommunityWrap').hide();
-            $('#referred_to_user_id').prop('disabled', false);
-            $('#referred_to_community_id').prop('disabled', true);
-        }
-        if (typeof $.fn.select2 === 'function') {
-            $('#referred_to_user_id, #referred_to_community_id').each(function () {
-                var $el = $(this);
-                if ($el.hasClass('select2-hidden-accessible')) {
-                    $el.trigger('change.select2');
-                }
-            });
-        }
-    }
-    $('input[name="referral_type"]').on('change', toggleReferForm);
-    toggleReferForm();
-
     $('#referRequestModal').on('shown.bs.modal', function () {
         initReferModalSelect2();
-        toggleReferForm();
     });
 
     $('#referRequestModal').on('hidden.bs.modal', function () {
-        referSelect2Destroy($('#referred_to_user_id'));
-        referSelect2Destroy($('#referred_to_community_id'));
+        referSelect2Destroy($('#referred_user_ids'));
+        referSelect2Destroy($('#referred_community_ids'));
+    });
+
+    $('#referRequestForm').on('submit', function (e) {
+        var u = $('#referred_user_ids').val() || [];
+        var c = $('#referred_community_ids').val() || [];
+        if (!Array.isArray(u)) { u = u ? [u] : []; }
+        if (!Array.isArray(c)) { c = c ? [c] : []; }
+        if (u.length + c.length < 2) {
+            e.preventDefault();
+            alert('Select at least two assignees in total (hub users and/or communities).');
+            return false;
+        }
     });
 
     $('.refer-request-btn').on('click', function() {
@@ -522,10 +503,8 @@ $(document).ready(function() {
         $('#referRequestForm').attr('action', {!! json_encode(url('admin/content-requests')) !!} + '/' + requestId + '/refer');
         $('#referRequestSubjectSummary').html('<strong>Subject:</strong> ' + $('<div/>').text(subject).html());
         $('#referral_notes').val('');
-        $('#referred_to_user_id').val(null).trigger('change');
-        $('#referred_to_community_id').val(null).trigger('change');
-        $('#refTypeUser').prop('checked', true);
-        toggleReferForm();
+        $('#referred_user_ids').val(null).trigger('change');
+        $('#referred_community_ids').val(null).trigger('change');
         $('#referRequestModal').modal('show');
     });
 
