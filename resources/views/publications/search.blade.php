@@ -159,10 +159,45 @@
                 return;
             }
 
+            function facetArrayParamKeyRegex(base) {
+                return new RegExp('^' + base.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\[(\\d+)\\]$');
+            }
+
             function removeFacetParams(params) {
-                ['data_category_id', 'data_category_id[]', 'file_category_id', 'file_category_id[]',
-                    'file_type_id', 'file_type_id[]', 'file_type', 'category'].forEach(function (k) {
-                    params.delete(k);
+                var keys = Array.from(new Set(Array.from(params.keys())));
+                keys.forEach(function (key) {
+                    if (key === 'file_type' || key === 'category') {
+                        params.delete(key);
+                        return;
+                    }
+                    ['data_category_id', 'file_category_id', 'file_type_id'].forEach(function (root) {
+                        if (key === root || key === root + '[]' || facetArrayParamKeyRegex(root).test(key)) {
+                            params.delete(key);
+                        }
+                    });
+                });
+            }
+
+            function normalizeFacetArrayQueryKeys(params) {
+                ['file_type_id', 'data_category_id', 'file_category_id'].forEach(function (base) {
+                    var re = facetArrayParamKeyRegex(base);
+                    var entries = [];
+                    params.forEach(function (val, key) {
+                        var m = key.match(re);
+                        if (m) {
+                            entries.push({ idx: parseInt(m[1], 10), val: val, key: key });
+                        }
+                    });
+                    if (!entries.length) {
+                        return;
+                    }
+                    entries.sort(function (a, b) { return a.idx - b.idx; });
+                    entries.forEach(function (e) {
+                        params.delete(e.key);
+                    });
+                    entries.forEach(function (e) {
+                        params.append(base + '[]', e.val);
+                    });
                 });
             }
 
@@ -170,6 +205,20 @@
                 var bracketed = params.getAll(base + '[]');
                 if (bracketed.length) {
                     return bracketed;
+                }
+                var indexed = [];
+                params.forEach(function (val, key) {
+                    if (facetArrayParamKeyRegex(base).test(key)) {
+                        indexed.push({ key: key, val: val });
+                    }
+                });
+                if (indexed.length) {
+                    indexed.sort(function (a, b) {
+                        var ai = parseInt(a.key.match(/\[(\d+)\]$/)[1], 10);
+                        var bi = parseInt(b.key.match(/\[(\d+)\]$/)[1], 10);
+                        return ai - bi;
+                    });
+                    return indexed.map(function (x) { return x.val; });
                 }
                 var single = params.get(base);
                 if (single !== null && single !== '') {
@@ -225,7 +274,9 @@
                     window.location.assign(fullUrl);
                     return;
                 }
-                var qs = u.searchParams.toString();
+                var fragParams = new URLSearchParams(u.search);
+                normalizeFacetArrayQueryKeys(fragParams);
+                var qs = fragParams.toString();
                 var fragUrl = FRAGMENT_URL + (qs ? '?' + qs : '');
                 mainEl.classList.add('is-loading');
                 fetch(fragUrl, {
@@ -266,7 +317,7 @@
                             twU.setAttribute('content', data.canonical_url);
                         }
                         if (push) {
-                            history.pushState({ recordsSearchAjax: 1 }, '', u.pathname + u.search);
+                            history.pushState({ recordsSearchAjax: 1 }, '', u.pathname + (qs ? '?' + qs : ''));
                         }
                         window.initSearchSidebarFacets();
                         updateSidebarTagActiveState();
