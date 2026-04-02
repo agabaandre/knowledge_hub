@@ -11,6 +11,18 @@
 <div class="sidebar-content search-facet-filters">
     <h5 class="popular-tags-title mb-2">{{ __('Refine results') }}</h5>
 
+    @if ($facetFileTypes->isNotEmpty())
+    <h6 class="facet-group-title">{{ __('File type') }}</h6>
+    <div class="facet-checkbox-column facet-checkbox-column--2col mb-3" data-facet-group="file_type_id">
+        @foreach ($facetFileTypes as $filetype)
+            <label class="facet-checkbox-label">
+                <input type="checkbox" class="search-facet-cb" value="{{ $filetype->id }}" data-param="file_type_id">
+                <span>{{ $filetype->name }}</span>
+            </label>
+        @endforeach
+    </div>
+    @endif
+
     @if ($facetVisibleCategories->isNotEmpty())
     <h6 class="facet-group-title">{{ __('Category') }}</h6>
     <div class="facet-checkbox-column mb-3" data-facet-group="data_category_id">
@@ -30,18 +42,6 @@
             <label class="facet-checkbox-label">
                 <input type="checkbox" class="search-facet-cb" value="{{ $pubCategory->id }}" data-param="file_category_id">
                 <span>{{ $pubCategory->category_name }}</span>
-            </label>
-        @endforeach
-    </div>
-    @endif
-
-    @if ($facetFileTypes->isNotEmpty())
-    <h6 class="facet-group-title">{{ __('File type') }}</h6>
-    <div class="facet-checkbox-column mb-3" data-facet-group="file_type_id">
-        @foreach ($facetFileTypes as $filetype)
-            <label class="facet-checkbox-label">
-                <input type="checkbox" class="search-facet-cb" value="{{ $filetype->id }}" data-param="file_type_id">
-                <span>{{ $filetype->name }}</span>
             </label>
         @endforeach
     </div>
@@ -85,12 +85,12 @@
 
     function initSearchSidebarFacets() {
         var params = new URLSearchParams(window.location.search);
-        var groups = ['data_category_id', 'file_category_id', 'file_type_id'];
+        var groups = ['file_type_id', 'data_category_id', 'file_category_id'];
         groups.forEach(function (paramName) {
             var selected = getMultiParam(params, paramName);
             document.querySelectorAll('.search-facet-cb[data-param="' + paramName + '"]').forEach(function (cb) {
                 if (selected === null) {
-                    cb.checked = true;
+                    cb.checked = false;
                 } else {
                     cb.checked = selected.indexOf(cb.value) !== -1 || selected.indexOf(String(cb.value)) !== -1;
                 }
@@ -103,9 +103,9 @@
         removeFacetParams(params);
 
         var groups = [
+            { param: 'file_type_id', selector: '.search-facet-cb[data-param="file_type_id"]' },
             { param: 'data_category_id', selector: '.search-facet-cb[data-param="data_category_id"]' },
-            { param: 'file_category_id', selector: '.search-facet-cb[data-param="file_category_id"]' },
-            { param: 'file_type_id', selector: '.search-facet-cb[data-param="file_type_id"]' }
+            { param: 'file_category_id', selector: '.search-facet-cb[data-param="file_category_id"]' }
         ];
 
         groups.forEach(function (g) {
