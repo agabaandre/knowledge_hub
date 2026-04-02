@@ -139,11 +139,6 @@ class PublicationsController extends Controller
      */
     public function searchFragment(Request $request)
     {
-        // Allow JSON fragment fetches even when X-Requested-With is stripped (proxies, extensions, or direct tooling).
-        if (! $request->ajax() && ! $request->wantsJson()) {
-            abort(404);
-        }
-
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
         $data = $this->buildRecordsSearchData($request);
