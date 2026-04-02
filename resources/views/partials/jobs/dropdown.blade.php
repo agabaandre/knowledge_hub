@@ -3,7 +3,11 @@
     <option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select Job' }}</option>
    
     @foreach ($jobs as $job)
-        <option value="{{$job->id}}" {{ (@$selected == $job->id)?'selected':''}}>{{$job->name}}</option>
+        @php
+            $valueField = $valueField ?? 'id';
+            $optionValue = $valueField === 'name' ? $job->name : $job->id;
+        @endphp
+        <option value="{{ $optionValue }}" {{ ((string)@$selected === (string)$optionValue)?'selected':''}}>{{ $job->name }}</option>
     @endforeach
     
 </select>

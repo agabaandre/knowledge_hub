@@ -5,6 +5,7 @@ use App\Jobs\SendMailJob;
 use App\Models\Author;
 use App\Models\Country;
 use App\Models\GeoCoverage;
+use App\Models\JobTitle;
 use App\Models\User;
 use App\Models\UserPreference;
 use Carbon\Carbon;
@@ -56,7 +57,18 @@ class UsersRepository {
         $user->phone_number  = ($request->phone ?? $request->phone_number)?($request->phone ?? $request->phone_number):$user->phone_number;
         
         // Handle job_title with camel case transformation
-        if($request->job_title) {
+        // Backward compatibility: if job is posted as numeric ID, resolve to JobTitle name.
+        $jobInput = $request->job_title_custom ?? $request->job_title ?? $request->job ?? null;
+        if (is_string($jobInput) && ctype_digit(trim($jobInput))) {
+            $resolvedName = JobTitle::query()->whereKey((int) $jobInput)->value('name');
+            if ($resolvedName) {
+                $request->merge(['job' => $resolvedName, 'job_title' => $resolvedName, 'job_title_custom' => $resolvedName]);
+            }
+        }
+
+        if($request->job_title_custom) {
+            $user->job_title = $this->toCamelCase($request->job_title_custom);
+        } elseif($request->job_title) {
             $user->job_title = $this->toCamelCase($request->job_title);
         } elseif($request->job) {
             $user->job_title = $this->toCamelCase($request->job);

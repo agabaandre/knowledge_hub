@@ -30,6 +30,10 @@ class AuthController extends Controller
             'lastname' => ['required', 'string', 'max:255'],
             'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'country_id' => ['required'],
+            'preferences' => ['required', 'array', 'min:1'],
+            'job' => ['exclude_if:job_missing,1', 'required_without:job_title_custom', 'nullable', 'string', 'max:255'],
+            'job_title_custom' => ['nullable', 'string', 'max:255'],
            // 'g-recaptcha-response'=>'required' //|captcha
         ],[
           //  'g-recaptcha-response.required' => 'Please complete the CAPTCHA to proceed.',

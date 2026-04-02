@@ -167,10 +167,30 @@
                                 <label class="form-label">Job Title</label>
                             </div>
                             <div class="col-md-9">
-                                <input type="text" class="form-control camel-case-input" placeholder="Job Title"
-                                    name="job_title" value="{{ $user->job_title }}" id="job_title">
+                                @include('partials.jobs.dropdown', [
+                                    'field' => 'job',
+                                    'selected' => old('job', $user->job_title),
+                                    'valueField' => 'name',
+                                ])
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="job_missing_account"
+                                        name="job_missing" value="1" {{ old('job_missing') ? 'checked' : '' }}>
+                                    <label class="form-check-label" for="job_missing_account">
+                                        My job title is missing from the list
+                                    </label>
+                                </div>
+                                <div id="job_title_custom_wrap_account" class="mt-2" style="{{ old('job_missing') ? '' : 'display:none;' }}">
+                                    <input type="text" class="form-control camel-case-input" placeholder="Job Title (optional)"
+                                        name="job_title_custom" value="{{ old('job_title_custom', '') }}" id="job_title_custom_account">
+                                    <small class="text-muted">Optional if your title is not listed.</small>
+                                </div>
                                 @error('job_title')
                                     <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                                @error('job_title_custom')
+                                    <span class="invalid-feedback d-block" role="alert">
                                         <strong>{{ $message }}</strong>
                                     </span>
                                 @enderror
@@ -297,27 +317,25 @@
                         </div>
                     </div>
 
-                    @if (!$user->country_id)
-                        <div class="form-group mb-2">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    <label class="form-label">Country *</label>
-                                </div>
-                                <div class="col-md-9">
-
-                                    @include('partials.countries.dropdown', [
-                                        'field' => 'country_id',
-                                        'selected' => $user->country_id ?? old('country_id'),
-                                    ])
-
-                                    @error('country_id')
-                                        <span class="invalid-feedback" role="alert">
-                                            <strong>{{ $message }}</strong>
-                                        </span>
-                                    @enderror
-                                </div>
+                    <div class="form-group mb-2">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="form-label">Country *</label>
                             </div>
-                    @endif
+                            <div class="col-md-9">
+                                @include('partials.countries.dropdown', [
+                                    'field' => 'country_id',
+                                    'selected' => old('country_id', $user->country_id),
+                                ])
+                                <small class="form-text text-muted">Please keep your country up to date for better recommendations and community matching.</small>
+                                @error('country_id')
+                                    <span class="invalid-feedback" role="alert">
+                                        <strong>{{ $message }}</strong>
+                                    </span>
+                                @enderror
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-group ">
                         <div class="row mt-2">
@@ -390,5 +408,25 @@
             }, 10);
         });
     });
+
+    var missingCheckbox = document.getElementById('job_missing_account');
+    var customWrap = document.getElementById('job_title_custom_wrap_account');
+    var customInput = document.getElementById('job_title_custom_account');
+    var dropdown = document.querySelector('select[name="job"]');
+
+    function syncAccountJobInputs() {
+        if (!missingCheckbox || !customWrap || !dropdown) return;
+        if (missingCheckbox.checked) {
+            customWrap.style.display = '';
+        } else {
+            customWrap.style.display = 'none';
+            if (customInput) customInput.value = '';
+        }
+    }
+
+    if (missingCheckbox) {
+        missingCheckbox.addEventListener('change', syncAccountJobInputs);
+        syncAccountJobInputs();
+    }
 })();
 </script>
