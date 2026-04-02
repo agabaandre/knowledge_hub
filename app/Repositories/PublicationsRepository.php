@@ -283,7 +283,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pub->geographical_coverage_id = $parent->geographical_coverage_id;
             $pub->is_version = 1;
             $pub->parent_id = $parent->id; // link to parent resource
-            $pub->title                    = clean_unicode($parent->title ?? ''); // Clean Unicode from parent title
+            $pub->title                    = format_title_with_ai_fallback($parent->title ?? '');
             $versions_now = count($parent->versioning);
             $pub->version_no  = ($request->version)?$request->version:(($versions_now ==0)?$versions_now +2: $versions_now+1);
             $request['category_id']= $parent->data_category_id;
@@ -299,7 +299,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 $pub->geographical_coverage_id  = $request->countries[0];
             endif;
             
-            $pub->title                     = clean_unicode($request->title ?? '');
+            $pub->title                     = format_title_with_ai_fallback($request->title ?? '');
 
         endif;
         
@@ -314,7 +314,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         }
         
         // Clean Unicode characters from text fields before saving
-        $pub->title                     = clean_unicode($request->title ?? '');
+        $pub->title                     = format_title_with_ai_fallback($request->title ?? '');
         $pub->description               = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $pub->associated_authors        = clean_unicode($request->associated_authors ?? '');
         $pub->author_affiliation        = clean_unicode($request->author_affiliation ?? '');

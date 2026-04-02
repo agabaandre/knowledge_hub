@@ -37,6 +37,14 @@
         color: #212529;
     }
 
+    .category-count {
+        display: inline-block;
+        margin-left: 0.35rem;
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: #6c757d;
+    }
+
     .category-card p {
         font-size: 0.82rem;
         color: #6c757d;
@@ -71,7 +79,12 @@
                             <div class="category-icon">
                                 <i class="{{ $category['icon'] }}"></i>
                             </div>
-                            <h6>{{ $category['title'] }}</h6>
+                            <h6>
+                                {{ $category['title'] }}
+                                @if(isset($category['stats']))
+                                    <span class="category-count">({{ number_format((int) $category['stats']) }})</span>
+                                @endif
+                            </h6>
                             @if(isset($category['description']))
                                 <p>{{ Str::limit($category['description'], 60) }}</p>
                             @endif

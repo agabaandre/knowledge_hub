@@ -306,7 +306,7 @@ class ForumsRepository extends SharedRepo{
     public function save(Request $request){
 
         $forum = new Forum();
-        $forum->forum_title = clean_unicode($request->title ?? '');
+        $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $forum->created_by = current_user()->id;
         $forum->status = 0;
@@ -766,7 +766,7 @@ class ForumsRepository extends SharedRepo{
             return false;
         }
 
-        $forum->forum_title = clean_unicode(strip_tags($title));
+        $forum->forum_title = format_title_with_ai_fallback($title);
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($descriptionHtml));
         $forum->save();
 
@@ -792,7 +792,7 @@ class ForumsRepository extends SharedRepo{
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
 
-        $forum->forum_title = clean_unicode($request->title ?? '');
+        $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
 
         if ($wasRejected) {

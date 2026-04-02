@@ -198,7 +198,12 @@
 <div class="authors-wrapper">
 <div class="container">
         <div class="authors-header">
-            <h2><i class="fa fa-users me-2"></i>Contributors</h2>
+            <h2>
+                <i class="fa fa-users me-2"></i>Contributors
+                @if(isset($authors) && method_exists($authors, 'total'))
+                    <small class="text-muted">({{ number_format($authors->total()) }} total)</small>
+                @endif
+            </h2>
             <p>Browse our community of knowledge contributors</p>
 </div>
 					
@@ -240,6 +245,12 @@
                                 {{ truncate($author->user->organization_name, 30) }}
                             </div>
                             @endif
+                            @if($author->user && $author->user->country && $author->user->country->name)
+                            <div class="author-organization">
+                                <i class="fa fa-map-marker-alt me-1" style="font-size: 0.8em;"></i>
+                                {{ $author->user->country->name }}
+                            </div>
+                            @endif
                             @if($author->user && $author->user->badges && $author->user->badges->count() > 0)
                             <div class="author-badges">
                                 @foreach($author->user->badges->take(3) as $userBadge)
@@ -267,7 +278,12 @@
                     <div class="author-stats">
                         <span class="author-resources">
                             <i class="fa fa-book"></i>
-                            {{ count($author->publications) }} {{ count($author->publications) == 1 ? 'Resource' : 'Resources' }}
+                            @php
+                                $publicationCount = (int) ($author->publications_count ?? 0);
+                                $forumEngagementCount = (int) ($author->forum_engagement_total ?? 0);
+                                $totalContributions = (int) ($author->total_contributions ?? ($publicationCount + $forumEngagementCount));
+                            @endphp
+                            {{ $totalContributions }} {{ $totalContributions == 1 ? 'Contribution' : 'Contributions' }}
                         </span>
                         <a href="{{ url('authors/publications')}}?author={{$author->id}}" class="view-link">
                             View Resources <i class="fa fa-arrow-right ms-1"></i>

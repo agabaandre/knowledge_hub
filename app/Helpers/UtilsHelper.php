@@ -166,6 +166,130 @@ if(!function_exists('clean_unicode')){
 	}
 }
 
+if (!function_exists('normalize_title_case_local')) {
+    /**
+     * Deterministic title-case formatter with common minor-word rules.
+     */
+    function normalize_title_case_local($title) {
+        $title = clean_unicode(strip_tags((string) $title));
+        if ($title === '') {
+            return $title;
+        }
+
+        $title = preg_replace('/\s+/u', ' ', trim($title));
+        $minorWords = [
+            'a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'from', 'in', 'into',
+            'nor', 'of', 'on', 'onto', 'or', 'per', 'so', 'the', 'to', 'up', 'via',
+            'with', 'yet', 'vs', 'v',
+        ];
+        $minorMap = array_fill_keys($minorWords, true);
+
+        $tokens = preg_split('/(\s+)/u', $title, -1, PREG_SPLIT_DELIM_CAPTURE);
+        $wordTokenIndexes = [];
+        foreach ($tokens as $i => $token) {
+            if (!preg_match('/^\s+$/u', $token)) {
+                $wordTokenIndexes[] = $i;
+            }
+        }
+        if (empty($wordTokenIndexes)) {
+            return $title;
+        }
+
+        $firstWordIndex = $wordTokenIndexes[0];
+        $lastWordIndex = $wordTokenIndexes[count($wordTokenIndexes) - 1];
+
+        foreach ($wordTokenIndexes as $tokenIndex) {
+            $isEdgeWord = ($tokenIndex === $firstWordIndex || $tokenIndex === $lastWordIndex);
+            $tokens[$tokenIndex] = _normalize_title_case_word($tokens[$tokenIndex], $minorMap, $isEdgeWord);
+        }
+
+        return implode('', $tokens);
+    }
+}
+
+if (!function_exists('_normalize_title_case_word')) {
+    function _normalize_title_case_word($word, $minorMap, $isEdgeWord) {
+        if ($word === '') {
+            return $word;
+        }
+
+        if (!preg_match('/^([("“\'\[]*)(.*?)([)\]"”\',.!?:;]*)$/u', $word, $m)) {
+            return $word;
+        }
+
+        $prefix = $m[1] ?? '';
+        $core = $m[2] ?? '';
+        $suffix = $m[3] ?? '';
+
+        if ($core === '') {
+            return $word;
+        }
+
+        $parts = preg_split('/([\-\/])/u', $core, -1, PREG_SPLIT_DELIM_CAPTURE);
+        foreach ($parts as $i => $part) {
+            if ($part === '-' || $part === '/') {
+                continue;
+            }
+
+            $trimmed = trim($part);
+            if ($trimmed === '') {
+                continue;
+            }
+
+            $isAcronym = preg_match('/^[A-Z0-9][A-Z0-9\-&]{1,}$/u', $trimmed) && mb_strlen($trimmed) <= 12;
+            if ($isAcronym) {
+                $parts[$i] = $trimmed;
+                continue;
+            }
+
+            $lower = mb_strtolower($trimmed);
+            if (!$isEdgeWord && isset($minorMap[$lower])) {
+                $parts[$i] = $lower;
+                continue;
+            }
+
+            $parts[$i] = mb_strtoupper(mb_substr($lower, 0, 1)) . mb_substr($lower, 1);
+        }
+
+        return $prefix . implode('', $parts) . $suffix;
+    }
+}
+
+if (!function_exists('format_title_with_ai_fallback')) {
+    /**
+     * Try AI title normalization first (when enabled), fallback to local deterministic formatter.
+     */
+    function format_title_with_ai_fallback($title) {
+        $source = clean_unicode(strip_tags((string) $title));
+        if ($source === '') {
+            return $source;
+        }
+
+        $local = normalize_title_case_local($source);
+        $useAi = filter_var(env('TITLE_CASE_AI_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+        if (!$useAi) {
+            return $local;
+        }
+
+        try {
+            $chatGpt = app('chatgpt');
+            if (is_object($chatGpt) && method_exists($chatGpt, 'formatTitleCase')) {
+                $aiTitle = $chatGpt->formatTitleCase($source);
+                if (is_string($aiTitle) && trim($aiTitle) !== '') {
+                    // Normalize AI output as final guardrail.
+                    return normalize_title_case_local($aiTitle);
+                }
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Title case AI formatting failed; using fallback.', [
+                'error' => $e->getMessage(),
+            ]);
+        }
+
+        return $local;
+    }
+}
+
 
 if (!function_exists('time_ago')) {
 

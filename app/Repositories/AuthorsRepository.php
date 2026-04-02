@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\Author;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class AuthorsRepository extends SharedRepo{
 
@@ -10,7 +11,20 @@ class AuthorsRepository extends SharedRepo{
 
         $rows_count = ($request->rows)?$request->rows:24;
         
-        $authors = Author::with(['user.badges.badgeType', 'user.communities', 'publications']);
+        $forumEngagementSubquery = DB::table('forum_engagements')
+            ->select('user_id', DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total'))
+            ->groupBy('user_id');
+
+        $authors = Author::query()
+            ->with(['user.country', 'user.badges.badgeType', 'user.communities', 'publications'])
+            ->withCount('publications')
+            ->leftJoin('users as author_users', 'author_users.author_id', '=', 'author.id')
+            ->leftJoinSub($forumEngagementSubquery, 'forum_totals', function ($join) {
+                $join->on('forum_totals.user_id', '=', 'author_users.id');
+            })
+            ->select('author.*')
+            ->selectRaw('COALESCE(forum_totals.forum_engagement_total, 0) as forum_engagement_total')
+            ->selectRaw('(COALESCE(publications_count, 0) + COALESCE(forum_totals.forum_engagement_total, 0)) as total_contributions');
 
         if($request->term) {
             $searchTerm = '%'.$request->term.'%';
@@ -30,7 +44,11 @@ class AuthorsRepository extends SharedRepo{
         //Access levels effect to query results
         $this->access_filter($authors);
 
-        $result = $authors->orderBy('id','desc')->paginate($rows_count);
+        $result = $authors
+            ->orderByDesc('total_contributions')
+            ->orderByDesc('publications_count')
+            ->orderBy('author.name', 'asc')
+            ->paginate($rows_count);
 
         return  $result;
     }

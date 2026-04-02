@@ -5,6 +5,57 @@ use Illuminate\Support\Facades\Log;
 
 class ChatGPTService implements AIModel{
 
+    /**
+     * Normalize a title to professional title case using AI.
+     * Returns null on any failure so callers can use deterministic fallback.
+     */
+    public function formatTitleCase(string $title): ?string
+    {
+        $title = trim($title);
+        if ($title === '' || mb_strlen($title) > 300) {
+            return null;
+        }
+
+        $api_key = config('ai.open_api_key');
+        if (empty($api_key)) {
+            return null;
+        }
+
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            "Authorization: Bearer $api_key",
+        ];
+
+        $guide = 'Rewrite the input as a clean publication/discussion title in English title case. '
+            .'Capitalize major words, keep short function words lower-case in the middle (for, and, of, to, in, on, at, by, with, from, a, an, the), '
+            .'but always capitalize the first and last word. Preserve acronyms and numbers. '
+            .'Do not add or remove meaning. Return only the rewritten title text with no quotes and no explanation.';
+
+        $payload = [
+            'messages' => [
+                ['role' => 'user', 'content' => $guide],
+                ['role' => 'user', 'content' => $title],
+            ],
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'max_tokens' => 120,
+            'temperature' => 0,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null || trim($content) === '') {
+            return null;
+        }
+
+        $out = trim((string) $content);
+        $out = preg_replace('/^```[a-zA-Z]*\s*/', '', $out);
+        $out = preg_replace('/```\s*$/', '', $out);
+        $out = trim(strip_tags($out), " \t\n\r\0\x0B\"'");
+
+        return $out !== '' ? $out : null;
+    }
+
     function prompt($question=null){
 
     $api_key  = config("ai.open_api_key");

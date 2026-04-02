@@ -199,6 +199,59 @@ class PublicationsController extends Controller
 
         $data['author']       = $this->authorsRepo->find($request->author);
         $data['publications'] = $this->publicationsRepo->get($request);
+        $data['forumContributions'] = collect();
+        $data['contributionStats'] = [
+            'resource_contributions' => method_exists($data['publications'], 'total') ? (int) $data['publications']->total() : count($data['publications'] ?? []),
+            'forum_posts' => 0,
+            'forum_comments' => 0,
+            'forum_contributions' => 0,
+            'total_contributions' => 0,
+        ];
+
+        if (!empty($data['author']) && !empty($data['author']->user)) {
+            $userId = (int) $data['author']->user->id;
+
+            $forumPosts = \App\Models\Forum::query()
+                ->where('created_by', $userId)
+                ->where('status', 1)
+                ->count();
+
+            $forumComments = \App\Models\ForumComment::query()
+                ->where('created_by', $userId)
+                ->whereHas('forum', function ($q) {
+                    $q->where('status', 1);
+                })
+                ->count();
+
+            $forumContributions = $this->forumsRepo->getByUser($userId, $request, 1)->withQueryString();
+            $forumContributions->setPageName('forums_page');
+
+            $forumIds = $forumContributions->getCollection()->pluck('id')->all();
+            $myCommentCountByForum = empty($forumIds)
+                ? collect()
+                : \App\Models\ForumComment::query()
+                    ->where('created_by', $userId)
+                    ->whereIn('forum_id', $forumIds)
+                    ->selectRaw('forum_id, COUNT(*) as total')
+                    ->groupBy('forum_id')
+                    ->pluck('total', 'forum_id');
+
+            $forumContributions->setCollection(
+                $forumContributions->getCollection()->map(function ($forum) use ($userId, $myCommentCountByForum) {
+                    $forum->is_authored_by_contributor = (int) $forum->created_by === $userId;
+                    $forum->my_comment_count = (int) ($myCommentCountByForum[$forum->id] ?? 0);
+                    return $forum;
+                })
+            );
+
+            $data['forumContributions'] = $forumContributions;
+            $data['contributionStats']['forum_posts'] = $forumPosts;
+            $data['contributionStats']['forum_comments'] = $forumComments;
+            $data['contributionStats']['forum_contributions'] = $forumPosts + $forumComments;
+            $data['contributionStats']['total_contributions'] = $data['contributionStats']['resource_contributions'] + $data['contributionStats']['forum_contributions'];
+        } else {
+            $data['contributionStats']['total_contributions'] = $data['contributionStats']['resource_contributions'];
+        }
 
         return view('publications.author_pubs',$data);
     }
