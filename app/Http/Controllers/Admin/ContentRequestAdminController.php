@@ -61,7 +61,18 @@ class ContentRequestAdminController extends Controller
             ->paginate(10)
             ->appends($request->except('page'));
 
-        return view('admin.content_requests.index', compact('contentRequests'));
+        $referUsers = User::query()
+            ->whereNotNull('email')
+            ->where('email', '!=', '')
+            ->orderBy('name')
+            ->limit(5000)
+            ->get(['id', 'name', 'email']);
+
+        $referCommunities = CommunityOfPractice::query()
+            ->orderBy('community_name')
+            ->get(['id', 'community_name']);
+
+        return view('admin.content_requests.index', compact('contentRequests', 'referUsers', 'referCommunities'));
     }
 
     public function create()

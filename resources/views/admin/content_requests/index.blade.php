@@ -372,7 +372,7 @@
                         <label for="referred_to_user_id">Hub user</label>
                         <select class="form-control" name="referred_to_user_id" id="referred_to_user_id">
                             <option value="">— Select user —</option>
-                            @foreach($referUsers as $u)
+                            @foreach($referUsers ?? [] as $u)
                                 <option value="{{ $u->id }}">{{ $u->name }} &lt;{{ $u->email }}&gt;</option>
                             @endforeach
                         </select>
@@ -382,7 +382,7 @@
                         <label for="referred_to_community_id">Community</label>
                         <select class="form-control" name="referred_to_community_id" id="referred_to_community_id">
                             <option value="">— Select community —</option>
-                            @foreach($referCommunities as $c)
+                            @foreach($referCommunities ?? [] as $c)
                                 <option value="{{ $c->id }}">{{ $c->community_name }}</option>
                             @endforeach
                         </select>
