@@ -46,7 +46,5 @@
         @endforeach
     </div>
     @endif
-
-    <button type="button" class="btn btn-sm btn-primary w-100" id="search-sidebar-facets-apply">{{ __('Apply filters') }}</button>
 </div>
 @endif

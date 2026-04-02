@@ -279,7 +279,14 @@
                     });
             }
 
+            var facetDebounceTimer = null;
+            var FACET_DEBOUNCE_MS = 280;
+
             function applySearchSidebarFacets() {
+                if (facetDebounceTimer) {
+                    clearTimeout(facetDebounceTimer);
+                    facetDebounceTimer = null;
+                }
                 var params = new URLSearchParams(window.location.search);
                 removeFacetParams(params);
                 params.delete('page');
@@ -306,15 +313,26 @@
                 runRecordsSearchAjax(url, { push: true });
             }
 
+            function scheduleApplySearchSidebarFacets() {
+                if (facetDebounceTimer) {
+                    clearTimeout(facetDebounceTimer);
+                }
+                facetDebounceTimer = setTimeout(function () {
+                    facetDebounceTimer = null;
+                    applySearchSidebarFacets();
+                }, FACET_DEBOUNCE_MS);
+            }
+
             document.addEventListener('DOMContentLoaded', function () {
                 window.initSearchSidebarFacets();
                 updateSidebarTagActiveState();
-                var btn = document.getElementById('search-sidebar-facets-apply');
-                if (btn) {
-                    btn.addEventListener('click', applySearchSidebarFacets);
-                }
                 var side = document.getElementById('records-search-sidebar');
                 if (side) {
+                    side.addEventListener('change', function (e) {
+                        if (e.target && e.target.classList && e.target.classList.contains('search-facet-cb')) {
+                            scheduleApplySearchSidebarFacets();
+                        }
+                    });
                     side.addEventListener('click', function (e) {
                         var a = e.target.closest('a.js-records-search-ajax');
                         if (!a) {
@@ -337,6 +355,10 @@
             window.addEventListener('popstate', function () {
                 if (!document.getElementById('records-search-main')) {
                     return;
+                }
+                if (facetDebounceTimer) {
+                    clearTimeout(facetDebounceTimer);
+                    facetDebounceTimer = null;
                 }
                 runRecordsSearchAjax(window.location.href, { push: false });
             });
