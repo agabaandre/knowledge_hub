@@ -28,7 +28,7 @@
             </div>
             <div class="card-body">
                 <p class="mb-2">
-                    At least <strong>20</strong> curated facts about health in Africa are maintained for the public “Did you know?” blocks.
+                    <strong>10</strong> curated facts about health in Africa are maintained for the public “Did you know?” blocks.
                     Each <strong>Monday at 05:30</strong> (server time) the scheduler runs <code>facts:refresh-ai</code>, which replaces only facts marked
                     <span class="badge badge-secondary">AI-managed</span>. Facts you add manually are kept.
                 </p>

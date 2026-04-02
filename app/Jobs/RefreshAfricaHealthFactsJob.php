@@ -32,14 +32,14 @@ class RefreshAfricaHealthFactsJob implements ShouldQueue
         $source = 'openai';
         $rows = null;
 
-        $result = $chat->generateAfricaHealthFacts(24);
+        $result = $chat->generateAfricaHealthFacts(10);
         if (($result['ok'] ?? false) && ! empty($result['facts'])) {
             $rows = $result['facts'];
         } else {
             Log::warning('RefreshAfricaHealthFactsJob: OpenAI unavailable or invalid response; using curated fallback.', [
                 'error' => $result['error'] ?? 'unknown',
             ]);
-            $rows = AfricaHealthFactsFallback::facts();
+            $rows = array_slice(AfricaHealthFactsFallback::facts(), 0, 10);
             $source = 'fallback';
         }
 

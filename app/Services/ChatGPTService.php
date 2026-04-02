@@ -606,9 +606,9 @@ class ChatGPTService implements AIModel{
      *
      * @return array{ok: true, facts: list<array{title: string, summary: string, description: string}>}|array{ok: false, error: string}
      */
-    public function generateAfricaHealthFacts(int $count = 24): array
+    public function generateAfricaHealthFacts(int $count = 10): array
     {
-        $count = max(20, min(35, $count));
+        $count = max(10, min(15, $count));
         $apiKey = config('ai.open_api_key');
         if (empty($apiKey)) {
             return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
@@ -665,7 +665,7 @@ class ChatGPTService implements AIModel{
         }
 
         $facts = $this->parseAfricaHealthFactsJson($content);
-        if (count($facts) < 20) {
+        if (count($facts) < 10) {
             return ['ok' => false, 'error' => 'OpenAI returned too few usable facts ('.count($facts).').'];
         }
 
@@ -688,7 +688,7 @@ class ChatGPTService implements AIModel{
             ];
         }
 
-        if (count($normalized) < 20) {
+        if (count($normalized) < 10) {
             return ['ok' => false, 'error' => 'Too few facts after normalization ('.count($normalized).').'];
         }
 
