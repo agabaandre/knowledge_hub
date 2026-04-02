@@ -20,6 +20,25 @@
                 <div class="col-xl-8 col-lg-8 col-md-12 col-sm-12 mfliud">
                     <form class="border p-3 rounded bg-white" method="POST" action="{{ route('registration') }}">
                         <h3 class="py-3 text-success">Register for an account</h3>
+                        <div class="row justify-content-center mb-3">
+                            <div class="btn-group" role="group" aria-label="Login with social media">
+                                @if(settings()->enable_microsoft_login ?? true)
+                                <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
+                                        class="lni lni-microsoft"></i>
+                                    Join with Microsoft</a>
+                                @endif
+                                @if(settings()->enable_google_login ?? true)
+                                <a href="{{ url('auth/google') }}" class="btn btn-outline-danger"><i
+                                        class="lni lni-google"></i>
+                                    Join with Google</a>
+                                @endif
+                                @if(settings()->enable_linkedin_login ?? true)
+                                <a href="{{ url('auth/linkedin') }}" class="btn btn-outline-primary"><i
+                                        class="fab fa-linkedin"></i>
+                                    Join with LinkedIn</a>
+                                @endif
+                            </div>
+                        </div>
 
                         @csrf
 
@@ -86,7 +105,7 @@
                                     </span>
                                 @enderror
                                 <div class="form-check mt-2">
-                                    <input class="form-check-input" type="checkbox" id="job_missing_register"
+                                    <input class="form-check-input" style="margin-left:2px;" type="checkbox" id="job_missing_register"
                                         name="job_missing" value="1" {{ old('job_missing') ? 'checked' : '' }}>
                                     <label class="form-check-label" for="job_missing_register">
                                         My job title is missing from the list
@@ -232,26 +251,6 @@
                                     Account</button>
                             </div>
                         </div>
-
-                        <div class="row justify-content-center">
-                            <div class="btn-group" role="group" aria-label="Login with social media">
-                                @if(settings()->enable_microsoft_login ?? true)
-                                <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
-                                        class="lni lni-microsoft"></i>
-                                    Join with Microsoft</a>
-                                @endif
-                                @if(settings()->enable_google_login ?? true)
-                                <a href="{{ url('auth/google') }}" class="btn btn-outline-danger"><i
-                                        class="lni lni-google"></i>
-                                    Join with Google</a>
-                                @endif
-                                @if(settings()->enable_linkedin_login ?? true)
-                                <a href="{{ url('auth/linkedin') }}" class="btn btn-outline-primary"><i
-                                        class="fab fa-linkedin"></i>
-                                    Join with LinkedIn</a>
-                                @endif
-                            </div>
-                        </div>
                     </form>
                 </div>
 
@@ -281,6 +280,13 @@
                 if (!missingCheckbox || !customWrap || !dropdown) return;
                 if (missingCheckbox.checked) {
                     customWrap.style.display = '';
+                    if (customInput && customInput.value.trim() === '') {
+                        var selectedOption = dropdown.options[dropdown.selectedIndex];
+                        var selectedText = selectedOption ? selectedOption.text.trim() : '';
+                        if (selectedText && selectedText.toLowerCase() !== 'select job') {
+                            customInput.value = selectedText;
+                        }
+                    }
                     dropdown.removeAttribute('required');
                 } else {
                     customWrap.style.display = 'none';

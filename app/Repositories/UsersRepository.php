@@ -53,7 +53,14 @@ class UsersRepository {
 
         }
 
-        $user->country_id    = ($request->country_id)?$request->country_id:$user->country_id;
+        // Persist country explicitly when submitted from profile/register forms.
+        if ($request->has('country_id')) {
+            $countryId = $request->input('country_id');
+            $user->country_id = $countryId !== '' ? $countryId : null;
+        } elseif ($request->has('country')) {
+            $countryId = $request->input('country');
+            $user->country_id = $countryId !== '' ? $countryId : $user->country_id;
+        }
         $user->phone_number  = ($request->phone ?? $request->phone_number)?($request->phone ?? $request->phone_number):$user->phone_number;
         
         // Handle job_title with camel case transformation

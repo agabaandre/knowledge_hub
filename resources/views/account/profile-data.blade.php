@@ -161,6 +161,14 @@
                         </div>
                     </div>
 
+                    @php
+                        $availableJobNames = \App\Models\JobTitle::query()->pluck('name')->map(function ($name) {
+                            return trim((string) $name);
+                        })->toArray();
+                        $currentJobTitle = trim((string) ($user->job_title ?? ''));
+                        $isCurrentJobMissing = $currentJobTitle !== '' && !in_array($currentJobTitle, $availableJobNames, true);
+                        $showCustomJobField = old('job_missing') || $isCurrentJobMissing;
+                    @endphp
                     <div class="form-group ">
                         <div class="row">
                             <div class="col-md-3">
@@ -174,14 +182,14 @@
                                 ])
                                 <div class="form-check mt-2">
                                     <input class="form-check-input" type="checkbox" id="job_missing_account"
-                                        name="job_missing" value="1" {{ old('job_missing') ? 'checked' : '' }}>
+                                        name="job_missing" value="1" {{ $showCustomJobField ? 'checked' : '' }}>
                                     <label class="form-check-label" for="job_missing_account">
                                         My job title is missing from the list
                                     </label>
                                 </div>
-                                <div id="job_title_custom_wrap_account" class="mt-2" style="{{ old('job_missing') ? '' : 'display:none;' }}">
+                                <div id="job_title_custom_wrap_account" class="mt-2" style="{{ $showCustomJobField ? '' : 'display:none;' }}">
                                     <input type="text" class="form-control camel-case-input" placeholder="Job Title (optional)"
-                                        name="job_title_custom" value="{{ old('job_title_custom', '') }}" id="job_title_custom_account">
+                                        name="job_title_custom" value="{{ old('job_title_custom', $isCurrentJobMissing ? $currentJobTitle : '') }}" id="job_title_custom_account">
                                     <small class="text-muted">Optional if your title is not listed.</small>
                                 </div>
                                 @error('job_title')
@@ -418,6 +426,13 @@
         if (!missingCheckbox || !customWrap || !dropdown) return;
         if (missingCheckbox.checked) {
             customWrap.style.display = '';
+            if (customInput && customInput.value.trim() === '') {
+                var selectedOption = dropdown.options[dropdown.selectedIndex];
+                var selectedText = selectedOption ? selectedOption.text.trim() : '';
+                if (selectedText && selectedText.toLowerCase() !== 'select job') {
+                    customInput.value = selectedText;
+                }
+            }
         } else {
             customWrap.style.display = 'none';
             if (customInput) customInput.value = '';

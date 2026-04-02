@@ -290,6 +290,19 @@ If you encounter permission errors, ensure the storage and public directories ar
 sudo chmod -R 777 storage public
 ```
 
+### 4. Repair Numeric Job Titles on Users
+If some users have numeric IDs saved in `users.job_title` (instead of the job title text), use the maintenance command below:
+
+Dry run first:
+```bash
+php artisan users:fix-job-title-ids --dry-run
+```
+
+Apply updates:
+```bash
+php artisan users:fix-job-title-ids
+```
+
 ---
 
 ## Conclusion

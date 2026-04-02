@@ -83,6 +83,7 @@ class AuthController extends Controller
             'last_name'=>'required',
             'email'=>'required',
             'preferences'=>'required',
+            'country_id' => 'required',
             'id'=>'required'
         ];
 
