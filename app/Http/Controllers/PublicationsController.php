@@ -136,10 +136,54 @@ class PublicationsController extends Controller
             'author' => 'nullable|integer',
             'author_id' => 'nullable|integer',
             'country_id' => 'nullable|integer',
-            'data_category_id' => 'nullable|integer',
-            'file_category_id' => 'nullable|integer',
-            'file_type_id' => 'nullable|integer',
-            'file_type' => 'nullable|integer',
+            'data_category_id' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (is_array($value)) {
+                    foreach ($value as $id) {
+                        if (! is_numeric($id) || (int) $id < 1) {
+                            $fail(__('Invalid category filter.'));
+                            return;
+                        }
+                    }
+                } elseif ($value !== null && $value !== '' && $value !== 'all' && (! is_numeric($value) || (int) $value < 1)) {
+                    $fail(__('Invalid category filter.'));
+                }
+            }],
+            'file_category_id' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (is_array($value)) {
+                    foreach ($value as $id) {
+                        if (! is_numeric($id) || (int) $id < 1) {
+                            $fail(__('Invalid sub category filter.'));
+                            return;
+                        }
+                    }
+                } elseif ($value !== null && $value !== '' && $value !== 'all' && (! is_numeric($value) || (int) $value < 1)) {
+                    $fail(__('Invalid sub category filter.'));
+                }
+            }],
+            'file_type_id' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (is_array($value)) {
+                    foreach ($value as $id) {
+                        if (! is_numeric($id) || (int) $id < 1) {
+                            $fail(__('Invalid file type filter.'));
+                            return;
+                        }
+                    }
+                } elseif ($value !== null && $value !== '' && $value !== 'all' && (! is_numeric($value) || (int) $value < 1)) {
+                    $fail(__('Invalid file type filter.'));
+                }
+            }],
+            'file_type' => ['nullable', function (string $attribute, mixed $value, \Closure $fail): void {
+                if (is_array($value)) {
+                    foreach ($value as $id) {
+                        if (! is_numeric($id) || (int) $id < 1) {
+                            $fail(__('Invalid file type filter.'));
+                            return;
+                        }
+                    }
+                } elseif ($value !== null && $value !== '' && $value !== 'all' && (! is_numeric($value) || (int) $value < 1)) {
+                    $fail(__('Invalid file type filter.'));
+                }
+            }],
         ]);
 
         // Track search execution time
@@ -186,10 +230,11 @@ class PublicationsController extends Controller
             ? 'Search results for "' . \Illuminate\Support\Str::limit($term, 60) . '" – publications, communities and discussion forums from ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub') . '.'
             : 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
         $data['pageKeywords'] = ($term ? $term . ', ' : '') . 'search, publications, communities, discussions, forums, ' . (settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
-        $data['canonicalUrl'] = url('records/search?' . http_build_query(array_filter($request->only([
+        $canonicalQuery = array_filter($request->only([
             'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id', 'sub_thematic_area_id', 'subtheme',
             'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag',
-        ]))));
+        ]));
+        $data['canonicalUrl'] = url('records/search?' . http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
         $data['ogType'] = 'website';
 
         return view('publications.search', $data);

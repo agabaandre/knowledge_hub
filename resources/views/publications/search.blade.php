@@ -223,7 +223,14 @@
                         .sidebar-tags{display:flex;flex-wrap:wrap;gap:0.5rem}
                         .sidebar-tag-pill{display:inline-block;padding:0.3rem 0.7rem;font-size:0.8rem;font-weight:500;color:#ffffff !important;text-decoration:none;border-radius:0.25rem;transition:all 0.2s ease;white-space:nowrap;background-color:var(--theme-color-primary, #119A48) !important;border:1px solid rgba(17,154,72,0.3)}
                         .sidebar-tag-pill:hover{transform:translateY(-2px);box-shadow:0 2px 6px rgba(17,154,72,0.3);color:#ffffff !important;text-decoration:none;background-color:var(--theme-color-primary, #119A48) !important}
+                        .search-facet-filters .facet-group-title{font-size:0.8rem;font-weight:600;margin:0 0 0.4rem 0;color:#475569;text-transform:none}
+                        .search-facet-filters .facet-checkbox-column{display:flex;flex-direction:column;align-items:flex-start;gap:0}
+                        .search-facet-filters .facet-checkbox-label{display:flex;align-items:flex-start;font-size:0.72rem;line-height:1.35;margin-bottom:0.35rem;cursor:pointer;color:#334155}
+                        .search-facet-filters .facet-checkbox-label input{margin-top:0.2rem;margin-right:0.35rem;flex-shrink:0}
+                        .search-facet-filters .facet-checkbox-label span{font-size:0.72rem}
                     </style>
+
+                    @include('partials.search.search_sidebar_facets')
 
                     {{-- Popular Tags --}}
                     @if(isset($tags) && count($tags) > 0)

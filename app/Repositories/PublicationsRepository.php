@@ -1534,8 +1534,54 @@ public function import(Request $request){
 
 }
 
+/**
+ * Normalize request input to a list of positive integers, or null when absent / "all" / empty (no facet restriction).
+ *
+ * @return list<int>|null
+ */
+private function normalizeMultiFilterIds($request, string $key): ?array
+{
+    $raw = $request->input($key);
+    if ($raw === null || $raw === '' || $raw === 'all') {
+        return null;
+    }
+    if (! is_array($raw)) {
+        $raw = [$raw];
+    }
+    $ids = array_values(array_unique(array_filter(array_map('intval', $raw), function ($id) {
+        return $id > 0;
+    })));
+
+    return $ids === [] ? null : $ids;
+}
+
 // New method to apply filters
 private function applyFilters($query, $request) {
+
+    $skipCategory = false;
+    $skipFileCategory = false;
+    $skipFileType = false;
+
+    $dcIds = $this->normalizeMultiFilterIds($request, 'data_category_id');
+    if ($dcIds !== null) {
+        $query->whereIn('publication_catgory_id', $dcIds);
+        $skipCategory = true;
+    }
+
+    $fcIds = $this->normalizeMultiFilterIds($request, 'file_category_id');
+    if ($fcIds !== null) {
+        $query->whereIn('data_category_id', $fcIds);
+        $skipFileCategory = true;
+    }
+
+    $ftIds = $this->normalizeMultiFilterIds($request, 'file_type_id');
+    if ($ftIds === null) {
+        $ftIds = $this->normalizeMultiFilterIds($request, 'file_type');
+    }
+    if ($ftIds !== null) {
+        $query->whereIn('file_type_id', $ftIds);
+        $skipFileType = true;
+    }
 
     $filters = [
         'admin_unit' => function ($q, $value) {
@@ -1602,10 +1648,22 @@ private function applyFilters($query, $request) {
     ];
 
     foreach ($filters as $key => $callback) {
+        if ($key === 'category' && $skipCategory) {
+            continue;
+        }
+        if ($key === 'file_category_id' && $skipFileCategory) {
+            continue;
+        }
+        if ($key === 'file_type' && $skipFileType) {
+            continue;
+        }
         $value = null;
         if (isset($aliases[$key])) {
             foreach ($aliases[$key] as $param) {
                 $v = $request->input($param);
+                if (is_array($v)) {
+                    continue;
+                }
                 if ($v !== null && $v !== '' && $v !== 'all') {
                     $value = $v;
                     break;
@@ -1613,6 +1671,9 @@ private function applyFilters($query, $request) {
             }
         } else {
             $value = $request->input($key);
+        }
+        if (is_array($value)) {
+            continue;
         }
         if ($value !== null && $value !== '' && $value !== 'all') {
             $callback($query, $value);

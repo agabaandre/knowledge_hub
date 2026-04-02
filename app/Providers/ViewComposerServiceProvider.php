@@ -48,8 +48,8 @@ class ViewComposerServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        View::composer(['home/partials/*','partials/publications/*','partials/search/*','account/*','admin/publications/*'],FileTypesViewComposer::class);
-        View::composer(['home/partials/*','partials/publications/*','partials/search/*','account/*','admin/publications/*'],PublicationCategoryViewComposer::class);
+        View::composer(['home/partials/*','partials/publications/*','partials/search/*','account/*','admin/publications/*','publications/search'],FileTypesViewComposer::class);
+        View::composer(['home/partials/*','partials/publications/*','partials/search/*','account/*','admin/publications/*','publications/search'],PublicationCategoryViewComposer::class);
         View::composer(['partials/quiz/*'],QuestionsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],FactsViewComposer::class);
         View::composer(['publications/partials/*','partials/publications/*'],SubThemesViewComposer::class);
