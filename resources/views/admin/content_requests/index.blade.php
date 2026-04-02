@@ -370,8 +370,9 @@
 
                     <div class="form-group" id="referUserWrap">
                         <label for="referred_to_user_id">Hub user</label>
-                        <select class="form-control" name="referred_to_user_id" id="referred_to_user_id">
-                            <option value="">— Select user —</option>
+                        <select class="form-control no-select2" name="referred_to_user_id" id="referred_to_user_id"
+                                data-placeholder="Search hub user by name or email…">
+                            <option value=""></option>
                             @foreach($referUsers ?? [] as $u)
                                 <option value="{{ $u->id }}">{{ $u->name }} &lt;{{ $u->email }}&gt;</option>
                             @endforeach
@@ -380,8 +381,9 @@
 
                     <div class="form-group" id="referCommunityWrap" style="display: none;">
                         <label for="referred_to_community_id">Community</label>
-                        <select class="form-control" name="referred_to_community_id" id="referred_to_community_id">
-                            <option value="">— Select community —</option>
+                        <select class="form-control no-select2" name="referred_to_community_id" id="referred_to_community_id"
+                                data-placeholder="Search community…">
+                            <option value=""></option>
                             @foreach($referCommunities ?? [] as $c)
                                 <option value="{{ $c->id }}">{{ $c->community_name }}</option>
                             @endforeach
@@ -446,6 +448,39 @@ $(document).ready(function() {
         $('#viewProcessedModal').modal('show');
     });
 
+    function referSelect2Destroy($el) {
+        if ($el.length && $el.hasClass('select2-hidden-accessible') && typeof $.fn.select2 === 'function') {
+            $el.select2('destroy');
+        }
+    }
+
+    function initReferModalSelect2() {
+        if (typeof $.fn.select2 !== 'function') {
+            return;
+        }
+        var $modal = $('#referRequestModal');
+        var $user = $('#referred_to_user_id');
+        var $community = $('#referred_to_community_id');
+        referSelect2Destroy($user);
+        referSelect2Destroy($community);
+        $user.select2({
+            width: '100%',
+            dir: 'ltr',
+            dropdownParent: $modal,
+            minimumResultsForSearch: 0,
+            placeholder: $user.data('placeholder') || 'Search hub user…',
+            allowClear: true
+        });
+        $community.select2({
+            width: '100%',
+            dir: 'ltr',
+            dropdownParent: $modal,
+            minimumResultsForSearch: 0,
+            placeholder: $community.data('placeholder') || 'Search community…',
+            allowClear: true
+        });
+    }
+
     function toggleReferForm() {
         var t = $('input[name="referral_type"]:checked').val();
         if (t === 'community') {
@@ -459,9 +494,27 @@ $(document).ready(function() {
             $('#referred_to_user_id').prop('disabled', false);
             $('#referred_to_community_id').prop('disabled', true);
         }
+        if (typeof $.fn.select2 === 'function') {
+            $('#referred_to_user_id, #referred_to_community_id').each(function () {
+                var $el = $(this);
+                if ($el.hasClass('select2-hidden-accessible')) {
+                    $el.trigger('change.select2');
+                }
+            });
+        }
     }
     $('input[name="referral_type"]').on('change', toggleReferForm);
     toggleReferForm();
+
+    $('#referRequestModal').on('shown.bs.modal', function () {
+        initReferModalSelect2();
+        toggleReferForm();
+    });
+
+    $('#referRequestModal').on('hidden.bs.modal', function () {
+        referSelect2Destroy($('#referred_to_user_id'));
+        referSelect2Destroy($('#referred_to_community_id'));
+    });
 
     $('.refer-request-btn').on('click', function() {
         var requestId = $(this).data('id');
@@ -469,8 +522,8 @@ $(document).ready(function() {
         $('#referRequestForm').attr('action', {!! json_encode(url('admin/content-requests')) !!} + '/' + requestId + '/refer');
         $('#referRequestSubjectSummary').html('<strong>Subject:</strong> ' + $('<div/>').text(subject).html());
         $('#referral_notes').val('');
-        $('#referred_to_user_id').val('');
-        $('#referred_to_community_id').val('');
+        $('#referred_to_user_id').val(null).trigger('change');
+        $('#referred_to_community_id').val(null).trigger('change');
         $('#refTypeUser').prop('checked', true);
         toggleReferForm();
         $('#referRequestModal').modal('show');
