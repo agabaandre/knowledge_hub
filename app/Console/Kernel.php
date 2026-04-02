@@ -36,6 +36,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('rss:fetch')->weeklyOn(2, '03:00');
         // Award community badges at the beginning of each month for the previous month
         $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
+        // Monthly profile-completion reminder (starts this month on today's day-of-month)
+        $schedule->command('profiles:remind-incomplete')->monthlyOn((int) now()->day, '09:00');
         // Cache forum and community counts every 5 minutes for menu badges
         $schedule->command('cache:forum-community-counts')->everyFiveMinutes();
         // Clean up PDF chat sessions older than 7 days (when enabled in admin settings)

@@ -371,7 +371,10 @@ class CommsOfPracticeController extends Controller
         $totalCommunities = CommunityOfPractice::query()->count();
         $totalUniqueMemberships = (clone $baseMembershipQuery)->distinct('users.id')->count('users.id');
         $membershipsByGeography = (clone $baseMembershipQuery)
-            ->select(DB::raw($geoTable.'.name as geography_name'), DB::raw('COUNT(*) as total'))
+            ->select(
+                DB::raw($geoTable.'.name as geography_name'),
+                DB::raw('COUNT(DISTINCT users.id) as total')
+            )
             ->groupBy(DB::raw($geoTable.'.name'))
             ->orderByDesc('total')
             ->get();
