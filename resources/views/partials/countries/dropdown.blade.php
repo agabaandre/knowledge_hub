@@ -3,12 +3,21 @@
     <option {{ (@$allfield)?'':'disabled' }}  value="">{{ $allfield ?? 'Select Country' }}</option>
 
     @php
-        $selected = $selected ?? false;
+        $selected = $selected ?? null;
+        $isMultiple = !empty($multiple);
     @endphp 
    
     @foreach ($countries as $country)
-        <option 
-        {{ (((!@$multiple && @$selected ?? null) == $country->id) || ( is_array($selected) && in_array($country->id, $selected)))?'selected':'' }} value="{{$country->id}}">
+        @php
+            $isSelected = false;
+            if ($isMultiple) {
+                $selectedValues = is_array($selected) ? $selected : [];
+                $isSelected = in_array((int) $country->id, array_map('intval', $selectedValues), true);
+            } else {
+                $isSelected = (string) $selected !== '' && (int) $selected === (int) $country->id;
+            }
+        @endphp
+        <option {{ $isSelected ? 'selected' : '' }} value="{{$country->id}}">
             {{$country->name}}
         </option>
     @endforeach
