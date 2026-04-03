@@ -25,7 +25,8 @@ class SharedRepo{
             $country_col ="country_id";
 
             if($table =="author"):
-               $col = "id"; //change filter col
+               // Must be qualified: author queries often join `users`, where both tables have `id`.
+               $col = "author.id";
              elseif($table =="forums"  || $table=="forum_comments"):
                $col = "created_by"; //filter column
                $use_user_id = true; //user id from users instead of author_id

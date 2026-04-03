@@ -44,7 +44,7 @@ class AuthorsRepository extends SharedRepo{
                 ->distinct()
                 ->pluck('author.id');
             
-            $authors->whereIn('id', $authorIds);
+            $authors->whereIn('author.id', $authorIds);
         }
 
         //Access levels effect to query results
