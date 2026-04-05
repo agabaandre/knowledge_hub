@@ -801,3 +801,6 @@ Route::group(["prefix" => "admin/static-links"], function () {
     Route::put('/update/{id}', [\App\Http\Controllers\Admin\StaticLinksController::class, 'update'])->name('admin.static_links.update');
     Route::delete('/delete/{id}', [\App\Http\Controllers\Admin\StaticLinksController::class, 'destroy'])->name('admin.static_links.destroy');
 });
+
+// l5-swagger UI lives at /docs; keep old bookmarks working
+Route::permanentRedirect('api/documentation', '/docs');

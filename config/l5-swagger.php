@@ -10,9 +10,13 @@ return [
 
             'routes' => [
                 /*
-                 * Route for accessing api documentation interface
+                 * Interactive Swagger UI (browse / try API). Raw OpenAPI JSON/YAML is served under `docs` below.
                 */
-                'api' => 'api/documentation',
+                'api' => 'docs',
+                /*
+                 * Base path for the spec file and Swagger UI static assets (e.g. /docs/spec/api-docs.json).
+                */
+                'docs' => 'docs/spec',
             ],
             'paths' => [
                 /*
@@ -210,7 +214,7 @@ return [
                  * 'full' (expands the tags and operations),
                  * 'none' (expands nothing).
                  */
-                'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'none'),
+                'doc_expansion' => env('L5_SWAGGER_UI_DOC_EXPANSION', 'list'),
 
                 /**
                  * If set, enables filtering. The top bar will show an edit box that
