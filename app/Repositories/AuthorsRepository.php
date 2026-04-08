@@ -2,8 +2,11 @@
 namespace App\Repositories;
 
 use App\Models\Author;
+use App\Models\Publication;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class AuthorsRepository extends SharedRepo{
 
@@ -76,6 +79,38 @@ class AuthorsRepository extends SharedRepo{
     public function delete($id){
 
         return Author::find($id)->delete();
+    }
+
+    /**
+     * Merge duplicate author records into one: reassign publications and user links (including forum identity via users.author_id), then delete merged authors.
+     *
+     * @param  int  $keepId  Author id to retain
+     * @param  array<int>  $sourceIds  Author ids to absorb and remove
+     */
+    public function mergeAuthors(int $keepId, array $sourceIds): void
+    {
+        $sourceIds = array_values(array_unique(array_map('intval', $sourceIds)));
+        $sourceIds = array_values(array_filter($sourceIds, fn ($id) => $id > 0 && $id !== $keepId));
+
+        if ($sourceIds === []) {
+            throw new \InvalidArgumentException('No authors to merge.');
+        }
+
+        DB::transaction(function () use ($keepId, $sourceIds) {
+            Publication::query()->whereIn('author_id', $sourceIds)->update(['author_id' => $keepId]);
+
+            if (Schema::hasTable('publication_summaries')) {
+                DB::table('publication_summaries')->whereIn('author_id', $sourceIds)->update(['author_id' => $keepId]);
+            }
+
+            if (Schema::hasTable('publications_staging')) {
+                DB::table('publications_staging')->whereIn('author_id', $sourceIds)->update(['author_id' => $keepId]);
+            }
+
+            User::query()->whereIn('author_id', $sourceIds)->update(['author_id' => $keepId]);
+
+            Author::query()->whereIn('id', $sourceIds)->delete();
+        });
     }
 
     public function count(){

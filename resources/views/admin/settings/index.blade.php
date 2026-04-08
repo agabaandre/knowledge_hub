@@ -557,6 +557,7 @@
                         <div class="col-md-4">
                             <div class="form-group">
                                 <label>Icon Font Color</label>
+                                <small class="form-text text-muted d-block mb-1">Publication card file-type icons and other icon accents. Default: Agenda 2063 — PANTONE 3415 C (<code>#007749</code>).</small>
                                 <div class="input-group colorPicker">
                                     <input type="text" name="icon_font_color" value="{{ $settings->icon_font_color }}" class="form-control" />
                                     <div class="input-group-append">

@@ -5,7 +5,7 @@
 @endphp
 @if($showFileTypeBadge && $pub && $pub->file_type)
 @php
-    $iconColor = settings()->icon_font_color ?? '#64748b';
+    $iconColor = settings()->icon_font_color ?? '#007749';
     $t = strtolower((string) ($pub->file_type->name ?? ''));
     $icon = 'fa-file-o';
     $short = strtoupper(\Illuminate\Support\Str::limit(trim((string) $pub->file_type->name), 7, ''));
