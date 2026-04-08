@@ -18,7 +18,9 @@
                     <input type="text" name="term" value="{{ request('term') }}" class="form-control form-control-sm" placeholder="Search name...">
                     <button class="btn btn-outline-dark btn-sm ml-1" type="submit"><i class="fa fa-search"></i></button>
                 </form>
+                @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
                 <button class="btn btn-primary btn-sm" onclick="openCreate()"><i class="fa fa-plus mr-1"></i>Add Author</button>
+                @endcanany
                 @can('delete_publication_metadata')
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-toggle="modal" data-target="#mergeAuthorsModal"><i class="fa fa-compress mr-1"></i>Merge authors</button>
                 @endcan
@@ -40,9 +42,14 @@
                         <td>{{ $authors->firstItem() + $idx }}</td>
                         <td>{{ $a->name }}</td>
                         <td>
-                            <button class="btn btn-outline-dark btn-sm mr-1" onclick="openEdit({{ $a->id }})"><i class="fa fa-edit"></i></button>
+                            @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
+                            <button type="button" class="btn btn-outline-dark btn-sm mr-1" data-author-id="{{ $a->id }}" data-author-name="{{ e($a->name) }}" onclick="openAuthorEdit(this)"><i class="fa fa-edit"></i></button>
+                            @endcanany
                             @can('delete_publication_metadata')
-                            <a class="btn btn-outline-danger btn-sm" href="{{ url('admin/authors/delete') }}?id={{ $a->id }}"><i class="fa fa-trash"></i></a>
+                            <button type="button" class="btn btn-outline-danger btn-sm"
+                                data-delete-id="{{ $a->id }}"
+                                data-delete-name="{{ e($a->name) }}"
+                                onclick="openDeleteAuthorModal(this); return false;"><i class="fa fa-trash"></i></button>
                             @endcan
                         </td>
                     </tr>
@@ -54,6 +61,7 @@
     </div>
 </div>
 
+@canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog" role="document">
     <div class="modal-content">
@@ -78,6 +86,7 @@
     </div>
   </div>
 </div>
+@endcanany
 
 @can('delete_publication_metadata')
 <div class="modal fade" id="mergeAuthorsModal" tabindex="-1" role="dialog" aria-labelledby="mergeAuthorsModalLabel" aria-hidden="true">
@@ -118,6 +127,33 @@
     </div>
   </div>
 </div>
+
+<div class="modal fade" id="deleteAuthorModal" tabindex="-1" role="dialog" aria-labelledby="deleteAuthorModalLabel" aria-hidden="true">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header border-danger bg-light">
+        <h5 class="modal-title text-danger" id="deleteAuthorModalLabel"><i class="fa fa-exclamation-triangle mr-1"></i> Delete author</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+      </div>
+      <form method="post" action="{{ url('admin/authors/delete') }}" id="deleteAuthorForm">
+        @csrf
+        <input type="hidden" name="id" id="delete_author_id" value="">
+        <div class="modal-body">
+          <p class="mb-2">You are about to delete this author record:</p>
+          <ul class="list-unstyled mb-0 pl-0">
+            <li><strong>Name:</strong> <span id="delete_author_name_display" class="text-dark"></span></li>
+            <li><strong>ID:</strong> <span id="delete_author_id_display" class="text-monospace text-dark"></span></li>
+          </ul>
+          <p class="text-muted small mt-3 mb-0">This cannot be undone. If publications or user accounts still reference this author, the delete may fail—use <strong>Merge authors</strong> to reassign first.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-danger">Delete author</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 @endcan
 @endsection
 
@@ -125,9 +161,22 @@
 <script>
 // Auto-hide alerts after a few seconds for a cleaner UX
 setTimeout(function(){ $('.alert').fadeOut(); }, 3500);
-const rows = @json($authors->items());
 function openCreate(){ document.getElementById('id').value=''; document.getElementById('name').value=''; $('#authorModal').modal('show'); }
-function openEdit(id){ const a = rows.find(x=>x.id===id); if(!a) return; document.getElementById('id').value=a.id; document.getElementById('name').value=a.name; $('#authorModal').modal('show'); }
+function openAuthorEdit(btn){
+  var id = btn.getAttribute('data-author-id');
+  var name = btn.getAttribute('data-author-name') || '';
+  document.getElementById('id').value = id;
+  document.getElementById('name').value = name;
+  $('#authorModal').modal('show');
+}
+function openDeleteAuthorModal(btn){
+  var id = btn.getAttribute('data-delete-id');
+  var name = btn.getAttribute('data-delete-name') || '';
+  document.getElementById('delete_author_id').value = id;
+  document.getElementById('delete_author_name_display').textContent = name;
+  document.getElementById('delete_author_id_display').textContent = id;
+  $('#deleteAuthorModal').modal('show');
+}
 function confirmMerge(){
   var keep = document.getElementById('merge_keep_id');
   var sel = document.getElementById('merge_merge_ids');

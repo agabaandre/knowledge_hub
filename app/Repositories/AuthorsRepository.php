@@ -14,26 +14,34 @@ class AuthorsRepository extends SharedRepo{
 
         $rows_count = ($request->rows)?$request->rows:24;
         
-        $forumEngagementSubquery = DB::table('forum_engagements')
+        // Per-user forum totals, then sum those by author_id so one row per author (multiple users may share author_id).
+        $forumEngagementPerUser = DB::table('forum_engagements')
             ->select('user_id', DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total'))
             ->groupBy('user_id');
+        $forumEngagementByAuthor = DB::table('users')
+            ->leftJoinSub($forumEngagementPerUser, 'fe_sum', function ($join) {
+                $join->on('fe_sum.user_id', '=', 'users.id');
+            })
+            ->whereNotNull('users.author_id')
+            ->select('users.author_id', DB::raw('SUM(COALESCE(fe_sum.forum_engagement_total, 0)) as forum_engagement_total'))
+            ->groupBy('users.author_id');
+
         $publicationCountSubquery = DB::table('publication')
             ->select('author_id', DB::raw('COUNT(*) as publications_count'))
             ->groupBy('author_id');
 
         $authors = Author::query()
             ->with(['user.country', 'user.badges.badgeType', 'user.communities', 'publications'])
-            ->leftJoin('users as author_users', 'author_users.author_id', '=', 'author.id')
             ->leftJoinSub($publicationCountSubquery, 'publication_totals', function ($join) {
                 $join->on('publication_totals.author_id', '=', 'author.id');
             })
-            ->leftJoinSub($forumEngagementSubquery, 'forum_totals', function ($join) {
-                $join->on('forum_totals.user_id', '=', 'author_users.id');
+            ->leftJoinSub($forumEngagementByAuthor, 'forum_by_author', function ($join) {
+                $join->on('forum_by_author.author_id', '=', 'author.id');
             })
             ->select('author.*')
             ->selectRaw('COALESCE(publication_totals.publications_count, 0) as publications_count')
-            ->selectRaw('COALESCE(forum_totals.forum_engagement_total, 0) as forum_engagement_total')
-            ->selectRaw('(COALESCE(publication_totals.publications_count, 0) + COALESCE(forum_totals.forum_engagement_total, 0)) as total_contributions');
+            ->selectRaw('COALESCE(forum_by_author.forum_engagement_total, 0) as forum_engagement_total')
+            ->selectRaw('(COALESCE(publication_totals.publications_count, 0) + COALESCE(forum_by_author.forum_engagement_total, 0)) as total_contributions');
 
         if($request->term) {
             $searchTerm = '%'.$request->term.'%';
@@ -76,9 +84,14 @@ class AuthorsRepository extends SharedRepo{
         return Author::find($id);
     }
 
-    public function delete($id){
+    public function delete($id): bool
+    {
+        $author = Author::find($id);
+        if (! $author) {
+            return false;
+        }
 
-        return Author::find($id)->delete();
+        return (bool) $author->delete();
     }
 
     /**
