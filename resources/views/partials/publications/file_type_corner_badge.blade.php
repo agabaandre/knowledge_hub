@@ -1,4 +1,4 @@
-{{-- Top-right file type icon + short label; color from Icon Font Color (icon_font_color). Toggle: show_publication_card_file_type_badge (default on). Parent: .pub-card-file-type-corner-wrap --}}
+{{-- Top-left file type icon + short label; color from Icon Font Color (icon_font_color). Toggle: show_publication_card_file_type_badge (default on). Parent: .pub-card-file-type-corner-wrap --}}
 @php
     $pub = $row ?? $publication ?? null;
     $showFileTypeBadge = settings()->show_publication_card_file_type_badge ?? true;
@@ -44,14 +44,15 @@
 .pub-card-file-type-corner {
     position: absolute;
     top: 0.35rem;
-    right: 0.45rem;
+    left: 0.45rem;
+    right: auto;
     z-index: 3;
     display: flex;
     flex-direction: column;
-    align-items: center;
+    align-items: flex-start;
     justify-content: flex-start;
     gap: 0.125rem;
-    text-align: center;
+    text-align: left;
     pointer-events: none;
     max-width: 4.25rem;
 }
