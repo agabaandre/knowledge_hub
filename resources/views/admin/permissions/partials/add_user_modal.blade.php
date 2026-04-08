@@ -35,15 +35,31 @@
                                 value="{{ old('mobile') }}" required />
                         </div>
 
-                        <div class="form-group col-md-6  col-sm-12">
-                            @csrf
+                        @if (states_enabled())
+                            <div class="form-group col-md-6  col-sm-12">
+                                <label class="text-bold">
+                                    <i class="icon-collaboration mr-2"></i>
+                                    Access Level
+                                </label>
+                                <select class="form-control form-control-select2 select js-access-level-select" id="add_level_id" name="level_id" data-fouc
+                                    readonly>
+                                    <option selected disabled>Choose Level</option>
+                                    @foreach ($levels as $level)
+                                        <option value="{{ $level->id }}" data-level-name="{{ $level->level_name }}"
+                                            {{ $level->id == @$user->access_level_id ? 'selected' : '' }}>
+                                            {{ strtoupper($level->level_name) }}</option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        @endif
+                        <div class="form-group col-md-6  col-sm-12 js-user-role-group" id="add_user_role_group">
                             <label class="text-bold">
                                 <i class="icon-collaboration mr-2"></i>
                                 {{ __('auth.user') }} {{ __('auth.role') }}
                             </label>
-                            <select class="form-control form-control-select2 select" name="role_id" data-fouc readonly>
+                            <select class="form-control form-control-select2 select js-user-role-select" name="role_id" id="add_role_id" data-fouc readonly>
                                 @if (empty(old('role_id')))
-                                    <option selected disabled>Choose Role</option>
+                                    <option value="" selected>Choose Role</option>
                                 @endif
                                 @foreach ($roles as $role)
                                     <option value="{{ $role->id }}"
@@ -52,23 +68,6 @@
                                 @endforeach
                             </select>
                         </div>
-                        @if (states_enabled())
-                            <div class="form-group col-md-6  col-sm-12">
-                                <label class="text-bold">
-                                    <i class="icon-collaboration mr-2"></i>
-                                    Access Level
-                                </label>
-                                <select class="form-control form-control-select2 select" name="level_id" data-fouc
-                                    readonly>
-                                    <option selected disabled>Choose Level</option>
-                                    @foreach ($levels as $level)
-                                        <option value="{{ $level->id }}"
-                                            {{ $level->id == @$user->access_level_id ? 'selected' : '' }}>
-                                            {{ strtoupper($level->level_name) }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                        @endif
 
                         @if (states_enabled())
                             <div class="form-group col-md-6  col-sm-12">

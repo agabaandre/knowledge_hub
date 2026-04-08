@@ -28,30 +28,18 @@ class HomeController extends Controller
     }
     
     public function index(Request $request){
-        $data['publications']  = $this->publicationsRepo->get($request);
-        $data['recent']        = collect($data['publications']->items())->take(6);
+        $topSearchesRequest = clone $request;
+        $topSearchesRequest->merge([
+            'rows' => 6,
+            'order_by_visits' => true,
+            'skip_random_order' => true,
+        ]);
+        $data['recent'] = collect($this->publicationsRepo->get($topSearchesRequest)->items());
         $data['authors']       = $this->authorsRepo->get($request);
         $data['categories']   = $this->get_categories();
-        $featuredRequest = clone $request;
-        $featuredRequest['is_featured'] = 1;
-        $featuredPublications = collect($this->publicationsRepo->get($featuredRequest, false, true)->items());
-
-        // Recommended feed:
-        // - Logged in: featured first, then publications related to favorite tags
-        //   and "Your Interests" (profile preferences/subthemes)
-        // - Logged out: featured only
-        if (auth()->check()) {
-            $relatedByTags = $this->publicationsRepo->relatedByFavoriteTags(auth()->id(), 20);
-            $recommendedByPreferences = $this->publicationsRepo->recommendedByPreferences(auth()->id(), 20);
-            $data['featured'] = $featuredPublications
-                ->concat($recommendedByPreferences)
-                ->concat($relatedByTags)
-                ->unique('id')
-                ->take(6)
-                ->values();
-        } else {
-            $data['featured'] = $featuredPublications->take(6)->values();
-        }
+        // Recommended: strict featured pool + (when logged in) preference & tag-based picks,
+        // merged and diversified across parent health themes (not a block of recent IDs from one theme).
+        $data['featured'] = $this->publicationsRepo->homeRecommendedPublications($request, auth()->id(), 6);
 
         $data['tags']	      = $this->publicationsRepo->get_tags();
 		$data['types']        = $this->publicationsRepo->get_types();

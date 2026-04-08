@@ -5,9 +5,9 @@
     .initiatives-track::-webkit-scrollbar{height:8px}
     .initiatives-track::-webkit-scrollbar-thumb{background:#e2e8f0;border-radius:0.25rem}
     .initiative-card{min-width:520px;max-width:560px;flex:0 0 auto;border:1px solid #e2e8f0;border-radius:0.25rem;scroll-snap-align:start;background:#fff;display:flex;overflow:hidden}
-    .initiative-cover{width:42%;min-width:42%;height:255px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
+    .initiative-cover{width:42%;min-width:42%;height:275px;background:transparent;border-right:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;flex-shrink:0}
     .initiative-cover img{width:100%;height:100%;object-fit:contain;background:transparent}
-    .initiative-body{padding:12px;flex:1;height:255px;display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box}
+    .initiative-body{padding:12px;flex:1;height:275px;display:flex;flex-direction:column;overflow-y:auto;box-sizing:border-box}
     .initiative-title{font-weight:700;color:#0f172a;margin:0 0 8px;font-size:0.875rem;line-height:1.4;flex-shrink:0}
     .initiative-meta{font-size:.86rem;color:#475569;margin-bottom:4px;display:flex;align-items:center;gap:8px;flex-wrap:wrap;flex-shrink:0}
     .initiative-meta i{color:var(--theme-color-primary, #119A48);font-size:0.75rem}

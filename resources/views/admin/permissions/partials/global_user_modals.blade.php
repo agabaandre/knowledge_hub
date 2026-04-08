@@ -33,33 +33,33 @@
                 <input type="text" class="form-control text-bold" placeholder="Mobile" name="mobile" id="edit_phone" required />
               </div>
 
-              <div class="form-group col-md-6 col-sm-12">
-                <label class="text-bold">
-                  <i class="icon-collaboration mr-2"></i>
-                  {{ __('auth.user') }} {{ __('auth.role') }} <span class="text-danger">*</span>
-                </label>
-                <select class="form-control form-control-select2 select" name="role_id" id="edit_role_id" data-fouc required>
-                  <option value="" disabled>Choose Role</option>
-                  @foreach ($roles as $role)
-                    <option value="{{ $role->id }}">{{ strtoupper($role->name) }}</option>
-                  @endforeach
-                </select>
-              </div>
-
               @if (states_enabled())
               <div class="form-group col-md-6 col-sm-12">
                 <label class="text-bold">
                   <i class="icon-collaboration mr-2"></i>
                   Access Level
                 </label>
-                <select class="form-control form-control-select2 select" name="level_id" id="edit_level_id" data-fouc>
+                <select class="form-control form-control-select2 select js-access-level-select" name="level_id" id="edit_level_id" data-fouc>
                   <option value="">Choose Level</option>
                   @foreach ($levels as $level)
-                    <option value="{{ $level->id }}">{{ strtoupper($level->level_name) }}</option>
+                    <option value="{{ $level->id }}" data-level-name="{{ $level->level_name }}">{{ strtoupper($level->level_name) }}</option>
                   @endforeach
                 </select>
               </div>
               @endif
+
+              <div class="form-group col-md-6 col-sm-12 js-user-role-group" id="edit_user_role_group">
+                <label class="text-bold">
+                  <i class="icon-collaboration mr-2"></i>
+                  {{ __('auth.user') }} {{ __('auth.role') }} <span class="text-danger js-role-required-marker">*</span>
+                </label>
+                <select class="form-control form-control-select2 select js-user-role-select" name="role_id" id="edit_role_id" data-fouc required>
+                  <option value="">Choose Role</option>
+                  @foreach ($roles as $role)
+                    <option value="{{ $role->id }}">{{ strtoupper($role->name) }}</option>
+                  @endforeach
+                </select>
+              </div>
 
               @if (states_enabled())
               <div class="form-group col-md-6 col-sm-12">

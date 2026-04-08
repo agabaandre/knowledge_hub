@@ -25,6 +25,7 @@ use App\Models\User;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use App\Imports\PublicationImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Log;
@@ -42,11 +43,15 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $with[] = 'rejector';
     }
     $pubs = Publication::with($with)
-    ->where('is_version', 0)
-    ->orderBy($request->order_by_visits ? 'visits' : 'id', 'desc')
-    ->searchTerm($request->term);
+    ->where('is_version', 0);
+    if ($request->order_by_visits) {
+        $pubs->orderBy('visits', 'desc')->orderBy('id', 'desc');
+    } else {
+        $pubs->orderBy('id', 'desc');
+    }
+    $pubs->searchTerm($request->term);
 
-    if ($featured && current_user()) {
+    if ($featured && current_user() && !$request->boolean('homepage_featured_strict')) {
         $user = current_user();
 
         // "Your Interests" from profile preferences
@@ -88,8 +93,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pubs->where('is_featured', 1);
     }
 
-    // Keep randomization for non-featured browsing only.
-    if (!$featured) {
+    // Random order for general browsing; skip when we need a stable ranking (e.g. homepage Top Searches by visits).
+    if (!$featured && !$request->boolean('skip_random_order')) {
         $pubs->inRandomOrder();
     }
 
@@ -254,6 +259,87 @@ public function get(Request $request, $return_array = false, $featured = false,$
         }
 
         return $pubs->inRandomOrder()->take($limit)->get();
+    }
+
+    /**
+     * Homepage "Recommended" strip: priority = strictly featured → preference-based → favorite-tag–based,
+     * then diversified across parent thematic areas (not six items from the same theme / recent-id ordering).
+     */
+    public function homeRecommendedPublications(Request $request, ?int $userId, int $limit = 6): Collection
+    {
+        $poolSize = max($limit * 6, 36);
+
+        $featuredRequest = clone $request;
+        $featuredRequest->merge([
+            'is_featured' => 1,
+            'rows' => $poolSize,
+            'order_by_visits' => true,
+            'homepage_featured_strict' => true,
+        ]);
+
+        $featuredPool = collect($this->get($featuredRequest, false, true)->items());
+
+        if ($userId) {
+            $prefs = $this->recommendedByPreferences($userId, $poolSize);
+            $tags = $this->relatedByFavoriteTags($userId, $poolSize);
+            $merged = $featuredPool->concat($prefs)->concat($tags)->unique('id');
+        } else {
+            $merged = $featuredPool;
+        }
+
+        return $this->diversifyPublicationsByThematicArea($merged, $limit);
+    }
+
+    /**
+     * Prefer one publication per parent theme first (in list order), then fill remaining slots.
+     *
+     * @param  Collection|array<int, Publication>  $candidates
+     */
+    protected function diversifyPublicationsByThematicArea($candidates, int $limit): Collection
+    {
+        $candidates = Collection::make($candidates)->values();
+        if ($candidates->isEmpty()) {
+            return collect();
+        }
+
+        $pubs = \Illuminate\Database\Eloquent\Collection::make($candidates->all());
+        $pubs->loadMissing('sub_theme');
+
+        $thematicKey = function ($pub) {
+            $id = optional($pub->sub_theme)->thematic_area_id;
+
+            return $id !== null ? (int) $id : 0;
+        };
+
+        $picked = collect();
+        $seenIds = [];
+        $usedTheme = [];
+
+        foreach ($pubs as $pub) {
+            if ($picked->count() >= $limit) {
+                break;
+            }
+            $t = $thematicKey($pub);
+            if (isset($usedTheme[$t])) {
+                continue;
+            }
+            $usedTheme[$t] = true;
+            $picked->push($pub);
+            $seenIds[$pub->id] = true;
+        }
+
+        foreach ($pubs as $pub) {
+            if ($picked->count() >= $limit) {
+                break;
+            }
+            if (!empty($seenIds[$pub->id])) {
+                continue;
+            }
+            $picked->push($pub);
+            $seenIds[$pub->id] = true;
+        }
+
+        return $picked->take($limit)->values();
     }
 
     public function find_type($id){

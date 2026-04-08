@@ -141,6 +141,36 @@
 @section('scripts')
 <script>
     $(function(){
+            function viewerRoleVisibility($levelSelect) {
+                if (!$levelSelect || !$levelSelect.length) return;
+                var $form = $levelSelect.closest('form');
+                var $group = $form.find('.js-user-role-group');
+                var $role = $form.find('.js-user-role-select');
+                if (!$group.length || !$role.length) return;
+                var levelName = ($levelSelect.find('option:selected').attr('data-level-name') || '').toLowerCase();
+                var isViewer = levelName === 'viewer';
+                if (isViewer) {
+                    $group.hide();
+                    $role.prop('disabled', true).prop('required', false).val('').trigger('change');
+                    $form.find('.js-role-required-marker').hide();
+                } else {
+                    $group.show();
+                    $role.prop('disabled', false);
+                    if ($role.attr('id') === 'edit_role_id') {
+                        $role.prop('required', true);
+                    }
+                    $form.find('.js-role-required-marker').show();
+                }
+            }
+
+            $(document).on('change select2:select', '.js-access-level-select', function () {
+                viewerRoleVisibility($(this));
+            });
+
+            $('#addUser').on('shown.bs.modal', function () {
+                viewerRoleVisibility($(this).find('.js-access-level-select'));
+            });
+
             var table = $('#users-table').DataTable({
             processing: true,
             serverSide: false,
@@ -205,8 +235,6 @@
                 $('#edit_last_name').val(lastName);
                 $('#edit_email').val(email);
                 $('#edit_phone').val(phone);
-                $('#edit_role_id').val(roleId).trigger('change');
-                $('#edit_level_id').val(levelId).trigger('change');
                 $('#edit_country_id').val(countryId).trigger('change');
                 $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
                 $('#edit_author_id').val(authorId).trigger('change');
@@ -237,8 +265,12 @@
                 
                 // Set values after Select2 initialization
                 setTimeout(function() {
-                    $('#edit_role_id').val(roleId).trigger('change');
                     $('#edit_level_id').val(levelId).trigger('change');
+                    var levelIsViewer = ($('#edit_level_id option:selected').attr('data-level-name') || '').toLowerCase() === 'viewer';
+                    viewerRoleVisibility($('#editUserModal .js-access-level-select'));
+                    if (!levelIsViewer) {
+                        $('#edit_role_id').val(roleId).trigger('change');
+                    }
                     $('#edit_country_id').val(countryId).trigger('change');
                     $('#edit_administrative_unit_id').val(administrativeUnitId).trigger('change');
                     $('#edit_author_id').val(authorId).trigger('change');

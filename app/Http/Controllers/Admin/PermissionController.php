@@ -260,10 +260,14 @@ class PermissionController extends Controller
 
         $saved = ($request->id)? $user->update():$user->save();
 
-        if($saved && $roleId){ //attach role
-            // Sync roles - remove old and assign new
-            $user->syncRoles([]);
-            $user->assignRole($roleId);
+        if ($saved) {
+            $isViewer = $this->isViewerAccessLevel($request->level_id ?? null);
+            if ($isViewer) {
+                $user->syncRoles([]);
+            } elseif ($roleId) {
+                $user->syncRoles([]);
+                $user->assignRole($roleId);
+            }
         }
 
         $msg = (!$saved)?"Operation failed, try again":($request->id?"User <b> $user->name </b> updated successfully":"User <b> $user->name </b> created successfuly with default password <b> $password </b>");
@@ -409,7 +413,8 @@ class PermissionController extends Controller
 
         $userId = $request->user_id;
         $roleId = $request->role_id;
-        
+        $isViewer = $this->isViewerAccessLevel($request->level_id ?? null);
+
         $user   = User::find($userId);
         $old_data = $user;
 
@@ -417,10 +422,10 @@ class PermissionController extends Controller
         $user->author_id       = $request->author_id;
         $user->update();
 
-        //first revoke all
-        $user->syncRoles([]); 
-        //assign new
-        $saved  = $user->assignRole($roleId);
+        $user->syncRoles([]);
+        $saved = (!$isViewer && $roleId)
+            ? $user->assignRole($roleId)
+            : true;
 
         $msg = (!$saved)?"Operation failed, try again":"Role assigned successfuly,refresh to view changes";
     
@@ -528,5 +533,14 @@ class PermissionController extends Controller
         return view('admin.permissions.audit')->with($data);
     }
 
+    private function isViewerAccessLevel($levelId): bool
+    {
+        if (empty($levelId)) {
+            return false;
+        }
+        $level = AccessLevel::find($levelId);
+
+        return $level && strcasecmp((string) $level->level_name, 'Viewer') === 0;
+    }
 
 }
