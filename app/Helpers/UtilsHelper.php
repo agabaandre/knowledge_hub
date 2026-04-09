@@ -1252,6 +1252,37 @@ function community_user_display_job_title(?\App\Models\User $user): string
 }
 
 /**
+ * System / seed placeholder filenames (not a real uploaded portrait). DB default is avatar.jpg.
+ */
+function community_user_profile_photo_is_system_placeholder(string $raw): bool
+{
+    $raw = trim(str_replace('\\', '/', $raw));
+    if ($raw === '') {
+        return true;
+    }
+    $path = $raw;
+    if (preg_match('#^https?://#i', $raw)) {
+        $path = (string) (parse_url($raw, PHP_URL_PATH) ?? '');
+        if ($path === '' || $path === '/') {
+            return false;
+        }
+    }
+    $base = strtolower(basename($path));
+    if ($base === '' || $base === '.' || $base === '..') {
+        return false;
+    }
+    static $placeholders = [
+        'avatar.jpg', 'avatar.jpeg', 'avatar.png',
+        'user.jpg', 'user.png',
+        'default.jpg', 'default.png',
+        'placeholder.jpg', 'placeholder.png',
+        'no-photo.png', 'nophoto.png',
+    ];
+
+    return in_array($base, $placeholders, true);
+}
+
+/**
  * True if the user has a profile image that is usable: external URL, or local file that exists on disk.
  */
 function community_user_has_profile_image(\App\Models\User $user): bool
@@ -1262,6 +1293,10 @@ function community_user_has_profile_image(\App\Models\User $user): bool
         return false;
     }
     $raw = trim((string) $raw);
+
+    if (community_user_profile_photo_is_system_placeholder($raw)) {
+        return false;
+    }
 
     if (! empty($attrs['is_photo_external']) && (int) $attrs['is_photo_external'] === 1) {
         return true;

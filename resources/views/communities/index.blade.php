@@ -181,6 +181,16 @@
         }
         .community-room-card__avatar-wrap {
             position: relative;
+            box-sizing: border-box;
+            width: calc(30px * 1.32);
+            height: calc(30px * 1.32);
+            min-width: calc(30px * 1.32);
+            min-height: calc(30px * 1.32);
+            aspect-ratio: 1;
+            align-self: center;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border: 2px solid #fff;
             border-radius: 50%;
             overflow: hidden;
@@ -205,21 +215,26 @@
             pointer-events: none;
         }
         .community-room-card__avatar {
-            width: calc(26px * 1.32);
-            height: calc(26px * 1.32);
+            width: 100%;
+            height: 100%;
+            max-width: 100%;
+            max-height: 100%;
             object-fit: cover;
             display: block;
             border-radius: 50%;
             vertical-align: top;
             position: relative;
             z-index: 1;
+            flex-shrink: 0;
         }
         .community-room-card__avatar-initials {
             display: flex;
             align-items: center;
             justify-content: center;
-            width: calc(26px * 1.32);
-            height: calc(26px * 1.32);
+            width: 100%;
+            height: 100%;
+            min-width: 0;
+            min-height: 0;
             font-size: calc(9px * 1.32);
             font-weight: 700;
             color: #3c4146;
@@ -229,6 +244,7 @@
             position: relative;
             z-index: 2;
             box-sizing: border-box;
+            flex-shrink: 0;
         }
         .community-room-card__more-members {
             font-size: calc(0.6875rem * 1.32);
@@ -543,6 +559,7 @@
             $('#coverage').trigger('change');
             }
 
+            var communityAvatarAutoScrollStates = [];
             $('.community-room-card__avatar-carousel').each(function () {
                 var $carousel = $(this);
                 var $track = $carousel.find('.community-room-card__avatar-track');
@@ -551,6 +568,8 @@
                 if (!$track.length) {
                     return;
                 }
+
+                var trackEl = $track[0];
 
                 function scrollStep() {
                     var $first = $track.find('.community-room-card__avatar-slides').children().first();
@@ -561,9 +580,8 @@
                 }
 
                 function updateNav() {
-                    var el = $track[0];
-                    var maxScroll = el.scrollWidth - el.clientWidth;
-                    var left = el.scrollLeft;
+                    var maxScroll = trackEl.scrollWidth - trackEl.clientWidth;
+                    var left = trackEl.scrollLeft;
                     var tol = 2;
                     if (maxScroll <= tol) {
                         $prev.prop('disabled', true);
@@ -576,19 +594,55 @@
 
                 $prev.on('click', function (e) {
                     e.stopPropagation();
-                    $track[0].scrollBy({ left: -scrollStep(), behavior: 'smooth' });
+                    trackEl.scrollBy({ left: -scrollStep(), behavior: 'smooth' });
                 });
                 $next.on('click', function (e) {
                     e.stopPropagation();
-                    $track[0].scrollBy({ left: scrollStep(), behavior: 'smooth' });
+                    trackEl.scrollBy({ left: scrollStep(), behavior: 'smooth' });
                 });
                 $track.on('scroll', updateNav);
                 $(window).on('resize', updateNav);
                 if (window.ResizeObserver) {
-                    new ResizeObserver(updateNav).observe($track[0]);
+                    new ResizeObserver(updateNav).observe(trackEl);
                 }
                 updateNav();
+
+                var autoState = { el: trackEl, paused: false };
+                communityAvatarAutoScrollStates.push(autoState);
+                $carousel.on('mouseenter', function () {
+                    autoState.paused = true;
+                });
+                $carousel.on('mouseleave', function () {
+                    autoState.paused = false;
+                });
             });
+
+            if (communityAvatarAutoScrollStates.length && !window.__communityAvatarAutoInterval) {
+                var pixelsPerTick = 0.55;
+                var tickMs = 50;
+                window.__communityAvatarAutoInterval = setInterval(function () {
+                    if (document.hidden) {
+                        return;
+                    }
+                    communityAvatarAutoScrollStates.forEach(function (state) {
+                        if (state.paused) {
+                            return;
+                        }
+                        var el = state.el;
+                        if (!el || !el.isConnected) {
+                            return;
+                        }
+                        var maxScroll = el.scrollWidth - el.clientWidth;
+                        if (maxScroll <= 2) {
+                            return;
+                        }
+                        el.scrollLeft += pixelsPerTick;
+                        if (el.scrollLeft >= maxScroll - 1) {
+                            el.scrollLeft = 0;
+                        }
+                    });
+                }, tickMs);
+            }
         });
 
         let communityId;
