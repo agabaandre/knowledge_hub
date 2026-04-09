@@ -70,32 +70,42 @@
     @endif
 
     @if($faces->isNotEmpty() || $moreMembers > 0)
-    <div class="community-room-card__avatars" onclick="event.stopPropagation();" aria-label="Contributors and members">
-        @foreach($faces as $face)
-            @php
-                $u = $face['user'];
-                $showImg = community_user_has_profile_image($u);
-                $jobTitle = community_user_display_job_title($u);
-                $hoverTip = $u->name;
-                if ($jobTitle !== '') {
-                    $hoverTip .= ' — ' . $jobTitle;
-                }
-                $hoverTip .= ' · ' . $roleLabel($face['role']);
-            @endphp
-            <span class="community-room-card__avatar-wrap {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}"
-                title="{{ e($hoverTip) }}">
-                @if($showImg)
-                    <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
-                        onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
-                    <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback" style="display:none" aria-hidden="true">{{ community_user_initials($u->name) }}</span>
-                @else
-                    <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
+    <div class="community-room-card__avatar-carousel" onclick="event.stopPropagation();" role="region" aria-label="Contributors and members">
+        <button type="button" class="community-room-card__avatar-nav community-room-card__avatar-nav--prev" aria-label="Scroll contributors left">
+            <i class="fa fa-chevron-left" aria-hidden="true"></i>
+        </button>
+        <div class="community-room-card__avatar-track">
+            <div class="community-room-card__avatar-slides">
+                @foreach($faces as $face)
+                    @php
+                        $u = $face['user'];
+                        $showImg = community_user_has_profile_image($u);
+                        $jobTitle = community_user_display_job_title($u);
+                        $hoverTip = $u->name;
+                        if ($jobTitle !== '') {
+                            $hoverTip .= ' — ' . $jobTitle;
+                        }
+                        $hoverTip .= ' · ' . $roleLabel($face['role']);
+                    @endphp
+                    <span class="community-room-card__avatar-wrap {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}"
+                        title="{{ e($hoverTip) }}">
+                        @if($showImg)
+                            <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
+                                onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
+                            <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback" style="display:none" aria-hidden="true">{{ community_user_initials($u->name) }}</span>
+                        @else
+                            <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
+                        @endif
+                    </span>
+                @endforeach
+                @if($moreMembers > 0)
+                    <span class="community-room-card__more-members">+{{ $moreMembers }} more</span>
                 @endif
-            </span>
-        @endforeach
-        @if($moreMembers > 0)
-            <span class="community-room-card__more-members">+{{ $moreMembers }} more</span>
-        @endif
+            </div>
+        </div>
+        <button type="button" class="community-room-card__avatar-nav community-room-card__avatar-nav--next" aria-label="Scroll contributors right">
+            <i class="fa fa-chevron-right" aria-hidden="true"></i>
+        </button>
     </div>
     @endif
 
