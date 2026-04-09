@@ -4,7 +4,7 @@
     $frontBodyFontSize = settings()->front_body_font_size ?? '14';
     $frontBodyFontSize = (is_numeric($frontBodyFontSize) && (int)$frontBodyFontSize >= 10 && (int)$frontBodyFontSize <= 24) ? (int)$frontBodyFontSize : 14;
 
-    $fontStack = 'inherit';
+    $fontStack = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
     $customFontFamily = null;
     if ($primaryFont === 'univers_45_light') {
         $fontStack = '"Univers 45 Light", "Univers", sans-serif';
@@ -55,18 +55,33 @@
         --font-family-primary: {!! $fontStack !!};
         --default-font-color: {{ $defaultFontColor }};
         --front-body-font-size: {{ $frontBodyFontSize }}px;
+        /* Bootstrap 5 / Nifty: UI text inherits Admin > Appearance primary font */
+        --bs-font-sans-serif: var(--font-family-primary);
+        --bs-body-font-family: var(--font-family-primary);
+        --bs-btn-font-family: var(--font-family-primary);
+        --nf-brand-font-family: var(--font-family-primary);
     }
-    /* Apply admin font and body font size to front end for all themes (default + theme1) */
+    /* Apply settings font site-wide (icons keep their own font-family from icon CSS) */
+    html {
+        font-family: var(--font-family-primary) !important;
+    }
     body {
         font-family: var(--font-family-primary) !important;
         color: var(--default-font-color) !important;
         font-size: var(--front-body-font-size) !important;
     }
     #main-wrapper,
+    #root.root,
+    .root,
     .content,
     .content__boxed,
     .content__wrap,
-    .front-bg {
+    .front-bg,
+    .front-container {
+        font-family: var(--font-family-primary) !important;
+    }
+    .h1, .h2, .h3, .h4, .h5, .h6,
+    h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-family-primary) !important;
     }
 </style>

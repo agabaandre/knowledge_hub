@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Repositories\AuthorsRepository;
 use App\Services\UITableService;
 use App\Models\Author;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\Rule;
 
 class AuthorsAdminController extends Controller
@@ -25,7 +26,14 @@ class AuthorsAdminController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100',
+            'icon' => 'nullable|string|max:30',
+            'is_organsiation' => 'nullable|string|max:10',
+            'address' => 'nullable|string|max:200',
+            'telephone' => 'nullable|string|max:13',
+            'email' => 'nullable|string|max:20',
+            'orcid' => 'nullable|string|max:19',
+            'logo' => 'nullable|string|max:100',
         ]);
         $rawId = $request->input('id');
         $editId = ($rawId !== null && $rawId !== '') ? (int) $rawId : null;
@@ -36,8 +44,19 @@ class AuthorsAdminController extends Controller
         if (! $author) {
             return back()->with(['message' => 'Author not found', 'status' => 'failure']);
         }
-        $author->name = $validated['name'];
-        $saved = $editId ? $author->update() : $author->save();
+
+        $orcid = isset($validated['orcid']) ? trim((string) $validated['orcid']) : '';
+        $author->fill([
+            'name' => $validated['name'],
+            'icon' => ($validated['icon'] ?? '') !== '' ? $validated['icon'] : 'fa fa-archive',
+            'is_organsiation' => ($validated['is_organsiation'] ?? '') !== '' ? $validated['is_organsiation'] : 'Yes',
+            'address' => $validated['address'] ?? '',
+            'telephone' => $validated['telephone'] ?? '',
+            'email' => $validated['email'] ?? '',
+            'orcid' => $orcid !== '' ? $orcid : null,
+            'logo' => ($validated['logo'] ?? '') !== '' ? $validated['logo'] : 'author.png',
+        ]);
+        $saved = $author->save();
         $data = $saved ? ['message' => 'Author saved successfully', 'status' => 'success'] : ['message' => 'Operation failed', 'status' => 'failure'];
 
         return back()->with($data);
@@ -48,6 +67,30 @@ class AuthorsAdminController extends Controller
         $data['authors'] = $this->authorsRepo->get($request);
         $data['authorsForMerge'] = Author::query()->orderBy('name')->get(['id', 'name']);
         return view('admin.authors.index',$data);
+    }
+
+    /**
+     * Author record for the admin edit modal (JSON).
+     */
+    public function show(Author $author): JsonResponse
+    {
+        if (! $this->userCanEditAuthors()) {
+            abort(403);
+        }
+
+        return response()->json([
+            'id' => $author->id,
+            'name' => $author->name,
+            'icon' => $author->getAttributes()['icon'] ?? 'fa fa-archive',
+            'is_organsiation' => (string) ($author->getAttributes()['is_organsiation'] ?? 'Yes'),
+            'address' => $author->address ?? '',
+            'telephone' => $author->telephone ?? '',
+            'email' => $author->email ?? '',
+            'orcid' => $author->orcid,
+            'logo' => $author->getAttributes()['logo'] ?? 'author.png',
+            'created_at' => $author->created_at?->toIso8601String(),
+            'updated_at' => $author->updated_at?->toIso8601String(),
+        ]);
     }
 
     public function destroy(Request $request){

@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Contr
 use App\Http\Controllers\Api\CommunitiesApiController;
 use App\Http\Controllers\Api\PushNotificationsApiController;
 use App\Http\Controllers\Api\CoursesApiController;
+use App\Http\Controllers\Api\HomeApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -45,6 +46,7 @@ Route::group(["prefix" =>"members"],function(){
 
 Route::get("publications",[PublicationsApiController::class,"index"])->middleware('auth.passport');;
 Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where('id', '[0-9]+');;
+Route::get('home', [HomeApiController::class, 'index'])->middleware('auth.passport');
 
 Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::post("/",[PublicationsApiController::class,"store"]);

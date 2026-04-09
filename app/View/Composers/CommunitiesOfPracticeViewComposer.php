@@ -11,11 +11,17 @@ class CommunitiesOfPracticeViewComposer{
 
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
-        $communities  = cache()->remember('communities',$minutes, function () {
-            return   CommunityOfPractice::where('is_active',1)->orderBy('community_name', 'asc')->get();
+        $communities = cache()->remember('communities', $minutes, function () {
+            return CommunityOfPractice::where('is_active', 1)->orderBy('community_name', 'asc')->get();
         });
-        
-        $view->with('communities',$communities);
+
+        if (! user_email_allows_africa_cdc_staff_community(auth()->user())) {
+            $communities = $communities->filter(function ($c) {
+                return ! community_is_africa_cdc_staff_restricted($c);
+            })->values();
+        }
+
+        $view->with('communities', $communities);
     }
 
 }

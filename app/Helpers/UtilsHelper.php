@@ -287,7 +287,7 @@ if (!function_exists('format_title_with_ai_fallback')) {
         }
 
         return $local;
-    }
+	}
 }
 
 
@@ -1134,6 +1134,107 @@ function html_to_text($html) {
 
 function clear_cache(){
   Cache::flush();
+}
+
+/**
+ * Two-letter initials for avatar fallback on community cards, etc.
+ */
+function community_user_initials(?string $name): string
+{
+    $name = trim((string) $name);
+    if ($name === '') {
+        return '?';
+    }
+    $parts = preg_split('/\s+/u', $name, -1, PREG_SPLIT_NO_EMPTY);
+    if (count($parts) >= 2) {
+        $a = mb_substr($parts[0], 0, 1);
+        $b = mb_substr($parts[count($parts) - 1], 0, 1);
+
+        return mb_strtoupper($a.$b);
+    }
+
+    return mb_strtoupper(mb_substr($parts[0], 0, min(2, mb_strlen($parts[0]))));
+}
+
+/**
+ * Display name of the community restricted to @africacdc.org accounts on the hub.
+ */
+function community_africa_cdc_staff_name(): string
+{
+    return 'Africa CDC Staff';
+}
+
+/**
+ * Whether the community is the internal Africa CDC Staff community (by name).
+ */
+function community_is_africa_cdc_staff_restricted(\App\Models\CommunityOfPractice $community): bool
+{
+    return strcasecmp(trim((string) ($community->community_name ?? '')), community_africa_cdc_staff_name()) === 0;
+}
+
+/**
+ * Logged-in user may see / join the Africa CDC Staff community (email domain @africacdc.org).
+ */
+function user_email_allows_africa_cdc_staff_community(?\Illuminate\Contracts\Auth\Authenticatable $user): bool
+{
+    if ($user === null || empty($user->email)) {
+        return false;
+    }
+
+    return (bool) preg_match('/@africacdc\.org$/i', trim((string) $user->email));
+}
+
+/**
+ * Relative path on the public disk for a stored user photo (uploads/users/...).
+ */
+function community_user_local_photo_storage_path(string $raw): ?string
+{
+    $raw = trim(str_replace('\\', '/', $raw));
+    if ($raw === '') {
+        return null;
+    }
+    if (preg_match('#/(?:storage/)?uploads/users/(.+)$#i', $raw, $m)) {
+        return 'uploads/users/'.$m[1];
+    }
+    if (str_starts_with(strtolower($raw), 'uploads/users/')) {
+        return $raw;
+    }
+
+    return 'uploads/users/'.basename($raw);
+}
+
+/**
+ * True if the user has a profile image that is usable: external URL, or local file that exists on disk.
+ */
+function community_user_has_profile_image(\App\Models\User $user): bool
+{
+    $attrs = $user->getAttributes();
+    $raw = $attrs['photo'] ?? null;
+    if ($raw === null || trim((string) $raw) === '') {
+        return false;
+    }
+    $raw = trim((string) $raw);
+
+    if (! empty($attrs['is_photo_external']) && (int) $attrs['is_photo_external'] === 1) {
+        return true;
+    }
+    if (filter_var($raw, FILTER_VALIDATE_URL)) {
+        return true;
+    }
+    if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+        return true;
+    }
+
+    $rel = community_user_local_photo_storage_path($raw);
+    if ($rel === null) {
+        return false;
+    }
+
+    if (Storage::disk('public')->exists($rel)) {
+        return true;
+    }
+
+    return is_file(public_path('storage/'.$rel));
 }
 
 function user_profile_photo($photo=null){

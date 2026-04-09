@@ -1,5 +1,4 @@
-{{-- Theme1: inherit colors and typography from Admin > Configure > Appearance --}}
-@include('partials.theming.typography')
+{{-- Theme1: colors only; typography + --font-family-primary come from header_resources (theming.colors) --}}
 @php
     $primary = settings()->primary_color ?? '#006239';
     $secondary = settings()->secondary_color ?? '#413C3C';
@@ -18,6 +17,12 @@
     $secondaryRgb = strlen($h2) >= 6 ? hexdec(substr($h2,0,2)).','.hexdec(substr($h2,2,2)).','.hexdec(substr($h2,4,2)) : '65,60,60';
 @endphp
 <style>
+    :root, [data-bs-theme="light"], [data-bs-theme="dark"] {
+        --bs-font-sans-serif: var(--font-family-primary);
+        --bs-body-font-family: var(--font-family-primary);
+        --bs-btn-font-family: var(--font-family-primary);
+        --nf-brand-font-family: var(--font-family-primary);
+    }
     :root, [data-bs-theme="light"] {
         --theme-color-primary: {{ $primary }};
         --theme-color-secondary: {{ $secondary }};

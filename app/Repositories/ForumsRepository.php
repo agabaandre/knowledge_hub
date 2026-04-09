@@ -18,6 +18,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
 use App\Services\ContentRequestReferralNotifier;
+use App\Services\ForumThreadActivityNotifier;
 
 class ForumsRepository extends SharedRepo{
 
@@ -499,6 +500,16 @@ class ForumsRepository extends SharedRepo{
             }
         }
 
+        if ($comment && $comment->id) {
+            $st = (string) ($comment->status ?? '');
+            if ($st === '' || strcasecmp($st, 'approved') === 0) {
+                $forumForNotify = Forum::find($comment->forum_id);
+                if ($forumForNotify) {
+                    ForumThreadActivityNotifier::notifyNewComment($forumForNotify, $comment);
+                }
+            }
+        }
+
         return $comment;
     }
 
@@ -707,6 +718,11 @@ class ForumsRepository extends SharedRepo{
                 
                 // Refresh forum model to get updated views count
                 $forum->refresh();
+
+                ForumThreadActivityNotifier::notifyViewMilestoneIfApplicable(
+                    $forum,
+                    (int) ($forum->views ?? 0)
+                );
                 
                 // Set cookie to prevent duplicate views (same user viewing same forum again)
                 set_cookie($cookie_name);
@@ -1060,6 +1076,13 @@ class ForumsRepository extends SharedRepo{
 
         $count = \App\Models\ForumLike::where('forum_id', $forumId)->count();
 
+        if ($liked && $userId) {
+            $forumModel = Forum::find($forumId);
+            if ($forumModel) {
+                ForumThreadActivityNotifier::notifyForumLiked($forumModel, (int) $userId);
+            }
+        }
+
         return [
             'liked' => $liked,
             'count' => $count
@@ -1085,6 +1108,13 @@ class ForumsRepository extends SharedRepo{
         }
 
         $count = \App\Models\ForumCommentLike::where('forum_comment_id', $commentId)->count();
+
+        if ($liked && $userId) {
+            $commentModel = ForumComment::query()->with('forum')->find($commentId);
+            if ($commentModel && $commentModel->forum) {
+                ForumThreadActivityNotifier::notifyCommentLiked($commentModel->forum, $commentModel, (int) $userId);
+            }
+        }
 
         return [
             'liked' => $liked,

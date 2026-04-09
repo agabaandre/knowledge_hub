@@ -17,9 +17,7 @@
 
     @include('layouts.partials.header_resources')
 
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;700&family=Ubuntu:wght@400;500;700&display=swap" rel="stylesheet">
+    {{-- Webfonts: loaded from Admin > Appearance (typography partial: Montserrat, custom uploads, etc.); avoid fixed Poppins/Ubuntu so settings font applies everywhere --}}
 
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/nifty.min.css') }}">

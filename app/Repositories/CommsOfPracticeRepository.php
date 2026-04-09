@@ -4,10 +4,30 @@ namespace App\Repositories;
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
+use App\Models\Tag;
+use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 class CommsOfPracticeRepository{
+
+    /**
+     * Hide "Africa CDC Staff" from listings/API unless the viewer is logged in with an @africacdc.org email.
+     * Admin requests (admin=true) always see all communities.
+     */
+    private function scopeAfricaCdcStaffVisibility($query, Request $request): void
+    {
+        if ($request->boolean('admin')) {
+            return;
+        }
+        if (user_email_allows_africa_cdc_staff_community(auth()->user())) {
+            return;
+        }
+        $query->whereRaw('LOWER(TRIM(community_name)) != ?', [strtolower(community_africa_cdc_staff_name())]);
+    }
 
     public function get(Request $request, $return_array = false)
     {
@@ -18,6 +38,8 @@ class CommsOfPracticeRepository{
         if (!$request->has('admin')) {
             $query->where('is_public', 1);
         }
+
+        $this->scopeAfricaCdcStaffVisibility($query, $request);
 
         // Add search functionality (community name, description, or creator name/email)
         if ($request->filled('term')) {
@@ -68,10 +90,10 @@ class CommsOfPracticeRepository{
         }
 
         if ($request->input('withRelated', false)) {
-            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country']);
+            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country', 'tags']);
         } else {
-            // Always load region and country for displaying coverage info
-            $query->with(['region', 'country']);
+            // Always load region, country, and tags for listing cards
+            $query->with(['region', 'country', 'tags']);
         }
 
         $results = $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
@@ -96,15 +118,19 @@ class CommsOfPracticeRepository{
             return collect();
         }
         $term = trim($request->term);
-        return CommunityOfPractice::with(['region', 'country'])
+        $q = CommunityOfPractice::with(['region', 'country'])
             ->where('is_public', 1)
-            ->where(function ($q) use ($term) {
-                $q->where('community_name', 'like', '%' . $term . '%')
+            ->where(function ($q2) use ($term) {
+                $q2->where('community_name', 'like', '%' . $term . '%')
                   ->orWhere('description', 'like', '%' . $term . '%')
                   ->orWhere('organisation', 'like', '%' . $term . '%')
                   ->orWhere('department', 'like', '%' . $term . '%');
-            })
-            ->orderBy('community_name')
+            });
+        if (! user_email_allows_africa_cdc_staff_community(auth()->user())) {
+            $q->whereRaw('LOWER(TRIM(community_name)) != ?', [strtolower(community_africa_cdc_staff_name())]);
+        }
+
+        return $q->orderBy('community_name')
             ->limit($limit)
             ->get();
     }
@@ -119,6 +145,11 @@ class CommsOfPracticeRepository{
 
         $query = CommunityOfPractice::whereIn('id', $memberCommunityIds);
 
+        $memberUser = User::find($userId);
+        if (! user_email_allows_africa_cdc_staff_community($memberUser)) {
+            $query->whereRaw('LOWER(TRIM(community_name)) != ?', [strtolower(community_africa_cdc_staff_name())]);
+        }
+
         // Add search functionality
         if ($request->filled('term')) {
             $term = $request->input('term');
@@ -129,7 +160,9 @@ class CommsOfPracticeRepository{
         }
 
         if ($request->input('withRelated', false)) {
-            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications']);
+            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country', 'tags']);
+        } else {
+            $query->with(['region', 'country', 'tags']);
         }
 
         $results = $query->paginate($request->rows ?? 20);
@@ -141,7 +174,312 @@ class CommsOfPracticeRepository{
         
         return $results;
     }
-    
+
+    /**
+     * Suggested communities for a logged-in user: match profile sub-themes and tags from favourited publications,
+     * then fall back to largest public communities the user has not joined.
+     *
+     * @return \Illuminate\Support\Collection<int, CommunityOfPractice>
+     */
+    public function recommendedForUser(int $userId, int $limit = 9): Collection
+    {
+        $joinedIds = CommunityOfPracticeMembers::query()
+            ->where('user_id', $userId)
+            ->pluck('community_of_practice_id')
+            ->unique()
+            ->filter()
+            ->values()
+            ->all();
+
+        $keywords = collect();
+        $user = User::query()->with(['preferences.subtheme'])->find($userId);
+        if ($user) {
+            foreach ($user->preferences as $pref) {
+                if ($pref->subtheme) {
+                    $st = $pref->subtheme;
+                    foreach (['description', 'detailed_description'] as $attr) {
+                        if (! empty($st->{$attr})) {
+                            $text = strip_tags((string) $st->{$attr});
+                            $keywords = $keywords->merge(preg_split('/\s+/u', $text, -1, PREG_SPLIT_NO_EMPTY));
+                        }
+                    }
+                }
+            }
+
+            $favTagIds = DB::table('favourites')
+                ->join('publication_tags', 'favourites.publication_id', '=', 'publication_tags.publication_id')
+                ->where('favourites.user_id', $userId)
+                ->distinct()
+                ->pluck('publication_tags.tag_id');
+
+            if ($favTagIds->isNotEmpty()) {
+                $keywords = $keywords->merge(Tag::query()->whereIn('id', $favTagIds)->pluck('tag_text'));
+            }
+        }
+
+        $keywords = $keywords->map(function ($k) {
+            $k = strtolower(trim((string) $k));
+
+            return preg_replace('/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/u', '', $k);
+        })->filter(function ($k) {
+            return strlen($k) >= 3;
+        })->unique()->take(25)->values()->all();
+
+        $allowStaffCommunity = $user && user_email_allows_africa_cdc_staff_community($user);
+
+        $baseQuery = function () use ($joinedIds, $allowStaffCommunity) {
+            $q = CommunityOfPractice::query()
+                ->where('is_public', 1)
+                ->with(['region', 'country', 'tags']);
+            if ($joinedIds !== []) {
+                $q->whereNotIn('id', $joinedIds);
+            }
+            if (! $allowStaffCommunity) {
+                $q->whereRaw('LOWER(TRIM(community_name)) != ?', [strtolower(community_africa_cdc_staff_name())]);
+            }
+
+            return $q;
+        };
+
+        if ($keywords !== []) {
+            $matched = $baseQuery()->where(function ($q) use ($keywords) {
+                foreach ($keywords as $kw) {
+                    $safe = addcslashes($kw, '%_\\');
+                    $q->orWhere(function ($sub) use ($safe) {
+                        $sub->where('community_name', 'like', '%'.$safe.'%')
+                            ->orWhere('description', 'like', '%'.$safe.'%')
+                            ->orWhereHas('tags', function ($tq) use ($safe) {
+                                $tq->where('tag_text', 'like', '%'.$safe.'%');
+                            });
+                    });
+                }
+            })
+                ->limit($limit * 4)
+                ->get()
+                ->unique('id')
+                ->take($limit)
+                ->values();
+
+            if ($matched->isNotEmpty()) {
+                return $matched;
+            }
+        }
+
+        return $baseQuery()
+            ->withCount('approvedMembers')
+            ->orderByDesc('approved_members_count')
+            ->limit($limit)
+            ->get();
+    }
+
+    /**
+     * Last activity, admin + top contributors (max 11 faces), and “+N” member overflow for listing cards.
+     *
+     * @param  LengthAwarePaginator|Collection  $communities
+     */
+    public function attachListingMeta($communities): void
+    {
+        $items = [];
+        if ($communities instanceof LengthAwarePaginator) {
+            $items = $communities->items();
+        } elseif ($communities instanceof Collection) {
+            $items = $communities->all();
+        }
+        if ($items === []) {
+            return;
+        }
+
+        $ids = collect($items)->pluck('id')->filter()->unique()->values()->all();
+        if ($ids === []) {
+            return;
+        }
+
+        $maxFaces = 11;
+
+        $activityRows = DB::table('forum_community_of_practices as fcp')
+            ->join('forums as f', 'f.id', '=', 'fcp.forum_id')
+            ->whereIn('fcp.community_of_practice_id', $ids)
+            ->groupBy('fcp.community_of_practice_id')
+            ->selectRaw('fcp.community_of_practice_id as cid, MAX(f.created_at) as last_at')
+            ->pluck('last_at', 'cid');
+
+        $memberGroups = CommunityOfPracticeMembers::query()
+            ->whereIn('community_of_practice_id', $ids)
+            ->where('is_approved', 1)
+            ->with(['user' => function ($q) {
+                $q->select('id', 'name', 'photo', 'updated_at');
+            }])
+            ->orderByDesc('id')
+            ->get()
+            ->groupBy('community_of_practice_id');
+
+        $adminByCid = CommunityOfPracticeMembers::query()
+            ->whereIn('community_of_practice_id', $ids)
+            ->where('is_approved', 1)
+            ->where('is_admin', 1)
+            ->orderByDesc('id')
+            ->get(['community_of_practice_id', 'user_id'])
+            ->groupBy('community_of_practice_id');
+
+        $links = DB::table('forum_community_of_practices')
+            ->whereIn('community_of_practice_id', $ids)
+            ->get(['community_of_practice_id', 'forum_id']);
+
+        $forumToCids = [];
+        foreach ($links as $l) {
+            $fid = (int) $l->forum_id;
+            $cid = (int) $l->community_of_practice_id;
+            if (! isset($forumToCids[$fid])) {
+                $forumToCids[$fid] = [];
+            }
+            $forumToCids[$fid][$cid] = true;
+        }
+        foreach ($forumToCids as $fid => $cmap) {
+            $forumToCids[$fid] = array_keys($cmap);
+        }
+
+        $allForumIds = array_keys($forumToCids);
+        $scoresByCid = [];
+        foreach ($ids as $id) {
+            $scoresByCid[(int) $id] = [];
+        }
+
+        if ($allForumIds !== []) {
+            $forumCreators = DB::table('forums')->whereIn('id', $allForumIds)->pluck('created_by', 'id');
+
+            foreach ($forumToCids as $fid => $cids) {
+                $creator = $forumCreators[$fid] ?? null;
+                if (! $creator) {
+                    continue;
+                }
+                $uid = (int) $creator;
+                foreach ($cids as $cid) {
+                    $scoresByCid[$cid][$uid] = ($scoresByCid[$cid][$uid] ?? 0) + 5;
+                }
+            }
+
+            $commentAgg = DB::table('forum_comments')
+                ->whereIn('forum_id', $allForumIds)
+                ->whereNotNull('created_by')
+                ->where(function ($q) {
+                    $q->where('status', 'approved')
+                        ->orWhere('status', 1)
+                        ->orWhereNull('status');
+                })
+                ->groupBy('forum_id', 'created_by')
+                ->selectRaw('forum_id, created_by as user_id, COUNT(*) as cnt')
+                ->get();
+
+            foreach ($commentAgg as $row) {
+                $fid = (int) $row->forum_id;
+                $uid = (int) $row->user_id;
+                $cnt = (int) $row->cnt;
+                foreach ($forumToCids[$fid] ?? [] as $cid) {
+                    $scoresByCid[$cid][$uid] = ($scoresByCid[$cid][$uid] ?? 0) + $cnt;
+                }
+            }
+        }
+
+        $slotsByCid = [];
+        $allFaceUserIds = [];
+
+        foreach ($items as $c) {
+            if (! $c instanceof CommunityOfPractice) {
+                continue;
+            }
+            $cid = (int) $c->id;
+            $ordered = [];
+            $seen = [];
+
+            $push = function (int $uid, string $role) use (&$ordered, &$seen, $maxFaces) {
+                if ($uid <= 0 || isset($seen[$uid]) || count($ordered) >= $maxFaces) {
+                    return;
+                }
+                $seen[$uid] = true;
+                $ordered[] = ['user_id' => $uid, 'role' => $role];
+            };
+
+            if (! empty($c->created_by)) {
+                $push((int) $c->created_by, 'creator');
+            }
+
+            $admins = $adminByCid[$cid] ?? $adminByCid[(string) $cid] ?? collect();
+            foreach ($admins as $adm) {
+                $push((int) $adm->user_id, 'admin');
+            }
+
+            $scores = $scoresByCid[$cid] ?? [];
+            arsort($scores);
+            foreach (array_keys($scores) as $uid) {
+                $push((int) $uid, 'contributor');
+            }
+
+            $members = $memberGroups[$cid] ?? $memberGroups[(string) $cid] ?? collect();
+            foreach ($members as $m) {
+                if ($m->user_id) {
+                    $push((int) $m->user_id, 'member');
+                }
+            }
+
+            $slotsByCid[$cid] = $ordered;
+            foreach ($ordered as $slot) {
+                $allFaceUserIds[$slot['user_id']] = true;
+            }
+        }
+
+        $userById = collect();
+        if ($allFaceUserIds !== []) {
+            $userById = User::query()
+                ->whereIn('id', array_keys($allFaceUserIds))
+                ->get(['id', 'name', 'photo', 'updated_at'])
+                ->keyBy('id');
+        }
+
+        $onlineBefore = Carbon::now()->subMinutes(20);
+
+        foreach ($items as $c) {
+            if (! $c instanceof CommunityOfPractice) {
+                continue;
+            }
+            $cid = (int) $c->id;
+            $raw = $activityRows[$cid] ?? $activityRows[(string) $cid] ?? null;
+            $c->setAttribute('listing_last_activity', $raw ? Carbon::parse($raw) : null);
+
+            $faces = collect();
+            $memberIdSet = [];
+            $mg = $memberGroups[$cid] ?? $memberGroups[(string) $cid] ?? collect();
+            foreach ($mg as $mem) {
+                if ($mem->user_id) {
+                    $memberIdSet[(int) $mem->user_id] = true;
+                }
+            }
+
+            foreach ($slotsByCid[$cid] ?? [] as $slot) {
+                $u = $userById->get($slot['user_id']);
+                if (! $u) {
+                    continue;
+                }
+                $online = $u->updated_at && $u->updated_at->gt($onlineBefore);
+                $faces->push([
+                    'user' => $u,
+                    'role' => $slot['role'],
+                    'online' => $online,
+                ]);
+            }
+
+            $c->setAttribute('listing_contributor_faces', $faces);
+
+            $shownMemberCount = $faces->filter(function ($f) use ($memberIdSet) {
+                return isset($memberIdSet[(int) $f['user']->id]);
+            })->count();
+
+            $c->setAttribute('listing_more_members_not_shown', max(0, (int) ($c->members_count ?? 0) - $shownMemberCount));
+
+            // Backward compatibility for any code using listing_member_preview
+            $c->setAttribute('listing_member_preview', $mg->take(8));
+        }
+    }
+
     public function save(Request $request){
 
         $access_grp = ($request->id)?CommunityOfPractice::find($request->id):new CommunityOfPractice();
@@ -267,7 +605,14 @@ class CommsOfPracticeRepository{
     }
 
     public function addMember($communityId, $userId) {
-       
+        $community = CommunityOfPractice::find($communityId);
+        if ($community && community_is_africa_cdc_staff_restricted($community)) {
+            $joinUser = User::find($userId);
+            if (! $joinUser || ! user_email_allows_africa_cdc_staff_community($joinUser)) {
+                return false;
+            }
+        }
+
         $existing = CommunityOfPracticeMembers::where('community_of_practice_id', $communityId)
             ->where('user_id', $userId)
             ->first();
@@ -378,6 +723,13 @@ class CommsOfPracticeRepository{
             return ['status' => 'error', 'message' => 'An active invitation already exists for this email'];
         }
 
+        $community = CommunityOfPractice::find($communityId);
+        if ($community && community_is_africa_cdc_staff_restricted($community)) {
+            if (! preg_match('/@africacdc\.org$/i', trim((string) $email))) {
+                return ['status' => 'error', 'message' => 'This community is limited to @africacdc.org email addresses.'];
+            }
+        }
+
         try {
             // Create new invitation
             $invitation = CommunityInvitation::create([
@@ -476,6 +828,11 @@ class CommsOfPracticeRepository{
             // Mark invitation as responded even if already member
             $invitation->markAsResponded();
             return ['status' => 'error', 'message' => 'You are already a member of this community'];
+        }
+
+        $community = CommunityOfPractice::find($invitation->community_of_practice_id);
+        if ($community && community_is_africa_cdc_staff_restricted($community) && ! user_email_allows_africa_cdc_staff_community($user)) {
+            return ['status' => 'error', 'message' => 'This community is only available to users with an @africacdc.org email address.'];
         }
 
         // Add user to community with auto-approval

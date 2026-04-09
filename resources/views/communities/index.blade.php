@@ -61,160 +61,229 @@
 
 @section('styles')
     <style>
-        .theme-text {
-            color: {{ settings()->primary_color ?? '#119A48' }};
-        }
+        .theme-text { color: {{ settings()->primary_color ?? '#119A48' }}; }
 
-        .community-card {
-            border: 1px solid #e0e0e0;
-            border-radius: 0.25rem;
-            margin-bottom: 20px;
-            padding: 1.5rem;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.08);
-            transition: all 0.3s ease;
-            text-align: center;
-            height: 100%;
+        /* Compact “chat room” style cards; vertical rhythm ~1.32× (base ×1.2, +10%) */
+        .community-room-card {
+            border: 1px solid #d6d9dc;
+            border-radius: 6px;
+            background: #fff;
+            padding: calc(8px * 1.32) calc(10px * 1.32);
             display: flex;
             flex-direction: column;
-        }
-
-        .community-card.clickable {
-            cursor: pointer;
-        }
-
-        .community-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-            border-color: {{ settings()->primary_color ?? '#119A48' }};
-        }
-
-        .community-card h4 {
-            margin-bottom: 0.75rem;
-            font-weight: 600;
-            font-size: 1.1rem;
-            color: #2d3748;
-        }
-
-        .community-card p {
-            margin: 0 0 1rem 0;
-            color: #4a5568;
             text-align: left;
-            font-size: 0.9rem;
-            line-height: 1.6;
-            flex-grow: 1;
+            transition: border-color .15s ease, box-shadow .15s ease;
+            font-size: calc(0.8125rem * 1.32);
+            line-height: 1.4;
+            max-width: 100%;
         }
-
-        .join-btn,
-        .leave-btn,
-        .forum-btn,
-        .publication-btn {
-            font-size: 0.875rem;
-            padding: 0.5rem 1.5rem;
-            border: 1px solid {{ settings()->primary_color ?? '#119A48' }};
-            color: {{ settings()->primary_color ?? '#119A48' }};
-            background-color: transparent;
-            transition: all 0.3s ease;
-            border-radius: 0.25rem;
-            font-weight: 500;
+        .community-room-card:hover {
+            border-color: #b0b8c1;
+            box-shadow: 0 1px 4px rgba(0,0,0,.06);
+        }
+        .community-room-card--clickable { cursor: pointer; }
+        .community-room-card__head { margin-bottom: calc(4px * 1.32); }
+        .community-room-card__title-row {
+            display: flex;
+            align-items: flex-start;
+            gap: calc(6px * 1.32);
+            margin-bottom: calc(4px * 1.32);
+        }
+        .community-room-card__pin {
+            color: var(--theme-color-primary, #119A48);
+            font-size: 0.75rem;
+            margin-top: 3px;
+            flex-shrink: 0;
+        }
+        .community-room-card__title {
+            flex: 1;
+            margin: 0;
+            font-size: calc(0.9rem * 1.32);
+            font-weight: 700;
+            line-height: 1.2;
+        }
+        .community-room-card__title-link {
+            color: var(--theme-color-primary, #119A48);
+            text-decoration: none;
+        }
+        .community-room-card__title-link:hover { text-decoration: underline; opacity: 0.88; }
+        .community-room-card__star {
+            color: #9aa6b2;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+        .community-room-card__badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: calc(6px * 1.32);
+            align-items: center;
+        }
+        .community-room-card__badge {
             display: inline-block;
-            white-space: nowrap;
-        }
-
-        .enter-community-btn {
-            font-size: 0.9rem;
-            padding: 0.6rem 1.75rem;
-            background-color: {{ settings()->primary_color ?? '#119A48' }};
-            color: #fff;
-            border: 1px solid {{ settings()->primary_color ?? '#119A48' }};
-            transition: all 0.3s ease;
-            border-radius: 0.25rem;
+            padding: calc(2px * 1.32) calc(8px * 1.32);
+            border-radius: 999px;
+            font-size: calc(0.6875rem * 1.32);
             font-weight: 600;
-            display: inline-block;
+            line-height: 1.35;
+        }
+        .community-room-card__badge--access {
+            background: #e1ecf4;
+            color: #39739d;
+        }
+        .community-room-card__badge--private {
+            background: #e8e8e8;
+            color: #555;
+        }
+        .community-room-card__badge--activity {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+        .community-room-card__desc {
+            margin: 0 0 calc(4px * 1.32);
+            color: #3b4045;
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            min-height: 0;
+            max-height: calc(2.8em * 1.32 * 1.5);
+            font-size: calc(0.75rem * 1.32);
+        }
+        .community-room-card__coverage {
+            margin: 0 0 calc(4px * 1.32);
+            font-size: calc(0.6875rem * 1.32);
+            color: #6a737c;
+        }
+        .community-room-card__coverage i { color: var(--theme-color-primary, #119A48); margin-right: 4px; }
+        .community-room-card__avatars {
+            display: flex;
+            align-items: center;
+            flex-wrap: nowrap;
+            gap: 0;
+            margin-bottom: calc(6px * 1.32);
+            min-height: calc(26px * 1.32);
+            overflow: hidden;
+        }
+        .community-room-card__avatar-wrap {
+            position: relative;
+            margin-left: calc(-5px * 1.32);
+            border: 2px solid #fff;
+            border-radius: 3px;
+            overflow: visible;
+            line-height: 0;
+            flex-shrink: 0;
+        }
+        .community-room-card__avatar-wrap:first-child { margin-left: 0; }
+        .community-room-card__avatar-wrap--online::after {
+            content: '';
+            position: absolute;
+            bottom: -1px;
+            right: -1px;
+            width: calc(7px * 1.32);
+            height: calc(7px * 1.32);
+            background: #2e7d32;
+            border: 1.5px solid #fff;
+            border-radius: 50%;
+            z-index: 1;
+        }
+        .community-room-card__avatar {
+            width: calc(24px * 1.32);
+            height: calc(24px * 1.32);
+            object-fit: cover;
+            display: block;
+            border-radius: 2px;
+            vertical-align: top;
+        }
+        .community-room-card__avatar-initials {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: calc(24px * 1.32);
+            height: calc(24px * 1.32);
+            font-size: calc(9px * 1.32);
+            font-weight: 700;
+            color: #3c4146;
+            background: #e4e6e8;
+            border-radius: 2px;
+            line-height: 1;
+        }
+        .community-room-card__more-members {
+            margin-left: calc(6px * 1.32);
+            font-size: calc(0.6875rem * 1.32);
+            color: #6a737c;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .community-room-card__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: calc(4px * 1.32);
+            padding-top: calc(4px * 1.32);
+            margin-top: 0;
+            border-top: 1px solid #edeff1;
+        }
+        .community-room-card__more-link {
+            font-size: calc(0.8125rem * 1.32);
+            font-weight: 500;
+            color: var(--theme-color-primary, #119A48);
+        }
+        .community-room-card__more-link:hover { opacity: 0.88; }
+        .community-room-card__stats {
+            font-size: calc(0.75rem * 1.32);
+            color: var(--theme-color-primary, #119A48);
+            font-weight: 500;
             white-space: nowrap;
         }
-
-        .enter-community-btn:hover {
-            background-color: {{ settings()->primary_color ?? '#0d7a3a' }};
-            border-color: {{ settings()->primary_color ?? '#0d7a3a' }};
-            color: #fff;
-            transform: translateY(-1px);
-            box-shadow: 0 2px 8px rgba(17, 154, 72, 0.3);
+        .community-room-card__stats i { margin-right: 4px; }
+        .community-room-card__stats-sep { margin: 0 4px; color: #9aa6b2; font-weight: 400; }
+        .community-room-card__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: calc(4px * 1.32);
+            margin-top: calc(4px * 1.32);
+            padding-top: calc(4px * 1.32);
+            border-top: 1px solid #f1f2f3;
         }
-
-        .join-btn:hover,
-        .leave-btn:hover,
-        .forum-btn:hover,
-        .publication-btn:hover {
-            background-color: {{ settings()->primary_color ?? '#119A48' }};
+        .community-room-card__btn-join {
+            border: 1px solid var(--theme-color-primary, #119A48);
+            color: var(--theme-color-primary, #119A48);
+            background: #fff;
+            font-size: calc(0.6875rem * 1.32);
+            padding: calc(0.15rem * 1.32) calc(0.45rem * 1.32);
+            line-height: 1.2;
+        }
+        .community-room-card__btn-join:hover {
+            background: var(--theme-color-primary, #119A48);
             color: #fff;
-            transform: translateY(-1px);
+        }
+        .community-room-card__btn-primary {
+            background: var(--theme-color-primary, #119A48);
+            border-color: var(--theme-color-primary, #119A48);
+            color: #fff;
+            font-size: calc(0.6875rem * 1.32);
+            padding: calc(0.15rem * 1.32) calc(0.45rem * 1.32);
+            line-height: 1.2;
+        }
+        .community-section-heading {
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: #242729;
+            margin-bottom: 0.25rem;
         }
 
         .page-title {
-            margin-bottom: 2rem;
-            padding: 2rem 0;
+            margin-bottom: 1.25rem;
+            padding: 1rem 0 0;
             text-align: center;
         }
-
-        .page-title h3 {
-            font-size: 1.875rem;
+        .page-title h1 {
+            font-size: 1.65rem;
             font-weight: 700;
-            color: #2d3748;
-            margin-bottom: 0.5rem;
-        }
-
-        .page-title h6 {
-            font-size: 1rem;
-            color: #718096;
-            font-weight: 400;
-        }
-
-        .community-stats {
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            margin-top: 1rem;
-            padding: 0.75rem 0;
-            border-top: 1px solid #e2e8f0;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        .community-stats p {
-            position: relative;
-            padding: 0 0.5rem;
-            font-size: 0.75rem;
-            text-align: center;
-            color: #718096;
-            margin: 0;
-        }
-
-        .community-stats p:not(:last-child)::after {
-            content: '';
-            position: absolute;
-            right: -0.5rem;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 1px;
-            height: 60%;
-            background-color: #cbd5e0;
-        }
-
-        .community-stats i {
-            margin-right: 0.25rem;
-            color: {{ settings()->primary_color ?? '#119A48' }};
-        }
-
-        .btn-group {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-            gap: 0.5rem;
-        }
-
-        .btn-group > * {
-            margin: 0.25rem;
+            color: #242729;
+            margin-bottom: 0.35rem;
         }
 
         /* Ensure filter select fields always show visible borders */
@@ -246,7 +315,8 @@
             <p style="margin: 0.5rem 0 0 0; font-size: 1rem; color: #718096;">Join a community of practice to connect with peers, share knowledge, and participate in discussions.</p>
         </div>
 
-        <!-- Filter Section -->
+        <!-- Filter Section (main directory only) -->
+        @if(!request()->routeIs('account.my-communities'))
         <div class="row mb-4">
             <div class="col-12">
                 <div class="card" style="border-radius: 0.25rem; border: 1px solid #e2e8f0;">
@@ -327,133 +397,32 @@
                 </div>
             </div>
         </div>
+        @endif
 
-        <div class="row">
+        @if(Auth::check() && isset($recommendedCommunities) && $recommendedCommunities->isNotEmpty() && !request()->routeIs('account.my-communities'))
+            <div class="mb-4 pb-2 border-bottom">
+                <h2 class="community-section-heading">Recommended for you</h2>
+                <p class="text-muted small mb-3 mb-md-4">Based on your profile health themes and tags from publications you have saved.</p>
+                <div class="row align-items-start">
+                    @foreach($recommendedCommunities as $community)
+                        <div class="col-md-6 col-lg-4 mb-3">
+                            @include('communities.partials.room_card', ['community' => $community, 'pinned' => true])
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        @endif
+
+        @if(request()->routeIs('account.my-communities'))
+            <h2 class="community-section-heading mb-3">Your communities</h2>
+        @else
+            <h2 class="community-section-heading mb-3">All communities</h2>
+        @endif
+
+        <div class="row align-items-start">
             @forelse ($communities as $community)
-                <div class="col-md-12 col-sm-12 col-lg-4 mb-4">
-                    @if(request()->routeIs('account.my-communities') && ($community->user_joined || $community->user_pending_approval))
-                        <div class="community-card clickable" onclick="window.location.href='{{ route('community.detail', $community->id) }}'">
-                    @else
-                    <div class="community-card">
-                    @endif
-                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
-                            <h2 style="margin: 0; flex: 1; font-size: 1.1rem;">
-                                @if(request()->routeIs('account.my-communities'))
-                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit; font-weight: 600;" onclick="event.stopPropagation();" title="{{ $community->community_name }}">
-                                        {{ $community->community_name }}
-                                    </a>
-                                @else
-                                    <a href="{{ route('community.detail', $community->id) }}" class="theme-text" style="text-decoration: none; color: inherit; font-weight: 600;" title="{{ $community->community_name }}">
-                                        {{ $community->community_name }}
-                                    </a>
-                                @endif
-                            </h2>
-                            @if(isset($community->is_public))
-                                @if($community->is_public)
-                                    <span class="badge" style="background-color: {{ settings()->primary_color ?? '#119A48' }}; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
-                                        <i class="fa fa-globe mr-1"></i>Public
-                                    </span>
-                                @else
-                                    <span class="badge" style="background-color: #6b7280; color: white; padding: 0.25rem 0.5rem; border-radius: 0.25rem; font-size: 0.75rem; font-weight: 600; margin-left: 0.5rem;">
-                                        <i class="fa fa-lock mr-1"></i>Private
-                                    </span>
-                                @endif
-                            @endif
-                        </div>
-                        <p>{!! \Illuminate\Support\Str::words(strip_tags($community->description ?? ''), 30, '...') !!}</p>
-                        
-                        {{-- Coverage Information --}}
-                        <div class="coverage-info" style="margin-bottom: 1rem; padding: 0.5rem; background-color: #f8fafc; border-radius: 0.25rem; text-align: left; font-size: 0.85rem;">
-                            <strong style="color: #2d3748;"><i class="fa fa-globe theme-text mr-1"></i>Coverage:</strong>
-                            @php
-                                $coverageParts = [];
-                                if (!$community->region_id && !$community->country_id) {
-                                    $coverageParts[] = 'Whole of Africa';
-                                } elseif ($community->region_id && !$community->country_id) {
-                                    $coverageParts[] = $community->region->region_name ?? 'Region';
-                                    $coverageParts[] = 'All Countries';
-                                } elseif ($community->country_id) {
-                                    $coverageParts[] = $community->country->name ?? 'Country';
-                                }
-                                
-                                if ($community->organisation) {
-                                    $coverageParts[] = $community->organisation;
-                                }
-                                if ($community->department) {
-                                    $coverageParts[] = $community->department;
-                                }
-                            @endphp
-                            <span style="color: #4a5568;">{{ implode(' • ', $coverageParts) ?: 'Not specified' }}</span>
-                        </div>
-                        <div class="community-stats">
-                            <p><i class="fa fa-users theme-text"></i> {{ $community->members_count }} Members</p>
-                            <p><i class="fa fa-comments theme-text"></i> {{ $community->forums_count }} Forums</p>
-                            <p><i class="fa fa-book theme-text"></i> {{ $community->publications_count }} Resources</p>
-                        </div>
-                        @if (Auth::check())
-                            @if (!$community->user_joined && !$community->user_pending_approval)
-                                <div class="mt-2" style="text-align: center;">
-                                    <button class="btn btn-sm join-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
-                                    Join Community
-                                </button>
-                                </div>
-                            @elseif ($community->user_pending_approval)
-                                <div class="mt-2" style="text-align: center;">
-                                    <button class="btn btn-sm btn-warning" disabled>
-                                    Request Pending Approval
-                                </button>
-                                </div>
-                            @else
-                                <div style="margin-top: 1rem;">
-                                    @if(request()->routeIs('account.my-communities'))
-                                        <div class="btn-group" role="group" aria-label="Community Actions">
-                                            <a href="{{ route('community.detail', $community->id) }}"
-                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
-                                                <i class="fa fa-eye mr-1"></i>Visit Community
-                                            </a>
-                                            <a href="{{ url('/records') }}?community_id={{ $community->id }}"
-                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
-                                                Publications
-                                            </a>
-                                            <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
-                                                class="btn btn-sm forum-btn" onclick="event.stopPropagation();">
-                                                Forums
-                                            </a>
-                                            <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
-                                                Leave
-                                            </button>
-                                        </div>
-                                    @else
-                                        <div style="text-align: center; margin-bottom: 0.75rem;">
-                                            <a href="{{ route('community.detail', $community->id) }}"
-                                                class="btn enter-community-btn" onclick="event.stopPropagation();">
-                                                <i class="fa fa-sign-in-alt mr-1"></i>Visit Community
-                                            </a>
-                                        </div>
-                                <div class="btn-group" role="group" aria-label="Community Actions">
-                                    <a href="{{ url('/records') }}?community_id={{ $community->id }}"
-                                                class="btn btn-sm publication-btn" onclick="event.stopPropagation();">
-                                        Publications
-                                    </a>
-                                    <a href="{{ url('/forums') }}?community_id={{ $community->id }}"
-                                                class="btn btn-sm forum-btn" onclick="event.stopPropagation();">
-                                        Forums
-                                    </a>
-                                            <button class="btn btn-sm leave-btn" data-community-id="{{ $community->id }}" onclick="event.stopPropagation();">
-                                                Leave
-                                    </button>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endif
-                        @else
-                            <div class="mt-2" style="text-align: center;">
-                                <a href="{{ route('login') }}" class="btn btn-sm join-btn">
-                                Login to Join
-                            </a>
-                            </div>
-                        @endif
-                    </div>
+                <div class="col-md-6 col-lg-4 mb-3">
+                    @include('communities.partials.room_card', ['community' => $community, 'pinned' => false])
                 </div>
             @empty
                 <div class="col-12">
@@ -523,13 +492,12 @@
     <link href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@1.5.2/dist/select2-bootstrap4.min.css" rel="stylesheet" />
     <script>
         $(document).ready(function() {
-            // Initialize Select2
+            if ($('#filterForm').length) {
             $('.select2').select2({
                 theme: 'bootstrap4',
                 width: '100%'
             });
 
-            // Show/hide region and country filters based on coverage selection
             $('#coverage').on('change', function() {
                 var coverage = $(this).val();
                 if (coverage === 'region') {
@@ -548,8 +516,8 @@
                 }
             });
 
-            // Trigger change on page load if coverage is set
             $('#coverage').trigger('change');
+            }
         });
 
         let communityId;

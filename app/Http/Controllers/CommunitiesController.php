@@ -60,8 +60,16 @@ class CommunitiesController extends Controller
         $pageImage = settings()->logo ?? asset('assets/images/logo.png');
         $canonicalUrl = url('communities');
         $ogType = 'website';
+
+        $this->commsOfPracticeRepository->attachListingMeta($communities);
+
+        $recommendedCommunities = collect();
+        if (Auth::check()) {
+            $recommendedCommunities = $this->commsOfPracticeRepository->recommendedForUser((int) Auth::id(), 9);
+            $this->commsOfPracticeRepository->attachListingMeta($recommendedCommunities);
+        }
         
-        return view('communities.index', compact('communities', 'regions', 'countries', 'organisations', 'departments', 'pageTitle', 'pageDescription', 'pageKeywords', 'pageImage', 'canonicalUrl', 'ogType'));
+        return view('communities.index', compact('communities', 'recommendedCommunities', 'regions', 'countries', 'organisations', 'departments', 'pageTitle', 'pageDescription', 'pageKeywords', 'pageImage', 'canonicalUrl', 'ogType'));
     }
 
     public function myCommunities()
@@ -76,7 +84,10 @@ class CommunitiesController extends Controller
         }
         
         $communities = $this->commsOfPracticeRepository->getByUser($userId, request());
-        return view('communities.index', compact('communities'));
+        $this->commsOfPracticeRepository->attachListingMeta($communities);
+        $recommendedCommunities = collect();
+
+        return view('communities.index', compact('communities', 'recommendedCommunities'));
     }
 
     public function join(Request $request)
@@ -86,6 +97,13 @@ class CommunitiesController extends Controller
         }
 
         $result = $this->commsOfPracticeRepository->addMember($request->community_id, Auth::id());
+
+        if ($result === false) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'This community is only available to users with an @africacdc.org email address.',
+            ], 403);
+        }
 
         return response()->json(['status' => 'success', 'message' => 'You request has been successfully submited to the community.']);
     }
@@ -138,6 +156,10 @@ class CommunitiesController extends Controller
         $community = $this->commsOfPracticeRepository->find($id);
         if (!$community) {
             return redirect()->route('account.my-communities')->with('error', 'Community not found.');
+        }
+
+        if (community_is_africa_cdc_staff_restricted($community) && ! user_email_allows_africa_cdc_staff_community(Auth::user())) {
+            return redirect()->route('account.my-communities')->with('error', 'You do not have access to this community.');
         }
 
         // Load counts for the community
@@ -217,6 +239,11 @@ class CommunitiesController extends Controller
             ->withCount(['communityPublications', 'communityForums', 'approvedMembers'])
             ->limit(5)
             ->get();
+        if (! user_email_allows_africa_cdc_staff_community(Auth::user())) {
+            $otherCommunities = $otherCommunities->filter(function ($c) {
+                return ! community_is_africa_cdc_staff_restricted($c);
+            })->values();
+        }
 
         $myMembership = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
             ->where('user_id', $userId)

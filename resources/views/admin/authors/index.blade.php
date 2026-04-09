@@ -5,6 +5,10 @@
     .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
     .af-card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
     .af-card-body{padding:16px}
+    .authors-admin-table td,.authors-admin-table th{vertical-align:middle}
+    .authors-admin-table .col-actions{white-space:nowrap;width:1%}
+    .authors-admin-table .author-name{word-break:break-word}
+    .authors-admin-table .text-placeholder{color:#94a3b8;font-style:italic}
  </style>
 @endsection
 
@@ -28,29 +32,43 @@
         </div>
         <div class="af-card-body">
             @include('layouts.partials.alerts')
-            <table class="table table-striped table-hover table-bordered">
+            <table class="table table-striped table-hover table-bordered authors-admin-table mb-0">
                 <thead class="thead-light">
                     <tr>
                         <th style="width:60px;">#</th>
                         <th>Name</th>
-                        <th style="width:140px;">Actions</th>
+                        <th class="col-actions">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach($authors as $idx => $a)
+                    @php
+                        $displayName = trim((string) ($a->name ?? ''));
+                        $labelForAttrs = $displayName !== '' ? $displayName : ('Author #'.$a->id);
+                    @endphp
                     <tr>
                         <td>{{ $authors->firstItem() + $idx }}</td>
-                        <td>{{ $a->name }}</td>
-                        <td>
+                        <td class="author-name">
+                            @if($displayName !== '')
+                                {{ $displayName }}
+                            @else
+                                <span class="text-placeholder" title="No name in database">Untitled source</span>
+                                <span class="text-muted small">(ID {{ $a->id }})</span>
+                            @endif
+                        </td>
+                        <td class="col-actions">
                             @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
-                            <button type="button" class="btn btn-outline-dark btn-sm mr-1" data-author-id="{{ $a->id }}" data-author-name="{{ e($a->name) }}" onclick="openAuthorEdit(this)"><i class="fa fa-edit"></i></button>
+                            <button type="button" class="btn btn-outline-dark btn-sm mr-1" data-author-id="{{ $a->id }}" data-author-name="{{ e($labelForAttrs) }}" onclick="openAuthorEdit(this)"><i class="fa fa-edit"></i></button>
                             @endcanany
                             @can('delete_publication_metadata')
                             <button type="button" class="btn btn-outline-danger btn-sm"
                                 data-delete-id="{{ $a->id }}"
-                                data-delete-name="{{ e($a->name) }}"
+                                data-delete-name="{{ e($labelForAttrs) }}"
                                 onclick="openDeleteAuthorModal(this); return false;"><i class="fa fa-trash"></i></button>
                             @endcan
+                            @unless(auth()->user()->can('delete_publication_metadata') || auth()->user()->can('update_sources') || auth()->user()->can('add_authors'))
+                                <span class="text-muted small">—</span>
+                            @endunless
                         </td>
                     </tr>
                     @endforeach
@@ -63,24 +81,69 @@
 
 @canany(['delete_publication_metadata', 'update_sources', 'add_authors'])
 <div class="modal fade" id="authorModal" tabindex="-1" role="dialog" aria-hidden="true">
-  <div class="modal-dialog" role="document">
+  <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 class="modal-title">Save Author</h5>
+        <h5 class="modal-title" id="authorModalTitle">Save author</h5>
         <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
       </div>
-      <form method="post" action="{{ url('admin/authors/store') }}">
+      <form method="post" action="{{ url('admin/authors/store') }}" id="authorForm">
         @csrf
-        <div class="modal-body">
+        <div class="modal-body" style="max-height:70vh;overflow-y:auto;">
             <input type="hidden" name="id" id="id">
+            <div id="authorTimestamps" class="small text-muted mb-3 d-none border-bottom pb-2">
+              <div><strong>ID:</strong> <span id="author_id_readonly">—</span></div>
+              <div><strong>Created:</strong> <span id="author_created_at">—</span></div>
+              <div><strong>Updated:</strong> <span id="author_updated_at">—</span></div>
+            </div>
             <div class="form-group">
-                <label>Name</label>
-                <input type="text" class="form-control" name="name" id="name" required>
+                <label for="name">Name <span class="text-danger">*</span></label>
+                <input type="text" class="form-control" name="name" id="name" maxlength="100" required autocomplete="off">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="icon">Icon (Font Awesome class)</label>
+                <input type="text" class="form-control text-monospace" name="icon" id="icon" maxlength="30" placeholder="fa fa-archive">
+                <small class="form-text text-muted">Default: <code>fa fa-archive</code></small>
+              </div>
+              <div class="form-group col-md-6">
+                <label for="is_organsiation">Organization source</label>
+                <select class="form-control" name="is_organsiation" id="is_organsiation">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+                <small class="form-text text-muted">Column <code>is_organsiation</code> in the database.</small>
+              </div>
+            </div>
+            <div class="form-group">
+              <label for="address">Address</label>
+              <input type="text" class="form-control" name="address" id="address" maxlength="200" autocomplete="street-address">
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="telephone">Telephone</label>
+                <input type="text" class="form-control" name="telephone" id="telephone" maxlength="13" autocomplete="tel">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="email">Email</label>
+                <input type="text" class="form-control" name="email" id="email" maxlength="20" autocomplete="email">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group col-md-6">
+                <label for="orcid">ORCID</label>
+                <input type="text" class="form-control" name="orcid" id="orcid" maxlength="19" placeholder="Optional">
+              </div>
+              <div class="form-group col-md-6">
+                <label for="logo">Logo filename</label>
+                <input type="text" class="form-control" name="logo" id="logo" maxlength="100" placeholder="author.png">
+                <small class="form-text text-muted">Default: <code>author.png</code></small>
+              </div>
             </div>
         </div>
         <div class="modal-footer">
             <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary">Save</button>
+            <button type="submit" class="btn btn-primary" id="authorFormSubmit">Save</button>
         </div>
       </form>
     </div>
@@ -159,15 +222,78 @@
 
 @section('scripts')
 <script>
+var authorsAdminFetchUrl = "{{ url('admin/authors') }}";
+function authorFormDefaults(){
+  var s = document.getElementById('is_organsiation');
+  for (var i = s.options.length - 1; i >= 0; i--) {
+    if (s.options[i].textContent.indexOf('(legacy)') !== -1) { s.remove(i); }
+  }
+  document.getElementById('id').value = '';
+  document.getElementById('name').value = '';
+  document.getElementById('icon').value = 'fa fa-archive';
+  document.getElementById('is_organsiation').value = 'Yes';
+  document.getElementById('address').value = '';
+  document.getElementById('telephone').value = '';
+  document.getElementById('email').value = '';
+  document.getElementById('orcid').value = '';
+  document.getElementById('logo').value = 'author.png';
+  document.getElementById('authorTimestamps').classList.add('d-none');
+  document.getElementById('authorModalTitle').textContent = 'Add author';
+}
+function formatIsoLocal(iso){
+  if (!iso) return '—';
+  try { var d = new Date(iso); return isNaN(d.getTime()) ? iso : d.toLocaleString(); } catch (e) { return iso; }
+}
+function setOrgansiationSelect(raw){
+  var s = document.getElementById('is_organsiation');
+  var v = (raw === null || raw === undefined) ? 'Yes' : String(raw).trim();
+  if (v === '0' || v.toLowerCase() === 'no' || v === 'false') { s.value = 'No'; return; }
+  if (v === '1' || v.toLowerCase() === 'yes' || v === 'true' || v === '') { s.value = 'Yes'; return; }
+  if (v === 'Yes' || v === 'No') { s.value = v; return; }
+  var opt = document.createElement('option');
+  opt.value = v;
+  opt.textContent = v + ' (legacy)';
+  opt.selected = true;
+  s.appendChild(opt);
+}
 // Auto-hide alerts after a few seconds for a cleaner UX
 setTimeout(function(){ $('.alert').fadeOut(); }, 3500);
-function openCreate(){ document.getElementById('id').value=''; document.getElementById('name').value=''; $('#authorModal').modal('show'); }
+function openCreate(){
+  authorFormDefaults();
+  $('#authorModal').modal('show');
+}
 function openAuthorEdit(btn){
   var id = btn.getAttribute('data-author-id');
-  var name = btn.getAttribute('data-author-name') || '';
-  document.getElementById('id').value = id;
-  document.getElementById('name').value = name;
+  if (!id) return;
+  authorFormDefaults();
+  document.getElementById('authorModalTitle').textContent = 'Edit author';
+  document.getElementById('authorTimestamps').classList.remove('d-none');
+  document.getElementById('author_id_readonly').textContent = id;
+  document.getElementById('author_created_at').textContent = '…';
+  document.getElementById('author_updated_at').textContent = '…';
   $('#authorModal').modal('show');
+  fetch(authorsAdminFetchUrl + '/' + encodeURIComponent(id), {
+    credentials: 'same-origin',
+    headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+  }).then(function(r){
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return r.json();
+  }).then(function(data){
+    document.getElementById('id').value = data.id;
+    document.getElementById('name').value = data.name || '';
+    document.getElementById('icon').value = data.icon || 'fa fa-archive';
+    setOrgansiationSelect(data.is_organsiation);
+    document.getElementById('address').value = data.address || '';
+    document.getElementById('telephone').value = data.telephone || '';
+    document.getElementById('email').value = data.email || '';
+    document.getElementById('orcid').value = data.orcid || '';
+    document.getElementById('logo').value = data.logo || 'author.png';
+    document.getElementById('author_created_at').textContent = formatIsoLocal(data.created_at);
+    document.getElementById('author_updated_at').textContent = formatIsoLocal(data.updated_at);
+  }).catch(function(){
+    alert('Could not load author details. Please refresh and try again.');
+    $('#authorModal').modal('hide');
+  });
 }
 function openDeleteAuthorModal(btn){
   var id = btn.getAttribute('data-delete-id');

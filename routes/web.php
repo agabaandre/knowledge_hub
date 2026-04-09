@@ -427,6 +427,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/merge", [AuthorsAdminController::class, 'merge']);
         Route::post("/delete", [AuthorsAdminController::class, 'destroy']);
         Route::get("/delete", [AuthorsAdminController::class, 'destroy']);
+        Route::get("/{author}", [AuthorsAdminController::class, 'show'])->whereNumber('author');
     });
 
     //authors

@@ -10,7 +10,16 @@ class Author extends Model
     use HasFactory;
     protected $table = "author";
 
-    protected $fillable =['name', 'orcid'];
+    protected $fillable = [
+        'name',
+        'icon',
+        'is_organsiation',
+        'address',
+        'telephone',
+        'email',
+        'orcid',
+        'logo',
+    ];
 
     public function publications(){
         return $this->hasMany(Publication::class);
@@ -18,10 +27,6 @@ class Author extends Model
 
     public function user(){
         return $this->hasOne(User::class, 'author_id');
-    }
-
-    public function getLogoAttribute($value){
-        return asset('storage/uploads/users/avatar.jpg');
     }
 
 }
