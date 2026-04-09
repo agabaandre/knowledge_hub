@@ -161,15 +161,14 @@
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             scroll-snap-type: x mandatory;
-            scrollbar-width: thin;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
             overscroll-behavior-x: contain;
         }
         .community-room-card__avatar-track::-webkit-scrollbar {
-            height: 4px;
-        }
-        .community-room-card__avatar-track::-webkit-scrollbar-thumb {
-            background: #d0d4d8;
-            border-radius: 2px;
+            display: none;
+            width: 0;
+            height: 0;
         }
         .community-room-card__avatar-slides {
             display: flex;
