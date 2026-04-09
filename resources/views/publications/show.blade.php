@@ -54,12 +54,12 @@
 
     $canonicalUrl = url('records/resource?id='.$publication->id);
     $ogType = 'article';
-
+    
     $publishDate = $publication->created_at ? $publication->created_at->toIso8601String() : now()->toIso8601String();
     $modifiedDate = $publication->updated_at ? $publication->updated_at->toIso8601String() : $publishDate;
     $articlePublishedTime = $publishDate;
     $articleModifiedTime = $modifiedDate;
-
+    
     $authors = [];
     if (! empty($publication->associated_authors)) {
         $authors = array_map('trim', explode(',', (string) $publication->associated_authors));
@@ -587,7 +587,7 @@
                         <!-- Cover Image - Inside Card -->
                         <div class="col-md-4 text-center mb-3 mb-md-0">
                             @unless ($showFullWidthVideo)
-                                <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
+                            <img src="{{ $image_link }}" class="img-fluid shadow rounded" alt="{{ $publication->title }} - Cover Image" itemprop="image" style="max-height: 250px; width: auto;" onerror="this.onerror=null; this.src='{{ $default_image }}';">
                             @endunless
                             
                             <!-- Source, Visits, Year, Comments below image -->
@@ -869,9 +869,9 @@
                 <div class="card-md">
                     @if ($pubUrl !== '')
                         @if (!($publication->is_video || $isVideoLink) && $publication->is_embedded)
-                            <div class="responsive-iframe-container mb-4">
+                        <div class="responsive-iframe-container mb-4">
                                 <iframe src="{{ $pubUrl }}" allowfullscreen></iframe>
-                            </div>
+                        </div>
                         @endif
                     @endif
                     <h2 class="section-heading">Description</h2>

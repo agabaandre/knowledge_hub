@@ -273,7 +273,7 @@ class CommsOfPracticeRepository{
     }
 
     /**
-     * Last activity, admin + top contributors (max 11 faces), and “+N” member overflow for listing cards.
+     * Last activity, admin + top contributors (max 8 faces), and “+N” member overflow for listing cards.
      *
      * @param  LengthAwarePaginator|Collection  $communities
      */
@@ -294,7 +294,7 @@ class CommsOfPracticeRepository{
             return;
         }
 
-        $maxFaces = 11;
+        $maxFaces = 8;
 
         $activityRows = DB::table('forum_community_of_practices as fcp')
             ->join('forums as f', 'f.id', '=', 'fcp.forum_id')
@@ -307,7 +307,7 @@ class CommsOfPracticeRepository{
             ->whereIn('community_of_practice_id', $ids)
             ->where('is_approved', 1)
             ->with(['user' => function ($q) {
-                $q->select('id', 'name', 'photo', 'updated_at');
+                $q->select('id', 'name', 'photo', 'updated_at', 'job_title', 'is_photo_external');
             }])
             ->orderByDesc('id')
             ->get()
@@ -431,7 +431,7 @@ class CommsOfPracticeRepository{
         if ($allFaceUserIds !== []) {
             $userById = User::query()
                 ->whereIn('id', array_keys($allFaceUserIds))
-                ->get(['id', 'name', 'photo', 'updated_at'])
+                ->get(['id', 'name', 'photo', 'updated_at', 'job_title', 'is_photo_external'])
                 ->keyBy('id');
         }
 

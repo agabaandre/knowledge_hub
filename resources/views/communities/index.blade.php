@@ -1,62 +1,20 @@
 @extends('layouts.app')
 
 @php
-    // SEO Meta Tags for Communities Listing Page
-    $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
-    $pageDescription = 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
-    $pageKeywords = 'communities of practice, public health communities, Africa CDC communities, health professionals, networking, collaboration, ' . (settings()->seo_keywords ?? '');
-    $pageImage = settings()->logo ?? asset('assets/images/logo.png');
-    $canonicalUrl = url('communities');
-    $ogType = 'website';
+    // SEO Meta Tags (controller may override for e.g. my-communities)
+    $pageTitle = $pageTitle ?? ('Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
+    $pageDescription = $pageDescription ?? 'Join professional communities of practice focused on public health topics across Africa. Connect with experts, share knowledge, and collaborate on health initiatives.';
+    $pageKeywords = $pageKeywords ?? ('communities of practice, public health communities, Africa CDC communities, health professionals, networking, collaboration, ' . (settings()->seo_keywords ?? ''));
+    $pageImage = $pageImage ?? (settings()->logo ?? asset('assets/images/logo.png'));
+    $canonicalUrl = $canonicalUrl ?? url('communities');
+    $ogType = $ogType ?? 'website';
 @endphp
 
 
 @section('structured_data')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "{{ $pageTitle }}",
-    "description": "{{ strip_tags($pageDescription) }}",
-    "url": "{{ $canonicalUrl }}",
-    "mainEntity": {
-        "@type": "ItemList",
-        "itemListElement": [
-            @if(isset($communities) && $communities->count() > 0)
-                @foreach($communities->take(10) as $index => $community)
-                {
-                    "@type": "ListItem",
-                    "position": {{ $index + 1 }},
-                    "item": {
-                        "@type": "Organization",
-                        "name": "{{ addslashes($community->community_name) }}",
-                        "url": "{{ url('communities/detail/' . $community->id) }}",
-                        "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 200)) }}"
-                    }
-                }@if(!$loop->last),@endif
-                @endforeach
-            @endif
-        ]
-    },
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "{{ url('/') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Communities",
-                "item": "{{ $canonicalUrl }}"
-            }
-        ]
-    }
-}
-</script>
+@if(!empty($communitiesCollectionPageSchema))
+<script type="application/ld+json">{!! json_encode($communitiesCollectionPageSchema, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+@endif
 @endsection
 
 @section('styles')
@@ -156,25 +114,32 @@
             color: #6a737c;
         }
         .community-room-card__coverage i { color: var(--theme-color-primary, #119A48); margin-right: 4px; }
-        .community-room-card__avatars {
+        .community-room-card__participants {
             display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 10px 14px;
+            margin-bottom: calc(8px * 1.32);
+        }
+        .community-room-card__participant {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            flex-wrap: nowrap;
-            gap: 0;
-            margin-bottom: calc(6px * 1.32);
-            min-height: calc(26px * 1.32);
-            overflow: hidden;
+            width: 92px;
+            max-width: 92px;
+            flex: 0 0 auto;
+            text-align: center;
         }
         .community-room-card__avatar-wrap {
             position: relative;
-            margin-left: calc(-5px * 1.32);
+            margin-left: 0;
             border: 2px solid #fff;
             border-radius: 3px;
             overflow: visible;
             line-height: 0;
             flex-shrink: 0;
+            box-shadow: 0 0 0 1px rgba(0,0,0,.06);
         }
-        .community-room-card__avatar-wrap:first-child { margin-left: 0; }
         .community-room-card__avatar-wrap--online::after {
             content: '';
             position: absolute;
@@ -208,8 +173,32 @@
             border-radius: 2px;
             line-height: 1;
         }
+        .community-room-card__participant-name {
+            display: block;
+            margin-top: 6px;
+            font-size: calc(0.7rem * 1.32);
+            font-weight: 600;
+            color: #242729;
+            line-height: 1.25;
+            word-break: break-word;
+            hyphens: auto;
+        }
+        .community-room-card__participant-title {
+            display: block;
+            margin-top: 2px;
+            font-size: calc(0.625rem * 1.32);
+            color: #5a6268;
+            line-height: 1.2;
+            word-break: break-word;
+        }
+        .community-room-card__participant-title--role {
+            color: #6a737c;
+            font-style: italic;
+            font-weight: 500;
+        }
         .community-room-card__more-members {
-            margin-left: calc(6px * 1.32);
+            align-self: center;
+            margin-left: 4px;
             font-size: calc(0.6875rem * 1.32);
             color: #6a737c;
             white-space: nowrap;

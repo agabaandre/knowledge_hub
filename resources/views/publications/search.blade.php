@@ -120,20 +120,20 @@
                     @if($sidebarTagsList->count() > 0)
                     <div class="sidebar-content">
                         <h5 class="popular-tags-title">{{ __('Popular Tags') }}</h5>
-                        <div class="sidebar-tags">
+                      <div class="sidebar-tags">
                             @foreach($sidebarTagsList as $tag)
                                 @php
                                     $tagQuery = array_merge($recordsSearchTagQuery, ['tag' => $tag->id]);
                                     $tagHref = url('records/search?' . http_build_query($tagQuery, '', '&', PHP_QUERY_RFC3986));
                                     $tagActive = request('tag') !== null && request('tag') !== '' && (string) request('tag') === (string) $tag->id;
-                                @endphp
+                    @endphp
                                 <a href="{{ $tagHref }}"
                                    class="sidebar-tag-pill js-records-search-ajax{{ $tagActive ? ' sidebar-tag-pill--active' : '' }}"
                                    title="{{ $tag->tag_text }}">
                                     {{ truncate($tag->tag_text, 15) }}
-                                </a>
-                            @endforeach
-                        </div>
+                        </a>
+                        @endforeach
+                      </div>
                     </div>
                     @endif
 

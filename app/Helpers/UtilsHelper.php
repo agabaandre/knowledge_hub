@@ -1193,6 +1193,13 @@ function community_user_local_photo_storage_path(string $raw): ?string
     if ($raw === '') {
         return null;
     }
+    // Full URL to this app’s /storage/...
+    if (preg_match('#^https?://#i', $raw)) {
+        $path = parse_url($raw, PHP_URL_PATH) ?? '';
+        if ($path !== '' && preg_match('#/storage/(.+)$#i', $path, $m)) {
+            return ltrim($m[1], '/');
+        }
+    }
     if (preg_match('#/(?:storage/)?uploads/users/(.+)$#i', $raw, $m)) {
         return 'uploads/users/'.$m[1];
     }
@@ -1201,6 +1208,18 @@ function community_user_local_photo_storage_path(string $raw): ?string
     }
 
     return 'uploads/users/'.basename($raw);
+}
+
+/**
+ * Job title / role line for community participant cards (User model uses job_title).
+ */
+function community_user_display_job_title(?\App\Models\User $user): string
+{
+    if ($user === null) {
+        return '';
+    }
+
+    return trim((string) ($user->job_title ?? ''));
 }
 
 /**
@@ -1218,10 +1237,16 @@ function community_user_has_profile_image(\App\Models\User $user): bool
     if (! empty($attrs['is_photo_external']) && (int) $attrs['is_photo_external'] === 1) {
         return true;
     }
-    if (filter_var($raw, FILTER_VALIDATE_URL)) {
-        return true;
-    }
-    if (str_starts_with($raw, 'http://') || str_starts_with($raw, 'https://')) {
+
+    // Same-site URL: verify file exists under public storage (avoids broken /storage/ links)
+    if (preg_match('#^https?://#i', $raw)) {
+        $path = parse_url($raw, PHP_URL_PATH) ?? '';
+        if ($path !== '' && preg_match('#/storage/(.+)$#i', $path, $m)) {
+            $rel = ltrim($m[1], '/');
+
+            return community_user_public_storage_file_usable($rel);
+        }
+
         return true;
     }
 
@@ -1230,11 +1255,30 @@ function community_user_has_profile_image(\App\Models\User $user): bool
         return false;
     }
 
-    if (Storage::disk('public')->exists($rel)) {
-        return true;
+    return community_user_public_storage_file_usable($rel);
+}
+
+/**
+ * True if the file exists on the public disk and is a non-empty readable file.
+ */
+function community_user_public_storage_file_usable(string $relativePath): bool
+{
+    $relativePath = ltrim(str_replace('\\', '/', $relativePath), '/');
+    if ($relativePath === '') {
+        return false;
     }
 
-    return is_file(public_path('storage/'.$rel));
+    try {
+        if (Storage::disk('public')->exists($relativePath)) {
+            return (int) Storage::disk('public')->size($relativePath) > 0;
+        }
+    } catch (\Throwable $e) {
+        // fall through to public_path check
+    }
+
+    $full = public_path('storage/'.$relativePath);
+
+    return is_file($full) && is_readable($full) && filesize($full) > 0;
 }
 
 function user_profile_photo($photo=null){

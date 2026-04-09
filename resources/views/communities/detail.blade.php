@@ -7,7 +7,21 @@
     $pageImage = settings()->logo ?? asset('assets/images/logo.png');
     $canonicalUrl = url('communities/detail/' . $community->id);
     $ogType = 'profile';
-    
+
+    $highlightParticipantNames = collect($community->listing_contributor_faces ?? [])
+        ->take(8)
+        ->map(fn ($f) => $f['user']->name ?? '')
+        ->filter()
+        ->unique()
+        ->values();
+    if ($highlightParticipantNames->isNotEmpty()) {
+        $pageKeywords .= ', ' . $highlightParticipantNames->implode(', ');
+        $pageDescription = \Illuminate\Support\Str::limit(
+            trim($pageDescription) . ' Featured participants: ' . $highlightParticipantNames->implode(', ') . '.',
+            320
+        );
+    }
+
     // Get community stats
     $memberCount = $community->approved_members_count ?? $community->members_count ?? 0;
     $forumCount = $community->community_forums_count ?? $community->forums_count ?? 0;
@@ -17,49 +31,9 @@
 @extends('layouts.app')
 
 @section('structured_data')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "{{ addslashes($community->community_name ?? 'Community') }}",
-    "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 300)) }}",
-    "url": "{{ $canonicalUrl }}",
-    @if($community->region)
-    "areaServed": {
-        "@type": "Place",
-        "name": "{{ addslashes($community->region->name ?? '') }}"
-    },
-    @endif
-    "memberOf": {
-        "@type": "Organization",
-        "name": "{{ settings()->site_name ?? 'Africa CDC Knowledge Hub' }}"
-    },
-    "numberOfMembers": {{ $memberCount }},
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            {
-                "@type": "ListItem",
-                "position": 1,
-                "name": "Home",
-                "item": "{{ url('/') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 2,
-                "name": "Communities",
-                "item": "{{ url('communities') }}"
-            },
-            {
-                "@type": "ListItem",
-                "position": 3,
-                "name": "{{ addslashes($community->community_name ?? 'Community') }}",
-                "item": "{{ $canonicalUrl }}"
-            }
-        ]
-    }
-}
-</script>
+@if(!empty($communityOrganizationLd))
+<script type="application/ld+json">{!! json_encode($communityOrganizationLd, JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT) !!}</script>
+@endif
 @endsection
 
 @section('styles')

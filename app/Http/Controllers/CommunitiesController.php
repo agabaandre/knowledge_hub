@@ -11,6 +11,7 @@ use App\Models\CommunityInvitation;
 use App\Models\ContentRequest;
 use App\Models\Event;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class CommunitiesController extends Controller
 {
@@ -60,8 +61,21 @@ class CommunitiesController extends Controller
         $pageImage = settings()->logo ?? asset('assets/images/logo.png');
         $canonicalUrl = url('communities');
         $ogType = 'website';
-
+        
         $this->commsOfPracticeRepository->attachListingMeta($communities);
+
+        $participantKeywords = collect($communities->items())
+            ->take(8)
+            ->flatMap(function ($c) {
+                return collect($c->listing_contributor_faces ?? [])->take(6)->map(fn ($f) => $f['user']->name ?? '');
+            })
+            ->filter()
+            ->unique()
+            ->take(24)
+            ->implode(', ');
+        if ($participantKeywords !== '') {
+            $pageKeywords .= ', '.$participantKeywords;
+        }
 
         $recommendedCommunities = collect();
         if (Auth::check()) {
@@ -69,7 +83,28 @@ class CommunitiesController extends Controller
             $this->commsOfPracticeRepository->attachListingMeta($recommendedCommunities);
         }
         
-        return view('communities.index', compact('communities', 'recommendedCommunities', 'regions', 'countries', 'organisations', 'departments', 'pageTitle', 'pageDescription', 'pageKeywords', 'pageImage', 'canonicalUrl', 'ogType'));
+        $communitiesCollectionPageSchema = $this->buildCommunitiesCollectionPageSchema(
+            $pageTitle,
+            $pageDescription,
+            $canonicalUrl,
+            $communities
+        );
+
+        return view('communities.index', compact(
+            'communities',
+            'recommendedCommunities',
+            'regions',
+            'countries',
+            'organisations',
+            'departments',
+            'pageTitle',
+            'pageDescription',
+            'pageKeywords',
+            'pageImage',
+            'canonicalUrl',
+            'ogType',
+            'communitiesCollectionPageSchema'
+        ));
     }
 
     public function myCommunities()
@@ -87,7 +122,39 @@ class CommunitiesController extends Controller
         $this->commsOfPracticeRepository->attachListingMeta($communities);
         $recommendedCommunities = collect();
 
-        return view('communities.index', compact('communities', 'recommendedCommunities'));
+        $pageKeywords = 'communities of practice, my communities, ' . (settings()->seo_keywords ?? '');
+        $participantKeywords = collect($communities->items())
+            ->take(8)
+            ->flatMap(function ($c) {
+                return collect($c->listing_contributor_faces ?? [])->take(6)->map(fn ($f) => $f['user']->name ?? '');
+            })
+            ->filter()
+            ->unique()
+            ->take(24)
+            ->implode(', ');
+        if ($participantKeywords !== '') {
+            $pageKeywords .= ', '.$participantKeywords;
+        }
+
+        $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
+        $pageDescription = 'Your communities of practice on ' . (settings()->site_name ?? 'the Knowledge Hub') . '.';
+        $canonicalUrl = url('account/my-communities');
+        $communitiesCollectionPageSchema = $this->buildCommunitiesCollectionPageSchema(
+            $pageTitle,
+            $pageDescription,
+            $canonicalUrl,
+            $communities
+        );
+
+        return view('communities.index', compact(
+            'communities',
+            'recommendedCommunities',
+            'communitiesCollectionPageSchema',
+            'pageTitle',
+            'pageDescription',
+            'canonicalUrl',
+            'pageKeywords'
+        ));
     }
 
     public function join(Request $request)
@@ -164,6 +231,8 @@ class CommunitiesController extends Controller
 
         // Load counts for the community
         $community->loadCount(['communityPublications', 'communityForums', 'approvedMembers']);
+        $community->loadMissing('region', 'country');
+        $this->commsOfPracticeRepository->attachListingMeta(collect([$community]));
 
         // Check if user is a member
         $isMember = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $id)
@@ -261,6 +330,9 @@ class CommunitiesController extends Controller
         // Get all badge types for displaying requirements
         $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
 
+        $memberCountForSeo = (int) ($community->approved_members_count ?? $community->members_count ?? 0);
+        $communityOrganizationLd = $this->buildCommunityDetailOrganizationSchema($community, $canonicalUrl, $memberCountForSeo);
+
         return view('communities.detail', compact(
             'community',
             'publications',
@@ -270,8 +342,127 @@ class CommunitiesController extends Controller
             'otherCommunities',
             'badgeTypes',
             'isCommunityAdmin',
-            'communityEvents'
+            'communityEvents',
+            'communityOrganizationLd'
         ));
+    }
+
+    /**
+     * JSON-LD CollectionPage for communities index / my-communities (includes highlighted participants per community).
+     */
+    private function buildCommunitiesCollectionPageSchema(string $pageTitle, string $pageDescription, string $canonicalUrl, $communities): array
+    {
+        if ($communities instanceof \Illuminate\Pagination\LengthAwarePaginator || $communities instanceof \Illuminate\Pagination\Paginator) {
+            $items = $communities->items();
+        } elseif ($communities instanceof \Illuminate\Support\Collection) {
+            $items = $communities->all();
+        } elseif (is_array($communities)) {
+            $items = $communities;
+        } else {
+            $items = [];
+        }
+
+        $itemListElement = [];
+        foreach (array_slice($items, 0, 10) as $index => $c) {
+            $members = [];
+            foreach (collect($c->listing_contributor_faces ?? [])->take(8) as $face) {
+                $u = $face['user'];
+                $row = ['@type' => 'Person', 'name' => $u->name];
+                $jt = trim((string) ($u->job_title ?? ''));
+                if ($jt !== '') {
+                    $row['jobTitle'] = $jt;
+                }
+                $members[] = $row;
+            }
+            $org = [
+                '@type' => 'Organization',
+                'name' => $c->community_name,
+                'url' => url('communities/detail/'.$c->id),
+                'description' => Str::limit(strip_tags($c->description ?? ''), 200),
+            ];
+            if ($members !== []) {
+                $org['member'] = $members;
+            }
+            $itemListElement[] = [
+                '@type' => 'ListItem',
+                'position' => $index + 1,
+                'item' => $org,
+            ];
+        }
+
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $pageTitle,
+            'description' => strip_tags($pageDescription),
+            'url' => $canonicalUrl,
+            'mainEntity' => [
+                '@type' => 'ItemList',
+                'itemListElement' => $itemListElement,
+            ],
+            'breadcrumb' => [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Communities', 'item' => $canonicalUrl],
+                ],
+            ],
+        ];
+    }
+
+    /**
+     * JSON-LD Organization for community detail (up to 8 highlighted members with job titles).
+     */
+    private function buildCommunityDetailOrganizationSchema(\App\Models\CommunityOfPractice $community, string $canonicalUrl, int $memberCount): array
+    {
+        $members = [];
+        foreach (collect($community->listing_contributor_faces ?? [])->take(8) as $face) {
+            $u = $face['user'];
+            $p = ['@type' => 'Person', 'name' => $u->name];
+            $jt = trim((string) ($u->job_title ?? ''));
+            if ($jt !== '') {
+                $p['jobTitle'] = $jt;
+            }
+            $members[] = $p;
+        }
+
+        $ld = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => $community->community_name ?? 'Community',
+            'description' => Str::limit(strip_tags($community->description ?? ''), 300),
+            'url' => $canonicalUrl,
+            'memberOf' => [
+                '@type' => 'Organization',
+                'name' => settings()->site_name ?? 'Africa CDC Knowledge Hub',
+            ],
+            'numberOfMembers' => $memberCount,
+            'breadcrumb' => [
+                '@type' => 'BreadcrumbList',
+                'itemListElement' => [
+                    ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+                    ['@type' => 'ListItem', 'position' => 2, 'name' => 'Communities', 'item' => url('communities')],
+                    ['@type' => 'ListItem', 'position' => 3, 'name' => $community->community_name ?? 'Community', 'item' => $canonicalUrl],
+                ],
+            ],
+        ];
+
+        if ($members !== []) {
+            $ld['member'] = $members;
+        }
+
+        $region = $community->region;
+        if ($region) {
+            $rn = trim((string) ($region->region_name ?? $region->name ?? ''));
+            if ($rn !== '') {
+                $ld['areaServed'] = [
+                    '@type' => 'Place',
+                    'name' => $rn,
+                ];
+            }
+        }
+
+        return $ld;
     }
 
     public function membersData(Request $request, $id)

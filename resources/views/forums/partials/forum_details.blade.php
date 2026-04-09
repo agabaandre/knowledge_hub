@@ -79,7 +79,7 @@
                 @else
                     <div class="forum-author-avatar-inline">
                         <i class="fa fa-user" aria-hidden="true"></i>
-                    </div>
+        </div>
                 @endif
                 <span class="forum-author-name">{{ $forum->user->name ?? 'Unknown' }}</span>
                 <span class="forum-post-time" style="margin-left: 4px; color: #64748b; font-size: 0.875rem;">
@@ -395,7 +395,7 @@
                             <div class="comment-file-attachments-summary">
                                 @foreach ($fileAttachmentsList as $attachment)
                                     @include('forums.partials.comment_file_attachment_link', ['attachment' => $attachment])
-                                @endforeach
+                                                @endforeach
                             </div>
                         @endif
                     </div>
@@ -577,8 +577,8 @@
                                     <div class="comment-file-attachments-summary">
                                         @foreach ($replyFileAttachmentsList as $attachment)
                                             @include('forums.partials.comment_file_attachment_link', ['attachment' => $attachment])
-                                        @endforeach
-                                    </div>
+                                    @endforeach
+                                </div>
                                 @endif
                             </div>
                             @endif
