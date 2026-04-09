@@ -162,6 +162,7 @@
             -webkit-overflow-scrolling: touch;
             scroll-snap-type: x mandatory;
             scrollbar-width: thin;
+            overscroll-behavior-x: contain;
         }
         .community-room-card__avatar-track::-webkit-scrollbar {
             height: 4px;
@@ -559,90 +560,149 @@
             $('#coverage').trigger('change');
             }
 
-            var communityAvatarAutoScrollStates = [];
+            /* Participant strip: same pattern as Flagship Initiatives (discrete smooth steps + interval autoplay) */
+            var communityAvatarReduceMotion = window.matchMedia
+                && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
             $('.community-room-card__avatar-carousel').each(function () {
                 var $carousel = $(this);
                 var $track = $carousel.find('.community-room-card__avatar-track');
+                var $slides = $track.find('.community-room-card__avatar-slides');
                 var $prev = $carousel.find('.community-room-card__avatar-nav--prev');
                 var $next = $carousel.find('.community-room-card__avatar-nav--next');
-                if (!$track.length) {
+                if (!$track.length || !$slides.length) {
                     return;
                 }
 
                 var trackEl = $track[0];
+                var slidesEl = $slides[0];
+                var autoPlayInterval = null;
+                var isPlaying = true;
+                var autoMs = 4800;
 
-                function scrollStep() {
-                    var $first = $track.find('.community-room-card__avatar-slides').children().first();
-                    if (!$first.length) {
-                        return 72;
+                function smoothBehavior() {
+                    return communityAvatarReduceMotion ? 'auto' : 'smooth';
+                }
+
+                function gapPx() {
+                    try {
+                        var g = window.getComputedStyle(slidesEl).columnGap || window.getComputedStyle(slidesEl).gap;
+                        var n = parseFloat(g);
+                        return isNaN(n) ? 10 : n;
+                    } catch (e) {
+                        return 10;
                     }
-                    return Math.max(56, Math.ceil($first.outerWidth(true) + 4));
+                }
+
+                function itemStep() {
+                    var first = $slides.children().first()[0];
+                    if (!first) {
+                        return 48;
+                    }
+                    return first.getBoundingClientRect().width + gapPx();
+                }
+
+                function maxScroll() {
+                    return trackEl.scrollWidth - trackEl.clientWidth;
                 }
 
                 function updateNav() {
-                    var maxScroll = trackEl.scrollWidth - trackEl.clientWidth;
+                    var ms = maxScroll();
                     var left = trackEl.scrollLeft;
                     var tol = 2;
-                    if (maxScroll <= tol) {
+                    if (ms <= tol) {
                         $prev.prop('disabled', true);
                         $next.prop('disabled', true);
                         return;
                     }
                     $prev.prop('disabled', left <= tol);
-                    $next.prop('disabled', left >= maxScroll - tol);
+                    $next.prop('disabled', left >= ms - tol);
                 }
+
+                function advanceAuto() {
+                    if (document.hidden) {
+                        return;
+                    }
+                    var ms = maxScroll();
+                    if (ms <= 5) {
+                        return;
+                    }
+                    var cur = trackEl.scrollLeft;
+                    var beh = smoothBehavior();
+                    if (cur >= ms - 8) {
+                        trackEl.scrollTo({ left: 0, behavior: beh });
+                    } else {
+                        trackEl.scrollBy({ left: itemStep(), behavior: beh });
+                    }
+                }
+
+                function startAutoPlay() {
+                    if (communityAvatarReduceMotion) {
+                        return;
+                    }
+                    clearInterval(autoPlayInterval);
+                    autoPlayInterval = setInterval(function () {
+                        if (!isPlaying) {
+                            return;
+                        }
+                        advanceAuto();
+                    }, autoMs);
+                }
+
+                function restartAutoPlay() {
+                    if (communityAvatarReduceMotion) {
+                        return;
+                    }
+                    clearInterval(autoPlayInterval);
+                    if (isPlaying) {
+                        startAutoPlay();
+                    }
+                }
+
+                $carousel.on('mouseenter', function () {
+                    isPlaying = false;
+                    clearInterval(autoPlayInterval);
+                });
+                $carousel.on('mouseleave', function () {
+                    isPlaying = true;
+                    startAutoPlay();
+                });
 
                 $prev.on('click', function (e) {
                     e.stopPropagation();
-                    trackEl.scrollBy({ left: -scrollStep(), behavior: 'smooth' });
+                    var delta = itemStep();
+                    var ms = maxScroll();
+                    var cur = trackEl.scrollLeft;
+                    var beh = smoothBehavior();
+                    if (cur <= 5) {
+                        trackEl.scrollTo({ left: ms, behavior: beh });
+                    } else {
+                        trackEl.scrollBy({ left: -delta, behavior: beh });
+                    }
+                    restartAutoPlay();
                 });
                 $next.on('click', function (e) {
                     e.stopPropagation();
-                    trackEl.scrollBy({ left: scrollStep(), behavior: 'smooth' });
+                    var delta = itemStep();
+                    var ms = maxScroll();
+                    var cur = trackEl.scrollLeft;
+                    var beh = smoothBehavior();
+                    if (cur >= ms - 5) {
+                        trackEl.scrollTo({ left: 0, behavior: beh });
+                    } else {
+                        trackEl.scrollBy({ left: delta, behavior: beh });
+                    }
+                    restartAutoPlay();
                 });
+
                 $track.on('scroll', updateNav);
                 $(window).on('resize', updateNav);
                 if (window.ResizeObserver) {
                     new ResizeObserver(updateNav).observe(trackEl);
                 }
                 updateNav();
-
-                var autoState = { el: trackEl, paused: false };
-                communityAvatarAutoScrollStates.push(autoState);
-                $carousel.on('mouseenter', function () {
-                    autoState.paused = true;
-                });
-                $carousel.on('mouseleave', function () {
-                    autoState.paused = false;
-                });
+                startAutoPlay();
             });
-
-            if (communityAvatarAutoScrollStates.length && !window.__communityAvatarAutoInterval) {
-                var pixelsPerTick = 0.55;
-                var tickMs = 50;
-                window.__communityAvatarAutoInterval = setInterval(function () {
-                    if (document.hidden) {
-                        return;
-                    }
-                    communityAvatarAutoScrollStates.forEach(function (state) {
-                        if (state.paused) {
-                            return;
-                        }
-                        var el = state.el;
-                        if (!el || !el.isConnected) {
-                            return;
-                        }
-                        var maxScroll = el.scrollWidth - el.clientWidth;
-                        if (maxScroll <= 2) {
-                            return;
-                        }
-                        el.scrollLeft += pixelsPerTick;
-                        if (el.scrollLeft >= maxScroll - 1) {
-                            el.scrollLeft = 0;
-                        }
-                    });
-                }, tickMs);
-            }
         });
 
         let communityId;
