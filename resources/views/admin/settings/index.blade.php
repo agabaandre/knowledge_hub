@@ -694,6 +694,20 @@
                                     <input type="checkbox" class="form-check-input" id="search_show_communities" name="search_show_communities" value="1" @if($settings->search_show_communities ?? true) checked @endif>
                                     <label class="form-check-label" for="search_show_communities">Show communities in search results</label>
                                 </div>
+                                @if(Schema::hasColumn('setting', 'communities_listing_show_participants'))
+                                <div class="form-check mt-3">
+                                    <input type="hidden" name="communities_listing_show_participants" value="0">
+                                    <input type="checkbox" class="form-check-input" id="communities_listing_show_participants" name="communities_listing_show_participants" value="1" @if($settings->communities_listing_show_participants ?? true) checked @endif>
+                                    <label class="form-check-label" for="communities_listing_show_participants">Show participants on community directory cards</label>
+                                </div>
+                                @endif
+                                @if(Schema::hasColumn('setting', 'communities_listing_max_faces'))
+                                <div class="form-group mt-2 mb-0">
+                                    <label for="communities_listing_max_faces">Max participant faces per community card</label>
+                                    <input type="number" class="form-control" id="communities_listing_max_faces" name="communities_listing_max_faces" min="1" max="24" value="{{ (int) ($settings->communities_listing_max_faces ?? 8) }}">
+                                    <small class="text-muted">Between 1 and 24. Default 8. Applies to the public communities listing and “My communities” cards.</small>
+                                </div>
+                                @endif
                                 @if(Schema::hasColumn('setting', 'show_publication_card_file_type_badge'))
                                 <div class="form-check mt-2">
                                     <input type="hidden" name="show_publication_card_file_type_badge" value="0">

@@ -64,17 +64,19 @@ class CommunitiesController extends Controller
         
         $this->commsOfPracticeRepository->attachListingMeta($communities);
 
-        $participantKeywords = collect($communities->items())
-            ->take(8)
-            ->flatMap(function ($c) {
-                return collect($c->listing_contributor_faces ?? [])->take(6)->map(fn ($f) => $f['user']->name ?? '');
-            })
-            ->filter()
-            ->unique()
-            ->take(24)
-            ->implode(', ');
-        if ($participantKeywords !== '') {
-            $pageKeywords .= ', '.$participantKeywords;
+        if (communities_listing_show_participants()) {
+            $participantKeywords = collect($communities->items())
+                ->take(8)
+                ->flatMap(function ($c) {
+                    return collect($c->listing_contributor_faces ?? [])->map(fn ($f) => $f['user']->name ?? '');
+                })
+                ->filter()
+                ->unique()
+                ->take(24)
+                ->implode(', ');
+            if ($participantKeywords !== '') {
+                $pageKeywords .= ', '.$participantKeywords;
+            }
         }
 
         $recommendedCommunities = collect();
@@ -123,17 +125,19 @@ class CommunitiesController extends Controller
         $recommendedCommunities = collect();
 
         $pageKeywords = 'communities of practice, my communities, ' . (settings()->seo_keywords ?? '');
-        $participantKeywords = collect($communities->items())
-            ->take(8)
-            ->flatMap(function ($c) {
-                return collect($c->listing_contributor_faces ?? [])->take(6)->map(fn ($f) => $f['user']->name ?? '');
-            })
-            ->filter()
-            ->unique()
-            ->take(24)
-            ->implode(', ');
-        if ($participantKeywords !== '') {
-            $pageKeywords .= ', '.$participantKeywords;
+        if (communities_listing_show_participants()) {
+            $participantKeywords = collect($communities->items())
+                ->take(8)
+                ->flatMap(function ($c) {
+                    return collect($c->listing_contributor_faces ?? [])->map(fn ($f) => $f['user']->name ?? '');
+                })
+                ->filter()
+                ->unique()
+                ->take(24)
+                ->implode(', ');
+            if ($participantKeywords !== '') {
+                $pageKeywords .= ', '.$participantKeywords;
+            }
         }
 
         $pageTitle = 'Communities of Practice - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
@@ -362,10 +366,12 @@ class CommunitiesController extends Controller
             $items = [];
         }
 
+        $faceLimit = communities_listing_show_participants() ? communities_listing_max_faces() : 0;
+
         $itemListElement = [];
         foreach (array_slice($items, 0, 10) as $index => $c) {
             $members = [];
-            foreach (collect($c->listing_contributor_faces ?? [])->take(8) as $face) {
+            foreach (collect($c->listing_contributor_faces ?? [])->take($faceLimit) as $face) {
                 $u = $face['user'];
                 $row = ['@type' => 'Person', 'name' => $u->name];
                 $jt = trim((string) ($u->job_title ?? ''));
@@ -411,12 +417,13 @@ class CommunitiesController extends Controller
     }
 
     /**
-     * JSON-LD Organization for community detail (up to 8 highlighted members with job titles).
+     * JSON-LD Organization for community detail (highlighted members from settings).
      */
     private function buildCommunityDetailOrganizationSchema(\App\Models\CommunityOfPractice $community, string $canonicalUrl, int $memberCount): array
     {
+        $faceLimit = communities_listing_show_participants() ? communities_listing_max_faces() : 0;
         $members = [];
-        foreach (collect($community->listing_contributor_faces ?? [])->take(8) as $face) {
+        foreach (collect($community->listing_contributor_faces ?? [])->take($faceLimit) as $face) {
             $u = $face['user'];
             $p = ['@type' => 'Person', 'name' => $u->name];
             $jt = trim((string) ($u->job_title ?? ''));

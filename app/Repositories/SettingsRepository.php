@@ -254,6 +254,13 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'search_show_communities')) {
             $settings->search_show_communities = (bool)$request->boolean('search_show_communities', true);
         }
+        if (Schema::hasColumn('setting', 'communities_listing_show_participants')) {
+            $settings->communities_listing_show_participants = $request->boolean('communities_listing_show_participants');
+        }
+        if (Schema::hasColumn('setting', 'communities_listing_max_faces')) {
+            $mf = (int) $request->input('communities_listing_max_faces', 8);
+            $settings->communities_listing_max_faces = max(1, min(24, $mf));
+        }
         if (Schema::hasColumn('setting', 'show_publication_card_file_type_badge')) {
             $settings->show_publication_card_file_type_badge = $request->boolean('show_publication_card_file_type_badge');
         }

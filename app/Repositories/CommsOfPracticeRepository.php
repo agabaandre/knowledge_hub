@@ -29,6 +29,20 @@ class CommsOfPracticeRepository{
         $query->whereRaw('LOWER(TRIM(community_name)) != ?', [strtolower(community_africa_cdc_staff_name())]);
     }
 
+    /**
+     * For @africacdc.org users, list “Africa CDC Staff” before other communities (secondary sort by name).
+     */
+    private function orderAfricaCdcStaffCommunityFirstForViewer($query, $viewer): void
+    {
+        if (! user_email_allows_africa_cdc_staff_community($viewer)) {
+            return;
+        }
+        $query->orderByRaw(
+            'CASE WHEN LOWER(TRIM(community_name)) = ? THEN 0 ELSE 1 END',
+            [strtolower(community_africa_cdc_staff_name())]
+        );
+    }
+
     public function get(Request $request, $return_array = false)
     {
         $query = CommunityOfPractice::query();
@@ -95,6 +109,11 @@ class CommsOfPracticeRepository{
             // Always load region, country, and tags for listing cards
             $query->with(['region', 'country', 'tags']);
         }
+
+        if (! $request->boolean('admin')) {
+            $this->orderAfricaCdcStaffCommunityFirstForViewer($query, auth()->user());
+        }
+        $query->orderBy('community_name');
 
         $results = $return_array ? $query->get() : $query->paginate($request->rows ?? 20);
         
@@ -164,6 +183,9 @@ class CommsOfPracticeRepository{
         } else {
             $query->with(['region', 'country', 'tags']);
         }
+
+        $this->orderAfricaCdcStaffCommunityFirstForViewer($query, $memberUser);
+        $query->orderBy('community_name');
 
         $results = $query->paginate($request->rows ?? 20);
         
@@ -273,7 +295,7 @@ class CommsOfPracticeRepository{
     }
 
     /**
-     * Last activity, admin + top contributors (max 8 faces), and “+N” member overflow for listing cards.
+     * Last activity, admin + top contributors (face count from settings), and “+N” member overflow for listing cards.
      *
      * @param  LengthAwarePaginator|Collection  $communities
      */
@@ -294,7 +316,9 @@ class CommsOfPracticeRepository{
             return;
         }
 
-        $maxFaces = 8;
+        $maxFaces = function_exists('communities_listing_show_participants') && function_exists('communities_listing_max_faces')
+            ? (communities_listing_show_participants() ? communities_listing_max_faces() : 0)
+            : 8;
 
         $activityRows = DB::table('forum_community_of_practices as fcp')
             ->join('forums as f', 'f.id', '=', 'fcp.forum_id')
@@ -302,6 +326,22 @@ class CommsOfPracticeRepository{
             ->groupBy('fcp.community_of_practice_id')
             ->selectRaw('fcp.community_of_practice_id as cid, MAX(f.created_at) as last_at')
             ->pluck('last_at', 'cid');
+
+        if ($maxFaces === 0) {
+            foreach ($items as $c) {
+                if (! $c instanceof CommunityOfPractice) {
+                    continue;
+                }
+                $cid = (int) $c->id;
+                $raw = $activityRows[$cid] ?? $activityRows[(string) $cid] ?? null;
+                $c->setAttribute('listing_last_activity', $raw ? Carbon::parse($raw) : null);
+                $c->setAttribute('listing_contributor_faces', collect());
+                $c->setAttribute('listing_more_members_not_shown', 0);
+                $c->setAttribute('listing_member_preview', collect());
+            }
+
+            return;
+        }
 
         $memberGroups = CommunityOfPracticeMembers::query()
             ->whereIn('community_of_practice_id', $ids)
@@ -476,7 +516,7 @@ class CommsOfPracticeRepository{
             $c->setAttribute('listing_more_members_not_shown', max(0, (int) ($c->members_count ?? 0) - $shownMemberCount));
 
             // Backward compatibility for any code using listing_member_preview
-            $c->setAttribute('listing_member_preview', $mg->take(8));
+            $c->setAttribute('listing_member_preview', $mg->take($maxFaces));
         }
     }
 

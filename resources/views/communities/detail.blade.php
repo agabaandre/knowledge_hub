@@ -8,8 +8,9 @@
     $canonicalUrl = url('communities/detail/' . $community->id);
     $ogType = 'profile';
 
+    $detailFaceLimit = communities_listing_show_participants() ? communities_listing_max_faces() : 0;
     $highlightParticipantNames = collect($community->listing_contributor_faces ?? [])
-        ->take(8)
+        ->take($detailFaceLimit)
         ->map(fn ($f) => $f['user']->name ?? '')
         ->filter()
         ->unique()

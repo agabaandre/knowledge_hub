@@ -69,36 +69,35 @@
         <p class="community-room-card__coverage"><i class="fa fa-globe"></i> {{ $coverageBits[0] }}</p>
     @endif
 
-    <div class="community-room-card__participants" onclick="event.stopPropagation();" aria-label="Contributors and members">
+    @if($faces->isNotEmpty() || $moreMembers > 0)
+    <div class="community-room-card__avatars" onclick="event.stopPropagation();" aria-label="Contributors and members">
         @foreach($faces as $face)
             @php
                 $u = $face['user'];
                 $showImg = community_user_has_profile_image($u);
                 $jobTitle = community_user_display_job_title($u);
+                $hoverTip = $u->name;
+                if ($jobTitle !== '') {
+                    $hoverTip .= ' — ' . $jobTitle;
+                }
+                $hoverTip .= ' · ' . $roleLabel($face['role']);
             @endphp
-            <div class="community-room-card__participant">
-                <span class="community-room-card__avatar-wrap {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}"
-                    title="{{ $u->name }}{{ $jobTitle !== '' ? ' — '.$jobTitle : '' }} — {{ $roleLabel($face['role']) }}">
-                    @if($showImg)
-                        <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
-                            onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
-                        <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback" style="display:none" aria-hidden="true">{{ community_user_initials($u->name) }}</span>
-                    @else
-                        <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
-                    @endif
-                </span>
-                <span class="community-room-card__participant-name">{{ Str::limit($u->name, 42) }}</span>
-                @if($jobTitle !== '')
-                    <span class="community-room-card__participant-title">{{ Str::limit($jobTitle, 52) }}</span>
+            <span class="community-room-card__avatar-wrap {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}"
+                title="{{ e($hoverTip) }}">
+                @if($showImg)
+                    <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
+                        onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
+                    <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback" style="display:none" aria-hidden="true">{{ community_user_initials($u->name) }}</span>
                 @else
-                    <span class="community-room-card__participant-title community-room-card__participant-title--role">{{ $roleLabel($face['role']) }}</span>
+                    <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
                 @endif
-            </div>
+            </span>
         @endforeach
         @if($moreMembers > 0)
             <span class="community-room-card__more-members">+{{ $moreMembers }} more</span>
         @endif
     </div>
+    @endif
 
     <div class="community-room-card__footer">
         <a href="{{ $detailUrl }}" class="community-room-card__more-link" onclick="event.stopPropagation();">More info</a>

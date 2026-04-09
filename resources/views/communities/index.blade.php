@@ -114,32 +114,25 @@
             color: #6a737c;
         }
         .community-room-card__coverage i { color: var(--theme-color-primary, #119A48); margin-right: 4px; }
-        .community-room-card__participants {
+        .community-room-card__avatars {
             display: flex;
-            flex-wrap: wrap;
-            align-items: flex-start;
-            gap: 10px 14px;
-            margin-bottom: calc(8px * 1.32);
-        }
-        .community-room-card__participant {
-            display: flex;
-            flex-direction: column;
             align-items: center;
-            width: 92px;
-            max-width: 92px;
-            flex: 0 0 auto;
-            text-align: center;
+            flex-wrap: nowrap;
+            gap: 0;
+            margin-bottom: calc(6px * 1.32);
+            min-height: calc(26px * 1.32);
+            overflow: hidden;
         }
         .community-room-card__avatar-wrap {
             position: relative;
-            margin-left: 0;
+            margin-left: calc(-5px * 1.32);
             border: 2px solid #fff;
             border-radius: 3px;
             overflow: visible;
             line-height: 0;
             flex-shrink: 0;
-            box-shadow: 0 0 0 1px rgba(0,0,0,.06);
         }
+        .community-room-card__avatar-wrap:first-child { margin-left: 0; }
         .community-room-card__avatar-wrap--online::after {
             content: '';
             position: absolute;
@@ -173,32 +166,8 @@
             border-radius: 2px;
             line-height: 1;
         }
-        .community-room-card__participant-name {
-            display: block;
-            margin-top: 6px;
-            font-size: calc(0.7rem * 1.32);
-            font-weight: 600;
-            color: #242729;
-            line-height: 1.25;
-            word-break: break-word;
-            hyphens: auto;
-        }
-        .community-room-card__participant-title {
-            display: block;
-            margin-top: 2px;
-            font-size: calc(0.625rem * 1.32);
-            color: #5a6268;
-            line-height: 1.2;
-            word-break: break-word;
-        }
-        .community-room-card__participant-title--role {
-            color: #6a737c;
-            font-style: italic;
-            font-weight: 500;
-        }
         .community-room-card__more-members {
-            align-self: center;
-            margin-left: 4px;
+            margin-left: calc(6px * 1.32);
             font-size: calc(0.6875rem * 1.32);
             color: #6a737c;
             white-space: nowrap;

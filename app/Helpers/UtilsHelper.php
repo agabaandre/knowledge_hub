@@ -1159,6 +1159,35 @@ function community_user_initials(?string $name): string
 /**
  * Display name of the community restricted to @africacdc.org accounts on the hub.
  */
+/**
+ * Whether community directory cards show the participant avatars / names strip (Admin → Configure).
+ */
+function communities_listing_show_participants(): bool
+{
+    try {
+        $s = settings();
+
+        return (bool) ($s->communities_listing_show_participants ?? true);
+    } catch (\Throwable $e) {
+        return true;
+    }
+}
+
+/**
+ * Max participant faces per community card (1–24, default 8).
+ */
+function communities_listing_max_faces(): int
+{
+    try {
+        $s = settings();
+        $n = (int) ($s->communities_listing_max_faces ?? 8);
+
+        return max(1, min(24, $n));
+    } catch (\Throwable $e) {
+        return 8;
+    }
+}
+
 function community_africa_cdc_staff_name(): string
 {
     return 'Africa CDC Staff';
