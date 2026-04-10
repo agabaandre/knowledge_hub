@@ -710,8 +710,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->file_type_id =$file_type->id; //$request->file_type;
         $pub->update();
       
-        // Attach communities (after mergeTagAllIntoRequest).
-        if ($saved && ($request->has('communities') || $request->boolean('tag_all_my_communities'))) {
+        // Attach communities (after mergeTagAllIntoRequest). Hidden multiselect UIs still post communities_multiselect_hidden.
+        if ($saved && ($request->has('communities') || $request->boolean('tag_all_my_communities') || $request->boolean('communities_multiselect_hidden'))) {
             $raw = $request->input('communities', []);
             $communities = is_array($raw) ? $raw : ($raw !== null && $raw !== '' ? [$raw] : []);
             $valid = array_values(array_filter($communities, function ($c) {

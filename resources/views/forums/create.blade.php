@@ -53,11 +53,14 @@
 
                   
                   <div class="form-group col-lg-12">
-                    <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
+                    <label class="form-label">Target Audience/Communities of Practice</label>
                       @include('partials.publications.publication_communities_dropdown', [
                           'field' => 'communities[]',
                           'selected' => [],
                           'show_hub_cop_options' => true,
+                          'hide_communities_multiselect' => true,
+                          'default_also_public_with_hub' => true,
+                          'is_editing_community_targets' => false,
                       ])
                   </div>
                   

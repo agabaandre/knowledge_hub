@@ -1,10 +1,21 @@
 @php
     $showHubCopOptions = $show_hub_cop_options ?? false;
-    $alsoPublicVal = (int) old('also_public_with_communities', isset($also_public_on_hub) ? (int) $also_public_on_hub : 0);
+    $hideCommunitiesMultiselect = $hide_communities_multiselect ?? false;
+
+    if (! empty($is_editing_community_targets)) {
+        $alsoPublicFallback = (int) ($also_public_on_hub ?? 0);
+    } else {
+        $alsoPublicFallback = ($default_also_public_with_hub ?? false) ? 1 : 0;
+    }
+
+    $alsoPublicVal = (int) old('also_public_with_communities', $alsoPublicFallback);
     $tagAllVal = (int) old('tag_all_my_communities', 0);
 @endphp
 @if ($showHubCopOptions && auth()->check())
     <input type="hidden" name="community_targeting_options" value="1">
+    @if ($hideCommunitiesMultiselect)
+        <input type="hidden" name="communities_multiselect_hidden" value="1">
+    @endif
     <div class="mb-2 p-2 rounded border bg-light community-targeting-options">
         <div class="d-flex align-items-start w-100 mb-2">
             <label class="form-check-label mb-0 flex-grow-1 pe-3" for="tag_all_my_communities">
@@ -36,10 +47,15 @@
         </style>
         @endonce
         <small class="text-muted d-block mt-1">
-            Use the second option when you keep <strong>All (visible to everyone)</strong> and add communities, or when you want both public discovery and community pages.
+            @if ($hideCommunitiesMultiselect)
+                Use <strong>Tag all my communities</strong> to notify your CoPs and list the post in those communities. Uncheck <strong>Also show on the main Knowledge Hub</strong> if you want the discussion or resource visible only to community members.
+            @else
+                Use the second option when you keep <strong>All (visible to everyone)</strong> and add communities, or when you want both public discovery and community pages.
+            @endif
         </small>
     </div>
 @endif
+@if (! $hideCommunitiesMultiselect)
 <select class="form-control {{ $class ?? 'select2' }} communities-select" name="{{ $field ?? 'communities[]' }}"
     id="communities" {{ $required ?? '' }} multiple data-placeholder="{{ $allfield ?? 'Select Communities (optional)' }}">
     @php
@@ -78,8 +94,11 @@
         </option>
     @endforeach
 </select>
+@endif
 <small class="text-muted d-block mt-1">
-    @if ($showHubCopOptions)
+    @if ($hideCommunitiesMultiselect)
+        Community links are managed with the options above (no manual list).
+    @elseif ($showHubCopOptions)
         Without “Also show on the main Knowledge Hub”, choosing specific communities limits visibility to members of those communities (plus you as author). With that option checked, the item stays public on the hub and appears in the selected communities.
     @else
         If you select one or more communities, this content will be visible only to members of those communities.

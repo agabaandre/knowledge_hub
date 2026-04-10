@@ -63,6 +63,7 @@
                                     'field' => 'communities[]',
                                     'selected' => $selectedCommunityIds ?? [],
                                     'show_hub_cop_options' => true,
+                                    'is_editing_community_targets' => true,
                                     'also_public_on_hub' => (int) ($forum->also_public_on_hub ?? 0),
                                 ])
                             </div>
