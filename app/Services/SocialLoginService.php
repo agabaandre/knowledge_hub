@@ -2,6 +2,7 @@
 namespace App\Services;
 
 use App\Repositories\UsersRepository;
+use App\Support\OAuthAccountSecurity;
 use Illuminate\Http\Request;
 use Log;
 
@@ -58,8 +59,9 @@ class SocialLoginService {
             $email = $userData->mail ?? $userData->email ?? $userData->userPrincipalName ?? '';
         }
 
-        if (!$email) {
-            Log::error('Microsoft Callback: No email found', ['userData' => $userData]);
+        $email = OAuthAccountSecurity::normalizedProviderEmail($email);
+        if (! $email) {
+            Log::error('Microsoft Callback: No valid email found', ['userData' => $userData]);
             return null;
         }
 
@@ -108,6 +110,8 @@ class SocialLoginService {
         } catch (\Exception $e) {
             Log::warning('Failed to get Microsoft photo', ['error' => $e->getMessage()]);
         }
+
+        $photoUrl = OAuthAccountSecurity::sanitizeStoredAvatarUrl($photoUrl);
 
         // Create a new Request object
         $request = new Request();
@@ -183,36 +187,55 @@ class SocialLoginService {
         }
     }
 
-    public function googleCallback($user) {
-       
-        Log::info('Google Response', (array) $user);
+    /**
+     * @param  \Laravel\Socialite\Contracts\User|\Laravel\Socialite\Two\User|object  $socialUser  Web Socialite user or API-shaped object with ->user
+     */
+    public function googleCallback($socialUser)
+    {
+        $u = [];
+        if (isset($socialUser->user)) {
+            $u = is_array($socialUser->user) ? $socialUser->user : (array) $socialUser->user;
+        }
 
-        // Create a new Request object
+        $rawEmail = method_exists($socialUser, 'getEmail')
+            ? $socialUser->getEmail()
+            : ($u['email'] ?? '');
+        $email = OAuthAccountSecurity::normalizedProviderEmail($rawEmail);
+        if (! $email) {
+            Log::error('Google Callback: No valid email');
+
+            return null;
+        }
+
+        $firstname = $u['given_name'] ?? $u['givenName'] ?? '';
+        $lastname = $u['family_name'] ?? $u['surname'] ?? '';
+        if ($firstname === '' && $lastname === '' && method_exists($socialUser, 'getName')) {
+            $parts = preg_split('/\s+/', trim((string) $socialUser->getName()), 2, PREG_SPLIT_NO_EMPTY);
+            $firstname = $parts[0] ?? '';
+            $lastname = $parts[1] ?? '';
+        }
+
+        $photoUrl = OAuthAccountSecurity::sanitizeStoredAvatarUrl($u['picture'] ?? null);
+
         $request = new Request();
-
-        // Populate the request with user data from Google
-        $photoUrl = $user->user->picture ?? null;
         $requestData = [
-            'firstname' => $user->user->given_name, // Extracting first name
-            'lastname' => $user->user->family_name, // Extracting last name
-            'email' => $user->user->email, // Extracting email
-            'phone' => null, // Set this if you have a way to determine the phone
-            'job' => null, // Google does not provide job title by default
-            'photo' => $photoUrl, // Extracting profile picture if available
-            'preferences' => null, // Handle user preferences if needed
-            'social_provider'=>'google'
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'phone' => null,
+            'job' => null,
+            'photo' => $photoUrl,
+            'preferences' => null,
+            'social_provider' => 'google',
         ];
 
-        if($photoUrl):
+        if ($photoUrl) {
             $requestData['is_photo_external'] = 1;
-        endif;
+        }
 
         $request->merge($requestData);
 
-        // Call the save method in UsersRepository
-        $savedUser = $this->usersRepo->save($request, true); // Pass true for social login
-
-        return $savedUser;
+        return $this->usersRepo->save($request, true);
     }
 
     public function linkedinCallback($socialUser) {
@@ -260,8 +283,9 @@ class SocialLoginService {
                 $email = $userData->email ?? $userData->emailAddress ?? '';
             }
 
-            if (!$email) {
-                Log::error('LinkedIn Callback: No email found', ['userData' => $userData]);
+            $email = OAuthAccountSecurity::normalizedProviderEmail($email);
+            if (! $email) {
+                Log::error('LinkedIn Callback: No valid email found', ['userData' => $userData]);
                 return null;
             }
 
@@ -308,6 +332,8 @@ class SocialLoginService {
             } catch (\Exception $e) {
                 Log::warning('Failed to get LinkedIn photo', ['error' => $e->getMessage()]);
             }
+
+            $photoUrl = OAuthAccountSecurity::sanitizeStoredAvatarUrl($photoUrl);
 
             // Get job title from LinkedIn if available
             $jobTitle = null;

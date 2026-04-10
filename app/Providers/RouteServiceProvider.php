@@ -82,5 +82,9 @@ class RouteServiceProvider extends ServiceProvider
             // Standard rate limit for regular users
             return Limit::perMinute(120)->by($request->ip());
         });
+
+        RateLimiter::for('oauth', function (Request $request) {
+            return Limit::perMinute(30)->by($request->ip());
+        });
     }
 }

@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
+use App\Support\OAuthAccountSecurity;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -125,29 +126,24 @@ class AuthController extends Controller
         return back()->with($data);
     }
 
-    public function microsoftLogin(){
+    public function microsoftLogin(Request $request)
+    {
+        if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'microsoft')) {
+            return $denied;
+        }
 
         try {
-            // Get the user from Microsoft
             $socialUser = Socialite::driver('microsoft')->user();
-            
-            \Log::info("Microsoft Login::", [
-                'email' => $socialUser->getEmail(),
-                'name' => $socialUser->getName(),
-                'id' => $socialUser->getId()
-            ]);
 
-            // Get email using Socialite's getEmail() method
-            $email = $socialUser->getEmail();
-            
-            if (!$email) {
-                \Log::error("Microsoft Login Error: No email found in response");
+            $email = OAuthAccountSecurity::normalizedProviderEmail($socialUser->getEmail());
+            if (! $email) {
+                \Log::warning('Microsoft Login: missing or invalid email from token response');
+
                 return redirect('/login')
                     ->with('alert_class', 'danger')
-                    ->with('alert', 'Unable to retrieve email from Microsoft. Please try again.');
+                    ->with('alert', 'Unable to retrieve a valid email from Microsoft. Please try again.');
             }
 
-            // Check if user exists by email (regardless of social login status)
             $user_exists = User::where('email', $email)->first();
 
             // Check if the user already exists in the database
@@ -185,19 +181,16 @@ class AuthController extends Controller
                     }
                     
                     // Update photo if Microsoft has one and user doesn't have an external photo
-                    if ($microsoftPhoto && (empty($user->photo) || !$user->is_photo_external)) {
-                        $user->photo = $microsoftPhoto;
+                    $safePhoto = OAuthAccountSecurity::sanitizeStoredAvatarUrl($microsoftPhoto);
+                    if ($safePhoto && (empty($user->photo) || ! $user->is_photo_external)) {
+                        $user->photo = $safePhoto;
                         $user->is_photo_external = 1;
                     }
                 } catch (\Exception $e) {
                     \Log::warning('Failed to update Microsoft photo for existing user', ['error' => $e->getMessage()]);
                 }
-                
+
                 $user->save();
-                \Log::info("Microsoft Login: Existing user found and activated", [
-                    'user_id' => $user->id,
-                    'email' => $user->email
-                ]);
             else:
                 // Auto-create new user and assign to community
                 $user = $this->socialLoginService->microsoftCallback($socialUser);
@@ -218,121 +211,136 @@ class AuthController extends Controller
                 ]);
             endif;
 
-            Auth::login($user);
+            Auth::login($user, false);
+            $request->session()->regenerate();
 
-            if(!$user->country_id){
+            if (! $user->country_id) {
                 $data['alert_class'] = 'success';
                 $data['message']     = "Please complete your profile";
                 $data['status']      = 200;
                 $redirect_to = "/account";
-            }else{
-                $redirect_to ="/";
+            } else {
+                $redirect_to = "/";
                 $data = [];
             }
 
             return redirect($redirect_to)->with($data);
-            
         } catch (\Exception $e) {
-            \Log::error("Microsoft Login Exception: " . $e->getMessage(), [
+            \Log::error('Microsoft Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
-            
+
             return redirect('/login')
                 ->with('alert_class', 'danger')
-                ->with('alert', 'Microsoft login failed: ' . $e->getMessage());
+                ->with('alert', 'Microsoft sign-in could not be completed. Please try again.');
         }
-   }
-
-
-    public function googleLogin(){
-
-         // Get the user from Google
-         $socialUser = Socialite::driver('google')->user();
-        
-         // Convert the GoogleUser object to a standard object
-         $user = json_decode(json_encode($socialUser));
-         \Log::info("Google Login::",['user'=>$user]);
-         $user_exists = $this->usersRepo->find_by_email($user->user->email);
-        
-         if($user_exists):
-            $user = $user_exists;
-            // Auto-activate and verify existing users on SSO login
-            if (!$user->email_verified_at) {
-                $user->email_verified_at = \Carbon\Carbon::now();
-            }
-            if (!$user->is_verified) {
-                $user->is_verified = 1;
-            }
-            if ($user->status != 1) {
-                $user->status = 1;
-            }
-            $user->save();
-         else:
-            $user =$this->socialLoginService->googleCallback($user);
-         endif;
-
-         Auth::login($user);
-
-         if(!$user->country_id){
-            $data['alert_class'] = 'success';
-            $data['message']     = "Please complete your profile";
-            $data['status']      = 200;
-            $redirect_to = "/account";
-         }
-         else{
-            $redirect_to ="/";
-            $data = [];
-         }
-
-         return redirect($redirect_to)->with($data);
- 
     }
 
-    public function linkedinLogin(Request $request){
+
+    public function googleLogin(Request $request)
+    {
+        if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'google')) {
+            return $denied;
+        }
+
+        if (! $request->filled('code')) {
+            \Log::warning('Google Login: missing authorization code');
+
+            return redirect('/login')
+                ->with('alert_class', 'danger')
+                ->with('alert', 'Google sign-in could not be completed. Please try again.');
+        }
 
         try {
-            // Check if there's an error from LinkedIn
-            if ($request->has('error')) {
-                \Log::error("LinkedIn Login Error: " . $request->error, [
-                    'error_description' => $request->error_description
-                ]);
+            $socialUser = Socialite::driver('google')->user();
+
+            $email = OAuthAccountSecurity::normalizedProviderEmail($socialUser->getEmail());
+            if (! $email) {
+                \Log::warning('Google Login: invalid or missing email from token response');
+
                 return redirect('/login')
                     ->with('alert_class', 'danger')
-                    ->with('alert', 'LinkedIn login cancelled or failed: ' . ($request->error_description ?? $request->error));
+                    ->with('alert', 'Unable to retrieve a valid email from Google. Please try again.');
             }
 
-            // Check if authorization code is present
-            if (!$request->has('code')) {
-                \Log::error("LinkedIn Login Error: No authorization code received", [
-                    'request_params' => $request->all()
-                ]);
+            $user_exists = User::where('email', $email)->first();
+
+            if ($user_exists) {
+                $user = $user_exists;
+                if (! $user->email_verified_at) {
+                    $user->email_verified_at = \Carbon\Carbon::now();
+                }
+                if (! $user->is_verified) {
+                    $user->is_verified = 1;
+                }
+                if ($user->status != 1) {
+                    $user->status = 1;
+                }
+                $user->save();
+            } else {
+                $user = $this->socialLoginService->googleCallback($socialUser);
+                if (! $user || ! $user->id) {
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', 'Failed to create your account. Please try again or contact support.');
+                }
+            }
+
+            Auth::login($user, false);
+            $request->session()->regenerate();
+
+            if (! $user->country_id) {
+                $data['alert_class'] = 'success';
+                $data['message'] = 'Please complete your profile';
+                $data['status'] = 200;
+                $redirect_to = '/account';
+            } else {
+                $redirect_to = '/';
+                $data = [];
+            }
+
+            return redirect($redirect_to)->with($data);
+        } catch (\Exception $e) {
+            \Log::error('Google Login Exception: '.$e->getMessage(), [
+                'trace' => $e->getTraceAsString(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+            ]);
+
+            return redirect('/login')
+                ->with('alert_class', 'danger')
+                ->with('alert', 'Google sign-in could not be completed. Please try again.');
+        }
+    }
+
+    public function linkedinLogin(Request $request)
+    {
+        if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'linkedin')) {
+            return $denied;
+        }
+
+        try {
+            if (! $request->filled('code')) {
+                \Log::warning('LinkedIn Login: no authorization code');
+
                 return redirect('/login')
                     ->with('alert_class', 'danger')
                     ->with('alert', 'LinkedIn authorization failed. Please try again.');
             }
 
-            // Get the user from LinkedIn
             $socialUser = Socialite::driver('linkedin-openid')->user();
-            
-            \Log::info("LinkedIn Login::", [
-                'email' => $socialUser->getEmail(),
-                'name' => $socialUser->getName(),
-                'id' => $socialUser->getId()
-            ]);
 
-            // Get email using Socialite's getEmail() method
-            $email = $socialUser->getEmail();
-            
-            if (!$email) {
-                \Log::error("LinkedIn Login Error: No email found in response");
+            $email = OAuthAccountSecurity::normalizedProviderEmail($socialUser->getEmail());
+            if (! $email) {
+                \Log::warning('LinkedIn Login: invalid or missing email from token response');
+
                 return redirect('/login')
                     ->with('alert_class', 'danger')
-                    ->with('alert', 'Unable to retrieve email from LinkedIn. Please ensure you grant email permission.');
+                    ->with('alert', 'Unable to retrieve a valid email from LinkedIn. Please ensure you grant email permission.');
             }
 
-            // Check if user exists by email (regardless of social login status)
             $user_exists = User::where('email', $email)->first();
             
             if($user_exists):
@@ -354,7 +362,7 @@ class AuthController extends Controller
                     if (method_exists($socialUser, 'getAvatar')) {
                         $linkedinPhoto = $socialUser->getAvatar();
                     }
-                    if (!$linkedinPhoto) {
+                    if (! $linkedinPhoto) {
                         $rawUser = method_exists($socialUser, 'getRaw') ? $socialUser->getRaw() : null;
                         if ($rawUser) {
                             if (is_array($rawUser)) {
@@ -364,9 +372,11 @@ class AuthController extends Controller
                             }
                         }
                     }
-                    
+
+                    $linkedinPhoto = OAuthAccountSecurity::sanitizeStoredAvatarUrl($linkedinPhoto);
+
                     // Update photo if LinkedIn has one and user doesn't have an external photo
-                    if ($linkedinPhoto && (empty($user->photo) || !$user->is_photo_external)) {
+                    if ($linkedinPhoto && (empty($user->photo) || ! $user->is_photo_external)) {
                         $user->photo = $linkedinPhoto;
                         $user->is_photo_external = 1;
                     }
@@ -399,31 +409,31 @@ class AuthController extends Controller
                 ]);
             endif;
 
-            Auth::login($user);
+            Auth::login($user, false);
+            $request->session()->regenerate();
 
-            if(!$user->country_id){
+            if (! $user->country_id) {
                 $data['alert_class'] = 'success';
-                $data['message']     = "Please complete your profile";
-                $data['status']      = 200;
-                $redirect_to = "/account";
-            }else{
-                $redirect_to ="/";
+                $data['message'] = 'Please complete your profile';
+                $data['status'] = 200;
+                $redirect_to = '/account';
+            } else {
+                $redirect_to = '/';
                 $data = [];
             }
 
             return redirect($redirect_to)->with($data);
-            
         } catch (\Exception $e) {
-            \Log::error("LinkedIn Login Exception: " . $e->getMessage(), [
+            \Log::error('LinkedIn Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'file' => $e->getFile(),
-                'line' => $e->getLine()
+                'line' => $e->getLine(),
             ]);
-            
+
             return redirect('/login')
                 ->with('alert_class', 'danger')
-                ->with('alert', 'LinkedIn login failed: ' . $e->getMessage());
+                ->with('alert', 'LinkedIn sign-in could not be completed. Please try again.');
         }
-   }
+    }
 
 }

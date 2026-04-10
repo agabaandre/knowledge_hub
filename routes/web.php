@@ -733,51 +733,52 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/detail/{id}', [CommunitiesController::class, 'detail'])->name('community.detail');
 });
 
-Route::get('auth/microsoft', function () {
-    if (!(settings()->enable_microsoft_login ?? true)) {
-        return redirect('/login')->with('alert_class', 'danger')
-            ->with('alert', 'Microsoft login is currently disabled.');
-    }
-    $clientId = config('services.microsoft.client_id');
-    $clientSecret = config('services.microsoft.client_secret');
-    if (empty($clientId) || empty($clientSecret)) {
-        \Log::warning('Microsoft login: client_id or client_secret missing. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET (or EXCHANGE_CLIENT_ID and EXCHANGE_CLIENT_SECRET) in .env.');
-        return redirect('/login')->with('alert_class', 'danger')
-            ->with('alert', 'Microsoft login is not configured. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET in .env (or use EXCHANGE_* if using the same Azure app).');
-    }
-    return Socialite::driver('microsoft')->redirect();
+Route::middleware('throttle:oauth')->group(function () {
+    Route::get('auth/microsoft', function () {
+        if (!(settings()->enable_microsoft_login ?? true)) {
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'Microsoft login is currently disabled.');
+        }
+        $clientId = config('services.microsoft.client_id');
+        $clientSecret = config('services.microsoft.client_secret');
+        if (empty($clientId) || empty($clientSecret)) {
+            \Log::warning('Microsoft login: client_id or client_secret missing. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET (or EXCHANGE_CLIENT_ID and EXCHANGE_CLIENT_SECRET) in .env.');
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'Microsoft login is not configured. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET in .env (or use EXCHANGE_* if using the same Azure app).');
+        }
+
+        return Socialite::driver('microsoft')->redirect();
+    });
+
+    Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
+
+    Route::get('auth/google', function () {
+        if (!(settings()->enable_google_login ?? true)) {
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'Google login is currently disabled.');
+        }
+
+        return Socialite::driver('google')->redirect();
+    });
+
+    Route::get('auth/google/callback', [AuthController::class, 'googleLogin']);
+
+    Route::get('auth/linkedin', function () {
+        if (!(settings()->enable_linkedin_login ?? true)) {
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'LinkedIn login is currently disabled.');
+        }
+        try {
+            return Socialite::driver('linkedin-openid')->redirect();
+        } catch (\Exception $e) {
+            \Log::error('LinkedIn redirect error: ' . $e->getMessage());
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'LinkedIn login is currently unavailable. Please try again later.');
+        }
+    });
+
+    Route::get('auth/linkedin/callback', [AuthController::class, 'linkedinLogin']);
 });
-
-Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
-
-Route::get('auth/google', function () {
-    if (!(settings()->enable_google_login ?? true)) {
-        return redirect('/login')->with('alert_class', 'danger')
-            ->with('alert', 'Google login is currently disabled.');
-    }
-    $state = session()->get('state');
-    \Log::info('Google OAuth State: ' . $state);
-    return Socialite::driver('google')->redirect();
-});
-
-Route::get('auth/google/callback', [AuthController::class,'googleLogin']);
-
-Route::get('auth/linkedin', function () {
-    if (!(settings()->enable_linkedin_login ?? true)) {
-        return redirect('/login')->with('alert_class', 'danger')
-            ->with('alert', 'LinkedIn login is currently disabled.');
-    }
-    try {
-        // Use LinkedIn OpenID Connect provider instead of deprecated scopes
-        return Socialite::driver('linkedin-openid')->redirect();
-    } catch (\Exception $e) {
-        \Log::error('LinkedIn redirect error: ' . $e->getMessage());
-        return redirect('/login')->with('alert_class', 'danger')
-            ->with('alert', 'LinkedIn login is currently unavailable. Please try again later.');
-    }
-});
-
-Route::get('auth/linkedin/callback', [AuthController::class, 'linkedinLogin']);
 
 Route::get("/tests",function(){
 
