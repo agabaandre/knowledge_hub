@@ -15,18 +15,24 @@ class AccessLogJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
     
-    private $ip_address,$request;
+    private $ip_address;
+
+    /** @var array|\Illuminate\Http\Request */
+    private $request;
+
+    /** @var int|string|null Authenticated user id when the hit was logged (queue workers have no session). */
+    private $userId;
 
     /**
      * Create a new job instance.
      *
-     * @return void
+     * @param  array|\Illuminate\Http\Request  $request
      */
-    public function __construct($ip,$request)
+    public function __construct($ip, $request, $userId = null)
     {
-        //
-        $this->ip_address = $ip; //"197.239.5.102"
-        $this->request    = $request;
+        $this->ip_address = $ip;
+        $this->request = $request;
+        $this->userId = $userId;
     }
 
     /**
@@ -94,7 +100,8 @@ class AccessLogJob implements ShouldQueue
             $locationLog->lat        = $lat ?: null;
             $locationLog->long       = $long ?: null;
             $locationLog->publication_id = $publicationId;
-            $locationLog->user_id    = optional(current_user())->id;
+            $uid = $this->userId ?? optional(current_user())->id;
+            $locationLog->user_id = $uid !== null && $uid !== '' ? (string) $uid : null;
 
             // Best-effort save without crashing
             try { $locationLog->save(); } catch (\Throwable $e) {

@@ -33,7 +33,7 @@ class Access
             unset($logData['spotlight_banner']);
             unset($logData['flag']);
 
-            AccessLogJob::dispatch($ip, $logData);
+            AccessLogJob::dispatch($ip, $logData, $userId);
             
             // Mark as logged in this session (session lasts until browser closes or expires)
             session()->put($sessionKey, true);

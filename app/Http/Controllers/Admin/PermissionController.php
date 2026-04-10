@@ -54,102 +54,78 @@ class PermissionController extends Controller
         $data['countries'] = \App\Models\Country::orderBy('name')->get();
         $data['authors'] = \App\Models\Author::orderBy('name')->get();
 
-        $name = urldecode($request->term);
+        $name = $request->filled('term') ? urldecode((string) $request->term) : null;
         $country_id = $request->country_id;
         $phone = $request->mobile;
-        $count = (!empty($request->count)) ? $request->count : 20;
-        $isStaff = $request->boolean('is_staff', null);
-        $verified = $request->input('verified', null); // '1' or '0'
+        $count = (! empty($request->count)) ? (int) $request->count : 20;
+        $isStaff = $request->has('is_staff') ? $request->boolean('is_staff') : null;
+        $verifiedFilter = $request->input('verified');
+
+        $accessLogSub = '(SELECT user_id, MAX(created_at) AS access_last_at FROM access_logs WHERE user_id IS NOT NULL AND user_id != \'\' GROUP BY user_id) AS al';
+        $spatieUserSql = 'App\\Models\\User';
 
         $usersQuery = DB::table('users')
             ->leftJoin('country', 'users.country_id', '=', 'country.id')
-            ->leftJoin('model_has_roles as mhr', function($join){
-                $join->on('mhr.model_id', '=', 'users.id')
-                     ->where('mhr.model_type', '=', 'App\\Models\\User');
+            ->leftJoin('access_levels', 'users.access_level_id', '=', 'access_levels.id')
+            ->leftJoin(DB::raw($accessLogSub), function ($join) {
+                $join->whereRaw('CAST(al.user_id AS UNSIGNED) = users.id');
             })
-            ->leftJoin('roles', 'roles.id', '=', 'mhr.role_id')
-            ->leftJoin(DB::raw('(select user_id, max(created_at) as last_login_at from access_logs group by user_id) as al'), 'al.user_id', '=', 'users.id')
             ->select(
-                'users.id','users.name','users.first_name','users.last_name','users.email','users.phone_number','users.status',
-                'users.email_verified_at','users.is_social_login','users.social_provider',
-                'users.country_id','users.administrative_unit_id','users.author_id','users.access_level_id',
-                'country.name as country_name','roles.name as role_name','roles.id as role_id','al.last_login_at'
+                'users.id', 'users.name', 'users.first_name', 'users.last_name', 'users.email', 'users.phone_number', 'users.status',
+                'users.email_verified_at', 'users.is_social_login', 'users.social_provider',
+                'users.country_id', 'users.administrative_unit_id', 'users.author_id', 'users.access_level_id',
+                'users.job_title', 'users.photo', 'users.is_photo_external',
+                'users.last_login_at',
+                'country.name as country_name',
+                'access_levels.level_name as access_level_name',
+                'al.access_last_at',
+                DB::raw("(SELECT r.id FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_id"),
+                DB::raw("(SELECT r.name FROM model_has_roles mhr INNER JOIN roles r ON r.id = mhr.role_id WHERE mhr.model_id = users.id AND mhr.model_type = '".$spatieUserSql."' ORDER BY r.id ASC LIMIT 1) AS role_name")
             )
             ->when($phone, function ($query, $phone) {
-                return $query->where('users.mobile', 'like', $phone . '%');
+                return $query->where('users.phone_number', 'like', $phone.'%');
             })
             ->when($name, function ($query, $name) {
                 return $query->where(function ($query) use ($name) {
-                    $query->where('users.name', 'like', $name . '%')
-                        ->orWhere('users.email', 'like', $name . '%')
-                        ->orWhere('users.phone_number', 'like', $name . '%');
+                    $query->where('users.name', 'like', '%'.$name.'%')
+                        ->orWhere('users.email', 'like', '%'.$name.'%')
+                        ->orWhere('users.phone_number', 'like', '%'.$name.'%');
                 });
             })
             ->when($country_id, function ($query, $country_id) {
                 return $query->where('users.country_id', $country_id);
             })
+            ->when($isStaff === true, function ($query) {
+                return $query->where('users.email', 'like', '%@africacdc.org');
+            })
+            ->when($isStaff === false, function ($query) {
+                return $query->where('users.email', 'not like', '%@africacdc.org');
+            })
+            ->when($verifiedFilter === '1' || $verifiedFilter === 1, function ($query) {
+                return $query->whereNotNull('users.email_verified_at');
+            })
+            ->when($verifiedFilter === '0' || $verifiedFilter === 0, function ($query) {
+                return $query->whereNull('users.email_verified_at');
+            })
             ->when(true, function ($query) {
                 return $this->sharedRepo->access_filter($query, true, true);
             })
-            ->orderBy('users.name', 'desc');
+            ->orderBy('users.name', 'asc');
 
-        // For DataTables client-side mode, return all rows
-        if ($request->ajax()) {
-            $users = $usersQuery->get();
-        } else {
-            $users = $usersQuery->paginate($count);
-            $users->appends($request->all());
-        }
+        $users = $usersQuery->paginate($count);
+        $users->appends($request->query());
 
-        // If AJAX request, return a lightweight JSON array for DataTables
-        if ($request->ajax()) {
-            $rows = [];
-            $index = 1;
-            $statuses = [0=>'InActive',2=>'Restricted',3=>'Reset',1=>'Active'];
-            foreach ($users as $u) {
-                $verified = $u->email_verified_at ? '<span class="badge badge-success">Yes</span>' : '<span class="badge badge-secondary">No</span>';
-                $statusBadge = '<span class="badge '.($u->status==1?'badge-success':'badge-secondary').'">'.($statuses[$u->status] ?? 'InActive').'</span>';
-                $type = $u->is_social_login ? '<span class="badge badge-info">Social</span>' : '<span class="badge badge-light">Normal</span>';
-                $lastLogin = $u->last_login_at ? date('M d, Y H:i', strtotime($u->last_login_at)) : '-';
+        $data['users'] = $users;
 
-                $actions = '<div class="btn-group btn-group-sm" role="group">'
-                    .'<button type="button" class="btn btn-outline-primary btn-edit-user" data-id="'.$u->id.'" data-first-name="'.e($u->first_name ?? '').'" data-last-name="'.e($u->last_name ?? '').'" data-name="'.e($u->name ?? '').'" data-email="'.e($u->email ?? '').'" data-phone="'.e($u->phone_number ?? '').'" data-role-id="'.($u->role_id ?? '').'" data-role="'.e($u->role_name ?? '').'" data-country-id="'.($u->country_id ?? '').'" data-administrative-unit-id="'.($u->administrative_unit_id ?? '').'" data-author-id="'.($u->author_id ?? '').'" data-level-id="'.($u->access_level_id ?? '').'" data-verified="'.($u->email_verified_at?1:0).'" data-status="'.(int)$u->status.'">'
-                    .'<i class="fa fa-edit"></i> Edit</button>'
-                    .'<button type="button" class="btn btn-outline-warning btn-reset-user" data-id="'.$u->id.'"><i class="fa fa-key"></i> Reset</button>'
-                    .(!$u->email_verified_at ? '<button type="button" class="btn btn-outline-success btn-send-verify" data-id="'.$u->id.'"><i class="fa fa-paper-plane"></i> Email Verify</button>' : '')
-                    .'<button type="button" class="btn btn-outline-danger btn-delete-user" data-id="'.$u->id.'"><i class="fa fa-trash"></i> Delete</button>'
-                    .'</div>';
-
-                $contact = '<div style="line-height:1.2">'
-                    .'<div><i class="fa fa-envelope mr-1"></i>'.e($u->email ?? '').'</div>'
-                    .'<div><i class="fa fa-phone mr-1"></i>'.e($u->phone_number ?? '-').'</div>'
-                    .'<div><i class="fa fa-globe mr-1"></i>'.e($u->country_name ?? '-').'</div>'
-                    .'</div>';
-
-                $rows[] = [
-                    $index++,
-                    e($u->name ?? ''),
-                    $contact,
-                    $verified,
-                    $statusBadge,
-                    $type,
-                    $lastLogin,
-                    strtoupper($u->role_name ?? 'N/A'),
-                    $actions,
-                ];
-            }
-            return response()->json(['data' => $rows]);
-        }
-
-        $data['users']  = $users;
-
-
-        $data['search'] = (object) array(
-            "country_id"=>$country_id,
-            "name"=>$name,
-            "count" =>$count,
-            "phone" =>$phone
-        );
+        $data['search'] = (object) [
+            'country_id' => $country_id,
+            'name' => $name,
+            'term' => $request->input('term'),
+            'count' => $count,
+            'phone' => $phone,
+            'is_staff' => $request->input('is_staff'),
+            'verified' => $verifiedFilter,
+        ];
 
 
         return view('admin.permissions.users')->with($data);
