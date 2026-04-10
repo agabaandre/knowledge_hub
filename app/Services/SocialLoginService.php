@@ -117,7 +117,6 @@ class SocialLoginService {
             'firstname' => $firstName,
             'lastname' => $lastName,
             'email' => $email,
-            'country_id' => null,
             'phone' => null,
             'job' => (is_array($userData) ? ($userData['jobTitle'] ?? null) : ($userData->jobTitle ?? null)),
             'subscribe' => null,
@@ -197,7 +196,6 @@ class SocialLoginService {
             'firstname' => $user->user->given_name, // Extracting first name
             'lastname' => $user->user->family_name, // Extracting last name
             'email' => $user->user->email, // Extracting email
-            'country_id' => null, // Set this if you have a way to determine the country
             'phone' => null, // Set this if you have a way to determine the phone
             'job' => null, // Google does not provide job title by default
             'photo' => $photoUrl, // Extracting profile picture if available
@@ -327,7 +325,6 @@ class SocialLoginService {
                 'firstname' => $firstName,
                 'lastname' => $lastName,
                 'email' => $email,
-                'country_id' => null,
                 'phone' => null,
                 'job' => $jobTitle,
                 'subscribe' => null,

@@ -53,10 +53,15 @@ class UsersRepository {
 
         }
 
-        // Persist country explicitly when submitted from profile/register forms.
-        if ($request->has('country_id')) {
+        // Country is chosen on the account profile (or registration), never from OAuth—we do not merge country_id in social callbacks.
+        if ($request->exists('country_id')) {
             $countryId = $request->input('country_id');
-            $user->country_id = $countryId !== '' ? $countryId : null;
+            $isEmpty = ($countryId === null || $countryId === '');
+            if (! $isEmpty) {
+                $user->country_id = $countryId;
+            } elseif (! $is_social || ! $user->exists) {
+                $user->country_id = null;
+            }
         } elseif ($request->has('country')) {
             $countryId = $request->input('country');
             $user->country_id = $countryId !== '' ? $countryId : $user->country_id;
