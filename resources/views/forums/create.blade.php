@@ -54,8 +54,11 @@
                   
                   <div class="form-group col-lg-12">
                     <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
-                      @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',
-                        'selected'=>[]])
+                      @include('partials.publications.publication_communities_dropdown', [
+                          'field' => 'communities[]',
+                          'selected' => [],
+                          'show_hub_cop_options' => true,
+                      ])
                   </div>
                   
                   <div class="form-group col-lg-12">

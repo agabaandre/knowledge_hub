@@ -29,8 +29,9 @@ class MessagingController extends Controller
         $validated = Validator::make($request->all(), [
             'community_ids' => 'required|array',
             'member_ids' => 'sometimes|array',
-            'title' => 'required|string',
+            'title' => 'required|string|max:500',
             'message' => 'required|string',
+            'email_only' => 'sometimes|boolean',
         ]);
 
         if($validated->fails()):

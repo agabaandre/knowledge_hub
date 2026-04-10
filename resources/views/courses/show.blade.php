@@ -1,5 +1,14 @@
 @extends('layouts.app')
 
+@php
+    $site = settings()->site_name ?? 'Africa Health Knowledge Hub';
+    $summaryPlain = trim(strip_tags($course->summary ?? ''));
+    $pageTitle = $course->fullname.' — '.$site;
+    $pageDescription = $summaryPlain !== ''
+        ? \Illuminate\Support\Str::limit($summaryPlain, 158)
+        : 'Learn more about this course on '.$site.': overview, provider, ratings, and how to enrol.';
+@endphp
+
 @section('styles')
 <style>
     .card-title {

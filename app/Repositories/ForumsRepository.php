@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
 use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
+use App\Support\CommunityTargeting;
 
 class ForumsRepository extends SharedRepo{
 
@@ -140,7 +141,8 @@ class ForumsRepository extends SharedRepo{
                     // (Laravel compiles that to "0 = 1"), which breaks the OR logic and can hide every thread.
                     $forums->where(function ($q) use ($commForums, $userId) {
                         $q->where('created_by', $userId)
-                            ->orWhereDoesntHave('communities');
+                            ->orWhereDoesntHave('communities')
+                            ->orWhere('also_public_on_hub', 1);
                         if ($commForums->isNotEmpty()) {
                             $q->orWhereIn('id', $commForums);
                         }
@@ -151,8 +153,10 @@ class ForumsRepository extends SharedRepo{
                     });
                 }
             } else {
-                //only those without targets
-                $forums->whereDoesntHave('communities');
+                $forums->where(function ($q) {
+                    $q->whereDoesntHave('communities')
+                        ->orWhere('also_public_on_hub', 1);
+                });
             }
         }
 
@@ -205,7 +209,8 @@ class ForumsRepository extends SharedRepo{
                 $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communities)->pluck('forum_id');
                 $forums->where(function ($q) use ($commForums, $userId) {
                     $q->where('created_by', $userId)
-                        ->orWhereDoesntHave('communities');
+                        ->orWhereDoesntHave('communities')
+                        ->orWhere('also_public_on_hub', 1);
                     if ($commForums->isNotEmpty()) {
                         $q->orWhereIn('id', $commForums);
                     }
@@ -216,7 +221,10 @@ class ForumsRepository extends SharedRepo{
                 });
             }
         } else {
-            $forums->whereDoesntHave('communities');
+            $forums->where(function ($q) {
+                $q->whereDoesntHave('communities')
+                    ->orWhere('also_public_on_hub', 1);
+            });
         }
 
         if ($applyAccessFilter) {
@@ -311,6 +319,8 @@ class ForumsRepository extends SharedRepo{
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $forum->created_by = current_user()->id;
         $forum->status = 0;
+        $forum->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
+        CommunityTargeting::mergeTagAllIntoRequest($request);
 
         if($request->hasFile('image')):
 
@@ -330,34 +340,33 @@ class ForumsRepository extends SharedRepo{
         if ($forum->created_by) {
             \App\Models\ForumEngagement::incrementForumPost($forum->created_by);
         }
-        
-        if($request->communities && count($request->communities)){
 
-            // Filter out empty values (e.g., "All")
-            $copIds = array_values(array_filter($request->communities, function($val){
-                return !is_null($val) && $val !== '' && intval($val) > 0;
-            }));
+        $copIds = CommunityTargeting::filterValidCommunityIds($request->input('communities', []));
+        $copIdsInt = array_map('intval', $copIds);
 
-            foreach ($copIds as $copId){
-                $forumComm = new ForumCommunityOfPractice();
-                $forumComm->forum_id = $forum->id;
-                $forumComm->community_of_practice_id = intval($copId);
-                $forumComm->save();
-            }
-            
-            // Send notifications to community members
-            if (!empty($copIds)) {
-                // Load user relationship for author name
-                $forum->load('user');
-                \App\Jobs\NotifyCommunityMembers::dispatch(
-                    $copIds,
-                    'forum',
-                    $forum->id,
-                    $forum->forum_title ?? 'Untitled Forum',
-                    $forum->forum_description ?? '',
-                    $forum->user->name ?? current_user()->name ?? 'Unknown'
-                )->onQueue('default');
-            }
+        foreach ($copIdsInt as $copId) {
+            $forumComm = new ForumCommunityOfPractice();
+            $forumComm->forum_id = $forum->id;
+            $forumComm->community_of_practice_id = $copId;
+            $forumComm->save();
+        }
+
+        if ($copIdsInt === []) {
+            $forum->also_public_on_hub = 0;
+            $forum->save();
+        }
+
+        if ($copIdsInt !== []) {
+            $forum->load('user');
+            \App\Jobs\NotifyCommunityMembers::dispatch(
+                $copIdsInt,
+                'forum',
+                $forum->id,
+                $forum->forum_title ?? 'Untitled Forum',
+                $forum->forum_description ?? '',
+                $forum->user->name ?? current_user()->name ?? 'Unknown',
+                (int) $forum->created_by ?: null
+            )->onQueue('default');
         }
 
         // Save tags if provided (expects array of tag IDs)
@@ -808,6 +817,11 @@ class ForumsRepository extends SharedRepo{
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
 
+        if ($request->has('community_targeting_options')) {
+            $forum->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
+        }
+        CommunityTargeting::mergeTagAllIntoRequest($request);
+
         $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
 
@@ -842,14 +856,18 @@ class ForumsRepository extends SharedRepo{
 
         ForumCommunityOfPractice::where('forum_id', $forum->id)->delete();
 
-        $copIds = array_values(array_filter($request->communities ?? [], function ($val) {
-            return ! is_null($val) && $val !== '' && (int) $val > 0;
-        }));
-        foreach ($copIds as $copId) {
+        $copIds = CommunityTargeting::filterValidCommunityIds($request->input('communities', []));
+        $copIdsInt = array_map('intval', $copIds);
+        foreach ($copIdsInt as $copId) {
             $forumComm = new ForumCommunityOfPractice();
             $forumComm->forum_id = $forum->id;
-            $forumComm->community_of_practice_id = (int) $copId;
+            $forumComm->community_of_practice_id = $copId;
             $forumComm->save();
+        }
+
+        if ($copIdsInt === [] && $request->has('community_targeting_options')) {
+            $forum->also_public_on_hub = 0;
+            $forum->save();
         }
 
         ForumTag::where('forum_id', $forum->id)->delete();

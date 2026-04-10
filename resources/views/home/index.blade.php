@@ -4,7 +4,7 @@
     $theme = site_theme();
     // SEO Meta Tags for Homepage
     $pageTitle = settings()->title ?? 'Africa CDC Knowledge Hub - Knowledge Repository for Public Health Resources';
-    $pageDescription = settings()->site_description ?? 'Explore comprehensive public health resources, publications, research, and knowledge from Africa CDC. Access verified health information, data, and publications across African countries.';
+    $pageDescription = 'Discover flagship initiatives, health topics, publications, forums, courses, and communities on '.(settings()->site_name ?? 'Africa Health Knowledge Hub').' — Africa CDC’s continental public health knowledge platform.';
     $pageKeywords = settings()->seo_keywords ?? 'Africa CDC, public health, health research, publications, knowledge hub, Africa, health data, medical research, public health resources';
     $pageImage = settings()->logo ?? asset('assets/images/logo.png');
 @endphp

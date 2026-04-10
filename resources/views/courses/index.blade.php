@@ -1,5 +1,11 @@
 @extends('layouts.app')
 
+@php
+    $site = settings()->site_name ?? 'Africa Health Knowledge Hub';
+    $pageTitle = 'Knowledge Hub Courses — '.$site;
+    $pageDescription = 'Browse online courses on public health, leadership, and technical topics on '.$site.'. Compare providers, ratings, and enrol in self-paced or facilitated learning.';
+@endphp
+
 @section('styles')
 <style>
     .course-card {

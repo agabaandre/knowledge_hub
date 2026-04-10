@@ -6,8 +6,11 @@
 {{-- SEO Meta Tags --}}
 @include('partials.seo.meta')
 
-<!-- Title -->
-<title>{{ $pageTitle ?? (settings()->title ?? 'Africa CDC Knowledge Hub') }}</title>
+@php
+    $__seoTitleSection = trim($__env->yieldContent('title'));
+@endphp
+<!-- Title: $pageTitle, @section('title'), or settings -->
+<title>{{ strip_tags($pageTitle ?? ($__seoTitleSection !== '' ? $__seoTitleSection : (settings()->title ?? 'Africa CDC Knowledge Hub'))) }}</title>
 
 {!! @settings()->analytics_script !!}
 <!-- @notifyCss -->

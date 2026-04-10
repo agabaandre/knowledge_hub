@@ -696,44 +696,112 @@ class CommsOfPracticeRepository{
     {
         $communityIds = $request->input('community_ids', []);
         $memberIds = $request->input('member_ids', []);
-        $message = $request->input('message');
-        $title = $request->input('title');
+        $message = (string) $request->input('message', '');
+        $title = (string) $request->input('title', '');
+        $emailOnly = $request->boolean('email_only');
 
-        $message = str_replace('{name}', 'Member', $message);
+        if ($emailOnly) {
+            $sentUserIds = [];
+
+            foreach ($communityIds as $communityId) {
+                $community = CommunityOfPractice::with('approvedMembers.user')->find($communityId);
+
+                if (!$community) {
+                    continue;
+                }
+
+                $members = $community->approvedMembers;
+
+                foreach ($members as $member) {
+                    if (!empty($memberIds) && !in_array((int) $member->user_id, array_map('intval', $memberIds), true)) {
+                        continue;
+                    }
+
+                    if (isset($sentUserIds[$member->user_id])) {
+                        continue;
+                    }
+
+                    $user = $member->user;
+                    if (!$user || empty($user->email) || !filter_var($user->email, FILTER_VALIDATE_EMAIL)) {
+                        continue;
+                    }
+
+                    $sentUserIds[$member->user_id] = true;
+
+                    $displayName = $user->name ?? 'Member';
+                    $personalSubject = str_replace('{name}', $displayName, $title);
+                    $personalBody = str_replace(
+                        '{name}',
+                        htmlspecialchars($displayName, ENT_QUOTES, 'UTF-8'),
+                        $message
+                    );
+
+                    $payload = (object) [
+                        'email' => $user->email,
+                        'subject' => $personalSubject,
+                        'body' => $personalBody,
+                    ];
+
+                    $result = send_email($payload);
+                    $ok = is_array($result)
+                        ? !empty($result['success'])
+                        : (is_object($result) && !empty($result->success));
+                    if (!$ok) {
+                        $err = is_array($result)
+                            ? ($result['message'] ?? 'unknown')
+                            : (is_object($result) ? ($result->message ?? 'unknown') : 'unknown');
+                        \Log::warning('Messaging email_only: send failed', [
+                            'user_id' => $member->user_id,
+                            'email' => $user->email,
+                            'message' => $err,
+                        ]);
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        // Push notification: plain text only (strip HTML if present)
+        $plainTitle = str_replace('{name}', 'Member', strip_tags(html_entity_decode($title, ENT_QUOTES | ENT_HTML5, 'UTF-8')));
+        $plainMessage = str_replace(
+            '{name}',
+            'Member',
+            strip_tags(html_entity_decode($message, ENT_QUOTES | ENT_HTML5, 'UTF-8'))
+        );
+        $plainMessage = preg_replace("/\r\n|\r|\n/", ' ', $plainMessage);
+        $plainMessage = trim(preg_replace('/\s+/', ' ', $plainMessage));
 
         foreach ($communityIds as $communityId) {
             $community = CommunityOfPractice::with('approvedMembers.user')->find($communityId);
 
             if (!$community) {
-                continue; // Skip if community not found
+                continue;
             }
 
             $members = $community->approvedMembers;
             $fcmTokens = [];
 
             if (empty($memberIds)) {
-                // Collect FCM tokens for all approved members if no specific members are selected
                 foreach ($members as $member) {
-                    if ($member->user->fcm_token) { // Assuming 'fcm_token' is the field name
+                    if ($member->user->fcm_token) {
                         $fcmTokens[] = $member->user->fcm_token;
                     }
                 }
             } else {
-                // Collect FCM tokens for specific members
                 foreach ($members as $member) {
-                    if (in_array($member->user_id, $memberIds) && $member->user->fcm_token) {
+                    if (in_array((int) $member->user_id, array_map('intval', $memberIds), true) && $member->user->fcm_token) {
                         $fcmTokens[] = $member->user->fcm_token;
                     }
                 }
             }
 
-            // Call the helper function to send the push notification
             if (!empty($fcmTokens)) {
-                sendPushNotification($title, $message, $fcmTokens);
+                sendPushNotification($plainTitle, $plainMessage, $fcmTokens);
             }
         }
 
-        return true; // Indicate success
+        return true;
     }
 
     /**

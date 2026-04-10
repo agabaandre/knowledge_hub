@@ -62,6 +62,7 @@ return [
     'permissions' => 'Permissions',
     'user_logs' => 'User Logs',
     'site_access_logs' => 'Site Access Logs',
+    'search_history' => 'Search History',
     'system_metrics' => 'System Metrics',
     'mailing_list' => 'Mailing List',
 

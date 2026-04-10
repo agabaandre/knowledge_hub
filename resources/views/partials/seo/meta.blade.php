@@ -3,7 +3,7 @@
     $currentUrl = url()->current();
     $canonicalUrl = $canonicalUrl ?? $currentUrl;
     $pageTitle = $pageTitle ?? (settings()->title ?? 'Africa CDC Knowledge Hub');
-    $pageDescription = $pageDescription ?? (settings()->site_description ?? 'Africa CDC Knowledge Hub - Comprehensive knowledge repository for public health resources, publications, and research across Africa.');
+    $pageDescription = $pageDescription ?? \App\Support\SeoDefaults::descriptionForRequest(request());
     $pageKeywords = $pageKeywords ?? (settings()->seo_keywords ?? 'Africa CDC, public health, health research, publications, knowledge hub, Africa');
     $pageImage = $pageImage ?? (settings()->logo ?? asset('assets/images/logo.png'));
     $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';

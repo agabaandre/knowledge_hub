@@ -559,9 +559,10 @@
             $('#coverage').trigger('change');
             }
 
-            /* Participant strip: same pattern as Flagship Initiatives (discrete smooth steps + interval autoplay) */
+            /* Participant strip: constant low-speed smooth scroll (rAF), pause on hover */
             var communityAvatarReduceMotion = window.matchMedia
                 && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+            var communityAvatarScrollControllers = [];
 
             $('.community-room-card__avatar-carousel').each(function () {
                 var $carousel = $(this);
@@ -575,9 +576,11 @@
 
                 var trackEl = $track[0];
                 var slidesEl = $slides[0];
-                var autoPlayInterval = null;
                 var isPlaying = true;
-                var autoMs = 4800;
+                var rafId = null;
+                var scrollFrac = 0;
+                var pixelsPerFrame = 0.22;
+                var resumeAfterNavTimer = null;
 
                 function smoothBehavior() {
                     return communityAvatarReduceMotion ? 'auto' : 'smooth';
@@ -618,54 +621,73 @@
                     $next.prop('disabled', left >= ms - tol);
                 }
 
-                function advanceAuto() {
-                    if (document.hidden) {
+                function stopContinuousScroll() {
+                    if (rafId !== null) {
+                        cancelAnimationFrame(rafId);
+                        rafId = null;
+                    }
+                }
+
+                function continuousTick() {
+                    rafId = null;
+                    if (communityAvatarReduceMotion || document.hidden || !isPlaying) {
                         return;
                     }
                     var ms = maxScroll();
-                    if (ms <= 5) {
-                        return;
-                    }
-                    var cur = trackEl.scrollLeft;
-                    var beh = smoothBehavior();
-                    if (cur >= ms - 8) {
-                        trackEl.scrollTo({ left: 0, behavior: beh });
-                    } else {
-                        trackEl.scrollBy({ left: itemStep(), behavior: beh });
-                    }
-                }
-
-                function startAutoPlay() {
-                    if (communityAvatarReduceMotion) {
-                        return;
-                    }
-                    clearInterval(autoPlayInterval);
-                    autoPlayInterval = setInterval(function () {
-                        if (!isPlaying) {
-                            return;
+                    if (ms > 2) {
+                        scrollFrac += pixelsPerFrame;
+                        var step = Math.floor(scrollFrac);
+                        if (step >= 1) {
+                            trackEl.scrollLeft += step;
+                            scrollFrac -= step;
                         }
-                        advanceAuto();
-                    }, autoMs);
+                        if (trackEl.scrollLeft >= ms - 0.75) {
+                            trackEl.scrollLeft = 0;
+                            scrollFrac = 0;
+                        }
+                    }
+                    if (isPlaying && !document.hidden && !communityAvatarReduceMotion) {
+                        rafId = requestAnimationFrame(continuousTick);
+                    }
                 }
 
-                function restartAutoPlay() {
+                function startContinuousScroll() {
                     if (communityAvatarReduceMotion) {
                         return;
                     }
-                    clearInterval(autoPlayInterval);
-                    if (isPlaying) {
-                        startAutoPlay();
+                    if (rafId !== null) {
+                        return;
                     }
+                    rafId = requestAnimationFrame(continuousTick);
                 }
+
+                communityAvatarScrollControllers.push({
+                    stop: stopContinuousScroll,
+                    resumeIfPlaying: function () {
+                        if (isPlaying && !document.hidden && !communityAvatarReduceMotion) {
+                            startContinuousScroll();
+                        }
+                    }
+                });
 
                 $carousel.on('mouseenter', function () {
                     isPlaying = false;
-                    clearInterval(autoPlayInterval);
+                    stopContinuousScroll();
                 });
                 $carousel.on('mouseleave', function () {
                     isPlaying = true;
-                    startAutoPlay();
+                    startContinuousScroll();
                 });
+
+                function afterManualNav() {
+                    clearTimeout(resumeAfterNavTimer);
+                    stopContinuousScroll();
+                    resumeAfterNavTimer = setTimeout(function () {
+                        if (isPlaying && !document.hidden && !communityAvatarReduceMotion) {
+                            startContinuousScroll();
+                        }
+                    }, 550);
+                }
 
                 $prev.on('click', function (e) {
                     e.stopPropagation();
@@ -673,12 +695,12 @@
                     var ms = maxScroll();
                     var cur = trackEl.scrollLeft;
                     var beh = smoothBehavior();
+                    afterManualNav();
                     if (cur <= 5) {
                         trackEl.scrollTo({ left: ms, behavior: beh });
                     } else {
                         trackEl.scrollBy({ left: -delta, behavior: beh });
                     }
-                    restartAutoPlay();
                 });
                 $next.on('click', function (e) {
                     e.stopPropagation();
@@ -686,12 +708,12 @@
                     var ms = maxScroll();
                     var cur = trackEl.scrollLeft;
                     var beh = smoothBehavior();
+                    afterManualNav();
                     if (cur >= ms - 5) {
                         trackEl.scrollTo({ left: 0, behavior: beh });
                     } else {
                         trackEl.scrollBy({ left: delta, behavior: beh });
                     }
-                    restartAutoPlay();
                 });
 
                 $track.on('scroll', updateNav);
@@ -700,8 +722,23 @@
                     new ResizeObserver(updateNav).observe(trackEl);
                 }
                 updateNav();
-                startAutoPlay();
+                startContinuousScroll();
             });
+
+            if (communityAvatarScrollControllers.length && !window.__khCommunitiesAvatarVis) {
+                window.__khCommunitiesAvatarVis = true;
+                document.addEventListener('visibilitychange', function () {
+                    if (document.hidden) {
+                        communityAvatarScrollControllers.forEach(function (c) {
+                            c.stop();
+                        });
+                    } else {
+                        communityAvatarScrollControllers.forEach(function (c) {
+                            c.resumeIfPlaying();
+                        });
+                    }
+                });
+            }
         });
 
         let communityId;

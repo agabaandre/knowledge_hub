@@ -22,6 +22,7 @@ use App\Models\SubThemeticArea;
 use App\Models\Tag;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
+use App\Support\CommunityTargeting;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -125,6 +126,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                         });
                     }
                     $q->orWhereDoesntHave('communities')
+                      ->orWhere('also_public_on_hub', 1)
                       ->orWhere('user_id', $user->id);
                 });
             }, function ($query) use ($request) {
@@ -134,7 +136,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
             });
         } 
         else {
-            $query->whereDoesntHave('communities');
+            $query->where(function ($q) {
+                $q->whereDoesntHave('communities')
+                    ->orWhere('also_public_on_hub', 1);
+            });
         }
     }, function ($query) {
         $this->access_filter($query);
@@ -413,6 +418,11 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->is_default_in_category    = $request->is_default ?? false;
         $pub->is_admin_only_access      = $request->admin_only ?? false;
         $pub->show_disclaimer            = $request->show_disclaimer ?? false;
+
+        if (! $request->id || $request->has('community_targeting_options')) {
+            $pub->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
+        }
+        CommunityTargeting::mergeTagAllIntoRequest($request);
 
         // Publication metadata fields - clean Unicode
         $pub->doi                       = clean_unicode($request->doi ?? null);
@@ -700,38 +710,26 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->file_type_id =$file_type->id; //$request->file_type;
         $pub->update();
       
-        //attach communitites
-        // Only attach if communities are provided and not empty
-        // Ignore "All" (empty value) - it means publication is visible to everyone
-        if($saved && $request->has('communities')) {
-            $communities = $request->communities;
-            // Check if communities is not empty (not just empty string or array with empty values)
-            if (!empty($communities)) {
-                // Filter out empty values (which represent "All") and invalid values
-                $communities = is_array($communities) ? array_filter($communities, function($c) {
-                    // Ignore empty, null, "all", "All" - these represent "visible to everyone"
-                    return !empty($c) && 
-                           $c !== '' && 
-                           $c !== null && 
-                           strtolower($c) !== 'all' &&
-                           is_numeric($c);
-                }) : $communities;
-                
-                // Only call attach if there are valid specific communities selected
-                // If empty after filtering, it means "All" was selected, so don't attach any communities
-                if (!empty($communities)) {
-                    $this->attach_to_community($communities, $id);
-                } else {
-                    // "All" was selected - clear any existing community attachments
-                    PublicationCommunityOfPractice::where('publication_id', $id)->delete();
-                    \Log::info('Communities cleared - publication visible to everyone', [
-                        'publication_id' => $id
-                    ]);
-                }
+        // Attach communities (after mergeTagAllIntoRequest).
+        if ($saved && ($request->has('communities') || $request->boolean('tag_all_my_communities'))) {
+            $raw = $request->input('communities', []);
+            $communities = is_array($raw) ? $raw : ($raw !== null && $raw !== '' ? [$raw] : []);
+            $valid = array_values(array_filter($communities, function ($c) {
+                return ! empty($c) && $c !== null && $c !== '' && strtolower((string) $c) !== 'all' && is_numeric($c);
+            }));
+            if (! empty($valid)) {
+                $this->attach_to_community($valid, $id);
             } else {
-                // No communities sent - clear any existing attachments (defaults to "All")
                 PublicationCommunityOfPractice::where('publication_id', $id)->delete();
+                \Log::info('Communities cleared - publication visible to everyone', [
+                    'publication_id' => $id,
+                ]);
             }
+        }
+
+        if ($saved && ! PublicationCommunityOfPractice::where('publication_id', $id)->exists() && (int) $pub->also_public_on_hub !== 0) {
+            $pub->also_public_on_hub = 0;
+            $pub->save();
         }
 
          //attach access groups
@@ -1163,7 +1161,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
                         $publication_id,
                         $publication->title ?? 'Untitled Publication',
                         $publication->description ?? '',
-                        $publication->author->name ?? current_user()->name ?? 'Unknown'
+                        $publication->author->name ?? current_user()->name ?? 'Unknown',
+                        (int) ($publication->user_id ?? 0) ?: null
                     )->onQueue('default');
                 }
             }

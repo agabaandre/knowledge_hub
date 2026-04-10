@@ -6,7 +6,7 @@
     
     <p>Hello {{ $memberName }},</p>
     
-    <p>A new {{ $contentType }} has been posted to <strong>{{ $communityName }}</strong> community:</p>
+    <p>A new {{ $contentType }} has been posted @if(strtolower($communityName) === 'your communities')to <strong>{{ $communityName }}</strong>@else to the <strong>{{ $communityName }}</strong> community@endif:</p>
     
     <div style="background: #f8f9fa;  padding: 15px; margin: 20px 0; border-radius: 0px;">
         <h3 style="margin-top: 0; color: #119A48;">{{ $contentTitle }}</h3>
@@ -31,7 +31,7 @@
     </div>
     
     <p style="margin-top: 30px; color: #666; font-size: 0.9em;">
-        You are receiving this email because you are a member of the <strong>{{ $communityName }}</strong> community.
+        You are receiving this email because you are a member @if(strtolower($communityName) === 'your communities')of <strong>{{ $communityName }}</strong>@else of the <strong>{{ $communityName }}</strong> community@endif.
     </p>
     
     <p style="margin-top: 20px; color: #666; font-size: 0.9em;">

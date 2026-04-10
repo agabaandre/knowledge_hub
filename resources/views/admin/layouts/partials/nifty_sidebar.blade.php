@@ -110,8 +110,8 @@
             </ul>
         </li>
         <li class="nav-item has-sub">
-            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-settings"><i class="fa fa-cog fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.settings') }}</span></a>
-            <ul class="mininav-content nav collapse" id="nav-settings">
+            <a href="#" class="mininav-toggle nav-link {{ request()->is('admin/search-logs*') ? '' : 'collapsed' }}" data-bs-toggle="collapse" data-bs-target="#nav-settings"><i class="fa fa-cog fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.settings') }}</span></a>
+            <ul class="mininav-content nav collapse {{ request()->is('admin/search-logs*') ? 'show' : '' }}" id="nav-settings">
                 <li class="nav-item"><a href="{{ url('admin/configure') }}" class="nav-link">{{ __('admin_nav.system_configurations') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.site-languages.index') }}" class="nav-link">{{ __('admin_nav.site_languages') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.language-management.index') }}" class="nav-link">{{ __('admin_nav.language_management') }}</a></li>
@@ -121,6 +121,7 @@
                 <li class="nav-item"><a href="{{ url('permissions') }}" class="nav-link">{{ __('admin_nav.permissions') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/logs/user') }}" class="nav-link">{{ __('admin_nav.user_logs') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/logs/access') }}" class="nav-link">{{ __('admin_nav.site_access_logs') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.search-logs.index') }}" class="nav-link">{{ __('admin_nav.search_history') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/metrics') }}" class="nav-link">{{ __('admin_nav.system_metrics') }}</a></li>
                 @can('view_mailing_list')<li class="nav-item"><a href="{{ url('mailing_list') }}" class="nav-link">{{ __('admin_nav.mailing_list') }}</a></li>@endcan
             </ul>

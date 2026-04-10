@@ -146,6 +146,9 @@
                                     <th style="width:60px;">#</th>
                             <th>Name</th>
                             <th>Email</th>
+                            <th>Telephone</th>
+                            <th>Job title</th>
+                            <th>Organisation</th>
                                     <th>Status</th>
                                     <th style="width:220px;">Action</th>
                         </tr>
@@ -162,7 +165,28 @@
                                         </td>
                                         <td>{{ $loop->iteration }}</td>
                                 <td>{{ $member->user->name }}</td>
-                                <td>{{ $member->user->email }}</td>
+                                <td>
+                                    @if(!empty($member->user->email))
+                                        <a href="mailto:{{ e($member->user->email) }}">{{ $member->user->email }}</a>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>
+                                    @php
+                                        $phoneRaw = trim((string) ($member->user->phone_number ?? ''));
+                                        $phoneHref = $phoneRaw !== '' ? preg_replace('/[^\d+]/', '', $phoneRaw) : '';
+                                    @endphp
+                                    @if($phoneRaw !== '' && $phoneHref !== '')
+                                        <a href="tel:{{ e($phoneHref) }}">{{ $phoneRaw }}</a>
+                                    @elseif($phoneRaw !== '')
+                                        <span>{{ $phoneRaw }}</span>
+                                    @else
+                                        <span class="text-muted">—</span>
+                                    @endif
+                                </td>
+                                <td>{{ trim((string) ($member->user->job_title ?? '')) !== '' ? $member->user->job_title : '—' }}</td>
+                                <td>{{ trim((string) ($member->user->organization_name ?? '')) !== '' ? $member->user->organization_name : '—' }}</td>
                                 <td>
                                     @if(($member->is_admin ?? false) && $member->is_approved == 1)
                                         <span class="badge badge-primary mr-1">Admin</span>
@@ -245,7 +269,13 @@
                                 @foreach ($invitations as $invitation)
                                     <tr data-invitation-id="{{ $invitation->id }}">
                                         <td>{{ $loop->iteration }}</td>
-                                        <td>{{ $invitation->email }}</td>
+                                        <td>
+                                            @if(!empty($invitation->email))
+                                                <a href="mailto:{{ e($invitation->email) }}">{{ $invitation->email }}</a>
+                                            @else
+                                                <span class="text-muted">—</span>
+                                            @endif
+                                        </td>
                                         <td>{{ $invitation->inviter->name ?? 'Unknown' }}</td>
                                         <td>{{ $invitation->created_at->format('M d, Y H:i') }}</td>
                                         <td>{{ $invitation->expires_at->format('M d, Y H:i') }}</td>

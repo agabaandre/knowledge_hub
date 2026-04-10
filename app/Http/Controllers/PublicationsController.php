@@ -10,6 +10,8 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ForumsRepository;
 use App\Repositories\CommsOfPracticeRepository;
+use App\Models\SearchLog;
+use Illuminate\Support\Facades\Log;
 
 class PublicationsController extends Controller
 {
@@ -130,8 +132,35 @@ class PublicationsController extends Controller
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
         $data = $this->buildRecordsSearchData($request);
+        $this->maybeLogKeywordSearch($request, $data);
 
         return view('publications.search', $data);
+    }
+
+    /**
+     * Persist homepage / records keyword searches for admin analytics (guests: user_id null).
+     */
+    protected function maybeLogKeywordSearch(Request $request, array $data): void
+    {
+        $term = trim((string) ($request->term ?? ''));
+        if ($term === '') {
+            return;
+        }
+
+        try {
+            SearchLog::query()->create([
+                'user_id' => auth()->id(),
+                'term' => mb_substr($term, 0, 255),
+                'results_count' => (int) ($data['results_count'] ?? 0),
+                'request_path' => '/'.$request->path(),
+                'ip_address' => $request->ip(),
+                'user_agent' => mb_substr((string) ($request->userAgent() ?? ''), 0, 2000),
+            ]);
+        } catch (\Throwable $e) {
+            Log::warning('search_logs.write_failed', [
+                'message' => $e->getMessage(),
+            ]);
+        }
     }
 
     /**
