@@ -126,6 +126,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                         });
                     }
                     $q->orWhereDoesntHave('communities')
+                      ->orWhere('also_public_on_hub', 1)
                       ->orWhere('user_id', $user->id);
                 });
             }, function ($query) use ($request) {
@@ -135,7 +136,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
             });
         } 
         else {
-            $query->whereDoesntHave('communities');
+            $query->where(function ($q) {
+                $q->whereDoesntHave('communities')
+                    ->orWhere('also_public_on_hub', 1);
+            });
         }
     }, function ($query) {
         $this->access_filter($query);
@@ -415,8 +419,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->is_admin_only_access      = $request->admin_only ?? false;
         $pub->show_disclaimer            = $request->show_disclaimer ?? false;
 
-        $pub->also_public_on_hub = 0;
         CommunityTargeting::mergeTagAllIntoRequest($request);
+        if (! $request->id || $request->has('community_targeting_options')) {
+            $pub->also_public_on_hub = CommunityTargeting::wantsAlsoPublicOnHubWithCommunities($request) ? 1 : 0;
+        }
 
         // Publication metadata fields - clean Unicode
         $pub->doi                       = clean_unicode($request->doi ?? null);
@@ -715,6 +721,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 $this->attach_to_community($valid, $id);
             } else {
                 PublicationCommunityOfPractice::where('publication_id', $id)->delete();
+                $pub->also_public_on_hub = 0;
+                $pub->save();
                 \Log::info('Communities cleared - publication visible to everyone', [
                     'publication_id' => $id,
                 ]);

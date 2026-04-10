@@ -54,4 +54,17 @@ final class CommunityTargeting
         $specific = self::filterValidCommunityIds($request->input($key, []));
         $request->merge([$key => array_values(array_unique(array_merge($specific, $mine)))]);
     }
+
+    /**
+     * True when content should appear on the main hub to everyone while still linked to CoPs.
+     * Requires at least one community ID in the request (after mergeTagAllIntoRequest).
+     */
+    public static function wantsAlsoPublicOnHubWithCommunities(Request $request, string $communityKey = 'communities'): bool
+    {
+        if (! $request->boolean('also_public_with_communities')) {
+            return false;
+        }
+
+        return count(self::filterValidCommunityIds($request->input($communityKey, []))) > 0;
+    }
 }

@@ -346,6 +346,7 @@
                             'field' => 'communities[]',
                             'selected' => @$row->communities ? $row->communities->pluck('id')->toArray() : [],
                             'show_hub_cop_options' => true,
+                            'also_public_on_hub' => (int) (@$row->also_public_on_hub ?? 0),
                         ])
                     </div>
                 </div>
