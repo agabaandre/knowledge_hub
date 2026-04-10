@@ -340,16 +340,13 @@
             </div>
 
                     <div class="form-group mt-2 p-2" style="background:#ffffff;">
-                        <label class="form-label">Target Audience/Communities of Practice</label>
+                        <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
                         <!-- <a href="#" class="btn btn-sm btn-dark btn-outline mb-2"><i class="fa fa-plus"></i> Add Community Of Practice</a> -->
                         @include('partials.publications.publication_communities_dropdown', [
                             'field' => 'communities[]',
                             'selected' => @$row->communities ? $row->communities->pluck('id')->toArray() : [],
                             'show_hub_cop_options' => true,
-                            'hide_communities_multiselect' => true,
-                            'default_also_public_with_hub' => true,
-                            'is_editing_community_targets' => (bool) ($publication && isset($publication->id)),
-                            'also_public_on_hub' => ($publication && isset($publication->id)) ? (int) ($publication->also_public_on_hub ?? 0) : 0,
+                            'also_public_on_hub' => (int) (@$row->also_public_on_hub ?? 0),
                         ])
                     </div>
                 </div>
