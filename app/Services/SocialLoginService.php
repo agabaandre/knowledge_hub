@@ -18,9 +18,9 @@ class SocialLoginService {
     
         try {
             Log::info('Microsoft Response', [
-                'email' => $socialUser->getEmail(),
-                'name' => $socialUser->getName(),
-                'id' => $socialUser->getId()
+                'email' => method_exists($socialUser, 'getEmail') ? $socialUser->getEmail() : null,
+                'name' => method_exists($socialUser, 'getName') ? $socialUser->getName() : null,
+                'id' => method_exists($socialUser, 'getId') ? $socialUser->getId() : null,
             ]);
 
         // Get user data from Microsoft - try both array access and object access
@@ -37,7 +37,7 @@ class SocialLoginService {
         }
         
         // Extract name parts - Microsoft provides displayName, we need to split it
-        $name = $socialUser->getName() ?? '';
+        $name = method_exists($socialUser, 'getName') ? (string) ($socialUser->getName() ?? '') : '';
         $nameParts = explode(' ', $name, 2);
         $firstName = $nameParts[0] ?? '';
         $lastName = isset($nameParts[1]) ? $nameParts[1] : '';
@@ -52,7 +52,7 @@ class SocialLoginService {
         }
 
         // Get email - Microsoft may use 'mail' or 'email' or we use getEmail()
-        $email = $socialUser->getEmail();
+        $email = method_exists($socialUser, 'getEmail') ? $socialUser->getEmail() : null;
         if (!$email && is_array($userData)) {
             $email = $userData['mail'] ?? $userData['email'] ?? $userData['userPrincipalName'] ?? '';
         } elseif (!$email && is_object($userData)) {

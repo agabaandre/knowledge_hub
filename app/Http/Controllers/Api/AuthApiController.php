@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
+use App\Support\OAuthAccountSecurity;
 use Auth;
 use Hash;
 use Password;
@@ -533,68 +535,88 @@ class AuthApiController extends ApiController
     public function socialLogin(Request $request)
     {
         $request->validate([
-            'provider' => 'required|string',
+            'provider' => 'required|string|in:google,microsoft',
             'email' => 'required|string|email',
             'name' => 'required|string',
-           // 'photoUrl' => 'string',
-            //'providerId' => 'string',
         ]);
 
-        // Split the name into first and last names
-        $nameParts = explode(' ', $request->name);
-        $firstName = array_shift($nameParts); // Get the first name
-        $lastName = implode(' ', $nameParts); // Join the rest as last name
+        $email = OAuthAccountSecurity::normalizedProviderEmail($request->email);
+        if (! $email) {
+            return response()->json(['message' => 'Invalid email address.'], 422);
+        }
 
-        // Prepare user data as an object with a 'user' property
+        $canonical = OAuthAccountSecurity::canonicalOAuthProvider($request->provider);
+
+        $existing = User::where('email', $email)->first();
+        if ($existing) {
+            if ($msg = OAuthAccountSecurity::oauthLoginDeniedMessage($existing, $canonical)) {
+                return response()->json(['message' => $msg], 403);
+            }
+            if ($existing->is_social_login && empty($existing->social_provider)) {
+                $existing->social_provider = $canonical;
+                $existing->save();
+            }
+
+            $user = $existing;
+            Auth::login($user);
+            $user->load('communities');
+            $user->load('preferences');
+            $tokenResult = $user->createToken('Personal Access Token');
+            updateUserPushToken($request, $user);
+
+            return response()->json([
+                'token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => $tokenResult->token->expires_at,
+                'user' => $user,
+            ]);
+        }
+
+        $nameParts = preg_split('/\s+/', trim((string) $request->name), 2, PREG_SPLIT_NO_EMPTY);
+        $firstName = $nameParts[0] ?? '';
+        $lastName = $nameParts[1] ?? '';
+
+        $safePicture = OAuthAccountSecurity::sanitizeStoredAvatarUrl($request->photoUrl);
+
         $userData = (object) [
             'user' => (object) [
-                'email' => $request->email,
-                'givenName' => $firstName, // Set first name
-                'surname' => $lastName, // Set last name
-                'given_name' => $firstName, // Set first name
-                'family_name' => $lastName, // Set last name
-                'mail' => $request->email, // Assuming email is used for mail
-                'email' => $request->email,
-                'jobTitle' => null, // Set to null or provide a value if available
-                'picture' => $request->photoUrl, // Assuming photoUrl maps to picture
+                'email' => $email,
+                'givenName' => $firstName,
+                'surname' => $lastName,
+                'given_name' => $firstName,
+                'family_name' => $lastName,
+                'mail' => $email,
+                'jobTitle' => null,
+                'picture' => $safePicture,
             ],
             'providerId' => $request->providerId,
-            'social_provider' => $request->provider,
+            'social_provider' => $canonical,
         ];
 
-        // Call the appropriate social login callback based on the provider
-        if ($request->provider === 'google' && strpos($request->email,"gmail")>-1) {
+        if ($canonical === 'google') {
             $savedUser = $this->socialLoginService->googleCallback($userData);
-        } elseif ($request->provider === 'microsoft') {
+        } elseif ($canonical === 'microsoft') {
             $savedUser = $this->socialLoginService->microsoftCallback($userData);
         } else {
             return response()->json(['message' => 'Unsupported provider'], 400);
         }
 
-        if($savedUser){
-
+        if ($savedUser) {
             $user = $savedUser;
-            
-            AUth::login($user);
-
-            $user->load("communities");
-            $user->load("preferences");
+            Auth::login($user);
+            $user->load('communities');
+            $user->load('preferences');
             $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->accessToken;
-            $tokenExpiration = $tokenResult->token->expires_at;
+            updateUserPushToken($request, $user);
 
-            updateUserPushToken($request,$user);
-            
             return response()->json([
-                'token' => $token,
+                'token' => $tokenResult->accessToken,
                 'token_type' => 'Bearer',
-                'expires_at' => $tokenExpiration,
-                'user' => $user
+                'expires_at' => $tokenResult->token->expires_at,
+                'user' => $user,
             ]);
-
         }
 
-        // Prepare the response similar to the login response
         return response()->json(['message' => 'Unable to log you in'], 400);
     }
     

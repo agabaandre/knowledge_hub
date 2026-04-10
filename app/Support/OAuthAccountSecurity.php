@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -88,5 +89,61 @@ final class OAuthAccountSecurity
         }
 
         return $url;
+    }
+
+    /**
+     * Normalized provider key stored on users.social_provider: google | microsoft | linkedin.
+     */
+    public static function canonicalOAuthProvider(string $driver): string
+    {
+        $d = strtolower(trim($driver));
+        if (str_contains($d, 'linkedin')) {
+            return 'linkedin';
+        }
+
+        return match ($d) {
+            'google' => 'google',
+            'microsoft' => 'microsoft',
+            default => $d,
+        };
+    }
+
+    public static function providerDisplayName(string $canonical): string
+    {
+        return match (self::canonicalOAuthProvider($canonical)) {
+            'google' => 'Google',
+            'microsoft' => 'Microsoft',
+            'linkedin' => 'LinkedIn',
+            default => 'your original sign-in method',
+        };
+    }
+
+    /**
+     * If the account must not accept this OAuth provider, return a user-safe message; otherwise null.
+     * Social accounts with no stored provider yet are allowed (backfilled on successful login).
+     */
+    public static function oauthLoginDeniedMessage(?User $user, string $attemptedCanonicalProvider): ?string
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        $attempted = self::canonicalOAuthProvider($attemptedCanonicalProvider);
+
+        if (! $user->is_social_login) {
+            return 'This email is registered with email and password. Please sign in using your password instead of social sign-in.';
+        }
+
+        $storedRaw = $user->social_provider;
+        if ($storedRaw === null || $storedRaw === '') {
+            return null;
+        }
+
+        $stored = self::canonicalOAuthProvider((string) $storedRaw);
+        if (strcasecmp($stored, $attempted) !== 0) {
+            return 'This account was registered with '.self::providerDisplayName($stored).'. Please use that sign-in option.';
+        }
+
+        return null;
     }
 }

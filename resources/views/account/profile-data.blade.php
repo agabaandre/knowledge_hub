@@ -48,8 +48,13 @@
             </div>
             <div class="card-body">
                 <div class="alert alert-info mb-0">
-                    <h5><i class="fa fa-info-circle me-2"></i>Account Managed by {{ ucfirst($user->social_provider ?? 'SSO Provider') }}</h5>
-                    <p class="mb-0">Your account is authenticated through {{ ucfirst($user->social_provider ?? 'your SSO provider') }}. Password changes must be managed through your {{ ucfirst($user->social_provider ?? 'SSO provider') }} account settings.</p>
+                    @php
+                        $ssoLabel = $user->social_provider
+                            ? \App\Support\OAuthAccountSecurity::providerDisplayName($user->social_provider)
+                            : 'your SSO provider';
+                    @endphp
+                    <h5><i class="fa fa-info-circle me-2"></i>Account managed by {{ $ssoLabel }}</h5>
+                    <p class="mb-0">Your account is signed in with {{ $ssoLabel }}. Password changes are managed in your {{ $ssoLabel }} account settings, not on this site.</p>
                 </div>
             </div>
         </div>

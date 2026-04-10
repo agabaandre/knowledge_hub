@@ -146,12 +146,30 @@ class AuthController extends Controller
 
             $user_exists = User::where('email', $email)->first();
 
+            if ($user_exists) {
+                if ($deny = OAuthAccountSecurity::oauthLoginDeniedMessage($user_exists, OAuthAccountSecurity::canonicalOAuthProvider('microsoft'))) {
+                    \Log::warning('OAuth login blocked: provider or auth method mismatch', [
+                        'email' => $email,
+                        'attempted_provider' => 'microsoft',
+                        'stored_provider' => $user_exists->social_provider,
+                        'is_social_login' => $user_exists->is_social_login,
+                    ]);
+
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', $deny);
+                }
+            }
+
             // Check if the user already exists in the database
             // If not, create a new user using the social login service
             // The service will auto-create and assign to Africa CDC Staff community
-            
-            if($user_exists):
+
+            if ($user_exists) :
                 $user = $user_exists;
+                if ($user->is_social_login && empty($user->social_provider)) {
+                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('microsoft');
+                }
                 // Auto-activate and verify existing users on SSO login
                 if (!$user->email_verified_at) {
                     $user->email_verified_at = \Carbon\Carbon::now();
@@ -268,7 +286,25 @@ class AuthController extends Controller
             $user_exists = User::where('email', $email)->first();
 
             if ($user_exists) {
+                if ($deny = OAuthAccountSecurity::oauthLoginDeniedMessage($user_exists, OAuthAccountSecurity::canonicalOAuthProvider('google'))) {
+                    \Log::warning('OAuth login blocked: provider or auth method mismatch', [
+                        'email' => $email,
+                        'attempted_provider' => 'google',
+                        'stored_provider' => $user_exists->social_provider,
+                        'is_social_login' => $user_exists->is_social_login,
+                    ]);
+
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', $deny);
+                }
+            }
+
+            if ($user_exists) {
                 $user = $user_exists;
+                if ($user->is_social_login && empty($user->social_provider)) {
+                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('google');
+                }
                 if (! $user->email_verified_at) {
                     $user->email_verified_at = \Carbon\Carbon::now();
                 }
@@ -342,9 +378,27 @@ class AuthController extends Controller
             }
 
             $user_exists = User::where('email', $email)->first();
-            
-            if($user_exists):
+
+            if ($user_exists) {
+                if ($deny = OAuthAccountSecurity::oauthLoginDeniedMessage($user_exists, OAuthAccountSecurity::canonicalOAuthProvider('linkedin'))) {
+                    \Log::warning('OAuth login blocked: provider or auth method mismatch', [
+                        'email' => $email,
+                        'attempted_provider' => 'linkedin',
+                        'stored_provider' => $user_exists->social_provider,
+                        'is_social_login' => $user_exists->is_social_login,
+                    ]);
+
+                    return redirect('/login')
+                        ->with('alert_class', 'danger')
+                        ->with('alert', $deny);
+                }
+            }
+
+            if ($user_exists) :
                 $user = $user_exists;
+                if ($user->is_social_login && empty($user->social_provider)) {
+                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('linkedin');
+                }
                 // Auto-activate and verify existing users on SSO login
                 if (!$user->email_verified_at) {
                     $user->email_verified_at = \Carbon\Carbon::now();

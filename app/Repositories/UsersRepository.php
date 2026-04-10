@@ -35,7 +35,12 @@ class UsersRepository {
 
         if(!$user)
             $user =  new User();
-        
+
+        if (! $is_social && ! $user->id) {
+            $user->is_social_login = false;
+            $user->social_provider = null;
+        }
+
         //don't update these values for social signups account edits
         if( (!$user->id || ($user->id && !$user->is_social_login))){
 
