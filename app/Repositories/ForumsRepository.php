@@ -141,8 +141,7 @@ class ForumsRepository extends SharedRepo{
                     // (Laravel compiles that to "0 = 1"), which breaks the OR logic and can hide every thread.
                     $forums->where(function ($q) use ($commForums, $userId) {
                         $q->where('created_by', $userId)
-                            ->orWhereDoesntHave('communities')
-                            ->orWhere('also_public_on_hub', 1);
+                            ->orWhereDoesntHave('communities');
                         if ($commForums->isNotEmpty()) {
                             $q->orWhereIn('id', $commForums);
                         }
@@ -153,10 +152,7 @@ class ForumsRepository extends SharedRepo{
                     });
                 }
             } else {
-                $forums->where(function ($q) {
-                    $q->whereDoesntHave('communities')
-                        ->orWhere('also_public_on_hub', 1);
-                });
+                $forums->whereDoesntHave('communities');
             }
         }
 
@@ -209,8 +205,7 @@ class ForumsRepository extends SharedRepo{
                 $commForums = ForumCommunityOfPractice::whereIn('community_of_practice_id', $communities)->pluck('forum_id');
                 $forums->where(function ($q) use ($commForums, $userId) {
                     $q->where('created_by', $userId)
-                        ->orWhereDoesntHave('communities')
-                        ->orWhere('also_public_on_hub', 1);
+                        ->orWhereDoesntHave('communities');
                     if ($commForums->isNotEmpty()) {
                         $q->orWhereIn('id', $commForums);
                     }
@@ -221,10 +216,7 @@ class ForumsRepository extends SharedRepo{
                 });
             }
         } else {
-            $forums->where(function ($q) {
-                $q->whereDoesntHave('communities')
-                    ->orWhere('also_public_on_hub', 1);
-            });
+            $forums->whereDoesntHave('communities');
         }
 
         if ($applyAccessFilter) {
@@ -319,7 +311,7 @@ class ForumsRepository extends SharedRepo{
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($request->description ?? ''));
         $forum->created_by = current_user()->id;
         $forum->status = 0;
-        $forum->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
+        $forum->also_public_on_hub = 0;
         CommunityTargeting::mergeTagAllIntoRequest($request);
 
         if($request->hasFile('image')):
@@ -349,11 +341,6 @@ class ForumsRepository extends SharedRepo{
             $forumComm->forum_id = $forum->id;
             $forumComm->community_of_practice_id = $copId;
             $forumComm->save();
-        }
-
-        if ($copIdsInt === []) {
-            $forum->also_public_on_hub = 0;
-            $forum->save();
         }
 
         if ($copIdsInt !== []) {
@@ -817,9 +804,7 @@ class ForumsRepository extends SharedRepo{
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
 
-        if ($request->has('community_targeting_options')) {
-            $forum->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
-        }
+        $forum->also_public_on_hub = 0;
         CommunityTargeting::mergeTagAllIntoRequest($request);
 
         $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');
@@ -863,11 +848,6 @@ class ForumsRepository extends SharedRepo{
             $forumComm->forum_id = $forum->id;
             $forumComm->community_of_practice_id = $copId;
             $forumComm->save();
-        }
-
-        if ($copIdsInt === [] && $request->has('community_targeting_options')) {
-            $forum->also_public_on_hub = 0;
-            $forum->save();
         }
 
         ForumTag::where('forum_id', $forum->id)->delete();

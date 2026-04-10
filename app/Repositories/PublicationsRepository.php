@@ -126,7 +126,6 @@ public function get(Request $request, $return_array = false, $featured = false,$
                         });
                     }
                     $q->orWhereDoesntHave('communities')
-                      ->orWhere('also_public_on_hub', 1)
                       ->orWhere('user_id', $user->id);
                 });
             }, function ($query) use ($request) {
@@ -136,10 +135,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             });
         } 
         else {
-            $query->where(function ($q) {
-                $q->whereDoesntHave('communities')
-                    ->orWhere('also_public_on_hub', 1);
-            });
+            $query->whereDoesntHave('communities');
         }
     }, function ($query) {
         $this->access_filter($query);
@@ -419,9 +415,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pub->is_admin_only_access      = $request->admin_only ?? false;
         $pub->show_disclaimer            = $request->show_disclaimer ?? false;
 
-        if (! $request->id || $request->has('community_targeting_options')) {
-            $pub->also_public_on_hub = CommunityTargeting::resolveAlsoPublicOnHub($request) ? 1 : 0;
-        }
+        $pub->also_public_on_hub = 0;
         CommunityTargeting::mergeTagAllIntoRequest($request);
 
         // Publication metadata fields - clean Unicode
@@ -725,11 +719,6 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     'publication_id' => $id,
                 ]);
             }
-        }
-
-        if ($saved && ! PublicationCommunityOfPractice::where('publication_id', $id)->exists() && (int) $pub->also_public_on_hub !== 0) {
-            $pub->also_public_on_hub = 0;
-            $pub->save();
         }
 
          //attach access groups

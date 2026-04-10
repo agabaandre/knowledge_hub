@@ -1,12 +1,11 @@
 @php
     $showHubCopOptions = $show_hub_cop_options ?? false;
-    $alsoPublicVal = (int) old('also_public_with_communities', isset($also_public_on_hub) ? (int) $also_public_on_hub : 0);
     $tagAllVal = (int) old('tag_all_my_communities', 0);
 @endphp
 @if ($showHubCopOptions && auth()->check())
     <input type="hidden" name="community_targeting_options" value="1">
     <div class="mb-2 p-2 rounded border bg-light community-targeting-options">
-        <div class="d-flex align-items-start w-100 mb-2">
+        <div class="d-flex align-items-start w-100">
             <label class="form-check-label mb-0 flex-grow-1 pe-3" for="tag_all_my_communities">
                 Tag all my communities (every CoP I am an approved member of)
             </label>
@@ -14,16 +13,6 @@
                 <input type="hidden" name="tag_all_my_communities" value="0">
                 <input class="form-check-input" type="checkbox" name="tag_all_my_communities" value="1" id="tag_all_my_communities"
                     {{ $tagAllVal === 1 ? 'checked' : '' }}>
-            </div>
-        </div>
-        <div class="d-flex align-items-start w-100">
-            <label class="form-check-label mb-0 flex-grow-1 pe-3" for="also_public_with_communities">
-                Also show on the main Knowledge Hub (everyone), not only inside communities
-            </label>
-            <div class="ms-auto flex-shrink-0 ps-2 community-targeting-options__toggle">
-                <input type="hidden" name="also_public_with_communities" value="0">
-                <input class="form-check-input" type="checkbox" name="also_public_with_communities" value="1" id="also_public_with_communities"
-                    {{ $alsoPublicVal === 1 ? 'checked' : '' }}>
             </div>
         </div>
         @once
@@ -35,8 +24,8 @@
             }
         </style>
         @endonce
-        <small class="text-muted d-block mt-1">
-            Use the second option when you keep <strong>All (visible to everyone)</strong> and add communities, or when you want both public discovery and community pages.
+        <small class="text-muted d-block mt-2">
+            Leave the list on <strong>All (visible to everyone)</strong> for a public resource. Choose specific communities (or use this shortcut) to limit visibility to members of those communities (and you as author).
         </small>
     </div>
 @endif
@@ -80,7 +69,7 @@
 </select>
 <small class="text-muted d-block mt-1">
     @if ($showHubCopOptions)
-        Without “Also show on the main Knowledge Hub”, choosing specific communities limits visibility to members of those communities (plus you as author). With that option checked, the item stays public on the hub and appears in the selected communities.
+        Specific communities restrict who can see this on the hub. <strong>All</strong> keeps it visible to everyone.
     @else
         If you select one or more communities, this content will be visible only to members of those communities.
         Leave as <strong>All</strong> to make it publicly visible.

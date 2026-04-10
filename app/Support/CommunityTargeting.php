@@ -54,16 +54,4 @@ final class CommunityTargeting
         $specific = self::filterValidCommunityIds($request->input($key, []));
         $request->merge([$key => array_values(array_unique(array_merge($specific, $mine)))]);
     }
-
-    public static function resolveAlsoPublicOnHub(Request $request, string $communityKey = 'communities'): bool
-    {
-        if ($request->boolean('also_public_with_communities')) {
-            return true;
-        }
-        if ($request->boolean('tag_all_my_communities')) {
-            return self::filterValidCommunityIds($request->input($communityKey, [])) === [];
-        }
-
-        return false;
-    }
 }
