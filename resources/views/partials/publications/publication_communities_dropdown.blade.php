@@ -15,7 +15,7 @@
                 <span>Tag all my approved communities</span>
             </label>
         </div>
-        <div class="mb-0">
+        <div class="mb-0" style="margin-left: 15px;">
             <label class="form-check-inline mb-0 d-inline-flex align-items-center" for="also_public_with_communities">
                 <input type="hidden" name="also_public_with_communities" value="0">
                 <input type="checkbox" name="also_public_with_communities" value="1" class="form-check-input mt-0 me-2 flex-shrink-0" id="also_public_with_communities"
