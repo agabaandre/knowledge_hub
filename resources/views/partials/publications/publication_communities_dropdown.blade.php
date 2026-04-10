@@ -6,37 +6,24 @@
 @if ($showHubCopOptions && auth()->check())
     <input type="hidden" name="community_targeting_options" value="1">
     <div class="mb-2 p-2 rounded border bg-light community-targeting-options">
-        <div class="d-flex align-items-start w-100 mb-2">
-            <label class="form-check-label mb-0 flex-grow-1 pe-3" for="tag_all_my_communities">
-                Tag all my communities (every CoP I am an approved member of)
+        <div class="form-check mb-2">
+            <input type="hidden" name="tag_all_my_communities" value="0">
+            <input class="form-check-input" type="checkbox" name="tag_all_my_communities" value="1" id="tag_all_my_communities"
+                {{ $tagAllVal === 1 ? 'checked' : '' }}>
+            <label class="form-check-label" for="tag_all_my_communities">
+                Tag all my approved communities
             </label>
-            <div class="ms-auto flex-shrink-0 ps-2 text-end community-targeting-options__toggle">
-                <input type="hidden" name="tag_all_my_communities" value="0">
-                <input class="form-check-input" type="checkbox" name="tag_all_my_communities" value="1" id="tag_all_my_communities"
-                    {{ $tagAllVal === 1 ? 'checked' : '' }}>
-            </div>
         </div>
-        <div class="d-flex align-items-start w-100">
-            <label class="form-check-label mb-0 flex-grow-1 pe-3" for="also_public_with_communities">
-                Also show on the main Knowledge Hub (everyone), while keeping community tags
+        <div class="form-check">
+            <input type="hidden" name="also_public_with_communities" value="0">
+            <input class="form-check-input" type="checkbox" name="also_public_with_communities" value="1" id="also_public_with_communities"
+                {{ $alsoPublicVal === 1 ? 'checked' : '' }}>
+            <label class="form-check-label" for="also_public_with_communities">
+                Also show on main hub (everyone)
             </label>
-            <div class="ms-auto flex-shrink-0 ps-2 text-end community-targeting-options__toggle">
-                <input type="hidden" name="also_public_with_communities" value="0">
-                <input class="form-check-input" type="checkbox" name="also_public_with_communities" value="1" id="also_public_with_communities"
-                    {{ $alsoPublicVal === 1 ? 'checked' : '' }}>
-            </div>
         </div>
-        @once
-        <style>
-            .community-targeting-options .community-targeting-options__toggle .form-check-input {
-                float: none;
-                margin-left: 0;
-                margin-top: 0.25rem;
-            }
-        </style>
-        @endonce
         <small class="text-muted d-block mt-2">
-            Use the second option when you want <strong>both</strong> public discovery on the hub and visibility inside the communities you tag (including via “Tag all my communities”). It only applies when at least one community is linked.
+            Second option: public on the hub <strong>and</strong> in tagged communities. Needs at least one community linked.
         </small>
     </div>
 @endif
@@ -80,7 +67,7 @@
 </select>
 <small class="text-muted d-block mt-1">
     @if ($showHubCopOptions)
-        Without the “Also show on the main Knowledge Hub” option, specific communities limit visibility to members of those communities (and you as author). With it checked, the item stays public on the hub and appears in the selected communities.
+        Without “Also show on main hub”, only tagged community members (and you) see it. With it checked, everyone sees it on the hub too.
     @else
         If you select one or more communities, this content will be visible only to members of those communities.
         Leave as <strong>All</strong> to make it publicly visible.
