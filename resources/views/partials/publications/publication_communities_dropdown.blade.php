@@ -7,7 +7,7 @@
     <input type="hidden" name="community_targeting_options" value="1">
     <div class="mb-2 p-2 rounded border bg-light community-targeting-options">
         {{-- Match Step 1 (External Link / Embedded / Default): inline label wrapping input; flex centers checkbox with text --}}
-        <div class="mb-2">
+        <div class="mb-2" style="margin-left: 15px;">
             <label class="form-check-inline mb-0 d-inline-flex align-items-center" for="tag_all_my_communities">
                 <input type="hidden" name="tag_all_my_communities" value="0">
                 <input type="checkbox" name="tag_all_my_communities" value="1" class="form-check-input mt-0 me-2 flex-shrink-0" id="tag_all_my_communities"
