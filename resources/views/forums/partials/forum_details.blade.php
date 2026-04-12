@@ -141,10 +141,17 @@
             <i class="fa fa-comment"></i>
             <span>{{ count($forum->comments) }} {{ count($forum->comments) == 1 ? 'Comment' : 'Comments' }}</span>
         </div>
-        <a onclick="summarise({{ $forum->id }},1)" class="forum-action-btn" style="cursor: pointer;">
+        @auth
+        <button type="button" class="forum-action-btn js-open-forum-assistant" data-forum-id="{{ $forum->id }}" data-thread-title="{{ e(Str::limit(strip_tags($forum->forum_title ?? ''), 140)) }}" style="cursor: pointer; border: none; background: none; padding: 0.5rem;">
             <i class="fa fa-robot"></i>
-            <span>Summarise</span>
+            <span>Khub AI Assistant</span>
+        </button>
+        @else
+        <a href="{{ route('login') }}" class="forum-action-btn" title="Log in to use Khub AI Assistant">
+            <i class="fa fa-robot"></i>
+            <span>Khub AI Assistant</span>
         </a>
+        @endauth
         @php $shareUrl = url('forums/thread').'?id='.$forum->id; $shareText = urlencode(strip_tags($forum->forum_title)); @endphp
         <a class="forum-action-btn" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" title="Share on LinkedIn">
             <i class="fab fa-linkedin-in"></i>

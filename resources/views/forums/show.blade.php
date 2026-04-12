@@ -1075,7 +1075,14 @@
     </div>
 </div>
 
-    @include('common.ai-summary')
+    @auth
+    @include('common.pdf-chat-modal')
+    <script>
+        window.khubAiChat = { type: 'forum', forum_id: {{ (int) $forum->id }}, publication_id: null };
+        var pdfChatDocumentTitle = @json(\Illuminate\Support\Str::limit(strip_tags($forum->forum_title ?? 'Forum thread'), 200));
+    </script>
+    @include('common.pdf-chat-js')
+    @endauth
     @include('common.attachment_js')
     
     {{-- Lobibox Notifications - Include before forum scripts --}}

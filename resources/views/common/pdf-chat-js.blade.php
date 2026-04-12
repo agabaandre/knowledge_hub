@@ -1,13 +1,26 @@
 <script>
 (function () {
-  var publicationId = typeof pdfChatPublicationId !== 'undefined' ? pdfChatPublicationId : null;
+  var ctx = typeof window.khubAiChat === 'object' && window.khubAiChat !== null ? window.khubAiChat : null;
+  var chatType = ctx && ctx.type === 'forum' ? 'forum' : 'publication';
+  var publicationId = ctx && ctx.publication_id != null && ctx.publication_id !== ''
+    ? parseInt(ctx.publication_id, 10)
+    : (typeof pdfChatPublicationId !== 'undefined' ? pdfChatPublicationId : null);
+  var forumId = ctx && ctx.forum_id != null && ctx.forum_id !== '' ? parseInt(ctx.forum_id, 10) : null;
+  if (forumId !== null && isNaN(forumId)) forumId = null;
+  if (publicationId !== null && isNaN(publicationId)) publicationId = null;
+
   var attachmentId = typeof pdfChatAttachmentId !== 'undefined' ? pdfChatAttachmentId : null;
   var pdfChatAssistantMode = typeof window.pdfChatAssistantMode !== 'undefined' ? window.pdfChatAssistantMode : 'auto';
+  if (chatType === 'forum') {
+    pdfChatAssistantMode = 'forum';
+  }
   var sessionId = null;
   var sourceId = null;
   var isStreaming = false;
 
   window.openPdfChat = function (pubId, attId, docTitle, assistantModeOpt) {
+    chatType = 'publication';
+    forumId = null;
     publicationId = pubId;
     attachmentId = attId === undefined || attId === '' ? null : attId;
     if (assistantModeOpt === 'publication' || assistantModeOpt === 'chatpdf' || assistantModeOpt === 'auto') {
@@ -43,8 +56,55 @@
     if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
   };
 
+  window.openForumAssistant = function (fId, threadTitle) {
+    chatType = 'forum';
+    forumId = typeof fId === 'number' ? fId : parseInt(fId, 10);
+    if (isNaN(forumId)) return;
+    publicationId = null;
+    attachmentId = null;
+    pdfChatAssistantMode = 'forum';
+    sessionId = null;
+    sourceId = null;
+    var titleEl = document.getElementById('pdf-chat-doc-title');
+    if (titleEl) {
+      titleEl.textContent = (typeof threadTitle === 'string' && threadTitle)
+        ? threadTitle
+        : (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Forum thread');
+    }
+    var modalEl = document.getElementById('pdf-chat-modal');
+    if (!modalEl) {
+      if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
+      return;
+    }
+    if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+      bootstrap.Modal.getOrCreateInstance(modalEl).show();
+    } else if (typeof $ !== 'undefined' && $.fn.modal) {
+      $(modalEl).modal('show');
+    } else {
+      modalEl.classList.add('show');
+      modalEl.style.display = 'block';
+      modalEl.setAttribute('aria-hidden', 'false');
+      document.body.classList.add('modal-open');
+      var backdrop = document.createElement('div');
+      backdrop.className = 'modal-backdrop fade show';
+      backdrop.id = 'pdf-chat-modal-backdrop';
+      document.body.appendChild(backdrop);
+    }
+    if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
+  };
+
   function initPdfChatDelegate() {
     document.body.addEventListener('click', function (e) {
+      var fBtn = e.target.closest('.js-open-forum-assistant');
+      if (fBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        var fid = parseInt(fBtn.getAttribute('data-forum-id'), 10);
+        if (isNaN(fid)) return;
+        var t = fBtn.getAttribute('data-thread-title') || (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : '');
+        openForumAssistant(fid, t);
+        return;
+      }
       var btn = e.target.closest('.js-open-pdf-chat');
       if (!btn) return;
       e.preventDefault();
@@ -307,6 +367,25 @@
     var container = messagesEl();
     container.innerHTML = '<div class="text-center py-4"><span class="spinner-border text-primary"></span> Loading...</div>';
 
+    if (chatType === 'forum' && !forumId) {
+      container.innerHTML = '';
+      showError('Forum context missing. Reload the page and try again.');
+      return;
+    }
+    if (chatType === 'publication' && !publicationId) {
+      container.innerHTML = '';
+      showError('Resource context missing. Reload the page and try again.');
+      return;
+    }
+
+    var sessionPayload = chatType === 'forum'
+      ? { forum_id: forumId, assistant_mode: 'forum' }
+      : {
+          publication_id: publicationId,
+          attachment_id: attachmentId || null,
+          assistant_mode: pdfChatAssistantMode || 'auto'
+        };
+
     fetch('{{ url("ai/pdf-chat/session") }}', {
       method: 'POST',
       headers: {
@@ -314,11 +393,7 @@
         'X-CSRF-TOKEN': getToken(),
         'Accept': 'application/json'
       },
-      body: JSON.stringify({
-        publication_id: publicationId,
-        attachment_id: attachmentId || null,
-        assistant_mode: pdfChatAssistantMode || 'auto'
-      })
+      body: JSON.stringify(sessionPayload)
     })
       .then(function (r) {
         if (!r.ok) throw new Error('Session failed');
@@ -332,7 +407,7 @@
         }
         sessionId = data.session_id;
         sourceId = data.source_id;
-        if (data.assistant_mode === 'publication' || data.assistant_mode === 'chatpdf') {
+        if (data.assistant_mode === 'publication' || data.assistant_mode === 'chatpdf' || data.assistant_mode === 'forum') {
           pdfChatAssistantMode = data.assistant_mode;
         }
         container.innerHTML = '';
@@ -341,9 +416,14 @@
             appendMessage(m.role, m.content, false);
           });
         } else {
-          var hint = (pdfChatAssistantMode === 'publication' || data.assistant_mode === 'publication')
-            ? 'Ask anything about this resource using the title, description, and available context. You can request a summary, clarify details, or explore topics related to the content.'
-            : 'Ask anything about this PDF. You can request a summary, ask about specific sections, or pose questions.';
+          var hint;
+          if (data.assistant_mode === 'forum') {
+            hint = 'Ask for a summary of this discussion thread, clarifications, or follow-up questions. Answers use only what appears in the thread.';
+          } else if (pdfChatAssistantMode === 'publication' || data.assistant_mode === 'publication') {
+            hint = 'Ask anything about this resource using the title, description, and available context. You can request a summary, clarify details, or explore topics related to the content.';
+          } else {
+            hint = 'Ask anything about this PDF. You can request a summary, ask about specific sections, or pose questions.';
+          }
           appendMessage('assistant', hint, false);
         }
       })
@@ -361,6 +441,14 @@
       showError('Session not ready. Please wait or close and try again.');
       return;
     }
+    if (chatType === 'forum' && !forumId) {
+      showError('Forum context missing. Please reload and try again.');
+      return;
+    }
+    if (chatType === 'publication' && !publicationId) {
+      showError('Resource context missing. Please reload and try again.');
+      return;
+    }
 
     isStreaming = true;
     input.value = '';
@@ -371,14 +459,21 @@
     var contentEl = appendMessage('assistant', '', true);
 
     var url = '{{ url("ai/pdf-chat/message") }}';
-    var body = {
-      publication_id: publicationId,
-      session_id: sessionId,
-      attachment_id: attachmentId || null,
-      assistant_mode: pdfChatAssistantMode || 'auto',
-      message: text,
-      stream: true
-    };
+    var body = chatType === 'forum'
+      ? {
+          forum_id: forumId,
+          session_id: sessionId,
+          message: text,
+          stream: true
+        }
+      : {
+          publication_id: publicationId,
+          session_id: sessionId,
+          attachment_id: attachmentId || null,
+          assistant_mode: pdfChatAssistantMode || 'auto',
+          message: text,
+          stream: true
+        };
 
     fetch(url, {
       method: 'POST',

@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Forum;
 use App\Models\Publication;
 use App\Models\PublicationAttachment;
 use App\Models\PdfChatSession;
 use App\Models\PdfChatMessage;
 use App\Services\ChatGPTService;
 use App\Services\ChatPDFService;
+use App\Support\ForumAssistantContext;
 use App\Support\PublicationAssistantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -31,20 +33,30 @@ class PdfChatController extends Controller
     }
 
     /**
-     * Get or create a chat session: ChatPDF when a PDF is available, otherwise GPT over publication context.
+     * Get or create a chat session: forum thread (GPT), publication (ChatPDF or GPT), reusing pdf_chat_sessions.
      */
     public function getOrCreateSession(Request $request)
     {
         try {
             $request->validate([
-                'publication_id' => 'required|integer',
+                'publication_id' => 'nullable|integer|required_without:forum_id',
+                'forum_id' => 'nullable|integer|required_without:publication_id|exists:forums,id',
                 'attachment_id' => 'nullable|integer',
-                'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto',
+                'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum',
             ]);
+
+            if ($request->filled('publication_id') && $request->filled('forum_id')) {
+                return response()->json(['error' => 'Send either publication_id or forum_id, not both.'], 422);
+            }
+
+            $userId = Auth::id();
+
+            if ($request->filled('forum_id')) {
+                return $this->getOrCreateForumSession((int) $request->forum_id, $userId);
+            }
 
             $publicationId = (int) $request->publication_id;
             $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
-            $userId = Auth::id();
 
             $publication = Publication::with('attachments')->find($publicationId);
             if (! $publication) {
@@ -198,12 +210,62 @@ class PdfChatController extends Controller
             Log::error('PdfChat getOrCreateSession error: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
                 'publication_id' => $request->input('publication_id'),
+                'forum_id' => $request->input('forum_id'),
             ]);
 
             return response()->json([
                 'error' => 'Could not start chat. Please try again.',
             ], 500);
         }
+    }
+
+    private function getOrCreateForumSession(int $forumId, ?int $userId)
+    {
+        if (! Forum::query()->whereKey($forumId)->exists()) {
+            return response()->json(['error' => 'Forum thread not found.'], 404);
+        }
+
+        $session = $this->findForumSession($forumId, $userId);
+        if (! $session) {
+            $session = $this->createForumChatSession($forumId, $userId);
+        }
+
+        $messages = $userId
+            ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
+            : [];
+
+        return response()->json([
+            'session_id' => $session->id,
+            'source_id' => null,
+            'assistant_mode' => 'forum',
+            'context_type' => 'forum',
+            'messages' => $messages,
+        ]);
+    }
+
+    private function findForumSession(int $forumId, ?int $userId): ?PdfChatSession
+    {
+        return PdfChatSession::where('forum_id', $forumId)
+            ->where('assistant_mode', 'forum')
+            ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+            ->when($userId === null, fn ($q) => $q->whereNull('user_id'))
+            ->first();
+    }
+
+    private function createForumChatSession(int $forumId, ?int $userId): PdfChatSession
+    {
+        $data = [
+            'user_id' => $userId,
+            'publication_id' => null,
+            'forum_id' => $forumId,
+            'source_id' => null,
+            'assistant_mode' => 'forum',
+        ];
+        if ($this->hasAttachmentIdColumn()) {
+            $data['attachment_id'] = null;
+        }
+
+        return PdfChatSession::create($data);
     }
 
     private function resolveAssistantMode(string $requested, Publication $publication, ?int $attachmentId): string
@@ -239,20 +301,30 @@ class PdfChatController extends Controller
     {
         try {
             $request->validate([
-                'publication_id' => 'required|integer',
+                'publication_id' => 'nullable|integer|required_without:forum_id',
+                'forum_id' => 'nullable|integer|required_without:publication_id|exists:forums,id',
                 'session_id' => 'nullable|integer',
                 'attachment_id' => 'nullable|integer',
                 'message' => 'required|string|max:4000',
                 'stream' => 'nullable|boolean',
             ]);
 
-            $publicationId = (int) $request->publication_id;
+            if ($request->filled('publication_id') && $request->filled('forum_id')) {
+                return response()->json(['error' => 'Send either publication_id or forum_id, not both.'], 422);
+            }
+
             $sessionId = $request->session_id ? (int) $request->session_id : null;
-            $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
             $userMessage = $request->message;
             $stream = (bool) $request->get('stream', true);
 
             $userId = Auth::id();
+
+            if ($request->filled('forum_id')) {
+                return $this->sendForumMessage((int) $request->forum_id, $sessionId, $userId, $userMessage, $stream);
+            }
+
+            $publicationId = (int) $request->publication_id;
+            $attachmentId = $request->attachment_id ? (int) $request->attachment_id : null;
 
             $session = $this->resolveSession($publicationId, $sessionId, $attachmentId, $userId);
             if (! $session) {
@@ -313,6 +385,49 @@ class PdfChatController extends Controller
                 'error' => 'Could not send message. Please try again.',
             ], 500);
         }
+    }
+
+    private function sendForumMessage(int $forumId, ?int $sessionId, ?int $userId, string $userMessage, bool $stream)
+    {
+        $forum = Forum::query()->find($forumId);
+        if (! $forum) {
+            return response()->json(['error' => 'Forum thread not found.'], 404);
+        }
+
+        if ($sessionId) {
+            $session = PdfChatSession::where('id', $sessionId)
+                ->where('forum_id', $forumId)
+                ->where('assistant_mode', 'forum')
+                ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+                ->when($userId === null, fn ($q) => $q->whereNull('user_id'))
+                ->first();
+            if (! $session) {
+                return response()->json(['error' => 'Session not found or invalid.'], 404);
+            }
+        } else {
+            $session = $this->findForumSession($forumId, $userId);
+            if (! $session) {
+                $session = $this->createForumChatSession($forumId, $userId);
+            }
+        }
+
+        $systemContent = ForumAssistantContext::build($forum);
+        $history = $this->buildMessagesForApi($session, $userId, $userMessage);
+        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
+
+        if ($stream) {
+            return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages);
+        }
+
+        $content = $this->chatGpt->chatMessagesComplete($openAiMessages);
+        if ($userId) {
+            $this->savePair($session, $userMessage, $content);
+        }
+
+        return response()->json([
+            'content' => $content,
+            'references' => [],
+        ]);
     }
 
     private function resolveSession(int $publicationId, ?int $sessionId, ?int $attachmentId, ?int $userId): ?PdfChatSession

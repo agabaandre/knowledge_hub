@@ -9,11 +9,16 @@ class PdfChatSession extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'publication_id', 'attachment_id', 'source_id', 'assistant_mode'];
+    protected $fillable = ['user_id', 'publication_id', 'forum_id', 'attachment_id', 'source_id', 'assistant_mode'];
 
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function forum()
+    {
+        return $this->belongsTo(Forum::class);
     }
 
     public function publication()
