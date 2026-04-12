@@ -261,12 +261,22 @@
                     "Authentication"
                 ],
                 "summary": "User Registration",
-                "description": "Register a new user",
+                "description": "Same fields as web `POST /registration` (register form). Password min length 8. Send `preferences` as sub-theme IDs (at least one). If `job_missing` is true/1, `job` from the dropdown is optional; otherwise `job` is required unless `job_title_custom` is provided. Use multipart for `photo`. JSON-encoded arrays accepted for `preferences` and `communities` when sent as strings.",
                 "operationId": "UserRegistration",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
                             "schema": {
+                                "required": [
+                                    "firstname",
+                                    "lastname",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "country_id",
+                                    "preferences"
+                                ],
                                 "properties": {
                                     "firstname": {
                                         "type": "string"
@@ -274,16 +284,102 @@
                                     "lastname": {
                                         "type": "string"
                                     },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone": {
+                                        "description": "Min 10 characters",
+                                        "type": "string"
+                                    },
+                                    "password": {
+                                        "description": "Min 8 characters",
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
                                     "country_id": {
                                         "type": "integer"
                                     },
                                     "job": {
+                                        "description": "Job title from lookup list (name or id); omit when job_missing=1",
                                         "type": "string"
                                     },
-                                    "phone": {
+                                    "job_missing": {
+                                        "description": "My job title is missing from the list",
+                                        "type": "boolean"
+                                    },
+                                    "job_title_custom": {
+                                        "description": "Custom job title when job_missing",
+                                        "type": "string"
+                                    },
+                                    "preferences": {
+                                        "description": "Sub-theme IDs (Your Interests)",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "communities": {
+                                        "description": "Preferred community IDs to join",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "organization_name": {
+                                        "type": "string"
+                                    },
+                                    "orcid": {
+                                        "type": "string",
+                                        "maxLength": 19
+                                    },
+                                    "langauge": {
+                                        "description": "Site language code (same spelling as web form, e.g. en)",
+                                        "type": "string"
+                                    },
+                                    "subscribe": {
+                                        "description": "Newsletter opt-in (also accepts is_subscribed)",
+                                        "type": "boolean"
+                                    },
+                                    "is_subscribed": {
+                                        "type": "boolean"
+                                    },
+                                    "photo": {
+                                        "description": "Profile photo",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        },
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "firstname",
+                                    "lastname",
+                                    "email",
+                                    "password",
+                                    "password_confirmation",
+                                    "phone",
+                                    "country_id",
+                                    "preferences"
+                                ],
+                                "properties": {
+                                    "firstname": {
+                                        "type": "string"
+                                    },
+                                    "lastname": {
                                         "type": "string"
                                     },
                                     "email": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
                                         "type": "string"
                                     },
                                     "password": {
@@ -292,22 +388,44 @@
                                     "password_confirmation": {
                                         "type": "string"
                                     },
+                                    "country_id": {
+                                        "type": "integer"
+                                    },
+                                    "job": {
+                                        "type": "string"
+                                    },
+                                    "job_missing": {
+                                        "type": "boolean"
+                                    },
+                                    "job_title_custom": {
+                                        "type": "string"
+                                    },
                                     "preferences": {
-                                        "description": "Array of Preference Ids",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
-                                        },
-                                        "example": [
-                                            1,
-                                            2,
-                                            3
-                                        ]
+                                        }
                                     },
-                                    "photo": {
-                                        "description": "Photo file to upload",
-                                        "type": "string",
-                                        "format": "binary"
+                                    "communities": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "organization_name": {
+                                        "type": "string"
+                                    },
+                                    "orcid": {
+                                        "type": "string"
+                                    },
+                                    "langauge": {
+                                        "type": "string"
+                                    },
+                                    "subscribe": {
+                                        "type": "boolean"
+                                    },
+                                    "is_subscribed": {
+                                        "type": "boolean"
                                     }
                                 },
                                 "type": "object"
@@ -2538,6 +2656,162 @@
                 ]
             }
         },
+        "/api/health-topics": {
+            "get": {
+                "tags": [
+                    "Health topics"
+                ],
+                "summary": "List health topics (A–Z)",
+                "description": "Tags marked as health topics (`is_health_topic`, or legacy `is_health_emergency` if that column is absent)—same scope as the web `/health-topics` index. Returns flat `topics`, `grouped_by_letter`, and `total`.",
+                "operationId": "HealthTopicsIndex",
+                "responses": {
+                    "200": {
+                        "description": "status, data.topics[], data.grouped_by_letter, data.total"
+                    }
+                }
+            }
+        },
+        "/api/health-topics/{id}": {
+            "get": {
+                "tags": [
+                    "Health topics"
+                ],
+                "summary": "Health topic detail",
+                "description": "Overview HTML, paginated tagged publications, related forums and communities—aligned with web `health-topics.show`. Query `page`, `per_page` / `page_size` (default page size 12, max 50). Includes `web.health_topic_page` and `web.records_search_by_tag` URLs.",
+                "operationId": "HealthTopicsShow",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "data.tag, data.publications, data.related_forums, data.related_communities, data.web"
+                    },
+                    "404": {
+                        "description": "Health topic not found"
+                    }
+                }
+            }
+        },
+        "/api/health-emergencies": {
+            "get": {
+                "tags": [
+                    "Health topics"
+                ],
+                "summary": "List health emergency tags",
+                "description": "Tags with `is_health_emergency` (same set as the web header **Health Emergencies** menu). Empty when the column is missing. Returns `emergencies`, `grouped_by_letter`, `total`.",
+                "operationId": "HealthEmergenciesIndex",
+                "responses": {
+                    "200": {
+                        "description": "status, data.emergencies[], data.grouped_by_letter, data.total"
+                    }
+                }
+            }
+        },
+        "/api/health-emergencies/{id}": {
+            "get": {
+                "tags": [
+                    "Health topics"
+                ],
+                "summary": "Health emergency tag detail",
+                "description": "Same payload shape as `GET /api/health-topics/{id}` but the tag must have `is_health_emergency`. Paginate publications with `page`, `per_page` / `page_size`.",
+                "operationId": "HealthEmergenciesShow",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Same as health topic detail"
+                    },
+                    "404": {
+                        "description": "Not found or emergencies not configured"
+                    }
+                }
+            }
+        },
+        "/api/home": {
+            "get": {
+                "tags": [
+                    "Home"
+                ],
+                "summary": "Combined home feed (all sections in one response)",
+                "description": "Returns three sections—`recommended`, `top_searches`, `flagship_initiatives`—each with `key`, `title`, `visible`, and `items` (publication arrays). Query `limit` (default **20**, max **48**) sets how many items are loaded for **recommended** and **top searches**. **Flagship** always returns the first **20** rows (category 10), matching the web home paginator default. Send `Authorization: Bearer` (via `auth.passport`) so **recommended** uses the same personalization as the website. Section `visible` flags follow site settings (`show_featured`, `show_top_searches`) and non-empty content. For paginated / infinite lists per section, use the dedicated `/api/publications/sections/*` endpoints instead.",
+                "operationId": "HomeSectionsBundle",
+                "parameters": [
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Item count for recommended and top_searches sections (default 20, max 48)",
+                        "schema": {
+                            "type": "integer",
+                            "default": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "data.sections[]"
+                    }
+                }
+            }
+        },
         "/api/lookup/resource-types": {
             "get": {
                 "tags": [
@@ -3280,6 +3554,147 @@
                 ]
             }
         },
+        "/api/publications/sections/recommended": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Home-style recommended publications (paginated)",
+                "description": "Matches the web home **Recommended** strip: strictly featured pool plus preference- and favorite-tag–based publications when a Bearer token is sent (`auth.passport` optional). Paginate with `page` and `per_page` (aliases: `page_size`, `limit`) for infinite scroll. Defaults: page=1, per_page=20 (max 100). `data.meta`: `has_more`, `ranking_total` (size of diversified ranking window, not full DB count). `data.visible` follows `settings.show_featured`.",
+                "operationId": "PublicationsSectionRecommended",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "1-based page index",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Page size (default 20)",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "description": "Legacy alias for per_page",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status, data.key, data.title, data.visible, data.items[], data.meta"
+                    }
+                }
+            }
+        },
+        "/api/publications/sections/top-searches": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Top publications by visits (paginated)",
+                "description": "Same ranking as the web home **Top Searches** strip: `order_by_visits` with stable order (`skip_random_order`). Paginate with `page` and `per_page` (aliases: `page_size`, `limit`). Defaults: page=1, per_page=20 (max 100). `data.meta`: `total`, `last_page`, `has_more`. `data.visible` follows `settings.show_top_searches`.",
+                "operationId": "PublicationsSectionTopSearches",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status, data.items[], data.meta (page, per_page, total, last_page, has_more)"
+                    }
+                }
+            }
+        },
+        "/api/publications/sections/flagship-initiatives": {
+            "get": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Flagship initiatives (category 10, paginated)",
+                "description": "Publications in **category / publication category id 10**, same pool as the web home initiatives strip. For infinite scroll this endpoint uses **stable** ordering (visits, then id), not the web carousel’s single-page random shuffle. Paginate with `page` and `per_page` (aliases: `page_size`, `limit`). Defaults: page=1, per_page=20 (max 100). `data.meta`: `total`, `last_page`, `has_more`.",
+                "operationId": "PublicationsSectionFlagshipInitiatives",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "status, data.items[], data.meta (page, per_page, total, last_page, has_more)"
+                    }
+                }
+            }
+        },
         "/api/publications/published": {
             "get": {
                 "tags": [
@@ -4010,6 +4425,14 @@
         {
             "name": "Forums",
             "description": "Forums"
+        },
+        {
+            "name": "Health topics",
+            "description": "Health topics"
+        },
+        {
+            "name": "Home",
+            "description": "Home"
         },
         {
             "name": "Lookup",

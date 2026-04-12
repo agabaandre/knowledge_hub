@@ -29,30 +29,53 @@ class AuthApiController extends ApiController
      *     operationId="UserRegistration",
      *     tags={"Authentication"},
      *     summary="User Registration",
-     *     description="Register a new user",
+     *     description="Same fields as web `POST /registration` (register form). Password min length 8. Send `preferences` as sub-theme IDs (at least one). If `job_missing` is true/1, `job` from the dropdown is optional; otherwise `job` is required unless `job_title_custom` is provided. Use multipart for `photo`. JSON-encoded arrays accepted for `preferences` and `communities` when sent as strings.",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
+     *                 required={"firstname","lastname","email","password","password_confirmation","phone","country_id","preferences"},
      *                 @OA\Property(property="firstname", type="string"),
      *                 @OA\Property(property="lastname", type="string"),
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 @OA\Property(property="phone", type="string", description="Min 10 characters"),
+     *                 @OA\Property(property="password", type="string", format="password", description="Min 8 characters"),
+     *                 @OA\Property(property="password_confirmation", type="string", format="password"),
      *                 @OA\Property(property="country_id", type="integer"),
-     *                 @OA\Property(property="job", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
+     *                 @OA\Property(property="job", type="string", description="Job title from lookup list (name or id); omit when job_missing=1"),
+     *                 @OA\Property(property="job_missing", type="boolean", description="My job title is missing from the list"),
+     *                 @OA\Property(property="job_title_custom", type="string", description="Custom job title when job_missing"),
+     *                 @OA\Property(property="preferences", type="array", description="Sub-theme IDs (Your Interests)", @OA\Items(type="integer")),
+     *                 @OA\Property(property="communities", type="array", description="Preferred community IDs to join", @OA\Items(type="integer")),
+     *                 @OA\Property(property="organization_name", type="string"),
+     *                 @OA\Property(property="orcid", type="string", maxLength=19),
+     *                 @OA\Property(property="langauge", type="string", description="Site language code (same spelling as web form, e.g. en)"),
+     *                 @OA\Property(property="subscribe", type="boolean", description="Newsletter opt-in (also accepts is_subscribed)"),
+     *                 @OA\Property(property="is_subscribed", type="boolean"),
+     *                 @OA\Property(property="photo", type="string", format="binary", description="Profile photo")
+     *             )
+     *         ),
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"firstname","lastname","email","password","password_confirmation","phone","country_id","preferences"},
+     *                 @OA\Property(property="firstname", type="string"),
+     *                 @OA\Property(property="lastname", type="string"),
      *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="phone", type="string"),
      *                 @OA\Property(property="password", type="string"),
      *                 @OA\Property(property="password_confirmation", type="string"),
-     *                 @OA\Property(property="preferences", type="array",
-     *                     @OA\Items(type="integer"),
-     *                     description="Array of Preference Ids",
-     *                     example={1, 2, 3}
-     *                 ),
-     *                 @OA\Property(
-     *                     property="photo",
-     *                     type="string",
-     *                     format="binary",
-     *                     description="Photo file to upload"
-     *                 )
+     *                 @OA\Property(property="country_id", type="integer"),
+     *                 @OA\Property(property="job", type="string"),
+     *                 @OA\Property(property="job_missing", type="boolean"),
+     *                 @OA\Property(property="job_title_custom", type="string"),
+     *                 @OA\Property(property="preferences", type="array", @OA\Items(type="integer")),
+     *                 @OA\Property(property="communities", type="array", @OA\Items(type="integer")),
+     *                 @OA\Property(property="organization_name", type="string"),
+     *                 @OA\Property(property="orcid", type="string"),
+     *                 @OA\Property(property="langauge", type="string"),
+     *                 @OA\Property(property="subscribe", type="boolean"),
+     *                 @OA\Property(property="is_subscribed", type="boolean")
      *             )
      *         )
      *     ),
@@ -83,15 +106,39 @@ class AuthApiController extends ApiController
      */
     public function register(Request $request)
     {
-        $this->validate($request, [
-            'firstname' => 'required|string|max:255',
-            'lastname' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:6|confirmed',
-            'phone' => 'required|string|min:10',
-            'job' => 'required|string|min:4',
-            'country_id' => 'required|integer'
+        $this->normalizeRegistrationRequest($request);
+
+        $request->validate([
+            'firstname' => ['required', 'string', 'max:255'],
+            'lastname' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['required', 'string', 'min:10'],
+            'country_id' => ['required', 'integer', 'exists:country,id'],
+            'preferences' => ['required', 'array', 'min:1'],
+            'preferences.*' => ['integer', 'exists:sub_thematic_area,id'],
+            'job' => [
+                Rule::excludeIf(fn () => $request->boolean('job_missing')),
+                'required_without:job_title_custom',
+                'nullable',
+                'string',
+                'max:255',
+            ],
+            'job_title_custom' => ['nullable', 'string', 'max:255'],
+            'job_missing' => ['sometimes', 'boolean'],
+            'communities' => ['sometimes', 'array'],
+            'communities.*' => ['integer', 'exists:community_of_practices,id'],
+            'organization_name' => ['nullable', 'string', 'max:255'],
+            'orcid' => ['nullable', 'string', 'max:19'],
+            'langauge' => ['nullable', 'string', 'max:32'],
+            'subscribe' => ['sometimes'],
+            'is_subscribed' => ['sometimes', 'boolean'],
+            'photo' => ['sometimes', 'file', 'image', 'max:5120'],
         ]);
+
+        if ($request->boolean('is_subscribed') || $request->boolean('subscribe')) {
+            $request->merge(['subscribe' => 'on']);
+        }
 
         $user   = $this->usersRepo->save($request);
         $client = \Laravel\Passport\Client::where('password_client', 1)->first();
@@ -770,5 +817,32 @@ class AuthApiController extends ApiController
 
         return response()->json(['message' => 'Unable to log you in'], 400);
     }
-    
+
+    /**
+     * Decode JSON array strings for multipart clients; normalize job_missing to boolean (matches web checkbox semantics).
+     */
+    private function normalizeRegistrationRequest(Request $request): void
+    {
+        foreach (['preferences', 'communities'] as $key) {
+            if (! $request->has($key)) {
+                continue;
+            }
+            $v = $request->input($key);
+            if (is_string($v)) {
+                $t = trim($v);
+                if ($t !== '' && str_starts_with($t, '[')) {
+                    $decoded = json_decode($t, true);
+                    if (is_array($decoded)) {
+                        $request->merge([$key => $decoded]);
+                    }
+                }
+            }
+        }
+
+        if ($request->has('job_missing')) {
+            $jm = $request->input('job_missing');
+            $truthy = $jm === true || $jm === 1 || $jm === '1' || $jm === 'true' || $jm === 'on' || $jm === 'yes';
+            $request->merge(['job_missing' => $truthy]);
+        }
+    }
 }
