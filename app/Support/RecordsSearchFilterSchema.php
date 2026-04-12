@@ -137,9 +137,9 @@ final class RecordsSearchFilterSchema
                 'multi' => false,
                 'allow_all' => true,
                 'all_value' => 'all',
-                'options' => Region::query()->orderBy('name')->get()->map(fn ($r) => [
+                'options' => Region::query()->orderBy('region_name')->get()->map(fn ($r) => [
                     'value' => (string) $r->id,
-                    'label' => (string) $r->name,
+                    'label' => (string) $r->region_name,
                 ])->values()->all(),
             ];
             $advanced['controls'][] = [
