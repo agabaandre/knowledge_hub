@@ -461,23 +461,25 @@
                     "Authentication"
                 ],
                 "summary": "User Login",
-                "description": "Authenticate a user and return a token",
+                "description": "Authenticate with the account email and password. Returns a bearer token.",
                 "operationId": "UserLogin",
                 "requestBody": {
+                    "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
+                                "required": [
+                                    "email",
+                                    "password"
+                                ],
                                 "properties": {
-                                    "username": {
-                                        "description": "User email (or send email instead)",
-                                        "type": "string"
-                                    },
                                     "email": {
                                         "type": "string",
                                         "format": "email"
                                     },
                                     "password": {
-                                        "type": "string"
+                                        "type": "string",
+                                        "format": "password"
                                     }
                                 },
                                 "type": "object"

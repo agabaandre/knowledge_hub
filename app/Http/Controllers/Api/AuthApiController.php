@@ -159,14 +159,15 @@ class AuthApiController extends ApiController
      *     operationId="UserLogin",
      *     tags={"Authentication"},
      *     summary="User Login",
-     *     description="Authenticate a user and return a token",
+     *     description="Authenticate with the account email and password. Returns a bearer token.",
      *     @OA\RequestBody(
+     *         required=true,
      *         @OA\MediaType(
      *             mediaType="application/json",
      *             @OA\Schema(
-     *                 @OA\Property(property="username", type="string", description="User email (or send email instead)"),
+     *                 required={"email","password"},
      *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="password", type="string")
+     *                 @OA\Property(property="password", type="string", format="password")
      *             )
      *         )
      *     ),
@@ -198,17 +199,11 @@ class AuthApiController extends ApiController
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required_without:email|nullable|string',
-            'email' => 'required_without:username|nullable|string|email',
-            'password' => 'required|string',
+            'email' => ['required', 'string', 'email'],
+            'password' => ['required', 'string'],
         ]);
 
-        $loginEmail = $request->input('username', $request->input('email'));
-        if (! $loginEmail) {
-            return response()->json([
-                'message' => 'Email (username or email field) is required',
-            ], 422);
-        }
+        $loginEmail = $request->input('email');
 
         if (!Auth::attempt(['email' => $loginEmail, 'password' => $request->password])) {
             return response()->json([
