@@ -146,6 +146,21 @@
 .pdf-chat-send-btn:disabled {
   cursor: not-allowed;
 }
+#pdf-chat-modal .pdf-chat-send-btn.btn-primary,
+#pdf-chat-modal button.pdf-chat-send-btn {
+  background-color: var(--theme-color-primary, #119A48) !important;
+  border-color: var(--theme-color-primary, #119A48) !important;
+  color: #fff !important;
+}
+#pdf-chat-modal .pdf-chat-send-btn.btn-primary:hover:not(:disabled),
+#pdf-chat-modal button.pdf-chat-send-btn:hover:not(:disabled) {
+  background-color: color-mix(in srgb, var(--theme-color-primary, #119A48) 88%, #000) !important;
+  border-color: color-mix(in srgb, var(--theme-color-primary, #119A48) 88%, #000) !important;
+  color: #fff !important;
+}
+#pdf-chat-modal .pdf-chat-send-btn:disabled {
+  opacity: 0.65;
+}
 </style>
 <div class="modal fade" id="pdf-chat-modal" tabindex="-1" role="dialog" aria-labelledby="pdf-chat-modal-label" aria-hidden="true">
   <div class="modal-dialog" role="document">

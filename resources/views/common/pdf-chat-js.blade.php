@@ -142,7 +142,7 @@
     var el = document.createElement('div');
     el.className = 'pdf-chat-msg ' + role;
     var label = role === 'user' ? 'You' : 'Assistant';
-    var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? markdownToHtml(content) : escapeHtml(content));
+    var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? formatAssistantReply(content) : escapeHtml(content));
     var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder;
     var actionsHtml = showExportOnResponse
       ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>'
@@ -201,6 +201,66 @@
     return s.replace(/<p><\/p>/g, '').replace(/<p>(<h[1-4]>)/g, '$1').replace(/(<\/h[1-4]>)<\/p>/g, '$1').replace(/<p>(<ul>)/g, '$1').replace(/(<\/ul>)<\/p>/g, '$1');
   }
 
+  /** True when the model returned HTML (legacy prompts); must not run through markdownToHtml's escape step. */
+  function looksLikeAssistantHtml(text) {
+    return /<\s*\/?(p|ul|ol|li|h[1-6]|div|strong|em|b|i|br|hr|a)\b/i.test(String(text));
+  }
+
+  function sanitizeAssistantHtml(html) {
+    var allowed = { P: 1, UL: 1, OL: 1, LI: 1, H3: 1, H4: 1, H2: 1, STRONG: 1, EM: 1, B: 1, I: 1, BR: 1, HR: 1, A: 1, DIV: 1, SPAN: 1 };
+    var doc = new DOMParser().parseFromString('<div class="pdf-chat-san-wrap">' + String(html) + '</div>', 'text/html');
+    var wrap = doc.body.querySelector('.pdf-chat-san-wrap');
+    if (!wrap) return escapeHtml(html);
+    function cleanNode(node) {
+      var child = node.firstChild;
+      while (child) {
+        var next = child.nextSibling;
+        if (child.nodeType === 1) {
+          var tag = child.tagName;
+          if (!allowed[tag]) {
+            while (child.firstChild) node.insertBefore(child.firstChild, child);
+            node.removeChild(child);
+          } else {
+            var attrs = child.attributes;
+            for (var i = attrs.length - 1; i >= 0; i--) {
+              var nm = attrs[i].name.toLowerCase();
+              if (nm.indexOf('on') === 0) {
+                child.removeAttribute(attrs[i].name);
+              } else if (tag === 'A') {
+                if (nm !== 'href' && nm !== 'target' && nm !== 'rel') child.removeAttribute(attrs[i].name);
+              } else if (nm === 'style' || nm === 'id') {
+                child.removeAttribute(attrs[i].name);
+              }
+            }
+            if (tag === 'A') {
+              var href = child.getAttribute('href') || '';
+              if (!/^https?:\/\//i.test(href)) {
+                child.removeAttribute('href');
+              } else {
+                child.setAttribute('rel', 'noopener noreferrer');
+                child.setAttribute('target', '_blank');
+              }
+            }
+            cleanNode(child);
+          }
+        } else if (child.nodeType !== 3 && child.nodeType !== 1 && child.nodeType !== 8) {
+          node.removeChild(child);
+        }
+        child = next;
+      }
+    }
+    cleanNode(wrap);
+    return wrap.innerHTML;
+  }
+
+  function formatAssistantReply(text) {
+    if (!text) return '';
+    if (looksLikeAssistantHtml(text)) {
+      return sanitizeAssistantHtml(text);
+    }
+    return markdownToHtml(text);
+  }
+
   function setStreamingContent(contentEl, text) {
     contentEl.textContent = text;
     messagesEl().scrollTop = messagesEl().scrollHeight;
@@ -208,7 +268,7 @@
 
   function finalizeStreamingMessage(contentEl) {
     var text = contentEl.textContent || '';
-    contentEl.innerHTML = markdownToHtml(text);
+    contentEl.innerHTML = formatAssistantReply(text);
     var msgDiv = contentEl.closest('.pdf-chat-msg');
     if (msgDiv && text) {
       var btn = '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>';

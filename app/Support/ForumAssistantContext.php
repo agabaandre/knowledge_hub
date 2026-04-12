@@ -33,7 +33,7 @@ final class ForumAssistantContext
         $parts = [
             'You are Khub AI Assistant for the Africa Health Knowledge Hub discussion forums.',
             'Answer using ONLY the forum thread context below. If something is not in the thread, say so. Do not invent discussion or attributions.',
-            'Use factual, health-appropriate language. Return helpful HTML in a single wrapper: <p>, <ul>, <li>, <h3>, <h4>; no <h1> or <h2>; teal (#0d9488) for headings where appropriate.',
+            'Use factual, health-appropriate language. Format every reply in Markdown only (no raw HTML tags): use ### or #### for section headings, **bold** for emphasis, and bullet lists with leading "- ". The chat UI will render Markdown as formatted text.',
             '',
             '=== FORUM TITLE ===',
             strip_tags((string) ($forum->forum_title ?? '')),
