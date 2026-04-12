@@ -716,34 +716,23 @@
                         </div>
                     </div>
                     
-                    <!-- Action Buttons - Favorite, Chat with PDF (if PDF) or Summarise (if non-PDF); both require auth -->
+                    <!-- Action Buttons - Favorite, Khub AI Assistant (PDF via ChatPDF; other formats via GPT context) -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('common.favourites_btn',['row'=>$publication])
                 @auth
-                    @if($publication->has_any_pdf)
                     <button type="button" class="btn btn-au btn-sm js-open-pdf-chat"
                             data-publication-id="{{ $publication->id }}"
-                            data-attachment-id="{{ $publication->pdf_sources[0]['attachment_id'] ?? '' }}"
+                            data-attachment-id="{{ $publication->has_any_pdf ? ($publication->pdf_sources[0]['attachment_id'] ?? '') : '' }}"
+                            data-assistant-mode="{{ $publication->has_any_pdf ? 'chatpdf' : 'publication' }}"
                             data-doc-title="{{ e(Str::limit(strip_tags($publication->title ?? 'Document'), 200)) }}"
-                            onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($publication->pdf_sources[0]['attachment_id'] ?? null), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)))">
-                        <i class="fa-solid fa-microchip"></i> Chat with PDF
+                            onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($publication->has_any_pdf ? ($publication->pdf_sources[0]['attachment_id'] ?? null) : null), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)), @json($publication->has_any_pdf ? 'chatpdf' : 'publication'))">
+                        <i class="fa-solid fa-microchip"></i> Khub AI Assistant
                     </button>
-                    @else
-                    <button onclick="summarise({{ $publication->id }})" class="btn btn-au btn-sm">
-                        <i class="fa-solid fa-microchip"></i> Summarise
-                    </button>
-                    @endif
                 @else
-                    @if($publication->has_any_pdf)
                     <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
-                        <i class="fa-solid fa-microchip"></i> Chat with PDF <small>(login required)</small>
+                        <i class="fa-solid fa-microchip"></i> Khub AI Assistant <small>(login required)</small>
                     </a>
-                    @else
-                    <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
-                        <i class="fa-solid fa-microchip"></i> Summarise <small>(login required)</small>
-                    </a>
-                    @endif
                 @endauth
             </div>
                         <div class="d-flex gap-2">
@@ -1286,16 +1275,16 @@
     </div>
 </section>
 </article>
-@include('common.ai-summary')
-@if($publication->has_any_pdf ?? false)
+@auth
 @include('common.pdf-chat-modal')
 <script>
   var pdfChatPublicationId = {{ $publication->id }};
-  var pdfChatAttachmentId = @json($publication->pdf_sources[0]['attachment_id'] ?? null);
+  var pdfChatAttachmentId = @json($publication->has_any_pdf ? ($publication->pdf_sources[0]['attachment_id'] ?? null) : null);
   var pdfChatDocumentTitle = @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200));
+  window.pdfChatAssistantMode = @json($publication->has_any_pdf ? 'chatpdf' : 'publication');
 </script>
 @include('common.pdf-chat-js')
-@endif
+@endauth
 <!-- Modal for preview - Bootstrap 4 compatible -->
 <div class="modal fade" id="previewModal" tabindex="-1" role="dialog" aria-labelledby="previewModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered" role="document" style="max-width: 100vw; width: 100vw; margin: 0; padding: 0;">

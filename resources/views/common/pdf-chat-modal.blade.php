@@ -1,4 +1,4 @@
-{{-- Full-screen PDF chat modal (ChatPDF). Include only on publication show when publication has PDF. --}}
+{{-- Full-screen Khub AI Assistant (ChatPDF for PDFs; GPT context for other resources). --}}
 <style>
 #pdf-chat-modal .modal-dialog {
   max-width: 100%;
@@ -153,7 +153,7 @@
       <div class="modal-header">
         <div class="flex-grow-1">
           <h5 class="modal-title mb-0" id="pdf-chat-modal-label">
-            <i class="fa-solid fa-microchip"></i> Chat with PDF
+            <i class="fa-solid fa-microchip"></i> Khub AI Assistant
           </h5>
           <p class="pdf-chat-doc-title mb-0" id="pdf-chat-doc-title" aria-hidden="true">—</p>
           <div class="pdf-chat-export-toolbar">
@@ -177,7 +177,7 @@
       </div>
       <div class="modal-footer">
         <div class="pdf-chat-input-wrap w-100">
-          <textarea class="form-control" id="pdf-chat-input" placeholder="Ask anything about this PDF..." rows="1"></textarea>
+          <textarea class="form-control" id="pdf-chat-input" placeholder="Ask anything about this resource..." rows="1"></textarea>
           <button type="button" class="btn btn-primary pdf-chat-send-btn" id="pdf-chat-send">
             <i class="fa fa-paper-plane"></i> Send
           </button>

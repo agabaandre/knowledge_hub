@@ -156,6 +156,82 @@ class ChatGPTService implements AIModel{
         curl_close($ch);
     }
 
+    /**
+     * Multi-turn chat with streaming (e.g. Khub AI Assistant for non-PDF resources).
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    public function chatMessagesStream(array $messages, callable $onChunk): void
+    {
+        $api_key = config('ai.open_api_key');
+        if (empty($api_key)) {
+            $onChunk('<div class="alert alert-danger">AI is not configured.</div>');
+
+            return;
+        }
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$api_key,
+        ];
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => $messages,
+            'max_tokens' => 3096,
+            'stream' => true,
+        ];
+        $jsonData = json_encode($payload);
+        $headers[] = 'Content-Length: '.strlen($jsonData);
+
+        $ch = curl_init($endpoint);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
+            $len = strlen($data);
+            if ($len > 0) {
+                $this->parseSSELine($data, $onChunk);
+            }
+
+            return $len;
+        });
+
+        curl_exec($ch);
+        if (curl_errno($ch)) {
+            Log::error('OpenAI chat stream error: '.curl_error($ch));
+            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
+        }
+        curl_close($ch);
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    public function chatMessagesComplete(array $messages): string
+    {
+        $api_key = config('ai.open_api_key');
+        if (empty($api_key)) {
+            return '<div class="alert alert-danger">AI is not configured.</div>';
+        }
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$api_key,
+        ];
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => $messages,
+            'max_tokens' => 3096,
+        ];
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+
+        return $content !== null && $content !== ''
+            ? $content
+            : '<div class="alert alert-danger">No response from AI.</div>';
+    }
+
     private function parseSSELine(string $data, callable $onChunk): void
     {
         $lines = explode("\n", $data);

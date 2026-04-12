@@ -150,15 +150,9 @@
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>
-                                @if($row->has_any_pdf ?? false)
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
-                                    <i class="fa-solid fa-microchip me-1"></i> Chat with PDF
+                                    <i class="fa-solid fa-microchip me-1"></i> Khub AI Assistant
                                 </a>
-                                @else
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
-                                    <i class="fa-solid fa-microchip me-1"></i> Summarise
-                                </a>
-                                @endif
                                 <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
                                 @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))
                                 <span class="text-muted small"><i class="fa fa-comments me-1"></i>{{ $row->comments->count() }} Comments</span>

@@ -52,6 +52,7 @@ Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::post("/",[PublicationsApiController::class,"store"]);
     Route::get("/published",[PublicationsApiController::class,"my_publications"]);
     Route::post("/comment",[PublicationsApiController::class,"comment"]);
+    Route::post('/{id}', [PublicationsApiController::class, 'update'])->where('id', '[0-9]+');
     Route::get("/favourites",[PublicationsApiController::class,"favourites"]);
     Route::get("/add_favourite",[PublicationsApiController::class,"add_favourite"]);
     Route::post("/content-request",[PublicationsApiController::class,"content_request"]);

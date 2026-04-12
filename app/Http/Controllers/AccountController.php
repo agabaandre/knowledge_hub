@@ -7,6 +7,7 @@ use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 use App\Models\AccessLevel;
 use App\Models\PdfChatSession;
+use App\Support\PublicationSubmissionValidation;
 
 class AccountController extends Controller
 {
@@ -215,82 +216,6 @@ class AccountController extends Controller
 
     public function submit_publication(Request $request){
 
-        // Get minimum word count from settings (default 150 words = ~750 characters)
-        $minWords = settings()->publication_min_words ?? 150;
-        $minChars = $minWords * 5; // Approximate: 5 characters per word
-
-        // Get required fields from settings
-        $requiredFields = json_decode(settings()->publication_required_fields ?? '{}', true);
-        if (empty($requiredFields)) {
-            $requiredFields = [
-                'title' => true,
-                'description' => true,
-                'associated_authors' => true,
-                'tags' => true,
-                'theme' => true,
-                'sub_theme' => true,
-                'data_category_id' => true,
-            ];
-        }
-
-        // Check if user is admin using the same logic as the view (role name contains 'admin')
-        $isAdmin = false;
-        if (auth()->check()) {
-            $role = \get_role(auth()->user()->id);
-            $isAdmin = ($role && strpos(strtolower($role->name), 'admin') !== false);
-        }
-
-        $val_rules = [
-            'title' => ($requiredFields['title'] ?? true) ? 'required|string|max:500' : 'nullable|string|max:500',
-            'description' => ($requiredFields['description'] ?? true) ? 'required|string|min:' . $minChars : 'nullable|string|min:' . $minChars,
-            'associated_authors' => ($requiredFields['associated_authors'] ?? true) ? 'required|string|max:500' : 'nullable|string|max:500',
-            'author_affiliation' => 'required|string|max:500',
-            'tags' => ($requiredFields['tags'] ?? true) ? 'required|array|min:1' : 'nullable|array',
-            'tags.*' => 'exists:tags,id',
-            'theme' => ($requiredFields['theme'] ?? true) ? 'required' : 'nullable',
-            'sub_theme' => ($requiredFields['sub_theme'] ?? true) ? 'required' : 'nullable',
-            'data_category_id' => ($requiredFields['data_category_id'] ?? true) ? 'required' : 'nullable',
-            'year_published' => ($requiredFields['year_published'] ?? false) ? 'required|integer|min:1900|max:' . date('Y') : 'nullable|integer|min:1900|max:' . date('Y'),
-            // Author field: only required for admins OR if explicitly set in requiredFields
-            // For non-admin users, author_id is automatically set from user's author_id
-            'author' => ($isAdmin && ($requiredFields['author'] ?? false)) ? 'required' : 'nullable',
-            'doi' => ($requiredFields['doi'] ?? false) ? 'required|string|max:255' : 'nullable|string|max:255',
-            'issn' => ($requiredFields['issn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
-            'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
-            'license_id' => ($requiredFields['license_id'] ?? false) ? 'required|exists:licenses,id' : 'nullable|exists:licenses,id',
-            'copyright_info' => ($requiredFields['copyright_info'] ?? false) ? 'required|string' : 'nullable|string',
-            // Member States are optional when audience is global/All
-            'countries' => 'nullable|array',
-            'countries.*' => 'exists:country,id',
-        ];
-
-        $messages = [
-            'data_category_id.required' => 'Please select a category for your resource.',
-            'theme.required' => 'Please select a thematic area.',
-            'sub_theme.required' => 'Please select a sub-theme.',
-            'title.required' => 'A resource title is required. Please provide a clear, descriptive title.',
-            'title.max' => 'The title cannot exceed 500 characters.',
-            'description.required' => 'A description is required. Please describe your resource in detail.',
-            'description.min' => 'The description must be at least ' . $minWords . ' words (approximately ' . $minChars . ' characters). Please provide more details about your resource.',
-            'associated_authors.required' => 'Associated authors are required. Please list the authors or co-authors.',
-            'associated_authors.max' => 'Associated authors cannot exceed 500 characters.',
-            'author_affiliation.required' => 'Author affiliation/institution is required. Please enter the institution or organization of the authors.',
-            'author_affiliation.max' => 'Author affiliation cannot exceed 500 characters.',
-            'tags.required' => 'Please select at least one tag/health topic to help categorize your publication.',
-            'tags.min' => 'Please select at least one tag/health topic.',
-            'tags.*.exists' => 'One or more selected tags are invalid.',
-            'year_published.required' => 'Year published is required.',
-            'author.required' => 'Source/Author is required.',
-            'doi.required' => 'DOI is required.',
-            'issn.required' => 'ISSN is required.',
-            'isbn.required' => 'ISBN is required.',
-            'license_id.required' => 'License is required.',
-            'copyright_info.required' => 'Copyright information is required.',
-            'countries.required' => 'Please select at least one member state.',
-            'countries.array' => 'Please select at least one member state.',
-            'countries.min' => 'Please select at least one member state.',
-        ];
-
         // For non-admin users, ensure they have an author_id set
         if (!is_admin() && !auth()->user()->author_id) {
             if ($request->ajax()) {
@@ -305,27 +230,16 @@ class AccountController extends Controller
             ])->withInput();
         }
 
-        // For link type, require URL
-        if($request->upload_type == 'link'):
-            $val_rules['link'] = 'required|url';
-            $messages['link.required'] = 'Please provide the external link URL for your resource.';
-            $messages['link.url'] = 'Please provide a valid URL (starting with http:// or https://).';
-        endif;
+        if ($request->original_id) {
+            $request->merge(['file_type' => 1]);
+        }
 
-        // Attachments are optional at submission time (user may supply a link instead)
+        if (! $request->is_active) {
+            $request['is_active'] = 'In-Active';
+        }
 
-        if($request->original_id):
-            unset($val_rules['sub_theme']);
-            unset($val_rules['title']);
-            $request['file_type'] = 1;
-        endif;
-        
-        if(!$request->is_active)
-         $request['is_active']='In-Active';
-
-        if($request->id):
-            unset($val_rules['cover']);
-        endif;
+        $val_rules = PublicationSubmissionValidation::rules($request);
+        $messages = PublicationSubmissionValidation::messages($request);
 
         $request->validate($val_rules, $messages);
 

@@ -9,7 +9,7 @@ class PdfChatSession extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'publication_id', 'attachment_id', 'source_id'];
+    protected $fillable = ['user_id', 'publication_id', 'attachment_id', 'source_id', 'assistant_mode'];
 
     public function user()
     {

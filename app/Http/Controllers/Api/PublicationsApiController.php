@@ -3,13 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Publication;
-use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Api\ApiController;
-use Illuminate\Support\Str;
+use App\Support\PublicationSubmissionValidation;
+use Illuminate\Validation\ValidationException;
 use Log;
 
 class PublicationsApiController extends ApiController
@@ -302,21 +302,44 @@ class PublicationsApiController extends ApiController
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 type="object",
-     *                 required={"cover", "data_category_id", "sub_theme", "description", "user_id"},
-     *                 @OA\Property(property="cover", type="file"),
-     *                 @OA\Property(property="data_category_id", type="integer"),
-     *                 @OA\Property(property="sub_theme", type="integer"),
+     *                 description="Same fields as the web publish wizard (account/publish). Required fields follow admin settings (publication_required_fields, publication_min_words).",
+     *                 required={"title","description","associated_authors","author_affiliation","tags","theme","sub_theme","data_category_id"},
+     *                 @OA\Property(property="upload_type", type="string", enum={"upload","link"}, description="link requires link URL"),
+     *                 @OA\Property(property="link", type="string", format="uri", description="External resource URL when upload_type=link"),
+     *                 @OA\Property(property="is_embedded", type="boolean", description="Embed linked content on the resource page"),
      *                 @OA\Property(property="title", type="string"),
-     *                 @OA\Property(property="description", type="string"),
-     *                 @OA\Property(property="author", type="integer", nullable=true),
-     *                 @OA\Property(property="user_id", type="integer", nullable=true),
-     *                 @OA\Property(property="publication_category_id", type="integer"),
-     *                 @OA\Property(property="link", type="string", nullable=true),
-     *                 @OA\Property(property="communities", type="array", nullable=true, @OA\Items(type="integer")),
-     *                 @OA\Property(property="preferences", type="array", nullable=true, @OA\Items(type="integer"), description="Array of Preference Ids", example={1}),
-     *                 @OA\Property(property="rccs", type="array", nullable=false, @OA\Items(type="integer"), description="Array of Region Ids", example={1}),
-     *                 @OA\Property(property="countries", type="array", nullable=false, @OA\Items(type="integer"), description="Array of Country Ids", example={1})
-     *             )    
+     *                 @OA\Property(property="year_published", type="integer"),
+     *                 @OA\Property(property="data_category_id", type="integer", description="Resource category (wizard Category)"),
+     *                 @OA\Property(property="category_id", type="integer", description="File/resource sub-type (wizard Sub Category)"),
+     *                 @OA\Property(property="publication_sub_category_id", type="integer", nullable=true),
+     *                 @OA\Property(property="theme", type="integer", description="Thematic area id"),
+     *                 @OA\Property(property="sub_theme", type="integer", description="Sub-thematic area id"),
+     *                 @OA\Property(property="tags", type="array", @OA\Items(type="integer"), description="Health topic tag ids"),
+     *                 @OA\Property(property="description", type="string", description="HTML or plain text; min length from settings"),
+     *                 @OA\Property(property="associated_authors", type="string"),
+     *                 @OA\Property(property="author_affiliation", type="string"),
+     *                 @OA\Property(property="doi", type="string", nullable=true),
+     *                 @OA\Property(property="issn", type="string", nullable=true),
+     *                 @OA\Property(property="isbn", type="string", nullable=true),
+     *                 @OA\Property(property="publisher", type="string", nullable=true),
+     *                 @OA\Property(property="license_id", type="integer", nullable=true),
+     *                 @OA\Property(property="funder", type="string", nullable=true),
+     *                 @OA\Property(property="copyright_info", type="string", nullable=true),
+     *                 @OA\Property(property="journal_name", type="string", nullable=true),
+     *                 @OA\Property(property="journal_volume", type="string", nullable=true),
+     *                 @OA\Property(property="journal_issue", type="string", nullable=true),
+     *                 @OA\Property(property="journal_pages", type="string", nullable=true),
+     *                 @OA\Property(property="rccs", type="array", @OA\Items(type="integer"), description="Regional coverage ids"),
+     *                 @OA\Property(property="countries", type="array", @OA\Items(type="integer"), description="Member state country ids"),
+     *                 @OA\Property(property="communities", type="array", @OA\Items(type="integer"), description="Target communities of practice"),
+     *                 @OA\Property(property="tag_all_my_communities", type="boolean", nullable=true),
+     *                 @OA\Property(property="cover", type="string", format="binary", description="Cover image (optional; default cover if omitted)"),
+     *                 @OA\Property(property="cover_url", type="string", nullable=true, description="External cover URL when editing"),
+     *                 @OA\Property(property="files", type="array", @OA\Items(type="string", format="binary"), description="Attachments (multipart files[])"),
+     *                 @OA\Property(property="author", type="integer", nullable=true, description="Admin only: source author id"),
+     *                 @OA\Property(property="original_id", type="integer", nullable=true, description="Create new version from this publication id"),
+     *                 @OA\Property(property="show_disclaimer", type="boolean", nullable=true)
+     *             )
      *         )
      *     ),
      *     @OA\Response(
@@ -344,28 +367,59 @@ class PublicationsApiController extends ApiController
      */
     public function store(Request $request)
     {
-        Log::info("Request" . json_encode($request->all()));
+        Log::info('API publication store', ['keys' => array_keys($request->all())]);
 
         $user = auth()->user();
-
-        $val_rules = [
-            'cover' => 'required',
-            'sub_theme' => 'required',
-            'description' => 'required'
-        ];
-
-        $request->validate($val_rules);
-        $result = null;
-
-        if ($user->is_verified) {
-            $result = $this->publicationsRepo->save($request);
+        if (! $user->is_verified) {
+            return response()->json([
+                'status' => 400,
+                'data' => null,
+                'msg' => 'User not verified',
+            ], 400);
         }
 
-        return [
-            "status" => ($user->is_verified) ? 200 : 400,
-            "data" => $result,
-            "msg" => ($user->is_verified) ? "Publication saved successfully" : "User not verified"
-        ];
+        if (! is_admin() && ! $user->author_id) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Your account is not associated with an author. Please contact the administrator to link your account to an author.',
+            ], 422);
+        }
+
+        $this->normalizePublicationArrayInputs($request);
+        $request->merge(['user_id' => null]);
+
+        if ($request->original_id) {
+            $request->merge(['file_type' => 1]);
+        }
+
+        if (! $request->is_active) {
+            $request->merge(['is_active' => 'In-Active']);
+        }
+
+        try {
+            $request->validate(
+                PublicationSubmissionValidation::rules($request),
+                PublicationSubmissionValidation::messages($request)
+            );
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        if (! $request->has('show_disclaimer')) {
+            $request->merge(['show_disclaimer' => 1]);
+        }
+
+        $result = $this->publicationsRepo->save($request);
+
+        return response()->json([
+            'status' => $result ? 200 : 400,
+            'data' => $result,
+            'msg' => $result ? 'Publication saved successfully' : 'Request failed try again',
+        ], $result ? 200 : 400);
     }
 
     /**
@@ -466,22 +520,25 @@ class PublicationsApiController extends ApiController
      *     summary="Update Publication",
      *     operationId="UpdatePublication",
      *     security={{"bearer_token":{}}},
-     *     description="Allows users to update publications for admin approval",
+     *     description="Update a draft or pending publication (same body as create; id is in the URL). Cover file optional when unchanged.",
      *     @OA\RequestBody(
-     *         @OA\JsonContent(),
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 type="object",
-     *                 required={"cover", "file_type", "sub_theme", "description", "user_id"},
-     *                 @OA\Property(property="cover", type="file"),
-     *                 @OA\Property(property="file_type", type="integer"),
-     *                 @OA\Property(property="sub_theme", type="integer"),
+     *                 @OA\Property(property="upload_type", type="string", enum={"upload","link"}),
+     *                 @OA\Property(property="link", type="string", format="uri"),
      *                 @OA\Property(property="title", type="string"),
      *                 @OA\Property(property="description", type="string"),
-     *                 @OA\Property(property="author", type="integer"),
-     *                 @OA\Property(property="user_id", type="integer"),
-     *                 @OA\Property(property="link", type="string")
+     *                 @OA\Property(property="associated_authors", type="string"),
+     *                 @OA\Property(property="author_affiliation", type="string"),
+     *                 @OA\Property(property="tags", type="array", @OA\Items(type="integer")),
+     *                 @OA\Property(property="theme", type="integer"),
+     *                 @OA\Property(property="sub_theme", type="integer"),
+     *                 @OA\Property(property="data_category_id", type="integer"),
+     *                 @OA\Property(property="category_id", type="integer"),
+     *                 @OA\Property(property="cover", type="string", format="binary"),
+     *                 @OA\Property(property="files", type="array", @OA\Items(type="string", format="binary"))
      *             )
      *         )
      *     ),
@@ -508,24 +565,93 @@ class PublicationsApiController extends ApiController
      *     )
      * )
      */
-    public function update(Request $request, Publication $Publication)
+    public function update(Request $request, int $id)
     {
-        $val_rules = [
-            'cover' => 'required',
-            'file_type' => 'required',
-            'sub_theme' => 'required',
-            'description' => 'required'
-        ];
+        $user = auth()->user();
+        if (! $user->is_verified) {
+            return response()->json([
+                'status' => 400,
+                'data' => null,
+                'msg' => 'User not verified',
+            ], 400);
+        }
 
-        $request->validate($val_rules);
+        $publication = Publication::query()->find($id);
+        if (! $publication) {
+            return response()->json(['status' => 404, 'message' => 'Publication not found'], 404);
+        }
 
-        $publication = $this->publicationsRepo->save($request);
+        if ((int) $publication->user_id !== (int) $user->id && ! is_admin()) {
+            return response()->json(['status' => 403, 'message' => 'Forbidden'], 403);
+        }
 
-        return [
-            "status" => 200,
-            "data" => $publication,
-            "msg" => "Publication updated successfully"
-        ];
+        if ($publication->is_approved && ! is_admin()) {
+            return response()->json([
+                'status' => 403,
+                'message' => 'Approved publications cannot be edited. Contact an administrator if you need changes.',
+            ], 403);
+        }
+
+        if (! is_admin() && ! $user->author_id) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Your account is not associated with an author. Please contact the administrator to link your account to an author.',
+            ], 422);
+        }
+
+        $this->normalizePublicationArrayInputs($request);
+        $request->merge(['id' => $id, 'user_id' => null]);
+
+        if (! $request->is_active) {
+            $request->merge(['is_active' => 'In-Active']);
+        }
+
+        try {
+            $request->validate(
+                PublicationSubmissionValidation::rules($request),
+                PublicationSubmissionValidation::messages($request)
+            );
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        if (! $request->has('show_disclaimer')) {
+            $request->merge(['show_disclaimer' => 1]);
+        }
+
+        $saved = $this->publicationsRepo->save($request);
+
+        return response()->json([
+            'status' => $saved ? 200 : 400,
+            'data' => $saved,
+            'msg' => $saved ? 'Publication updated successfully' : 'Request failed try again',
+        ], $saved ? 200 : 400);
+    }
+
+    /**
+     * Decode JSON-encoded array fields from mobile clients (multipart).
+     */
+    private function normalizePublicationArrayInputs(Request $request): void
+    {
+        foreach (['tags', 'countries', 'rccs', 'communities'] as $key) {
+            if (! $request->has($key)) {
+                continue;
+            }
+            $v = $request->input($key);
+            if (is_string($v)) {
+                $t = trim($v);
+                if ($t !== '' && isset($t[0]) && $t[0] === '[') {
+                    $decoded = json_decode($t, true);
+                    if (is_array($decoded)) {
+                        $request->merge([$key => $decoded]);
+                    }
+                }
+            }
+        }
     }
 
     public function destroy(Publication $publication)

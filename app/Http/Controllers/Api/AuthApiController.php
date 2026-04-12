@@ -8,6 +8,7 @@ use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
 use Auth;
+use Carbon\Carbon;
 use Hash;
 use Password;
 
@@ -115,7 +116,8 @@ class AuthApiController extends ApiController
      *         @OA\MediaType(
      *             mediaType="application/json",
      *             @OA\Schema(
-     *                 @OA\Property(property="username", type="string"),
+     *                 @OA\Property(property="username", type="string", description="User email (or send email instead)"),
+     *                 @OA\Property(property="email", type="string", format="email"),
      *                 @OA\Property(property="password", type="string")
      *             )
      *         )
@@ -148,17 +150,36 @@ class AuthApiController extends ApiController
     public function login(Request $request)
     {
         $request->validate([
-            'username' => 'required',
+            'username' => 'required_without:email|nullable|string',
+            'email' => 'required_without:username|nullable|string|email',
             'password' => 'required|string',
         ]);
 
-        if (!Auth::attempt(['email' => $request->username, "password" => $request->password])) {
+        $loginEmail = $request->input('username', $request->input('email'));
+        if (! $loginEmail) {
+            return response()->json([
+                'message' => 'Email (username or email field) is required',
+            ], 422);
+        }
+
+        if (!Auth::attempt(['email' => $loginEmail, 'password' => $request->password])) {
             return response()->json([
                 'message' => 'Invalid login details'
             ], 401);
         }
 
         $user = Auth::user();
+
+        if ($user->is_social_login) {
+            Auth::logout();
+            $providerLabel = ($user->social_provider !== null && $user->social_provider !== '')
+                ? OAuthAccountSecurity::providerDisplayName((string) $user->social_provider)
+                : 'social';
+
+            return response()->json([
+                'message' => 'This account uses '.$providerLabel.' sign-in. Use social login in the app, or contact support to add a password.',
+            ], 403);
+        }
 
         if(!$user->is_verified){
 
@@ -507,12 +528,12 @@ class AuthApiController extends ApiController
      *     description="Authenticate a user via social login",
      *     @OA\RequestBody(
      *         @OA\JsonContent(
-     *             required={"provider", "email", "name", "photoUrl", "providerId"},
-     *             @OA\Property(property="provider", type="string", example="google"),
+     *             required={"provider", "email", "name"},
+     *             @OA\Property(property="provider", type="string", example="google", description="google, microsoft, linkedin, or linkedin-openid"),
      *             @OA\Property(property="email", type="string"),
      *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="photoUrl", type="string"),
-     *             @OA\Property(property="providerId", type="string")
+     *             @OA\Property(property="photoUrl", type="string", nullable=true),
+     *             @OA\Property(property="providerId", type="string", nullable=true)
      *         )
      *     ),
      *     @OA\Response(
@@ -534,10 +555,18 @@ class AuthApiController extends ApiController
      */
     public function socialLogin(Request $request)
     {
+        if ($request->has('provider')) {
+            $request->merge([
+                'provider' => strtolower(trim((string) $request->input('provider'))),
+            ]);
+        }
+
         $request->validate([
-            'provider' => 'required|string|in:google,microsoft',
+            'provider' => 'required|string|in:google,microsoft,linkedin,linkedin-openid',
             'email' => 'required|string|email',
             'name' => 'required|string',
+            'photoUrl' => 'nullable|string|max:2048',
+            'providerId' => 'nullable|string|max:255',
         ]);
 
         $email = OAuthAccountSecurity::normalizedProviderEmail($request->email);
@@ -554,8 +583,17 @@ class AuthApiController extends ApiController
             }
             if ($existing->is_social_login && empty($existing->social_provider)) {
                 $existing->social_provider = $canonical;
-                $existing->save();
             }
+            if (! $existing->email_verified_at) {
+                $existing->email_verified_at = Carbon::now();
+            }
+            if (! $existing->is_verified) {
+                $existing->is_verified = 1;
+            }
+            if ($existing->status != 1) {
+                $existing->status = 1;
+            }
+            $existing->save();
 
             $user = $existing;
             Auth::login($user);
@@ -597,6 +635,20 @@ class AuthApiController extends ApiController
             $savedUser = $this->socialLoginService->googleCallback($userData);
         } elseif ($canonical === 'microsoft') {
             $savedUser = $this->socialLoginService->microsoftCallback($userData);
+        } elseif ($canonical === 'linkedin') {
+            $linkedinPayload = (object) [
+                'user' => (object) [
+                    'email' => $email,
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
+                    'localizedFirstName' => $firstName,
+                    'localizedLastName' => $lastName,
+                    'headline' => null,
+                    'profilePicture' => $safePicture,
+                    'picture' => $safePicture,
+                ],
+            ];
+            $savedUser = $this->socialLoginService->linkedinCallback($linkedinPayload);
         } else {
             return response()->json(['message' => 'Unsupported provider'], 400);
         }

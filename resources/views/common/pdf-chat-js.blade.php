@@ -2,13 +2,21 @@
 (function () {
   var publicationId = typeof pdfChatPublicationId !== 'undefined' ? pdfChatPublicationId : null;
   var attachmentId = typeof pdfChatAttachmentId !== 'undefined' ? pdfChatAttachmentId : null;
+  var pdfChatAssistantMode = typeof window.pdfChatAssistantMode !== 'undefined' ? window.pdfChatAssistantMode : 'auto';
   var sessionId = null;
   var sourceId = null;
   var isStreaming = false;
 
-  window.openPdfChat = function (pubId, attId, docTitle) {
+  window.openPdfChat = function (pubId, attId, docTitle, assistantModeOpt) {
     publicationId = pubId;
     attachmentId = attId === undefined || attId === '' ? null : attId;
+    if (assistantModeOpt === 'publication' || assistantModeOpt === 'chatpdf' || assistantModeOpt === 'auto') {
+      pdfChatAssistantMode = assistantModeOpt;
+    } else if (typeof window.pdfChatAssistantMode !== 'undefined') {
+      pdfChatAssistantMode = window.pdfChatAssistantMode;
+    } else {
+      pdfChatAssistantMode = 'auto';
+    }
     sessionId = null;
     sourceId = null;
     var titleEl = document.getElementById('pdf-chat-doc-title');
@@ -47,7 +55,8 @@
       if (attId === '' || attId === null || attId === undefined) attId = null;
       else { attId = parseInt(attId, 10); if (isNaN(attId)) attId = null; }
       var docTitle = btn.getAttribute('data-doc-title') || (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Document');
-      openPdfChat(pubId, attId, docTitle);
+      var am = btn.getAttribute('data-assistant-mode');
+      openPdfChat(pubId, attId, docTitle, am || undefined);
     }, true);
   }
   function runPdfChatDelegate() {
@@ -305,7 +314,11 @@
         'X-CSRF-TOKEN': getToken(),
         'Accept': 'application/json'
       },
-      body: JSON.stringify({ publication_id: publicationId, attachment_id: attachmentId || null })
+      body: JSON.stringify({
+        publication_id: publicationId,
+        attachment_id: attachmentId || null,
+        assistant_mode: pdfChatAssistantMode || 'auto'
+      })
     })
       .then(function (r) {
         if (!r.ok) throw new Error('Session failed');
@@ -319,13 +332,19 @@
         }
         sessionId = data.session_id;
         sourceId = data.source_id;
+        if (data.assistant_mode === 'publication' || data.assistant_mode === 'chatpdf') {
+          pdfChatAssistantMode = data.assistant_mode;
+        }
         container.innerHTML = '';
         if (data.messages && data.messages.length) {
           data.messages.forEach(function (m) {
             appendMessage(m.role, m.content, false);
           });
         } else {
-          appendMessage('assistant', 'Ask anything about this PDF. You can request a summary, ask about specific sections, or pose questions.', false);
+          var hint = (pdfChatAssistantMode === 'publication' || data.assistant_mode === 'publication')
+            ? 'Ask anything about this resource using the title, description, and available context. You can request a summary, clarify details, or explore topics related to the content.'
+            : 'Ask anything about this PDF. You can request a summary, ask about specific sections, or pose questions.';
+          appendMessage('assistant', hint, false);
         }
       })
       .catch(function (err) {
@@ -338,7 +357,7 @@
     var input = document.getElementById('pdf-chat-input');
     var text = (input && input.value) ? input.value.trim() : '';
     if (!text || isStreaming) return;
-    if (!sessionId && !sourceId) {
+    if (!sessionId) {
       showError('Session not ready. Please wait or close and try again.');
       return;
     }
@@ -356,6 +375,7 @@
       publication_id: publicationId,
       session_id: sessionId,
       attachment_id: attachmentId || null,
+      assistant_mode: pdfChatAssistantMode || 'auto',
       message: text,
       stream: true
     };

@@ -65,6 +65,6 @@ try {
 
 $out('');
 $out('=== Front-end (run in browser) ===');
-$out('1. Search page links: Open DevTools (F12) -> Console. Click "Read more" or "Chat with PDF". If nothing happens, check for JS errors and that the link href is correct.');
-$out('2. Chat modal: On a resource detail page (with PDF), click "Chat with PDF". If modal does not open, check Console for errors and that openPdfChat is defined (type: typeof openPdfChat).');
+$out('1. Search page links: Open DevTools (F12) -> Console. Click "Read more" or "Khub AI Assistant". If nothing happens, check for JS errors and that the link href is correct.');
+$out('2. AI Assistant: On a resource detail page, click "Khub AI Assistant". If modal does not open, check Console for errors and that openPdfChat is defined (type: typeof openPdfChat).');
 $out('3. Bootstrap: In Console type: typeof bootstrap?.Modal  (Theme1) or typeof $.fn.modal  (default) to see if modal API is available.');
