@@ -6,16 +6,8 @@
     },
     "servers": [
         {
-            "url": "http://localhost:85/knowhub",
-            "description": "Local Development server"
-        },
-        {
-            "url": "https://khub.africacdc.org/",
-            "description": "Production server"
-        },
-        {
-            "url": "https://khub.africacdc.org/demo/",
-            "description": "Demo server"
+            "url": "http://localhost/knowledge_hub",
+            "description": "Current deployment (set APP_URL in .env)"
         }
     ],
     "paths": {
@@ -24,9 +16,9 @@
                 "tags": [
                     "AI Operations"
                 ],
-                "summary": "Summarise Content",
-                "description": "Summarises the content of a publication or forum",
-                "operationId": "Summarise Content",
+                "summary": "Summarise content (legacy one-shot)",
+                "description": "Returns a one-shot summary for a forum thread or publication. For interactive Q&A, summaries with follow-ups, and comparisons in natural language, use `POST /api/ai/assistant/session` and `POST /api/ai/assistant/message` (Khub AI Assistant).",
+                "operationId": "summariseContentLegacy",
                 "requestBody": {
                     "required": true,
                     "content": {
@@ -78,35 +70,46 @@
                 ]
             }
         },
-        "/api/ai/compare": {
+        "/api/ai/assistant/session": {
             "post": {
                 "tags": [
                     "AI Operations"
                 ],
-                "summary": "Compare Content",
-                "description": "Compares the content of two publications",
-                "operationId": "Compare Content",
+                "summary": "Start or resume Khub AI Assistant session",
+                "description": "Creates or returns a chat session for a publication (PDF ChatPDF or publication context) or a forum thread. Send exactly one of `publication_id` or `forum_id`. For publications, optional `attachment_id` targets a specific PDF; `assistant_mode` can be `auto`, `chatpdf`, `publication`, or `forum` (forced when using `forum_id`).",
+                "operationId": "aiAssistantSession",
                 "requestBody": {
                     "required": true,
                     "content": {
                         "application/json": {
                             "schema": {
-                                "required": [
-                                    "resource_id",
-                                    "other_resource_id"
-                                ],
                                 "properties": {
-                                    "resource_id": {
+                                    "publication_id": {
+                                        "description": "Use with attachment_id for PDF chat; XOR forum_id",
                                         "type": "integer",
-                                        "example": 1
+                                        "example": 42,
+                                        "nullable": true
                                     },
-                                    "other_resource_id": {
+                                    "forum_id": {
+                                        "description": "Forum thread id; XOR publication_id",
                                         "type": "integer",
-                                        "example": 2
+                                        "example": 7,
+                                        "nullable": true
                                     },
-                                    "prompt": {
+                                    "attachment_id": {
+                                        "description": "Publication PDF attachment id for ChatPDF",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "assistant_mode": {
                                         "type": "string",
-                                        "example": "Keep it short and concise"
+                                        "enum": [
+                                            "auto",
+                                            "chatpdf",
+                                            "publication",
+                                            "forum"
+                                        ],
+                                        "example": "auto"
                                     }
                                 },
                                 "type": "object"
@@ -116,12 +119,133 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful",
+                        "description": "Session ready",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "properties": {
+                                        "session_id": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "source_id": {
+                                            "description": "ChatPDF source when mode is chatpdf",
+                                            "type": "string",
+                                            "nullable": true
+                                        },
+                                        "assistant_mode": {
+                                            "type": "string",
+                                            "example": "publication"
+                                        },
+                                        "context_type": {
+                                            "type": "string",
+                                            "example": "forum",
+                                            "nullable": true
+                                        },
+                                        "messages": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/ai/assistant/message": {
+            "post": {
+                "tags": [
+                    "AI Operations"
+                ],
+                "summary": "Send a message to Khub AI Assistant",
+                "description": "Send a user message for an existing session. Use the same scope as session creation (`publication_id` + optional `attachment_id`, or `forum_id`). Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for a single JSON body with `content`. For comparisons across resources, ask the assistant in natural language within this chat instead of a separate compare endpoint.",
+                "operationId": "aiAssistantMessage",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "message"
+                                ],
+                                "properties": {
+                                    "session_id": {
+                                        "description": "From session response; omit only if a single session already exists for this user and scope",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "message": {
+                                        "type": "string",
+                                        "example": "Summarise the main points in bullet form."
+                                    },
+                                    "stream": {
+                                        "type": "boolean",
+                                        "example": true
+                                    },
+                                    "publication_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "attachment_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "forum_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Assistant reply (JSON when stream=false)",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "content": {
+                                            "type": "string"
+                                        },
+                                        "references": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Session or resource not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     }
                 },
                 "security": [
@@ -227,7 +351,12 @@
                             "schema": {
                                 "properties": {
                                     "username": {
+                                        "description": "User email (or send email instead)",
                                         "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
                                     },
                                     "password": {
                                         "type": "string"
@@ -318,67 +447,53 @@
             }
         },
         "/api/profile": {
-            "put": {
+            "get": {
                 "tags": [
-                    "Authentication"
+                    "User"
                 ],
-                "summary": "Update user profile",
-                "operationId": "f7d9ce7bd9135d365f646348db83d885",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "firstname": {
-                                        "type": "string"
-                                    },
-                                    "lastname": {
-                                        "type": "string"
-                                    },
-                                    "email": {
-                                        "type": "string",
-                                        "format": "email"
-                                    },
-                                    "password": {
-                                        "type": "string"
-                                    },
-                                    "password_confirmation": {
-                                        "type": "string"
-                                    },
-                                    "phone": {
-                                        "type": "string"
-                                    },
-                                    "job": {
-                                        "type": "string"
-                                    },
-                                    "country_id": {
-                                        "type": "integer"
-                                    },
-                                    "preferences": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        }
-                                    },
-                                    "photo": {
-                                        "type": "string",
-                                        "format": "binary"
-                                    }
-                                },
-                                "type": "object"
-                            }
+                "summary": "Get current user profile",
+                "description": "Returns the authenticated user's profile (same fields as the web account page). Optional `id` query parameter loads another user only if the caller has `alter_access_levels` permission.",
+                "operationId": "UserProfile",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "query",
+                        "description": "Optional user id (admins / users with alter_access_levels only)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
                         }
                     }
-                },
+                ],
                 "responses": {
                     "200": {
-                        "description": "Profile updated successfully"
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "description": "Full user row (first_name, last_name, email, phone_number, job_title, organization_name, orcid, country_id, langauge, theme_preference, is_subscribed, is_social_login, photo URL, access_level, country, author, communities, preferences, etc.) plus preference_subtheme_ids, level_id (same as access_level_id), and community_ids",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
                     },
-                    "422": {
-                        "description": "Validation error"
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "403": {
+                        "description": "Forbidden (viewing another user without permission)"
                     },
                     "401": {
-                        "description": "Unauthenticated"
+                        "description": "Unauthorized"
                     }
                 },
                 "security": [
@@ -434,6 +549,1469 @@
                         "bearer_token": []
                     }
                 ]
+            }
+        },
+        "/api/logout": {
+            "get": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "User Logout",
+                "description": "Logs out the user and revokes the token",
+                "operationId": "UserLogout",
+                "responses": {
+                    "200": {
+                        "description": "Successfully logged out"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/profile/update": {
+            "post": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Update User Profile",
+                "description": "Update an existing user's profile",
+                "operationId": "UserProfileUpdate",
+                "requestBody": {
+                    "description": "Same logical fields as the web account form (`/account`). The authenticated user is always updated; do not send `id`. Use multipart when uploading `photo`.",
+                    "required": true,
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "properties": {
+                                    "first_name": {
+                                        "type": "string"
+                                    },
+                                    "last_name": {
+                                        "type": "string"
+                                    },
+                                    "firstname": {
+                                        "description": "Alias for first_name",
+                                        "type": "string"
+                                    },
+                                    "lastname": {
+                                        "description": "Alias for last_name",
+                                        "type": "string"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "format": "email"
+                                    },
+                                    "phone_number": {
+                                        "type": "string"
+                                    },
+                                    "phone": {
+                                        "description": "Alias for phone_number",
+                                        "type": "string"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    },
+                                    "job": {
+                                        "type": "string"
+                                    },
+                                    "job_title": {
+                                        "type": "string"
+                                    },
+                                    "job_title_custom": {
+                                        "type": "string"
+                                    },
+                                    "organization_name": {
+                                        "type": "string"
+                                    },
+                                    "orcid": {
+                                        "type": "string"
+                                    },
+                                    "langauge": {
+                                        "description": "Language code (matches web form spelling)",
+                                        "type": "string"
+                                    },
+                                    "theme_preference": {
+                                        "type": "string",
+                                        "enum": [
+                                            "light",
+                                            "dark",
+                                            "system"
+                                        ]
+                                    },
+                                    "is_subscribed": {
+                                        "type": "boolean"
+                                    },
+                                    "level_id": {
+                                        "description": "Access level; only applied if user has alter_access_levels",
+                                        "type": "integer"
+                                    },
+                                    "password": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "password_confirmation": {
+                                        "type": "string",
+                                        "format": "password"
+                                    },
+                                    "preferences": {
+                                        "description": "Subtheme ids (same as web preferences[])",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        },
+                                        "example": [
+                                            1,
+                                            2,
+                                            3
+                                        ]
+                                    },
+                                    "photo": {
+                                        "description": "Profile photo file (stored like web account upload)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "data": {
+                                            "properties": {
+                                                "id": {
+                                                    "type": "integer",
+                                                    "example": 1
+                                                },
+                                                "name": {
+                                                    "type": "string",
+                                                    "example": "John Doe"
+                                                },
+                                                "email": {
+                                                    "type": "string",
+                                                    "example": "john.doe@example.com"
+                                                },
+                                                "photo": {
+                                                    "type": "string",
+                                                    "example": "http://example.com/photo.jpg"
+                                                }
+                                            },
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "404": {
+                        "description": "User not found"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/social-login": {
+            "post": {
+                "tags": [
+                    "Authentication"
+                ],
+                "summary": "Social login (Google, Microsoft, LinkedIn)",
+                "description": "Exchange a verified identity from your mobile or web OAuth flow for a **Passport bearer token**.\\n\\n**How it works**\\n1. In your app, complete sign-in with the provider SDK (Google Sign-In, Microsoft MSAL, LinkedIn OpenID Connect).\\n2. Read **email** and **display name** from the IdP user profile (and ideally **subject id** + **photo URL**).\\n3. `POST` JSON to this endpoint with `provider` set to `google`, `microsoft`, `linkedin`, or `linkedin-openid`.\\n4. Use the returned `token` as `Authorization: Bearer <token>` on other `/api/*` routes.\\n\\n**Providers**\\n- **Google** — `provider`: `google`. Use the email and name from Google Sign-In / OAuth userinfo.\\n- **Microsoft** — `provider`: `microsoft`. Use Entra ID / Microsoft account email and display name from MSAL / Graph.\\n- **LinkedIn** — `provider`: `linkedin` or `linkedin-openid` (both are treated as LinkedIn).\\n\\n**Notes**\\n- `email` must be the verified address from the IdP. If the email already exists as a **password-only** account, the API returns **403**.\\n- If the email exists under a **different** social provider, the API returns **403** with a message to use the original provider.\\n- New users are created on first successful call; existing social users receive a new token.\\n\\nTry the **Examples** dropdown in Swagger UI (`google_signin`, `microsoft_msal`, `linkedin_openid`).",
+                "operationId": "SocialLogin",
+                "requestBody": {
+                    "description": "Payload built from your OAuth / OIDC user profile after successful provider sign-in.",
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "provider",
+                                    "email",
+                                    "name"
+                                ],
+                                "properties": {
+                                    "provider": {
+                                        "description": "Identity provider key accepted by the API.",
+                                        "type": "string",
+                                        "enum": [
+                                            "google",
+                                            "microsoft",
+                                            "linkedin",
+                                            "linkedin-openid"
+                                        ],
+                                        "example": "google"
+                                    },
+                                    "email": {
+                                        "description": "Verified email from the IdP.",
+                                        "type": "string",
+                                        "format": "email",
+                                        "example": "jane.doe@gmail.com"
+                                    },
+                                    "name": {
+                                        "description": "Full display name; server splits into first/last when creating a user.",
+                                        "type": "string",
+                                        "example": "Jane Doe"
+                                    },
+                                    "photoUrl": {
+                                        "description": "Optional profile image URL (https recommended; localhost blocked in production).",
+                                        "type": "string",
+                                        "format": "uri",
+                                        "nullable": true
+                                    },
+                                    "providerId": {
+                                        "description": "Optional stable subject from the IdP (Google `sub`, Microsoft `oid`, LinkedIn person URN, etc.).",
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            },
+                            "examples": {
+                                "google_signin": {
+                                    "summary": "Google Sign-In",
+                                    "description": "After Google OAuth / Google Sign-In for Android, iOS, or web — send email, name, and optional sub + picture from userinfo.",
+                                    "value": {
+                                        "provider": "google",
+                                        "email": "jane.doe@gmail.com",
+                                        "name": "Jane Doe",
+                                        "providerId": "109876543210987654321",
+                                        "photoUrl": "https://lh3.googleusercontent.com/a-/AOh14GgExampleProfilePhoto"
+                                    }
+                                },
+                                "microsoft_msal": {
+                                    "summary": "Microsoft (MSAL / Entra)",
+                                    "description": "After Microsoft sign-in — use mail and displayName from Microsoft Graph / token claims; oid as providerId when available.",
+                                    "value": {
+                                        "provider": "microsoft",
+                                        "email": "jane.doe@contoso.com",
+                                        "name": "Jane Doe",
+                                        "providerId": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+                                        "photoUrl": "https://graph.microsoft.com/v1.0/me/photo/$value"
+                                    }
+                                },
+                                "linkedin_openid": {
+                                    "summary": "LinkedIn (OIDC)",
+                                    "description": "Use `linkedin` or `linkedin-openid`. Send email and name from LinkedIn's OpenID Connect userinfo; person id or URN as providerId if available.",
+                                    "value": {
+                                        "provider": "linkedin-openid",
+                                        "email": "jane.doe@company.org",
+                                        "name": "Jane Doe",
+                                        "providerId": "urn:li:person:AbCdEfGhIj",
+                                        "photoUrl": "https://media.licdn.com/dms/image/v2/example-profile-photo-endpoint"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Passport access token and user",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "type": "string",
+                                            "example": "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.example..."
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "user": {
+                                            "description": "User model including communities and preferences relations.",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request or unable to complete login"
+                    },
+                    "401": {
+                        "description": "Unauthorized"
+                    },
+                    "403": {
+                        "description": "Account exists with password only, or registered with a different social provider"
+                    },
+                    "422": {
+                        "description": "Validation error (e.g. invalid email)"
+                    }
+                }
+            }
+        },
+        "/api/communities": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "List public communities",
+                "description": "Paginated public communities (same filters as the web directory). Unauthenticated.",
+                "operationId": "getCommunitiesList",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "description": "Search name, description, or creator",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "malaria"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    },
+                    {
+                        "name": "coverage",
+                        "in": "query",
+                        "description": "whole_of_africa | region | country",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "country"
+                        }
+                    },
+                    {
+                        "name": "region_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 2
+                        }
+                    },
+                    {
+                        "name": "country_id",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 5
+                        }
+                    },
+                    {
+                        "name": "organisation",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "Ministry"
+                        }
+                    },
+                    {
+                        "name": "department",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "EPI"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laravel paginator payload + status/message",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "Communities retrieved successfully"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "current_page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 42
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Create a new community (reserved)",
+                "description": "Not exposed on default API routes; documented for future/admin use.",
+                "operationId": "createCommunity",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "name": {
+                                        "type": "string",
+                                        "example": "Community Name"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Description of the community"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Created"
+                    }
+                }
+            }
+        },
+        "/api/communities/me": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Communities I belong to",
+                "description": "Approved memberships only (same idea as web /account/my-communities).",
+                "operationId": "getMyCommunities",
+                "parameters": [
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 15
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginated communities"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/invitations/accept/{token}": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Accept a community invitation",
+                "description": "Authenticated user must match the invitation email. Same as web /communities/accept-invitation/{token}.",
+                "operationId": "acceptCommunityInvitation",
+                "parameters": [
+                    {
+                        "name": "token",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "string",
+                            "example": "abc123token"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Joined community",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Invitation email does not match signed-in user"
+                    },
+                    "422": {
+                        "description": "Invalid, expired, or already used invitation"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Get community detail (member only)",
+                "description": "Requires an approved, active membership. Includes related members, forums links, publication links, tags (same shape as web detail data load).",
+                "operationId": "getCommunityById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Community with relations"
+                    },
+                    "403": {
+                        "description": "Not a member or restricted community"
+                    },
+                    "404": {
+                        "description": "Not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Update community (reserved)",
+                "operationId": "updateCommunity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    }
+                }
+            }
+        },
+        "/api/communities/{id}/join": {
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Request to join a community",
+                "description": "Same as web POST /communities/join. Creates a pending membership (is_approved=0) unless already present.",
+                "operationId": "joinCommunity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Request submitted"
+                    },
+                    "403": {
+                        "description": "e.g. Africa CDC Staff community restriction"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/leave": {
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Leave a community",
+                "description": "Same as web POST /communities/leave.",
+                "operationId": "leaveCommunity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Left community"
+                    },
+                    "400": {
+                        "description": "Could not leave"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/members": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "List community members with details",
+                "description": "Approved members only. Paginated list with optional search `q` (name, email, job title). Includes publication_count in this community and admin flags. Same payload as web GET /communities/detail/{id}/members-data.",
+                "operationId": "getCommunityMembers",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 1
+                        }
+                    },
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    },
+                    {
+                        "name": "q",
+                        "in": "query",
+                        "description": "Search",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "nurse"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "items, pagination, is_community_admin",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "items": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        },
+                                        "page": {
+                                            "type": "integer",
+                                            "example": 1
+                                        },
+                                        "per_page": {
+                                            "type": "integer",
+                                            "example": 20
+                                        },
+                                        "total": {
+                                            "type": "integer",
+                                            "example": 100
+                                        },
+                                        "has_more": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "is_community_admin": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not a member"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/publications": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Publications linked to this community",
+                "description": "Member only. Paginated; use page_size 1–50 (default 10).",
+                "operationId": "getCommunityPublications",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laravel pagination JSON"
+                    },
+                    "403": {
+                        "description": "Not a member"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/forums": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Forum threads linked to this community",
+                "description": "Member only. Paginated; use page_size 1–50 (default 10).",
+                "operationId": "getCommunityForums",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Laravel pagination JSON"
+                    },
+                    "403": {
+                        "description": "Not a member"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/events": {
+            "get": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "List upcoming community events",
+                "description": "Member only. Non-cancelled events ordered by start date. Optional limit (max 100, default 50).",
+                "operationId": "getCommunityEvents",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    },
+                    {
+                        "name": "limit",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Array of events"
+                    },
+                    "403": {
+                        "description": "Not a member"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Create a community event (admin)",
+                "description": "Same rules as web POST /communities/detail/{id}/events — community admin, creator, or system admin.",
+                "operationId": "createCommunityEvent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "event_category",
+                                    "startdate"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string",
+                                        "example": "Community webinar: IPC"
+                                    },
+                                    "description": {
+                                        "type": "string",
+                                        "example": "Join us for a one-hour session on infection prevention."
+                                    },
+                                    "event_category": {
+                                        "type": "string",
+                                        "example": "Webinar"
+                                    },
+                                    "startdate": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-05-01T14:00:00Z"
+                                    },
+                                    "enddate": {
+                                        "type": "string",
+                                        "format": "date-time",
+                                        "example": "2026-05-01T15:00:00Z",
+                                        "nullable": true
+                                    },
+                                    "venue": {
+                                        "type": "string",
+                                        "example": "Online",
+                                        "nullable": true
+                                    },
+                                    "event_link": {
+                                        "type": "string",
+                                        "format": "uri",
+                                        "example": "https://meet.example.com/room/abc",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Created"
+                    },
+                    "403": {
+                        "description": "Not allowed"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/invites": {
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Invite colleagues by email",
+                "description": "Active members may invite up to 5 emails per request (comma/space separated). Same as web POST /communities/detail/{id}/invite.",
+                "operationId": "inviteColleaguesToCommunity",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "emails"
+                                ],
+                                "properties": {
+                                    "emails": {
+                                        "description": "Up to 5 addresses, separated by comma, space, or semicolon",
+                                        "type": "string",
+                                        "example": "colleague1@who.int, colleague2@unicef.org"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Invitations sent",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "string",
+                                            "example": "success"
+                                        },
+                                        "message": {
+                                            "type": "string",
+                                            "example": "2 invitation(s) sent."
+                                        },
+                                        "result": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "403": {
+                        "description": "Not an active member"
+                    },
+                    "422": {
+                        "description": "Invalid or too many emails"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{id}/member-status": {
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Activate or deactivate a member (admin)",
+                "description": "Same as web POST /communities/detail/{id}/member-status. Cannot deactivate yourself.",
+                "operationId": "updateCommunityMemberStatus",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "member_id",
+                                    "action"
+                                ],
+                                "properties": {
+                                    "member_id": {
+                                        "description": "community_of_practice_members.id",
+                                        "type": "integer",
+                                        "example": 55
+                                    },
+                                    "action": {
+                                        "type": "string",
+                                        "enum": [
+                                            "activate",
+                                            "deactivate"
+                                        ]
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Updated"
+                    },
+                    "403": {
+                        "description": "Not admin"
+                    },
+                    "422": {
+                        "description": "Validation / cannot deactivate self"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/communities/{communityId}/members": {
+            "post": {
+                "tags": [
+                    "Communities"
+                ],
+                "summary": "Add a user to community (admin)",
+                "description": "Creates a pending membership for user_id. **Community admin or system admin only** (not the same as /join).",
+                "operationId": "addMemberToCommunity",
+                "parameters": [
+                    {
+                        "name": "communityId",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer",
+                            "example": 12
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "user_id"
+                                ],
+                                "properties": {
+                                    "user_id": {
+                                        "type": "integer",
+                                        "example": 42
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Member row created or returned"
+                    },
+                    "403": {
+                        "description": "Not an admin"
+                    },
+                    "404": {
+                        "description": "Community not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/courses": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get list of courses",
+                "description": "Returns list of courses",
+                "operationId": "getCoursesList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Store new course",
+                "description": "Returns course data",
+                "operationId": "storeCourse",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "fullname": {
+                                        "type": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/courses/{id}": {
+            "get": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Get course information",
+                "description": "Returns course data",
+                "operationId": "getCourseById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Courses"
+                ],
+                "summary": "Update existing course",
+                "description": "Returns updated course data",
+                "operationId": "updateCourse",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "fullname": {
+                                        "type": "string"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Course not found"
+                    }
+                }
+            }
+        },
+        "/api/events": {
+            "get": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get list of events",
+                "description": "Returns list of events",
+                "operationId": "getEventsList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Store new event",
+                "description": "Returns event data",
+                "operationId": "storeEvent",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/events/{id}": {
+            "get": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Get event information",
+                "description": "Returns event data",
+                "operationId": "getEventById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "Events"
+                ],
+                "summary": "Update existing event",
+                "description": "Returns updated event data",
+                "operationId": "updateEvent",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Event not found"
+                    }
+                }
             }
         },
         "/api/experts": {
@@ -645,38 +2223,6 @@
                         "bearer_token": []
                     }
                 ]
-            },
-            "delete": {
-                "tags": [
-                    "Experts"
-                ],
-                "summary": "Delete Expert",
-                "description": "Deletes a single expert record based on the ID.",
-                "operationId": "DeleteExpert",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Record ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                }
             }
         },
         "/api/forums": {
@@ -855,38 +2401,6 @@
                 "summary": "Show Forum",
                 "description": "Retrieve a single forum record based on the ID.",
                 "operationId": "ShowForum",
-                "parameters": [
-                    {
-                        "name": "id",
-                        "in": "path",
-                        "description": "Forum ID",
-                        "required": true,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
-                    },
-                    "404": {
-                        "description": "Not Found"
-                    }
-                }
-            },
-            "delete": {
-                "tags": [
-                    "Forums"
-                ],
-                "summary": "Delete Forum",
-                "description": "Deletes a single forum record based on the ID.",
-                "operationId": "DeleteForum",
                 "parameters": [
                     {
                         "name": "id",
@@ -1104,6 +2618,26 @@
                 }
             }
         },
+        "/api/lookup/settings": {
+            "get": {
+                "tags": [
+                    "Lookup"
+                ],
+                "summary": "System Settings",
+                "description": "Returns configurations",
+                "operationId": "System Settings",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
@@ -1213,6 +2747,15 @@
                         "schema": {
                             "type": "integer"
                         }
+                    },
+                    {
+                        "name": "category",
+                        "in": "query",
+                        "description": "Filter by Category Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
                     }
                 ],
                 "responses": {
@@ -1237,60 +2780,177 @@
                     "content": {
                         "multipart/form-data": {
                             "schema": {
+                                "description": "Same fields as the web publish wizard (account/publish). Required fields follow admin settings (publication_required_fields, publication_min_words).",
                                 "required": [
-                                    "cover",
-                                    "data_category_id",
-                                    "sub_theme",
+                                    "title",
                                     "description",
-                                    "user_id"
+                                    "associated_authors",
+                                    "author_affiliation",
+                                    "tags",
+                                    "theme",
+                                    "sub_theme",
+                                    "data_category_id"
                                 ],
                                 "properties": {
-                                    "cover": {
-                                        "type": "file"
+                                    "upload_type": {
+                                        "description": "link requires link URL",
+                                        "type": "string",
+                                        "enum": [
+                                            "upload",
+                                            "link"
+                                        ]
                                     },
-                                    "data_category_id": {
-                                        "type": "integer"
+                                    "link": {
+                                        "description": "External resource URL when upload_type=link",
+                                        "type": "string",
+                                        "format": "uri"
                                     },
-                                    "sub_theme": {
-                                        "type": "integer"
+                                    "is_embedded": {
+                                        "description": "Embed linked content on the resource page",
+                                        "type": "boolean"
                                     },
                                     "title": {
                                         "type": "string"
                                     },
-                                    "description": {
-                                        "type": "string"
-                                    },
-                                    "author": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "user_id": {
-                                        "type": "integer",
-                                        "nullable": true
-                                    },
-                                    "publication_category_id": {
+                                    "year_published": {
                                         "type": "integer"
                                     },
-                                    "link": {
+                                    "data_category_id": {
+                                        "description": "Resource category (wizard Category)",
+                                        "type": "integer"
+                                    },
+                                    "category_id": {
+                                        "description": "File/resource sub-type (wizard Sub Category)",
+                                        "type": "integer"
+                                    },
+                                    "publication_sub_category_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "theme": {
+                                        "description": "Thematic area id",
+                                        "type": "integer"
+                                    },
+                                    "sub_theme": {
+                                        "description": "Sub-thematic area id",
+                                        "type": "integer"
+                                    },
+                                    "tags": {
+                                        "description": "Health topic tag ids",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "description": {
+                                        "description": "HTML or plain text; min length from settings",
+                                        "type": "string"
+                                    },
+                                    "associated_authors": {
+                                        "type": "string"
+                                    },
+                                    "author_affiliation": {
+                                        "type": "string"
+                                    },
+                                    "doi": {
                                         "type": "string",
                                         "nullable": true
                                     },
-                                    "communities": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "integer"
-                                        },
+                                    "issn": {
+                                        "type": "string",
                                         "nullable": true
                                     },
-                                    "preferences": {
-                                        "description": "Array of Preference Ids",
+                                    "isbn": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "publisher": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "license_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "funder": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "copyright_info": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "journal_name": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "journal_volume": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "journal_issue": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "journal_pages": {
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "rccs": {
+                                        "description": "Regional coverage ids",
                                         "type": "array",
                                         "items": {
                                             "type": "integer"
-                                        },
-                                        "example": [
-                                            1
-                                        ],
+                                        }
+                                    },
+                                    "countries": {
+                                        "description": "Member state country ids",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "communities": {
+                                        "description": "Target communities of practice",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "tag_all_my_communities": {
+                                        "type": "boolean",
+                                        "nullable": true
+                                    },
+                                    "cover": {
+                                        "description": "Cover image (optional; default cover if omitted)",
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "cover_url": {
+                                        "description": "External cover URL when editing",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "files": {
+                                        "description": "Attachments (multipart files[])",
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "author": {
+                                        "description": "Admin only: source author id",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "original_id": {
+                                        "description": "Create new version from this publication id",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "show_disclaimer": {
+                                        "type": "boolean",
                                         "nullable": true
                                     }
                                 },
@@ -1568,28 +3228,23 @@
                     "Publications"
                 ],
                 "summary": "Update Publication",
-                "description": "Allows users to update publications for admin approval",
+                "description": "Update a draft or pending publication (same body as create; id is in the URL). Cover file optional when unchanged.",
                 "operationId": "UpdatePublication",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
                             "schema": {
-                                "required": [
-                                    "cover",
-                                    "file_type",
-                                    "sub_theme",
-                                    "description",
-                                    "user_id"
-                                ],
                                 "properties": {
-                                    "cover": {
-                                        "type": "file"
+                                    "upload_type": {
+                                        "type": "string",
+                                        "enum": [
+                                            "upload",
+                                            "link"
+                                        ]
                                     },
-                                    "file_type": {
-                                        "type": "integer"
-                                    },
-                                    "sub_theme": {
-                                        "type": "integer"
+                                    "link": {
+                                        "type": "string",
+                                        "format": "uri"
                                     },
                                     "title": {
                                         "type": "string"
@@ -1597,21 +3252,44 @@
                                     "description": {
                                         "type": "string"
                                     },
-                                    "author": {
-                                        "type": "integer"
-                                    },
-                                    "user_id": {
-                                        "type": "integer"
-                                    },
-                                    "link": {
+                                    "associated_authors": {
                                         "type": "string"
+                                    },
+                                    "author_affiliation": {
+                                        "type": "string"
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "theme": {
+                                        "type": "integer"
+                                    },
+                                    "sub_theme": {
+                                        "type": "integer"
+                                    },
+                                    "data_category_id": {
+                                        "type": "integer"
+                                    },
+                                    "category_id": {
+                                        "type": "integer"
+                                    },
+                                    "cover": {
+                                        "type": "string",
+                                        "format": "binary"
+                                    },
+                                    "files": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
                                     }
                                 },
                                 "type": "object"
                             }
-                        },
-                        "application/json": {
-                            "schema": {}
                         }
                     }
                 },
@@ -1641,8 +3319,338 @@
                     }
                 ]
             }
+        },
+        "/api/publications/content-request": {
+            "post": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Create Content Request",
+                "description": "Allows users to submit a content request",
+                "operationId": "CreateContentRequest",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "title",
+                                    "description",
+                                    "country_id"
+                                ],
+                                "properties": {
+                                    "title": {
+                                        "type": "string"
+                                    },
+                                    "description": {
+                                        "type": "string"
+                                    },
+                                    "country_id": {
+                                        "type": "integer"
+                                    },
+                                    "email": {
+                                        "type": "string",
+                                        "nullable": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Content request created successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request, when some required data is missing"
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "403": {
+                        "description": "Forbidden"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/push-notifications": {
+            "get": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Get list of push notifications",
+                "description": "Returns list of push notifications",
+                "operationId": "getPushNotificationsList",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            },
+            "post": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Store new push notification",
+                "description": "Returns push notification data",
+                "operationId": "storePushNotification",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/push-notifications/{id}": {
+            "get": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Get push notification information",
+                "description": "Returns push notification data",
+                "operationId": "getPushNotificationById",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Push notification not found"
+                    }
+                }
+            },
+            "put": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Update existing push notification",
+                "description": "Returns updated push notification data",
+                "operationId": "updatePushNotification",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {}
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Push notification not found"
+                    }
+                }
+            }
+        },
+        "/api/push-notifications/user": {
+            "get": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Get push notifications by user",
+                "description": "Returns list of push notifications for a specific user",
+                "operationId": "getPushNotificationsByUser",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "User not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/push-notifications/mark-as-read": {
+            "post": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Mark notifications as read",
+                "description": "Marks specified notifications as read",
+                "operationId": "markNotificationsAsRead",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "ids": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Notifications marked as read successfully",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/push-notifications/unread-count": {
+            "get": {
+                "tags": [
+                    "PushNotifications"
+                ],
+                "summary": "Get count of unread notifications",
+                "description": "Returns the count of unread notifications for the authenticated user",
+                "operationId": "getUnreadNotificationsCount",
+                "responses": {
+                    "200": {
+                        "description": "Successful operation",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
         }
     },
+    "tags": [
+        {
+            "name": "Communities",
+            "description": "Communities of practice: browse public listings, join/leave, members, linked publications & forums, invitations, and community events (mirrors web routes under /communities)."
+        },
+        {
+            "name": "AI Operations",
+            "description": "AI Operations"
+        },
+        {
+            "name": "Authentication",
+            "description": "Authentication"
+        },
+        {
+            "name": "User",
+            "description": "User"
+        },
+        {
+            "name": "Courses",
+            "description": "Courses"
+        },
+        {
+            "name": "Events",
+            "description": "Events"
+        },
+        {
+            "name": "Experts",
+            "description": "Experts"
+        },
+        {
+            "name": "Forums",
+            "description": "Forums"
+        },
+        {
+            "name": "Lookup",
+            "description": "Lookup"
+        },
+        {
+            "name": "Members",
+            "description": "Members"
+        },
+        {
+            "name": "Publications",
+            "description": "Publications"
+        },
+        {
+            "name": "PushNotifications",
+            "description": "PushNotifications"
+        }
+    ],
     "components": {
         "securitySchemes": {
             "bearer_token": {

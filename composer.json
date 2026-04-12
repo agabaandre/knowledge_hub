@@ -77,7 +77,8 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ]
+        ],
+        "openapi": "php artisan l5-swagger:generate"
     },
     "extra": {
     

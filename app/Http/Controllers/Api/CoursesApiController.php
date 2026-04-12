@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Repositories\CoursesRepository;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use App\Http\Controllers\Api\ApiController;
 
 class CoursesApiController extends ApiController
@@ -152,35 +151,5 @@ class CoursesApiController extends ApiController
         $course = Course::findOrFail($id);
         $course->update($validatedData);
         return response()->json($course);
-    }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/courses/{id}",
-     *     operationId="deleteCourse",
-     *     tags={"Courses"},
-     *     summary="Delete course",
-     *     description="Deletes a record and returns no content",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Successful operation"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Course not found"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        $course = Course::findOrFail($id);
-        $course->delete();
-        return response()->json(null, 204);
     }
 }

@@ -53,11 +53,6 @@ class AIController extends Controller
         ]);
     }
 
-    public function compare(Request $request)
-    {
-        return $this->aiService->compare($request->resource_id, $request->other_resource_id);
-    }
-
     /**
      * Extract summary from uploaded file (used during publication creation)
      */

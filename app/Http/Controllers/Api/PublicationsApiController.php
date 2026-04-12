@@ -260,33 +260,114 @@ class PublicationsApiController extends ApiController
     }
 
     /**
-     * @OA\Get(
-     *     path="/api/publications/add_favourite",
-     *     operationId="AddFavouritePublications",
+     * Add publication to favourites (same as web heart / “likes” count on listings).
+     *
+     * Canonical: `POST /api/publications/favourite` with JSON `publication_id` (or `id`).
+     * Same handler: `GET|POST /api/publications/add_favourite?id=`, `POST /api/publications/like/{publicationId}`.
+     *
+     * @OA\Post(
+     *     path="/api/publications/favourite",
+     *     operationId="AddPublicationFavourite",
      *     tags={"Publications"},
      *     security={{"bearer_token":{}}},
-     *     summary="Add Favourite Publications",
-     *     description="Add Favourite publications",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="query",
+     *     summary="Add favourite (like)",
+     *     description="Favourite a publication. Web equivalent: `/publications/add_favourite`. Aliases: `GET|POST /api/publications/add_favourite?id=`, `POST /api/publications/like/{publicationId}`.",
+     *     @OA\RequestBody(
      *         required=true,
-     *         description="Publication Id",
-     *         @OA\Schema(type="integer")
+     *         @OA\JsonContent(
+     *             required={"publication_id"},
+     *             @OA\Property(property="publication_id", type="integer", example=42),
+     *             @OA\Property(property="id", type="integer", description="Alias for publication_id")
+     *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Successful",
-     *         @OA\JsonContent()
-     *     )
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="favourited", type="boolean", example=true)
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Missing or invalid publication id"),
+     *     @OA\Response(response=404, description="Publication not found")
      * )
      */
-    public function add_favourite(Request $request)
+    public function add_favourite(Request $request, $publicationId = null)
     {
-        $this->publicationsRepo->add_favourite($request->id);
-        $data['message'] = "Added to favourites successfully";
+        $id = $this->resolvePublicationFavouriteId($request, $publicationId);
+        if ($id === null) {
+            return response()->json(['success' => false, 'error' => 'Publication ID required'], 400);
+        }
 
-        return response()->json($data, 200);
+        if (! Publication::query()->whereKey($id)->exists()) {
+            return response()->json(['success' => false, 'error' => 'Publication not found'], 404);
+        }
+
+        $this->publicationsRepo->add_favourite($id);
+
+        return response()->json(['success' => true, 'favourited' => true], 200);
+    }
+
+    /**
+     * Remove publication from favourites (unlike).
+     *
+     * Canonical: `DELETE /api/publications/favourite/{publicationId}`.
+     * Same handler: `GET|POST /api/publications/remove_favourite?id=`, `POST /api/publications/unlike/{publicationId}`.
+     *
+     * @OA\Delete(
+     *     path="/api/publications/favourite/{publicationId}",
+     *     operationId="RemovePublicationFavourite",
+     *     tags={"Publications"},
+     *     security={{"bearer_token":{}}},
+     *     summary="Remove favourite (unlike)",
+     *     description="Web equivalent: `/publications/remove_favourite`. Aliases: `GET|POST /api/publications/remove_favourite?id=`, `POST /api/publications/unlike/{publicationId}`.",
+     *     @OA\Parameter(name="publicationId", in="path", required=true, @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="favourited", type="boolean", example=false)
+     *         )
+     *     ),
+     *     @OA\Response(response=400, description="Missing or invalid publication id"),
+     *     @OA\Response(response=404, description="Publication not found")
+     * )
+     */
+    public function remove_favourite(Request $request, $publicationId = null)
+    {
+        $id = $this->resolvePublicationFavouriteId($request, $publicationId);
+        if ($id === null) {
+            return response()->json(['success' => false, 'error' => 'Publication ID required'], 400);
+        }
+
+        if (! Publication::query()->whereKey($id)->exists()) {
+            return response()->json(['success' => false, 'error' => 'Publication not found'], 404);
+        }
+
+        $this->publicationsRepo->remove_favourite($id);
+
+        return response()->json(['success' => true, 'favourited' => false], 200);
+    }
+
+    /**
+     * @param  int|string|null  $publicationId  From route parameter when using /like/{id}, etc.
+     */
+    private function resolvePublicationFavouriteId(Request $request, $publicationId = null): ?int
+    {
+        if ($publicationId !== null && $publicationId !== '') {
+            $n = (int) $publicationId;
+
+            return $n > 0 ? $n : null;
+        }
+
+        $raw = $request->input('id', $request->input('publication_id'));
+        if ($raw === null || $raw === '') {
+            return null;
+        }
+        $n = (int) $raw;
+
+        return $n > 0 ? $n : null;
     }
 
     /**

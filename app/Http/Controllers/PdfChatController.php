@@ -12,7 +12,6 @@ use App\Services\ChatPDFService;
 use App\Support\ForumAssistantContext;
 use App\Support\PublicationAssistantContext;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -32,6 +31,11 @@ class PdfChatController extends Controller
         return Schema::hasColumn('pdf_chat_sessions', 'attachment_id');
     }
 
+    private function resolveUserId(Request $request): ?int
+    {
+        return $request->user()?->id;
+    }
+
     /**
      * Get or create a chat session: forum thread (GPT), publication (ChatPDF or GPT), reusing pdf_chat_sessions.
      */
@@ -49,7 +53,7 @@ class PdfChatController extends Controller
                 return response()->json(['error' => 'Send either publication_id or forum_id, not both.'], 422);
             }
 
-            $userId = Auth::id();
+            $userId = $this->resolveUserId($request);
 
             if ($request->filled('forum_id')) {
                 return $this->getOrCreateForumSession((int) $request->forum_id, $userId);
@@ -317,7 +321,7 @@ class PdfChatController extends Controller
             $userMessage = $request->message;
             $stream = (bool) $request->get('stream', true);
 
-            $userId = Auth::id();
+            $userId = $this->resolveUserId($request);
 
             if ($request->filled('forum_id')) {
                 return $this->sendForumMessage((int) $request->forum_id, $sessionId, $userId, $userMessage, $stream);

@@ -10,7 +10,6 @@ use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
 use App\Models\ContentRequest;
 use App\Models\Event;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class CommunitiesController extends Controller
@@ -500,73 +499,15 @@ class CommunitiesController extends Controller
         $perPage = max((int) $request->input('per_page', 20), 1);
         $search = trim((string) $request->input('q', ''));
 
-        $base = DB::table('community_of_practice_members as m')
-            ->join('users as u', 'u.id', '=', 'm.user_id')
-            ->leftJoin('publication as p', 'p.user_id', '=', 'u.id')
-            ->leftJoin('publication_community_of_practices as pcp', function ($join) {
-                $join->on('pcp.publication_id', '=', 'p.id');
-                $join->on('pcp.community_of_practice_id', '=', 'm.community_of_practice_id');
-            })
-            ->where('m.community_of_practice_id', (int) $id)
-            ->where('m.is_approved', 1)
-            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title')
-            ->select(
-                'm.id as membership_id',
-                'm.user_id',
-                'm.is_active',
-                'm.is_admin',
-                'u.name',
-                'u.email',
-                'u.job_title',
-                DB::raw('COUNT(DISTINCT pcp.publication_id) as publication_count')
-            );
+        $payload = $this->commsOfPracticeRepository->approvedMembersPaginatedWithStats(
+            (int) $id,
+            $page,
+            $perPage,
+            $search,
+            $isCommunityAdmin
+        );
 
-        if ($search !== '') {
-            $base->where(function ($q) use ($search) {
-                $q->where('u.name', 'like', '%' . $search . '%')
-                    ->orWhere('u.email', 'like', '%' . $search . '%')
-                    ->orWhere('u.job_title', 'like', '%' . $search . '%');
-            });
-        }
-
-        $recordsFiltered = DB::table(DB::raw('(' . $base->toSql() . ') as x'))
-            ->mergeBindings($base)
-            ->count();
-
-        $rows = $base
-            ->orderBy('publication_count', 'desc')
-            ->orderBy('name', 'asc')
-            ->offset(($page - 1) * $perPage)
-            ->limit($perPage)
-            ->get();
-
-        $rankStart = (($page - 1) * $perPage) + 1;
-        $items = [];
-        foreach ($rows as $index => $row) {
-            $items[] = [
-                'rank' => $rankStart + $index,
-                'membership_id' => (int) $row->membership_id,
-                'user_id' => (int) $row->user_id,
-                'name' => (string) $row->name,
-                'job_title' => (string) ($row->job_title ?: 'Not specified'),
-                'email' => (string) $row->email,
-                'publication_count' => (int) $row->publication_count,
-                'is_admin' => (bool) $row->is_admin,
-                'is_active' => (bool) $row->is_active,
-            ];
-        }
-
-        $loadedCount = (($page - 1) * $perPage) + count($items);
-        $hasMore = $loadedCount < $recordsFiltered;
-
-        return response()->json([
-            'items' => $items,
-            'page' => $page,
-            'per_page' => $perPage,
-            'total' => $recordsFiltered,
-            'has_more' => $hasMore,
-            'is_community_admin' => $isCommunityAdmin,
-        ]);
+        return response()->json($payload);
     }
 
     public function inviteColleagues(Request $request, $id)

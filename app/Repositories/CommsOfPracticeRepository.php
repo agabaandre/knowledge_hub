@@ -4,6 +4,11 @@ namespace App\Repositories;
 use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\CommunityInvitation;
+use App\Models\Event;
+use App\Models\Forum;
+use App\Models\ForumCommunityOfPractice;
+use App\Models\Publication;
+use App\Models\PublicationCommunityOfPractice;
 use App\Models\Tag;
 use App\Models\User;
 use Carbon\Carbon;
@@ -1181,5 +1186,120 @@ class CommsOfPracticeRepository{
             ->delete();
 
         return $deleted;
+    }
+
+    /**
+     * Paginated approved members with publication counts in this community (same logic as web members-data).
+     *
+     * @return array{items: list<array<string, mixed>>, page: int, per_page: int, total: int, has_more: bool, is_community_admin: bool}
+     */
+    public function approvedMembersPaginatedWithStats(int $communityId, int $page, int $perPage, string $search, bool $isCommunityAdmin): array
+    {
+        $page = max($page, 1);
+        $perPage = max($perPage, 1);
+
+        $base = DB::table('community_of_practice_members as m')
+            ->join('users as u', 'u.id', '=', 'm.user_id')
+            ->leftJoin('publication as p', 'p.user_id', '=', 'u.id')
+            ->leftJoin('publication_community_of_practices as pcp', function ($join) {
+                $join->on('pcp.publication_id', '=', 'p.id');
+                $join->on('pcp.community_of_practice_id', '=', 'm.community_of_practice_id');
+            })
+            ->where('m.community_of_practice_id', $communityId)
+            ->where('m.is_approved', 1)
+            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title')
+            ->select(
+                'm.id as membership_id',
+                'm.user_id',
+                'm.is_active',
+                'm.is_admin',
+                'u.name',
+                'u.email',
+                'u.job_title',
+                DB::raw('COUNT(DISTINCT pcp.publication_id) as publication_count')
+            );
+
+        if ($search !== '') {
+            $base->where(function ($q) use ($search) {
+                $q->where('u.name', 'like', '%'.$search.'%')
+                    ->orWhere('u.email', 'like', '%'.$search.'%')
+                    ->orWhere('u.job_title', 'like', '%'.$search.'%');
+            });
+        }
+
+        $recordsFiltered = DB::table(DB::raw('('.$base->toSql().') as x'))
+            ->mergeBindings($base)
+            ->count();
+
+        $rows = $base
+            ->orderBy('publication_count', 'desc')
+            ->orderBy('name', 'asc')
+            ->offset(($page - 1) * $perPage)
+            ->limit($perPage)
+            ->get();
+
+        $rankStart = (($page - 1) * $perPage) + 1;
+        $items = [];
+        foreach ($rows as $index => $row) {
+            $items[] = [
+                'rank' => $rankStart + $index,
+                'membership_id' => (int) $row->membership_id,
+                'user_id' => (int) $row->user_id,
+                'name' => (string) $row->name,
+                'job_title' => (string) ($row->job_title ?: 'Not specified'),
+                'email' => (string) $row->email,
+                'publication_count' => (int) $row->publication_count,
+                'is_admin' => (bool) $row->is_admin,
+                'is_active' => (bool) $row->is_active,
+            ];
+        }
+
+        $loadedCount = (($page - 1) * $perPage) + count($items);
+        $hasMore = $loadedCount < $recordsFiltered;
+
+        return [
+            'items' => $items,
+            'page' => $page,
+            'per_page' => $perPage,
+            'total' => $recordsFiltered,
+            'has_more' => $hasMore,
+            'is_community_admin' => $isCommunityAdmin,
+        ];
+    }
+
+    public function paginatedPublicationsForCommunity(int $communityId, int $perPage): LengthAwarePaginator
+    {
+        $perPage = max(1, min($perPage, 50));
+        $ids = PublicationCommunityOfPractice::where('community_of_practice_id', $communityId)->pluck('publication_id');
+
+        return Publication::whereIn('id', $ids)
+            ->with(['author'])
+            ->orderByDesc('created_at')
+            ->paginate($perPage);
+    }
+
+    public function paginatedForumsForCommunity(int $communityId, int $perPage): LengthAwarePaginator
+    {
+        $perPage = max(1, min($perPage, 50));
+        $ids = ForumCommunityOfPractice::where('community_of_practice_id', $communityId)->pluck('forum_id');
+
+        return Forum::whereIn('id', $ids)
+            ->with(['user'])
+            ->orderByDesc('id')
+            ->paginate($perPage);
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Event>
+     */
+    public function activeEventsForCommunity(int $communityId, int $limit = 50)
+    {
+        $limit = max(1, min($limit, 100));
+
+        return Event::where('community_of_practice_id', $communityId)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('startdate', 'asc')
+            ->limit($limit)
+            ->get();
     }
 }

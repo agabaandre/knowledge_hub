@@ -7,7 +7,8 @@ use App\Http\Controllers\Api\LookupApiController;
 use App\Http\Controllers\Api\MembersApiController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\PublicationsApiController;
-use App\Http\Controllers\Api\AIApiController; // Use the new AI API Controller
+use App\Http\Controllers\Api\AIApiController;
+use App\Http\Controllers\Api\AssistantApiController;
 use App\Http\Controllers\Api\EventsApiController; // Use the new Event API Controller
 use App\Http\Controllers\Api\CommunitiesApiController;
 use App\Http\Controllers\Api\PushNotificationsApiController;
@@ -49,13 +50,18 @@ Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where
 Route::get('home', [HomeApiController::class, 'index'])->middleware('auth.passport');
 
 Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
-    Route::post("/",[PublicationsApiController::class,"store"]);
-    Route::get("/published",[PublicationsApiController::class,"my_publications"]);
-    Route::post("/comment",[PublicationsApiController::class,"comment"]);
-    Route::post('/{id}', [PublicationsApiController::class, 'update'])->where('id', '[0-9]+');
-    Route::get("/favourites",[PublicationsApiController::class,"favourites"]);
-    Route::get("/add_favourite",[PublicationsApiController::class,"add_favourite"]);
-    Route::post("/content-request",[PublicationsApiController::class,"content_request"]);
+    Route::get('/published', [PublicationsApiController::class, 'my_publications']);
+    Route::get('/favourites', [PublicationsApiController::class, 'favourites']);
+    Route::match(['get', 'post'], '/add_favourite', [PublicationsApiController::class, 'add_favourite']);
+    Route::match(['get', 'post'], '/remove_favourite', [PublicationsApiController::class, 'remove_favourite']);
+    Route::post('/favourite', [PublicationsApiController::class, 'add_favourite']);
+    Route::delete('/favourite/{publicationId}', [PublicationsApiController::class, 'remove_favourite'])->whereNumber('publicationId');
+    Route::post('/like/{publicationId}', [PublicationsApiController::class, 'add_favourite'])->whereNumber('publicationId');
+    Route::post('/unlike/{publicationId}', [PublicationsApiController::class, 'remove_favourite'])->whereNumber('publicationId');
+    Route::post('/comment', [PublicationsApiController::class, 'comment']);
+    Route::post('/content-request', [PublicationsApiController::class, 'content_request']);
+    Route::post('/', [PublicationsApiController::class, 'store']);
+    Route::post('/{id}', [PublicationsApiController::class, 'update'])->whereNumber('id');
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
@@ -116,9 +122,10 @@ $apiUrl = "http://ipinfo.io/{$userIp}/json"; // Construct the query URL
 });
 
 
-Route::group(['prefix' => 'ai','middleware' => 'auth:api'], function () {
+Route::group(['prefix' => 'ai', 'middleware' => 'auth:api'], function () {
     Route::post('/summarise', [AIApiController::class, 'summarise']);
-    Route::post('/compare', [AIApiController::class, 'compare']);
+    Route::post('/assistant/session', [AssistantApiController::class, 'session']);
+    Route::post('/assistant/message', [AssistantApiController::class, 'message']);
 });
 
 Route::prefix('events')->group(function () {
@@ -127,25 +134,31 @@ Route::prefix('events')->group(function () {
 
 Route::group(['middleware' => 'auth:api'], function () {
     Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
-    //Route::put('/{id}', [EventsApiController::class, 'update'])->name('events.update');
-    //Route::delete('/{id}', [EventsApiController::class, 'destroy'])->name('events.destroy');
 });
 
 });
 
 Route::prefix('communities')->group(function () {
-    
     Route::get('/', [CommunitiesApiController::class, 'index'])->name('communities.index');
-    
-    Route::group(['middleware' => 'auth:api'], function () { 
-        Route::get('/{id}', [CommunitiesApiController::class, 'show'])->name('communities.show');
-        //Route::post('/', [CommunitiesApiController::class, 'store'])->name('communities.store');
-        //Route::put('/{id}', [CommunitiesApiController::class, 'update'])->name('communities.update');
-        //Route::delete('/{id}', [CommunitiesApiController::class, 'destroy'])->name('communities.destroy');
-        Route::post('/{communityId}/members', [CommunitiesApiController::class, 'addMember'])->name('communities.addMember');
-        Route::delete('/{communityId}/members/{userId}', [CommunitiesApiController::class, 'removeMember'])->name('communities.removeMember');
-    });
 
+    Route::group(['middleware' => 'auth:api'], function () {
+        Route::get('/me', [CommunitiesApiController::class, 'myCommunities'])->name('communities.me');
+        Route::get('/invitations/accept/{token}', [CommunitiesApiController::class, 'acceptInvitation'])->name('communities.invitations.accept');
+
+        Route::post('/{id}/join', [CommunitiesApiController::class, 'join'])->where('id', '[0-9]+')->name('communities.join');
+        Route::post('/{id}/leave', [CommunitiesApiController::class, 'leave'])->where('id', '[0-9]+')->name('communities.leave');
+        Route::get('/{id}/members', [CommunitiesApiController::class, 'members'])->where('id', '[0-9]+')->name('communities.members');
+        Route::get('/{id}/publications', [CommunitiesApiController::class, 'publications'])->where('id', '[0-9]+')->name('communities.publications');
+        Route::get('/{id}/forums', [CommunitiesApiController::class, 'forums'])->where('id', '[0-9]+')->name('communities.forums');
+        Route::get('/{id}/events', [CommunitiesApiController::class, 'events'])->where('id', '[0-9]+')->name('communities.events.index');
+        Route::post('/{id}/events', [CommunitiesApiController::class, 'storeCommunityEvent'])->where('id', '[0-9]+')->name('communities.events.store');
+        Route::post('/{id}/invites', [CommunitiesApiController::class, 'inviteColleagues'])->where('id', '[0-9]+')->name('communities.invites');
+        Route::post('/{id}/member-status', [CommunitiesApiController::class, 'updateMemberStatus'])->where('id', '[0-9]+')->name('communities.member-status');
+
+        Route::post('/{communityId}/members', [CommunitiesApiController::class, 'addMember'])->where('communityId', '[0-9]+')->name('communities.addMember');
+
+        Route::get('/{id}', [CommunitiesApiController::class, 'show'])->where('id', '[0-9]+')->name('communities.show');
+    });
 });
 
 
@@ -162,8 +175,5 @@ Route::prefix('push-notifications')->group(function() {
 
 Route::prefix('courses')->group(function () {
     Route::get('/', [CoursesApiController::class, 'index']);
-  //  Route::post('courses', [CoursesApiController::class, 'store']);
     Route::get('/{id}', [CoursesApiController::class, 'show']);
- //   Route::put('courses/{id}', [CoursesApiController::class, 'update']);
- //   Route::delete('courses/{id}', [CoursesApiController::class, 'destroy']);
 });

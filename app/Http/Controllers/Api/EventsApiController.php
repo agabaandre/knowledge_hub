@@ -182,48 +182,4 @@ class EventsApiController extends Controller
             "data" => $event
         ], 200);
     }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/events/{id}",
-     *     operationId="deleteEvent",
-     *     tags={"Events"},
-     *     summary="Delete event",
-     *     description="Deletes a record and returns no content",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Successful operation"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Event not found"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        $event = $this->eventsRepo->find($id);
-
-        if (!$event) {
-            return response()->json([
-                "status" => 404,
-                "message" => "Event not found",
-                "data" => null
-            ], 404);
-        }
-
-        $this->eventsRepo->delete($event);
-
-        return response()->json([
-            "status" => 204,
-            "message" => "Event deleted successfully",
-            "data" => null
-        ], 204);
-    }
 }

@@ -1218,21 +1218,30 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
     public function add_favourite($pub_id){
 
-         $fav = new Favourite();
-         $fav->user_id = auth()->user()->id;
-         $fav->publication_id = $pub_id;
-         $fav->save();
+        $userId = auth()->id();
+        if (! $userId) {
+            return;
+        }
+
+        $exists = Favourite::where('user_id', $userId)->where('publication_id', $pub_id)->exists();
+        if ($exists) {
+            return;
+        }
+
+        $fav = new Favourite();
+        $fav->user_id = $userId;
+        $fav->publication_id = $pub_id;
+        $fav->save();
     }
 
     public function remove_favourite($pub_id){
 
-        $fav = Favourite::where('publication_id',$pub_id)
-        ->where('user_id',current_user()->id)
-        ->first();
+        $userId = auth()->id();
+        if (! $userId) {
+            return;
+        }
 
-        if($fav)
-        $fav->delete();
-
+        Favourite::where('publication_id', $pub_id)->where('user_id', $userId)->delete();
     }
 
     private function save_attachments($files,$publication_id=null){

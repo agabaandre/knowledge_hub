@@ -175,50 +175,6 @@ class PushNotificationsApiController extends Controller
     }
 
     /**
-     * @OA\Delete(
-     *     path="/api/push-notifications/{id}",
-     *     operationId="deletePushNotification",
-     *     tags={"PushNotifications"},
-     *     summary="Delete push notification",
-     *     description="Deletes a record and returns no content",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=204,
-     *         description="Successful operation"
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Push notification not found"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        $pushNotification = $this->pushNotificationsRepo->find($id);
-
-        if (!$pushNotification) {
-            return response()->json([
-                "status" => 404,
-                "message" => "Push notification not found",
-                "data" => null
-            ], 404);
-        }
-
-        $this->pushNotificationsRepo->delete($pushNotification);
-
-        return response()->json([
-            "status" => 204,
-            "message" => "Push notification deleted successfully",
-            "data" => null
-        ], 204);
-    }
-
-    /**
      * @OA\Get(
      *     path="/api/push-notifications/user",
      *     operationId="getPushNotificationsByUser",

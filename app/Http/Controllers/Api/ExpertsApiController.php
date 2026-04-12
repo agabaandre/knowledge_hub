@@ -193,37 +193,4 @@ class ExpertsApiController extends ApiController
         ];
     }
 
-    /**
-     * @OA\Delete(
-     *     path="/api/experts/{id}",
-     *     operationId="DeleteExpert",
-     *     tags={"Experts"},
-     *     summary="Delete Expert",
-     *     description="Deletes a single expert record based on the ID.",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Record ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not Found"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        return [
-            "status" => 200,
-            "data" => ($this->expertsRepo->delete($id)) ? "Successfully deleted" : "Operation Failed"
-        ];
-    }
-
 }

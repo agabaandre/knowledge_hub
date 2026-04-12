@@ -18,11 +18,11 @@ class AIApiController extends Controller
     /**
      * @OA\Post(
      * path="/api/ai/summarise",
-     * operationId="Summarise Content",
+     * operationId="summariseContentLegacy",
      * tags={"AI Operations"},
-     * summary="Summarise Content",
+     * summary="Summarise content (legacy one-shot)",
      * security={{"bearer_token":{}}},
-     * description="Summarises the content of a publication or forum",
+     * description="Returns a one-shot summary for a forum thread or publication. For interactive Q&A, summaries with follow-ups, and comparisons in natural language, use `POST /api/ai/assistant/session` and `POST /api/ai/assistant/message` (Khub AI Assistant).",
      * @OA\RequestBody(
      *    required=true,
      *    @OA\JsonContent(
@@ -42,35 +42,6 @@ class AIApiController extends Controller
      */
     public function summarise(Request $request)
     {
-        return $this->aiService->summarise($request->resource_id, $request->type, $request->language,$request->prompt);
-    }
-
-    /**
-     * @OA\Post(
-     * path="/api/ai/compare",
-     * operationId="Compare Content",
-     * tags={"AI Operations"},
-     * summary="Compare Content",
-     * security={{"bearer_token":{}}},
-     * description="Compares the content of two publications",
-     * @OA\RequestBody(
-     *    required=true,
-     *    @OA\JsonContent(
-     *       required={"resource_id", "other_resource_id"},
-     *       @OA\Property(property="resource_id", type="integer", example=1),
-     *       @OA\Property(property="other_resource_id", type="integer", example=2),
-     *       @OA\Property(property="prompt", type="string", example="Keep it short and concise")
-     *    ),
-     * ),
-     * @OA\Response(
-     *    response=200,
-     *    description="Successful",
-     *    @OA\JsonContent()
-     * )
-     * )
-     */
-    public function compare(Request $request)
-    {
-        return $this->aiService->compare($request->resource_id, $request->other_resource_id,$request->prompt);
+        return $this->aiService->summarise($request->resource_id, $request->type, $request->language, $request->prompt);
     }
 }

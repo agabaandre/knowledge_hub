@@ -202,37 +202,4 @@ class ForumsApiController extends ApiController
         $data['status'] = 200;
         return response()->json($data, 200);
     }
-
-    /**
-     * @OA\Delete(
-     *     path="/api/forums/{id}",
-     *     operationId="DeleteForum",
-     *     tags={"Forums"},
-     *     summary="Delete Forum",
-     *     description="Deletes a single forum record based on the ID.",
-     *     @OA\Parameter(
-     *         name="id",
-     *         in="path",
-     *         required=true,
-     *         description="Forum ID",
-     *         @OA\Schema(type="integer")
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Successful operation",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response=404,
-     *         description="Not Found"
-     *     )
-     * )
-     */
-    public function destroy($id)
-    {
-        return [
-            "status" => 200,
-            "data" => ($this->forumsRepo->delete($id)) ? "Successfully deleted" : "Operation Failed"
-        ];
-    }
 }

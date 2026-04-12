@@ -106,7 +106,10 @@ class UsersRepository {
 
         if(!$is_social || ($user->id && !$user->is_social_login)){
 
-            $user->password      = Hash::make($request->password);
+            if ($request->filled('password')) {
+                $user->password = Hash::make($request->password);
+            }
+
             // Auto-verify and activate regular registrations
             $user->verification_token = null;
             $user->is_verified = 1;
@@ -171,6 +174,14 @@ class UsersRepository {
 
         if (\Illuminate\Support\Facades\Schema::hasColumn('users', 'theme_preference') && $request->has('theme_preference')) {
             $user->theme_preference = in_array($request->theme_preference, ['light', 'dark', 'system']) ? $request->theme_preference : 'light';
+        }
+
+        if ($request->has('level_id')) {
+            $actor = auth()->user();
+            if ($actor && $actor->can('alter_access_levels')) {
+                $levelId = $request->input('level_id');
+                $user->access_level_id = ($levelId === null || $levelId === '') ? null : (int) $levelId;
+            }
         }
 
         $user_saved = ($user->id)?$user->update():$user->save();
@@ -289,57 +300,7 @@ class UsersRepository {
     }
 
     public function update_profile(Request $request){
-        
-        $user = User::find($request->id);
-
-        if($request->firstname || $request->first_name)
-        $user->first_name = $request->firstname ?? $request->first_name;
-
-        if($request->lastname || $request->last_name)
-        $user->last_name  = $request->lastname ?? $request->last_name;
-
-        if($request->email)
-        $user->email      = $request->email;
-
-        if($request->langauge)
-        $user->langauge = $request->langauge;
-
-        if(($request->firstname || $request->first_name) && ($request->lastname || $request->last_name))
-        $user->name  = ($request->firstname ?? $request->first_name)." ".($request->lastname ?? $request->last_name);
-       
-        if($request->phone_number)
-        $user->phone_number      = $request->phone_number;
-
-        if($request->orcid)
-        $user->orcid      = $request->orcid;
-
-        if($request->level_id)
-        $user->access_level_id = $request->level_id;
-
-        \Log::info("preferences::");
-        \Log::info($request->all());
-
-        if($request->preferences){
-
-            $user->preferences()->delete();
-            $preferences = is_array($request->preferences) ? $request->preferences : (json_decode($request->preferences) ?? []);
-            //$user->preferences()->attach($preferences);
-            $this->save_preferences($request->id,$request->preferences);
-        }
-
-        if($request->hasFile('photo')):
-            //upload photo
-            $file        = $request->file('photo');
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $file_name.'.'.$extension;
-            $file->move(storage_path().'/app/public/uploads/users/',$file_path);
-            $user->photo  = $file_path;
-        endif;
-
-        $user->update();
-
-        return $user;
+        return $this->save($request);
     }
 
     public function update_password(Request $request){
@@ -364,10 +325,6 @@ class UsersRepository {
         $user->save();
 
         return true;
-    }
-
-    public function profile(Request $request){
-        return User::find($request->id);
     }
 
     public function find_by_email($email,$as_social=false){

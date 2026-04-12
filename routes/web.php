@@ -699,8 +699,6 @@ Route::group(["prefix" => "dashboards"], function () {
 });
 
 Route::group(["prefix" => "ai"], function () {
-    Route::post("/compare",  [AIController::class, 'compare']);
-
     // Summarise and PDF chat require authentication
     Route::post("/summarise",  [AIController::class, 'summarise'])->middleware('auth');
     Route::post("/summarise-file",  [AIController::class, 'summariseFile'])->name('ai.summarise.file')->middleware('auth');

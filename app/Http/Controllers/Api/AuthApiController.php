@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
@@ -282,70 +283,93 @@ class AuthApiController extends ApiController
     }
 
     /**
- * @OA\Get(
- *     path="/api/profile",
- *     operationId="UserProfile",
- *     tags={"User"},
- *     security={{"bearer_token":{}}},
- *     summary="Get User Profile",
- *     description="Retrieve a user's profile by ID",
-  *     @OA\Parameter(
+     * @OA\Get(
+     *     path="/api/profile",
+     *     operationId="UserProfile",
+     *     tags={"User"},
+     *     security={{"bearer_token":{}}},
+     *     summary="Get current user profile",
+     *     description="Returns the authenticated user's profile (same fields as the web account page). Optional `id` query parameter loads another user only if the caller has `alter_access_levels` permission.",
+     *     @OA\Parameter(
      *         name="id",
      *         in="query",
-     *         required=true,
-     *         description="User Id",
+     *         required=false,
+     *         description="Optional user id (admins / users with alter_access_levels only)",
      *         @OA\Schema(type="integer")
      *     ),
- *     @OA\Response(
- *         response=200,
- *         description="Success",
- *         @OA\JsonContent(
- *             @OA\Property(property="status", type="integer", example=200),
- *             @OA\Property(property="data", type="object",
- *                 @OA\Property(property="id", type="integer", example=1),
- *                 @OA\Property(property="name", type="string", example="John Doe"),
- *                 @OA\Property(property="email", type="string", example="john.doe@example.com"),
- *                 @OA\Property(property="photo", type="string", example="http://example.com/photo.jpg")
- *             )
- *         )
- *     ),
- *     @OA\Response(
- *         response=400,
- *         description="Bad Request, when some required data is missing"
- *     ),
- *     @OA\Response(
- *         response=404,
- *         description="User not found"
- *     ),
- *     @OA\Response(
- *         response=403,
- *         description="Forbidden"
- *     ),
- *     @OA\Response(
- *         response=401,
- *         description="Unauthorized"
- *     )
- * )
- */
+     *     @OA\Response(
+     *         response=200,
+     *         description="Success",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(
+     *                 property="data",
+     *                 type="object",
+     *                 description="Full user row (first_name, last_name, email, phone_number, job_title, organization_name, orcid, country_id, langauge, theme_preference, is_subscribed, is_social_login, photo URL, access_level, country, author, communities, preferences, etc.) plus preference_subtheme_ids, level_id (same as access_level_id), and community_ids"
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="User not found"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Forbidden (viewing another user without permission)"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Unauthorized"
+     *     )
+     * )
+     */
     public function profile(Request $request)
     {
-        $request->validate([
-            'id' => 'required|integer|exists:users,id',
-        ]);
+        $auth = $request->user();
+        $requestedId = $request->query('id');
 
-        $user = $this->usersRepo->profile($request);
+        if ($requestedId !== null && $requestedId !== '') {
+            $requestedId = (int) $requestedId;
+            if ($requestedId !== (int) $auth->id) {
+                if (! $auth->can('alter_access_levels')) {
+                    return response()->json(['status' => 403, 'message' => 'Forbidden'], 403);
+                }
+            }
+            $user = User::find($requestedId);
+        } else {
+            $user = $auth;
+        }
 
-        if (!$user) {
+        if (! $user) {
             return response()->json(['status' => 404, 'message' => 'User not found'], 404);
         }
 
-        // Optionally, load related data
-        $user->load('preferences', 'country', 'author', 'access_level');
+        return response()->json([
+            'status' => 200,
+            'data' => $this->profilePayload($user),
+        ]);
+    }
 
-        unset($user->password);
-        unset($user->remember_token);
+    /**
+     * Serialize user for GET /api/profile and successful profile updates.
+     */
+    private function profilePayload(User $user): array
+    {
+        $u = User::query()
+            ->with(['preferences', 'country', 'author', 'access_level', 'communities'])
+            ->find($user->id);
 
-        return response()->json(['status' => 200, 'data' => $user]);
+        if (! $u) {
+            return [];
+        }
+
+        $payload = $u->makeHidden(['password', 'remember_token'])->toArray();
+        // Mirror web account form / update payload naming for clients
+        $payload['preference_subtheme_ids'] = $u->preferences->pluck('subtheme_id')->values()->all();
+        $payload['level_id'] = $u->access_level_id;
+        $payload['community_ids'] = $u->communities->pluck('id')->values()->all();
+
+        return $payload;
     }
     
 
@@ -439,26 +463,39 @@ class AuthApiController extends ApiController
      *     description="Update an existing user's profile",
      *     @OA\RequestBody(
      *         required=true,
+     *         description="Same logical fields as the web account form (`/account`). The authenticated user is always updated; do not send `id`. Use multipart when uploading `photo`.",
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="id", type="integer", description="User ID", example=1),
-     *                 @OA\Property(property="firstname", type="string"),
-     *                 @OA\Property(property="lastname", type="string"),
+     *                 @OA\Property(property="first_name", type="string"),
+     *                 @OA\Property(property="last_name", type="string"),
+     *                 @OA\Property(property="firstname", type="string", description="Alias for first_name"),
+     *                 @OA\Property(property="lastname", type="string", description="Alias for last_name"),
+     *                 @OA\Property(property="email", type="string", format="email"),
+     *                 @OA\Property(property="phone_number", type="string"),
+     *                 @OA\Property(property="phone", type="string", description="Alias for phone_number"),
      *                 @OA\Property(property="country_id", type="integer"),
      *                 @OA\Property(property="job", type="string"),
-     *                 @OA\Property(property="phone", type="string"),
-     *                 @OA\Property(property="email", type="string"),
+     *                 @OA\Property(property="job_title", type="string"),
+     *                 @OA\Property(property="job_title_custom", type="string"),
+     *                 @OA\Property(property="organization_name", type="string"),
+     *                 @OA\Property(property="orcid", type="string"),
+     *                 @OA\Property(property="langauge", type="string", description="Language code (matches web form spelling)"),
+     *                 @OA\Property(property="theme_preference", type="string", enum={"light","dark","system"}),
+     *                 @OA\Property(property="is_subscribed", type="boolean"),
+     *                 @OA\Property(property="level_id", type="integer", description="Access level; only applied if user has alter_access_levels"),
+     *                 @OA\Property(property="password", type="string", format="password"),
+     *                 @OA\Property(property="password_confirmation", type="string", format="password"),
      *                 @OA\Property(property="preferences", type="array",
      *                     @OA\Items(type="integer"),
-     *                     description="Array of Preference Ids",
+     *                     description="Subtheme ids (same as web preferences[])",
      *                     example={1, 2, 3}
      *                 ),
      *                 @OA\Property(
      *                     property="photo",
      *                     type="string",
      *                     format="binary",
-     *                     description="Photo file to upload"
+     *                     description="Profile photo file (stored like web account upload)"
      *                 )
      *             )
      *         )
@@ -496,27 +533,49 @@ class AuthApiController extends ApiController
      */
     public function updateProfile(Request $request)
     {
+        $userId = $request->user()->id;
+
         $this->validate($request, [
+            'first_name' => 'sometimes|string|max:255',
             'firstname' => 'sometimes|string|max:255',
+            'last_name' => 'sometimes|string|max:255',
             'lastname' => 'sometimes|string|max:255',
-            'email' => 'sometimes|string|email|max:255|exists:users,email',
+            'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
             'password' => 'sometimes|string|min:6|confirmed',
-            'phone' => 'sometimes|string|min:10',
-            'job' => 'sometimes|string|min:4',
-            'country_id' => 'sometimes|integer',
+            'phone_number' => 'sometimes|nullable|string|max:64',
+            'phone' => 'sometimes|nullable|string|max:64',
+            'job' => 'sometimes|nullable|string|max:255',
+            'job_title' => 'sometimes|nullable|string|max:255',
+            'job_title_custom' => 'sometimes|nullable|string|max:255',
+            'organization_name' => 'sometimes|nullable|string|max:255',
+            'orcid' => 'sometimes|nullable|string|max:64',
+            'country_id' => 'sometimes|nullable|integer|exists:country,id',
+            'langauge' => 'sometimes|nullable|string|max:32',
+            'theme_preference' => 'sometimes|nullable|in:light,dark,system',
+            'is_subscribed' => 'sometimes|boolean',
+            'level_id' => 'sometimes|nullable|integer',
+            'preferences' => 'sometimes|array',
+            'preferences.*' => 'integer',
             'photo' => 'sometimes|file|image|max:2048',
-            'id' => 'required|integer|exists:users,id',
         ]);
 
-        $saved   = $this->usersRepo->update_profile($request);
+        $request->merge(['id' => $userId]);
 
-        $message = ($saved)?'Profile update successfully':'Request failed try again';
+        $saved = $this->usersRepo->save($request);
 
-        $data['message']     = $message;
-        $data['status']      = ($saved)?200:400;
-        $data['data']        = $saved;
+        if (! $saved) {
+            return response()->json([
+                'message' => 'Request failed try again',
+                'status' => 400,
+                'data' => null,
+            ], 400);
+        }
 
-        return response()->json($data);
+        return response()->json([
+            'message' => 'Profile update successfully',
+            'status' => 200,
+            'data' => $this->profilePayload($saved),
+        ]);
     }
 
     /**
@@ -524,32 +583,72 @@ class AuthApiController extends ApiController
      *     path="/api/social-login",
      *     operationId="SocialLogin",
      *     tags={"Authentication"},
-     *     summary="Social Login",
-     *     description="Authenticate a user via social login",
+     *     summary="Social login (Google, Microsoft, LinkedIn)",
+     *     description="Exchange a verified identity from your mobile or web OAuth flow for a **Passport bearer token**.\n\n**How it works**\n1. In your app, complete sign-in with the provider SDK (Google Sign-In, Microsoft MSAL, LinkedIn OpenID Connect).\n2. Read **email** and **display name** from the IdP user profile (and ideally **subject id** + **photo URL**).\n3. `POST` JSON to this endpoint with `provider` set to `google`, `microsoft`, `linkedin`, or `linkedin-openid`.\n4. Use the returned `token` as `Authorization: Bearer <token>` on other `/api/*` routes.\n\n**Providers**\n- **Google** — `provider`: `google`. Use the email and name from Google Sign-In / OAuth userinfo.\n- **Microsoft** — `provider`: `microsoft`. Use Entra ID / Microsoft account email and display name from MSAL / Graph.\n- **LinkedIn** — `provider`: `linkedin` or `linkedin-openid` (both are treated as LinkedIn).\n\n**Notes**\n- `email` must be the verified address from the IdP. If the email already exists as a **password-only** account, the API returns **403**.\n- If the email exists under a **different** social provider, the API returns **403** with a message to use the original provider.\n- New users are created on first successful call; existing social users receive a new token.\n\nTry the **Examples** dropdown in Swagger UI (`google_signin`, `microsoft_msal`, `linkedin_openid`).",
      *     @OA\RequestBody(
-     *         @OA\JsonContent(
-     *             required={"provider", "email", "name"},
-     *             @OA\Property(property="provider", type="string", example="google", description="google, microsoft, linkedin, or linkedin-openid"),
-     *             @OA\Property(property="email", type="string"),
-     *             @OA\Property(property="name", type="string"),
-     *             @OA\Property(property="photoUrl", type="string", nullable=true),
-     *             @OA\Property(property="providerId", type="string", nullable=true)
+     *         required=true,
+     *         description="Payload built from your OAuth / OIDC user profile after successful provider sign-in.",
+     *         @OA\MediaType(
+     *             mediaType="application/json",
+     *             @OA\Schema(
+     *                 required={"provider", "email", "name"},
+     *                 @OA\Property(
+     *                     property="provider",
+     *                     type="string",
+     *                     enum={"google", "microsoft", "linkedin", "linkedin-openid"},
+     *                     example="google",
+     *                     description="Identity provider key accepted by the API."
+     *                 ),
+     *                 @OA\Property(property="email", type="string", format="email", example="jane.doe@gmail.com", description="Verified email from the IdP."),
+     *                 @OA\Property(property="name", type="string", example="Jane Doe", description="Full display name; server splits into first/last when creating a user."),
+     *                 @OA\Property(property="photoUrl", type="string", format="uri", nullable=true, description="Optional profile image URL (https recommended; localhost blocked in production)."),
+     *                 @OA\Property(property="providerId", type="string", nullable=true, description="Optional stable subject from the IdP (Google `sub`, Microsoft `oid`, LinkedIn person URN, etc.).")
+     *             ),
+     *             @OA\Examples(
+     *                 example="google_signin",
+     *                 summary="Google Sign-In",
+     *                 description="After Google OAuth / Google Sign-In for Android, iOS, or web — send email, name, and optional sub + picture from userinfo.",
+     *                 value={"provider":"google","email":"jane.doe@gmail.com","name":"Jane Doe","providerId":"109876543210987654321","photoUrl":"https://lh3.googleusercontent.com/a-/AOh14GgExampleProfilePhoto"}
+     *             ),
+     *             @OA\Examples(
+     *                 example="microsoft_msal",
+     *                 summary="Microsoft (MSAL / Entra)",
+     *                 description="After Microsoft sign-in — use mail and displayName from Microsoft Graph / token claims; oid as providerId when available.",
+     *                 value={"provider":"microsoft","email":"jane.doe@contoso.com","name":"Jane Doe","providerId":"a1b2c3d4-e5f6-7890-abcd-ef1234567890","photoUrl":"https://graph.microsoft.com/v1.0/me/photo/$value"}
+     *             ),
+     *             @OA\Examples(
+     *                 example="linkedin_openid",
+     *                 summary="LinkedIn (OIDC)",
+     *                 description="Use `linkedin` or `linkedin-openid`. Send email and name from LinkedIn's OpenID Connect userinfo; person id or URN as providerId if available.",
+     *                 value={"provider":"linkedin-openid","email":"jane.doe@company.org","name":"Jane Doe","providerId":"urn:li:person:AbCdEfGhIj","photoUrl":"https://media.licdn.com/dms/image/v2/example-profile-photo-endpoint"}
+     *             )
      *         )
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Success",
-     *         @OA\MediaType(
-     *             mediaType="application/json"
+     *         description="Passport access token and user",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.example..."),
+     *             @OA\Property(property="token_type", type="string", example="Bearer"),
+     *             @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="user", type="object", description="User model including communities and preferences relations.")
      *         )
      *     ),
      *     @OA\Response(
      *         response=400,
-     *         description="Bad Request, when some required data is missing"
+     *         description="Bad request or unable to complete login"
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Invalid User Credentials"
+     *         description="Unauthorized"
+     *     ),
+     *     @OA\Response(
+     *         response=403,
+     *         description="Account exists with password only, or registered with a different social provider"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation error (e.g. invalid email)"
      *     )
      * )
      */
