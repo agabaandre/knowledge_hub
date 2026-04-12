@@ -208,7 +208,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         return $result;
     }
 
-    public function recommendedByPreferences($user_id, $limit = 10){
+    public function recommendedByPreferences($user_id, $limit = 10, bool $stableRanking = false){
         $user = \App\Models\User::find($user_id);
         if (!$user) {
             return collect();
@@ -232,10 +232,14 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pubs->where('is_admin_only_access', 0);
         }
 
+        if ($stableRanking) {
+            return $pubs->orderByDesc('visits')->orderByDesc('id')->take($limit)->get();
+        }
+
         return $pubs->inRandomOrder()->take($limit)->get();
     }
 
-    public function relatedByFavoriteTags($user_id, $limit = 10){
+    public function relatedByFavoriteTags($user_id, $limit = 10, bool $stableRanking = false){
         // Get tag IDs from user's favorited publications
         $favoriteTagIds = DB::table('favourites')
             ->join('publication_tags', 'favourites.publication_id', '=', 'publication_tags.publication_id')
@@ -261,6 +265,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         if (!is_admin()) {
             $pubs->where('is_admin_only_access', 0);
+        }
+
+        if ($stableRanking) {
+            return $pubs->orderByDesc('visits')->orderByDesc('id')->take($limit)->get();
         }
 
         return $pubs->inRandomOrder()->take($limit)->get();
@@ -293,6 +301,50 @@ public function get(Request $request, $return_array = false, $featured = false,$
         }
 
         return $this->diversifyPublicationsByThematicArea($merged, $limit);
+    }
+
+    /**
+     * Recommended feed for infinite scroll: same merge rules as {@see homeRecommendedPublications} but returns one page
+     * with stable preference/tag ordering so page N is reproducible. Pool size is capped per request for performance.
+     *
+     * @return array{items: Collection, has_more: bool, ranking_total: int}
+     */
+    public function homeRecommendedPublicationsPage(Request $request, ?int $userId, int $perPage, int $page): array
+    {
+        $perPage = max(1, min(100, $perPage));
+        $page = max(1, $page);
+        $offset = ($page - 1) * $perPage;
+        $need = $page * $perPage;
+        $poolSize = min(max($need * 6, 36), 600);
+
+        $featuredRequest = clone $request;
+        $featuredRequest->merge([
+            'is_featured' => 1,
+            'rows' => $poolSize,
+            'order_by_visits' => true,
+            'homepage_featured_strict' => true,
+        ]);
+
+        $featuredPool = collect($this->get($featuredRequest, false, true)->items());
+
+        if ($userId) {
+            $prefs = $this->recommendedByPreferences($userId, $poolSize, true);
+            $tags = $this->relatedByFavoriteTags($userId, $poolSize, true);
+            $merged = $featuredPool->concat($prefs)->concat($tags)->unique('id');
+        } else {
+            $merged = $featuredPool;
+        }
+
+        $diversified = $this->diversifyPublicationsByThematicArea($merged, $need);
+        $rankingTotal = $diversified->count();
+        $pageItems = $diversified->slice($offset, $perPage)->values();
+        $hasMore = $rankingTotal > ($page * $perPage);
+
+        return [
+            'items' => $pageItems,
+            'has_more' => $hasMore,
+            'ranking_total' => $rankingTotal,
+        ];
     }
 
     /**

@@ -14,6 +14,8 @@ use App\Http\Controllers\Api\CommunitiesApiController;
 use App\Http\Controllers\Api\PushNotificationsApiController;
 use App\Http\Controllers\Api\CoursesApiController;
 use App\Http\Controllers\Api\HomeApiController;
+use App\Http\Controllers\Api\HealthTopicsApiController;
+use App\Http\Controllers\Api\MeApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -39,15 +41,24 @@ Route::group(['middleware' => 'auth:api'],function(){
     Route::post('/change-password', [AuthApiController::class, 'changePassword']);
     Route::get('/logout', [AuthApiController::class, 'logout']);
     Route::get('/profile', [AuthApiController::class, 'profile']);
+    Route::get('/me', [MeApiController::class, 'library']);
  });
 
 Route::group(["prefix" =>"members"],function(){
     Route::get('/', [MembersApiController::class,"member_states"]);
 });
 
+Route::get('publications/sections/recommended', [PublicationsApiController::class, 'sectionRecommended'])->middleware('auth.passport');
+Route::get('publications/sections/top-searches', [PublicationsApiController::class, 'sectionTopSearches'])->middleware('auth.passport');
+Route::get('publications/sections/flagship-initiatives', [PublicationsApiController::class, 'sectionFlagshipInitiatives'])->middleware('auth.passport');
 Route::get("publications",[PublicationsApiController::class,"index"])->middleware('auth.passport');;
 Route::get("publications/{id}",[PublicationsApiController::class,"show"])->where('id', '[0-9]+');;
 Route::get('home', [HomeApiController::class, 'index'])->middleware('auth.passport');
+
+Route::get('health-topics', [HealthTopicsApiController::class, 'index']);
+Route::get('health-topics/{id}', [HealthTopicsApiController::class, 'showTopic'])->whereNumber('id');
+Route::get('health-emergencies', [HealthTopicsApiController::class, 'emergenciesIndex']);
+Route::get('health-emergencies/{id}', [HealthTopicsApiController::class, 'showEmergency'])->whereNumber('id');
 
 Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::get('/published', [PublicationsApiController::class, 'my_publications']);
@@ -65,10 +76,13 @@ Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
-Route::get("forums/{id}",[ForumsApiController::class,"show"]);
+Route::get("forums/{id}",[ForumsApiController::class,"show"])->whereNumber('id');
 Route::group(['middleware' => 'auth:api'],function(){
-    Route::post("forums",[ForumsApiController::class,"store"]);
+    Route::post("forums/comment/like",[ForumsApiController::class,"likeComment"]);
     Route::post("forums/comment",[ForumsApiController::class,"comment"]);
+    Route::post("forums/{id}/join",[ForumsApiController::class,"join"])->whereNumber('id');
+    Route::post("forums/{id}/like",[ForumsApiController::class,"like"])->whereNumber('id');
+    Route::post("forums",[ForumsApiController::class,"store"]);
 });
 
 Route::get("experts",[ExpertsApiController::class,'index']);

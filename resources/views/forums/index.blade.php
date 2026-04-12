@@ -23,7 +23,12 @@
         "@type": "ItemList",
         "itemListElement": [
             @if(isset($forums) && $forums->count() > 0)
-                @foreach($forums->take(10) as $index => $forum)
+                @php
+                    $schemaForums = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                        ? $forums->getCollection()->take(10)
+                        : collect($forums)->take(10);
+                @endphp
+                @foreach($schemaForums as $index => $forum)
                 {
                     "@type": "ListItem",
                     "position": {{ $index + 1 }},
@@ -582,11 +587,7 @@
                                 }
                             @endphp
                             <h2 class="forum-title" itemprop="headline">
-                                @if(in_array($forum->id, $my_forums))
-                                    <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
-                                @else
-                                    {!! $forum->forum_title !!}
-                                @endif
+                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
                             </h2>
                             <p class="forum-description">
                                 @php
@@ -1279,13 +1280,37 @@ document.addEventListener('DOMContentLoaded', function() {
 
     const searchInput = document.getElementById('forum-search');
     const filterButtons = document.querySelectorAll('.filter-btn');
-    const forumCards = document.querySelectorAll('.forum-card');
+    const forumsList = document.getElementById('forums-list');
+    const forumCards = forumsList ? Array.from(forumsList.querySelectorAll('.forum-card')) : [];
 
-    // Search functionality
-    if(searchInput) {
-        searchInput.addEventListener('input', function() {
-            const searchTerm = this.value.trim().toLowerCase();
-            filterForums(searchTerm);
+    function restoreDefaultOrder() {
+        if (!forumsList || !window._forumsListInitialOrder) return;
+        window._forumsListInitialOrder.forEach(function (node) {
+            forumsList.appendChild(node);
+        });
+    }
+
+    function sortCardsInDom(compareFn) {
+        if (!forumsList || forumCards.length === 0) return;
+        const sorted = forumCards.slice().sort(compareFn);
+        sorted.forEach(function (card) {
+            forumsList.appendChild(card);
+        });
+    }
+
+    if (forumsList && forumCards.length) {
+        window._forumsListInitialOrder = forumCards.slice();
+    }
+
+    function getActiveFilter() {
+        const active = document.querySelector('.filter-btn.active');
+        return active && active.dataset.filter ? active.dataset.filter : 'all';
+    }
+
+    // Search functionality (respects current filter: joined / recent / popular / all)
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            applyFilter(getActiveFilter());
         });
     }
 
@@ -1299,42 +1324,49 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    function filterForums(searchTerm) {
-        forumCards.forEach(card => {
-            const title = card.querySelector('.forum-title').textContent.toLowerCase();
-            const description = card.querySelector('.forum-description').textContent.toLowerCase();
-            const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase()).join(' ');
-            
-            if (!searchTerm || title.includes(searchTerm) || description.includes(searchTerm) || tags.includes(searchTerm)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none';
-            }
-        });
+    function cardMatchesSearch(card, searchTerm) {
+        if (!searchTerm) return true;
+        const titleEl = card.querySelector('.forum-title');
+        const descEl = card.querySelector('.forum-description');
+        const title = titleEl ? titleEl.textContent.toLowerCase() : '';
+        const description = descEl ? descEl.textContent.toLowerCase() : '';
+        const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase()).join(' ');
+        return title.includes(searchTerm) || description.includes(searchTerm) || tags.includes(searchTerm);
     }
 
     function applyFilter(filter) {
         const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';
-        
+
+        restoreDefaultOrder();
+
+        if (filter === 'recent') {
+            sortCardsInDom(function (a, b) {
+                const da = new Date(a.dataset.date || 0).getTime();
+                const db = new Date(b.dataset.date || 0).getTime();
+                return db - da;
+            });
+        } else if (filter === 'popular') {
+            sortCardsInDom(function (a, b) {
+                const ca = parseInt(a.dataset.comments, 10) || 0;
+                const cb = parseInt(b.dataset.comments, 10) || 0;
+                if (cb !== ca) return cb - ca;
+                const da = new Date(a.dataset.date || 0).getTime();
+                const db = new Date(b.dataset.date || 0).getTime();
+                return db - da;
+            });
+        }
+
         forumCards.forEach(card => {
             let shouldShow = true;
-            
+
             if (filter === 'joined') {
                 shouldShow = card.dataset.joined === 'true';
-            } else if (filter === 'recent') {
-                shouldShow = true;
-            } else if (filter === 'popular') {
-                const comments = parseInt(card.dataset.comments) || 0;
-                shouldShow = comments > 0;
             }
-            
+
             if (shouldShow && searchTerm) {
-                const title = card.querySelector('.forum-title').textContent.toLowerCase();
-                const description = card.querySelector('.forum-description').textContent.toLowerCase();
-                const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase()).join(' ');
-                shouldShow = title.includes(searchTerm) || description.includes(searchTerm) || tags.includes(searchTerm);
+                shouldShow = cardMatchesSearch(card, searchTerm);
             }
-            
+
             card.style.display = shouldShow ? 'block' : 'none';
         });
     }

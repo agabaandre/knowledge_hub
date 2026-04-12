@@ -2230,24 +2230,35 @@
                 "tags": [
                     "Forums"
                 ],
-                "summary": "List Forums",
-                "description": "Returns a list of all Forums",
+                "summary": "List forums",
+                "description": "Paginated approved forums (same rules as web `/forums`: search, tag, community filter, visibility). Send `Authorization: Bearer` to include `joined_forum_ids` for the current user.",
                 "operationId": "ListForums",
                 "parameters": [
                     {
                         "name": "term",
                         "in": "query",
-                        "description": "Search term for specific records",
-                        "required": false,
                         "schema": {
                             "type": "string"
                         }
                     },
                     {
+                        "name": "tag",
+                        "in": "query",
+                        "description": "Filter by tag text (ForumTag)",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "community_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
                         "name": "page",
                         "in": "query",
-                        "description": "Page",
-                        "required": false,
                         "schema": {
                             "type": "integer"
                         }
@@ -2255,17 +2266,6 @@
                     {
                         "name": "page_size",
                         "in": "query",
-                        "description": "Page Size",
-                        "required": false,
-                        "schema": {
-                            "type": "integer"
-                        }
-                    },
-                    {
-                        "name": "community_id",
-                        "in": "query",
-                        "description": "Filter by Community Id",
-                        "required": false,
                         "schema": {
                             "type": "integer"
                         }
@@ -2273,12 +2273,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Paginator payload + status + optional joined_forum_ids"
                     }
                 }
             },
@@ -2286,24 +2281,53 @@
                 "tags": [
                     "Forums"
                 ],
-                "summary": "Create Forum",
-                "description": "Allows users to submit Forum Discussion",
+                "summary": "Create forum thread",
+                "description": "Same as web `POST /forums/publish`: pending moderation, optional cover `image`, `attachments[]`, `communities` ids, `tags` ids, `tag_all_my_communities`, `also_public_with_communities`. Use multipart for files.",
                 "operationId": "CreateForum",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
                             "schema": {
+                                "required": [
+                                    "title",
+                                    "description"
+                                ],
                                 "properties": {
                                     "title": {
                                         "type": "string"
                                     },
                                     "description": {
+                                        "description": "HTML allowed; sanitized like web",
                                         "type": "string"
                                     },
                                     "image": {
-                                        "description": "Photo file to upload",
                                         "type": "string",
                                         "format": "binary"
+                                    },
+                                    "attachments": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    },
+                                    "communities": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "tags": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "integer"
+                                        }
+                                    },
+                                    "tag_all_my_communities": {
+                                        "type": "boolean"
+                                    },
+                                    "also_public_with_communities": {
+                                        "type": "boolean"
                                     }
                                 },
                                 "type": "object"
@@ -2313,77 +2337,13 @@
                 },
                 "responses": {
                     "201": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {}
-                        }
+                        "description": "Created (pending approval)"
+                    },
+                    "422": {
+                        "description": "Validation error"
                     },
                     "401": {
                         "description": "Unauthenticated"
-                    },
-                    "400": {
-                        "description": "Bad Request, when some required data is missing"
-                    },
-                    "404": {
-                        "description": "Not found when you send the request to an invalid endpoint"
-                    },
-                    "403": {
-                        "description": "Forbidden"
-                    }
-                },
-                "security": [
-                    {
-                        "bearer_token": []
-                    }
-                ]
-            }
-        },
-        "/api/forums/comment": {
-            "post": {
-                "tags": [
-                    "Forums"
-                ],
-                "summary": "Create Forum Comment",
-                "description": "Allows users to submit Forum Discussion Comment",
-                "operationId": "CreateForumComment",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
-                                    "id": {
-                                        "type": "integer"
-                                    },
-                                    "parent_id": {
-                                        "type": "integer"
-                                    },
-                                    "comment": {
-                                        "type": "string"
-                                    }
-                                },
-                                "type": "object"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "201": {
-                        "description": "Success",
-                        "content": {
-                            "application/json": {}
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthenticated"
-                    },
-                    "400": {
-                        "description": "Bad Request, when some required data is missing"
-                    },
-                    "404": {
-                        "description": "Not found when you send the request to an invalid endpoint"
-                    },
-                    "403": {
-                        "description": "Forbidden"
                     }
                 },
                 "security": [
@@ -2398,14 +2358,13 @@
                 "tags": [
                     "Forums"
                 ],
-                "summary": "Show Forum",
-                "description": "Retrieve a single forum record based on the ID.",
+                "summary": "Forum thread",
+                "description": "Full thread (same eager loads as web). Non–live threads are only visible to the author or an admin. View count increments like the web thread page.",
                 "operationId": "ShowForum",
                 "parameters": [
                     {
                         "name": "id",
                         "in": "path",
-                        "description": "Forum ID",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -2414,17 +2373,169 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful operation",
-                        "content": {
-                            "application/json": {
-                                "schema": {}
-                            }
-                        }
+                        "description": "Forum + meta"
                     },
                     "404": {
-                        "description": "Not Found"
+                        "description": "Not found or not visible"
                     }
                 }
+            }
+        },
+        "/api/forums/comment": {
+            "post": {
+                "tags": [
+                    "Forums"
+                ],
+                "summary": "Post comment or reply",
+                "description": "`forum_id` (or legacy `id`) + `comment`; optional `parent_id` for replies. Max 300 words, 20000 chars. Multipart supported for `attachments[]`.",
+                "operationId": "CreateForumComment",
+                "requestBody": {
+                    "content": {
+                        "multipart/form-data": {
+                            "schema": {
+                                "required": [
+                                    "comment"
+                                ],
+                                "properties": {
+                                    "forum_id": {
+                                        "type": "integer"
+                                    },
+                                    "id": {
+                                        "description": "Alias for forum_id",
+                                        "type": "integer"
+                                    },
+                                    "parent_id": {
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "comment": {
+                                        "type": "string"
+                                    },
+                                    "attachments": {
+                                        "type": "array",
+                                        "items": {
+                                            "type": "string",
+                                            "format": "binary"
+                                        }
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "201": {
+                        "description": "Comment created"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/forums/{id}/join": {
+            "post": {
+                "tags": [
+                    "Forums"
+                ],
+                "summary": "Join discussion",
+                "description": "Same as web `GET /forums/join?id=` — subscribes the user (idempotent).",
+                "operationId": "JoinForum",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Joined"
+                    },
+                    "404": {
+                        "description": "Forum not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/forums/{id}/like": {
+            "post": {
+                "tags": [
+                    "Forums"
+                ],
+                "summary": "Like or unlike forum thread",
+                "operationId": "ToggleForumLike",
+                "parameters": [
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "required": true,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "{ liked, count }"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/forums/comment/like": {
+            "post": {
+                "tags": [
+                    "Forums"
+                ],
+                "summary": "Like or unlike a comment",
+                "operationId": "ToggleForumCommentLike",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "comment_id"
+                                ],
+                                "properties": {
+                                    "comment_id": {
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "{ liked, count }"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
             }
         },
         "/api/lookup/resource-types": {
@@ -2638,6 +2749,129 @@
                 }
             }
         },
+        "/api/me": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "My favourites, publications, communities, and AI chats (summary)",
+                "description": "Returns paginated slices for favourites, publications you submitted, and communities you belong to (same data as `GET /api/publications/favourites`, `GET /api/publications/published`, `GET /api/communities/me`). Also returns Khub AI Assistant chat sessions (publication/PDF and forum) in a shape aligned with the web account chats page — there is no separate chats list route.",
+                "operationId": "getMeLibrary",
+                "parameters": [
+                    {
+                        "name": "per_page",
+                        "in": "query",
+                        "description": "Page size for each paginated section (default 10, max 50)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
+                    },
+                    {
+                        "name": "favourites_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "publications_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "communities_page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "publications_term",
+                        "in": "query",
+                        "description": "Search filter for my publications only",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "communities_term",
+                        "in": "query",
+                        "description": "Search filter for my communities only",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Combined payload",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "endpoints": {
+                                            "properties": {
+                                                "favourites": {
+                                                    "type": "string",
+                                                    "example": "/api/publications/favourites"
+                                                },
+                                                "my_publications": {
+                                                    "type": "string",
+                                                    "example": "/api/publications/published"
+                                                },
+                                                "my_communities": {
+                                                    "type": "string",
+                                                    "example": "/api/communities/me"
+                                                },
+                                                "assistant_session": {
+                                                    "type": "string",
+                                                    "example": "/api/ai/assistant/session"
+                                                }
+                                            },
+                                            "type": "object"
+                                        },
+                                        "favourites": {
+                                            "type": "object"
+                                        },
+                                        "my_publications": {
+                                            "type": "object"
+                                        },
+                                        "communities": {
+                                            "type": "object"
+                                        },
+                                        "chats": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
         "/api/members": {
             "get": {
                 "tags": [
@@ -2664,7 +2898,7 @@
                     "Publications"
                 ],
                 "summary": "List Publications",
-                "description": "Returns a list of all publications",
+                "description": "Records search / listing aligned with web `records/search` filters. By default includes `meta.filter_groups` for mobile refine UI (set include_filters=0 to omit). Empty `term` returns the same broad listing as the website (no dummy keyword).",
                 "operationId": "ListPublications",
                 "parameters": [
                     {
@@ -2755,6 +2989,66 @@
                         "required": false,
                         "schema": {
                             "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "theme",
+                        "in": "query",
+                        "description": "Alias for thematic_area_id (web)",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "rcc",
+                        "in": "query",
+                        "description": "Region id when member states enabled",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "country_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "tag",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "data_category_id",
+                        "in": "query",
+                        "description": "Repeat or use array for multi-select",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "file_category_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "file_type_id",
+                        "in": "query",
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "include_filters",
+                        "in": "query",
+                        "description": "1 (default) = include meta.filter_groups",
+                        "schema": {
+                            "type": "boolean"
                         }
                     }
                 ],
@@ -3101,19 +3395,84 @@
                 ]
             }
         },
-        "/api/publications/add_favourite": {
-            "get": {
+        "/api/publications/favourite": {
+            "post": {
                 "tags": [
                     "Publications"
                 ],
-                "summary": "Add Favourite Publications",
-                "description": "Add Favourite publications",
-                "operationId": "AddFavouritePublications",
+                "summary": "Add favourite (like)",
+                "description": "Favourite a publication. Web equivalent: `/publications/add_favourite`. Aliases: `GET|POST /api/publications/add_favourite?id=`, `POST /api/publications/like/{publicationId}`.",
+                "operationId": "AddPublicationFavourite",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "required": [
+                                    "publication_id"
+                                ],
+                                "properties": {
+                                    "publication_id": {
+                                        "type": "integer",
+                                        "example": 42
+                                    },
+                                    "id": {
+                                        "description": "Alias for publication_id",
+                                        "type": "integer"
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "Success",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "favourited": {
+                                            "type": "boolean",
+                                            "example": true
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Missing or invalid publication id"
+                    },
+                    "404": {
+                        "description": "Publication not found"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/publications/favourite/{publicationId}": {
+            "delete": {
+                "tags": [
+                    "Publications"
+                ],
+                "summary": "Remove favourite (unlike)",
+                "description": "Web equivalent: `/publications/remove_favourite`. Aliases: `GET|POST /api/publications/remove_favourite?id=`, `POST /api/publications/unlike/{publicationId}`.",
+                "operationId": "RemovePublicationFavourite",
                 "parameters": [
                     {
-                        "name": "id",
-                        "in": "query",
-                        "description": "Publication Id",
+                        "name": "publicationId",
+                        "in": "path",
                         "required": true,
                         "schema": {
                             "type": "integer"
@@ -3122,12 +3481,30 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful",
+                        "description": "Success",
                         "content": {
                             "application/json": {
-                                "schema": {}
+                                "schema": {
+                                    "properties": {
+                                        "success": {
+                                            "type": "boolean",
+                                            "example": true
+                                        },
+                                        "favourited": {
+                                            "type": "boolean",
+                                            "example": false
+                                        }
+                                    },
+                                    "type": "object"
+                                }
                             }
                         }
+                    },
+                    "400": {
+                        "description": "Missing or invalid publication id"
+                    },
+                    "404": {
+                        "description": "Publication not found"
                     }
                 },
                 "security": [

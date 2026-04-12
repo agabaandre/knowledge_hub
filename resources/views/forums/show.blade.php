@@ -1034,7 +1034,12 @@
                     <h5 class="sidebar-card-title">
                         <i class="fa fa-comments me-2" style="color: {{ $primaryColor }};"></i>Recent Forums
                     </h5>
-                    @foreach ($forums->take(5) as $other)
+                    @php
+                        $sidebarForums = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                            ? $forums->getCollection()->take(5)
+                            : collect($forums)->take(5);
+                    @endphp
+                    @foreach ($sidebarForums as $other)
                     <a href="{{ url('forums/thread') }}?id={{ $other->id }}" class="forum-sidebar-item">
                         <div>
                                         @if (is_image($other->forum_image))

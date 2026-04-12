@@ -163,6 +163,13 @@ class ForumsRepository extends SharedRepo{
         if ($adminQueue === null || $adminQueue === '') {
             if ($approved !== 3) {
                 $forums->where('status', $approved);
+                // Public / live directory: only show moderator-approved threads (matches records search)
+                if ((int) $approved === 1) {
+                    $forums->where('is_approved', 1)
+                        ->where(function ($q) {
+                            $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                        });
+                }
             }
         }
 
@@ -1026,15 +1033,34 @@ class ForumsRepository extends SharedRepo{
 
     }
 
-    public function join_forum($request){
+    public function join_forum($request)
+    {
+        if (! current_user() || ! current_user()->id) {
+            return null;
+        }
 
-        $joining = ForumSubscription::create([
-            'user_id'=>current_user()->id,
-            'forum_id'=>$request->id
-        ]);
+        $forumId = null;
+        if ($request instanceof Forum) {
+            $forumId = (int) $request->id;
+        } elseif ($request instanceof Request) {
+            $forumId = (int) $request->input('id');
+        } elseif (is_object($request) && isset($request->id)) {
+            $forumId = (int) $request->id;
+        }
 
-        $joining->save();
+        if ($forumId < 1) {
+            return null;
+        }
 
+        ForumSubscription::firstOrCreate(
+            [
+                'user_id' => (int) current_user()->id,
+                'forum_id' => $forumId,
+            ],
+            []
+        );
+
+        return true;
     }
 
     private function save_attachments($files,$record_id,$model){
@@ -1069,9 +1095,9 @@ class ForumsRepository extends SharedRepo{
        return $file_path;
     }
 
-    public function toggleLike($forumId)
+    public function toggleLike($forumId, ?int $userId = null)
     {
-        $userId = auth()->id();
+        $userId = $userId ?? auth()->id();
         $like = \App\Models\ForumLike::where('forum_id', $forumId)
             ->where('user_id', $userId)
             ->first();
@@ -1102,9 +1128,9 @@ class ForumsRepository extends SharedRepo{
         ];
     }
 
-    public function toggleCommentLike($commentId)
+    public function toggleCommentLike($commentId, ?int $userId = null)
     {
-        $userId = auth()->id();
+        $userId = $userId ?? auth()->id();
         $like = \App\Models\ForumCommentLike::where('forum_comment_id', $commentId)
             ->where('user_id', $userId)
             ->first();

@@ -275,6 +275,39 @@ For a longer deployment checklist, see [docs/FORUM_ATTACHMENTS_PDF.md](docs/FORU
 
 ---
 
+## REST API documentation
+
+Interactive **OpenAPI 3** docs (try requests, schemas) are served by **L5 Swagger**:
+
+- **Swagger UI:** `{APP_URL}/docs` (e.g. `https://your-hub.example/docs`)
+- **OpenAPI JSON:** `{APP_URL}/docs/spec/api-docs.json`
+
+Regenerate the spec after changing `@OA\` annotations in `app/`:
+
+```bash
+php artisan l5-swagger:generate
+```
+
+In production, set `L5_SWAGGER_GENERATE_ALWAYS=false` in `.env` and run the command on deploy (see `config/l5-swagger.php`).
+
+### Notable public endpoints
+
+| Endpoint | Summary |
+|----------|---------|
+| `GET /api/publications` | Records search / listing; optional `meta.filter_groups` for mobile refine UI (`include_filters`, default on). |
+| `GET /api/publications/sections/recommended` | Home-style recommended feed; **paginated** (`page`, `per_page` / `page_size` / `limit`; default size **20**, max **100**). Optional Bearer (`auth.passport`) for personalization. |
+| `GET /api/publications/sections/top-searches` | Top publications by visits; **paginated** (same query params; `meta.has_more`, `total`, `last_page`). |
+| `GET /api/publications/sections/flagship-initiatives` | Category **10** initiatives; **paginated**, stable sort for infinite scroll. |
+| `GET /api/home` | Single JSON with all three home sections; `limit` default **20**, max **48** (recommended + top searches); flagship fixed at **20** items. |
+| `GET /api/health-topics` | Health topics list (matches web `/health-topics`). |
+| `GET /api/health-topics/{id}` | Topic detail, publications, forums, communities. |
+| `GET /api/health-emergencies` | Health emergency tags (header menu). |
+| `GET /api/health-emergencies/{id}` | Emergency tag detail (same shape as topic detail). |
+
+Authenticated routes (e.g. `POST /api/login`, `auth:api` groups) are documented in Swagger under **bearer_token** where applicable.
+
+---
+
 ## Troubleshooting
 
 ### 1. 404 Not Found Errors:

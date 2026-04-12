@@ -9,6 +9,8 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Support\PublicationSubmissionValidation;
+use App\Support\RecordsSearchFilterSchema;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Log;
 
@@ -32,7 +34,7 @@ class PublicationsApiController extends ApiController
      *     operationId="ListPublications",
      *     tags={"Publications"},
      *     summary="List Publications",
-     *     description="Returns a list of all publications",
+     *     description="Records search / listing aligned with web `records/search` filters. By default includes `meta.filter_groups` for mobile refine UI (set include_filters=0 to omit). Empty `term` returns the same broad listing as the website (no dummy keyword).",
      *     @OA\Parameter(
      *         name="term",
      *         in="query",
@@ -103,6 +105,14 @@ class PublicationsApiController extends ApiController
      *         description="Filter by Category Id",
      *         @OA\Schema(type="integer")
      *     ),
+     *     @OA\Parameter(name="theme", in="query", description="Alias for thematic_area_id (web)", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="rcc", in="query", description="Region id when member states enabled", @OA\Schema(type="string")),
+     *     @OA\Parameter(name="country_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="tag", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="data_category_id", in="query", description="Repeat or use array for multi-select", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="file_category_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="file_type_id", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="include_filters", in="query", description="1 (default) = include meta.filter_groups", @OA\Schema(type="boolean")),
      *     @OA\Response(
      *         response=200,
      *         description="Successful",
@@ -112,29 +122,223 @@ class PublicationsApiController extends ApiController
      */
     public function index(Request $request)
     {
-        Log::info($request->all());
+        $this->preparePublicationListingRequest($request);
 
-        if (!$request->term) {
-            $request['term'] = 'a';
-        }
-
-        $request['rows'] = $request->page_size ?? 20;
-        $request['subtheme'] = $request->sub_thematic_area_id;
-
-        $get_featured = $request->is_featured ?? false;
-        $publications = $this->publicationsRepo->get($request, true,$get_featured);
+        $get_featured = filter_var($request->input('is_featured', false), FILTER_VALIDATE_BOOLEAN);
+        $publications = $this->publicationsRepo->get($request, true, $get_featured);
 
         $data = $publications->toArray() ?? [];
         $data['status'] = 200;
-        $data['page_size'] = intval($data['per_page']);
+        $data['page_size'] = (int) ($data['per_page'] ?? 20);
         unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);
 
-        // Check for encoding errors
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \Exception('Error encoding JSON: ' . json_last_error_msg());
+        if ($request->boolean('include_filters', true)) {
+            $schema = RecordsSearchFilterSchema::build($request, $this->publicationsRepo);
+            $data['meta'] = [
+                'active_filters' => RecordsSearchFilterSchema::activeFilterSnapshot($request),
+                'filter_groups' => $schema['filter_groups'],
+                'supported_query_params' => $schema['supported_query_params'],
+                'filter_notes' => $schema['notes'],
+            ];
         }
 
         return response()->json($data, 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/publications/sections/recommended",
+     *     operationId="PublicationsSectionRecommended",
+     *     tags={"Publications"},
+     *     summary="Home-style recommended publications (paginated)",
+     *     description="Matches the web home **Recommended** strip: strictly featured pool plus preference- and favorite-tag–based publications when a Bearer token is sent (`auth.passport` optional). Paginate with `page` and `per_page` (aliases: `page_size`, `limit`) for infinite scroll. Defaults: page=1, per_page=20 (max 100). `data.meta`: `has_more`, `ranking_total` (size of diversified ranking window, not full DB count). `data.visible` follows `settings.show_featured`.",
+     *     @OA\Parameter(name="page", in="query", description="1-based page index", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="per_page", in="query", description="Page size (default 20)", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page_size", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="limit", in="query", description="Legacy alias for per_page", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="status, data.key, data.title, data.visible, data.items[], data.meta"
+     *     )
+     * )
+     *
+     * Same pool and ordering as the web home "Recommended" strip (featured + preferences when logged in),
+     * shown only when settings.show_featured is on and there is at least one item (matches web).
+     */
+    public function sectionRecommended(Request $request): JsonResponse
+    {
+        $settings = settings();
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = (int) $request->input('per_page', $request->input('page_size', $request->input('limit', 20)));
+        $perPage = max(1, min(100, $perPage));
+
+        $slice = $this->publicationsRepo->homeRecommendedPublicationsPage(
+            $request,
+            $this->apiOptionalUserId($request),
+            $perPage,
+            $page
+        );
+
+        $items = $slice['items'];
+        $sectionOn = (bool) ($settings->show_featured ?? false);
+        $visible = $sectionOn && ($page > 1 || $items->isNotEmpty());
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'key' => 'recommended',
+                'title' => $settings->section_title_recommended ?? 'Recommended',
+                'visible' => $visible,
+                'items' => $items->values()->map(fn ($p) => $p->toArray())->all(),
+                'meta' => [
+                    'page' => $page,
+                    'per_page' => $perPage,
+                    'has_more' => $slice['has_more'],
+                    'ranking_total' => $slice['ranking_total'],
+                ],
+            ],
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/publications/sections/top-searches",
+     *     operationId="PublicationsSectionTopSearches",
+     *     tags={"Publications"},
+     *     summary="Top publications by visits (paginated)",
+     *     description="Same ranking as the web home **Top Searches** strip: `order_by_visits` with stable order (`skip_random_order`). Paginate with `page` and `per_page` (aliases: `page_size`, `limit`). Defaults: page=1, per_page=20 (max 100). `data.meta`: `total`, `last_page`, `has_more`. `data.visible` follows `settings.show_top_searches`.",
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page_size", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="limit", in="query", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="status, data.items[], data.meta (page, per_page, total, last_page, has_more)"
+     *     )
+     * )
+     *
+     * Same ranking as web home $recent: order_by_visits + skip_random_order. Paginate with page / per_page for infinite scroll.
+     */
+    public function sectionTopSearches(Request $request): JsonResponse
+    {
+        $settings = settings();
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = (int) $request->input('per_page', $request->input('page_size', $request->input('limit', 20)));
+        $perPage = max(1, min(100, $perPage));
+
+        $topReq = clone $request;
+        $topReq->merge([
+            'rows' => $perPage,
+            'page' => $page,
+            'order_by_visits' => true,
+            'skip_random_order' => true,
+        ]);
+        $paginator = $this->publicationsRepo->get($topReq, false, false);
+        $items = collect($paginator->items());
+        $sectionOn = (bool) ($settings->show_top_searches ?? false);
+        $visible = $sectionOn && ($page > 1 || $items->isNotEmpty());
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'key' => 'top_searches',
+                'title' => $settings->section_title_top_searches ?? 'Top Searches',
+                'visible' => $visible,
+                'items' => $items->values()->map(fn ($p) => $p->toArray())->all(),
+                'meta' => $this->paginationMetaFromPaginator($paginator),
+            ],
+        ]);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/publications/sections/flagship-initiatives",
+     *     operationId="PublicationsSectionFlagshipInitiatives",
+     *     tags={"Publications"},
+     *     summary="Flagship initiatives (category 10, paginated)",
+     *     description="Publications in **category / publication category id 10**, same pool as the web home initiatives strip. For infinite scroll this endpoint uses **stable** ordering (visits, then id), not the web carousel’s single-page random shuffle. Paginate with `page` and `per_page` (aliases: `page_size`, `limit`). Defaults: page=1, per_page=20 (max 100). `data.meta`: `total`, `last_page`, `has_more`.",
+     *     @OA\Parameter(name="page", in="query", @OA\Schema(type="integer", default=1)),
+     *     @OA\Parameter(name="per_page", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page_size", in="query", @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="limit", in="query", @OA\Schema(type="integer")),
+     *     @OA\Response(
+     *         response=200,
+     *         description="status, data.items[], data.meta (page, per_page, total, last_page, has_more)"
+     *     )
+     * )
+     *
+     * Flagship initiatives (category 10). Uses stable ordering (visits, id) so pages do not reshuffle — required for infinite scroll
+     * (web home carousel uses random order on a single page only).
+     */
+    public function sectionFlagshipInitiatives(Request $request): JsonResponse
+    {
+        $settings = settings();
+        $page = max(1, (int) $request->input('page', 1));
+        $perPage = (int) $request->input('per_page', $request->input('page_size', $request->input('limit', 20)));
+        $perPage = max(1, min(100, $perPage));
+
+        $req = clone $request;
+        $req->merge([
+            'category' => 10,
+            'rows' => $perPage,
+            'page' => $page,
+            'order_by_visits' => true,
+            'skip_random_order' => true,
+        ]);
+        $paginator = $this->publicationsRepo->get($req, false, false);
+        $items = collect($paginator->items());
+        $visible = $page > 1 || $items->isNotEmpty();
+
+        return response()->json([
+            'status' => 200,
+            'data' => [
+                'key' => 'flagship_initiatives',
+                'title' => $settings->section_title_flagship_initiatives ?? 'Flagship Initiatives',
+                'visible' => $visible,
+                'items' => $items->values()->map(fn ($p) => $p->toArray())->all(),
+                'meta' => $this->paginationMetaFromPaginator($paginator),
+            ],
+        ]);
+    }
+
+    /**
+     * @param  \Illuminate\Contracts\Pagination\LengthAwarePaginator  $paginator
+     */
+    private function paginationMetaFromPaginator($paginator): array
+    {
+        return [
+            'page' => $paginator->currentPage(),
+            'per_page' => $paginator->perPage(),
+            'total' => $paginator->total(),
+            'last_page' => $paginator->lastPage(),
+            'has_more' => $paginator->hasMorePages(),
+        ];
+    }
+
+    private function preparePublicationListingRequest(Request $request): void
+    {
+        $mergedThematic = $request->input('theme');
+        if ($mergedThematic === null) {
+            $mergedThematic = $request->input('thematic_area_id');
+        }
+        if ($mergedThematic !== null && $mergedThematic !== '') {
+            $request->merge(['thematic_area_id' => $mergedThematic]);
+        }
+
+        $request->merge([
+            'rows' => $request->input('page_size', $request->input('rows', 20)),
+        ]);
+
+        if ($request->filled('sub_thematic_area_id')) {
+            $request->merge(['subtheme' => $request->input('sub_thematic_area_id')]);
+        }
+    }
+
+    private function apiOptionalUserId(Request $request): ?int
+    {
+        $u = $request->user();
+
+        return $u ? (int) $u->id : null;
     }
 
     /**

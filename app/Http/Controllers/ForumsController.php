@@ -148,8 +148,31 @@ class ForumsController extends Controller
 
     public function thread(Request $request)
     {
-        $data['forum']     = $this->forumsRepo->find($request->id);
+        $request->validate([
+            'id' => 'required|integer|min:1',
+        ]);
+
         $forumId = (int) $request->id;
+        $data['forum'] = $this->forumsRepo->find($forumId);
+
+        if (! $data['forum']) {
+            abort(404);
+        }
+
+        $forum = $data['forum'];
+        $isRejected = (int) ($forum->is_rejected ?? 0) === 1;
+        $isLive = (int) ($forum->status ?? 0) === 1
+            && (int) ($forum->is_approved ?? 0) === 1
+            && ! $isRejected;
+
+        if (! $isLive) {
+            $userId = auth()->id();
+            $isAuthor = $userId && (int) $forum->created_by === (int) $userId;
+            if (! $isAuthor && ! is_admin()) {
+                abort(404);
+            }
+        }
+
         $data['linkedContentRequest'] = ContentRequest::query()
             ->where(function ($q) use ($forumId) {
                 $q->where('referral_forum_id', $forumId)
@@ -163,8 +186,7 @@ class ForumsController extends Controller
         $data['my_forums'] = $this->forumsRepo->getJoinedForums($request);
         
         // SEO variables (linked content-request forums use privacy-safe copy in the view’s @php as well)
-        if ($data['forum']) {
-            $forum = $data['forum'];
+        {
             $data['pageTitle'] = ($forum->forum_title ?? 'Forum Discussion') . ' - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub');
             if (! empty($data['linkedContentRequest'])) {
                 $data['pageDescription'] = 'Community discussion for a Knowledge Hub content request. Requester contact details are not shown on this page.';
@@ -182,7 +204,7 @@ class ForumsController extends Controller
             $data['canonicalUrl'] = url('forums/thread?id=' . $forum->id);
             $data['ogType'] = 'article';
         }
-        $request['rows']   = 6;
+        $request->merge(['rows' => 6]);
         $data['search']    = (object) $request->all();
         $data['forums']    = $this->forumsRepo->get($request, 1, null, false);
 
