@@ -31,7 +31,7 @@ use Illuminate\Routing\Controller as BaseController;
  * @OA\Tag(name="Members", description="Member states / geography helpers.")
  * @OA\Tag(name="Courses", description="Training courses catalogue.")
  * @OA\Tag(name="Health topics", description="Health topics and health emergencies listings.")
- * @OA\Tag(name="AI Operations", description="Summarisation and conversational assistant. **Prefer** `POST /api/ai/chat` for document and forum Q&A; `POST /api/ai/summarise` is a one-shot summary. Legacy `assistant/session` and `assistant/message` remain for backward compatibility.")
+ * @OA\Tag(name="AI Operations", description="Summarisation and conversational assistant. Use `POST /api/ai/chat` for a single request/response flow, or `POST /api/ai/assistant/session` plus `POST /api/ai/assistant/message` for an explicit two-step flow. `POST /api/ai/summarise` is a one-shot summary.")
  * @OA\Tag(name="PushNotifications", description="Notification inbox, unread count, and mark-as-read for authenticated users.")
  */
 

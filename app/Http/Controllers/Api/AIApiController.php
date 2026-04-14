@@ -22,7 +22,7 @@ class AIApiController extends Controller
      * tags={"AI Operations"},
      * summary="Summarise content (one-shot)",
      * security={{"bearer_token":{}}},
-     * description="Returns a one-shot summary for a forum thread or publication. For interactive Q&A with follow-ups, use **`POST /api/ai/chat`** (recommended). Legacy split flow: `POST /api/ai/assistant/session` + `POST /api/ai/assistant/message` (deprecated in docs).",
+     * description="Returns a one-shot summary for a forum thread or publication. For interactive Q&A with follow-ups, use **`POST /api/ai/chat`**, or **`POST /api/ai/assistant/session`** + **`POST /api/ai/assistant/message`** for a two-step flow.",
      * @OA\RequestBody(
      *    required=true,
      *    @OA\JsonContent(

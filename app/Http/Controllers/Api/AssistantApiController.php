@@ -17,7 +17,7 @@ class AssistantApiController extends Controller
 Use this one endpoint for document and forum assistant chat.
 
 • Send exactly one scope: `publication_id` OR `forum_id` (never both).
-• For a publication, optional `attachment_id` selects a specific PDF; omit it to use the main publication PDF when available.
+• For a publication, optional `attachment_id` (must belong to that publication) selects **one** PDF attachment for ChatPDF. Omit it to use the main publication PDF when present, or—when the resource has **several** PDFs and you use `assistant_mode` `auto`/`publication`—to chat over **all** PDFs via GPT context (same as web).
 • Optional `assistant_mode`: `auto` (default), `chatpdf`, `publication`, or `forum` (implicit when using `forum_id`).
 • Omit `message` (or send an empty string) to only open or resume the session and return prior `messages`.
 • Include `message` to chat in the same request: the API always ensures a session for that document or forum first, then sends your message.
@@ -44,7 +44,7 @@ TXT;
      *         @OA\JsonContent(
      *             @OA\Property(property="publication_id", type="integer", nullable=true, example=42, description="Document scope; required unless forum_id"),
      *             @OA\Property(property="forum_id", type="integer", nullable=true, example=7, description="Forum thread scope; XOR publication_id"),
-     *             @OA\Property(property="attachment_id", type="integer", nullable=true, description="Publication PDF attachment id when chatting with a specific file"),
+     *             @OA\Property(property="attachment_id", type="integer", nullable=true, description="Optional PDF attachment id (`publication_attachments.id`) for single-file ChatPDF; omit for main PDF or multi-PDF GPT context (see `/api/ai/assistant/session`)"),
      *             @OA\Property(property="assistant_mode", type="string", enum={"auto","chatpdf","publication"}, example="auto", description="Ignored for forum scope"),
      *             @OA\Property(property="message", type="string", nullable=true, description="User turn; omit to only create/resume session"),
      *             @OA\Property(property="session_id", type="integer", nullable=true, description="If set with message, use existing session after scope checks"),
@@ -112,10 +112,9 @@ TXT;
      * @OA\Post(
      *     path="/api/ai/assistant/session",
      *     operationId="aiAssistantSession",
-     *     deprecated=true,
      *     tags={"AI Operations"},
      *     summary="Start or resume Khub AI Assistant session",
-     *     description="Creates or returns a chat session for a publication (PDF ChatPDF or publication context) or a forum thread. Send exactly one of `publication_id` or `forum_id`. For publications, optional `attachment_id` targets a specific PDF; `assistant_mode` can be `auto`, `chatpdf`, `publication`, or `forum` (forced when using `forum_id`).",
+     *     description="Creates or returns a chat session for a publication (ChatPDF on one PDF, or GPT over publication metadata + extracted PDF text) or a forum thread. Send exactly one of `publication_id` or `forum_id`. **Attachments (publications only):** optional `attachment_id` is the `publication_attachments.id` of a **PDF** belonging to that publication—use it to open a **single-file** ChatPDF session on that file. Omit `attachment_id` to use the main record PDF when available; if the publication has **multiple** PDFs and you omit `attachment_id`, `auto` resolves to **`publication`** mode so the assistant can use **all** PDFs (extracted text in context). `assistant_mode`: `auto` (default), `chatpdf`, `publication`, or `forum` (implicit for `forum_id`).",
      *     security={{"bearer_token":{}}},
      *
      *     @OA\RequestBody(
@@ -124,7 +123,7 @@ TXT;
      *         @OA\JsonContent(
      *             @OA\Property(property="publication_id", type="integer", nullable=true, example=42, description="Use with attachment_id for PDF chat; XOR forum_id"),
      *             @OA\Property(property="forum_id", type="integer", nullable=true, example=7, description="Forum thread id; XOR publication_id"),
-     *             @OA\Property(property="attachment_id", type="integer", nullable=true, description="Publication PDF attachment id for ChatPDF"),
+     *             @OA\Property(property="attachment_id", type="integer", nullable=true, description="Optional. PDF attachment row id for this publication. When set: ChatPDF session for that file only. When omitted: main PDF or multi-PDF publication mode per `assistant_mode` / `auto`."),
      *             @OA\Property(property="assistant_mode", type="string", enum={"auto","chatpdf","publication","forum"}, example="auto")
      *         )
      *     ),
@@ -156,10 +155,9 @@ TXT;
      * @OA\Post(
      *     path="/api/ai/assistant/message",
      *     operationId="aiAssistantMessage",
-     *     deprecated=true,
      *     tags={"AI Operations"},
      *     summary="Send a message to Khub AI Assistant",
-     *     description="Send a user message for an existing session. Use the same scope as session creation (`publication_id` + optional `attachment_id`, or `forum_id`). Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for a single JSON body with `content`. For comparisons across resources, ask the assistant in natural language within this chat instead of a separate compare endpoint.",
+     *     description="Send a user message for an existing session. **Repeat the same scope as `/api/ai/assistant/session`:** `publication_id` with the **same** optional `attachment_id` (if the session was opened on one attachment), or `forum_id`. Include `session_id` from the session response when possible. Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for JSON with `content` and `references` (ChatPDF).",
      *     security={{"bearer_token":{}}},
      *
      *     @OA\RequestBody(
@@ -171,9 +169,9 @@ TXT;
      *             @OA\Property(property="session_id", type="integer", nullable=true, description="From session response; omit only if a single session already exists for this user and scope"),
      *             @OA\Property(property="message", type="string", example="Summarise the main points in bullet form."),
      *             @OA\Property(property="stream", type="boolean", example=true),
-     *             @OA\Property(property="publication_id", type="integer", nullable=true),
-     *             @OA\Property(property="attachment_id", type="integer", nullable=true),
-     *             @OA\Property(property="forum_id", type="integer", nullable=true)
+     *             @OA\Property(property="publication_id", type="integer", nullable=true, description="Same publication as session; required with publication scope"),
+     *             @OA\Property(property="attachment_id", type="integer", nullable=true, description="Must match session if ChatPDF was opened on a specific PDF attachment; omit if session used main PDF or multi-PDF publication mode"),
+     *             @OA\Property(property="forum_id", type="integer", nullable=true, description="Same forum thread as session")
      *         )
      *     ),
      *
