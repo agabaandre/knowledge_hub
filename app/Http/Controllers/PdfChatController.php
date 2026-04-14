@@ -274,6 +274,19 @@ class PdfChatController extends Controller
 
     private function resolveAssistantMode(string $requested, Publication $publication, ?int $attachmentId): string
     {
+        $publication->loadMissing('attachments');
+        $pdfSources = $publication->pdf_sources;
+        $pdfSourceCount = is_array($pdfSources) ? count($pdfSources) : 0;
+
+        // ChatPDF is single-document. Multiple PDFs on the resource → GPT context with text from all PDFs.
+        if ($pdfSourceCount > 1 && ! $attachmentId) {
+            if ($requested === 'chatpdf') {
+                return 'publication';
+            }
+
+            return 'publication';
+        }
+
         if ($requested === 'publication') {
             return 'publication';
         }
