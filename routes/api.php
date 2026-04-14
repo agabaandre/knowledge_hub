@@ -42,6 +42,7 @@ Route::group(['middleware' => 'auth:api'],function(){
     Route::get('/logout', [AuthApiController::class, 'logout']);
     Route::get('/profile', [AuthApiController::class, 'profile']);
     Route::get('/me', [MeApiController::class, 'library']);
+    Route::get('/me/chats', [MeApiController::class, 'chats']);
  });
 
 Route::group(["prefix" =>"members"],function(){

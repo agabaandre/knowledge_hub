@@ -157,7 +157,7 @@ class ChatGPTService implements AIModel{
     }
 
     /**
-     * Multi-turn chat with streaming (e.g. Khub AI Assistant for non-PDF resources).
+     * Multi-turn chat with streaming (e.g. Khub AI for non-PDF resources).
      *
      * @param  array<int, array{role: string, content: string}>  $messages
      */

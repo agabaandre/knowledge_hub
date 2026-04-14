@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * Passport/JWT API surface for Khub AI Assistant (same behaviour as web `ai/pdf-chat/*`).
+ * Passport/JWT API surface for Khub AI (same behaviour as web `ai/pdf-chat/*`).
  */
 class AssistantApiController extends Controller
 {
@@ -113,7 +113,7 @@ TXT;
      *     path="/api/ai/assistant/session",
      *     operationId="aiAssistantSession",
      *     tags={"AI Operations"},
-     *     summary="Start or resume Khub AI Assistant session",
+     *     summary="Start or resume Khub AI session",
      *     description="Creates or returns a chat session for a publication (ChatPDF on one PDF, or GPT over publication metadata + extracted PDF text) or a forum thread. Send exactly one of `publication_id` or `forum_id`. **Attachments (publications only):** optional `attachment_id` is the `publication_attachments.id` of a **PDF** belonging to that publication—use it to open a **single-file** ChatPDF session on that file. Omit `attachment_id` to use the main record PDF when available; if the publication has **multiple** PDFs and you omit `attachment_id`, `auto` resolves to **`publication`** mode so the assistant can use **all** PDFs (extracted text in context). `assistant_mode`: `auto` (default), `chatpdf`, `publication`, or `forum` (implicit for `forum_id`).",
      *     security={{"bearer_token":{}}},
      *
@@ -156,7 +156,7 @@ TXT;
      *     path="/api/ai/assistant/message",
      *     operationId="aiAssistantMessage",
      *     tags={"AI Operations"},
-     *     summary="Send a message to Khub AI Assistant",
+     *     summary="Send a message to Khub AI",
      *     description="Send a user message for an existing session. **Repeat the same scope as `/api/ai/assistant/session`:** `publication_id` with the **same** optional `attachment_id` (if the session was opened on one attachment), or `forum_id`. Include `session_id` from the session response when possible. Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for JSON with `content` and `references` (ChatPDF).",
      *     security={{"bearer_token":{}}},
      *

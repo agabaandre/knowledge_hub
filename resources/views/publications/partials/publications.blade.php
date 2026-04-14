@@ -297,11 +297,11 @@
                          </a>
                          @auth
                              <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
-                                 <i class="fa-solid fa-microchip"></i> Khub AI Assistant
+                                 <i class="fa-solid fa-microchip"></i> Khub AI
                              </a>
                          @else
                              <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="btn btn-sm btn-outline-primary" style="border-color: var(--theme-color-primary, #119A48); color: var(--theme-color-primary, #119A48); text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem;">
-                                 <i class="fa-solid fa-microchip"></i> Khub AI Assistant <small>(login)</small>
+                                 <i class="fa-solid fa-microchip"></i> Khub AI <small>(login)</small>
                              </a>
                          @endauth
                      </div>

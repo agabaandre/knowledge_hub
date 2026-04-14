@@ -732,7 +732,7 @@
                             }
                         }
                     @endphp
-                    <!-- Action Buttons - Favorite, Khub AI Assistant (PDF via ChatPDF; other formats via GPT context) -->
+                    <!-- Action Buttons - Favorite, Khub AI (PDF via ChatPDF; other formats via GPT context) -->
                     <div class="mt-3 pt-3 border-top d-flex justify-content-between align-items-center">
                         <div class="d-flex gap-2 flex-wrap align-items-center">
                     @include('common.favourites_btn',['row'=>$publication])
@@ -744,11 +744,11 @@
                             data-doc-title="{{ e(Str::limit(strip_tags($publication->title ?? 'Document'), 200)) }}"
                             title="{{ $pdfSourceCount > 1 ? 'Chat using all PDFs on this resource' : '' }}"
                             onclick="typeof openPdfChat === 'function' && openPdfChat({{ $publication->id }}, @json($defaultAssistantAttachmentId), @json(Str::limit(strip_tags($publication->title ?? 'Document'), 200)), @json($defaultAssistantMode))">
-                        <i class="fa-solid fa-microchip"></i> Khub AI Assistant
+                        <i class="fa-solid fa-microchip"></i> Khub AI
                     </button>
                 @else
                     <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
-                        <i class="fa-solid fa-microchip"></i> Khub AI Assistant <small>(login required)</small>
+                        <i class="fa-solid fa-microchip"></i> Khub AI <small>(login required)</small>
                     </a>
                 @endauth
             </div>

@@ -1,13 +1,14 @@
 {
     "openapi": "3.0.0",
     "info": {
-        "title": "AFRICA CDC KnowledgeHub API",
+        "title": "Africa CDC KnowledgeHub API",
+        "description": "HTTP API for the Africa CDC Knowledge Hub (web and mobile clients). **URL base:** routes in this specification are rooted at `/api` (example: `GET /api/publications` → `{server}/api/publications`). **Auth:** call `POST /api/login` with email and password to receive a Laravel Passport access token; send `Authorization: Bearer {access_token}` on protected operations. **Optional Bearer** on some public GET routes enables personalised results (e.g. recommended publications). **Errors:** Laravel validation typically returns `422` with `message` and/or `errors`; many success payloads use `status` and `data` at the top level.",
         "version": "1.0.0"
     },
     "servers": [
         {
             "url": "http://localhost/knowledge_hub",
-            "description": "Current deployment (set APP_URL in .env)"
+            "description": "Origin used in Try it out — must match how clients reach the app (scheme + host + path prefix if any; no trailing slash). Override with `APP_URL` or `L5_OPENAPI_SERVER_URL` in `.env`."
         }
     ],
     "paths": {
@@ -16,8 +17,8 @@
                 "tags": [
                     "AI Operations"
                 ],
-                "summary": "Summarise content (legacy one-shot)",
-                "description": "Returns a one-shot summary for a forum thread or publication. For interactive Q&A, summaries with follow-ups, and comparisons in natural language, use `POST /api/ai/assistant/session` and `POST /api/ai/assistant/message` (Khub AI Assistant).",
+                "summary": "Summarise content (one-shot)",
+                "description": "Returns a one-shot summary for a forum thread or publication. For interactive Q&A with follow-ups, use **`POST /api/ai/chat`**, or **`POST /api/ai/assistant/session`** + **`POST /api/ai/assistant/message`** for a two-step flow.",
                 "operationId": "summariseContentLegacy",
                 "requestBody": {
                     "required": true,
@@ -70,13 +71,124 @@
                 ]
             }
         },
+        "/api/ai/chat": {
+            "post": {
+                "tags": [
+                    "AI Operations"
+                ],
+                "summary": "Document or forum assistant (recommended)",
+                "description": "Single entry point for Khub AI chat. Send **either** `publication_id` **or** `forum_id` (not both). Always creates or reuses a session for that scope before sending. **No `message`:** JSON with `session_id`, `messages`, and `usage` (integration guide). **With `message`:** if `stream` is true (default), response body is **`text/plain`** streamed chunks (not JSON); if `stream` is false, JSON with `content` and `references`.",
+                "operationId": "aiChat",
+                "requestBody": {
+                    "required": true,
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "properties": {
+                                    "publication_id": {
+                                        "description": "Document scope; required unless forum_id",
+                                        "type": "integer",
+                                        "example": 42,
+                                        "nullable": true
+                                    },
+                                    "forum_id": {
+                                        "description": "Forum thread scope; XOR publication_id",
+                                        "type": "integer",
+                                        "example": 7,
+                                        "nullable": true
+                                    },
+                                    "attachment_id": {
+                                        "description": "Optional PDF attachment id (`publication_attachments.id`) for single-file ChatPDF; omit for main PDF or multi-PDF GPT context (see `/api/ai/assistant/session`)",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "assistant_mode": {
+                                        "description": "Ignored for forum scope",
+                                        "type": "string",
+                                        "enum": [
+                                            "auto",
+                                            "chatpdf",
+                                            "publication"
+                                        ],
+                                        "example": "auto"
+                                    },
+                                    "message": {
+                                        "description": "User turn; omit to only create/resume session",
+                                        "type": "string",
+                                        "nullable": true
+                                    },
+                                    "session_id": {
+                                        "description": "If set with message, use existing session after scope checks",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
+                                    "stream": {
+                                        "description": "When false, assistant reply is JSON with content and references",
+                                        "type": "boolean",
+                                        "example": true
+                                    }
+                                },
+                                "type": "object"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "description": "**Session-only:** JSON with session_id, messages, usage. **Chat with stream=true:** `Content-Type: text/plain` body. **Chat with stream=false:** JSON content + references.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "session_id": {
+                                            "type": "integer"
+                                        },
+                                        "usage": {
+                                            "description": "Integration guide; present when no message was sent",
+                                            "type": "string"
+                                        },
+                                        "content": {
+                                            "type": "string"
+                                        },
+                                        "references": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    },
+                    "404": {
+                        "description": "Resource not found"
+                    },
+                    "422": {
+                        "description": "Validation error"
+                    },
+                    "502": {
+                        "description": "Upstream AI/PDF service error"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
         "/api/ai/assistant/session": {
             "post": {
                 "tags": [
                     "AI Operations"
                 ],
-                "summary": "Start or resume Khub AI Assistant session",
-                "description": "Creates or returns a chat session for a publication (PDF ChatPDF or publication context) or a forum thread. Send exactly one of `publication_id` or `forum_id`. For publications, optional `attachment_id` targets a specific PDF; `assistant_mode` can be `auto`, `chatpdf`, `publication`, or `forum` (forced when using `forum_id`).",
+                "summary": "Start or resume Khub AI session",
+                "description": "Creates or returns a chat session for a publication (ChatPDF on one PDF, or GPT over publication metadata + extracted PDF text) or a forum thread. Send exactly one of `publication_id` or `forum_id`. **Attachments (publications only):** optional `attachment_id` is the `publication_attachments.id` of a **PDF** belonging to that publication—use it to open a **single-file** ChatPDF session on that file. Omit `attachment_id` to use the main record PDF when available; if the publication has **multiple** PDFs and you omit `attachment_id`, `auto` resolves to **`publication`** mode so the assistant can use **all** PDFs (extracted text in context). `assistant_mode`: `auto` (default), `chatpdf`, `publication`, or `forum` (implicit for `forum_id`).",
                 "operationId": "aiAssistantSession",
                 "requestBody": {
                     "required": true,
@@ -97,7 +209,7 @@
                                         "nullable": true
                                     },
                                     "attachment_id": {
-                                        "description": "Publication PDF attachment id for ChatPDF",
+                                        "description": "Optional. PDF attachment row id for this publication. When set: ChatPDF session for that file only. When omitted: main PDF or multi-PDF publication mode per `assistant_mode` / `auto`.",
                                         "type": "integer",
                                         "nullable": true
                                     },
@@ -173,8 +285,8 @@
                 "tags": [
                     "AI Operations"
                 ],
-                "summary": "Send a message to Khub AI Assistant",
-                "description": "Send a user message for an existing session. Use the same scope as session creation (`publication_id` + optional `attachment_id`, or `forum_id`). Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for a single JSON body with `content`. For comparisons across resources, ask the assistant in natural language within this chat instead of a separate compare endpoint.",
+                "summary": "Send a message to Khub AI",
+                "description": "Send a user message for an existing session. **Repeat the same scope as `/api/ai/assistant/session`:** `publication_id` with the **same** optional `attachment_id` (if the session was opened on one attachment), or `forum_id`. Include `session_id` from the session response when possible. Responses are streamed as `text/plain` when `stream` is true (default); set `stream` to false for JSON with `content` and `references` (ChatPDF).",
                 "operationId": "aiAssistantMessage",
                 "requestBody": {
                     "required": true,
@@ -199,14 +311,17 @@
                                         "example": true
                                     },
                                     "publication_id": {
+                                        "description": "Same publication as session; required with publication scope",
                                         "type": "integer",
                                         "nullable": true
                                     },
                                     "attachment_id": {
+                                        "description": "Must match session if ChatPDF was opened on a specific PDF attachment; omit if session used main PDF or multi-PDF publication mode",
                                         "type": "integer",
                                         "nullable": true
                                     },
                                     "forum_id": {
+                                        "description": "Same forum thread as session",
                                         "type": "integer",
                                         "nullable": true
                                     }
@@ -460,8 +575,8 @@
                 "tags": [
                     "Authentication"
                 ],
-                "summary": "User Login",
-                "description": "Authenticate with the account email and password. Returns a bearer token.",
+                "summary": "User login (Passport token)",
+                "description": "Authenticate with **email** and **password**. Returns a Laravel Passport access token — use it as `Authorization: Bearer {token}` on protected routes. Social-only accounts receive 403 with guidance to use social login.",
                 "operationId": "UserLogin",
                 "requestBody": {
                     "required": true,
@@ -489,9 +604,32 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Success",
+                        "description": "Authenticated; use `token` as Bearer access token",
                         "content": {
-                            "application/json": {}
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "token": {
+                                            "description": "Passport access token",
+                                            "type": "string"
+                                        },
+                                        "token_type": {
+                                            "type": "string",
+                                            "example": "Bearer"
+                                        },
+                                        "expires_at": {
+                                            "type": "string",
+                                            "format": "date-time",
+                                            "nullable": true
+                                        },
+                                        "user": {
+                                            "description": "User model without password",
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
                         }
                     },
                     "400": {
@@ -501,10 +639,10 @@
                         "description": "Not found when you sent the request to an invalid endpoint"
                     },
                     "403": {
-                        "description": "Forbidden"
+                        "description": "Forbidden (e.g. social-only account)"
                     },
                     "401": {
-                        "description": "Invalid User Credentials"
+                        "description": "Invalid credentials or unverified account"
                     }
                 }
             }
@@ -3031,7 +3169,7 @@
                     "User"
                 ],
                 "summary": "My favourites, publications, communities, and AI chats (summary)",
-                "description": "Returns paginated slices for favourites, publications you submitted, and communities you belong to (same data as `GET /api/publications/favourites`, `GET /api/publications/published`, `GET /api/communities/me`). Also returns Khub AI Assistant chat sessions (publication/PDF and forum) in a shape aligned with the web account chats page — there is no separate chats list route.",
+                "description": "Returns paginated slices for favourites, publications you submitted, and communities you belong to (same data as `GET /api/publications/favourites`, `GET /api/publications/published`, `GET /api/communities/me`). The `chats` object matches **`GET /api/me/chats`** (`by_publication` / `by_forum`, with `resource_url` / `thread_url`). Use `GET /api/me/chats` when you only need the chat list.",
                 "operationId": "getMeLibrary",
                 "parameters": [
                     {
@@ -3115,6 +3253,18 @@
                                                 "assistant_session": {
                                                     "type": "string",
                                                     "example": "/api/ai/assistant/session"
+                                                },
+                                                "assistant_message": {
+                                                    "type": "string",
+                                                    "example": "/api/ai/assistant/message"
+                                                },
+                                                "ai_chat": {
+                                                    "type": "string",
+                                                    "example": "/api/ai/chat"
+                                                },
+                                                "my_chats": {
+                                                    "type": "string",
+                                                    "example": "/api/me/chats"
                                                 }
                                             },
                                             "type": "object"
@@ -3129,6 +3279,99 @@
                                             "type": "object"
                                         },
                                         "chats": {
+                                            "type": "object"
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/me/chats": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "List my Khub AI chats",
+                "description": "Returns PDF/document and forum Khub AI sessions grouped by resource — same information as the web **My Chats** page (`/account/chats`). Each group includes a `resource_url` or `thread_url` for opening the resource in the browser.",
+                "operationId": "getMyAiChats",
+                "responses": {
+                    "200": {
+                        "description": "Grouped chat sessions",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "chats": {
+                                            "properties": {
+                                                "by_publication": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "publication_id": {
+                                                                "type": "integer",
+                                                                "nullable": true
+                                                            },
+                                                            "attachment_id": {
+                                                                "type": "integer",
+                                                                "nullable": true
+                                                            },
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "resource_url": {
+                                                                "description": "Web URL for this resource + attachment",
+                                                                "type": "string"
+                                                            },
+                                                            "sessions": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                },
+                                                "by_forum": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "properties": {
+                                                            "forum_id": {
+                                                                "type": "integer"
+                                                            },
+                                                            "title": {
+                                                                "type": "string"
+                                                            },
+                                                            "thread_url": {
+                                                                "type": "string"
+                                                            },
+                                                            "sessions": {
+                                                                "type": "array",
+                                                                "items": {
+                                                                    "type": "object"
+                                                                }
+                                                            }
+                                                        },
+                                                        "type": "object"
+                                                    }
+                                                }
+                                            },
                                             "type": "object"
                                         }
                                     },
@@ -3173,8 +3416,8 @@
                 "tags": [
                     "Publications"
                 ],
-                "summary": "List Publications",
-                "description": "Records search / listing aligned with web `records/search` filters. By default includes `meta.filter_groups` for mobile refine UI (set include_filters=0 to omit). Empty `term` returns the same broad listing as the website (no dummy keyword).",
+                "summary": "List publications (search & filters)",
+                "description": "Records search / listing aligned with web `records/search`. **Pagination:** `page` (1-based) and **`page_size`** or **`rows`** (page size, default 20). **`include_filters`:** `1`/`true` (default) returns `meta.filter_groups`, `supported_query_params`, and `filter_notes` for building the same refine UI as the website; set `0`/`false` to omit and reduce payload size. Empty `term` matches the broad listing (no dummy keyword). Uses `auth.passport` middleware optional Bearer for community-scoped visibility rules when logged in.",
                 "operationId": "ListPublications",
                 "parameters": [
                     {
@@ -3253,6 +3496,25 @@
                         "name": "community_id",
                         "in": "query",
                         "description": "Filter by Community Id",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "description": "1-based page index (Laravel paginator)",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "rows",
+                        "in": "query",
+                        "description": "Page size alias (default 20); merged with page_size in controller",
                         "required": false,
                         "schema": {
                             "type": "integer"
@@ -4398,59 +4660,59 @@
     "tags": [
         {
             "name": "Communities",
-            "description": "Communities of practice: browse public listings, join/leave, members, linked publications & forums, invitations, and community events (mirrors web routes under /communities)."
-        },
-        {
-            "name": "AI Operations",
-            "description": "AI Operations"
+            "description": "Communities of practice: browse, join, members, events, publications, and forums."
         },
         {
             "name": "Authentication",
-            "description": "Authentication"
+            "description": "Register, login, password reset, token refresh, and social login."
         },
         {
             "name": "User",
-            "description": "User"
-        },
-        {
-            "name": "Courses",
-            "description": "Courses"
-        },
-        {
-            "name": "Events",
-            "description": "Events"
-        },
-        {
-            "name": "Experts",
-            "description": "Experts"
-        },
-        {
-            "name": "Forums",
-            "description": "Forums"
-        },
-        {
-            "name": "Health topics",
-            "description": "Health topics"
-        },
-        {
-            "name": "Home",
-            "description": "Home"
-        },
-        {
-            "name": "Lookup",
-            "description": "Lookup"
-        },
-        {
-            "name": "Members",
-            "description": "Members"
+            "description": "Authenticated profile, library, and account endpoints (`auth:api`)."
         },
         {
             "name": "Publications",
-            "description": "Publications"
+            "description": "Search, list, detail, favourites, comments, content requests, and home-style section feeds. Some GET routes use optional Passport token middleware for personalisation."
+        },
+        {
+            "name": "Home",
+            "description": "Aggregated home dashboard payload."
+        },
+        {
+            "name": "Lookup",
+            "description": "Reference data for forms and filters: themes, jobs, communities, categories, authors, settings."
+        },
+        {
+            "name": "Forums",
+            "description": "Forum threads, comments, likes, and participation."
+        },
+        {
+            "name": "Events",
+            "description": "Events listing and authenticated creation."
+        },
+        {
+            "name": "Experts",
+            "description": "Expert directory and profiles."
+        },
+        {
+            "name": "Members",
+            "description": "Member states / geography helpers."
+        },
+        {
+            "name": "Courses",
+            "description": "Training courses catalogue."
+        },
+        {
+            "name": "Health topics",
+            "description": "Health topics and health emergencies listings."
+        },
+        {
+            "name": "AI Operations",
+            "description": "Summarisation and conversational assistant. Use `POST /api/ai/chat` for a single request/response flow, or `POST /api/ai/assistant/session` plus `POST /api/ai/assistant/message` for an explicit two-step flow. `POST /api/ai/summarise` is a one-shot summary."
         },
         {
             "name": "PushNotifications",
-            "description": "PushNotifications"
+            "description": "Notification inbox, unread count, and mark-as-read for authenticated users."
         }
     ],
     "components": {
@@ -4459,7 +4721,7 @@
                 "type": "http",
                 "scheme": "bearer",
                 "bearerFormat": "JWT",
-                "description": "Enter JWT token in format (Bearer <token>)",
+                "description": "Laravel Passport personal access token from `POST /api/login`. In Swagger UI use: Bearer eyJ0eXAiOiJKV1QiLCJhbGc... (paste the raw token after the word Bearer).",
                 "name": "Authorization",
                 "in": "header"
             }

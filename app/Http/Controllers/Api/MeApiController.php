@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\PdfChatSession;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Repositories\PublicationsRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
@@ -34,7 +35,7 @@ class MeApiController extends Controller
      *     tags={"User"},
      *     security={{"bearer_token":{}}},
      *     summary="My favourites, publications, communities, and AI chats (summary)",
-     *     description="Returns paginated slices for favourites, publications you submitted, and communities you belong to (same data as `GET /api/publications/favourites`, `GET /api/publications/published`, `GET /api/communities/me`). Also returns Khub AI Assistant chat sessions (publication/PDF and forum) in a shape aligned with the web account chats page — there is no separate chats list route.",
+     *     description="Returns paginated slices for favourites, publications you submitted, and communities you belong to (same data as `GET /api/publications/favourites`, `GET /api/publications/published`, `GET /api/communities/me`). The `chats` object matches **`GET /api/me/chats`** (`by_publication` / `by_forum`, with `resource_url` / `thread_url`). Use `GET /api/me/chats` when you only need the chat list.",
      *     @OA\Parameter(
      *         name="per_page",
      *         in="query",
@@ -58,7 +59,10 @@ class MeApiController extends Controller
      *                 @OA\Property(property="favourites", type="string", example="/api/publications/favourites"),
      *                 @OA\Property(property="my_publications", type="string", example="/api/publications/published"),
      *                 @OA\Property(property="my_communities", type="string", example="/api/communities/me"),
-     *                 @OA\Property(property="assistant_session", type="string", example="/api/ai/assistant/session")
+     *                 @OA\Property(property="assistant_session", type="string", example="/api/ai/assistant/session"),
+     *                 @OA\Property(property="assistant_message", type="string", example="/api/ai/assistant/message"),
+     *                 @OA\Property(property="ai_chat", type="string", example="/api/ai/chat"),
+     *                 @OA\Property(property="my_chats", type="string", example="/api/me/chats")
      *             ),
      *             @OA\Property(property="favourites", type="object"),
      *             @OA\Property(property="my_publications", type="object"),
@@ -114,11 +118,68 @@ class MeApiController extends Controller
                 'my_communities' => url('/api/communities/me'),
                 'assistant_session' => url('/api/ai/assistant/session'),
                 'assistant_message' => url('/api/ai/assistant/message'),
+                'ai_chat' => url('/api/ai/chat'),
+                'my_chats' => url('/api/me/chats'),
             ],
             'favourites' => $this->stripPaginatorMeta($favouritesPaginator->toArray()),
             'my_publications' => $this->stripPaginatorMeta($publicationsPaginator->toArray()),
             'communities' => $this->stripPaginatorMeta($communitiesPaginator->toArray()),
-            'chats' => $this->buildUserChatsSummary($userId),
+            'chats' => $this->buildUserChatsData($userId),
+        ], 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/me/chats",
+     *     operationId="getMyAiChats",
+     *     tags={"User"},
+     *     security={{"bearer_token":{}}},
+     *     summary="List my Khub AI chats",
+     *     description="Returns PDF/document and forum Khub AI sessions grouped by resource — same information as the web **My Chats** page (`/account/chats`). Each group includes a `resource_url` or `thread_url` for opening the resource in the browser.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Grouped chat sessions",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="status", type="integer", example=200),
+     *             @OA\Property(
+     *                 property="chats",
+     *                 type="object",
+     *                 @OA\Property(
+     *                     property="by_publication",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="publication_id", type="integer", nullable=true),
+     *                         @OA\Property(property="attachment_id", type="integer", nullable=true),
+     *                         @OA\Property(property="title", type="string"),
+     *                         @OA\Property(property="resource_url", type="string", description="Web URL for this resource + attachment"),
+     *                         @OA\Property(property="sessions", type="array", @OA\Items(type="object"))
+     *                     )
+     *                 ),
+     *                 @OA\Property(
+     *                     property="by_forum",
+     *                     type="array",
+     *                     @OA\Items(
+     *                         type="object",
+     *                         @OA\Property(property="forum_id", type="integer"),
+     *                         @OA\Property(property="title", type="string"),
+     *                         @OA\Property(property="thread_url", type="string"),
+     *                         @OA\Property(property="sessions", type="array", @OA\Items(type="object"))
+     *                     )
+     *                 )
+     *             )
+     *         )
+     *     ),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function chats(Request $request): JsonResponse
+    {
+        $userId = (int) $request->user()->id;
+
+        return response()->json([
+            'status' => 200,
+            'chats' => $this->buildUserChatsData($userId),
         ], 200);
     }
 
@@ -139,9 +200,11 @@ class MeApiController extends Controller
     }
 
     /**
-     * Mirrors web `AccountController::chats` grouping; adds forum-based assistant sessions.
+     * Mirrors web `AccountController::chats` grouping (publication + attachment); adds forum assistant sessions and web URLs.
+     *
+     * @return array{by_publication: list<array>, by_forum: list<array>}
      */
-    private function buildUserChatsSummary(int $userId): array
+    private function buildUserChatsData(int $userId): array
     {
         $sessions = PdfChatSession::query()
             ->where('user_id', $userId)
@@ -170,11 +233,13 @@ class MeApiController extends Controller
                 $key = 'f-'.$session->forum_id;
                 if (! isset($byForum[$key])) {
                     $forum = $session->forum;
+                    $forumId = (int) $session->forum_id;
                     $byForum[$key] = [
-                        'forum_id' => (int) $session->forum_id,
+                        'forum_id' => $forumId,
                         'title' => ($forum && $forum->forum_title !== null && $forum->forum_title !== '')
                             ? $forum->forum_title
-                            : ('Forum #'.$session->forum_id),
+                            : ('Forum #'.$forumId),
+                        'thread_url' => url('forums/thread?id='.$forumId),
                         'sessions' => [],
                     ];
                 }
@@ -183,12 +248,18 @@ class MeApiController extends Controller
                 $pub = $session->publication;
                 $key = ($session->publication_id ?? '0').'-'.($session->attachment_id ?? 'main');
                 if (! isset($byPublication[$key])) {
+                    $publicationId = $session->publication_id !== null ? (int) $session->publication_id : null;
+                    $attachmentId = $session->attachment_id !== null ? (int) $session->attachment_id : null;
+                    $resourceUrl = $publicationId !== null
+                        ? url('records/resource?id='.$publicationId.($attachmentId ? '&attachment_id='.$attachmentId : ''))
+                        : null;
                     $byPublication[$key] = [
-                        'publication_id' => $session->publication_id,
-                        'attachment_id' => $session->attachment_id,
+                        'publication_id' => $publicationId,
+                        'attachment_id' => $attachmentId,
                         'title' => $pub
                             ? $pub->title
                             : ('Resource #'.$session->publication_id),
+                        'resource_url' => $resourceUrl,
                         'sessions' => [],
                     ];
                 }

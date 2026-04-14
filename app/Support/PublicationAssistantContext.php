@@ -6,7 +6,7 @@ use App\Models\Publication;
 use App\Models\PublicationAttachment;
 
 /**
- * Builds a text context for Khub AI Assistant on publications (GPT), including extracted PDF text
+ * Builds a text context for Khub AI on publications (GPT), including extracted PDF text
  * from the main document and every PDF attachment when in "publication" mode.
  */
 final class PublicationAssistantContext
@@ -43,7 +43,7 @@ final class PublicationAssistantContext
         $commentsJson = json_encode($publication->comments->toArray());
 
         $parts = [
-            'You are Khub AI Assistant for the Africa Health Knowledge Hub.',
+            'You are Khub AI for the Africa Health Knowledge Hub.',
             'Answer ONLY using the resource context below. If the user asks something not covered, say so clearly.',
             'When multiple PDFs are provided below, you may summarise across all of them and attribute facts to the correct file when helpful.',
             'Use factual, health-appropriate language. Format every reply in Markdown only (no raw HTML tags): use ### or #### for section headings, **bold** for emphasis, and bullet lists with leading "- ". The chat UI will render Markdown as formatted text.',

@@ -5,7 +5,7 @@ namespace App\Support;
 use App\Models\Forum;
 
 /**
- * System context for Khub AI Assistant on forum threads (aligned with AIService forum summarisation).
+ * System context for Khub AI on forum threads (aligned with AIService forum summarisation).
  */
 final class ForumAssistantContext
 {
@@ -31,7 +31,7 @@ final class ForumAssistantContext
         $tags = $forum->tags ? $forum->tags->pluck('tag')->filter()->implode(', ') : '';
 
         $parts = [
-            'You are Khub AI Assistant for the Africa Health Knowledge Hub discussion forums.',
+            'You are Khub AI for the Africa Health Knowledge Hub discussion forums.',
             'Answer using ONLY the forum thread context below. If something is not in the thread, say so. Do not invent discussion or attributions.',
             'Use factual, health-appropriate language. Format every reply in Markdown only (no raw HTML tags): use ### or #### for section headings, **bold** for emphasis, and bullet lists with leading "- ". The chat UI will render Markdown as formatted text.',
             '',

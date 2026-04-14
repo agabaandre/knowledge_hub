@@ -144,12 +144,12 @@
         @auth
         <button type="button" class="forum-action-btn js-open-forum-assistant" data-forum-id="{{ $forum->id }}" data-thread-title="{{ e(Str::limit(strip_tags($forum->forum_title ?? ''), 140)) }}" style="cursor: pointer; border: none; background: none; padding: 0.5rem;">
             <i class="fa fa-robot"></i>
-            <span>Khub AI Assistant</span>
+            <span>Khub AI</span>
         </button>
         @else
-        <a href="{{ route('login') }}" class="forum-action-btn" title="Log in to use Khub AI Assistant">
+        <a href="{{ route('login') }}" class="forum-action-btn" title="Log in to use Khub AI">
             <i class="fa fa-robot"></i>
-            <span>Khub AI Assistant</span>
+            <span>Khub AI</span>
         </a>
         @endauth
         @php $shareUrl = url('forums/thread').'?id='.$forum->id; $shareText = urlencode(strip_tags($forum->forum_title)); @endphp

@@ -288,7 +288,7 @@ class Publication extends Model
     }
 
     /**
-     * List of PDF sources for Khub AI Assistant (ChatPDF): main (if PDF) + each PDF attachment.
+     * List of PDF sources for Khub AI (ChatPDF): main (if PDF) + each PDF attachment.
      * Each item: ['type' => 'main'|'attachment', 'label' => string, 'attachment_id' => null|int]
      */
     public function getPdfSourcesAttribute()

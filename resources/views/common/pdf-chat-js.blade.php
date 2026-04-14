@@ -141,7 +141,7 @@
   function appendMessage(role, content, isStreamingPlaceholder) {
     var el = document.createElement('div');
     el.className = 'pdf-chat-msg ' + role;
-    var label = role === 'user' ? 'You' : 'Assistant';
+    var label = role === 'user' ? 'You' : 'Khub AI';
     var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? formatAssistantReply(content) : escapeHtml(content));
     var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder;
     var actionsHtml = showExportOnResponse

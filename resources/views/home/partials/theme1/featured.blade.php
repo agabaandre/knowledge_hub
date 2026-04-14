@@ -151,7 +151,7 @@
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>
                                 <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
-                                    <i class="fa-solid fa-microchip me-1"></i> Khub AI Assistant
+                                    <i class="fa-solid fa-microchip me-1"></i> Khub AI
                                 </a>
                                 <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>
                                 @if(method_exists($row, 'comments') && $row->relationLoaded('comments'))

@@ -100,7 +100,7 @@
                 <div class="chats-empty">
                     <i class="fa fa-comments fa-3x mb-3"></i>
                     <p class="mb-0 fw-medium">You have no PDF chats yet.</p>
-                    <p class="small mt-1 mb-0">Open a resource and use <strong>Khub AI Assistant</strong> to start a conversation.</p>
+                    <p class="small mt-1 mb-0">Open a resource and use <strong>Khub AI</strong> to start a conversation.</p>
                 </div>
             </div>
         @else
