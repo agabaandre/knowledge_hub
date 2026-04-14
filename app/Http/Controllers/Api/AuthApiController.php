@@ -158,8 +158,8 @@ class AuthApiController extends ApiController
      *     path="/api/login",
      *     operationId="UserLogin",
      *     tags={"Authentication"},
-     *     summary="User Login",
-     *     description="Authenticate with the account email and password. Returns a bearer token.",
+     *     summary="User login (Passport token)",
+     *     description="Authenticate with **email** and **password**. Returns a Laravel Passport access token — use it as `Authorization: Bearer {token}` on protected routes. Social-only accounts receive 403 with guidance to use social login.",
      *     @OA\RequestBody(
      *         required=true,
      *         @OA\MediaType(
@@ -173,9 +173,12 @@ class AuthApiController extends ApiController
      *     ),
      *     @OA\Response(
      *         response=200,
-     *         description="Success",
-     *         @OA\MediaType(
-     *             mediaType="application/json"
+     *         description="Authenticated; use `token` as Bearer access token",
+     *         @OA\JsonContent(
+     *             @OA\Property(property="token", type="string", description="Passport access token"),
+     *             @OA\Property(property="token_type", type="string", example="Bearer"),
+     *             @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="user", type="object", description="User model without password")
      *         )
      *     ),
      *     @OA\Response(
@@ -188,11 +191,11 @@ class AuthApiController extends ApiController
      *     ),
      *     @OA\Response(
      *         response=403,
-     *         description="Forbidden"
+     *         description="Forbidden (e.g. social-only account)"
      *     ),
      *     @OA\Response(
      *         response=401,
-     *         description="Invalid User Credentials"
+     *         description="Invalid credentials or unverified account"
      *     )
      * )
      */

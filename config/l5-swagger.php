@@ -161,7 +161,7 @@ return [
                 'type' => 'http',
                 'scheme'=>'bearer',
                 'bearerFormat' => 'JWT',
-                'description' => 'Enter JWT token in format (Bearer <token>)',
+                'description' => 'Laravel Passport personal access token from `POST /api/login`. In Swagger UI use: Bearer eyJ0eXAiOiJKV1QiLCJhbGc... (paste the raw token after the word Bearer).',
                 'name' => 'Authorization',
                 'in' => 'header',
             ],

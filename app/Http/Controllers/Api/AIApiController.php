@@ -20,9 +20,9 @@ class AIApiController extends Controller
      * path="/api/ai/summarise",
      * operationId="summariseContentLegacy",
      * tags={"AI Operations"},
-     * summary="Summarise content (legacy one-shot)",
+     * summary="Summarise content (one-shot)",
      * security={{"bearer_token":{}}},
-     * description="Returns a one-shot summary for a forum thread or publication. For interactive Q&A, summaries with follow-ups, and comparisons in natural language, use `POST /api/ai/assistant/session` and `POST /api/ai/assistant/message` (Khub AI Assistant).",
+     * description="Returns a one-shot summary for a forum thread or publication. For interactive Q&A with follow-ups, use **`POST /api/ai/chat`** (recommended). Legacy split flow: `POST /api/ai/assistant/session` + `POST /api/ai/assistant/message` (deprecated in docs).",
      * @OA\RequestBody(
      *    required=true,
      *    @OA\JsonContent(

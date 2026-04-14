@@ -33,8 +33,8 @@ class PublicationsApiController extends ApiController
      *     path="/api/publications",
      *     operationId="ListPublications",
      *     tags={"Publications"},
-     *     summary="List Publications",
-     *     description="Records search / listing aligned with web `records/search` filters. By default includes `meta.filter_groups` for mobile refine UI (set include_filters=0 to omit). Empty `term` returns the same broad listing as the website (no dummy keyword).",
+     *     summary="List publications (search & filters)",
+     *     description="Records search / listing aligned with web `records/search`. **Pagination:** `page` (1-based) and **`page_size`** or **`rows`** (page size, default 20). **`include_filters`:** `1`/`true` (default) returns `meta.filter_groups`, `supported_query_params`, and `filter_notes` for building the same refine UI as the website; set `0`/`false` to omit and reduce payload size. Empty `term` matches the broad listing (no dummy keyword). Uses `auth.passport` middleware optional Bearer for community-scoped visibility rules when logged in.",
      *     @OA\Parameter(
      *         name="term",
      *         in="query",
@@ -98,7 +98,21 @@ class PublicationsApiController extends ApiController
      *         description="Filter by Community Id",
      *         @OA\Schema(type="integer")
      *     ),
-     * *  @OA\Parameter(
+     *     @OA\Parameter(
+     *         name="page",
+     *         in="query",
+     *         required=false,
+     *         description="1-based page index (Laravel paginator)",
+     *         @OA\Schema(type="integer", default=1)
+     *     ),
+     *     @OA\Parameter(
+     *         name="rows",
+     *         in="query",
+     *         required=false,
+     *         description="Page size alias (default 20); merged with page_size in controller",
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Parameter(
      *         name="category",
      *         in="query",
      *         required=false,
