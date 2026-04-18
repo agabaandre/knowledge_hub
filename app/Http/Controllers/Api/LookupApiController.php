@@ -11,6 +11,8 @@ use App\Repositories\ThemesRepository;
 use App\Http\Controllers\Api\ApiController;
 use App\Models\CommunityOfPractice;
 use App\Models\Country;
+use App\Models\License;
+use App\Models\StaticLink;
 use App\Repositories\CommonsRepository;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Repositories\ExpertsRepository;
@@ -260,6 +262,68 @@ class LookupApiController extends ApiController
         return [
             "status" => 200,
             "data" => $categories
+        ];
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lookup/licenses",
+     *     operationId="ListPublicationLicenses",
+     *     tags={"Lookup"},
+     *     summary="List publication licenses",
+     *     description="Returns Creative Commons / other license options for publications (`license_id` on create/update), ordered like the admin licenses list. By default only **active** licenses are returned.",
+     *     @OA\Parameter(
+     *         name="all",
+     *         in="query",
+     *         required=false,
+     *         description="If `true` or `1`, include inactive licenses (same full list as admin).",
+     *         @OA\Schema(type="boolean", example=false)
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function licenses(Request $request)
+    {
+        $query = License::query()->orderBy('sort_order')->orderBy('name');
+
+        if (! $request->boolean('all')) {
+            $query->where('is_active', true);
+        }
+
+        return [
+            'status' => 200,
+            'data' => $query->get(),
+        ];
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lookup/static-links",
+     *     operationId="ListStaticLinks",
+     *     tags={"Lookup"},
+     *     summary="Key links (static links)",
+     *     description="Returns the same ordered list managed under **Admin → Static Links** (site header “Key links”): title, URL, display order, and whether to open in a new tab.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function staticLinks()
+    {
+        $links = StaticLink::query()
+            ->orderBy('order')
+            ->orderBy('title')
+            ->get();
+
+        return [
+            'status' => 200,
+            'data' => $links,
         ];
     }
 

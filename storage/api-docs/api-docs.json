@@ -3240,6 +3240,58 @@
                 }
             }
         },
+        "/api/lookup/licenses": {
+            "get": {
+                "tags": [
+                    "Lookup"
+                ],
+                "summary": "List publication licenses",
+                "description": "Returns Creative Commons / other license options for publications (`license_id` on create/update), ordered like the admin licenses list. By default only **active** licenses are returned.",
+                "operationId": "ListPublicationLicenses",
+                "parameters": [
+                    {
+                        "name": "all",
+                        "in": "query",
+                        "description": "If `true` or `1`, include inactive licenses (same full list as admin).",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "example": false
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
+        "/api/lookup/static-links": {
+            "get": {
+                "tags": [
+                    "Lookup"
+                ],
+                "summary": "Key links (static links)",
+                "description": "Returns the same ordered list managed under **Admin → Static Links** (site header “Key links”): title, URL, display order, and whether to open in a new tab.",
+                "operationId": "ListStaticLinks",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/lookup/authors": {
             "get": {
                 "tags": [
@@ -3400,7 +3452,7 @@
                                             "type": "object"
                                         },
                                         "forums": {
-                                            "description": "First page of forums you joined (`GET /api/me/forums`)",
+                                            "description": "First page of forums you joined (`GET /api/forums/me` or `GET /api/me/forums`)",
                                             "type": "object"
                                         },
                                         "chats": {
