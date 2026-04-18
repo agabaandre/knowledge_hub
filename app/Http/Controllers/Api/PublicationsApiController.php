@@ -632,7 +632,7 @@ class PublicationsApiController extends ApiController
      *                 @OA\Property(property="countries", type="array", @OA\Items(type="integer"), description="Member state country ids"),
      *                 @OA\Property(property="communities", type="array", @OA\Items(type="integer"), description="Target communities of practice"),
      *                 @OA\Property(property="tag_all_my_communities", type="boolean", nullable=true),
-     *                 @OA\Property(property="cover", type="string", format="binary", description="Cover image (optional; default cover if omitted)"),
+     *                 @OA\Property(property="cover", type="string", format="binary", description="Cover image (optional). If omitted and the first uploaded attachment is a PDF, the server renders the first page as the cover (same as the web wizard; requires Imagick). Otherwise the default cover is used."),
      *                 @OA\Property(property="cover_url", type="string", nullable=true, description="External cover URL when editing"),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", format="binary"), description="Attachments (multipart files[])"),
      *                 @OA\Property(property="author", type="integer", nullable=true, description="**Admin only (optional):** `author.id` from `GET /api/lookup/authors`. **Members:** omit or send anything — value is replaced with your `users.author_id` (= `author.id`)."),

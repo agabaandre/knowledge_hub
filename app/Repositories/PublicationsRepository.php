@@ -768,6 +768,33 @@ public function get(Request $request, $return_array = false, $featured = false,$
                 }
             }
         }
+
+        // Non-video: first PDF attachment → first page as cover (web wizard does this client-side; API does it here).
+        if (! $isVideo && $saved && ! $hasManualCover && $id) {
+            $rawExistingCover = (string) ($pub->getRawOriginal('cover') ?? '');
+            $isDefaultCover = ($rawExistingCover === '' || $rawExistingCover === 'cover.jpg');
+            if ($isDefaultCover) {
+                $firstPdfRow = PublicationAttachment::query()
+                    ->where('publication_id', $id)
+                    ->orderBy('id')
+                    ->get()
+                    ->first(function (PublicationAttachment $row) {
+                        return publication_filename_is_pdf((string) $row->getRawOriginal('file'));
+                    });
+                if ($firstPdfRow) {
+                    $pdfBasename = basename((string) $firstPdfRow->getRawOriginal('file'));
+                    $pdfPath = storage_path('app/public/uploads/publications/'.$pdfBasename);
+                    if (is_file($pdfPath)) {
+                        $outDir = storage_path('app/public/uploads/publications');
+                        $coverBasename = $this->extractPublicationCoverJpegFromPdf($pdfPath, $outDir);
+                        if ($coverBasename !== null) {
+                            $pub->cover = $coverBasename;
+                            $pub->cover_is_exteranl = false;
+                        }
+                    }
+                }
+            }
+        }
          
         $pub->file_type_id =$file_type->id; //$request->file_type;
         $pub->update();
@@ -1869,6 +1896,43 @@ public function getLightweight(Request $request, $return_array = false)
     
     return $return_array ? $results : $results;
 }
+
+    /**
+     * Render PDF first page to a JPEG in $outputDir; returns stored basename for publication.cover (Imagick).
+     */
+    private function extractPublicationCoverJpegFromPdf(string $pdfAbsolutePath, string $outputDir): ?string
+    {
+        if (! extension_loaded('imagick') || ! class_exists(\Imagick::class)) {
+            Log::info('PDF cover extraction skipped: Imagick extension not available');
+
+            return null;
+        }
+        if (! is_readable($pdfAbsolutePath)) {
+            return null;
+        }
+        try {
+            $imagick = new \Imagick();
+            $imagick->setResolution(144, 144);
+            $imagick->readImage($pdfAbsolutePath.'[0]');
+            $imagick->setImageFormat('jpeg');
+            $imagick->setImageCompressionQuality(85);
+            $stem = pathinfo($pdfAbsolutePath, PATHINFO_FILENAME);
+            $basename = $stem.'_cover_'.substr(md5_file($pdfAbsolutePath), 0, 12).'.jpg';
+            $outPath = rtrim($outputDir, DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR.$basename;
+            $imagick->writeImage($outPath);
+            $imagick->clear();
+            $imagick->destroy();
+
+            return is_file($outPath) ? $basename : null;
+        } catch (\Throwable $e) {
+            Log::warning('PDF first-page cover extraction failed', [
+                'path' => $pdfAbsolutePath,
+                'message' => $e->getMessage(),
+            ]);
+
+            return null;
+        }
+    }
 
 public function bulkInactive($ids)
 {
