@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\PdfChatSession;
 use App\Repositories\CommsOfPracticeRepository;
+use App\Repositories\ForumsRepository;
 use App\Repositories\PublicationsRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,12 +21,17 @@ class MeApiController extends Controller
     /** @var CommsOfPracticeRepository */
     private $commsRepo;
 
+    /** @var ForumsRepository */
+    private $forumsRepo;
+
     public function __construct(
         PublicationsRepository $publicationsRepo,
-        CommsOfPracticeRepository $commsRepo
+        CommsOfPracticeRepository $commsRepo,
+        ForumsRepository $forumsRepo
     ) {
         $this->publicationsRepo = $publicationsRepo;
         $this->commsRepo = $commsRepo;
+        $this->forumsRepo = $forumsRepo;
     }
 
     /**
@@ -59,6 +65,7 @@ class MeApiController extends Controller
      *                 @OA\Property(property="favourites", type="string", example="/api/publications/favourites"),
      *                 @OA\Property(property="my_publications", type="string", example="/api/publications/published"),
      *                 @OA\Property(property="my_communities", type="string", example="/api/communities/me"),
+     *                 @OA\Property(property="my_forums", type="string", example="/api/me/forums"),
      *                 @OA\Property(property="assistant_session", type="string", example="/api/ai/assistant/session"),
      *                 @OA\Property(property="assistant_message", type="string", example="/api/ai/assistant/message"),
      *                 @OA\Property(property="ai_chat", type="string", example="/api/ai/chat"),
@@ -67,6 +74,7 @@ class MeApiController extends Controller
      *             @OA\Property(property="favourites", type="object"),
      *             @OA\Property(property="my_publications", type="object"),
      *             @OA\Property(property="communities", type="object"),
+     *             @OA\Property(property="forums", type="object", description="First page of forums you joined (`GET /api/me/forums`)"),
      *             @OA\Property(property="chats", type="object")
      *         )
      *     ),
@@ -106,9 +114,15 @@ class MeApiController extends Controller
             'rows' => (int) ($commRequest->input('page_size') ?? $per),
         ]);
 
+        $forumRequest = $request->duplicate(array_merge($request->query->all(), [
+            'page' => 1,
+            'page_size' => $per,
+        ]));
+
         $favouritesPaginator = $this->publicationsRepo->favourites($favRequest);
         $publicationsPaginator = $this->publicationsRepo->my_publications($pubRequest);
         $communitiesPaginator = $this->commsRepo->getByUser($userId, $commRequest);
+        $forumsPaginator = $this->forumsRepo->getSubscribedForUser($userId, $forumRequest);
 
         return response()->json([
             'status' => 200,
@@ -116,6 +130,7 @@ class MeApiController extends Controller
                 'favourites' => url('/api/publications/favourites'),
                 'my_publications' => url('/api/publications/published'),
                 'my_communities' => url('/api/communities/me'),
+                'my_forums' => url('/api/me/forums'),
                 'assistant_session' => url('/api/ai/assistant/session'),
                 'assistant_message' => url('/api/ai/assistant/message'),
                 'ai_chat' => url('/api/ai/chat'),
@@ -124,8 +139,41 @@ class MeApiController extends Controller
             'favourites' => $this->stripPaginatorMeta($favouritesPaginator->toArray()),
             'my_publications' => $this->stripPaginatorMeta($publicationsPaginator->toArray()),
             'communities' => $this->stripPaginatorMeta($communitiesPaginator->toArray()),
+            'forums' => $this->stripPaginatorMeta($forumsPaginator->toArray()),
             'chats' => $this->buildUserChatsData($userId),
         ], 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/me/forums",
+     *     operationId="getMyForums",
+     *     tags={"User"},
+     *     security={{"bearer_token":{}}},
+     *     summary="Forum threads I joined",
+     *     description="Paginated list of live, approved forums you are subscribed to (`forum_subscriptions`). Use `page_size` (1–50) and optional `term` search.",
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page_size", in="query", required=false, @OA\Schema(type="integer", example=20)),
+     *     @OA\Parameter(name="term", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Paginator JSON + status + page_size"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function forums(Request $request): JsonResponse
+    {
+        $userId = (int) $request->user()->id;
+        $request->merge([
+            'page_size' => min(max((int) $request->input('page_size', 20), 1), 50),
+        ]);
+
+        $paginator = $this->forumsRepo->getSubscribedForUser($userId, $request);
+        $data = $paginator->toArray() ?? [];
+        $data['status'] = 200;
+        $data['message'] = 'Your forums retrieved successfully';
+        $data['page_size'] = (int) ($data['per_page'] ?? 20);
+        unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);
+
+        return response()->json($data, 200);
     }
 
     /**

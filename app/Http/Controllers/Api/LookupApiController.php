@@ -16,10 +16,11 @@ use App\Repositories\CommsOfPracticeRepository;
 use App\Repositories\ExpertsRepository;
 use App\Repositories\FileTypesRepository;
 use App\Repositories\TagsRepository;
+use App\Repositories\AreasRepository;
 
 class LookupApiController extends ApiController
 {
-    private $publicationsRepo, $authorsRepo, $quotesRepo, $themesRepo, $expertsRepo, $commsRepo, $tagsRepo, $fileTypesRepo, $commonsRepos;
+    private $publicationsRepo, $authorsRepo, $quotesRepo, $themesRepo, $expertsRepo, $commsRepo, $tagsRepo, $fileTypesRepo, $commonsRepos, $areasRepo;
 
     public function __construct(
         PublicationsRepository $publicationsRepo,
@@ -30,7 +31,8 @@ class LookupApiController extends ApiController
         CommsOfPracticeRepository $commsRepo,
         CommonsRepository $commonsRepos,
         TagsRepository $tagsRepo,
-        FileTypesRepository $fileTypesRepo
+        FileTypesRepository $fileTypesRepo,
+        AreasRepository $areasRepo
     ) {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo = $authorsRepo;
@@ -41,6 +43,7 @@ class LookupApiController extends ApiController
         $this->tagsRepo = $tagsRepo;
         $this->fileTypesRepo = $fileTypesRepo;
         $this->commonsRepos = $commonsRepos;
+        $this->areasRepo = $areasRepo;
     }
 
     /**
@@ -86,6 +89,30 @@ class LookupApiController extends ApiController
         return [
             "status" => 200,
             "data" => $themes
+        ];
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/lookup/regions",
+     *     operationId="ListRegions",
+     *     tags={"Lookup"},
+     *     summary="List RCC regions",
+     *     description="Returns all regions with `countries_count` (number of countries linked to each region). Use with community filters (`region_id`) and the countries API.",
+     *     @OA\Response(
+     *         response=200,
+     *         description="Successful",
+     *         @OA\JsonContent()
+     *     )
+     * )
+     */
+    public function regions()
+    {
+        $regions = $this->areasRepo->regionsWithCountryCounts();
+
+        return [
+            'status' => 200,
+            'data' => $regions,
         ];
     }
 

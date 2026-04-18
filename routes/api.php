@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\CoursesApiController;
 use App\Http\Controllers\Api\HomeApiController;
 use App\Http\Controllers\Api\HealthTopicsApiController;
 use App\Http\Controllers\Api\MeApiController;
+use App\Http\Controllers\Api\CountriesApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -43,6 +44,7 @@ Route::group(['middleware' => 'auth:api'],function(){
     Route::get('/profile', [AuthApiController::class, 'profile']);
     Route::get('/me', [MeApiController::class, 'library']);
     Route::get('/me/chats', [MeApiController::class, 'chats']);
+    Route::get('/me/forums', [MeApiController::class, 'forums']);
  });
 
 Route::group(["prefix" =>"members"],function(){
@@ -60,6 +62,8 @@ Route::get('health-topics', [HealthTopicsApiController::class, 'index']);
 Route::get('health-topics/{id}', [HealthTopicsApiController::class, 'showTopic'])->whereNumber('id');
 Route::get('health-emergencies', [HealthTopicsApiController::class, 'emergenciesIndex']);
 Route::get('health-emergencies/{id}', [HealthTopicsApiController::class, 'showEmergency'])->whereNumber('id');
+
+Route::get('countries', [CountriesApiController::class, 'index']);
 
 Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
     Route::get('/published', [PublicationsApiController::class, 'my_publications']);
@@ -91,6 +95,7 @@ Route::get("experts",[ExpertsApiController::class,'index']);
 Route::group(["prefix" =>"lookup"],function(){
     Route::get('/resource-types', [LookupApiController::class,"resource_types"]);
     Route::get('/themes', [LookupApiController::class,"themes"]);
+    Route::get('/regions', [LookupApiController::class,"regions"]);
     Route::get('/sub_themes', [LookupApiController::class,"sub_themes"]);
     Route::get('/jobs', [LookupApiController::class,"jobs"]);
     Route::get('/preferences', [LookupApiController::class,"preferences"]);

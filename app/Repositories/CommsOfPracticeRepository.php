@@ -108,11 +108,20 @@ class CommsOfPracticeRepository{
             $query->where('department', 'like', '%' . $request->input('department') . '%');
         }
 
+        $minMembers = (int) $request->input('min_members', 0);
+        if ($minMembers > 0) {
+            $query->withCount([
+                'membership as approved_active_members_count' => function ($q) {
+                    $q->where('community_of_practice_members.is_approved', 1)
+                        ->where('community_of_practice_members.is_active', 1);
+                },
+            ])->having('approved_active_members_count', '>=', $minMembers);
+        }
+
         if ($request->input('withRelated', false)) {
-            $query->with(['membership', 'approvedMembers','approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country', 'tags']);
+            $query->with(['membership', 'approvedMembers', 'approvedMembers.user', 'pendingMembers', 'rejectedMembers', 'communityForums', 'communityPublications', 'region', 'country', 'tags', 'creator']);
         } else {
-            // Always load region, country, and tags for listing cards
-            $query->with(['region', 'country', 'tags']);
+            $query->with(['region', 'country', 'tags', 'creator']);
         }
 
         if (! $request->boolean('admin')) {
@@ -124,7 +133,7 @@ class CommsOfPracticeRepository{
         
         // Append query parameters to pagination links
         if (!$return_array) {
-            $appends = array_filter($request->only(['term', 'coverage', 'region_id', 'country_id', 'organisation', 'department']));
+            $appends = array_filter($request->only(['term', 'coverage', 'region_id', 'country_id', 'organisation', 'department', 'min_members']));
             if (!empty($appends)) {
                 $results->appends($appends);
             }

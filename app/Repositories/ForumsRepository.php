@@ -1161,4 +1161,44 @@ class ForumsRepository extends SharedRepo{
         ];
     }
 
+    /**
+     * Forum threads the user joined via ForumSubscription (approved / live threads only).
+     */
+    public function getSubscribedForUser(int $userId, Request $request): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        $rows = (int) ($request->input('page_size') ?: $request->input('rows') ?: 20);
+        $rows = max(1, min(50, $rows));
+
+        $forumIds = ForumSubscription::query()
+            ->where('user_id', $userId)
+            ->pluck('forum_id');
+
+        if ($forumIds->isEmpty()) {
+            return Forum::query()->whereRaw('0 = 1')->paginate($rows);
+        }
+
+        $forums = Forum::with(['user', 'tags'])
+            ->withCount([
+                'comments as total_comments' => function ($query) {
+                    $query->whereNull('parent_id');
+                },
+                'likes as total_likes',
+            ])
+            ->whereIn('id', $forumIds)
+            ->where('status', 1)
+            ->where('is_approved', 1)
+            ->where(function ($q) {
+                $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+            });
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->input('term'));
+            if ($term !== '') {
+                $this->applyForumTermSearch($forums, $term);
+            }
+        }
+
+        return $forums->orderBy('created_at', 'desc')->paginate($rows)->withQueryString();
+    }
+
 }

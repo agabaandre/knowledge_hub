@@ -56,7 +56,15 @@ class CountriesController extends Controller
         $request['area'] = $request['state'];
 		$data['publications']   = $this->publicationsRepo->getLightweight($request);
         $data['kpis'] = $this->dashRepo->get_country_kpis(['country_id'=>$request->state]);
-        
+        $countryId = (int) $request->state;
+        $data['engagement_stats'] = $countryId > 0
+            ? $this->areasRepo->memberStateEngagementStats($countryId)
+            : [
+                'publications_count' => 0,
+                'forum_discussions_count' => 0,
+                'enrolled_users_count' => 0,
+            ];
+
         return view('countries.details',$data);
     }
 

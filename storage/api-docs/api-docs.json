@@ -1210,6 +1210,16 @@
                             "type": "string",
                             "example": "EPI"
                         }
+                    },
+                    {
+                        "name": "min_members",
+                        "in": "query",
+                        "description": "Minimum approved active members (default 10). Pass 0 to list all public communities.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 10
+                        }
                     }
                 ],
                 "responses": {
@@ -2014,6 +2024,43 @@
                         "bearer_token": []
                     }
                 ]
+            }
+        },
+        "/api/countries": {
+            "get": {
+                "tags": [
+                    "Countries"
+                ],
+                "summary": "Member states with statistics",
+                "description": "Returns all member states (countries with a region) and counts of linked publications, forum threads started by users from that country, and enrolled users (`users.country_id`). Publication counts use the same filters as the public country details list (active, approved, non-version, not admin-only).",
+                "operationId": "listMemberStatesWithStats",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
+                                        "status": {
+                                            "type": "integer",
+                                            "example": 200
+                                        },
+                                        "message": {
+                                            "type": "string"
+                                        },
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "object"
+                                            }
+                                        }
+                                    },
+                                    "type": "object"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "/api/courses": {
@@ -2992,6 +3039,26 @@
                 }
             }
         },
+        "/api/lookup/regions": {
+            "get": {
+                "tags": [
+                    "Lookup"
+                ],
+                "summary": "List RCC regions",
+                "description": "Returns all regions with `countries_count` (number of countries linked to each region). Use with community filters (`region_id`) and the countries API.",
+                "operationId": "ListRegions",
+                "responses": {
+                    "200": {
+                        "description": "Successful",
+                        "content": {
+                            "application/json": {
+                                "schema": {}
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/api/lookup/sub_themes": {
             "get": {
                 "tags": [
@@ -3250,6 +3317,10 @@
                                                     "type": "string",
                                                     "example": "/api/communities/me"
                                                 },
+                                                "my_forums": {
+                                                    "type": "string",
+                                                    "example": "/api/me/forums"
+                                                },
                                                 "assistant_session": {
                                                     "type": "string",
                                                     "example": "/api/ai/assistant/session"
@@ -3278,6 +3349,10 @@
                                         "communities": {
                                             "type": "object"
                                         },
+                                        "forums": {
+                                            "description": "First page of forums you joined (`GET /api/me/forums`)",
+                                            "type": "object"
+                                        },
                                         "chats": {
                                             "type": "object"
                                         }
@@ -3286,6 +3361,56 @@
                                 }
                             }
                         }
+                    },
+                    "401": {
+                        "description": "Unauthenticated"
+                    }
+                },
+                "security": [
+                    {
+                        "bearer_token": []
+                    }
+                ]
+            }
+        },
+        "/api/me/forums": {
+            "get": {
+                "tags": [
+                    "User"
+                ],
+                "summary": "Forum threads I joined",
+                "description": "Paginated list of live, approved forums you are subscribed to (`forum_subscriptions`). Use `page_size` (1–50) and optional `term` search.",
+                "operationId": "getMyForums",
+                "parameters": [
+                    {
+                        "name": "page",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer"
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "example": 20
+                        }
+                    },
+                    {
+                        "name": "term",
+                        "in": "query",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Paginator JSON + status + page_size"
                     },
                     "401": {
                         "description": "Unauthenticated"
@@ -4661,6 +4786,10 @@
         {
             "name": "Communities",
             "description": "Communities of practice: browse, join, members, events, publications, and forums."
+        },
+        {
+            "name": "Countries",
+            "description": "Member states and country-level engagement statistics (aligned with the public countries map and details pages)."
         },
         {
             "name": "Authentication",

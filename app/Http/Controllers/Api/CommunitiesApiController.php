@@ -65,6 +65,13 @@ class CommunitiesApiController extends Controller
      *     @OA\Parameter(name="country_id", in="query", required=false, @OA\Schema(type="integer", example=5)),
      *     @OA\Parameter(name="organisation", in="query", required=false, @OA\Schema(type="string", example="Ministry")),
      *     @OA\Parameter(name="department", in="query", required=false, @OA\Schema(type="string", example="EPI")),
+     *     @OA\Parameter(
+     *         name="min_members",
+     *         in="query",
+     *         required=false,
+     *         description="Minimum approved active members (default 10). Pass 0 to list all public communities.",
+     *         @OA\Schema(type="integer", example=10)
+     *     ),
      *     @OA\Response(
      *         response=200,
      *         description="Laravel paginator payload + status/message",
@@ -80,6 +87,10 @@ class CommunitiesApiController extends Controller
      */
     public function index(Request $request)
     {
+        if (! $request->query->has('min_members')) {
+            $request->merge(['min_members' => 10]);
+        }
+
         $request->merge(['rows' => $request->page_size ?? 15]);
 
         $communities = $this->commsRepo->get($request);

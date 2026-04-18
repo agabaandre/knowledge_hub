@@ -15,23 +15,31 @@ class AuthorsRepository extends SharedRepo{
         $rows_count = ($request->rows)?$request->rows:24;
         
         // Per-user forum totals, then sum those by author_id so one row per author (multiple users may share author_id).
-        $forumEngagementPerUser = DB::table('forum_engagements')
-            ->select('user_id', DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total'))
-            ->groupBy('user_id');
-        $forumEngagementByAuthor = DB::table('users')
-            ->leftJoinSub($forumEngagementPerUser, 'fe_sum', function ($join) {
-                $join->on('fe_sum.user_id', '=', 'users.id');
-            })
-            ->whereNotNull('users.author_id')
-            ->select('users.author_id', DB::raw('SUM(COALESCE(fe_sum.forum_engagement_total, 0)) as forum_engagement_total'))
-            ->groupBy('users.author_id');
+        if (Schema::hasTable('forum_engagements')) {
+            $forumEngagementPerUser = DB::table('forum_engagements')
+                ->select('user_id', DB::raw('SUM(forum_posts + forum_comments) as forum_engagement_total'))
+                ->groupBy('user_id');
+            $forumEngagementByAuthor = DB::table('users')
+                ->leftJoinSub($forumEngagementPerUser, 'fe_sum', function ($join) {
+                    $join->on('fe_sum.user_id', '=', 'users.id');
+                })
+                ->whereNotNull('users.author_id')
+                ->select('users.author_id', DB::raw('SUM(COALESCE(fe_sum.forum_engagement_total, 0)) as forum_engagement_total'))
+                ->groupBy('users.author_id');
+        } else {
+            $forumEngagementByAuthor = DB::table('users')
+                ->whereNotNull('users.author_id')
+                ->select('users.author_id', DB::raw('0 as forum_engagement_total'))
+                ->groupBy('users.author_id');
+        }
 
         $publicationCountSubquery = DB::table('publication')
             ->select('author_id', DB::raw('COUNT(*) as publications_count'))
             ->groupBy('author_id');
 
+        // Do not eager-load `publications` (can load thousands of rows per author and cause timeouts / HTTP 500).
         $authors = Author::query()
-            ->with(['user.country', 'user.badges.badgeType', 'user.communities', 'publications'])
+            ->with(['user.country', 'user.badges.badgeType', 'user.communities'])
             ->leftJoinSub($publicationCountSubquery, 'publication_totals', function ($join) {
                 $join->on('publication_totals.author_id', '=', 'author.id');
             })

@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\GeoCoverage;
 use App\Models\Region;
 use App\Models\Forum;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -157,6 +158,115 @@ class AreasRepository{
         $uniquePublications = $this->getUniqueResourcesByRegion($regionId);
         $forums = $this->getForumsByRegion($regionId);
         return $uniquePublications + $forums;
+    }
+
+    /**
+     * Regions with country counts (for API lookup / docs). Exposed as `countries_count` on each region model.
+     */
+    public function regionsWithCountryCounts()
+    {
+        return Region::query()
+            ->withCount('countries')
+            ->orderBy('region_name')
+            ->get();
+    }
+
+    /**
+     * Engagement stats for one member state (matches filters used on the public country details page for publications).
+     */
+    public function memberStateEngagementStats(int $countryId): array
+    {
+        $publicationsCount = (int) DB::table('publication_countries as pc')
+            ->join('publication as p', 'p.id', '=', 'pc.publication_id')
+            ->where('pc.country_id', $countryId)
+            ->where('p.is_version', 0)
+            ->where('p.is_admin_only_access', 0)
+            ->where('p.is_active', 'Active')
+            ->where('p.is_approved', 1)
+            ->distinct()
+            ->count('p.id');
+
+        $forumThreadsCount = (int) Forum::query()
+            ->where('status', 1)
+            ->where('is_approved', 1)
+            ->where(function ($q) {
+                $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+            })
+            ->whereHas('user', fn ($q) => $q->where('country_id', $countryId))
+            ->count();
+
+        $enrolledUsersCount = (int) User::query()->where('country_id', $countryId)->count();
+
+        return [
+            'publications_count' => $publicationsCount,
+            'forum_discussions_count' => $forumThreadsCount,
+            'enrolled_users_count' => $enrolledUsersCount,
+        ];
+    }
+
+    /**
+     * Member states (country.region_id set) with publication, forum, and user enrolment aggregates for API consumers.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function memberStatesWithStats(): array
+    {
+        $countries = Country::query()
+            ->where('region_id', '>', 0)
+            ->with('region')
+            ->orderBy('name')
+            ->get();
+
+        $publicationCounts = DB::table('publication_countries as pc')
+            ->join('publication as p', 'p.id', '=', 'pc.publication_id')
+            ->where('p.is_version', 0)
+            ->where('p.is_admin_only_access', 0)
+            ->where('p.is_active', 'Active')
+            ->where('p.is_approved', 1)
+            ->groupBy('pc.country_id')
+            ->select('pc.country_id', DB::raw('COUNT(DISTINCT pc.publication_id) as c'))
+            ->pluck('c', 'country_id')
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => (int) $v]);
+
+        $forumCounts = DB::table('forums as f')
+            ->join('users as u', 'u.id', '=', 'f.created_by')
+            ->where('f.status', 1)
+            ->where('f.is_approved', 1)
+            ->where(function ($q) {
+                $q->where('f.is_rejected', 0)->orWhereNull('f.is_rejected');
+            })
+            ->groupBy('u.country_id')
+            ->select('u.country_id', DB::raw('COUNT(*) as c'))
+            ->pluck('c', 'country_id')
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => (int) $v]);
+
+        $userCounts = User::query()
+            ->whereNotNull('country_id')
+            ->groupBy('country_id')
+            ->selectRaw('country_id, COUNT(*) as c')
+            ->pluck('c', 'country_id')
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => (int) $v]);
+
+        return $countries->map(function (Country $country) use ($publicationCounts, $forumCounts, $userCounts) {
+            $cid = (int) $country->id;
+
+            return [
+                'id' => $cid,
+                'name' => $country->name,
+                'region_id' => $country->region_id ? (int) $country->region_id : null,
+                'region' => $country->relationLoaded('region') && $country->region
+                    ? [
+                        'id' => (int) $country->region->id,
+                        'region_name' => $country->region->region_name,
+                    ]
+                    : null,
+                'stats' => [
+                    'publications_count' => (int) ($publicationCounts->get($cid, 0)),
+                    'forum_discussions_count' => (int) ($forumCounts->get($cid, 0)),
+                    'enrolled_users_count' => (int) ($userCounts->get($cid, 0)),
+                ],
+            ];
+        })->values()->all();
     }
 
 }
