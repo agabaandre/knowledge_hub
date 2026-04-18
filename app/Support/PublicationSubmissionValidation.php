@@ -29,8 +29,9 @@ final class PublicationSubmissionValidation
         }
 
         $isAdmin = false;
-        if (auth()->check()) {
-            $role = \get_role(auth()->user()->id);
+        $authUser = auth('api')->user() ?? auth()->user();
+        if ($authUser) {
+            $role = \get_role($authUser->id);
             $isAdmin = ($role && strpos(strtolower($role->name), 'admin') !== false);
         }
 
@@ -116,7 +117,7 @@ final class PublicationSubmissionValidation
             'tags.*.exists' => 'One or more selected tags are invalid.',
             'year_published.required' => 'Year published is required.',
             'author.required' => 'Source/Author is required.',
-            'author.exists' => 'author must be a valid author id from GET /api/lookup/authors (table author.id). Omit author to use your linked author_id, or ensure the id exists.',
+            'author.exists' => 'author must be a valid author id (author.id = users.author_id for the intended account). Use GET /api/lookup/authors for ids. On POST /api/publications, non-admins are always assigned their own users.author_id.',
             'doi.required' => 'DOI is required.',
             'issn.required' => 'ISSN is required.',
             'isbn.required' => 'ISBN is required.',

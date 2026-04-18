@@ -595,7 +595,7 @@ class PublicationsApiController extends ApiController
      *     summary="Create Publication",
      *     operationId="CreatePublication",
      *     security={{"bearer_token":{}}},
-     *     description="Allows users to submit publications for admin approval. **Author / coverage:** `author` must be an integer **`author.id`** from `GET /api/lookup/authors` (not a name string). If you send `author`, that author record should have a linked portal user with `country_id`, or include **`countries`** (member state ids) so the first entry can be used for geographical coverage. Non-admin callers may omit `author`; the API then uses your account `author_id`.",
+     *     description="Allows users to submit publications for admin approval. **Author:** `author.id` in the `author` table is the same integer as **`users.author_id`** on the submitting account. **Non-admin:** any client `author` value is ignored; the server always sets `author` to your `users.author_id` (must exist — see 422 below). **Admin:** optional `author` is a valid `author.id` (see `GET /api/lookup/authors`). **Coverage:** include **`countries`** (member state ids) when needed; geography may use `countries[0]` if the chosen author has no linked user with `country_id`.",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
@@ -635,7 +635,7 @@ class PublicationsApiController extends ApiController
      *                 @OA\Property(property="cover", type="string", format="binary", description="Cover image (optional; default cover if omitted)"),
      *                 @OA\Property(property="cover_url", type="string", nullable=true, description="External cover URL when editing"),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", format="binary"), description="Attachments (multipart files[])"),
-     *                 @OA\Property(property="author", type="integer", nullable=true, description="Optional source `author.id` (exists in `author` table — see GET /api/lookup/authors). If set for a non-admin submission, the author should have a linked user with country_id, or send `countries` so coverage can fall back to `countries[0]`."),
+     *                 @OA\Property(property="author", type="integer", nullable=true, description="**Admin only (optional):** `author.id` from `GET /api/lookup/authors`. **Members:** omit or send anything — value is replaced with your `users.author_id` (= `author.id`)."),
      *                 @OA\Property(property="original_id", type="integer", nullable=true, description="Create new version from this publication id"),
      *                 @OA\Property(property="show_disclaimer", type="boolean", nullable=true)
      *             )
@@ -690,6 +690,11 @@ class PublicationsApiController extends ApiController
 
         $this->normalizePublicationArrayInputs($request);
         $request->merge(['user_id' => null]);
+
+        // Non-admins always publish as their linked source: users.author_id === author.id (client `author` is ignored).
+        if (! is_admin() && $user->author_id) {
+            $request->merge(['author' => (int) $user->author_id]);
+        }
 
         if ($request->original_id) {
             $request->merge(['file_type' => 1]);
@@ -823,12 +828,13 @@ class PublicationsApiController extends ApiController
      *     summary="Update Publication",
      *     operationId="UpdatePublication",
      *     security={{"bearer_token":{}}},
-     *     description="Update a draft or pending publication (same body as create; id is in the URL). Cover file optional when unchanged.",
+     *     description="Update a draft or pending publication (same body as create; id is in the URL). **Non-admin:** `author` is forced to `users.author_id` (= `author.id`) like create. Cover file optional when unchanged.",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
      *                 type="object",
+     *                 @OA\Property(property="author", type="integer", nullable=true, description="Ignored for members; server uses users.author_id. Admins: optional author.id."),
      *                 @OA\Property(property="upload_type", type="string", enum={"upload","link"}),
      *                 @OA\Property(property="link", type="string", format="uri"),
      *                 @OA\Property(property="title", type="string"),
@@ -904,6 +910,10 @@ class PublicationsApiController extends ApiController
 
         $this->normalizePublicationArrayInputs($request);
         $request->merge(['id' => $id, 'user_id' => null]);
+
+        if (! is_admin() && $user->author_id) {
+            $request->merge(['author' => (int) $user->author_id]);
+        }
 
         if (! $request->is_active) {
             $request->merge(['is_active' => 'In-Active']);

@@ -3833,7 +3833,7 @@
                     "Publications"
                 ],
                 "summary": "Create Publication",
-                "description": "Allows users to submit publications for admin approval. **Author / coverage:** `author` must be an integer **`author.id`** from `GET /api/lookup/authors` (not a name string). If you send `author`, that author record should have a linked portal user with `country_id`, or include **`countries`** (member state ids) so the first entry can be used for geographical coverage. Non-admin callers may omit `author`; the API then uses your account `author_id`.",
+                "description": "Allows users to submit publications for admin approval. **Author:** `author.id` in the `author` table is the same integer as **`users.author_id`** on the submitting account. **Non-admin:** any client `author` value is ignored; the server always sets `author` to your `users.author_id` (must exist — see 422 below). **Admin:** optional `author` is a valid `author.id` (see `GET /api/lookup/authors`). **Coverage:** include **`countries`** (member state ids) when needed; geography may use `countries[0]` if the chosen author has no linked user with `country_id`.",
                 "operationId": "CreatePublication",
                 "requestBody": {
                     "content": {
@@ -3999,7 +3999,7 @@
                                         }
                                     },
                                     "author": {
-                                        "description": "Optional source `author.id` (exists in `author` table — see GET /api/lookup/authors). If set for a non-admin submission, the author should have a linked user with country_id, or send `countries` so coverage can fall back to `countries[0]`.",
+                                        "description": "**Admin only (optional):** `author.id` from `GET /api/lookup/authors`. **Members:** omit or send anything — value is replaced with your `users.author_id` (= `author.id`).",
                                         "type": "integer",
                                         "nullable": true
                                     },
@@ -4514,13 +4514,18 @@
                     "Publications"
                 ],
                 "summary": "Update Publication",
-                "description": "Update a draft or pending publication (same body as create; id is in the URL). Cover file optional when unchanged.",
+                "description": "Update a draft or pending publication (same body as create; id is in the URL). **Non-admin:** `author` is forced to `users.author_id` (= `author.id`) like create. Cover file optional when unchanged.",
                 "operationId": "UpdatePublication",
                 "requestBody": {
                     "content": {
                         "multipart/form-data": {
                             "schema": {
                                 "properties": {
+                                    "author": {
+                                        "description": "Ignored for members; server uses users.author_id. Admins: optional author.id.",
+                                        "type": "integer",
+                                        "nullable": true
+                                    },
                                     "upload_type": {
                                         "type": "string",
                                         "enum": [
