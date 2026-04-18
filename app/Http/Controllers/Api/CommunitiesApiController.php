@@ -52,12 +52,64 @@ class CommunitiesApiController extends Controller
     }
 
     /**
+     * @param  iterable<int, CommunityOfPractice>  $items
+     */
+    private function attachViewerCommunityAdminToCommunities($items, $viewer): void
+    {
+        $list = is_array($items) ? $items : iterator_to_array($items);
+        if ($list === []) {
+            return;
+        }
+
+        if (! $viewer) {
+            foreach ($list as $c) {
+                if ($c instanceof CommunityOfPractice) {
+                    $c->setAttribute('viewer_is_community_admin', false);
+                }
+            }
+
+            return;
+        }
+
+        $uid = (int) $viewer->id;
+        $isSystemAdmin = is_admin() || (method_exists($viewer, 'can') && $viewer->can('view_publications'));
+        $ids = [];
+        foreach ($list as $c) {
+            if ($c instanceof CommunityOfPractice && $c->id) {
+                $ids[] = (int) $c->id;
+            }
+        }
+        $ids = array_values(array_unique($ids));
+        if ($ids === []) {
+            return;
+        }
+
+        $rows = CommunityOfPracticeMembers::query()
+            ->where('user_id', $uid)
+            ->whereIn('community_of_practice_id', $ids)
+            ->where('is_approved', 1)
+            ->get(['community_of_practice_id', 'is_admin'])
+            ->keyBy('community_of_practice_id');
+
+        foreach ($list as $c) {
+            if (! $c instanceof CommunityOfPractice) {
+                continue;
+            }
+            $cid = (int) $c->id;
+            $m = $rows->get($cid) ?? $rows->get((string) $cid);
+            $isFlaggedAdmin = $m && (bool) ($m->is_admin ?? false);
+            $isCreator = (int) ($c->created_by ?? 0) === $uid;
+            $c->setAttribute('viewer_is_community_admin', $isSystemAdmin || $isFlaggedAdmin || $isCreator);
+        }
+    }
+
+    /**
      * @OA\Get(
      *     path="/api/communities",
      *     operationId="getCommunitiesList",
      *     tags={"Communities"},
      *     summary="List public communities",
-     *     description="Paginated public communities (same filters as the web directory). Unauthenticated.",
+     *     description="Paginated public communities (same filters as the web directory). Uses **`auth.passport`**: unauthenticated is allowed; send **`Authorization: Bearer`** so each row includes **`viewer_is_community_admin`** when you are the creator, flagged community admin, or a system admin. Public listings always require **at least 10** approved active members (values below 10 are raised to 10; use **`admin=1`** for unfiltered counts).",
      *     @OA\Parameter(name="term", in="query", required=false, description="Search name, description, or creator", @OA\Schema(type="string", example="malaria")),
      *     @OA\Parameter(name="page_size", in="query", required=false, @OA\Schema(type="integer", example=15)),
      *     @OA\Parameter(name="coverage", in="query", required=false, description="whole_of_africa | region | country", @OA\Schema(type="string", example="country")),
@@ -69,7 +121,7 @@ class CommunitiesApiController extends Controller
      *         name="min_members",
      *         in="query",
      *         required=false,
-     *         description="Minimum approved active members (default 10). Pass 0 to list all public communities.",
+     *         description="Minimum approved active members. For normal public requests the server enforces **at least 10** (larger values still apply). With **`admin=1`**, omit or set as needed (0 = no minimum).",
      *         @OA\Schema(type="integer", example=10)
      *     ),
      *     @OA\Response(
@@ -87,13 +139,15 @@ class CommunitiesApiController extends Controller
      */
     public function index(Request $request)
     {
-        if (! $request->query->has('min_members')) {
-            $request->merge(['min_members' => 10]);
+        if (! $request->boolean('admin')) {
+            $request->merge(['min_members' => max(10, (int) $request->input('min_members', 10))]);
         }
 
         $request->merge(['rows' => $request->page_size ?? 15]);
 
         $communities = $this->commsRepo->get($request);
+        $viewer = $request->user() ?? auth()->user();
+        $this->attachViewerCommunityAdminToCommunities($communities->items(), $viewer);
         $data = $communities->toArray() ?? [];
         $data['status'] = 200;
         $data['message'] = 'Communities retrieved successfully';
@@ -109,7 +163,7 @@ class CommunitiesApiController extends Controller
      *     operationId="getMyCommunities",
      *     tags={"Communities"},
      *     summary="Communities I belong to",
-     *     description="Approved memberships only (same idea as web /account/my-communities).",
+     *     description="Approved memberships only (same idea as web /account/my-communities). Each item includes **`viewer_is_community_admin`** when you are the community creator, have **`is_admin`** on your membership, or are a system admin.",
      *     security={{"bearer_token":{}}},
      *     @OA\Parameter(name="term", in="query", required=false, @OA\Schema(type="string")),
      *     @OA\Parameter(name="page_size", in="query", required=false, @OA\Schema(type="integer", example=15)),
@@ -123,6 +177,7 @@ class CommunitiesApiController extends Controller
         $request->merge(['rows' => $request->page_size ?? 15]);
 
         $communities = $this->commsRepo->getByUser($userId, $request);
+        $this->attachViewerCommunityAdminToCommunities($communities->items(), $request->user());
         $data = $communities->toArray() ?? [];
         $data['status'] = 200;
         $data['message'] = 'Your communities retrieved successfully';
@@ -185,7 +240,7 @@ class CommunitiesApiController extends Controller
      *     operationId="getCommunityById",
      *     tags={"Communities"},
      *     summary="Get community detail (member only)",
-     *     description="Requires an approved, active membership. Includes related members, forums links, publication links, tags (same shape as web detail data load).",
+     *     description="Requires an approved, active membership. Includes related members, forums links, publication links, tags (same shape as web detail data load). **`viewer_is_community_admin`:** whether the signed-in user is a community admin (creator, membership `is_admin`, or system admin). **`community_admin_user_ids`:** distinct user ids who are admins (membership `is_admin` plus creator if not already listed). Each **`approvedMembers`** row includes **`is_community_admin`** (true for creator or `is_admin` on the membership).",
      *     security={{"bearer_token":{}}},
      *     @OA\Parameter(name="id", in="path", required=true, @OA\Schema(type="integer", example=12)),
      *     @OA\Response(response=200, description="Community with relations"),
@@ -218,6 +273,33 @@ class CommunitiesApiController extends Controller
                 'message' => 'You do not have access to this community.',
                 'data' => null,
             ], 403);
+        }
+
+        $community->setAttribute('viewer_is_community_admin', $this->userIsCommunityAdmin($community, $user));
+
+        $adminUserIds = CommunityOfPracticeMembers::query()
+            ->where('community_of_practice_id', $id)
+            ->where('is_approved', 1)
+            ->where('is_active', 1)
+            ->where('is_admin', 1)
+            ->pluck('user_id')
+            ->map(fn ($uid) => (int) $uid)
+            ->unique()
+            ->values()
+            ->all();
+        $creatorId = (int) ($community->created_by ?? 0);
+        if ($creatorId > 0 && ! in_array($creatorId, $adminUserIds, true)) {
+            $adminUserIds[] = $creatorId;
+        }
+        sort($adminUserIds);
+        $community->setAttribute('community_admin_user_ids', $adminUserIds);
+
+        foreach ($community->approvedMembers as $m) {
+            $memberUid = (int) ($m->user_id ?? 0);
+            $m->setAttribute(
+                'is_community_admin',
+                (bool) ($m->is_admin ?? false) || ($creatorId > 0 && $memberUid === $creatorId)
+            );
         }
 
         return response()->json([

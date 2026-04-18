@@ -164,7 +164,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 });
 
 Route::prefix('communities')->group(function () {
-    Route::get('/', [CommunitiesApiController::class, 'index'])->name('communities.index');
+    Route::get('/', [CommunitiesApiController::class, 'index'])->middleware('auth.passport')->name('communities.index');
 
     Route::group(['middleware' => 'auth:api'], function () {
         Route::get('/me', [CommunitiesApiController::class, 'myCommunities'])->name('communities.me');
