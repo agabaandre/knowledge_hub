@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\ApiController;
 use App\Models\Forum;
 use App\Models\ForumSubscription;
 use App\Repositories\ForumsRepository;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -57,6 +58,38 @@ class ForumsApiController extends ApiController
         } else {
             $data['joined_forum_ids'] = [];
         }
+
+        return response()->json($data, 200);
+    }
+
+    /**
+     * @OA\Get(
+     *     path="/api/forums/me",
+     *     operationId="getMyForumsByPath",
+     *     tags={"Forums"},
+     *     security={{"bearer_token":{}}},
+     *     summary="Forum threads I joined",
+     *     description="Same response as `GET /api/me/forums`: paginated live, approved forums you are subscribed to (`forum_subscriptions`). Query: `page`, `page_size` (1–50), optional `term`.",
+     *     @OA\Parameter(name="page", in="query", required=false, @OA\Schema(type="integer")),
+     *     @OA\Parameter(name="page_size", in="query", required=false, @OA\Schema(type="integer", example=20)),
+     *     @OA\Parameter(name="term", in="query", required=false, @OA\Schema(type="string")),
+     *     @OA\Response(response=200, description="Paginator JSON + status + page_size"),
+     *     @OA\Response(response=401, description="Unauthenticated")
+     * )
+     */
+    public function myForums(Request $request): JsonResponse
+    {
+        $userId = (int) $request->user()->id;
+        $request->merge([
+            'page_size' => min(max((int) $request->input('page_size', 20), 1), 50),
+        ]);
+
+        $paginator = $this->forumsRepo->getSubscribedForUser($userId, $request);
+        $data = $paginator->toArray() ?? [];
+        $data['status'] = 200;
+        $data['message'] = 'Your forums retrieved successfully';
+        $data['page_size'] = (int) ($data['per_page'] ?? 20);
+        unset($data['links'], $data['last_page_url'], $data['next_page_url'], $data['path'], $data['first_page_url'], $data['prev_page_url']);
 
         return response()->json($data, 200);
     }

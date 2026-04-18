@@ -81,6 +81,7 @@ Route::group(['middleware' => 'auth:api','prefix'=>"publications"],function(){
 });
 
 Route::get("forums",[ForumsApiController::class,"index"]);
+Route::get('forums/me', [ForumsApiController::class, 'myForums'])->middleware('auth:api');
 Route::get("forums/{id}",[ForumsApiController::class,"show"])->whereNumber('id');
 Route::group(['middleware' => 'auth:api'],function(){
     Route::post("forums/comment/like",[ForumsApiController::class,"likeComment"]);
