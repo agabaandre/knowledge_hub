@@ -595,7 +595,7 @@ class PublicationsApiController extends ApiController
      *     summary="Create Publication",
      *     operationId="CreatePublication",
      *     security={{"bearer_token":{}}},
-     *     description="Allows users to submit publications for admin approval",
+     *     description="Allows users to submit publications for admin approval. **Author / coverage:** `author` must be an integer **`author.id`** from `GET /api/lookup/authors` (not a name string). If you send `author`, that author record should have a linked portal user with `country_id`, or include **`countries`** (member state ids) so the first entry can be used for geographical coverage. Non-admin callers may omit `author`; the API then uses your account `author_id`.",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
@@ -635,7 +635,7 @@ class PublicationsApiController extends ApiController
      *                 @OA\Property(property="cover", type="string", format="binary", description="Cover image (optional; default cover if omitted)"),
      *                 @OA\Property(property="cover_url", type="string", nullable=true, description="External cover URL when editing"),
      *                 @OA\Property(property="files", type="array", @OA\Items(type="string", format="binary"), description="Attachments (multipart files[])"),
-     *                 @OA\Property(property="author", type="integer", nullable=true, description="Admin only: source author id"),
+     *                 @OA\Property(property="author", type="integer", nullable=true, description="Optional source `author.id` (exists in `author` table — see GET /api/lookup/authors). If set for a non-admin submission, the author should have a linked user with country_id, or send `countries` so coverage can fall back to `countries[0]`."),
      *                 @OA\Property(property="original_id", type="integer", nullable=true, description="Create new version from this publication id"),
      *                 @OA\Property(property="show_disclaimer", type="boolean", nullable=true)
      *             )
@@ -649,6 +649,10 @@ class PublicationsApiController extends ApiController
      *     @OA\Response(
      *         response=401,
      *         description="Unauthenticated"
+     *     ),
+     *     @OA\Response(
+     *         response=422,
+     *         description="Validation failed (e.g. unknown author id, invalid tags, description too short)"
      *     ),
      *     @OA\Response(
      *         response=400,
@@ -668,8 +672,8 @@ class PublicationsApiController extends ApiController
     {
         Log::info('API publication store', ['keys' => array_keys($request->all())]);
 
-        $user = auth()->user();
-        if (! $user->is_verified) {
+        $user = $request->user('api') ?? $request->user() ?? auth()->user();
+        if (! $user || ! $user->is_verified) {
             return response()->json([
                 'status' => 400,
                 'data' => null,
@@ -866,8 +870,8 @@ class PublicationsApiController extends ApiController
      */
     public function update(Request $request, int $id)
     {
-        $user = auth()->user();
-        if (! $user->is_verified) {
+        $user = $request->user('api') ?? $request->user() ?? auth()->user();
+        if (! $user || ! $user->is_verified) {
             return response()->json([
                 'status' => 400,
                 'data' => null,

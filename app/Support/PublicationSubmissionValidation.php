@@ -45,7 +45,9 @@ final class PublicationSubmissionValidation
             'sub_theme' => ($requiredFields['sub_theme'] ?? true) ? 'required' : 'nullable',
             'data_category_id' => ($requiredFields['data_category_id'] ?? true) ? 'required' : 'nullable',
             'year_published' => ($requiredFields['year_published'] ?? false) ? 'required|integer|min:1900|max:'.date('Y') : 'nullable|integer|min:1900|max:'.date('Y'),
-            'author' => ($isAdmin && ($requiredFields['author'] ?? false)) ? 'required' : 'nullable',
+            'author' => ($isAdmin && ($requiredFields['author'] ?? false))
+                ? 'required|exists:author,id'
+                : 'nullable|exists:author,id',
             'doi' => ($requiredFields['doi'] ?? false) ? 'required|string|max:255' : 'nullable|string|max:255',
             'issn' => ($requiredFields['issn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
             'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
@@ -114,6 +116,7 @@ final class PublicationSubmissionValidation
             'tags.*.exists' => 'One or more selected tags are invalid.',
             'year_published.required' => 'Year published is required.',
             'author.required' => 'Source/Author is required.',
+            'author.exists' => 'author must be a valid author id from GET /api/lookup/authors (table author.id). Omit author to use your linked author_id, or ensure the id exists.',
             'doi.required' => 'DOI is required.',
             'issn.required' => 'ISSN is required.',
             'isbn.required' => 'ISBN is required.',

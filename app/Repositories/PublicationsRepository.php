@@ -417,7 +417,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
         }
 
         $pub  = ($request->id)? Publication::find($request->id):new Publication();
-        $user = ($request->user_id)?User::find($request->user_id):auth()->user();
+        $user = $request->user_id
+            ? User::find($request->user_id)
+            : ($request->user('api') ?? $request->user() ?? auth()->user());
   
         if($request->original_id):
 
@@ -498,8 +500,16 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pub->is_approved = 0;
             $pub->is_rejected = 0;
 
-            if($request->author)
-            $pub->geographical_coverage_id  = Author::find($request->author)->user->country_id;
+            // When `author` is sent, legacy code sets geo from the linked portal user on that author
+            // record (hasOne). Many authors have no linked user, or the id may be wrong — avoid 500.
+            if ($request->filled('author')) {
+                $authorRecord = Author::find($request->author);
+                if ($authorRecord && $authorRecord->user && $authorRecord->user->country_id) {
+                    $pub->geographical_coverage_id = (int) $authorRecord->user->country_id;
+                } elseif ($request->filled('countries') && is_array($request->countries) && count($request->countries) > 0) {
+                    $pub->geographical_coverage_id = (int) $request->countries[0];
+                }
+            }
         }
         else {
             // Auto-publish when submitted by privileged roles (IDs), configurable via ENV
