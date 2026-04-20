@@ -1265,7 +1265,12 @@
                             <div class="comment-box">
                                 <strong>{{ $comment->user->name ?? 'Anonymous' }}</strong>
                                 <small class="text-muted d-block">{{ time_ago($comment->created_at) }}</small>
-                                <div class="mb-0">{!! nl2br(e($comment->comment)) !!}</div>
+                                @php
+                                    $rawComment = (string) ($comment->comment ?? '');
+                                    $hasHtml = preg_match('/<[^>]+>/', $rawComment) === 1;
+                                    $safeHtmlComment = sanitize_rich_text_for_display($rawComment);
+                                @endphp
+                                <div class="mb-0">{!! $hasHtml ? $safeHtmlComment : nl2br(e($rawComment)) !!}</div>
                 </div>
                         @endforeach
                     </div>
