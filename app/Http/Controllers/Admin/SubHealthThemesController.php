@@ -20,6 +20,10 @@ class SubHealthThemesController extends Controller
 
         $data['themes'] = ThemeticArea::all();
         $data['subthemes'] = $this->themesRepo->get_all_subthemes($request);
+        $data['allSubthemesForMapping'] = $this->themesRepo->allSubthemesForMapping();
+        $data['faIconOptions'] = $this->themesRepo->fontAwesomeIconOptions();
+        $data['faVersion'] = $this->themesRepo->fontAwesomeVersion();
+        $data['faCheatsheetUrl'] = $this->themesRepo->fontAwesomeCheatsheetUrl();
         $data['search'] = (Object) $request->all();
 
         return view('admin.subthemes.index',$data);
@@ -47,7 +51,16 @@ class SubHealthThemesController extends Controller
         if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
             return response(['status'=>'failure','message'=>'Unauthorized'], 403);
         }
-        return $this->themesRepo->delete_subtheme($request->id);
+
+        $request->validate([
+            'id' => 'required|integer|exists:sub_thematic_area,id',
+            'replacement_subtheme_id' => 'required|integer|exists:sub_thematic_area,id|different:id',
+        ]);
+
+        $result = $this->themesRepo->deleteSubthemeWithMapping((int) $request->id, (int) $request->replacement_subtheme_id);
+        $statusCode = ($result['status'] ?? 'failure') === 'success' ? 200 : 422;
+
+        return response()->json($result, $statusCode);
     }
 
 

@@ -3,10 +3,14 @@ namespace App\Repositories;
 
 use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
+use App\Models\Publication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class ThemesRepository
 {
+    private const FA_VERSION = '5.3.1';
 
     public function get(Request $request)
     {
@@ -77,6 +81,58 @@ class ThemesRepository
         return ThemeticArea::find($id)->delete();
     }
 
+    public function allForMapping()
+    {
+        return ThemeticArea::orderBy('description')->get(['id', 'description']);
+    }
+
+    public function deleteWithMapping(int $id, int $replacementThemeId): array
+    {
+        if ($id === $replacementThemeId) {
+            return ['status' => 'failure', 'message' => 'Please select a different theme to map data to.'];
+        }
+
+        $oldTheme = ThemeticArea::find($id);
+        $newTheme = ThemeticArea::find($replacementThemeId);
+        if (! $oldTheme || ! $newTheme) {
+            return ['status' => 'failure', 'message' => 'Selected theme was not found.'];
+        }
+
+        return DB::transaction(function () use ($oldTheme, $newTheme) {
+            $subThemeIds = SubThemeticArea::where('thematic_area_id', $oldTheme->id)->pluck('id');
+            $mappedSubThemes = 0;
+            $mappedPublications = 0;
+
+            if ($subThemeIds->isNotEmpty()) {
+                $mappedSubThemes = SubThemeticArea::whereIn('id', $subThemeIds)->update([
+                    'thematic_area_id' => $newTheme->id,
+                ]);
+
+                $mappedPublications = Publication::whereIn('sub_thematic_area_id', $subThemeIds)->count();
+
+                // Keep legacy denormalized column aligned if it exists in this deployment.
+                if (Schema::hasColumn('publication', 'thematic_area_id')) {
+                    Publication::whereIn('sub_thematic_area_id', $subThemeIds)->update([
+                        'thematic_area_id' => $newTheme->id,
+                    ]);
+                }
+            }
+
+            $oldTheme->delete();
+
+            return [
+                'status' => 'success',
+                'message' => 'Theme deleted and data mapped successfully.',
+                'data' => [
+                    'mapped_subthemes' => $mappedSubThemes,
+                    'mapped_publications' => $mappedPublications,
+                    'deleted_theme_id' => $oldTheme->id,
+                    'replacement_theme_id' => $newTheme->id,
+                ],
+            ];
+        });
+    }
+
     public function save_subtheme(Request $request)
     {
 
@@ -110,9 +166,94 @@ class ThemesRepository
         return SubThemeticArea::find($id)->delete();
     }
 
+    public function allSubthemesForMapping()
+    {
+        return SubThemeticArea::with('theme')
+            ->orderBy('description')
+            ->get(['id', 'description', 'thematic_area_id']);
+    }
+
+    public function deleteSubthemeWithMapping(int $id, int $replacementSubthemeId): array
+    {
+        if ($id === $replacementSubthemeId) {
+            return ['status' => 'failure', 'message' => 'Please select a different subtheme to map data to.'];
+        }
+
+        $oldSubtheme = SubThemeticArea::find($id);
+        $newSubtheme = SubThemeticArea::find($replacementSubthemeId);
+        if (! $oldSubtheme || ! $newSubtheme) {
+            return ['status' => 'failure', 'message' => 'Selected subtheme was not found.'];
+        }
+
+        return DB::transaction(function () use ($oldSubtheme, $newSubtheme) {
+            $mappedPublications = Publication::where('sub_thematic_area_id', $oldSubtheme->id)->count();
+            if ($mappedPublications > 0) {
+                $updates = ['sub_thematic_area_id' => $newSubtheme->id];
+                if (Schema::hasColumn('publication', 'thematic_area_id')) {
+                    $updates['thematic_area_id'] = $newSubtheme->thematic_area_id;
+                }
+                Publication::where('sub_thematic_area_id', $oldSubtheme->id)->update($updates);
+            }
+
+            $oldSubtheme->delete();
+
+            return [
+                'status' => 'success',
+                'message' => 'Subtheme deleted and publications mapped successfully.',
+                'data' => [
+                    'mapped_publications' => $mappedPublications,
+                    'deleted_subtheme_id' => $oldSubtheme->id,
+                    'replacement_subtheme_id' => $newSubtheme->id,
+                ],
+            ];
+        });
+    }
+
     public function count()
     {
         return count(ThemeticArea::all());
+    }
+
+    public function fontAwesomeVersion(): string
+    {
+        return self::FA_VERSION;
+    }
+
+    public function fontAwesomeCheatsheetUrl(): string
+    {
+        return 'https://fontawesome.com/v'.self::FA_VERSION.'/icons?d=gallery&m=free';
+    }
+
+    /**
+     * Returns icon values in the stored format used by this project (e.g. "fa-eye").
+     *
+     * @return array<int, string>
+     */
+    public function fontAwesomeIconOptions(): array
+    {
+        $base = public_path('assets/plugins/fontawesome-free/svgs');
+        $paths = [
+            $base.'/solid/*.svg',
+            $base.'/regular/*.svg',
+            $base.'/brands/*.svg',
+        ];
+        $icons = [];
+        foreach ($paths as $pattern) {
+            foreach (glob($pattern) ?: [] as $file) {
+                $name = pathinfo($file, PATHINFO_FILENAME);
+                if ($name === '') {
+                    continue;
+                }
+                $icons['fa-'.$name] = true;
+            }
+        }
+        if ($icons === []) {
+            return ['fa-eye', 'fa-book', 'fa-folder', 'fa-file', 'fa-heart'];
+        }
+        $list = array_keys($icons);
+        sort($list);
+
+        return $list;
     }
 
 

@@ -19,7 +19,16 @@
                     </div>
                     <div class="form-group">
                         <label for="icon">Icon</label>
-                        <input type="text" class="form-control" id="theme_icon" name="icon" required>
+                        <select class="form-control select2-fa-icons" id="theme_icon" name="icon" required>
+                            <option value="">Select icon class</option>
+                            @foreach(($faIconOptions ?? []) as $iconClass)
+                                <option value="{{ $iconClass }}">{{ $iconClass }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted d-block mt-1">
+                            Using Font Awesome {{ $faVersion ?? '5.3.1' }}.
+                            <a href="{{ $faCheatsheetUrl ?? 'https://fontawesome.com/v5.3.1/icons?d=gallery&m=free' }}" target="_blank" rel="noopener noreferrer">Open cheatsheet</a>
+                        </small>
                     </div>
 
 
@@ -57,13 +66,24 @@
             // Populate the form fields with the retrieved data
             $('#theme_id').val(id);
             $('#theme_description').val(description);
-             $('#theme_icon').val(icon);
+            var iconSelect = $('#theme_icon');
+            if (icon && iconSelect.find('option[value="' + icon + '"]').length === 0) {
+                iconSelect.append(new Option(icon, icon, false, false));
+            }
+            iconSelect.val(icon).trigger('change');
+
+            $('#edit-theme-modal .select2-fa-icons').select2({
+                placeholder: 'Select icon class',
+                width: '100%',
+                dir: "ltr",
+            });
         });
 
         // Optional: If you want to reset the form fields when the modal is closed
         $('#edit-theme-modal').on('hidden.bs.modal', function() {
             $('#theme_id').val('');
             $('#theme_description').val('');
+            $('#theme_icon').val('').trigger('change');
         });
     </script>
 @endpush

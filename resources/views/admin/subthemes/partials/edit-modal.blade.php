@@ -20,7 +20,16 @@
 
                     <div class="form-group">
                         <label for="icon">Icon</label>
-                        <input type="text" class="form-control" id="subtheme_icon" name="icon" required>
+                        <select class="form-control select2-fa-icons" id="subtheme_icon" name="icon" required>
+                            <option value="">Select icon class</option>
+                            @foreach(($faIconOptions ?? []) as $iconClass)
+                                <option value="{{ $iconClass }}">{{ $iconClass }}</option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted d-block mt-1">
+                            Using Font Awesome {{ $faVersion ?? '5.3.1' }}.
+                            <a href="{{ $faCheatsheetUrl ?? 'https://fontawesome.com/v5.3.1/icons?d=gallery&m=free' }}" target="_blank" rel="noopener noreferrer">Open cheatsheet</a>
+                        </small>
                     </div>
 
                     <div class="form-group">
@@ -62,7 +71,11 @@
             // Populate the form fields with the retrieved data
             $('#subtheme_id').val(id);
             $('#subtheme_description').val(description);
-            $('#subtheme_icon').val(icon);
+            var iconSelect = $('#subtheme_icon');
+            if (icon && iconSelect.find('option[value="' + icon + '"]').length === 0) {
+                iconSelect.append(new Option(icon, icon, false, false));
+            }
+            iconSelect.val(icon).trigger('change');
             $('#thematic_area_id').val(thematic_area_id);
 
             // Initialize Select2 for thematic area select field
@@ -70,6 +83,11 @@
                 placeholder: 'Select a thematic area',
                 width: '100%',
                 dir: "ltr",
+            });
+            $('#edit-subtheme-modal .select2-fa-icons').select2({
+                placeholder: 'Select icon class',
+                width: '100%',
+                dir: 'ltr',
             });
         });
 
