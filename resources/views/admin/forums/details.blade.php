@@ -224,7 +224,7 @@
                             <ul class="af-list">
                                 @foreach($forum->attachments as $att)
                                     <li>
-                                        <a href="{{ $att->path }}" target="_blank" rel="noopener noreferrer">
+                                        <a href="{{ forum_comment_attachment_effective_href($att) }}" target="_blank" rel="noopener noreferrer">
                                             <i class="fa fa-paperclip mr-1"></i>{{ forum_attachment_display_name($att) }}
                                         </a>
                                     </li>
@@ -269,7 +269,7 @@
                                                             <ul class="list-unstyled mb-0 mt-1">
                                                                 @foreach($comment->attachments as $catt)
                                                                     <li>
-                                                                        <a href="{{ $catt->path }}" target="_blank" rel="noopener noreferrer">
+                                                                        <a href="{{ forum_comment_attachment_effective_href($catt) }}" target="_blank" rel="noopener noreferrer">
                                                                             <i class="fa fa-paperclip mr-1"></i>{{ forum_attachment_display_name($catt) }}
                                                                         </a>
                                                                     </li>

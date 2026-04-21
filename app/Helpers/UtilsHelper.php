@@ -1071,10 +1071,17 @@ if (!function_exists('forum_comment_attachment_raw_extension')) {
 
 if (!function_exists('forum_comment_attachment_is_convertible_office')) {
     /**
-     * Office types stored as originals may be converted to PDF on demand via the PDF route.
+     * Office types on forum comments or forum thread posts (may be converted to PDF on demand via the PDF route).
      */
     function forum_comment_attachment_is_convertible_office($attachment): bool
     {
+        if (!$attachment instanceof \App\Models\CustomAttachment) {
+            return false;
+        }
+        $model = (string) $attachment->getAttribute('model');
+        if (! in_array($model, ['forum_comments', 'forums'], true)) {
+            return false;
+        }
         $ext = forum_comment_attachment_raw_extension($attachment);
 
         return $ext !== '' && app(\App\Services\OfficeDocumentToPdfService::class)->isConvertibleExtension($ext);

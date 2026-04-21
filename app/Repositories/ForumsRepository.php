@@ -1102,38 +1102,61 @@ class ForumsRepository extends SharedRepo{
         return true;
     }
 
-    private function save_attachments($files,$record_id,$model){
+    private function save_attachments($files, $record_id, $model)
+    {
+        $upfiles = (! is_array($files)) ? [$files] : $files;
+        $lastPath = null;
+        $dir = storage_path('app/public/uploads/' . $model);
+        if (! is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+        $converter = app(OfficeDocumentToPdfService::class);
 
-        $upfiles   = (!is_array($files))?[$files]:$files;
-        $file_path = null;
-        
         foreach ($upfiles as $file) {
+            if (! $file || ! $file->isValid()) {
+                continue;
+            }
 
             $description = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
-            $file_name   = md5_file($file->getRealPath());
-            $extension   = $file->guessExtension();
-            $file_path   = $model.'/'.$file_name.'.'.$extension;
-           
-            $file->move(storage_path('/app/public/uploads/'.$file_path));
+            $file_name = md5_file($file->getRealPath());
+            $extension = strtolower((string) ($file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION)));
+            $basename = $file_name . '.' . $extension;
+            $moved = $file->move($dir, $basename);
+            if (! $moved) {
+                continue;
+            }
 
-        //insert if to be in different table
-        if($record_id):
+            $finalPath = $dir . DIRECTORY_SEPARATOR . $basename;
+            $file_path = $model . '/' . $basename;
 
-            $attachment   =  [
-            "model"=>$model,
-            "path"=> $file_path,
-            "name"=> $description,
-            "stored_filename"=> basename($file_path),
-            "record_id"=>$record_id
-           ];
-       
-         CustomAttachment::insert($attachment);
+            if ($converter->isConvertibleExtension($extension)) {
+                $pdfPath = $converter->convertToPdf($finalPath);
+                if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
+                    if (is_file($finalPath) && $finalPath !== $pdfPath) {
+                        @unlink($finalPath);
+                    }
+                    $extension = 'pdf';
+                    $basename = $file_name . '.pdf';
+                    $file_path = $model . '/' . $basename;
+                    $description = pathinfo($description, PATHINFO_FILENAME) . '.pdf';
+                    $finalPath = $pdfPath;
+                }
+            }
 
-        endif;
+            $lastPath = $file_path;
 
-       }
+            if ($record_id) {
+                CustomAttachment::create([
+                    'model' => $model,
+                    'path' => $file_path,
+                    'name' => $description,
+                    'stored_filename' => basename($file_path),
+                    'record_id' => $record_id,
+                ]);
+            }
+        }
 
-       return $file_path;
+        return $lastPath;
     }
 
     public function toggleLike($forumId, ?int $userId = null)

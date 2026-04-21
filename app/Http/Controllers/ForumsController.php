@@ -15,6 +15,9 @@ class ForumsController extends Controller
 {
     private $forumsRepo;
 
+    /** Same allowed types as forum comments + forum thread attachments (office → PDF on server). */
+    private const FORUM_THREAD_ATTACHMENTS_MIMES = 'jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf';
+
     public function __construct(ForumsRepository $forumsRepo)
     {
         $this->forumsRepo = $forumsRepo;
@@ -278,10 +281,13 @@ class ForumsController extends Controller
             return redirect()->route('login');
         }
 
-        $request->validate([
+        $request->validate(array_merge([
             'title' => 'required|string|max:500',
             'description' => 'required|string|max:200000',
-        ]);
+        ], $request->hasFile('attachments') ? [
+            'attachments' => 'required|array',
+            'attachments.*' => 'file|max:10240|mimes:' . self::FORUM_THREAD_ATTACHMENTS_MIMES,
+        ] : []));
 
         $wasRejected = (int) ($forum->is_rejected ?? 0) === 1;
 
@@ -305,7 +311,15 @@ class ForumsController extends Controller
     
     public function publish(Request $request)
     {
-       $saved = $this->forumsRepo->save($request);
+        $request->validate([
+            'title' => 'required|string|max:500',
+            'description' => 'required|string|max:200000',
+            'image' => 'sometimes|file|image|max:10240',
+            'attachments' => 'sometimes|array',
+            'attachments.*' => 'file|max:10240|mimes:' . self::FORUM_THREAD_ATTACHMENTS_MIMES,
+        ]);
+
+        $saved = $this->forumsRepo->save($request);
    
         $message = ($saved)?'Forum submitted for approval':'Request failed try again';
 
@@ -440,7 +454,7 @@ class ForumsController extends Controller
      */
     public function commentAttachmentPdf(CustomAttachment $attachment, OfficeDocumentToPdfService $converter)
     {
-        abort_unless($attachment->getAttribute('model') === 'forum_comments', 404);
+        abort_unless(in_array($attachment->getAttribute('model'), ['forum_comments', 'forums'], true), 404);
 
         $relative = $attachment->getRawOriginal('path') ?: $attachment->getAttribute('path');
         if ($relative === null || $relative === '') {

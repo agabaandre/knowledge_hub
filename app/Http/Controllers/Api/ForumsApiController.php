@@ -184,7 +184,7 @@ class ForumsApiController extends ApiController
             'description' => 'required|string|max:200000',
             'image' => 'sometimes|file|image|max:10240',
             'attachments' => 'sometimes|array',
-            'attachments.*' => 'file|max:10240',
+            'attachments.*' => 'file|max:10240|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf',
             'communities' => 'sometimes|array',
             'communities.*' => 'integer',
             'tags' => 'sometimes|array',

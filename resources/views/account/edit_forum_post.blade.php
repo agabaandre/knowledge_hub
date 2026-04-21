@@ -93,7 +93,7 @@
                                 <div class="mb-3">
                                     <label class="form-label" for="forum_attachments">Attachments</label>
                                     <div class="custom-file">
-                                        <input type="file" class="custom-file-input" name="attachments" id="forum_attachments" multiple>
+                                        <input type="file" class="custom-file-input" name="attachments[]" id="forum_attachments" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.rtf,video/*,audio/*,.mp3,.m4a,.wav,.aac,.ogg,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg">
                                         <label class="custom-file-label" for="forum_attachments">Add files…</label>
                                         <div class="forum_preview py-2"></div>
                                     </div>
