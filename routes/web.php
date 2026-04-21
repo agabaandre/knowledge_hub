@@ -101,8 +101,10 @@ Auth::routes(['verify' => true, 'reset' => false]);
 |--------------------------------------------------------------------------
 | Swagger UI (`/docs`) is provided by l5-swagger. This endpoint serves the
 | OpenAPI JSON with a dynamic `servers` URL sourced from env/current host.
+| Path must NOT be under `docs/spec/*` — that prefix is served by l5-swagger
+| and would shadow this route (404 in production).
 */
-Route::get('docs/spec/api-docs.dynamic.json', [DocsController::class, 'openApiJson']);
+Route::get('docs/openapi-dynamic.json', [DocsController::class, 'openApiJson'])->name('docs.openapi.dynamic');
 
 /*
 | Password reset: Laravel expects the token in the path (/password/reset/{token}).

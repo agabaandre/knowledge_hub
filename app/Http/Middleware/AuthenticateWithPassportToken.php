@@ -25,21 +25,29 @@ class AuthenticateWithPassportToken
      */
     public function handle(Request $request, Closure $next)
     {
-        $headers = $request->headers->all();
-
-        \Log::info('Request Headers:'.json_encode($headers));
+        if (config('app.debug')) {
+            \Log::debug('AuthenticateWithPassportToken: incoming request', [
+                'path' => $request->path(),
+            ]);
+        }
         updateUSerPushToken($request);
 
         // Get the token from the Authorization header (Bearer token)
         $token = $request->bearerToken();
 
         if (!empty($token) && !auth()->user()) {
-
+            // Only Laravel Passport personal access tokens are JWT-shaped (header.payload.signature).
+            // Google / other OAuth access tokens (e.g. ya29...) are opaque — do not parse as JWT.
             $decodedPayload = $this->decodeJWT($token);
-            $userId = $decodedPayload['sub'];
+            if (!is_array($decodedPayload) || !isset($decodedPayload['sub'], $decodedPayload['jti'])) {
+                return $next($request);
+            }
 
-            $tokenId = $decodedPayload['jti']; // Assuming 'jti' is the token ID
-            \Log::info('Token ID: '.$tokenId);
+            $userId = $decodedPayload['sub'];
+            $tokenId = $decodedPayload['jti'];
+            if (config('app.debug')) {
+                \Log::debug('AuthenticateWithPassportToken: Passport JWT', ['jti' => $tokenId]);
+            }
             $tokenRecord = $this->tokenRepository->find($tokenId);
 
             if ($tokenRecord && !$tokenRecord->revoked && $tokenRecord->user_id == $userId) {
@@ -60,15 +68,30 @@ class AuthenticateWithPassportToken
         return base64_decode(strtr($input, '-_', '+/'));
     }
     
-    private function decodeJWT($jwt) {
-        // Split the JWT into its three parts
-        list($header, $payload, $signature) = explode('.', $jwt);
-        
-        // Decode the payload (which is the second part)
+    /**
+     * Decode a JWT payload only when the string is a valid 3-segment JWT.
+     *
+     * @return array<string, mixed>|null
+     */
+    private function decodeJWT(string $jwt): ?array
+    {
+        $parts = explode('.', $jwt);
+        if (count($parts) !== 3) {
+            return null;
+        }
+        [$header, $payload, $signature] = $parts;
+        if ($header === '' || $payload === '' || $signature === '') {
+            return null;
+        }
+
         $decodedPayload = $this->base64UrlDecode($payload);
-        
-        // Convert the decoded payload into an associative array
-        return json_decode($decodedPayload, true);
+        if ($decodedPayload === false || $decodedPayload === '') {
+            return null;
+        }
+
+        $data = json_decode($decodedPayload, true);
+
+        return is_array($data) ? $data : null;
     }
 
 }

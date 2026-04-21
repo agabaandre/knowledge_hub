@@ -178,6 +178,12 @@ class BotProtection
      */
     public function handle(Request $request, Closure $next)
     {
+        // API routes use their own throttling/auth; heuristic bot checks break mobile apps
+        // and OAuth flows (e.g. JSON POST to /api/social-login with a browser-like UA).
+        if ($request->is('api') || $request->is('api/*')) {
+            return $next($request);
+        }
+
         $userAgent = strtolower($request->header('User-Agent', ''));
         
         // If no user agent, it's suspicious
