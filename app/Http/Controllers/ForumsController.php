@@ -8,7 +8,6 @@ use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\Tag;
 use App\Repositories\ForumsRepository;
-use App\Services\OfficeDocumentToPdfService;
 use Illuminate\Http\Request;
 
 class ForumsController extends Controller
@@ -436,9 +435,9 @@ class ForumsController extends Controller
     }
 
     /**
-     * Resolve forum comment attachment as PDF: converts legacy office files once, then redirects to storage URL.
+     * Legacy route name kept for bookmarks: redirects to the stored file URL (no conversion).
      */
-    public function commentAttachmentPdf(CustomAttachment $attachment, OfficeDocumentToPdfService $converter)
+    public function commentAttachmentPdf(CustomAttachment $attachment)
     {
         abort_unless($attachment->getAttribute('model') === 'forum_comments', 404);
 
@@ -452,44 +451,7 @@ class ForumsController extends Controller
             abort(404);
         }
 
-        $ext = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
-        if ($ext === 'pdf') {
-            return redirect()->away(storage_link('uploads/' . $relative));
-        }
-
-        if (!$converter->isConvertibleExtension($ext)) {
-            return redirect()->away(storage_link('uploads/' . $relative));
-        }
-
-        $stem = pathinfo($relative, PATHINFO_FILENAME);
-        $dir = str_replace('\\', '/', dirname($relative));
-        $pdfRelative = ($dir === '.' || $dir === '') ? $stem . '.pdf' : $dir . '/' . $stem . '.pdf';
-        $pdfAbs = storage_path('app/public/uploads/' . $pdfRelative);
-
-        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
-            $converter->convertToPdf($absolute);
-        }
-
-        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
-            return redirect()->away(storage_link('uploads/' . $relative));
-        }
-
-        if ($relative !== $pdfRelative) {
-            @unlink($absolute);
-            $displayBase = pathinfo(forum_attachment_display_name($attachment), PATHINFO_FILENAME);
-            if ($displayBase === '' || $displayBase === '.') {
-                $displayBase = pathinfo($attachment->getAttributes()['name'] ?? '', PATHINFO_FILENAME);
-            }
-            if ($displayBase === '' || $displayBase === '.') {
-                $displayBase = pathinfo($relative, PATHINFO_FILENAME);
-            }
-            $attachment->path = $pdfRelative;
-            $attachment->name = $displayBase . '.pdf';
-            $attachment->stored_filename = basename($pdfRelative);
-            $attachment->save();
-        }
-
-        return redirect()->away(storage_link('uploads/' . $pdfRelative));
+        return redirect()->away(storage_link('uploads/' . $relative));
     }
 
 }

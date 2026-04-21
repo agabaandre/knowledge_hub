@@ -646,20 +646,6 @@ class ForumsRepository extends SharedRepo{
                     throw new \Exception('File does not exist after move: ' . $finalPath);
                 }
 
-                $converter = app(\App\Services\OfficeDocumentToPdfService::class);
-                if ($converter->isConvertibleExtension($extension)) {
-                    $pdfPath = $converter->convertToPdf($finalPath);
-                    if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
-                        if (is_file($finalPath) && $finalPath !== $pdfPath) {
-                            @unlink($finalPath);
-                        }
-                        $extension = 'pdf';
-                        $file_path = 'forum/'.$file_name.'.pdf';
-                        $original_filename = pathinfo($original_filename, PATHINFO_FILENAME).'.pdf';
-                        $finalPath = $pdfPath;
-                    }
-                }
-
                 \Log::info('Forum comment attachment saved successfully', [
                     'comment_id' => $comment_id,
                     'original_filename' => $original_filename,
