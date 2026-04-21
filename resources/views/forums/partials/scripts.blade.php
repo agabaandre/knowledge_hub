@@ -162,6 +162,11 @@ try {
         const maxFileSize = 2 * 1024 * 1024; // 2MB
         const allowedTypes = [
             'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/pjpeg', 'application/pdf',
+            'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+            'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet', 'application/vnd.oasis.opendocument.presentation',
+            'application/rtf', 'text/rtf',
             'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-ms-wmv', 'video/x-flv',
             'video/3gpp', 'video/mpeg', 'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
             'audio/wav', 'audio/x-wav', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/x-ms-wma', 'audio/webm'
@@ -263,9 +268,11 @@ try {
 
                 const typeOk = allowedTypes.includes(file.type)
                     || (file.type && file.type.indexOf('video/') === 0)
-                    || (file.type && file.type.indexOf('audio/') === 0);
+                    || (file.type && file.type.indexOf('audio/') === 0)
+                    || (file.type && file.type.indexOf('application/vnd') === 0)
+                    || (file.type && (file.type === 'application/msword' || file.type === 'application/rtf' || file.type === 'text/rtf'));
                 if (!typeOk && !isAllowedExtension(file.name)) {
-                    alert(file.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
+                    alert(file.name + ' is not allowed. Use images, PDF, Word/Excel/PowerPoint, or common audio/video formats.');
                     return;
                 }
 
@@ -288,6 +295,7 @@ try {
             const ext = filename.split('.').pop().toLowerCase();
             const allowed = [
                 'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+                'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf',
                 'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
                 'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma'
             ];
@@ -328,6 +336,9 @@ try {
                 reader.readAsDataURL(file);
             } else {
                 const icon = file.type.includes('pdf') ? 'file-pdf'
+                    : (file.type.includes('word') || /\.(doc|docx)$/i.test(file.name)) ? 'file-word'
+                    : (file.type.includes('excel') || file.type.includes('spreadsheet') || /\.(xls|xlsx)$/i.test(file.name)) ? 'file-excel'
+                    : (file.type.includes('powerpoint') || file.type.includes('presentation') || /\.(ppt|pptx)$/i.test(file.name)) ? 'file-powerpoint'
                     : (file.type.includes('audio') || /\.(mp3|m4a|wav|aac|ogg|oga|opus|flac|wma)$/i.test(file.name)) ? 'file-audio'
                     : (file.type.includes('video') || /\.(mp4|m4v|mov|avi|webm|mkv|wmv|flv|3gp|3gpp|mpeg|mpg)$/i.test(file.name)) ? 'file-video'
                     : 'file';

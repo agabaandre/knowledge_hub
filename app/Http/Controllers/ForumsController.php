@@ -8,6 +8,7 @@ use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\Tag;
 use App\Repositories\ForumsRepository;
+use App\Services\OfficeDocumentToPdfService;
 use Illuminate\Http\Request;
 
 class ForumsController extends Controller
@@ -325,7 +326,7 @@ class ForumsController extends Controller
             'comment' => 'required|string|max:20000',
             'parent_id' => 'nullable|integer',
             'attachments' => 'sometimes|array',
-            'attachments.*' => 'file|max:2048|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma',
+            'attachments.*' => 'file|max:2048|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma,doc,docx,xls,xlsx,ppt,pptx,odt,ods,odp,rtf',
         ]);
 
         $commentText = trim((string) $request->input('comment'));
@@ -435,9 +436,9 @@ class ForumsController extends Controller
     }
 
     /**
-     * Legacy route name kept for bookmarks: redirects to the stored file URL (no conversion).
+     * Forum comment attachment as PDF: converts legacy office files on demand, then redirects to storage URL.
      */
-    public function commentAttachmentPdf(CustomAttachment $attachment)
+    public function commentAttachmentPdf(CustomAttachment $attachment, OfficeDocumentToPdfService $converter)
     {
         abort_unless($attachment->getAttribute('model') === 'forum_comments', 404);
 
@@ -451,7 +452,44 @@ class ForumsController extends Controller
             abort(404);
         }
 
-        return redirect()->away(storage_link('uploads/' . $relative));
+        $ext = strtolower(pathinfo($relative, PATHINFO_EXTENSION));
+        if ($ext === 'pdf') {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        if (!$converter->isConvertibleExtension($ext)) {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        $stem = pathinfo($relative, PATHINFO_FILENAME);
+        $dir = str_replace('\\', '/', dirname($relative));
+        $pdfRelative = ($dir === '.' || $dir === '') ? $stem . '.pdf' : $dir . '/' . $stem . '.pdf';
+        $pdfAbs = storage_path('app/public/uploads/' . $pdfRelative);
+
+        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
+            $converter->convertToPdf($absolute);
+        }
+
+        if (!is_file($pdfAbs) || filesize($pdfAbs) === 0) {
+            return redirect()->away(storage_link('uploads/' . $relative));
+        }
+
+        if ($relative !== $pdfRelative) {
+            @unlink($absolute);
+            $displayBase = pathinfo(forum_attachment_display_name($attachment), PATHINFO_FILENAME);
+            if ($displayBase === '' || $displayBase === '.') {
+                $displayBase = pathinfo($attachment->getAttributes()['name'] ?? '', PATHINFO_FILENAME);
+            }
+            if ($displayBase === '' || $displayBase === '.') {
+                $displayBase = pathinfo($relative, PATHINFO_FILENAME);
+            }
+            $attachment->path = $pdfRelative;
+            $attachment->name = $displayBase . '.pdf';
+            $attachment->stored_filename = basename($pdfRelative);
+            $attachment->save();
+        }
+
+        return redirect()->away(storage_link('uploads/' . $pdfRelative));
     }
 
 }

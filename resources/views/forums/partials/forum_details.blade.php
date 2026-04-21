@@ -223,11 +223,11 @@
                         <div class="file-upload-area" id="fileUploadArea" style="cursor: pointer;">
                             <div class="file-upload-text">
                                 <i class="fa fa-paperclip me-1"></i>
-                                <span>Attach images, PDF, audio, or video (max 2MB per file)</span>
+                                <span>Attach images, PDF, office, audio, or video (max 2MB per file)</span>
                             </div>
-                            <div class="file-upload-hint">Images: JPEG, PNG, GIF, WebP · PDF · Audio: MP3, WAV, M4A, AAC, OGG, FLAC, … · Video: MP4, WebM, MOV, …</div>
+                            <div class="file-upload-hint">Images · PDF · Word/Excel/PowerPoint (saved as PDF) · Audio · Video</div>
                             <input type="file" name="attachments[]" id="forumCommentFiles" 
-                                   multiple accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,audio/*,video/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg" 
+                                   multiple accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.rtf,audio/*,video/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg" 
                                    style="display: none;">
                         </div>
 

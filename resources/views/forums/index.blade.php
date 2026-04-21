@@ -836,11 +836,11 @@
                                                 <div class="file-upload-area inline-file-upload-area" style="cursor: pointer;">
                                                     <div class="file-upload-text">
                                                         <i class="fa fa-paperclip me-1"></i>
-                                                        <span>Attach images, PDF, audio, or video (max 2MB per file)</span>
+                                                        <span>Attach images, PDF, office, audio, or video (max 2MB per file)</span>
                                                     </div>
-                                                    <div class="file-upload-hint">Images: JPEG, PNG, GIF, WebP · PDF · common audio/video formats</div>
+                                                    <div class="file-upload-hint">Images · PDF · Word/Excel/PowerPoint (saved as PDF) · Audio · Video</div>
                                                     <input type="file" name="attachments[]" class="inline-forum-attachments-input" multiple
-                                                           accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,audio/*,video/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg"
+                                                           accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.odt,.ods,.odp,.rtf,audio/*,video/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg"
                                                            style="display: none;">
                                                 </div>
                                                 <div class="file-preview inline-forum-file-preview"></div>
@@ -1164,6 +1164,11 @@ function initForumListingInlineCommentCounters() {
     var inlineForumUploadMaxBytes = 2 * 1024 * 1024;
     var inlineForumUploadAllowedTypes = [
         'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/pjpeg', 'application/pdf',
+        'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        'application/vnd.oasis.opendocument.text', 'application/vnd.oasis.opendocument.spreadsheet', 'application/vnd.oasis.opendocument.presentation',
+        'application/rtf', 'text/rtf',
         'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-ms-wmv', 'video/x-flv',
         'video/3gpp', 'video/mpeg', 'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
         'audio/wav', 'audio/x-wav', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/x-ms-wma', 'audio/webm'
@@ -1179,6 +1184,7 @@ function initForumListingInlineCommentCounters() {
         var ext = (name.split('.').pop() || '').toLowerCase();
         return [
             'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+            'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'ods', 'odp', 'rtf',
             'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
             'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma'
         ].indexOf(ext) !== -1;
@@ -1190,6 +1196,12 @@ function initForumListingInlineCommentCounters() {
             return true;
         }
         if (t.indexOf('video/') === 0 || t.indexOf('audio/') === 0) {
+            return true;
+        }
+        if (t.indexOf('application/vnd') === 0) {
+            return true;
+        }
+        if (t === 'application/msword' || t === 'application/rtf' || t === 'text/rtf') {
             return true;
         }
         return false;
@@ -1280,12 +1292,14 @@ function initForumListingInlineCommentCounters() {
                 var icon = 'fa-file';
                 if (file.type.indexOf('pdf') !== -1) {
                     icon = 'fa-file-pdf';
-                } else if (file.type.indexOf('word') !== -1) {
+                } else if (file.type.indexOf('word') !== -1 || /\.(doc|docx)$/i.test(file.name)) {
                     icon = 'fa-file-word';
-                } else if (file.type.indexOf('excel') !== -1 || file.type.indexOf('spreadsheet') !== -1) {
+                } else if (file.type.indexOf('excel') !== -1 || file.type.indexOf('spreadsheet') !== -1 || /\.(xls|xlsx)$/i.test(file.name)) {
                     icon = 'fa-file-excel';
-                } else if (file.type.indexOf('powerpoint') !== -1 || file.type.indexOf('presentation') !== -1) {
+                } else if (file.type.indexOf('powerpoint') !== -1 || file.type.indexOf('presentation') !== -1 || /\.(ppt|pptx)$/i.test(file.name)) {
                     icon = 'fa-file-powerpoint';
+                } else if (/\.(odt|ods|odp|rtf)$/i.test(file.name)) {
+                    icon = 'fa-file-o';
                 } else if (file.type.indexOf('audio') !== -1 || /\.(mp3|m4a|wav|aac|ogg|oga|opus|flac|wma)$/i.test(file.name)) {
                     icon = 'fa-file-audio';
                 } else if (file.type.indexOf('video') !== -1 || /\.(mp4|m4v|mov|avi|webm|mkv|wmv|flv|3gp|3gpp|mpeg|mpg)$/i.test(file.name)) {
@@ -1328,7 +1342,7 @@ function initForumListingInlineCommentCounters() {
                 return;
             }
             if (!inlineForumTypeAllowed(file) && !inlineForumAllowedExt(file.name)) {
-                alert(file.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
+                alert(file.name + ' is not allowed. Use images, PDF, Word/Excel/PowerPoint, or common audio/video formats.');
                 return;
             }
             if (inlineForumUploadDangerousTypes.indexOf(file.type) !== -1 || inlineForumDangerousExt(file.name)) {
@@ -1421,7 +1435,7 @@ function initForumListingInlineCommentCounters() {
                 return false;
             }
             if (!inlineForumTypeAllowed(f) && !inlineForumAllowedExt(f.name)) {
-                alert(f.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
+                alert(f.name + ' is not allowed. Use images, PDF, Word/Excel/PowerPoint, or common audio/video formats.');
                 return false;
             }
             if (inlineForumUploadDangerousTypes.indexOf(f.type) !== -1 || inlineForumDangerousExt(f.name)) {

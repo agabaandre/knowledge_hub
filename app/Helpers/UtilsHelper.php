@@ -1071,22 +1071,27 @@ if (!function_exists('forum_comment_attachment_raw_extension')) {
 
 if (!function_exists('forum_comment_attachment_is_convertible_office')) {
     /**
-     * Forum attachments are served in their original format (no Word→PDF conversion).
+     * Office types stored as originals may be converted to PDF on demand via the PDF route.
      */
     function forum_comment_attachment_is_convertible_office($attachment): bool
     {
-        return false;
+        $ext = forum_comment_attachment_raw_extension($attachment);
+
+        return $ext !== '' && app(\App\Services\OfficeDocumentToPdfService::class)->isConvertibleExtension($ext);
     }
 }
 
 if (!function_exists('forum_comment_attachment_effective_href')) {
     /**
-     * Public URL for download/preview (original stored file).
+     * Public URL for download/preview: convertible office types use the on-demand PDF route.
      */
     function forum_comment_attachment_effective_href($attachment): string
     {
         if (!$attachment instanceof \App\Models\CustomAttachment) {
             return '';
+        }
+        if (forum_comment_attachment_is_convertible_office($attachment)) {
+            return route('forums.comment-attachment.pdf', ['attachment' => $attachment->id], true);
         }
 
         return $attachment->path;
@@ -1096,6 +1101,10 @@ if (!function_exists('forum_comment_attachment_effective_href')) {
 if (!function_exists('forum_comment_attachment_preview_extension')) {
     function forum_comment_attachment_preview_extension($attachment): string
     {
+        if (forum_comment_attachment_is_convertible_office($attachment)) {
+            return 'pdf';
+        }
+
         return forum_comment_attachment_raw_extension($attachment);
     }
 }

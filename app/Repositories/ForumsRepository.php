@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Schema as DBSchema;
 use Illuminate\Support\Str;
 use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
+use App\Services\OfficeDocumentToPdfService;
 use App\Support\CommunityTargeting;
 
 class ForumsRepository extends SharedRepo{
@@ -541,16 +542,17 @@ class ForumsRepository extends SharedRepo{
             return 0;
         }
 
-        $allowedExtensions = [
+        $officeService = app(OfficeDocumentToPdfService::class);
+        $allowedExtensions = array_values(array_unique(array_merge([
             'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
             'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
             'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
-        ];
+        ], OfficeDocumentToPdfService::CONVERTIBLE_EXTENSIONS)));
         $rasterPdfMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
-        $octetStreamExtensions = [
+        $octetStreamExtensions = array_values(array_unique(array_merge([
             'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
             'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
-        ];
+        ], OfficeDocumentToPdfService::CONVERTIBLE_EXTENSIONS)));
         $maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
         $dangerousExtensions = ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'apk', 'dll', 'sh', 'php', 'asp', 'jsp', 'py', 'rb', 'pl', 'cgi', 'bin', 'msi', 'deb', 'rpm'];
         
@@ -588,12 +590,15 @@ class ForumsRepository extends SharedRepo{
                 $mimeNorm = 'image/jpeg';
             }
 
+            $isOfficeConvertible = $officeService->isConvertibleExtension($extension);
+
             $mimeAllowed = in_array($mimeNorm, $rasterPdfMimes, true)
                 || Str::startsWith($mimeNorm, 'video/')
                 || Str::startsWith($mimeNorm, 'audio/')
-                || ($mimeNorm === 'application/octet-stream' && in_array($extension, $octetStreamExtensions, true));
+                || ($mimeNorm === 'application/octet-stream' && in_array($extension, $octetStreamExtensions, true))
+                || $isOfficeConvertible;
 
-            if (Str::startsWith($mimeNorm, 'image/') && ! in_array($mimeNorm, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
+            if (Str::startsWith($mimeNorm, 'image/') && ! in_array($mimeNorm, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true) && ! $isOfficeConvertible) {
                 $mimeAllowed = false;
             }
 
@@ -644,6 +649,20 @@ class ForumsRepository extends SharedRepo{
                 $finalPath = $storagePath . $file_name.'.'.$extension;
                 if (!file_exists($finalPath)) {
                     throw new \Exception('File does not exist after move: ' . $finalPath);
+                }
+
+                $converter = app(OfficeDocumentToPdfService::class);
+                if ($converter->isConvertibleExtension($extension)) {
+                    $pdfPath = $converter->convertToPdf($finalPath);
+                    if ($pdfPath && is_file($pdfPath) && filesize($pdfPath) > 0) {
+                        if (is_file($finalPath) && $finalPath !== $pdfPath) {
+                            @unlink($finalPath);
+                        }
+                        $extension = 'pdf';
+                        $file_path = 'forum/'.$file_name.'.pdf';
+                        $original_filename = pathinfo($original_filename, PATHINFO_FILENAME).'.pdf';
+                        $finalPath = $pdfPath;
+                    }
                 }
 
                 \Log::info('Forum comment attachment saved successfully', [
