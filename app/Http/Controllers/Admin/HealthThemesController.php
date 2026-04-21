@@ -51,7 +51,7 @@ class HealthThemesController extends Controller
 
 
     public function destroy(Request $request){
-        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+        if (!auth()->user() || !auth()->user()->can('delete_publication_metadata')) {
             return response(['status'=>'failure','message'=>'Unauthorized'], 403);
         }
 
