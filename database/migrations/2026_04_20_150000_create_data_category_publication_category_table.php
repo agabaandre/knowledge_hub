@@ -12,9 +12,12 @@ return new class extends Migration
         if (! Schema::hasTable('data_category_publication_category')) {
             Schema::create('data_category_publication_category', function (Blueprint $table) {
                 $table->id();
-                $table->foreignId('data_category_id')->constrained('data_categories')->cascadeOnDelete();
-                $table->foreignId('publication_category_id')->constrained('publication_categories')->cascadeOnDelete();
+                $table->unsignedBigInteger('data_category_id');
+                $table->unsignedBigInteger('publication_category_id');
                 $table->timestamps();
+
+                $table->index('data_category_id', 'dc_pc_data_category_idx');
+                $table->index('publication_category_id', 'dc_pc_publication_category_idx');
                 $table->unique(['data_category_id', 'publication_category_id'], 'dc_pc_unique');
             });
         }
