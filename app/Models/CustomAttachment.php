@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str;
 
 class CustomAttachment extends Model
 {
@@ -23,8 +22,9 @@ class CustomAttachment extends Model
     ];
 
     /**
-     * Public URL for the file. The DB column must hold a relative path (e.g. {@code forums/name.pdf}).
-     * Some legacy rows store an absolute URL, or {@code uploads/} + URL; avoid double-prefixing {@code storage_link}.
+     * Public URL for the stored file. DB `path` is normally relative (e.g. `forums/abc.pdf`).
+     * Some rows store a full URL or already include `uploads/` — avoid prefixing `uploads/` again
+     * (which produced `/storage/uploads/https://…/storage/uploads/…`).
      */
     public function getPathAttribute($path)
     {
@@ -32,33 +32,21 @@ class CustomAttachment extends Model
             return '';
         }
         $path = trim((string) $path);
-
-        // Doubled absolute URLs in one string (e.g. …/storage/uploads/https://…/forums/file.pdf) — keep the last URL.
-        if (preg_match_all('#https?://#i', $path, $schemeMatches, PREG_OFFSET_CAPTURE) > 1) {
-            $last = end($schemeMatches[0]);
-            if (is_array($last) && isset($last[1])) {
-                $path = trim(substr($path, (int) $last[1]));
-            }
+        if ($path === '') {
+            return '';
+        }
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return storage_link($path);
+        }
+        // Legacy bad rows: `uploads/https://…` — strip the mistaken prefix.
+        if (preg_match('#^uploads/(https?://)#i', $path)) {
+            return storage_link(substr($path, strlen('uploads/')));
+        }
+        if (str_starts_with($path, 'uploads/')) {
+            return storage_link($path);
         }
 
-        if (Str::startsWith($path, 'http://') || Str::startsWith($path, 'https://')) {
-            return normalize_web_storage_url($path);
-        }
-
-        // First URL embedded in a mistaken "uploads/" + absolute URL value
-        if (Str::contains($path, '://') && preg_match('#https?://[^\s"\'<>]+#i', $path, $m)) {
-            return normalize_web_storage_url(rtrim($m[0], '/'));
-        }
-
-        $path = ltrim($path, '/');
-        if (Str::startsWith($path, 'storage/')) {
-            return normalize_web_storage_url(storage_link($path));
-        }
-        if (Str::startsWith($path, 'uploads/')) {
-            return normalize_web_storage_url(storage_link($path));
-        }
-
-        return normalize_web_storage_url(storage_link('uploads/'.$path));
+        return storage_link('uploads/'.$path);
     }
 
 }

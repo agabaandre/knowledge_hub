@@ -214,7 +214,7 @@ class ForumsApiController extends ApiController
      *     tags={"Forums"},
      *     security={{"bearer_token":{}}},
      *     summary="Post comment or reply",
-     *     description="`forum_id` (or legacy `id`) + `comment`; optional `parent_id` for replies. Max 300 words, 20000 chars. Multipart supported for `attachments[]`.",
+     *     description="`forum_id` (or legacy `id`) + `comment`; optional `parent_id` for replies. Max 300 words, 20000 chars. Multipart: optional `attachments[]` — images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats, max 2MB each.",
      *     @OA\RequestBody(
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
@@ -244,7 +244,7 @@ class ForumsApiController extends ApiController
             'comment' => 'required|string|max:20000',
             'parent_id' => 'nullable|integer',
             'attachments' => 'sometimes|array',
-            'attachments.*' => 'file|max:2048',
+            'attachments.*' => 'file|max:2048|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma',
         ]);
 
         $commentText = trim((string) $request->input('comment'));

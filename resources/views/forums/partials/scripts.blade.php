@@ -160,12 +160,12 @@ try {
         console.log('Reply buttons found:', $('.reply-comment-btn').length);
         console.log('Share buttons found:', $('.share-comment-btn').length);
         const maxFileSize = 2 * 1024 * 1024; // 2MB
-        const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 
-                              'video/mp4', 'video/avi', 'video/mov', 'video/wmv', 'video/flv', 'video/webm',
-                              'application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-                              'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-                              'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
-                              'text/plain'];
+        const allowedTypes = [
+            'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/pjpeg', 'application/pdf',
+            'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-ms-wmv', 'video/x-flv',
+            'video/3gpp', 'video/mpeg', 'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
+            'audio/wav', 'audio/x-wav', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/x-ms-wma', 'audio/webm'
+        ];
         const dangerousTypes = ['application/x-msdownload', 'application/x-sh', 'application/x-executable', 
                                 'application/x-msdos-program', 'application/javascript', 'application/x-php'];
 
@@ -261,9 +261,11 @@ try {
                     return;
                 }
 
-                // Validate file type
-                if (!allowedTypes.includes(file.type) && !isAllowedExtension(file.name)) {
-                    alert(file.name + ' is not an allowed file type.');
+                const typeOk = allowedTypes.includes(file.type)
+                    || (file.type && file.type.indexOf('video/') === 0)
+                    || (file.type && file.type.indexOf('audio/') === 0);
+                if (!typeOk && !isAllowedExtension(file.name)) {
+                    alert(file.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
                     return;
                 }
 
@@ -284,8 +286,11 @@ try {
 
         function isAllowedExtension(filename) {
             const ext = filename.split('.').pop().toLowerCase();
-            const allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 
-                           'mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
+            const allowed = [
+                'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+                'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+                'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma'
+            ];
             return allowed.includes(ext);
         }
 
@@ -322,11 +327,10 @@ try {
                 };
                 reader.readAsDataURL(file);
             } else {
-                const icon = file.type.includes('pdf') ? 'file-pdf' : 
-                            file.type.includes('word') ? 'file-word' : 
-                            file.type.includes('excel') || file.type.includes('spreadsheet') ? 'file-excel' :
-                            file.type.includes('powerpoint') || file.type.includes('presentation') ? 'file-powerpoint' :
-                            file.type.includes('video') ? 'file-video' : 'file';
+                const icon = file.type.includes('pdf') ? 'file-pdf'
+                    : (file.type.includes('audio') || /\.(mp3|m4a|wav|aac|ogg|oga|opus|flac|wma)$/i.test(file.name)) ? 'file-audio'
+                    : (file.type.includes('video') || /\.(mp4|m4v|mov|avi|webm|mkv|wmv|flv|3gp|3gpp|mpeg|mpg)$/i.test(file.name)) ? 'file-video'
+                    : 'file';
                 
                 previewItem.innerHTML = `
                     <div style="width: 80px; height: 80px; background: #f8f9fa; border: 1px solid #e2e8f0; border-radius: 4px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 0.5rem;">

@@ -452,6 +452,81 @@
     justify-content: flex-end;
 }
 
+.inline-forum-upload-widget {
+    margin-top: 0.75rem;
+}
+
+.inline-comment-form .file-upload-area {
+    margin-top: 0.5rem;
+    padding: 0.65rem;
+    border: 2px dashed #e2e8f0;
+    border-radius: 4px;
+    background: #fff;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.inline-comment-form .file-upload-area:hover {
+    border-color: var(--theme-color-primary, #119A48);
+    background: rgba(17, 154, 72, 0.03);
+}
+
+.inline-comment-form .file-upload-area.dragover {
+    border-color: var(--theme-color-primary, #119A48);
+    background: rgba(17, 154, 72, 0.06);
+}
+
+.inline-comment-form .file-upload-text {
+    color: #64748b;
+    font-size: 0.8125rem;
+    margin-bottom: 0.35rem;
+}
+
+.inline-comment-form .file-upload-hint {
+    color: #94a3b8;
+    font-size: 0.7rem;
+}
+
+.inline-comment-form .file-preview {
+    margin-top: 0.65rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.inline-comment-form .file-preview-item {
+    position: relative;
+    display: inline-block;
+}
+
+.inline-comment-form .file-preview-img {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 4px;
+    border: 1px solid #e2e8f0;
+    cursor: pointer;
+}
+
+.inline-comment-form .file-preview-remove {
+    position: absolute;
+    top: -6px;
+    right: -6px;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #ef4444;
+    color: white;
+    border: 2px solid white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.75rem;
+    font-weight: bold;
+    line-height: 1;
+}
+
 .no-comments {
     text-align: center;
     padding: 1.5rem;
@@ -749,13 +824,26 @@
                                 @auth
                                 @if(in_array($forum->id, $my_forums))
                                 <div class="inline-comment-form" id="comment-form-{{ $forum->id }}" style="display: none;">
-                                    <form onsubmit="submitInlineComment(event, {{ $forum->id }})">
+                                    <form onsubmit="submitInlineComment(event, {{ $forum->id }})" enctype="multipart/form-data" method="post" action="{{ url('forums/comment') }}">
                                         <div class="inline-comment-field">
                                             <textarea name="comment" id="inline-comment-{{ $forum->id }}"
                                                       class="comment-textarea"
                                                       placeholder="Add a comment..." required maxlength="20000" rows="3"></textarea>
                                             <div class="comment-char-count" style="font-size: 0.75rem; color: #94a3b8; text-align: right; margin-top: 0.25rem;">
                                                 <span class="char-count">0</span> / 300 words max
+                                            </div>
+                                            <div class="inline-forum-upload-widget" data-forum-id="{{ $forum->id }}">
+                                                <div class="file-upload-area inline-file-upload-area" style="cursor: pointer;">
+                                                    <div class="file-upload-text">
+                                                        <i class="fa fa-paperclip me-1"></i>
+                                                        <span>Attach images, PDF, audio, or video (max 2MB per file)</span>
+                                                    </div>
+                                                    <div class="file-upload-hint">Images: JPEG, PNG, GIF, WebP · PDF · common audio/video formats</div>
+                                                    <input type="file" name="attachments[]" class="inline-forum-attachments-input" multiple
+                                                           accept="image/jpeg,image/png,image/gif,image/webp,application/pdf,audio/*,video/*,.mp3,.m4a,.wav,.aac,.ogg,.oga,.opus,.flac,.wma,.mp4,.webm,.mov,.avi,.mkv,.wmv,.flv,.3gp,.mpeg,.mpg"
+                                                           style="display: none;">
+                                                </div>
+                                                <div class="file-preview inline-forum-file-preview"></div>
                                             </div>
                                         </div>
                                         <div class="inline-comment-actions">
@@ -1072,6 +1160,279 @@ function initForumListingInlineCommentCounters() {
     });
 }
 
+(function () {
+    var inlineForumUploadMaxBytes = 2 * 1024 * 1024;
+    var inlineForumUploadAllowedTypes = [
+        'image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/pjpeg', 'application/pdf',
+        'video/mp4', 'video/quicktime', 'video/x-msvideo', 'video/webm', 'video/x-ms-wmv', 'video/x-flv',
+        'video/3gpp', 'video/mpeg', 'audio/mpeg', 'audio/mp3', 'audio/mp4', 'audio/x-m4a', 'audio/m4a',
+        'audio/wav', 'audio/x-wav', 'audio/aac', 'audio/ogg', 'audio/flac', 'audio/x-ms-wma', 'audio/webm'
+    ];
+    var inlineForumUploadDangerousTypes = [
+        'application/x-msdownload', 'application/x-sh', 'application/x-executable',
+        'application/x-msdos-program', 'application/javascript', 'application/x-php'
+    ];
+
+    window._inlineForumUploadState = window._inlineForumUploadState || {};
+
+    function inlineForumAllowedExt(name) {
+        var ext = (name.split('.').pop() || '').toLowerCase();
+        return [
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+            'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+            'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma'
+        ].indexOf(ext) !== -1;
+    }
+
+    function inlineForumTypeAllowed(file) {
+        var t = file.type || '';
+        if (inlineForumUploadAllowedTypes.indexOf(t) !== -1) {
+            return true;
+        }
+        if (t.indexOf('video/') === 0 || t.indexOf('audio/') === 0) {
+            return true;
+        }
+        return false;
+    }
+
+    function inlineForumDangerousExt(name) {
+        var ext = (name.split('.').pop() || '').toLowerCase();
+        return ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'apk', 'dll', 'sh', 'php',
+            'asp', 'jsp', 'py', 'rb', 'pl', 'cgi', 'bin', 'msi', 'deb', 'rpm'].indexOf(ext) !== -1;
+    }
+
+    function inlineForumGetState(forumId) {
+        var key = String(forumId);
+        if (window._inlineForumUploadState[key]) {
+            return window._inlineForumUploadState[key];
+        }
+        var widget = document.querySelector('.inline-forum-upload-widget[data-forum-id="' + key + '"]');
+        if (!widget) {
+            return null;
+        }
+        window._inlineForumUploadState[key] = {
+            selectedFiles: [],
+            input: widget.querySelector('.inline-forum-attachments-input'),
+            preview: widget.querySelector('.inline-forum-file-preview'),
+            area: widget.querySelector('.inline-file-upload-area')
+        };
+        return window._inlineForumUploadState[key];
+    }
+
+    function inlineForumSyncInput(forumId) {
+        var st = inlineForumGetState(forumId);
+        if (!st || !st.input) {
+            return;
+        }
+        var dt = new DataTransfer();
+        st.selectedFiles.forEach(function (f) {
+            dt.items.add(f);
+        });
+        st.input.files = dt.files;
+    }
+
+    function inlineForumRemoveAt(forumId, index) {
+        var st = inlineForumGetState(forumId);
+        if (!st) {
+            return;
+        }
+        st.selectedFiles.splice(index, 1);
+        inlineForumRenderPreviews(forumId);
+        inlineForumSyncInput(forumId);
+    }
+
+    function inlineForumRenderPreviews(forumId) {
+        var st = inlineForumGetState(forumId);
+        if (!st || !st.preview) {
+            return;
+        }
+        st.preview.innerHTML = '';
+        st.selectedFiles.forEach(function (file, idx) {
+            var item = document.createElement('div');
+            item.className = 'file-preview-item';
+
+            if (file.type.indexOf('image/') === 0) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var dataUrl = e.target.result;
+                    var img = document.createElement('img');
+                    img.src = dataUrl;
+                    img.className = 'file-preview-img';
+                    img.alt = file.name;
+                    img.addEventListener('click', function () {
+                        if (typeof openImageModal === 'function') {
+                            openImageModal(dataUrl, file.name);
+                        }
+                    });
+                    var rm = document.createElement('span');
+                    rm.className = 'file-preview-remove';
+                    rm.textContent = '\u00d7';
+                    rm.addEventListener('click', function (ev) {
+                        ev.preventDefault();
+                        ev.stopPropagation();
+                        inlineForumRemoveAt(forumId, idx);
+                    });
+                    item.appendChild(img);
+                    item.appendChild(rm);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                var icon = 'fa-file';
+                if (file.type.indexOf('pdf') !== -1) {
+                    icon = 'fa-file-pdf';
+                } else if (file.type.indexOf('word') !== -1) {
+                    icon = 'fa-file-word';
+                } else if (file.type.indexOf('excel') !== -1 || file.type.indexOf('spreadsheet') !== -1) {
+                    icon = 'fa-file-excel';
+                } else if (file.type.indexOf('powerpoint') !== -1 || file.type.indexOf('presentation') !== -1) {
+                    icon = 'fa-file-powerpoint';
+                } else if (file.type.indexOf('audio') !== -1 || /\.(mp3|m4a|wav|aac|ogg|oga|opus|flac|wma)$/i.test(file.name)) {
+                    icon = 'fa-file-audio';
+                } else if (file.type.indexOf('video') !== -1 || /\.(mp4|m4v|mov|avi|webm|mkv|wmv|flv|3gp|3gpp|mpeg|mpg)$/i.test(file.name)) {
+                    icon = 'fa-file-video';
+                }
+                var box = document.createElement('div');
+                box.style.cssText = 'width:72px;height:72px;background:#f8f9fa;border:1px solid #e2e8f0;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:0.35rem;';
+                var ic = document.createElement('i');
+                ic.className = 'fa ' + icon;
+                ic.style.cssText = 'font-size:1.35rem;color:#64748b;margin-bottom:0.2rem;';
+                var lbl = document.createElement('span');
+                lbl.style.cssText = 'font-size:0.6rem;color:#64748b;text-align:center;word-break:break-all;max-width:100%;';
+                lbl.textContent = file.name.length > 12 ? file.name.substring(0, 12) + '\u2026' : file.name;
+                box.appendChild(ic);
+                box.appendChild(lbl);
+                var rm = document.createElement('span');
+                rm.className = 'file-preview-remove';
+                rm.textContent = '\u00d7';
+                rm.addEventListener('click', function (ev) {
+                    ev.preventDefault();
+                    ev.stopPropagation();
+                    inlineForumRemoveAt(forumId, idx);
+                });
+                item.appendChild(box);
+                item.appendChild(rm);
+            }
+
+            st.preview.appendChild(item);
+        });
+    }
+
+    function inlineForumHandleFiles(forumId, files) {
+        var st = inlineForumGetState(forumId);
+        if (!st) {
+            return;
+        }
+        files.forEach(function (file) {
+            if (file.size > inlineForumUploadMaxBytes) {
+                alert(file.name + ' is too large. Maximum file size is 2MB.');
+                return;
+            }
+            if (!inlineForumTypeAllowed(file) && !inlineForumAllowedExt(file.name)) {
+                alert(file.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
+                return;
+            }
+            if (inlineForumUploadDangerousTypes.indexOf(file.type) !== -1 || inlineForumDangerousExt(file.name)) {
+                alert(file.name + ' is not allowed for security reasons.');
+                return;
+            }
+            st.selectedFiles.push(file);
+        });
+        inlineForumRenderPreviews(forumId);
+        inlineForumSyncInput(forumId);
+    }
+
+    window.initForumListingInlineFileUploads = function () {
+        document.querySelectorAll('.inline-forum-upload-widget').forEach(function (widget) {
+            if (widget.dataset.inlineUploadBound) {
+                return;
+            }
+            widget.dataset.inlineUploadBound = '1';
+            var forumId = widget.dataset.forumId;
+            var st = inlineForumGetState(forumId);
+            if (!st || !st.area || !st.input || !st.preview) {
+                return;
+            }
+
+            st.area.addEventListener('click', function (e) {
+                if (e.target.closest('.file-preview-remove')) {
+                    return;
+                }
+                if (!e.target.closest('input') && !e.target.closest('textarea')) {
+                    e.preventDefault();
+                    st.input.click();
+                }
+            });
+
+            st.input.addEventListener('change', function () {
+                if (this.files && this.files.length) {
+                    inlineForumHandleFiles(forumId, Array.from(this.files));
+                }
+            });
+
+            st.area.addEventListener('dragover', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                st.area.classList.add('dragover');
+            });
+            st.area.addEventListener('dragleave', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                st.area.classList.remove('dragover');
+            });
+            st.area.addEventListener('drop', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                st.area.classList.remove('dragover');
+                var fl = e.dataTransfer && e.dataTransfer.files;
+                if (fl && fl.length) {
+                    inlineForumHandleFiles(forumId, Array.from(fl));
+                }
+            });
+        });
+    };
+
+    window.clearInlineForumAttachments = function (forumId) {
+        var key = String(forumId);
+        var st = window._inlineForumUploadState[key];
+        if (st) {
+            st.selectedFiles = [];
+            if (st.preview) {
+                st.preview.innerHTML = '';
+            }
+            if (st.input) {
+                st.input.value = '';
+                try {
+                    st.input.files = new DataTransfer().files;
+                } catch (err) { /* ignore */ }
+            }
+        }
+    };
+
+    window.inlineForumValidateAttachmentsBeforeSubmit = function (forumId) {
+        inlineForumSyncInput(forumId);
+        var st = inlineForumGetState(forumId);
+        if (!st || !st.selectedFiles.length) {
+            return true;
+        }
+        for (var i = 0; i < st.selectedFiles.length; i++) {
+            var f = st.selectedFiles[i];
+            if (f.size > inlineForumUploadMaxBytes) {
+                alert(f.name + ' exceeds the 2MB limit.');
+                return false;
+            }
+            if (!inlineForumTypeAllowed(f) && !inlineForumAllowedExt(f.name)) {
+                alert(f.name + ' is not allowed. Use images (JPEG, PNG, GIF, WebP), PDF, or common audio/video formats.');
+                return false;
+            }
+            if (inlineForumUploadDangerousTypes.indexOf(f.type) !== -1 || inlineForumDangerousExt(f.name)) {
+                alert(f.name + ' is not allowed for security reasons.');
+                return false;
+            }
+        }
+        return true;
+    };
+})();
+
 function toggleComments(forumId) {
     const inlineToggle = document.querySelector(`.comments-toggle-inline[data-forum-id="${forumId}"]`);
     const commentsList = document.getElementById(`comments-list-${forumId}`);
@@ -1192,6 +1553,9 @@ function cancelInlineComment(forumId) {
             textarea.value = '';
             updateForumListingCommentCharCount(textarea);
         }
+        if (typeof clearInlineForumAttachments === 'function') {
+            clearInlineForumAttachments(forumId);
+        }
     }
 }
 
@@ -1214,6 +1578,11 @@ function submitInlineComment(event, forumId) {
     }
     if (commentText.length > 20000) {
         alert('Comment is too long.');
+        return;
+    }
+
+    if (typeof inlineForumValidateAttachmentsBeforeSubmit === 'function' &&
+        !inlineForumValidateAttachmentsBeforeSubmit(forumId)) {
         return;
     }
     
@@ -1277,6 +1646,9 @@ function submitInlineComment(event, forumId) {
 
 document.addEventListener('DOMContentLoaded', function() {
     initForumListingInlineCommentCounters();
+    if (typeof initForumListingInlineFileUploads === 'function') {
+        initForumListingInlineFileUploads();
+    }
 
     const searchInput = document.getElementById('forum-search');
     const filterButtons = document.querySelectorAll('.filter-btn');

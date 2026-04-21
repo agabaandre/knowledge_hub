@@ -325,6 +325,8 @@ class ForumsController extends Controller
             'id' => 'required|integer',
             'comment' => 'required|string|max:20000',
             'parent_id' => 'nullable|integer',
+            'attachments' => 'sometimes|array',
+            'attachments.*' => 'file|max:2048|mimes:jpeg,jpg,png,gif,webp,pdf,mp4,m4v,mov,avi,webm,mkv,wmv,flv,3gp,3gpp,mpeg,mpg,mp3,m4a,wav,aac,ogg,oga,opus,flac,wma',
         ]);
 
         $commentText = trim((string) $request->input('comment'));

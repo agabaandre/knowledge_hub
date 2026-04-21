@@ -17,6 +17,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
+use Illuminate\Support\Str;
 use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
 use App\Support\CommunityTargeting;
@@ -540,7 +541,16 @@ class ForumsRepository extends SharedRepo{
             return 0;
         }
 
-        $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'txt', 'mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'];
+        $allowedExtensions = [
+            'jpg', 'jpeg', 'png', 'gif', 'webp', 'pdf',
+            'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+            'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
+        ];
+        $rasterPdfMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf'];
+        $octetStreamExtensions = [
+            'mp4', 'm4v', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv', '3gp', '3gpp', 'mpeg', 'mpg',
+            'mp3', 'm4a', 'wav', 'aac', 'ogg', 'oga', 'opus', 'flac', 'wma',
+        ];
         $maxFileSize = 2 * 1024 * 1024; // 2MB in bytes
         $dangerousExtensions = ['exe', 'bat', 'cmd', 'com', 'pif', 'scr', 'vbs', 'js', 'jar', 'apk', 'dll', 'sh', 'php', 'asp', 'jsp', 'py', 'rb', 'pl', 'cgi', 'bin', 'msi', 'deb', 'rpm'];
         
@@ -567,6 +577,29 @@ class ForumsRepository extends SharedRepo{
             // Validate file
             if (!in_array($extension, $allowedExtensions)) {
                 \Log::warning('File extension not allowed for forum comment', [
+                    'extension' => $extension,
+                    'filename' => $file->getClientOriginalName()
+                ]);
+                continue;
+            }
+
+            $mimeNorm = strtolower((string) $file->getMimeType());
+            if (in_array($mimeNorm, ['image/jpg', 'image/pjpeg'], true)) {
+                $mimeNorm = 'image/jpeg';
+            }
+
+            $mimeAllowed = in_array($mimeNorm, $rasterPdfMimes, true)
+                || Str::startsWith($mimeNorm, 'video/')
+                || Str::startsWith($mimeNorm, 'audio/')
+                || ($mimeNorm === 'application/octet-stream' && in_array($extension, $octetStreamExtensions, true));
+
+            if (Str::startsWith($mimeNorm, 'image/') && ! in_array($mimeNorm, ['image/jpeg', 'image/png', 'image/gif', 'image/webp'], true)) {
+                $mimeAllowed = false;
+            }
+
+            if (! $mimeAllowed) {
+                \Log::warning('File MIME type not allowed for forum comment', [
+                    'mime' => $mimeNorm,
                     'extension' => $extension,
                     'filename' => $file->getClientOriginalName()
                 ]);
