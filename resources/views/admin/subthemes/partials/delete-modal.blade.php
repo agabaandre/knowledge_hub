@@ -43,10 +43,15 @@
         var toDeleteRowName = '';
         function showDeleteNotice(message, type = 'info', onClose = null) {
             if (typeof swal === 'function') {
-                swal(type === 'success' ? 'Success' : 'Notice', message, type)
-                    .then(function () {
+                const result = swal(type === 'success' ? 'Success' : 'Notice', message, type);
+                if (result && typeof result.then === 'function') {
+                    result.then(function () {
                         if (typeof onClose === 'function') onClose();
                     });
+                } else if (typeof onClose === 'function') {
+                    // SweetAlert v1 may not return a Promise.
+                    setTimeout(onClose, 300);
+                }
                 return;
             }
             alert(message);
