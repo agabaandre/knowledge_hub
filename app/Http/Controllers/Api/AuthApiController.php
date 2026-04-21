@@ -676,6 +676,7 @@ class AuthApiController extends ApiController
      *             @OA\Property(property="token", type="string", example="eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.example..."),
      *             @OA\Property(property="token_type", type="string", example="Bearer"),
      *             @OA\Property(property="expires_at", type="string", format="date-time", nullable=true),
+     *             @OA\Property(property="is_first_time", type="boolean", example=true, description="True when the account still needs basic profile data: country, job title, or phone number is missing."),
      *             @OA\Property(property="user", type="object", description="User model including communities and preferences relations.")
      *         )
      *     ),
@@ -750,6 +751,7 @@ class AuthApiController extends ApiController
                 'token' => $tokenResult->accessToken,
                 'token_type' => 'Bearer',
                 'expires_at' => $tokenResult->token->expires_at,
+                'is_first_time' => $this->socialLoginNeedsProfileCompletion($user),
                 'user' => $user,
             ]);
         }
@@ -809,11 +811,31 @@ class AuthApiController extends ApiController
                 'token' => $tokenResult->accessToken,
                 'token_type' => 'Bearer',
                 'expires_at' => $tokenResult->token->expires_at,
+                'is_first_time' => $this->socialLoginNeedsProfileCompletion($user),
                 'user' => $user,
             ]);
         }
 
         return response()->json(['message' => 'Unable to log you in'], 400);
+    }
+
+    /**
+     * True when social-login user should be guided through profile completion
+     * (missing country, job title, or phone number).
+     */
+    private function socialLoginNeedsProfileCompletion(User $user): bool
+    {
+        if ($user->country_id === null || $user->country_id === '' || (int) $user->country_id === 0) {
+            return true;
+        }
+        if (trim((string) ($user->phone_number ?? '')) === '') {
+            return true;
+        }
+        if (trim((string) ($user->job_title ?? '')) === '') {
+            return true;
+        }
+
+        return false;
     }
 
     /**

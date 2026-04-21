@@ -23,3 +23,4 @@ yarn-error.log
 /Afcdc theme/
 /HTML
 /public/.well-known/assets.json
+/public/.well-known/assetlinks.json
