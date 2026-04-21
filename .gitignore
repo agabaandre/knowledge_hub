@@ -22,3 +22,4 @@ yarn-error.log
 /.vscode
 /Afcdc theme/
 /HTML
+/public/.well-known/assets.json
