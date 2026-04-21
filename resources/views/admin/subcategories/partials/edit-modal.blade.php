@@ -19,6 +19,14 @@
                         <label for="edit_category_desc">Description</label>
                         <input type="text" class="form-control" id="edit_category_desc" name="category_desc" maxlength="500">
                     </div>
+                    <div class="form-group">
+                        <label for="edit_linked_data_categories">Linked Data Categories</label>
+                        <select class="form-control select2" id="edit_linked_data_categories" name="linked_data_categories[]" multiple data-placeholder="Select one or more categories">
+                            @foreach(($dataCategories ?? []) as $dc)
+                                <option value="{{ (int) $dc->id }}">{{ $dc->category_name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
@@ -39,6 +47,13 @@
         $('#editSubcategoryForm').attr('action', baseUrl + '/' + id);
         $('#edit_category_name').val(btn.data('category_name'));
         $('#edit_category_desc').val(btn.data('category_desc') || '');
+        var linked = btn.data('linked_categories') || [];
+        linked = Array.isArray(linked) ? linked.map(String) : [];
+        $('#edit_linked_data_categories option').prop('selected', false);
+        linked.forEach(function (id) {
+            $('#edit_linked_data_categories option[value="' + id + '"]').prop('selected', true);
+        });
+        $('#edit_linked_data_categories').trigger('change');
     });
 })();
 </script>

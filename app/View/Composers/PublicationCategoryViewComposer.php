@@ -12,7 +12,10 @@ class PublicationCategoryViewComposer
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
         $file_categories = cache()->remember('file_categories', $minutes, function () {
-            return PublicationCategory::parentOnly()->orderBy('category_name', 'asc')->get();
+            return PublicationCategory::parentOnly()
+                ->with('linkedDataCategories:id')
+                ->orderBy('category_name', 'asc')
+                ->get();
         });
 
         $publication_sub_categories = cache()->remember('publication_sub_categories', $minutes, function () {

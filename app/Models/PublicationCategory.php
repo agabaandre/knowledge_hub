@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class PublicationCategory extends Model
 {
@@ -44,6 +45,16 @@ class PublicationCategory extends Model
     public function scopeSubCategoriesOnly(Builder $query): Builder
     {
         return $query->whereNotNull('parent_id');
+    }
+
+    public function linkedDataCategories(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            DataCategory::class,
+            'data_category_publication_category',
+            'publication_category_id',
+            'data_category_id'
+        );
     }
 
     protected static function booted(): void

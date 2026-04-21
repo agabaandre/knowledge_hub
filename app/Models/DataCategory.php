@@ -13,4 +13,14 @@ class DataCategory extends Model
 
         return $this->hasMany(DataSubCategory::class);
     }
+
+    public function publication_categories()
+    {
+        return $this->belongsToMany(
+            PublicationCategory::class,
+            'data_category_publication_category',
+            'data_category_id',
+            'publication_category_id'
+        );
+    }
 }

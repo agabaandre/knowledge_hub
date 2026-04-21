@@ -3,6 +3,7 @@
 @foreach ($file_categories as $filecategory)
     <option 
     value="{{$filecategory->id}}"
+    data-linked-data-categories="{{ ($filecategory->linkedDataCategories ?? collect())->pluck('id')->implode(',') }}"
     {{ (@$selected == $filecategory->id)?'selected':''}}
     >
         {{$filecategory->category_name}}

@@ -4,9 +4,11 @@ namespace App\Repositories;
 
 use App\Models\PublicationCategory;
 use App\Models\Publication;
+use App\Models\DataCategory;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Cache;
 
 class PublicationSubCategoryRepository
 {
@@ -15,7 +17,10 @@ class PublicationSubCategoryRepository
      */
     public function getPaginated(Request $request): LengthAwarePaginator
     {
-        $query = PublicationCategory::parentOnly()->withCount('sub_categories')->orderBy('category_name');
+        $query = PublicationCategory::parentOnly()
+            ->withCount('sub_categories')
+            ->with('linkedDataCategories:id')
+            ->orderBy('category_name');
 
         if ($request->filled('term')) {
             $term = $request->term;
@@ -38,6 +43,19 @@ class PublicationSubCategoryRepository
         $cat->category_name = $request->category_name;
         $cat->category_desc = $request->category_desc;
         $cat->save();
+
+        $linkedIds = collect($request->input('linked_data_categories', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($linkedIds)) {
+            $linkedIds = DataCategory::query()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        }
+        $cat->linkedDataCategories()->sync($linkedIds);
+        Cache::forget('file_categories');
         return $cat;
     }
 
@@ -53,6 +71,19 @@ class PublicationSubCategoryRepository
         $cat->category_name = $request->category_name;
         $cat->category_desc = $request->category_desc;
         $cat->save();
+
+        $linkedIds = collect($request->input('linked_data_categories', []))
+            ->filter()
+            ->map(fn ($id) => (int) $id)
+            ->unique()
+            ->values()
+            ->all();
+
+        if (empty($linkedIds)) {
+            $linkedIds = DataCategory::query()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        }
+        $cat->linkedDataCategories()->sync($linkedIds);
+        Cache::forget('file_categories');
         return $cat;
     }
 
@@ -68,6 +99,13 @@ class PublicationSubCategoryRepository
     public function allParentCategoriesForMapping()
     {
         return PublicationCategory::parentOnly()
+            ->orderBy('category_name')
+            ->get(['id', 'category_name']);
+    }
+
+    public function allDataCategories()
+    {
+        return DataCategory::query()
             ->orderBy('category_name')
             ->get(['id', 'category_name']);
     }

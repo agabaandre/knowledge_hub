@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\DataCategory;
 use App\Models\DataRecord;
 use App\Models\DataSubCategory;
+use App\Models\PublicationCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -188,7 +189,26 @@ class DataRecordsRepository extends SharedRepo{
         $record->slug             = Str::slug($request->title);
         $record->show_on_menu     = $request->show_menu;
 
-        return $record->save();
+        $saved = $record->save();
+        if ($saved) {
+            $publicationCategoryIds = PublicationCategory::query()
+                ->whereNull('parent_id')
+                ->pluck('id');
+            foreach ($publicationCategoryIds as $publicationCategoryId) {
+                DB::table('data_category_publication_category')->updateOrInsert(
+                    [
+                        'data_category_id' => $record->id,
+                        'publication_category_id' => (int) $publicationCategoryId,
+                    ],
+                    [
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+            }
+        }
+
+        return $saved;
     }
 
     public function save_subcategory(Request $request){

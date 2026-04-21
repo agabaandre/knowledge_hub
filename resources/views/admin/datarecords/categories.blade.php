@@ -11,7 +11,6 @@
 		<div class="card-header text-left">
 			<h3 class="card-title float-left">{{ $title ?? '' }}</h3>
 				<a href="#add_category" data-toggle="modal" class="btn btn-info">Add Category</a>
-				<a href="{{ url('admin/datarecords/categories/subcategories')}}"  class="btn btn-dark">Brow Sub-categories</a>
 			    <hr>
 		</div>
 		<!-- Card Header With Form Filters -->

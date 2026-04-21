@@ -16,8 +16,9 @@ class PublicationSubCategoryController extends Controller
     {
         $subcategories = $this->repo->getPaginated($request);
         $allCategoriesForMapping = $this->repo->allParentCategoriesForMapping();
+        $dataCategories = $this->repo->allDataCategories();
         $search = (object) $request->all();
-        return view('admin.subcategories.index', compact('subcategories', 'search', 'allCategoriesForMapping'));
+        return view('admin.subcategories.index', compact('subcategories', 'search', 'allCategoriesForMapping', 'dataCategories'));
     }
 
     public function store(Request $request)
@@ -25,6 +26,8 @@ class PublicationSubCategoryController extends Controller
         $request->validate([
             'category_name' => 'required|string|max:255',
             'category_desc' => 'nullable|string|max:500',
+            'linked_data_categories' => 'nullable|array',
+            'linked_data_categories.*' => 'integer|exists:data_categories,id',
         ]);
         $this->repo->store($request);
         return redirect()->route('admin.subcategories.index')
@@ -36,6 +39,8 @@ class PublicationSubCategoryController extends Controller
         $request->validate([
             'category_name' => 'required|string|max:255',
             'category_desc' => 'nullable|string|max:500',
+            'linked_data_categories' => 'nullable|array',
+            'linked_data_categories.*' => 'integer|exists:data_categories,id',
         ]);
         $this->repo->update($request, $id);
         return redirect()->route('admin.subcategories.index')

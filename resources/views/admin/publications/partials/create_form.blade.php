@@ -80,6 +80,19 @@
 
                         <div class="col-md-6">
                             <div class="mb-3">
+                                <label class="form-label" for="linked_data_category_id">Data Category</label>
+                                <select class="form-control select2" id="linked_data_category_id" data-placeholder="Select Data Category">
+                                    <option value="">All Data Categories</option>
+                                    @foreach(($data_categories ?? []) as $dc)
+                                        <option value="{{ (int) $dc->id }}">{{ $dc->category_name }}</option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Use this to filter File Categories.</small>
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="mb-3">
                                 <label class="form-label" for="publication">File Category</label>
                                 @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
                                 'selected'=>(@$publication->publication_catgory_id)?$publication->publication_catgory_id:''])
@@ -159,3 +172,44 @@
                 <button class="btn btn-danger" data-dismiss="modal" type="button">Cancel</button>
                 <button class="btn btn-primary" type="submit">Save Record</button>
             </div>
+<script>
+    (function () {
+        function applyDataCategoryFilter() {
+            var dcEl = document.getElementById('linked_data_category_id');
+            var fileCatEl = document.getElementById('publication_catgory_id');
+            if (!dcEl || !fileCatEl) return;
+
+            var selectedDataCategory = String(dcEl.value || '');
+            var selectedFileCategory = String(fileCatEl.value || '');
+            var selectedStillValid = false;
+
+            Array.prototype.forEach.call(fileCatEl.options, function (opt) {
+                if (!opt.value) return;
+                var links = String(opt.getAttribute('data-linked-data-categories') || '')
+                    .split(',')
+                    .map(function (v) { return v.trim(); })
+                    .filter(Boolean);
+                var allowed = !selectedDataCategory || links.indexOf(selectedDataCategory) !== -1;
+                opt.hidden = !allowed;
+                opt.disabled = !allowed;
+                if (allowed && opt.value === selectedFileCategory) {
+                    selectedStillValid = true;
+                }
+            });
+
+            if (selectedFileCategory && !selectedStillValid) {
+                fileCatEl.value = '';
+                if (window.jQuery && window.jQuery(fileCatEl).hasClass('select2-hidden-accessible')) {
+                    window.jQuery(fileCatEl).val('').trigger('change');
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            var dcEl = document.getElementById('linked_data_category_id');
+            if (!dcEl) return;
+            dcEl.addEventListener('change', applyDataCategoryFilter);
+            applyDataCategoryFilter();
+        });
+    })();
+</script>
