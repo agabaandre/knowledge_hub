@@ -79,9 +79,9 @@ $i = 1;
                                 <td>
                                     <a href="#edit-theme-modal" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                         data-id="{{ $row->id }}"
-                                        data-description="{!! $row->description !!}"
+                                        data-description="{{ e((string) $row->description) }}"
                                         data-detailed_description="{{ e((string) ($row->detailed_description ?? '')) }}"
-                                        data-icon="{!! $row->icon !!}"
+                                        data-icon="{{ e((string) $row->icon) }}"
                                         data-display_order="{{ (int) ($row->display_order ?? 0) }}">Edit
                                         Theme</a>
 

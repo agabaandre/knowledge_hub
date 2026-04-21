@@ -81,7 +81,7 @@
                                 <td>{{ $row->theme->description ?? '' }}</td>
                                 <td>
                                     <a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}"
-                                        data-description="{{ $row->description }}" data-icon="{{ $row->icon }}"
+                                        data-description="{{ e((string) $row->description) }}" data-icon="{{ e((string) $row->icon) }}"
                                         data-thematic_area_id="{{ $row->thematic_area_id }}"
                                         class="btn btn-sm btn-primary ml-1">Edit</a>
                                     @can('delete_publication_metadata')
