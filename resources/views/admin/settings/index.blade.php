@@ -768,6 +768,13 @@
                                 <small class="info-text">Opacity of the health theme cards on the homepage (default: 100%).</small>
                             </div>
                         </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Theme cards per row (desktop)</label>
+                                <input type="number" name="theme_cards_per_row" class="form-control" min="2" max="8" value="{{ (int) ($settings->theme_cards_per_row ?? 4) }}">
+                                <small class="info-text">Controls how many health theme cards appear per row on desktop (default: 4).</small>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-section-title mt-4">

@@ -2,6 +2,8 @@
     $healthThemesTitleDefault = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
     $themeCardOpacityDefault = settings()->theme_card_opacity ?? '1';
     $themeCardOpacityDefault = is_numeric($themeCardOpacityDefault) ? max(0.5, min(1, (float)$themeCardOpacityDefault)) : 1;
+    $themeCardsPerRow = (int) (settings()->theme_cards_per_row ?? 4);
+    $themeCardsPerRow = max(2, min(8, $themeCardsPerRow));
 @endphp
 <style>
     .theme-grid {
@@ -123,13 +125,13 @@
     /* Responsive adjustments */
     @media (min-width: 1200px) {
         .themes-grid {
-            grid-template-columns: repeat(6, 1fr);
+            grid-template-columns: repeat({{ $themeCardsPerRow }}, 1fr);
         }
     }
 
     @media (min-width: 992px) and (max-width: 1199px) {
         .themes-grid {
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat({{ $themeCardsPerRow }}, 1fr);
         }
     }
 

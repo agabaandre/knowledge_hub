@@ -77,6 +77,8 @@ $i = 1;
                                 <td>{{ (int) ($row->display_order ?? 0) }}</td>
                                 <td>{{ $row->icon }}</td>
                                 <td>
+                                    <a href="{{ url('admin/subthemes') }}?theme_id={{ (int) $row->id }}"
+                                        class="btn btn-sm btn-info mr-1">View Subthemes</a>
                                     <a href="#edit-theme-modal" class="btn btn-sm btn-success mr-1" data-toggle="modal"
                                         data-id="{{ $row->id }}"
                                         data-description="{{ e((string) $row->description) }}"

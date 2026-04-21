@@ -27,6 +27,7 @@ class SubHealthThemesController extends Controller
         $data['faIconOptions'] = $this->themesRepo->fontAwesomeIconOptions();
         $data['faVersion'] = $this->themesRepo->fontAwesomeVersion();
         $data['faCheatsheetUrl'] = $this->themesRepo->fontAwesomeCheatsheetUrl();
+        $data['selectedThemeId'] = (int) ($request->input('theme_id', $request->input('thematic_area_id', 0)));
         $data['search'] = (Object) $request->all();
 
         return view('admin.subthemes.index',$data);

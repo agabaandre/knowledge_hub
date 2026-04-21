@@ -38,6 +38,19 @@
                                     placeholder="Filter by name" value="{{ @$search->term ?? '' }}">
                             </div>
                         </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label for="theme_id">Thematic Area</label>
+                                <select class="form-control select2" name="theme_id" id="theme_id">
+                                    <option value="">All thematic areas</option>
+                                    @foreach ($themes as $theme)
+                                        <option value="{{ (int) $theme->id }}" @if(($selectedThemeId ?? 0) === (int) $theme->id) selected @endif>
+                                            {{ $theme->description }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
 
 
                     </div>
@@ -103,6 +116,7 @@
 
         @include('admin.subthemes.partials.create-modal', [
             'themes' => $themes,
+            'selectedThemeId' => $selectedThemeId ?? 0,
         ])
         <!-- Include edit-modal.php -->
         @include('admin.subthemes.partials.edit-modal', [

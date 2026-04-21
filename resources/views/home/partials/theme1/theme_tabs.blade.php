@@ -3,6 +3,8 @@
     $healthThemesTitle = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
     $themeCardOpacity = settings()->theme_card_opacity ?? '1';
     $themeCardOpacity = is_numeric($themeCardOpacity) ? max(0.5, min(1, (float)$themeCardOpacity)) : 1;
+    $themeCardsPerRow = (int) (settings()->theme_cards_per_row ?? 4);
+    $themeCardsPerRow = max(2, min(8, $themeCardsPerRow));
 @endphp
 <style>
 .theme1-themes-section {
@@ -72,13 +74,13 @@
     color: {{ $primary }};
 }
 @media (min-width: 576px) {
-    .theme1-themes-grid { grid-template-columns: repeat(3, 1fr); }
+    .theme1-themes-grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (min-width: 768px) {
-    .theme1-themes-grid { grid-template-columns: repeat(4, 1fr); gap: 1.25rem; }
+    .theme1-themes-grid { grid-template-columns: repeat(3, 1fr); gap: 1.25rem; }
 }
 @media (min-width: 992px) {
-    .theme1-themes-grid { grid-template-columns: repeat(6, 1fr); }
+    .theme1-themes-grid { grid-template-columns: repeat({{ $themeCardsPerRow }}, 1fr); }
 }
 </style>
 <section class="theme1-themes-section" id="themes">

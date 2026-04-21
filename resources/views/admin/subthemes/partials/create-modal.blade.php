@@ -38,7 +38,7 @@
                         <label for="thematic_area_id">Thematic Area</label>
                         <select class="form-control select2" id="new_thematic_area_id" name="thematic_area_id">
                             @foreach ($themes as $theme)
-                                <option value="{{ $theme['id'] }}">{{ $theme['description'] }}</option>
+                                <option value="{{ $theme['id'] }}" @if(($selectedThemeId ?? 0) === (int) $theme['id']) selected @endif>{{ $theme['description'] }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -74,7 +74,11 @@
             $('#new_subtheme_description').val('');
             $('#new_subtheme_detailed_description').val('');
             $('#new_subtheme_icon').val('').trigger('change');
+            @if(($selectedThemeId ?? 0) > 0)
+            $('#new_thematic_area_id').val('{{ (int) $selectedThemeId }}').trigger('change');
+            @else
             $('#new_thematic_area_id').val('').trigger('change');
+            @endif
         });
     </script>
 @endpush

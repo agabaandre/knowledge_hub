@@ -246,6 +246,10 @@ class SettingsRepository
             $op = $request->input('theme_card_opacity');
             $settings->theme_card_opacity = $op !== null && $op !== '' ? (string) $op : '1';
         }
+        if (Schema::hasColumn('setting', 'theme_cards_per_row')) {
+            $cards = (int) $request->input('theme_cards_per_row', 4);
+            $settings->theme_cards_per_row = max(2, min(8, $cards));
+        }
 
         // Search page: show forums and communities in combined results (default true)
         if (Schema::hasColumn('setting', 'search_show_forums')) {
@@ -455,6 +459,7 @@ class SettingsRepository
             'section_title_recommended' => $request->input('section_title_recommended'),
             'section_title_flagship_initiatives' => $request->input('section_title_flagship_initiatives'),
             'theme_card_opacity' => $request->input('theme_card_opacity') !== null && $request->input('theme_card_opacity') !== '' ? (string) $request->input('theme_card_opacity') : '1',
+            'theme_cards_per_row' => (string) max(2, min(8, (int) $request->input('theme_cards_per_row', 4))),
         ];
         foreach ($map as $key => $value) {
             if ($value !== null) {

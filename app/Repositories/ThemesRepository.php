@@ -51,9 +51,15 @@ class ThemesRepository
 
         $rows_count = ($request->rows) ? $request->rows : 24;
         $themes = SubThemeticArea::with('theme')->orderBy('id', 'desc');
+        if ($request->filled('theme_id')) {
+            $themes->where('thematic_area_id', (int) $request->theme_id);
+        } elseif ($request->filled('thematic_area_id')) {
+            $themes->where('thematic_area_id', (int) $request->thematic_area_id);
+        }
         if ($request->term)
             $themes->where('description', 'like', '%' . $request->term . '%');
         $result = $themes->paginate($rows_count);
+        $result->appends($request->only(['term', 'theme_id', 'thematic_area_id']));
 
         return $result;
     }
