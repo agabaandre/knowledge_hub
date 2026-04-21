@@ -392,6 +392,10 @@ if(!function_exists('storage_link')){
         if (strpos($file_path, 'http://') === 0 || strpos($file_path, 'https://') === 0) {
             return $file_path;
         }
+        // Mis-stored "uploads/https://..." or similar — use embedded absolute URL
+        if (preg_match('#https?://[^\s"\'<>]+#i', $file_path, $m) && strpos($file_path, '://') !== 0) {
+            return rtrim($m[0], '/');
+        }
         // Get storage URL
         $storageUrl = Storage::disk('local')->url($file_path);
         // If storage URL already contains domain, return as-is, otherwise prepend site URL
