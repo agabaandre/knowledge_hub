@@ -148,12 +148,28 @@
     .custom-bg {
         @php
             $settings = settings();
-            $bgImage = (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'storage/uploads/config/') !== false && strpos($settings->spotlight_banner, 'http') !== false) ? $settings->spotlight_banner : '';
             $gradientStart = $settings->gradient_start_color ?? '#119A48';
             $gradientEnd = $settings->gradient_end_color ?? '#16c653';
+
+            $bgImage = '';
+            if (!empty($settings->spotlight_banner)) {
+                $rawBanner = (string) $settings->spotlight_banner;
+                $bgImage = (strpos($rawBanner, 'http') === 0 || strpos($rawBanner, '//') === 0)
+                    ? $rawBanner
+                    : asset(ltrim($rawBanner, '/'));
+            }
+
+            $overlayHex = $settings->spotlight_overlay_color ?? '#000000';
+            $overlayOpacityPercent = (int) ($settings->spotlight_overlay_opacity ?? 35);
+            $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
+            $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
+            if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
+                $overlayRgb = [0, 0, 0];
+            }
+            $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
         @endphp
         @if(!empty($bgImage))
-        background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url('{{ $bgImage }}') !important;
+        background: linear-gradient({{ $overlayRgba }}, {{ $overlayRgba }}), url('{{ $bgImage }}') !important;
         background-repeat: no-repeat !important;
         background-size: cover !important;
         background-position: center !important;
