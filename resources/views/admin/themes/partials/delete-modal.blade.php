@@ -38,15 +38,26 @@
         
         var toDeleteRow = '';
         var toDeleteRowName = '';
+        function showDeleteNotice(message, type = 'info', onClose = null) {
+            if (typeof swal === 'function') {
+                swal(type === 'success' ? 'Success' : 'Notice', message, type)
+                    .then(function () {
+                        if (typeof onClose === 'function') onClose();
+                    });
+                return;
+            }
+            alert(message);
+            if (typeof onClose === 'function') onClose();
+        }
 
         function deleteRow () {
             const replacementThemeId = (document.getElementById('replacement_theme_id') || {}).value;
             if (!replacementThemeId) {
-                alert('Please select the thematic area to map the data to.');
+                showDeleteNotice('Please select the thematic area to map the data to.', 'warning');
                 return;
             }
             if (String(replacementThemeId) === String(toDeleteRow)) {
-                alert('Please select a different thematic area.');
+                showDeleteNotice('Please select a different thematic area.', 'warning');
                 return;
             }
             let url = `{{ url('admin/themes/delete')}}?id=${toDeleteRow}&replacement_theme_id=${replacementThemeId}`;
@@ -55,13 +66,19 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.status !== 'success') {
-                        alert(res.message || 'Failed to delete thematic area.');
+                        showDeleteNotice(res.message || 'Failed to delete thematic area.', 'error');
                         return;
                     }
                     $('#delete-modal').modal('hide');
-                    window.location.reload();
+                    const movedSubs = res?.data?.mapped_subthemes ?? 0;
+                    const movedPubs = res?.data?.mapped_publications ?? 0;
+                    showDeleteNotice(
+                        `${res.message || 'Theme deleted.'} Mapped ${movedSubs} subthemes and ${movedPubs} publications.`,
+                        'success',
+                        function () { window.location.reload(); }
+                    );
                 })
-                .catch(() => alert('Failed to delete thematic area.'));
+                .catch(() => showDeleteNotice('Failed to delete thematic area.', 'error'));
         }
 
 

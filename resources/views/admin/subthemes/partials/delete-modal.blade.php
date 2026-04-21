@@ -41,15 +41,26 @@
         
         var toDeleteRow = '';
         var toDeleteRowName = '';
+        function showDeleteNotice(message, type = 'info', onClose = null) {
+            if (typeof swal === 'function') {
+                swal(type === 'success' ? 'Success' : 'Notice', message, type)
+                    .then(function () {
+                        if (typeof onClose === 'function') onClose();
+                    });
+                return;
+            }
+            alert(message);
+            if (typeof onClose === 'function') onClose();
+        }
 
         function deleteRow () {
             const replacementSubthemeId = (document.getElementById('replacement_subtheme_id') || {}).value;
             if (!replacementSubthemeId) {
-                alert('Please select the subtheme to map the publications to.');
+                showDeleteNotice('Please select the subtheme to map the publications to.', 'warning');
                 return;
             }
             if (String(replacementSubthemeId) === String(toDeleteRow)) {
-                alert('Please select a different subtheme.');
+                showDeleteNotice('Please select a different subtheme.', 'warning');
                 return;
             }
             let url = `{{ url('admin/subthemes/delete')}}?id=${toDeleteRow}&replacement_subtheme_id=${replacementSubthemeId}`;
@@ -58,13 +69,18 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.status !== 'success') {
-                        alert(res.message || 'Failed to delete subtheme.');
+                        showDeleteNotice(res.message || 'Failed to delete subtheme.', 'error');
                         return;
                     }
                     $('#delete-modal').modal('hide');
-                    window.location.reload();
+                    const movedPubs = res?.data?.mapped_publications ?? 0;
+                    showDeleteNotice(
+                        `${res.message || 'Subtheme deleted.'} Mapped ${movedPubs} publications.`,
+                        'success',
+                        function () { window.location.reload(); }
+                    );
                 })
-                .catch(() => alert('Failed to delete subtheme.'));
+                .catch(() => showDeleteNotice('Failed to delete subtheme.', 'error'));
         }
 
 
