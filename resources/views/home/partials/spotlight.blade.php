@@ -1,8 +1,11 @@
 @php
     $settings = settings();
     $bannerImage = '';
-    if (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'storage/uploads/config/') !== false) {
-        $bannerImage = $settings->spotlight_banner;
+    if (!empty($settings->spotlight_banner)) {
+        $rawBanner = (string) $settings->spotlight_banner;
+        $bannerImage = (strpos($rawBanner, 'http') === 0 || strpos($rawBanner, '//') === 0)
+            ? $rawBanner
+            : asset(ltrim($rawBanner, '/'));
     }
     $gradientStart = $settings->gradient_start_color ?? '#119A48';
     $gradientEnd = $settings->gradient_end_color ?? '#16c653';
@@ -15,7 +18,7 @@
     }
     $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
     
-    if (!empty($bannerImage) && strpos($bannerImage, 'http') !== false) {
+    if (!empty($bannerImage)) {
         $bgStyle = "background: linear-gradient({$overlayRgba}, {$overlayRgba}), url('{$bannerImage}'); background-size: cover; background-position: center;";
     } else {
         $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
