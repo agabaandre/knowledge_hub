@@ -12,7 +12,8 @@ class ThemesViewComposer{
 
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
-        $subthemes = cache()->remember('themes',$minutes, function () {
+        // Publication wizard & forms: A–Z. (Homepage uses HomeController + ThemesRepository::get → display order.)
+        $subthemes = cache()->remember('themes_form_alphabetical', $minutes, function () {
             return ThemeticArea::with(['subthemes' => function ($query) {
                 $query->orderBy('description', 'asc');
             }])->orderBy('description', 'asc')

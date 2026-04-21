@@ -18,7 +18,7 @@ class TagsController extends Controller
     public function index(Request $request){
 
         $data['all_tags'] = $this->tagsRepo->get($request,false);
-        //dd($data['tags']);
+        $data['allTagsForMapping'] = $this->tagsRepo->allTagsForMapping();
         $data['search']    = (Object) $request->all();
         return view('admin.tags.index',$data);
     }
@@ -44,9 +44,9 @@ class TagsController extends Controller
     {
         $updated = $this->tagsRepo->update($request, $request->input('tag_id'));
 
-        if($updated) {
-            $data = ['message'=>'Tag saved successfully','status'=>'success','data'=>$updated];
-        }
+        $data = $updated
+            ? ['message' => 'Tag saved successfully', 'status' => 'success', 'data' => $updated]
+            : ['message' => 'Tag could not be saved', 'status' => 'failure', 'data' => null];
 
         if($request->ajax()){
             return response($data,200);
@@ -60,10 +60,20 @@ class TagsController extends Controller
 
 
     public function destroy(Request $request){
-        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
-            return response(['status'=>'failure','message'=>'Unauthorized'], 403);
+        $user = auth()->user();
+        if (! $user || (! $user->can('delete_publication_metadata') && ! $user->can('delete_meta_data'))) {
+            return response()->json(['status' => 'failure', 'message' => 'Unauthorized'], 403);
         }
-        return $this->tagsRepo->delete($request->id);
+
+        $request->validate([
+            'id' => 'required|integer|exists:tags,id',
+            'replacement_tag_id' => 'required|integer|exists:tags,id|different:id',
+        ]);
+
+        $result = $this->tagsRepo->deleteTagWithMapping((int) $request->id, (int) $request->replacement_tag_id);
+        $statusCode = ($result['status'] ?? 'failure') === 'success' ? 200 : 422;
+
+        return response()->json($result, $statusCode);
     }
 
 

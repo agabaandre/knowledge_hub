@@ -16,6 +16,7 @@ class ThemesRepository
     private function forgetThematicAreaViewCaches(): void
     {
         Cache::forget('themes');
+        Cache::forget('themes_form_alphabetical');
         Cache::forget('subthemes');
     }
 
@@ -24,7 +25,9 @@ class ThemesRepository
 
         $rows_count = ($request->rows) ? $request->rows : 24;
 
+        // Homepage + public browse: follow admin "Display order", then name.
         $themes = ThemeticArea::query()
+            ->orderBy('display_order', 'asc')
             ->orderBy('description', 'asc')
             ->orderBy('id', 'asc');
 
