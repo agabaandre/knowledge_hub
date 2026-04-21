@@ -63,4 +63,46 @@
         }
 
     });
+
+    function filterSearchFileCategoriesByDataCategory() {
+        var dataCategoryEl = document.getElementById('data_category_id');
+        var fileCategoryEl = document.getElementById('file_category_id');
+        if (!dataCategoryEl || !fileCategoryEl) {
+            return;
+        }
+
+        var selectedDataCategory = String(dataCategoryEl.value || '');
+        var selectedFileCategory = String(fileCategoryEl.value || '');
+        var selectedStillValid = false;
+
+        Array.prototype.forEach.call(fileCategoryEl.options, function (opt) {
+            if (!opt.value) return;
+            var linked = String(opt.getAttribute('data-linked-data-categories') || '')
+                .split(',')
+                .map(function (v) { return v.trim(); })
+                .filter(Boolean);
+            var allowed = !selectedDataCategory || linked.indexOf(selectedDataCategory) !== -1;
+            opt.hidden = !allowed;
+            opt.disabled = !allowed;
+
+            if (allowed && opt.value === selectedFileCategory) {
+                selectedStillValid = true;
+            }
+        });
+
+        if (selectedFileCategory && !selectedStillValid) {
+            fileCategoryEl.value = '';
+            if (window.jQuery && window.jQuery(fileCategoryEl).hasClass('select2-hidden-accessible')) {
+                window.jQuery(fileCategoryEl).val('').trigger('change');
+            }
+        }
+    }
+
+    $(document).on('change', '#data_category_id', function () {
+        filterSearchFileCategoriesByDataCategory();
+    });
+
+    $(document).ready(function () {
+        filterSearchFileCategoriesByDataCategory();
+    });
 </script>

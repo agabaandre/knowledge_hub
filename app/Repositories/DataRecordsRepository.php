@@ -165,6 +165,27 @@ class DataRecordsRepository extends SharedRepo{
                     ->update(['data_category_id' => $new->id]);
             }
 
+            $remappedLinkedSubCategories = 0;
+            $linkedPublicationCategoryIds = DB::table('data_category_publication_category')
+                ->where('data_category_id', $old->id)
+                ->pluck('publication_category_id');
+            foreach ($linkedPublicationCategoryIds as $publicationCategoryId) {
+                DB::table('data_category_publication_category')->updateOrInsert(
+                    [
+                        'data_category_id' => (int) $new->id,
+                        'publication_category_id' => (int) $publicationCategoryId,
+                    ],
+                    [
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+                $remappedLinkedSubCategories++;
+            }
+            DB::table('data_category_publication_category')
+                ->where('data_category_id', $old->id)
+                ->delete();
+
             $old->delete();
 
             return [
@@ -173,6 +194,7 @@ class DataRecordsRepository extends SharedRepo{
                 'data' => [
                     'moved_subcategories' => (int) $movedSubcategories,
                     'moved_records' => (int) $movedRecords,
+                    'remapped_linked_subcategories' => (int) $remappedLinkedSubCategories,
                     'deleted_category_id' => (int) $old->id,
                     'replacement_category_id' => (int) $new->id,
                 ],

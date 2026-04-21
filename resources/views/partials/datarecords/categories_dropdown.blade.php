@@ -12,7 +12,9 @@
         }
     }
 @endphp
-<select class="form-control text-left form-select data_category select2" name="{{ $field ?? 'data_category_id' }}"
+<select class="{{ $class ?? 'form-control text-left form-select data_category select2' }}"
+    id="{{ $id ?? ($field ?? 'data_category_id') }}"
+    name="{{ $field ?? 'data_category_id' }}"
     {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select Category' }}">
     @if (!empty($allfield))
         <option value="" {{ $__catSelected === '' ? 'selected' : '' }}>{{ $allfield }}</option>

@@ -1,4 +1,10 @@
-<select class="form-control {{ $class ?? 'select2' }}" name="{{$field ?? 'publication_catgory_id'}}" id="publication_catgory_id" {{ $required ?? '' }} data-placeholder="{{ $allfield ?? 'Select Category' }}">
+<select
+    class="form-control {{ $class ?? 'select2' }}"
+    name="{{ $field ?? 'publication_catgory_id' }}"
+    id="{{ $id ?? ($field ?? 'publication_catgory_id') }}"
+    {{ $required ?? '' }}
+    data-placeholder="{{ $allfield ?? 'Select Category' }}"
+>
 <option {{ (@$allfield)?'':'disabled' }} selected value="">{{ $allfield ?? 'Select Category' }}</option>
 @foreach ($file_categories as $filecategory)
     <option 

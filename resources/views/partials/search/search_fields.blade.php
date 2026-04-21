@@ -69,6 +69,7 @@
             <label class="form-label-sm" for="file_category_id"><small>Sub Category</small></label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
+                'id' => 'file_category_id',
                 'class' => 'select2 form-control',
                 'selected' => $fileCategorySelected,
                 'allfield' => 'All',
@@ -81,6 +82,7 @@
             @include('partials.datarecords.categories_dropdown', [
                 'class' => 'category select2 form-control',
                 'field' => 'data_category_id',
+                'id' => 'data_category_id',
                 'selected' => $categorySelected,
                 'allfield' => 'All',
                 'exclude_special' => true,
@@ -136,6 +138,7 @@
             <label class="form-label-sm" for="file_category_id"><small>Sub Category</small></label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
+                'id' => 'file_category_id',
                 'class' => 'select2 form-control',
                 'selected' => $fileCategorySelected,
                 'allfield' => 'All',
@@ -148,6 +151,7 @@
             @include('partials.datarecords.categories_dropdown', [
                 'class' => 'category select2 form-control',
                 'field' => 'data_category_id',
+                'id' => 'data_category_id',
                 'selected' => $categorySelected,
                 'allfield' => 'All',
                 'exclude_special' => true,

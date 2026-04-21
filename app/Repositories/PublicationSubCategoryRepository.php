@@ -146,6 +146,27 @@ class PublicationSubCategoryRepository
                     ->update(['publication_sub_category_id' => $new->id]);
             }
 
+            $remappedLinkedDataCategories = 0;
+            $linkedDataCategoryIds = DB::table('data_category_publication_category')
+                ->where('publication_category_id', $old->id)
+                ->pluck('data_category_id');
+            foreach ($linkedDataCategoryIds as $dataCategoryId) {
+                DB::table('data_category_publication_category')->updateOrInsert(
+                    [
+                        'data_category_id' => (int) $dataCategoryId,
+                        'publication_category_id' => (int) $new->id,
+                    ],
+                    [
+                        'updated_at' => now(),
+                        'created_at' => now(),
+                    ]
+                );
+                $remappedLinkedDataCategories++;
+            }
+            DB::table('data_category_publication_category')
+                ->where('publication_category_id', $old->id)
+                ->delete();
+
             $old->delete();
 
             return [
@@ -155,6 +176,7 @@ class PublicationSubCategoryRepository
                     'moved_subcategories' => (int) $movedSubcategories,
                     'moved_publications' => (int) $movedPublications,
                     'moved_legacy_subcategory_refs' => (int) $legacySubcategoryRefs,
+                    'remapped_linked_data_categories' => (int) $remappedLinkedDataCategories,
                     'deleted_category_id' => (int) $old->id,
                     'replacement_category_id' => (int) $new->id,
                 ],

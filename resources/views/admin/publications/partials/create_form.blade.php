@@ -95,6 +95,7 @@
                             <div class="mb-3">
                                 <label class="form-label" for="publication">File Category</label>
                                 @include('partials.publications.filecategory_dropdown',['field'=>'category_id',
+                                'id'=>'publication_catgory_id',
                                 'selected'=>(@$publication->publication_catgory_id)?$publication->publication_catgory_id:''])
                             </div>
                         </div>
