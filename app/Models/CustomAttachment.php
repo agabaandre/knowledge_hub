@@ -42,23 +42,23 @@ class CustomAttachment extends Model
         }
 
         if (Str::startsWith($path, 'http://') || Str::startsWith($path, 'https://')) {
-            return $path;
+            return normalize_web_storage_url($path);
         }
 
         // First URL embedded in a mistaken "uploads/" + absolute URL value
         if (Str::contains($path, '://') && preg_match('#https?://[^\s"\'<>]+#i', $path, $m)) {
-            return rtrim($m[0], '/');
+            return normalize_web_storage_url(rtrim($m[0], '/'));
         }
 
         $path = ltrim($path, '/');
         if (Str::startsWith($path, 'storage/')) {
-            return storage_link($path);
+            return normalize_web_storage_url(storage_link($path));
         }
         if (Str::startsWith($path, 'uploads/')) {
-            return storage_link($path);
+            return normalize_web_storage_url(storage_link($path));
         }
 
-        return storage_link('uploads/'.$path);
+        return normalize_web_storage_url(storage_link('uploads/'.$path));
     }
 
 }

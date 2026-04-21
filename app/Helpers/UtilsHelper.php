@@ -385,27 +385,65 @@ if (!function_exists('is_valid_image')) {
     }
 }
 
-if(!function_exists('storage_link')){
+if (!function_exists('normalize_web_storage_url')) {
+    /**
+     * Fix bad links: /public/storage/... (docroot is already public), trailing slash on static files, etc.
+     */
+    function normalize_web_storage_url($url)
+    {
+        if ($url === null || $url === '') {
+            return '';
+        }
+        $url = trim((string) $url);
+        // https://host/public/storage/... → https://host/storage/...
+        $url = preg_replace('#^(https?://[^/]+)/public(/storage/)#i', '$1$2', $url);
+        // Same for root-relative paths
+        $url = preg_replace('#^/public(/storage/)#i', '$1', $url);
+        // "file.pdf/" often yields 403 or wrong handler
+        if (preg_match('#\.(pdf|zip|docx?|xlsx?|pptx?|png|jpe?g|gif|webp|txt|csv|mp4|mov|avi|svg|json)\/*$#i', $url)) {
+            $url = rtrim($url, '/');
+        }
 
-    function storage_link($file_path){
-        // If file_path already contains full URL, return as-is
+        return $url;
+    }
+}
+
+if (!function_exists('storage_link')) {
+
+    function storage_link($file_path)
+    {
+        if ($file_path === null || (string) $file_path === '') {
+            return '';
+        }
+        $file_path = trim((string) $file_path);
+
         if (strpos($file_path, 'http://') === 0 || strpos($file_path, 'https://') === 0) {
-            return $file_path;
+            return normalize_web_storage_url($file_path);
         }
-        // Mis-stored "uploads/https://..." or similar — use embedded absolute URL
+        // Mis-stored "uploads/https://..." — use embedded absolute URL
         if (preg_match('#https?://[^\s"\'<>]+#i', $file_path, $m) && strpos($file_path, '://') !== 0) {
-            return rtrim($m[0], '/');
+            return normalize_web_storage_url(rtrim($m[0], '/'));
         }
-        // Get storage URL
-        $storageUrl = Storage::disk('local')->url($file_path);
-        // If storage URL already contains domain, return as-is, otherwise prepend site URL
-        if (strpos($storageUrl, 'http://') === 0 || strpos($storageUrl, 'https://') === 0) {
-            return $storageUrl;
+
+        // Files live under storage/app/public (see public disk). The old "local" disk pointed at storage/app and produced wrong /public/storage URLs.
+        $rel = ltrim($file_path, '/');
+        if (stripos($rel, 'storage/') === 0) {
+            $rel = substr($rel, strlen('storage/'));
         }
-        return url('/').$storageUrl;
-     }
-   
-   }
+        if (stripos($rel, 'uploads/') !== 0) {
+            $rel = 'uploads/'.$rel;
+        }
+
+        try {
+            $storageUrl = Storage::disk('public')->url($rel);
+        } catch (\Throwable $e) {
+            $storageUrl = asset('storage/'.$rel);
+        }
+
+        return normalize_web_storage_url($storageUrl);
+    }
+
+}
 
    if(!function_exists('form_edit')){
 
