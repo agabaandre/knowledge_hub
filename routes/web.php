@@ -79,6 +79,7 @@ use App\Http\Controllers\HealthTopicsController;
 use App\Http\Controllers\EventsController as PublicEventsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\DocsController;
 
 
 /*
@@ -93,6 +94,15 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 */
 
 Auth::routes(['verify' => true, 'reset' => false]);
+
+/*
+|--------------------------------------------------------------------------
+| API Docs helpers
+|--------------------------------------------------------------------------
+| Swagger UI (`/docs`) is provided by l5-swagger. This endpoint serves the
+| OpenAPI JSON with a dynamic `servers` URL sourced from env/current host.
+*/
+Route::get('docs/spec/api-docs.dynamic.json', [DocsController::class, 'openApiJson']);
 
 /*
 | Password reset: Laravel expects the token in the path (/password/reset/{token}).
