@@ -166,7 +166,11 @@ final class RecordsSearchFilterSchema
             'multi' => false,
             'allow_all' => true,
             'all_value' => '',
-            'options' => ThemeticArea::query()->orderBy('description', 'asc')->get()->map(fn ($t) => [
+            'options' => ThemeticArea::query()
+                ->orderBy('display_order', 'asc')
+                ->orderBy('description', 'asc')
+                ->get()
+                ->map(fn ($t) => [
                 'value' => (int) $t->id,
                 'label' => (string) $t->description,
             ])->values()->all(),

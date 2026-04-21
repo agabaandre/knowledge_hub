@@ -24,6 +24,13 @@
           </div>
           <div class="col-md-12">
             <div class="mb-3">
+              <label class="form-label" for="display_order">Display Order</label>
+              <input type="number" min="0" step="1" class="form-control" id="display_order" name="display_order" value="0" required>
+              <small class="text-muted">Lower numbers appear first in theme selection lists.</small>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="mb-3">
               <label class="form-label" for="icon">Icon</label>
               <select class="form-control select2-fa-icons" id="icon" name="icon" required>
                 <option value="">Select icon class</option>
@@ -62,6 +69,7 @@
   });
   $('#create-modal').on('hidden.bs.modal', function () {
     $('#create-modal #icon').val('').trigger('change');
+    $('#create-modal #display_order').val('0');
   });
 </script>
 @endpush

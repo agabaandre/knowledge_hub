@@ -59,6 +59,7 @@
                         <tr>
                             <th>#</th>
                             <th>Thematic Area</th>
+                            <th>Display Order</th>
                             <th>Icon</th>
                             <th>Actions</th>
                         </tr>
@@ -73,10 +74,11 @@ $i = 1;
                             <tr>
                                 <td>{{ $i++ }}</td>
                                 <td>{{ $row->description }}</td>
+                                <td>{{ (int) ($row->display_order ?? 0) }}</td>
                                 <td>{{ $row->icon }}</td>
                                 <td>
                                     <a href="#edit-theme-modal" class="btn btn-sm btn-success mr-1" data-toggle="modal"
-                                        data-id="{{ $row->id }}" data-description="{!! $row->description !!}" data-icon="{!! $row->icon !!}">Edit
+                                        data-id="{{ $row->id }}" data-description="{!! $row->description !!}" data-icon="{!! $row->icon !!}" data-display_order="{{ (int) ($row->display_order ?? 0) }}">Edit
                                         Theme</a>
 
                                     @can('delete_publication_metadata')

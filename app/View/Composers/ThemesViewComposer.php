@@ -15,7 +15,9 @@ class ThemesViewComposer{
         $subthemes = cache()->remember('themes',$minutes, function () {
             return   ThemeticArea::with(['subthemes' => function($query) {
                 $query->orderBy('description', 'asc');
-            }])->orderBy('description', 'asc')->get();
+            }])->orderBy('display_order', 'asc')
+                ->orderBy('description', 'asc')
+                ->get();
         });
 
         $view->with('themes',$subthemes);

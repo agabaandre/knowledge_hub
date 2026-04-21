@@ -17,7 +17,10 @@ class ThemesRepository
 
         $rows_count = ($request->rows) ? $request->rows : 24;
 
-        $themes = ThemeticArea::orderBy('id', 'desc');
+        $themes = ThemeticArea::query()
+            ->orderBy('display_order', 'asc')
+            ->orderBy('description', 'asc')
+            ->orderBy('id', 'desc');
 
         if ($request->term)
             $themes->where('description', 'like', '%' . $request->term . '%');
@@ -63,6 +66,7 @@ class ThemesRepository
         // Update fields
         $theme->description = $request->description;
         $theme->icon = $request->icon;
+        $theme->display_order = (int) ($request->display_order ?? 0);
 
         // Save the record
         $theme->save();
@@ -83,7 +87,10 @@ class ThemesRepository
 
     public function allForMapping()
     {
-        return ThemeticArea::orderBy('description')->get(['id', 'description']);
+        return ThemeticArea::query()
+            ->orderBy('display_order', 'asc')
+            ->orderBy('description', 'asc')
+            ->get(['id', 'description', 'display_order']);
     }
 
     public function deleteWithMapping(int $id, int $replacementThemeId): array

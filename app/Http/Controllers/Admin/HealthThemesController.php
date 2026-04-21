@@ -29,6 +29,9 @@ class HealthThemesController extends Controller
     }
 
     public function store(Request $request){
+        $request->validate([
+            'display_order' => 'nullable|integer|min:0',
+        ]);
 
         $saved = $this->themesRepo->save($request);
 
