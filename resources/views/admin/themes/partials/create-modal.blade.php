@@ -24,6 +24,12 @@
           </div>
           <div class="col-md-12">
             <div class="mb-3">
+              <label class="form-label" for="theme_detailed_description">Description <small class="text-muted">(optional)</small></label>
+              <textarea class="form-control" id="theme_detailed_description" name="detailed_description" rows="3" placeholder="Optional detailed description for this thematic area"></textarea>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="mb-3">
               <label class="form-label" for="display_order">Display Order</label>
               <input type="number" min="0" step="1" class="form-control" id="display_order" name="display_order" value="0" required>
               <small class="text-muted">Lower numbers appear first in theme selection lists.</small>
@@ -70,6 +76,7 @@
   $('#create-modal').on('hidden.bs.modal', function () {
     $('#create-modal #icon').val('').trigger('change');
     $('#create-modal #display_order').val('0');
+    $('#create-modal #theme_detailed_description').val('');
   });
 </script>
 @endpush

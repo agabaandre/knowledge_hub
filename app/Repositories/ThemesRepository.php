@@ -65,6 +65,9 @@ class ThemesRepository
 
         // Update fields
         $theme->description = $request->description;
+        $theme->detailed_description = $request->filled('detailed_description')
+            ? (string) $request->detailed_description
+            : null;
         $theme->icon = $request->icon;
         $theme->display_order = (int) ($request->display_order ?? 0);
 

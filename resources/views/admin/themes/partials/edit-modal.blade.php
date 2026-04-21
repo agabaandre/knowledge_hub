@@ -18,6 +18,10 @@
                         <input type="text" class="form-control" id="theme_description" name="description" required>
                     </div>
                     <div class="form-group">
+                        <label for="theme_detailed_description">Description <small class="text-muted">(optional)</small></label>
+                        <textarea class="form-control" id="theme_detailed_description" name="detailed_description" rows="3" placeholder="Optional detailed description for this thematic area"></textarea>
+                    </div>
+                    <div class="form-group">
                         <label for="theme_display_order">Display Order</label>
                         <input type="number" min="0" step="1" class="form-control" id="theme_display_order" name="display_order" required>
                         <small class="text-muted">Lower numbers appear first in theme selection lists.</small>
@@ -60,12 +64,14 @@
 
             // Assuming you want to populate the form fields with existing data
             var description = button.data('description');
+            var detailed_description = button.data('detailed_description');
             var icon = button.data('icon');
             var display_order = button.data('display_order');
 
             console.log({
                 id,
                 description,
+                detailed_description,
                 icon,
                 display_order
             })
@@ -73,6 +79,7 @@
             // Populate the form fields with the retrieved data
             $('#theme_id').val(id);
             $('#theme_description').val(description);
+            $('#theme_detailed_description').val(detailed_description || '');
             $('#theme_display_order').val(display_order ?? 0);
             var iconSelect = $('#theme_icon');
             if (icon && iconSelect.find('option[value="' + icon + '"]').length === 0) {
@@ -91,6 +98,7 @@
         $('#edit-theme-modal').on('hidden.bs.modal', function() {
             $('#theme_id').val('');
             $('#theme_description').val('');
+            $('#theme_detailed_description').val('');
             $('#theme_display_order').val('0');
             $('#theme_icon').val('').trigger('change');
         });
