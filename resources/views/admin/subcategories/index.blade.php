@@ -51,8 +51,7 @@
                                 <th>#</th>
                                 <th>Category</th>
                                 <th>Description</th>
-                                <th>Sub categories</th>
-                                    <th>Linked Data Categories</th>
+                                    <th>Linked Sub Categories</th>
                                 <th width="140">Actions</th>
                             </tr>
                         </thead>
@@ -62,7 +61,6 @@
                                     <td>{{ $subcategories->firstItem() + $idx }}</td>
                                     <td>{{ $row->category_name }}</td>
                                     <td>{{ \Illuminate\Support\Str::limit($row->category_desc, 60) }}</td>
-                                    <td>{{ $row->sub_categories_count ?? 0 }}</td>
                                     <td>{{ $row->linkedDataCategories->count() }}</td>
                                     <td>
                                         <a href="#edit-subcategory-modal" data-toggle="modal"

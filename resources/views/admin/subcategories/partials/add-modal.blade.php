@@ -19,7 +19,7 @@
                         <input type="text" class="form-control" id="add_category_desc" name="category_desc" maxlength="500">
                     </div>
                     <div class="form-group">
-                        <label for="add_linked_data_categories">Linked Data Categories</label>
+                        <label for="add_linked_data_categories">Linked Data Sub Categories</label>
                         <select class="form-control select2" id="add_linked_data_categories" name="linked_data_categories[]" multiple data-placeholder="Select one or more categories">
                             @foreach(($dataCategories ?? []) as $dc)
                                 <option value="{{ (int) $dc->id }}" selected>{{ $dc->category_name }}</option>
