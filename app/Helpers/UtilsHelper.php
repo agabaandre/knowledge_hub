@@ -388,6 +388,14 @@ if (!function_exists('is_valid_image')) {
 if(!function_exists('storage_link')){
 
     function storage_link($file_path){
+        $file_path = trim((string) $file_path);
+        if ($file_path === '') {
+            return '';
+        }
+        // Legacy double prefix: "uploads/https://…" (e.g. admin views concatenating uploads/ + already-absolute path)
+        if (preg_match('#^uploads/(https?://)#i', $file_path)) {
+            return storage_link(substr($file_path, strlen('uploads/')));
+        }
         // If file_path already contains full URL, return as-is
         if (strpos($file_path, 'http://') === 0 || strpos($file_path, 'https://') === 0) {
             return $file_path;

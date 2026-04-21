@@ -224,8 +224,8 @@
                             <ul class="af-list">
                                 @foreach($forum->attachments as $att)
                                     <li>
-                                        <a href="{{ storage_link('uploads/'.$att->path) }}" target="_blank">
-                                            <i class="fa fa-paperclip mr-1"></i> {{ basename($att->path) }}
+                                        <a href="{{ $att->path }}" target="_blank" rel="noopener noreferrer">
+                                            <i class="fa fa-paperclip mr-1"></i>{{ forum_attachment_display_name($att) }}
                                         </a>
                                     </li>
                                 @endforeach
@@ -263,6 +263,20 @@
                                                         </div>
                                                     </div>
                                                     <div class="mt-2">{!! sanitize_rich_text_for_display($comment->comment) !!}</div>
+                                                    @if($comment->attachments && $comment->attachments->count() > 0)
+                                                        <div class="mt-2 small">
+                                                            <span class="text-muted">Attachments:</span>
+                                                            <ul class="list-unstyled mb-0 mt-1">
+                                                                @foreach($comment->attachments as $catt)
+                                                                    <li>
+                                                                        <a href="{{ $catt->path }}" target="_blank" rel="noopener noreferrer">
+                                                                            <i class="fa fa-paperclip mr-1"></i>{{ forum_attachment_display_name($catt) }}
+                                                                        </a>
+                                                                    </li>
+                                                                @endforeach
+                                                            </ul>
+                                                        </div>
+                                                    @endif
                                                 </div>
                                             </li>
                                         @endforeach
