@@ -15,7 +15,7 @@ class SettingsRepository
         'gradient_start_color', 'gradient_end_color', 'translate_button_filled', 'translate_button_text_color',
         'header_logo_inverse', 'footer_logo_inverse', 'logo_scale',
         'au_red', 'au_gold', 'au_corporate_green', 'au_green', 'au_plum', 'au_grey_text', 'au_white',
-        'logo', 'favicon', 'spotlight_banner',
+        'logo', 'favicon', 'spotlight_banner', 'spotlight_overlay_color', 'spotlight_overlay_opacity',
     ];
 
     public function get(Request $request){
@@ -246,6 +246,13 @@ class SettingsRepository
             $op = $request->input('theme_card_opacity');
             $settings->theme_card_opacity = $op !== null && $op !== '' ? (string) $op : '1';
         }
+        if (Schema::hasColumn('setting', 'spotlight_overlay_color')) {
+            $settings->spotlight_overlay_color = $request->input('spotlight_overlay_color') ?: '#000000';
+        }
+        if (Schema::hasColumn('setting', 'spotlight_overlay_opacity')) {
+            $overlayOpacity = (int) $request->input('spotlight_overlay_opacity', 35);
+            $settings->spotlight_overlay_opacity = max(0, min(100, $overlayOpacity));
+        }
         if (Schema::hasColumn('setting', 'theme_cards_per_row')) {
             $cards = (int) $request->input('theme_cards_per_row', 4);
             $settings->theme_cards_per_row = max(2, min(8, $cards));
@@ -460,6 +467,8 @@ class SettingsRepository
             'section_title_flagship_initiatives' => $request->input('section_title_flagship_initiatives'),
             'theme_card_opacity' => $request->input('theme_card_opacity') !== null && $request->input('theme_card_opacity') !== '' ? (string) $request->input('theme_card_opacity') : '1',
             'theme_cards_per_row' => (string) max(2, min(8, (int) $request->input('theme_cards_per_row', 4))),
+            'spotlight_overlay_color' => $request->input('spotlight_overlay_color') ?: '#000000',
+            'spotlight_overlay_opacity' => (string) max(0, min(100, (int) $request->input('spotlight_overlay_opacity', 35))),
         ];
         foreach ($map as $key => $value) {
             if ($value !== null) {

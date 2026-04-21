@@ -69,6 +69,7 @@ class DataRecordsAdminController extends Controller
     public function categories(Request $request){
 
         $data['categories'] = $this->dataRecordsRepo->get_categories($request);
+        $data['allCategoriesForMapping'] = $this->dataRecordsRepo->allCategoriesForMapping();
         $data['search']       = (Object) $request->all();
         return view('admin.datarecords.categories',$data);
     }
@@ -83,10 +84,18 @@ class DataRecordsAdminController extends Controller
     }
 
     public function delete_category(Request $request){
-        if (!auth()->user() || !auth()->user()->can('delete_meta_data')) {
+        if (!auth()->user() || !auth()->user()->can('delete_publication_metadata')) {
             return response(['status'=>'failure','message'=>'Unauthorized'], 403);
         }
-        return $this->dataRecordsRepo->delete_category($request->id);
+        $request->validate([
+            'id' => 'required|integer|exists:data_categories,id',
+            'replacement_category_id' => 'required|integer|exists:data_categories,id|different:id',
+        ]);
+
+        $result = $this->dataRecordsRepo->deleteCategoryWithMapping((int) $request->id, (int) $request->replacement_category_id);
+        $statusCode = ($result['status'] ?? 'failure') === 'success' ? 200 : 422;
+
+        return response()->json($result, $statusCode);
     }
 
     public function save_category(Request $request){

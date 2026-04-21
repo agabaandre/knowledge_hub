@@ -45,7 +45,7 @@
 								>Edit</a>
 								<!-- Delete Modal Action -->
                                 @can('delete_publication_metadata')
-                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick="openDeleteModal('{{ $record->id }}')" class="text-danger"> Delete</a>
+                                <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);" onclick='openDeleteModal({{ (int) $record->id }}, @json((string) $record->category_name))' class="text-danger"> Delete</a>
                                 @endcan
 							</td>
 						</tr>

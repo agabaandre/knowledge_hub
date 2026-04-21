@@ -6,9 +6,17 @@
     }
     $gradientStart = $settings->gradient_start_color ?? '#119A48';
     $gradientEnd = $settings->gradient_end_color ?? '#16c653';
+    $overlayHex = $settings->spotlight_overlay_color ?? '#000000';
+    $overlayOpacityPercent = (int) ($settings->spotlight_overlay_opacity ?? 35);
+    $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
+    $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
+    if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
+        $overlayRgb = [0, 0, 0];
+    }
+    $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
     
     if (!empty($bannerImage) && strpos($bannerImage, 'http') !== false) {
-        $bgStyle = "background: linear-gradient(var(--theme-color-primary), rgba(0, 0, 0, 0.4)), url('{$bannerImage}'); background-size: cover; background-position: center;";
+        $bgStyle = "background: linear-gradient({$overlayRgba}, {$overlayRgba}), url('{$bannerImage}'); background-size: cover; background-position: center;";
     } else {
         $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
     }

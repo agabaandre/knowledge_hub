@@ -5,6 +5,14 @@
         $bannerUrl = (strpos($b, 'http') === 0 || strpos($b, '//') === 0) ? $b : asset($b);
     }
     $primary = settings()->primary_color ?? '#119A48';
+    $overlayHex = settings()->spotlight_overlay_color ?? '#000000';
+    $overlayOpacityPercent = (int) (settings()->spotlight_overlay_opacity ?? 35);
+    $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
+    $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
+    if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
+        $overlayRgb = [0, 0, 0];
+    }
+    $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
 @endphp
 <style>
 .theme1-spotlight {
@@ -28,7 +36,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%);
+    background: {{ $bannerUrl ? $overlayRgba : 'linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%)' }};
     pointer-events: none;
 }
 .theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 1; }

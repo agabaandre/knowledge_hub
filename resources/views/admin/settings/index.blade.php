@@ -878,6 +878,34 @@
                         <small class="info-text">Preview of the gradient (shown when no banner image is set)</small>
                     </div>
 
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Spotlight Image Overlay Color</label>
+                                <div class="input-group colorPicker">
+                                    <input type="text" name="spotlight_overlay_color" value="{{ $settings->spotlight_overlay_color ?? '#000000' }}" class="form-control" />
+                                    <div class="input-group-append">
+                                        <span class="input-group-text color-preview" style="background-color: {{ $settings->spotlight_overlay_color ?? '#000000' }}"></span>
+                                    </div>
+                                </div>
+                                <small class="info-text">Overlay color applied on top of the spotlight image.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Spotlight Image Overlay Darkness (%)</label>
+                                <input type="number"
+                                       name="spotlight_overlay_opacity"
+                                       min="0"
+                                       max="100"
+                                       step="1"
+                                       class="form-control"
+                                       value="{{ (int) ($settings->spotlight_overlay_opacity ?? 35) }}" />
+                                <small class="info-text">0 = no overlay, 100 = fully solid overlay.</small>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="form-section-subtitle mt-4 mb-2">AU official colors</div>
                     <div class="row">
                         <div class="col-md-6">

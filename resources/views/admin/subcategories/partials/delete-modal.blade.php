@@ -8,7 +8,22 @@
                 </button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete this category? Any sub categories under it will also be removed.</p>
+                <p>Deleting this category requires selecting a replacement category.</p>
+                <p class="mb-2">
+                    Existing subcategories and publications under
+                    <strong id="deleteCategoryName">selected category</strong>
+                    will be mapped before deletion.
+                </p>
+                <div class="form-group mb-0">
+                    <label for="replacement_category_id">Replacement category <span class="text-danger">*</span></label>
+                    <select id="replacement_category_id" class="form-control">
+                        <option value="">Select replacement category</option>
+                        @foreach(($allCategoriesForMapping ?? []) as $catOption)
+                            <option value="{{ $catOption->id }}">{{ $catOption->category_name }}</option>
+                        @endforeach
+                    </select>
+                    <small class="text-muted">Subcategories and publications will be moved first.</small>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>

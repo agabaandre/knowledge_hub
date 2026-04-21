@@ -8,6 +8,7 @@ use App\Models\DataRecord;
 use App\Models\DataSubCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class DataRecordsRepository extends SharedRepo{
 
@@ -131,6 +132,51 @@ class DataRecordsRepository extends SharedRepo{
     public function delete_category($id){
 
         return DataCategory::find($id)->delete();
+    }
+
+    public function allCategoriesForMapping()
+    {
+        return DataCategory::query()->orderBy('category_name')->get(['id', 'category_name']);
+    }
+
+    public function deleteCategoryWithMapping(int $id, int $replacementCategoryId): array
+    {
+        if ($id === $replacementCategoryId) {
+            return ['status' => 'failure', 'message' => 'Please select a different category to map data to.'];
+        }
+        $old = DataCategory::find($id);
+        $new = DataCategory::find($replacementCategoryId);
+        if (! $old || ! $new) {
+            return ['status' => 'failure', 'message' => 'Selected category was not found.'];
+        }
+
+        return DB::transaction(function () use ($old, $new) {
+            $movedSubcategories = DataSubCategory::query()
+                ->where('data_category_id', $old->id)
+                ->update(['data_category_id' => $new->id]);
+
+            $movedRecords = DataRecord::query()
+                ->where('data_category_id', $old->id)
+                ->count();
+            if ($movedRecords > 0) {
+                DataRecord::query()
+                    ->where('data_category_id', $old->id)
+                    ->update(['data_category_id' => $new->id]);
+            }
+
+            $old->delete();
+
+            return [
+                'status' => 'success',
+                'message' => 'Category deleted and data mapped successfully.',
+                'data' => [
+                    'moved_subcategories' => (int) $movedSubcategories,
+                    'moved_records' => (int) $movedRecords,
+                    'deleted_category_id' => (int) $old->id,
+                    'replacement_category_id' => (int) $new->id,
+                ],
+            ];
+        });
     }
 
 

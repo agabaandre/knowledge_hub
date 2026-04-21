@@ -69,7 +69,7 @@
                                            data-category_desc="{{ e($row->category_desc ?? '') }}"
                                            class="btn btn-sm btn-outline-primary">Edit</a>
                                         @can('delete_publication_metadata')
-                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal({{ $row->id }})">Delete</a>
+                                            <a href="javascript:void(0);" class="btn btn-sm btn-outline-danger" onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->category_name))'>Delete</a>
                                         @endcan
                                     </td>
                                 </tr>
@@ -94,13 +94,67 @@
 @section('scripts')
 <script>
     var toDeleteId = '';
-    function openDeleteModal(id) {
+    var toDeleteName = '';
+    function openDeleteModal(id, categoryName) {
         toDeleteId = id;
+        toDeleteName = categoryName || '';
         $('#delete-subcategory-modal').modal('show');
+        var nameEl = document.getElementById('deleteCategoryName');
+        if (nameEl) {
+            nameEl.textContent = toDeleteName || ('ID ' + toDeleteId);
+        }
+        var replacementSelect = document.getElementById('replacement_category_id');
+        if (replacementSelect) {
+            replacementSelect.value = '';
+            Array.from(replacementSelect.options).forEach(function (opt) {
+                if (String(opt.value) === String(toDeleteId)) {
+                    opt.disabled = true;
+                } else if (opt.value !== '') {
+                    opt.disabled = false;
+                }
+            });
+        }
+    }
+    function showDeleteNotice(message, type = 'info', onClose = null) {
+        if (typeof swal === 'function') {
+            var result = swal(type === 'success' ? 'Success' : 'Notice', message, type);
+            if (result && typeof result.then === 'function') {
+                result.then(function () { if (typeof onClose === 'function') onClose(); });
+            } else if (typeof onClose === 'function') {
+                setTimeout(onClose, 300);
+            }
+            return;
+        }
+        alert(message);
+        if (typeof onClose === 'function') onClose();
     }
     function confirmDelete() {
         if (!toDeleteId) return;
-        window.location.href = "{{ route('admin.subcategories.destroy') }}?id=" + toDeleteId;
+        var replacementCategoryId = (document.getElementById('replacement_category_id') || {}).value;
+        if (!replacementCategoryId) {
+            showDeleteNotice('Please select the category to map data to.', 'warning');
+            return;
+        }
+        if (String(replacementCategoryId) === String(toDeleteId)) {
+            showDeleteNotice('Please select a different category.', 'warning');
+            return;
+        }
+        var url = "{{ route('admin.subcategories.destroy') }}" + "?id=" + encodeURIComponent(toDeleteId) + "&replacement_category_id=" + encodeURIComponent(replacementCategoryId);
+        fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (res) { return res.json(); })
+            .then(function (res) {
+                if (res.status !== 'success') {
+                    showDeleteNotice(res.message || 'Failed to delete category.', 'error');
+                    return;
+                }
+                $('#delete-subcategory-modal').modal('hide');
+                var movedSubs = res?.data?.moved_subcategories ?? 0;
+                var movedPubs = res?.data?.moved_publications ?? 0;
+                showDeleteNotice((res.message || 'Category deleted.') + ' Mapped ' + movedSubs + ' subcategories and ' + movedPubs + ' publications.', 'success', function () {
+                    window.location.reload();
+                });
+            })
+            .catch(function () { showDeleteNotice('Failed to delete category.', 'error'); });
     }
 </script>
 @endsection

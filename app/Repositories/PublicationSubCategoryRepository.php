@@ -3,8 +3,10 @@
 namespace App\Repositories;
 
 use App\Models\PublicationCategory;
+use App\Models\Publication;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 
 class PublicationSubCategoryRepository
 {
@@ -61,5 +63,64 @@ class PublicationSubCategoryRepository
     {
         $cat = PublicationCategory::parentOnly()->find($id);
         return $cat ? $cat->delete() : false;
+    }
+
+    public function allParentCategoriesForMapping()
+    {
+        return PublicationCategory::parentOnly()
+            ->orderBy('category_name')
+            ->get(['id', 'category_name']);
+    }
+
+    public function destroyWithMapping(int $id, int $replacementId): array
+    {
+        if ($id === $replacementId) {
+            return ['status' => 'failure', 'message' => 'Please select a different category to map data to.'];
+        }
+
+        $old = PublicationCategory::parentOnly()->find($id);
+        $new = PublicationCategory::parentOnly()->find($replacementId);
+        if (! $old || ! $new) {
+            return ['status' => 'failure', 'message' => 'Selected category was not found.'];
+        }
+
+        return DB::transaction(function () use ($old, $new) {
+            $movedSubcategories = PublicationCategory::query()
+                ->where('parent_id', $old->id)
+                ->update(['parent_id' => $new->id]);
+
+            $movedPublications = Publication::query()
+                ->where('publication_catgory_id', $old->id)
+                ->count();
+            if ($movedPublications > 0) {
+                Publication::query()
+                    ->where('publication_catgory_id', $old->id)
+                    ->update(['publication_catgory_id' => $new->id]);
+            }
+
+            // Defensive mapping in case legacy rows used parent id directly here.
+            $legacySubcategoryRefs = Publication::query()
+                ->where('publication_sub_category_id', $old->id)
+                ->count();
+            if ($legacySubcategoryRefs > 0) {
+                Publication::query()
+                    ->where('publication_sub_category_id', $old->id)
+                    ->update(['publication_sub_category_id' => $new->id]);
+            }
+
+            $old->delete();
+
+            return [
+                'status' => 'success',
+                'message' => 'Category deleted and data mapped successfully.',
+                'data' => [
+                    'moved_subcategories' => (int) $movedSubcategories,
+                    'moved_publications' => (int) $movedPublications,
+                    'moved_legacy_subcategory_refs' => (int) $legacySubcategoryRefs,
+                    'deleted_category_id' => (int) $old->id,
+                    'replacement_category_id' => (int) $new->id,
+                ],
+            ];
+        });
     }
 }

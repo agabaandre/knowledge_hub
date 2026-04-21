@@ -15,8 +15,9 @@ class PublicationSubCategoryController extends Controller
     public function index(Request $request)
     {
         $subcategories = $this->repo->getPaginated($request);
+        $allCategoriesForMapping = $this->repo->allParentCategoriesForMapping();
         $search = (object) $request->all();
-        return view('admin.subcategories.index', compact('subcategories', 'search'));
+        return view('admin.subcategories.index', compact('subcategories', 'search', 'allCategoriesForMapping'));
     }
 
     public function store(Request $request)
@@ -44,10 +45,17 @@ class PublicationSubCategoryController extends Controller
     public function destroy(Request $request)
     {
         if (!auth()->user()?->can('delete_publication_metadata')) {
-            return redirect()->route('admin.subcategories.index')->with('error', 'Unauthorized.');
+            return response()->json(['status' => 'failure', 'message' => 'Unauthorized.'], 403);
         }
-        $this->repo->destroy((int) $request->id);
-        return redirect()->route('admin.subcategories.index')
-            ->with('success', 'Category deleted.');
+
+        $request->validate([
+            'id' => 'required|integer|exists:publication_categories,id',
+            'replacement_category_id' => 'required|integer|exists:publication_categories,id|different:id',
+        ]);
+
+        $result = $this->repo->destroyWithMapping((int) $request->id, (int) $request->replacement_category_id);
+        $statusCode = ($result['status'] ?? 'failure') === 'success' ? 200 : 422;
+
+        return response()->json($result, $statusCode);
     }
 }
