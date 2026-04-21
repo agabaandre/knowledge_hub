@@ -87,7 +87,7 @@ $i = 1;
 
                                     @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
-                                        onclick="openDeleteModal('{{ $row->id }}', @json($row->description))" class="text-danger"> Delete</a>
+                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))' class="text-danger"> Delete</a>
                                     @endcan
                                 </td>
                             </tr>

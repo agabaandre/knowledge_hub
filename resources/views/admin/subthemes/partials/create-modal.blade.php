@@ -15,6 +15,10 @@
                         <label for="description">Description</label>
                         <input type="text" class="form-control" id="new_subtheme_description" name="description" required>
                     </div>
+                    <div class="form-group">
+                        <label for="new_subtheme_detailed_description">Description <small class="text-muted">(optional)</small></label>
+                        <textarea class="form-control" id="new_subtheme_detailed_description" name="detailed_description" rows="3" placeholder="Optional detailed description for this subtheme"></textarea>
+                    </div>
 
                     <div class="form-group">
                         <label for="icon">Icon</label>
@@ -68,6 +72,7 @@
         // Optional: If you want to reset the form fields when the modal is closed
         $('#create-subtheme-modal').on('hidden.bs.modal', function() {
             $('#new_subtheme_description').val('');
+            $('#new_subtheme_detailed_description').val('');
             $('#new_subtheme_icon').val('').trigger('change');
             $('#new_thematic_area_id').val('').trigger('change');
         });

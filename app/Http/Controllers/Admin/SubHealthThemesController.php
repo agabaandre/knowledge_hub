@@ -33,6 +33,9 @@ class SubHealthThemesController extends Controller
     }
 
     public function store(Request $request){
+        $request->validate([
+            'detailed_description' => 'nullable|string|max:10000',
+        ]);
 
         $saved = $this->themesRepo->save_subtheme($request);
 

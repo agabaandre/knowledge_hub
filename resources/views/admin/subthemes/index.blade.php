@@ -82,11 +82,12 @@
                                 <td>
                                     <a href="#edit-subtheme-modal " data-toggle="modal" data-id="{{ $row->id }}"
                                         data-description="{{ e((string) $row->description) }}" data-icon="{{ e((string) $row->icon) }}"
+                                        data-detailed_description="{{ e((string) ($row->detailed_description ?? '')) }}"
                                         data-thematic_area_id="{{ $row->thematic_area_id }}"
                                         class="btn btn-sm btn-primary ml-1">Edit</a>
                                     @can('delete_publication_metadata')
                                     <a class="btn btn-sm btn-danger ml-1" href="javascript:void(0);"
-                                        onclick="openDeleteModal('{{ $row->id }}', @json($row->description))" class="text-danger"> Delete</a>
+                                        onclick='openDeleteModal({{ (int) $row->id }}, @json((string) $row->description))' class="text-danger"> Delete</a>
                                     @endcan
                                 </td>
                             </tr>

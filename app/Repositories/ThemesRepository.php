@@ -162,6 +162,9 @@ class ThemesRepository
 
         // Update fields with new values from request
         $theme->description = $request->description;
+        $theme->detailed_description = $request->filled('detailed_description')
+            ? (string) $request->detailed_description
+            : null;
         $theme->icon = $request->icon;
         $theme->thematic_area_id = $request->thematic_area_id;
 

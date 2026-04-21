@@ -17,6 +17,10 @@
                         <label for="description">Description</label>
                         <input type="text" class="form-control" id="subtheme_description" name="description" required>
                     </div>
+                    <div class="form-group">
+                        <label for="subtheme_detailed_description">Description <small class="text-muted">(optional)</small></label>
+                        <textarea class="form-control" id="subtheme_detailed_description" name="detailed_description" rows="3" placeholder="Optional detailed description for this subtheme"></textarea>
+                    </div>
 
                     <div class="form-group">
                         <label for="icon">Icon</label>
@@ -60,6 +64,7 @@
             // Extract data from the button
             var id = button.data('id');
             var description = button.data('description');
+            var detailed_description = button.data('detailed_description');
             var icon = button.data('icon');
             var thematic_area_id = button.data('thematic_area_id');
 
@@ -71,6 +76,7 @@
             // Populate the form fields with the retrieved data
             $('#subtheme_id').val(id);
             $('#subtheme_description').val(description);
+            $('#subtheme_detailed_description').val(detailed_description || '');
             var iconSelect = $('#subtheme_icon');
             if (icon && iconSelect.find('option[value="' + icon + '"]').length === 0) {
                 iconSelect.append(new Option(icon, icon, false, false));
@@ -95,6 +101,7 @@
         $('#edit-subtheme-modal').on('hidden.bs.modal', function() {
             $('#subtheme_id').val('');
             $('#subtheme_description').val('');
+            $('#subtheme_detailed_description').val('');
             $('#subtheme_icon').val('');
             $('#thematic_area_id').val('').trigger('change');
         });
