@@ -624,8 +624,8 @@ class ForumsRepository extends SharedRepo{
             }
 
             try {
-                // Store the human-readable original filename
-                $original_filename = $file->getClientOriginalName();
+                // Human-readable original filename + hashed storage basename
+                $original_filename = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
                 $file_name = md5_file($file->getRealPath());
                 $file_path = 'forum/'.$file_name.'.'.$extension;
                
@@ -673,8 +673,9 @@ class ForumsRepository extends SharedRepo{
                     $attachment = CustomAttachment::create([
                         'model' => 'forum_comments',
                         'path' => $file_path,
-                        'name' => $original_filename, // Save human-readable filename
-                        'record_id' => $comment_id
+                        'name' => $original_filename,
+                        'stored_filename' => basename($file_path),
+                        'record_id' => $comment_id,
                     ]);
                     
                     if (!$attachment || !$attachment->id) {
@@ -1103,7 +1104,7 @@ class ForumsRepository extends SharedRepo{
         
         foreach ($upfiles as $file) {
 
-            $description = $file->getClientOriginalName();
+            $description = str_replace(["\0", "\r"], '', (string) $file->getClientOriginalName());
             $file_name   = md5_file($file->getRealPath());
             $extension   = $file->guessExtension();
             $file_path   = $model.'/'.$file_name.'.'.$extension;
@@ -1116,6 +1117,8 @@ class ForumsRepository extends SharedRepo{
             $attachment   =  [
             "model"=>$model,
             "path"=> $file_path,
+            "name"=> $description,
+            "stored_filename"=> basename($file_path),
             "record_id"=>$record_id
            ];
        

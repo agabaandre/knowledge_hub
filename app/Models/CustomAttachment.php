@@ -13,6 +13,7 @@ class CustomAttachment extends Model
         'model',
         'path',
         'name',
+        'stored_filename',
         'record_id',
     ];
 

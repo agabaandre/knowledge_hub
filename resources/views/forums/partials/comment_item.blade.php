@@ -153,12 +153,13 @@
                 <div class="comment-image-attachments" style="display: flex; flex-wrap: wrap; gap: 8px;">
                     @foreach ($imageAttachments as $attachment)
                     <div class="comment-attachment-img-wrapper" style="position: relative;">
-                        <img src="{{ $attachment->path }}" alt="{{ $attachment->name ?? 'Attachment' }}" class="comment-attachment-img" 
-                             onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }"
+                        @php $forumAttDisplay = forum_attachment_display_name($attachment); @endphp
+                        <img src="{{ $attachment->path }}" alt="{{ $forumAttDisplay }}" class="comment-attachment-img" 
+                             onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', {{ json_encode($forumAttDisplay) }}); } else { window.open('{{ $attachment->path }}', '_blank'); }"
                              style="cursor: pointer; width: 180px; height: 180px; object-fit: cover; border-radius: 4px; border: 1px solid #e2e8f0;">
-                        @if($attachment->name)
+                        @if($forumAttDisplay !== 'Attachment')
                         <div style="position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.7); color: white; padding: 2px 4px; font-size: 0.625rem; border-radius: 0 0 4px 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                            {{ Str::limit($attachment->name, 15) }}
+                            {{ Str::limit($forumAttDisplay, 15) }}
                         </div>
                         @endif
                     </div>

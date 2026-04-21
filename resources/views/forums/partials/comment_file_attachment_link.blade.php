@@ -9,7 +9,7 @@
     $isPowerpoint = in_array($rawExt, ['ppt', 'pptx']);
     $isImage = in_array($rawExt, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
     $isOfficeToPdf = forum_comment_attachment_is_convertible_office($attachment);
-    $fileName = $attachment->name ?? basename($attachment->path);
+    $fileName = forum_attachment_display_name($attachment);
     $canPreview = $isPdf || $isVideo || $isOfficeToPdf;
     $iconClass = 'fa-file-o';
     if ($isPdf) {

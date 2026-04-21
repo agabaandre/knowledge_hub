@@ -363,10 +363,11 @@
                             <!-- Image Attachments as Dropcaps -->
                             @if(count($imageAttachments) > 0)
                                 @foreach ($imageAttachments as $attachment)
-                                    <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
+                                    @php $forumAttDisplay = forum_attachment_display_name($attachment); @endphp
+                                    <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', {{ json_encode($forumAttDisplay) }}); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
                                        style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
                                         <img src="{{ $attachment->path }}" 
-                                             alt="{{ $attachment->name ?? 'Attachment' }}" 
+                                             alt="{{ $forumAttDisplay }}" 
                                              style="width: 144px; height: 144px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
                                              onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"
                                              onmouseover="this.style.transform='scale(1.05)'"
@@ -545,10 +546,11 @@
                                     <!-- Image Attachments as Dropcaps -->
                                     @if(count($replyImageAttachments) > 0)
                                         @foreach ($replyImageAttachments as $attachment)
-                                            <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', '{{ $attachment->name ?? 'Attachment' }}'); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
+                                            @php $forumAttDisplayReply = forum_attachment_display_name($attachment); @endphp
+                                            <a href="javascript:void(0);" onclick="if(typeof openImageModal === 'function') { openImageModal('{{ $attachment->path }}', {{ json_encode($forumAttDisplayReply) }}); } else { window.open('{{ $attachment->path }}', '_blank'); }" 
                                                style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
                                                 <img src="{{ $attachment->path }}" 
-                                                     alt="{{ $attachment->name ?? 'Attachment' }}" 
+                                                     alt="{{ $forumAttDisplayReply }}" 
                                                      style="width: 144px; height: 144px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
                                                      onerror="this.onerror=null; this.src='{{ asset('assets/images/cover.png') }}';"
                                                      onmouseover="this.style.transform='scale(1.05)'"

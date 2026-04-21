@@ -1016,6 +1016,36 @@ if (!function_exists('publication_filename_is_pdf')) {
     }
 }
 
+if (!function_exists('forum_attachment_display_name')) {
+    /**
+     * Human-readable filename for forum UI (never the hashed storage basename when `name` is set).
+     */
+    function forum_attachment_display_name($attachment): string
+    {
+        if (!$attachment instanceof \App\Models\CustomAttachment) {
+            return 'Attachment';
+        }
+        $attrs = $attachment->getAttributes();
+        $name = isset($attrs['name']) ? trim((string) $attrs['name']) : '';
+        if ($name !== '') {
+            return $name;
+        }
+
+        $rawPath = $attachment->getRawOriginal('path');
+        if ($rawPath === null || $rawPath === '') {
+            $rawPath = (string) ($attrs['path'] ?? '');
+        }
+        if ($rawPath !== '' && !preg_match('#^https?://#i', $rawPath)) {
+            $base = basename(str_replace('\\', '/', $rawPath));
+            if ($base !== '' && strpos($base, '.') !== false) {
+                return $base;
+            }
+        }
+
+        return 'Attachment';
+    }
+}
+
 if (!function_exists('forum_comment_attachment_raw_extension')) {
     function forum_comment_attachment_raw_extension($attachment): string
     {

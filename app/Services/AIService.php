@@ -348,8 +348,8 @@ Please summarize this forum discussion, including:
                 }
                 
                 foreach ($attachments as $attachment) {
-                    $fileName = $attachment->name ?? basename($attachment->path);
-                    $extension = strtolower(pathinfo($attachment->path ?? $fileName, PATHINFO_EXTENSION));
+                    $fileName = forum_attachment_display_name($attachment);
+                    $extension = forum_comment_attachment_raw_extension($attachment);
                     
                     $fileType = 'file';
                     if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp'])) {
@@ -394,8 +394,8 @@ Please summarize this forum discussion, including:
                         }
                         
                         foreach ($replyAttachments as $attachment) {
-                            $fileName = $attachment->name ?? basename($attachment->path);
-                            $extension = strtolower(pathinfo($attachment->path ?? $fileName, PATHINFO_EXTENSION));
+                            $fileName = forum_attachment_display_name($attachment);
+                            $extension = forum_comment_attachment_raw_extension($attachment);
                             $fileType = 'file';
                             if (in_array($extension, ['jpg', 'jpeg', 'png', 'gif', 'webp'])) $fileType = 'image';
                             elseif (in_array($extension, ['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm'])) $fileType = 'video';

@@ -476,9 +476,16 @@ class ForumsController extends Controller
 
         if ($relative !== $pdfRelative) {
             @unlink($absolute);
+            $displayBase = pathinfo(forum_attachment_display_name($attachment), PATHINFO_FILENAME);
+            if ($displayBase === '' || $displayBase === '.') {
+                $displayBase = pathinfo($attachment->getAttributes()['name'] ?? '', PATHINFO_FILENAME);
+            }
+            if ($displayBase === '' || $displayBase === '.') {
+                $displayBase = pathinfo($relative, PATHINFO_FILENAME);
+            }
             $attachment->path = $pdfRelative;
-            $baseName = pathinfo($attachment->name ?? pathinfo($relative, PATHINFO_FILENAME), PATHINFO_FILENAME);
-            $attachment->name = $baseName . '.pdf';
+            $attachment->name = $displayBase . '.pdf';
+            $attachment->stored_filename = basename($pdfRelative);
             $attachment->save();
         }
 
