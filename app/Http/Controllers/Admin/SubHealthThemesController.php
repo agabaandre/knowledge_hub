@@ -19,8 +19,8 @@ class SubHealthThemesController extends Controller
     public function index(Request $request){
 
         $data['themes'] = ThemeticArea::query()
-            ->orderBy('display_order', 'asc')
             ->orderBy('description', 'asc')
+            ->orderBy('id', 'asc')
             ->get();
         $data['subthemes'] = $this->themesRepo->get_all_subthemes($request);
         $data['allSubthemesForMapping'] = $this->themesRepo->allSubthemesForMapping();

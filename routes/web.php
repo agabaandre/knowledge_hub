@@ -566,6 +566,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
             Route::get("/", [DataRecordsAdminController::class, 'categories']);
             Route::post("/save", [DataRecordsAdminController::class, 'save_category']);
+            Route::post("/update", [DataRecordsAdminController::class, 'update_category']);
             Route::get("/delete", [DataRecordsAdminController::class, 'delete_category']);
 
             Route::get('/ajax/subcategories', [DataRecordsAdminController::class, 'getSubcategories'])->name('get-subcategories');

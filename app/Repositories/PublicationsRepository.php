@@ -1146,7 +1146,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
     }
 
     public function get_tags(){
-        return Tag::all();
+        return Tag::query()->orderBy('tag_text', 'asc')->orderBy('id', 'asc')->get();
     }
 
     public function save_tags($tags,$publication_id){

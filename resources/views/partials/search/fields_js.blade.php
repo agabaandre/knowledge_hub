@@ -20,7 +20,7 @@
             let selected = (typeof $(this).val() == 'object') ? $(this).val()[0] :
                 $(this).val();
 
-            var regions = JSON.parse('<?php echo json_encode($regions->toArray()); ?>');
+            var regions = JSON.parse('<?php echo json_encode(($regions ?? collect())->toArray()); ?>');
             let selectedRegion = regions.find(item => item.id === parseInt(selected));
 
             $('.country').html('<option value="all" >All</option>');
@@ -46,7 +46,7 @@
 
         if ($(this).val()) {
 
-            var themes = JSON.parse('<?php echo json_encode($themes->toArray()); ?>');
+            var themes = JSON.parse('<?php echo json_encode(($themes ?? collect())->toArray()); ?>');
 
 
             let selectedTheme = themes.find(item => item.id === parseInt($(this).val()));
@@ -66,7 +66,8 @@
 
     function filterSearchFileCategoriesByDataCategory() {
         var dataCategoryEl = document.getElementById('data_category_id');
-        var fileCategoryEl = document.getElementById('file_category_id');
+        // Search uses file_category_id; publish wizard uses category_id for the same linkage.
+        var fileCategoryEl = document.getElementById('file_category_id') || document.getElementById('category_id');
         if (!dataCategoryEl || !fileCategoryEl) {
             return;
         }
@@ -95,6 +96,8 @@
             if (window.jQuery && window.jQuery(fileCategoryEl).hasClass('select2-hidden-accessible')) {
                 window.jQuery(fileCategoryEl).val('').trigger('change');
             }
+        } else if (window.jQuery && window.jQuery(fileCategoryEl).hasClass('select2-hidden-accessible')) {
+            window.jQuery(fileCategoryEl).trigger('change.select2');
         }
     }
 
@@ -104,5 +107,6 @@
 
     $(document).ready(function () {
         filterSearchFileCategoriesByDataCategory();
+        setTimeout(filterSearchFileCategoriesByDataCategory, 450);
     });
 </script>

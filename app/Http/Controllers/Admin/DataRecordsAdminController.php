@@ -114,6 +114,23 @@ class DataRecordsAdminController extends Controller
         return back()->with($data);
     }
 
+    public function update_category(Request $request)
+    {
+        $saved = $this->dataRecordsRepo->update_category($request);
+
+        if ($saved) {
+            $data = ['message' => 'Category updated successfully', 'status' => 'success', 'data' => $saved];
+        } else {
+            $data = ['message' => 'Operation failed, try again', 'status' => 'failure', 'data' => $saved];
+        }
+
+        if ($request->ajax()) {
+            return response($data, 200);
+        }
+
+        return back()->with($data);
+    }
+
     public function save_subcategory(Request $request){
 
         $saved = $this->dataRecordsRepo->save_subcategory($request);
@@ -135,8 +152,12 @@ class DataRecordsAdminController extends Controller
     {
         $category_id = $request->input('category_id');
         
-        // Fetch subcategories based on the selected category ID
-        $subcategories = DataSubCategory::where('data_category_id', $category_id)->get();
+        // Fetch subcategories based on the selected category ID (A–Z for admin + modals)
+        $subcategories = DataSubCategory::query()
+            ->where('data_category_id', $category_id)
+            ->orderBy('sub_catgeory_name', 'asc')
+            ->orderBy('id', 'asc')
+            ->get();
 
         // Return subcategories as JSON response
         return response()->json($subcategories);

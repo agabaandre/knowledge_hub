@@ -92,7 +92,7 @@
                 <div class="col-lg-4" id="records-search-sidebar">
                     @php
                         $recordsSearchTagQuery = request()->except('page');
-                        $sidebarTagsList = (isset($tags) && count($tags) > 0) ? $tags->take(10) : \App\Models\Tag::orderBy('id', 'desc')->limit(10)->get();
+                        $sidebarTagsList = (isset($tags) && count($tags) > 0) ? $tags->take(10) : \App\Models\Tag::query()->orderBy('tag_text', 'asc')->limit(10)->get();
                     @endphp
                     <style>
                         .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.5rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}

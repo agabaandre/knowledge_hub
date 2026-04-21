@@ -9,6 +9,7 @@ use App\Models\DataSubCategory;
 use App\Models\PublicationCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class DataRecordsRepository extends SharedRepo{
@@ -106,7 +107,7 @@ class DataRecordsRepository extends SharedRepo{
     public function get_categories(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $results    = DataCategory::orderBy('id','desc');
+        $results    = DataCategory::query()->orderBy('category_name', 'asc')->orderBy('id', 'asc');
 
         return $results->paginate($rows_count);
     }
@@ -114,7 +115,7 @@ class DataRecordsRepository extends SharedRepo{
     public function get_subcategories(Request $request){
 
         $rows_count = ($request->rows)?$request->rows:20;
-        $results    = DataSubCategory::orderBy('id','desc');
+        $results    = DataSubCategory::query()->orderBy('sub_catgeory_name', 'asc')->orderBy('id', 'asc');
 
         return $results->paginate($rows_count);
     }
@@ -126,8 +127,7 @@ class DataRecordsRepository extends SharedRepo{
 
     public function get_json_categories()
     {
-        $results = DataCategory::all();
-        return $results;
+        return DataCategory::query()->orderBy('category_name', 'asc')->orderBy('id', 'asc')->get();
     }
 
     public function delete_category($id){
@@ -151,7 +151,7 @@ class DataRecordsRepository extends SharedRepo{
             return ['status' => 'failure', 'message' => 'Selected category was not found.'];
         }
 
-        return DB::transaction(function () use ($old, $new) {
+        $result = DB::transaction(function () use ($old, $new) {
             $movedSubcategories = DataSubCategory::query()
                 ->where('data_category_id', $old->id)
                 ->update(['data_category_id' => $new->id]);
@@ -200,6 +200,18 @@ class DataRecordsRepository extends SharedRepo{
                 ],
             ];
         });
+
+        if (($result['status'] ?? '') === 'success') {
+            $this->forgetDataCategoryCaches();
+        }
+
+        return $result;
+    }
+
+    private function forgetDataCategoryCaches(): void
+    {
+        Cache::forget('categories');
+        Cache::forget('dashboard_categories');
     }
 
 
@@ -208,8 +220,8 @@ class DataRecordsRepository extends SharedRepo{
 
         $record->category_name    = $request->name;
         $record->url_path         = $request->url;
-        $record->slug             = Str::slug($request->title);
-        $record->show_on_menu     = $request->show_menu;
+        $record->slug             = Str::slug($request->name ?? '');
+        $record->show_on_menu     = $request->boolean('show_menu');
 
         $saved = $record->save();
         if ($saved) {
@@ -230,7 +242,33 @@ class DataRecordsRepository extends SharedRepo{
             }
         }
 
+        if ($saved) {
+            $this->forgetDataCategoryCaches();
+        }
+
         return $saved;
+    }
+
+    public function update_category(Request $request): bool
+    {
+        $request->validate([
+            'id' => 'required|integer|exists:data_categories,id',
+            'name' => 'required|string|max:255',
+            'url' => 'nullable|string|max:500',
+        ]);
+
+        $record = DataCategory::findOrFail((int) $request->id);
+        $record->category_name = $request->name;
+        $record->url_path = $request->url;
+        $record->slug = Str::slug($request->name ?? '');
+        $record->show_on_menu = $request->boolean('show_menu');
+
+        $ok = $record->save();
+        if ($ok) {
+            $this->forgetDataCategoryCaches();
+        }
+
+        return $ok;
     }
 
     public function save_subcategory(Request $request){
@@ -240,7 +278,12 @@ class DataRecordsRepository extends SharedRepo{
         $record->sub_catgeory_name   = $request->name;
         $record->data_category_id         = $request->category_id;
 
-        return $record->save();
+        $saved = $record->save();
+        if ($saved) {
+            $this->forgetDataCategoryCaches();
+        }
+
+        return $saved;
     }
 
 }

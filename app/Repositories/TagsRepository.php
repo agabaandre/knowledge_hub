@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Tag;
+use App\View\Composers\TagsViewComposer;
 use Illuminate\Http\Request;
 
 class TagsRepository{
@@ -9,7 +10,7 @@ class TagsRepository{
     public function get(Request $request, $return_array = false){
         \Log::info('TagsRepository@get called', ['return_array' => $return_array]);
         $rows_count = ($request->rows)?$request->rows:20;
-        $tags       = Tag::orderBy('id','desc');
+        $tags       = Tag::query()->orderBy('tag_text', 'asc')->orderBy('id', 'asc');
 
         if($request->term)
         $tags->where('tag_text','like','%'.$request->term.'%');
@@ -34,6 +35,7 @@ class TagsRepository{
             $tag->overview = $request->overview;
         }
         $tag->save();
+        TagsViewComposer::forgetTagListCache();
 
         return $tag;
     }
@@ -62,13 +64,17 @@ class TagsRepository{
             $tag->overview = $request->overview;
         }
         $tag->save();
+        TagsViewComposer::forgetTagListCache();
 
         return $tag;
     }
 
     public function delete($id){
 
-        return Tag::find($id)->delete();
+        $deleted = Tag::find($id)?->delete();
+        TagsViewComposer::forgetTagListCache();
+
+        return $deleted;
     }
 
 

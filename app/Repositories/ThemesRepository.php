@@ -5,6 +5,7 @@ use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
 use App\Models\Publication;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -12,15 +13,20 @@ class ThemesRepository
 {
     private const FA_VERSION = '5.3.1';
 
+    private function forgetThematicAreaViewCaches(): void
+    {
+        Cache::forget('themes');
+        Cache::forget('subthemes');
+    }
+
     public function get(Request $request)
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
 
         $themes = ThemeticArea::query()
-            ->orderBy('display_order', 'asc')
             ->orderBy('description', 'asc')
-            ->orderBy('id', 'desc');
+            ->orderBy('id', 'asc');
 
         if ($request->term)
             $themes->where('description', 'like', '%' . $request->term . '%');
@@ -33,7 +39,7 @@ class ThemesRepository
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
-        $qry = SubThemeticArea::orderBy('id','desc');
+        $qry = SubThemeticArea::query()->orderBy('description', 'asc')->orderBy('id', 'asc');
 
       if($request->theme_id)
        $qry= $qry->where('thematic_area_id', $request->theme_id);
@@ -50,7 +56,7 @@ class ThemesRepository
     {
 
         $rows_count = ($request->rows) ? $request->rows : 24;
-        $themes = SubThemeticArea::with('theme')->orderBy('id', 'desc');
+        $themes = SubThemeticArea::with('theme')->orderBy('description', 'asc')->orderBy('id', 'asc');
         if ($request->filled('theme_id')) {
             $themes->where('thematic_area_id', (int) $request->theme_id);
         } elseif ($request->filled('thematic_area_id')) {
@@ -79,6 +85,7 @@ class ThemesRepository
 
         // Save the record
         $theme->save();
+        $this->forgetThematicAreaViewCaches();
 
         return $theme;
     }
@@ -91,14 +98,23 @@ class ThemesRepository
 
     public function delete($id)
     {
-        return ThemeticArea::find($id)->delete();
+        $row = ThemeticArea::find($id);
+        if (! $row) {
+            return false;
+        }
+        $ok = $row->delete();
+        if ($ok) {
+            $this->forgetThematicAreaViewCaches();
+        }
+
+        return $ok;
     }
 
     public function allForMapping()
     {
         return ThemeticArea::query()
-            ->orderBy('display_order', 'asc')
             ->orderBy('description', 'asc')
+            ->orderBy('id', 'asc')
             ->get(['id', 'description', 'display_order']);
     }
 
@@ -114,7 +130,7 @@ class ThemesRepository
             return ['status' => 'failure', 'message' => 'Selected theme was not found.'];
         }
 
-        return DB::transaction(function () use ($oldTheme, $newTheme) {
+        $result = DB::transaction(function () use ($oldTheme, $newTheme) {
             $subThemeIds = SubThemeticArea::where('thematic_area_id', $oldTheme->id)->pluck('id');
             $mappedSubThemes = 0;
             $mappedPublications = 0;
@@ -147,6 +163,12 @@ class ThemesRepository
                 ],
             ];
         });
+
+        if (($result['status'] ?? '') === 'success') {
+            $this->forgetThematicAreaViewCaches();
+        }
+
+        return $result;
     }
 
     public function save_subtheme(Request $request)
@@ -176,19 +198,30 @@ class ThemesRepository
 
         // Save changes
         $theme->save();
+        $this->forgetThematicAreaViewCaches();
 
         return $theme;
     }
 
     public function delete_subtheme($id)
     {
-        return SubThemeticArea::find($id)->delete();
+        $row = SubThemeticArea::find($id);
+        if (! $row) {
+            return false;
+        }
+        $ok = $row->delete();
+        if ($ok) {
+            $this->forgetThematicAreaViewCaches();
+        }
+
+        return $ok;
     }
 
     public function allSubthemesForMapping()
     {
         return SubThemeticArea::with('theme')
-            ->orderBy('description')
+            ->orderBy('description', 'asc')
+            ->orderBy('id', 'asc')
             ->get(['id', 'description', 'thematic_area_id']);
     }
 
@@ -204,7 +237,7 @@ class ThemesRepository
             return ['status' => 'failure', 'message' => 'Selected subtheme was not found.'];
         }
 
-        return DB::transaction(function () use ($oldSubtheme, $newSubtheme) {
+        $result = DB::transaction(function () use ($oldSubtheme, $newSubtheme) {
             $mappedPublications = Publication::where('sub_thematic_area_id', $oldSubtheme->id)->count();
             if ($mappedPublications > 0) {
                 $updates = ['sub_thematic_area_id' => $newSubtheme->id];
@@ -226,6 +259,12 @@ class ThemesRepository
                 ],
             ];
         });
+
+        if (($result['status'] ?? '') === 'success') {
+            $this->forgetThematicAreaViewCaches();
+        }
+
+        return $result;
     }
 
     public function count()

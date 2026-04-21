@@ -13,10 +13,10 @@ class ThemesViewComposer{
         $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
 
         $subthemes = cache()->remember('themes',$minutes, function () {
-            return   ThemeticArea::with(['subthemes' => function($query) {
+            return ThemeticArea::with(['subthemes' => function ($query) {
                 $query->orderBy('description', 'asc');
-            }])->orderBy('display_order', 'asc')
-                ->orderBy('description', 'asc')
+            }])->orderBy('description', 'asc')
+                ->orderBy('id', 'asc')
                 ->get();
         });
 
