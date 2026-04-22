@@ -156,7 +156,7 @@ class LookupApiController extends ApiController
      *     operationId="ListJobs",
      *     tags={"Lookup"},
      *     summary="List Jobs",
-     *     description="Returns a list of Jobs",
+     *     description="Returns job titles **unique by name** (case-insensitive, trimmed). When duplicates exist in the database, the lowest `id` is kept per normalized name.",
      *     @OA\Response(
      *         response=200,
      *         description="Successful",
@@ -166,7 +166,7 @@ class LookupApiController extends ApiController
      */
     public function jobs(Request $request)
     {
-        $jobs = $this->expertsRepo->get_jobs($request, true);
+        $jobs = $this->expertsRepo->get_jobs($request);
         return [
             "status" => 200,
             "data" => $jobs

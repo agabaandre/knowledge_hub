@@ -9,11 +9,12 @@ use App\Models\JobTitle;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class ExpertsRepository extends SharedRepo{
 
     /** @var string Cache key shared with OccupationsViewComposer and API lookups */
-    public const CACHE_KEY_JOB_TITLES_ALL = 'occupations';
+    public const CACHE_KEY_JOB_TITLES_ALL = 'occupations_unique_by_name_v1';
 
     private const CACHE_KEY_PREFIX_JOB_TITLES_BY_ISCO = 'job_titles_by_isco_';
 
@@ -36,7 +37,17 @@ class ExpertsRepository extends SharedRepo{
             self::CACHE_KEY_JOB_TITLES_ALL,
             $this->jobTitlesCacheTtlMinutes(),
             static function () {
-                return JobTitle::orderBy('name')->get();
+                return JobTitle::query()
+                    ->orderBy('name')
+                    ->orderBy('id')
+                    ->get()
+                    ->unique(function (JobTitle $job) {
+                        $name = trim((string) ($job->name ?? ''));
+
+                        return $name === '' ? "\0empty" : Str::lower($name);
+                    })
+                    ->sortBy(fn (JobTitle $job) => Str::lower(trim((string) ($job->name ?? ''))))
+                    ->values();
             }
         );
     }

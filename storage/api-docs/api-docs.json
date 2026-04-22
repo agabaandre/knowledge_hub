@@ -3211,7 +3211,7 @@
                     "Lookup"
                 ],
                 "summary": "List Jobs",
-                "description": "Returns a list of Jobs",
+                "description": "Returns job titles **unique by name** (case-insensitive, trimmed). When duplicates exist in the database, the lowest `id` is kept per normalized name.",
                 "operationId": "ListJobs",
                 "responses": {
                     "200": {
