@@ -200,11 +200,39 @@ class CommunitiesController extends Controller
             return redirect()->route('login')->with('info', 'Please login to accept the invitation.');
         }
 
+        $invitation = CommunityInvitation::where('token', $token)->first();
+        if (!$invitation) {
+            return redirect()->route('community.index')
+                ->with('alert-danger', 'Invalid invitation token');
+        }
+
+        $authEmail = strtolower(trim((string) (Auth::user()->email ?? '')));
+        $inviteEmail = strtolower(trim((string) $invitation->email));
+        if ($authEmail !== $inviteEmail) {
+            return redirect()->route('community.index')
+                ->with('alert-danger', 'Sign in with the invited email address to accept this invitation.');
+        }
+
+        $communityId = (int) ($invitation->community_of_practice_id ?? 0);
+
         $result = $this->commsOfPracticeRepository->acceptInvitation($token);
+        if (!$communityId && !empty($result['community']) && !empty($result['community']->id)) {
+            $communityId = (int) $result['community']->id;
+        }
 
         if ($result['status'] === 'success') {
+            if ($communityId > 0) {
+                return redirect()->route('community.detail', ['id' => $communityId])
+                    ->with('alert-success', $result['message']);
+            }
+
             return redirect()->route('community.index')
                 ->with('alert-success', $result['message']);
+        }
+
+        if ($communityId > 0) {
+            return redirect()->route('community.detail', ['id' => $communityId])
+                ->with('alert-danger', $result['message']);
         }
 
         return redirect()->route('community.index')
