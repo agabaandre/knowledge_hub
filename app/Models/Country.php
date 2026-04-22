@@ -2,14 +2,29 @@
 
 namespace App\Models;
 
+use App\Rules\AfricanMemberStateInternationalPhone;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 class Country extends Model
 {
     use HasFactory;
 
     protected $table ="country";
+
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::saved(function () {
+            Cache::forget(AfricanMemberStateInternationalPhone::CACHE_KEY);
+        });
+
+        static::deleted(function () {
+            Cache::forget(AfricanMemberStateInternationalPhone::CACHE_KEY);
+        });
+    }
 
     public function region(){
         return $this->belongsTo(Region::class,"region_id","id");

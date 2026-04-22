@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
+use App\Rules\AfricanMemberStateInternationalPhone;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
 use Illuminate\Http\Request;
@@ -79,13 +80,14 @@ class AuthController extends Controller
     
     public function update_profile(Request $request){
 
-        $val_rules =[
-            'first_name'=>'required',
-            'last_name'=>'required',
-            'email'=>'required',
-            'preferences'=>'required',
+        $val_rules = [
+            'first_name' => 'required',
+            'last_name' => 'required',
+            'email' => 'required',
+            'preferences' => 'required',
             'country_id' => 'required',
-            'id'=>'required'
+            'id' => 'required',
+            'phone_number' => ['nullable', 'string', 'max:64', new AfricanMemberStateInternationalPhone()],
         ];
 
         $request->validate($val_rules);

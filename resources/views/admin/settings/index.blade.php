@@ -1,4 +1,4 @@
-@extends(admin_layout())
+12@extends(admin_layout())
 @section('styles')
     @if((settings()->site_theme ?? '') !== 'theme1.')
     <!-- Bootstrap Colorpicker CSS (Bootstrap 4 only; Theme1 uses Bootstrap 5) -->
