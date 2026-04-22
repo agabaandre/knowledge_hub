@@ -41,7 +41,27 @@
         $aiSearchColor = '#0e7a3a'; // Fallback darker green
     }
 @endphp
-<div class="spotlight px-3 py-3 custom-bg" style="{{ $bgStyle }}">
+<style>
+    .home-spotlight {
+        position: relative;
+        background-size: cover !important;
+        background-position: center !important;
+        background-repeat: no-repeat !important;
+    }
+    .home-spotlight::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: var(--spotlight-overlay-color, transparent);
+        pointer-events: none;
+        z-index: 0;
+    }
+    .home-spotlight > * {
+        position: relative;
+        z-index: 1;
+    }
+</style>
+<div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }} --spotlight-overlay-color: {{ !empty($bannerImage) ? $overlayRgba : 'transparent' }};">
     <div class="search-container" style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 15px; box-sizing: border-box;">
         <form action="{{ url('records/search') }}" class="filters" role="search" aria-label="Search records">
         <div class="row no-gutters bg-white rounded search-form" id="simple_search" style="border-radius: 0.375rem !important;">
