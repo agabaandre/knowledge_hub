@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Rules\AfricanMemberStateInternationalPhone;
+use App\Rules\InternationalPhoneKnownCallingCode;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Cache;
@@ -18,11 +18,11 @@ class Country extends Model
         parent::boot();
 
         static::saved(function () {
-            Cache::forget(AfricanMemberStateInternationalPhone::CACHE_KEY);
+            Cache::forget(InternationalPhoneKnownCallingCode::CACHE_KEY);
         });
 
         static::deleted(function () {
-            Cache::forget(AfricanMemberStateInternationalPhone::CACHE_KEY);
+            Cache::forget(InternationalPhoneKnownCallingCode::CACHE_KEY);
         });
     }
 

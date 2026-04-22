@@ -6,7 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Repositories\UsersRepository;
-use App\Rules\AfricanMemberStateInternationalPhone;
+use App\Rules\InternationalPhoneKnownCallingCode;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
 use Auth;
@@ -516,7 +516,7 @@ class AuthApiController extends ApiController
      *                 @OA\Property(property="first_name", type="string", description="First name (required on web when updating profile)."),
      *                 @OA\Property(property="last_name", type="string", description="Last name (required on web when updating profile)."),
      *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="phone_number", type="string", nullable=true, description="International format; digits (after optional +) must begin with an ITU calling code for an African member state from the hub country list (same `phonecode` values as `country` rows where `national = national`). Example: +251115517700."),
+     *                 @OA\Property(property="phone_number", type="string", nullable=true, description="International format; digits (after optional +) must begin with an ITU calling code present on a `country` row with non-empty `phonecode` (includes African member states and other countries in the database). Example: +251115517700."),
      *                 @OA\Property(property="country_id", type="integer", description="Country id (required on web)."),
      *                 @OA\Property(property="job", type="string", nullable=true, description="Job title from the dropdown (same as web `job`)."),
      *                 @OA\Property(property="job_missing", type="boolean", nullable=true, description="Set true when using custom job title (same as web checkbox)."),
@@ -596,7 +596,7 @@ class AuthApiController extends ApiController
             'first_name' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            'phone_number' => ['sometimes', 'nullable', 'string', 'max:64', new AfricanMemberStateInternationalPhone()],
+            'phone_number' => ['sometimes', 'nullable', 'string', 'max:64', new InternationalPhoneKnownCallingCode()],
             'job' => 'sometimes|nullable|string|max:255',
             'job_missing' => 'sometimes|boolean',
             'job_title_custom' => 'sometimes|nullable|string|max:255',

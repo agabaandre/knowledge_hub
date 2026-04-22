@@ -8,12 +8,12 @@ use Illuminate\Support\Facades\Cache;
 
 /**
  * Phone numbers must be international-style and begin with an ITU calling code
- * that belongs to an African member state row in `country` (same list as the
- * account country dropdown: `national = national`, non-empty `phonecode`).
+ * present on any row in `country` with a non-empty `phonecode` (ISO-style list
+ * in the database), including African member states and other countries.
  */
-class AfricanMemberStateInternationalPhone implements Rule
+class InternationalPhoneKnownCallingCode implements Rule
 {
-    public const CACHE_KEY = 'african_member_state_calling_codes_v1';
+    public const CACHE_KEY = 'country_table_calling_codes_v1';
 
     public function passes($attribute, $value)
     {
@@ -46,7 +46,7 @@ class AfricanMemberStateInternationalPhone implements Rule
 
     public function message()
     {
-        return 'Enter your phone number in international format using an African member state country code (e.g. +251 11 551 7700), matching the codes in our country list.';
+        return 'Enter your phone number in international format with a valid country calling code (e.g. +251 11 551 7700 or +44 20 7946 0958), matching a code in our country database.';
     }
 
     /**
@@ -56,7 +56,6 @@ class AfricanMemberStateInternationalPhone implements Rule
     {
         return Cache::remember(self::CACHE_KEY, 3600, function () {
             $codes = Country::query()
-                ->where('national', 'national')
                 ->whereNotNull('phonecode')
                 ->where('phonecode', '!=', '')
                 ->pluck('phonecode')

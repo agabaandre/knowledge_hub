@@ -913,7 +913,7 @@
                                         "format": "email"
                                     },
                                     "phone_number": {
-                                        "description": "International format; digits (after optional +) must begin with an ITU calling code for an African member state from the hub country list (same `phonecode` values as `country` rows where `national = national`). Example: +251115517700.",
+                                        "description": "International format; digits (after optional +) must begin with an ITU calling code present on a `country` row with non-empty `phonecode` (includes African member states and other countries in the database). Example: +251115517700.",
                                         "type": "string",
                                         "nullable": true
                                     },
