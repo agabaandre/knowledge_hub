@@ -9,14 +9,20 @@
     }
     $gradientStart = $settings->gradient_start_color ?? '#119A48';
     $gradientEnd = $settings->gradient_end_color ?? '#16c653';
-    $overlayHex = $settings->spotlight_overlay_color ?? '#000000';
     $overlayOpacityPercent = (int) ($settings->spotlight_overlay_opacity ?? 35);
     $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
-    $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
-    if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
-        $overlayRgb = [0, 0, 0];
+
+    $gradientStartRgb = sscanf((string) $gradientStart, '#%02x%02x%02x');
+    if (!is_array($gradientStartRgb) || count($gradientStartRgb) !== 3) {
+        $gradientStartRgb = [17, 154, 72];
     }
-    $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
+    $gradientEndRgb = sscanf((string) $gradientEnd, '#%02x%02x%02x');
+    if (!is_array($gradientEndRgb) || count($gradientEndRgb) !== 3) {
+        $gradientEndRgb = [22, 198, 83];
+    }
+    $gradientStartRgba = 'rgba(' . (int) $gradientStartRgb[0] . ', ' . (int) $gradientStartRgb[1] . ', ' . (int) $gradientStartRgb[2] . ', ' . $overlayOpacity . ')';
+    $gradientEndRgba = 'rgba(' . (int) $gradientEndRgb[0] . ', ' . (int) $gradientEndRgb[1] . ', ' . (int) $gradientEndRgb[2] . ', ' . $overlayOpacity . ')';
+    $overlayGradient = "linear-gradient(135deg, {$gradientStartRgba} 0%, {$gradientEndRgba} 100%)";
     
     if (!empty($bannerImage)) {
         $bgStyle = "background: linear-gradient({$overlayRgba}, {$overlayRgba}), url('{$bannerImage}'); background-size: cover; background-position: center;";
@@ -52,7 +58,7 @@
         content: '';
         position: absolute;
         inset: 0;
-        background: var(--spotlight-overlay-color, transparent);
+        background: var(--spotlight-overlay-bg, transparent);
         pointer-events: none;
         z-index: 0;
     }
@@ -61,7 +67,7 @@
         z-index: 1;
     }
 </style>
-<div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }} --spotlight-overlay-color: {{ !empty($bannerImage) ? $overlayRgba : 'transparent' }};">
+<div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }} --spotlight-overlay-bg: {{ !empty($bannerImage) ? $overlayGradient : 'transparent' }};">
     <div class="search-container" style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 15px; box-sizing: border-box;">
         <form action="{{ url('records/search') }}" class="filters" role="search" aria-label="Search records">
         <div class="row no-gutters bg-white rounded search-form" id="simple_search" style="border-radius: 0.375rem !important;">
