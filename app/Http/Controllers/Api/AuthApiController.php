@@ -509,7 +509,7 @@ class AuthApiController extends ApiController
      *     description="Update an existing user's profile",
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Same field names as the web account profile form at `/account` (Personal Information). The authenticated user is always updated; do not send `id`. Use `multipart/form-data` when uploading `photo`. Password changes use `POST /api/change-password`, not this endpoint.",
+     *         description="Same field names as the web account profile form at `/account` (Personal Information). The authenticated user is always updated; do not send `id`. Use `multipart/form-data` when uploading `photo`. Password changes use `POST /api/change-password`, not this endpoint. JSON-encoded arrays are accepted for `preferences` and `communities` when sent as strings (same behaviour as `POST /api/publications` and registration).",
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
@@ -591,6 +591,9 @@ class AuthApiController extends ApiController
         if (! $request->filled('phone_number') && $request->filled('phone')) {
             $request->merge(['phone_number' => $request->input('phone')]);
         }
+
+        // Multipart clients often send array fields as JSON strings (same as registration and POST /api/publications).
+        $this->normalizeRegistrationRequest($request);
 
         $this->validate($request, [
             'first_name' => 'sometimes|string|max:255',
@@ -852,7 +855,7 @@ class AuthApiController extends ApiController
     }
 
     /**
-     * Decode JSON array strings for multipart clients; normalize job_missing to boolean (matches web checkbox semantics).
+     * Decode JSON array strings for multipart clients (registration and profile update); normalize job_missing to boolean (matches web checkbox semantics).
      */
     private function normalizeRegistrationRequest(Request $request): void
     {
