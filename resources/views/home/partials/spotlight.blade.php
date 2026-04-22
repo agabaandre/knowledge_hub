@@ -25,7 +25,7 @@
     $overlayGradient = "linear-gradient(135deg, {$gradientStartRgba} 0%, {$gradientEndRgba} 100%)";
     
     if (!empty($bannerImage)) {
-        $bgStyle = "background: linear-gradient({$overlayRgba}, {$overlayRgba}), url('{$bannerImage}'); background-size: cover; background-position: center;";
+        $bgStyle = "background-image: url('{$bannerImage}'); background-size: cover; background-position: center;";
     } else {
         $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
     }
