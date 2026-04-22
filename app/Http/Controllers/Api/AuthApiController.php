@@ -508,39 +508,39 @@ class AuthApiController extends ApiController
      *     description="Update an existing user's profile",
      *     @OA\RequestBody(
      *         required=true,
-     *         description="Same logical fields as the web account form (`/account`). The authenticated user is always updated; do not send `id`. Use multipart when uploading `photo`.",
+     *         description="Same field names as the web account profile form at `/account` (Personal Information). The authenticated user is always updated; do not send `id`. Use `multipart/form-data` when uploading `photo`. Password changes use `POST /api/change-password`, not this endpoint.",
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
      *             @OA\Schema(
-     *                 @OA\Property(property="first_name", type="string"),
-     *                 @OA\Property(property="last_name", type="string"),
-     *                 @OA\Property(property="firstname", type="string", description="Alias for first_name"),
-     *                 @OA\Property(property="lastname", type="string", description="Alias for last_name"),
+     *                 @OA\Property(property="first_name", type="string", description="First name (required on web when updating profile)."),
+     *                 @OA\Property(property="last_name", type="string", description="Last name (required on web when updating profile)."),
      *                 @OA\Property(property="email", type="string", format="email"),
-     *                 @OA\Property(property="phone_number", type="string"),
-     *                 @OA\Property(property="phone", type="string", description="Alias for phone_number"),
-     *                 @OA\Property(property="country_id", type="integer"),
-     *                 @OA\Property(property="job", type="string"),
-     *                 @OA\Property(property="job_title", type="string"),
-     *                 @OA\Property(property="job_title_custom", type="string"),
-     *                 @OA\Property(property="organization_name", type="string"),
-     *                 @OA\Property(property="orcid", type="string"),
-     *                 @OA\Property(property="langauge", type="string", description="Language code (matches web form spelling)"),
-     *                 @OA\Property(property="theme_preference", type="string", enum={"light","dark","system"}),
-     *                 @OA\Property(property="is_subscribed", type="boolean"),
-     *                 @OA\Property(property="level_id", type="integer", description="Access level; only applied if user has alter_access_levels"),
-     *                 @OA\Property(property="password", type="string", format="password"),
-     *                 @OA\Property(property="password_confirmation", type="string", format="password"),
+     *                 @OA\Property(property="phone_number", type="string", nullable=true, description="Phone number."),
+     *                 @OA\Property(property="country_id", type="integer", description="Country id (required on web)."),
+     *                 @OA\Property(property="job", type="string", nullable=true, description="Job title from the dropdown (same as web `job`)."),
+     *                 @OA\Property(property="job_missing", type="boolean", nullable=true, description="Set true when using custom job title (same as web checkbox)."),
+     *                 @OA\Property(property="job_title_custom", type="string", nullable=true, description="Custom job title when `job_missing` is true."),
+     *                 @OA\Property(property="organization_name", type="string", nullable=true),
+     *                 @OA\Property(property="orcid", type="string", nullable=true, maxLength=19),
+     *                 @OA\Property(property="langauge", type="string", nullable=true, description="Language code (same spelling as web form field `langauge`)."),
+     *                 @OA\Property(property="theme_preference", type="string", enum={"light","dark","system"}, nullable=true),
+     *                 @OA\Property(property="is_subscribed", type="boolean", nullable=true, description="Subscribe to monthly updates (same as web checkbox)."),
+     *                 @OA\Property(property="level_id", type="integer", nullable=true, description="Access level; only applied if the user has `alter_access_levels`."),
      *                 @OA\Property(property="preferences", type="array",
      *                     @OA\Items(type="integer"),
-     *                     description="Subtheme ids (same as web preferences[])",
+     *                     description="Subtheme ids (same as web `preferences[]`).",
      *                     example={1, 2, 3}
+     *                 ),
+     *                 @OA\Property(property="communities", type="array",
+     *                     @OA\Items(type="integer"),
+     *                     nullable=true,
+     *                     description="Community of practice ids (same as web `communities[]`)."
      *                 ),
      *                 @OA\Property(
      *                     property="photo",
      *                     type="string",
      *                     format="binary",
-     *                     description="Profile photo file (stored like web account upload)"
+     *                     description="Profile photo file (same as web account upload)."
      *                 )
      *             )
      *         )
@@ -580,17 +580,24 @@ class AuthApiController extends ApiController
     {
         $userId = $request->user()->id;
 
+        // Accept legacy aliases once, then validate only canonical names used by `/account`.
+        if (! $request->filled('first_name') && $request->filled('firstname')) {
+            $request->merge(['first_name' => $request->input('firstname')]);
+        }
+        if (! $request->filled('last_name') && $request->filled('lastname')) {
+            $request->merge(['last_name' => $request->input('lastname')]);
+        }
+        if (! $request->filled('phone_number') && $request->filled('phone')) {
+            $request->merge(['phone_number' => $request->input('phone')]);
+        }
+
         $this->validate($request, [
             'first_name' => 'sometimes|string|max:255',
-            'firstname' => 'sometimes|string|max:255',
             'last_name' => 'sometimes|string|max:255',
-            'lastname' => 'sometimes|string|max:255',
             'email' => ['sometimes', 'email', 'max:255', Rule::unique('users', 'email')->ignore($userId)],
-            'password' => 'sometimes|string|min:6|confirmed',
             'phone_number' => 'sometimes|nullable|string|max:64',
-            'phone' => 'sometimes|nullable|string|max:64',
             'job' => 'sometimes|nullable|string|max:255',
-            'job_title' => 'sometimes|nullable|string|max:255',
+            'job_missing' => 'sometimes|boolean',
             'job_title_custom' => 'sometimes|nullable|string|max:255',
             'organization_name' => 'sometimes|nullable|string|max:255',
             'orcid' => 'sometimes|nullable|string|max:64',
@@ -601,6 +608,8 @@ class AuthApiController extends ApiController
             'level_id' => 'sometimes|nullable|integer',
             'preferences' => 'sometimes|array',
             'preferences.*' => 'integer',
+            'communities' => 'sometimes|array',
+            'communities.*' => 'integer|exists:community_of_practices,id',
             'photo' => 'sometimes|file|image|max:2048',
         ]);
 
