@@ -1360,7 +1360,7 @@
                         "in": "query",
                         "required": false,
                         "schema": {
-                            "type": "string"
+                                        "type": "string"
                         }
                     },
                     {
@@ -1419,14 +1419,14 @@
                                             "example": "success"
                                         },
                                         "message": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "type": "object"
-                                }
+                                        "type": "string"
+                                    }
+                                },
+                                "type": "object"
                             }
                         }
-                    },
+                    }
+                },
                     "403": {
                         "description": "Invitation email does not match signed-in user"
                     },
@@ -2665,8 +2665,8 @@
                                     "attachments": {
                                         "type": "array",
                                         "items": {
-                                            "type": "string",
-                                            "format": "binary"
+                                        "type": "string",
+                                        "format": "binary"
                                         }
                                     },
                                     "communities": {
@@ -2918,8 +2918,8 @@
                 "operationId": "ToggleForumCommentLike",
                 "requestBody": {
                     "required": true,
-                    "content": {
-                        "application/json": {
+                        "content": {
+                            "application/json": {
                             "schema": {
                                 "required": [
                                     "comment_id"
@@ -4028,7 +4028,7 @@
                                         "items": {
                                             "type": "integer"
                                         }
-                                    },
+                                        },
                                     "tag_all_my_communities": {
                                         "type": "boolean",
                                         "nullable": true
@@ -4605,7 +4605,7 @@
                                     "tags": {
                                         "type": "array",
                                         "items": {
-                                            "type": "integer"
+                                        "type": "integer"
                                         }
                                     },
                                     "theme": {
@@ -4786,7 +4786,7 @@
                         "name": "id",
                         "in": "path",
                         "required": true,
-                        "schema": {
+                            "schema": {
                             "type": "integer"
                         }
                     }
@@ -4841,10 +4841,10 @@
                     },
                     "404": {
                         "description": "Push notification not found"
+                            }
+                        }
                     }
-                }
-            }
-        },
+                },
         "/api/push-notifications/user": {
             "get": {
                 "tags": [
@@ -4883,21 +4883,21 @@
                 "operationId": "markNotificationsAsRead",
                 "requestBody": {
                     "required": true,
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "properties": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "properties": {
                                     "ids": {
-                                        "type": "array",
-                                        "items": {
+                                            "type": "array",
+                                            "items": {
                                             "type": "integer"
                                         }
                                     }
                                 },
-                                "type": "object"
-                            }
-                        }
-                    }
+                                                "type": "object"
+                                            }
+                                        }
+                                    }
                 },
                 "responses": {
                     "200": {

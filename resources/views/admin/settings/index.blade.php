@@ -331,6 +331,37 @@
         #cache-output-terminal::-webkit-scrollbar-thumb:hover {
             background: #4e4e4e;
         }
+
+        .settings-group-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            background: #ffffff;
+            padding: 1.25rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+            height: 100%;
+        }
+
+        .settings-group-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .settings-group-title i {
+            color: var(--theme-color-primary, #119A48);
+        }
+
+        .settings-group-help {
+            color: #64748b;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
     </style>
 @endsection
 
@@ -1381,154 +1412,182 @@
                         <i class="fa fa-code"></i>
                         Advanced Settings
                     </div>
+                    <p class="settings-group-help">Grouped controls make governance and day-to-day maintenance clearer. Related options are now bundled by function.</p>
+                    @if(isset($settingKeyGroups) && $settingKeyGroups->count() > 0)
+                        <div class="mb-3 d-flex flex-wrap gap-2">
+                            @foreach($settingKeyGroups as $groupName => $rows)
+                                <span class="badge rounded-pill text-bg-light border px-3 py-2">
+                                    {{ $groupName }} <span class="text-muted">({{ $rows->count() }})</span>
+                                </span>
+                            @endforeach
+                        </div>
+                    @endif
 
-                    <div class="form-group">
-                        <label>Google Analytics Script</label>
-                        <textarea name="analytics_script" rows="6" class="form-control" placeholder="Paste your Google Analytics script here">{{ $settings->analytics_script }}</textarea>
-                        <small class="info-text">Paste the complete Google Analytics tracking code.</small>
-                    </div>
-
-                <div class="form-group">
-                    <label>Content Disclaimer</label>
-                        <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
-                </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-file-alt"></i>
-                        Publication Form Settings
-                    </div>
-
-                    <div class="form-group">
-                        <label>Minimum Publication Description Words</label>
-                        <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
-                        <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
-                </div>
-
-                    <div class="form-group">
-                        <label>Required Fields on Publication Form</label>
-                        <small class="info-text d-block mb-3">Select which fields should be required when users submit publications:</small>
-                        
-                        @php
-                            $requiredFields = json_decode($settings->publication_required_fields ?? '{}', true);
-                            if (empty($requiredFields)) {
-                                $requiredFields = [
-                                    'title' => true,
-                                    'description' => true,
-                                    'associated_authors' => true,
-                                    'tags' => true,
-                                    'theme' => true,
-                                    'sub_theme' => true,
-                                    'data_category_id' => true,
-                                ];
-                            }
-                        @endphp
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[title]" value="1" id="req_title" @if($requiredFields['title'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_title">Title</label>
+                    <div class="row g-3">
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-bullhorn"></i>
+                                    Platform Content & Tracking
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[description]" value="1" id="req_description" @if($requiredFields['description'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_description">Description</label>
+                                <div class="form-group">
+                                    <label>Google Analytics Script</label>
+                                    <textarea name="analytics_script" rows="6" class="form-control" placeholder="Paste your Google Analytics script here">{{ $settings->analytics_script }}</textarea>
+                                    <small class="info-text">Paste the complete Google Analytics tracking code.</small>
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[associated_authors]" value="1" id="req_associated_authors" @if($requiredFields['associated_authors'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_associated_authors">Associated Authors</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[tags]" value="1" id="req_tags" @if($requiredFields['tags'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_tags">Tags/Health Topics</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[theme]" value="1" id="req_theme" @if($requiredFields['theme'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_theme">Theme</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[sub_theme]" value="1" id="req_sub_theme" @if($requiredFields['sub_theme'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_sub_theme">Sub Theme</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[data_category_id]" value="1" id="req_data_category_id" @if($requiredFields['data_category_id'] ?? true) checked @endif>
-                                    <label class="form-check-label" for="req_data_category_id">Category</label>
+                                <div class="form-group mb-0">
+                                    <label>Content Disclaimer</label>
+                                    <textarea name="content_disclaimer" rows="5" class="form-control" placeholder="Enter content disclaimer text">{{ $settings->content_disclaimer }}</textarea>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[year_published]" value="1" id="req_year_published" @if($requiredFields['year_published'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_year_published">Year Published</label>
+                        </div>
+
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-sign-in-alt"></i>
+                                    Authentication & Social Sign-In
                                 </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[author]" value="1" id="req_author" @if($requiredFields['author'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_author">Source/Author</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[doi]" value="1" id="req_doi" @if($requiredFields['doi'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_doi">DOI</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[issn]" value="1" id="req_issn" @if($requiredFields['issn'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_issn">ISSN</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[isbn]" value="1" id="req_isbn" @if($requiredFields['isbn'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_isbn">ISBN</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[license_id]" value="1" id="req_license_id" @if($requiredFields['license_id'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_license_id">License</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[copyright_info]" value="1" id="req_copyright_info" @if($requiredFields['copyright_info'] ?? false) checked @endif>
-                                    <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
+                                <div class="form-group mb-0">
+                                    <label>Social Login Providers</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="enable_microsoft_login" name="enable_microsoft_login" value="1" @if(!empty($settings->enable_microsoft_login)) checked @endif>
+                                        <label class="form-check-label" for="enable_microsoft_login">
+                                            <i class="lni lni-microsoft me-2" style="color: #00a1f1;"></i>Enable Microsoft Login
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="enable_google_login" name="enable_google_login" value="1" @if(!empty($settings->enable_google_login)) checked @endif>
+                                        <label class="form-check-label" for="enable_google_login">
+                                            <i class="lni lni-google me-2" style="color: #db4437;"></i>Enable Google Login
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="enable_linkedin_login" name="enable_linkedin_login" value="1" @if(!empty($settings->enable_linkedin_login)) checked @endif>
+                                        <label class="form-check-label" for="enable_linkedin_login">
+                                            <i class="fab fa-linkedin me-2" style="color: #0077b5;"></i>Enable LinkedIn Login
+                                        </label>
+                                    </div>
+                                    <div class="form-check mt-2">
+                                        <input type="checkbox" class="form-check-input" id="allow_email_password_accounts_social_login" name="allow_email_password_accounts_social_login" value="1" @if(!isset($settings->allow_email_password_accounts_social_login) || $settings->allow_email_password_accounts_social_login) checked @endif>
+                                        <label class="form-check-label" for="allow_email_password_accounts_social_login">
+                                            Allow email/password accounts to sign in with social login
+                                        </label>
+                                    </div>
+                                    <small class="info-text d-block">When enabled, users who originally registered with email/password can use social login if the email matches. A successful social login verifies unverified accounts and updates sign-in method to social.</small>
+                                    <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
                                 </div>
                             </div>
-            </div>
-        </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-sign-in-alt"></i>
-                        Social Login Configuration
-                    </div>
-
-                    <div class="form-group">
-                        <label>Social Login Providers</label>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="enable_microsoft_login" name="enable_microsoft_login" value="1" @if(!empty($settings->enable_microsoft_login)) checked @endif>
-                            <label class="form-check-label" for="enable_microsoft_login">
-                                <i class="lni lni-microsoft me-2" style="color: #00a1f1;"></i>Enable Microsoft Login
-                            </label>
                         </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="enable_google_login" name="enable_google_login" value="1" @if(!empty($settings->enable_google_login)) checked @endif>
-                            <label class="form-check-label" for="enable_google_login">
-                                <i class="lni lni-google me-2" style="color: #db4437;"></i>Enable Google Login
-                            </label>
-                        </div>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="enable_linkedin_login" name="enable_linkedin_login" value="1" @if(!empty($settings->enable_linkedin_login)) checked @endif>
-                            <label class="form-check-label" for="enable_linkedin_login">
-                                <i class="fab fa-linkedin me-2" style="color: #0077b5;"></i>Enable LinkedIn Login
-                            </label>
-                        </div>
-                        <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
-                    </div>
 
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-file-alt"></i>
-                        Version Submission Configuration
-                    </div>
+                        <div class="col-lg-12">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-file-alt"></i>
+                                    Publication Submission Workflow
+                                </div>
 
-                    <div class="form-group">
-                        <label>Version Submission Settings</label>
-                        <div class="form-check">
-                            <input type="checkbox" class="form-check-input" id="enable_version_submission" name="enable_version_submission" value="1" @if(!isset($settings->enable_version_submission) || $settings->enable_version_submission) checked @endif>
-                            <label class="form-check-label" for="enable_version_submission">
-                                <i class="fa fa-plus-circle me-2"></i>Enable Version Submission
-                            </label>
+                                <div class="form-group">
+                                    <label>Minimum Publication Description Words</label>
+                                    <input type="number" name="publication_min_words" value="{{ $settings->publication_min_words ?? 150 }}" class="form-control" min="10" max="1000" step="10">
+                                    <small class="info-text">Set the minimum number of words required for publication descriptions. Default is 150 words.</small>
+                                </div>
+
+                                <div class="form-group">
+                                    <label>Required Fields on Publication Form</label>
+                                    <small class="info-text d-block mb-3">Select which fields should be required when users submit publications:</small>
+                                    
+                                    @php
+                                        $requiredFields = json_decode($settings->publication_required_fields ?? '{}', true);
+                                        if (empty($requiredFields)) {
+                                            $requiredFields = [
+                                                'title' => true,
+                                                'description' => true,
+                                                'associated_authors' => true,
+                                                'tags' => true,
+                                                'theme' => true,
+                                                'sub_theme' => true,
+                                                'data_category_id' => true,
+                                            ];
+                                        }
+                                    @endphp
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[title]" value="1" id="req_title" @if($requiredFields['title'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_title">Title</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[description]" value="1" id="req_description" @if($requiredFields['description'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_description">Description</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[associated_authors]" value="1" id="req_associated_authors" @if($requiredFields['associated_authors'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_associated_authors">Associated Authors</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[tags]" value="1" id="req_tags" @if($requiredFields['tags'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_tags">Tags/Health Topics</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[theme]" value="1" id="req_theme" @if($requiredFields['theme'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_theme">Theme</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[sub_theme]" value="1" id="req_sub_theme" @if($requiredFields['sub_theme'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_sub_theme">Sub Theme</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[data_category_id]" value="1" id="req_data_category_id" @if($requiredFields['data_category_id'] ?? true) checked @endif>
+                                                <label class="form-check-label" for="req_data_category_id">Category</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[year_published]" value="1" id="req_year_published" @if($requiredFields['year_published'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_year_published">Year Published</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[author]" value="1" id="req_author" @if($requiredFields['author'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_author">Source/Author</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[doi]" value="1" id="req_doi" @if($requiredFields['doi'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_doi">DOI</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[issn]" value="1" id="req_issn" @if($requiredFields['issn'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_issn">ISSN</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[isbn]" value="1" id="req_isbn" @if($requiredFields['isbn'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_isbn">ISBN</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[license_id]" value="1" id="req_license_id" @if($requiredFields['license_id'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_license_id">License</label>
+                                            </div>
+                                            <div class="form-check mb-2">
+                                                <input type="checkbox" class="form-check-input required-field-checkbox" name="required_fields[copyright_info]" value="1" id="req_copyright_info" @if($requiredFields['copyright_info'] ?? false) checked @endif>
+                                                <label class="form-check-label" for="req_copyright_info">Copyright Info</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="form-group mb-0">
+                                    <label>Version Submission Settings</label>
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="enable_version_submission" name="enable_version_submission" value="1" @if(!isset($settings->enable_version_submission) || $settings->enable_version_submission) checked @endif>
+                                        <label class="form-check-label" for="enable_version_submission">
+                                            <i class="fa fa-plus-circle me-2"></i>Enable Version Submission
+                                        </label>
+                                    </div>
+                                    <small class="info-text">When enabled, users can submit new versions of publications. Only parent publications (non-versions) can have versions submitted. Versions themselves cannot have versions submitted.</small>
+                                </div>
+                            </div>
                         </div>
-                        <small class="info-text">When enabled, users can submit new versions of publications. Only parent publications (non-versions) can have versions submitted. Versions themselves cannot have versions submitted.</small>
                     </div>
                 </div>
                 </div>

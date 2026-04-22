@@ -287,6 +287,9 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'enable_linkedin_login')) {
             $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
         }
+        if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
+            $settings->allow_email_password_accounts_social_login = (bool)$request->boolean('allow_email_password_accounts_social_login', true);
+        }
 
         // Publication form settings
         if (Schema::hasColumn('setting', 'publication_min_words')) {
@@ -574,7 +577,7 @@ class SettingsRepository
                     continue;
                 }
                 $value = $item->textContent;
-                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'show_publication_card_file_type_badge' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search' || $key === 'enable_ai_chat_prune') {
+                if ($key === 'menu_icons_enabled' || $key === 'show_featured' || $key === 'show_events' || $key === 'show_top_searches' || $key === 'show_tags' || $key === 'show_quotes' || $key === 'show_quiz' || $key === 'show_health_themes' || $key === 'translate_button_filled' || $key === 'header_logo_inverse' || $key === 'footer_logo_inverse' || $key === 'search_show_forums' || $key === 'search_show_communities' || $key === 'show_publication_card_file_type_badge' || $key === 'enable_microsoft_login' || $key === 'enable_google_login' || $key === 'enable_linkedin_login' || $key === 'allow_email_password_accounts_social_login' || $key === 'enable_version_submission' || $key === 'auto_approve_comments' || $key === 'enable_ai_search' || $key === 'enable_ai_chat_prune') {
                     $setting->{$key} = in_array(strtolower($value), ['1', 'true', 'yes'], true);
                 } else {
                     $setting->{$key} = $value;

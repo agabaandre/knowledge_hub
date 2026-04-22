@@ -13,6 +13,24 @@ use Illuminate\Support\Facades\Log;
 final class OAuthAccountSecurity
 {
     /**
+     * Whether password-registered accounts are allowed to switch to social sign-in.
+     * Defaults to true when setting is unavailable.
+     */
+    public static function allowPasswordAccountsToUseSocialLogin(): bool
+    {
+        try {
+            $settings = settings();
+            if (! $settings || ! isset($settings->allow_email_password_accounts_social_login)) {
+                return true;
+            }
+
+            return (bool) $settings->allow_email_password_accounts_social_login;
+        } catch (\Throwable $e) {
+            return true;
+        }
+    }
+
+    /**
      * If the IdP returned an OAuth error, redirect to login with a generic message (no reflected provider text).
      */
     public static function redirectIfOAuthDenied(Request $request, string $provider): ?RedirectResponse
@@ -131,6 +149,9 @@ final class OAuthAccountSecurity
         $attempted = self::canonicalOAuthProvider($attemptedCanonicalProvider);
 
         if (! $user->is_social_login) {
+            if (self::allowPasswordAccountsToUseSocialLogin()) {
+                return null;
+            }
             return 'This email is registered with email and password. Please sign in using your password instead of social sign-in.';
         }
 

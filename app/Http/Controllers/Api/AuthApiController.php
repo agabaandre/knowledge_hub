@@ -726,7 +726,10 @@ class AuthApiController extends ApiController
             if ($msg = OAuthAccountSecurity::oauthLoginDeniedMessage($existing, $canonical)) {
                 return response()->json(['message' => $msg], 403);
             }
-            if ($existing->is_social_login && empty($existing->social_provider)) {
+            if (! $existing->is_social_login) {
+                $existing->is_social_login = 1;
+                $existing->social_provider = $canonical;
+            } elseif (empty($existing->social_provider)) {
                 $existing->social_provider = $canonical;
             }
             if (! $existing->email_verified_at) {

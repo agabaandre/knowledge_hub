@@ -6,6 +6,8 @@ use App\Models\CustomFont;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
 
 class SettingsController extends Controller
 {
@@ -33,6 +35,12 @@ class SettingsController extends Controller
         $data['configGalleryImages'] = array_unique($configImages);
         $data['customFonts'] = \Illuminate\Support\Facades\Schema::hasTable('custom_fonts')
             ? CustomFont::orderBy('name')->get()
+            : collect();
+        $data['settingKeyGroups'] = Schema::hasTable('setting_key_groups')
+            ? DB::table('setting_key_groups')
+                ->orderBy('sort_order')
+                ->get()
+                ->groupBy('group_name')
             : collect();
         return view('admin.settings.index', $data);
     }

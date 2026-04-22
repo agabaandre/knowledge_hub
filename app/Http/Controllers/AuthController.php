@@ -167,8 +167,12 @@ class AuthController extends Controller
 
             if ($user_exists) :
                 $user = $user_exists;
-                if ($user->is_social_login && empty($user->social_provider)) {
-                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('microsoft');
+                $canonicalProvider = OAuthAccountSecurity::canonicalOAuthProvider('microsoft');
+                if (!$user->is_social_login) {
+                    $user->is_social_login = 1;
+                    $user->social_provider = $canonicalProvider;
+                } elseif (empty($user->social_provider)) {
+                    $user->social_provider = $canonicalProvider;
                 }
                 // Auto-activate and verify existing users on SSO login
                 if (!$user->email_verified_at) {
@@ -302,8 +306,12 @@ class AuthController extends Controller
 
             if ($user_exists) {
                 $user = $user_exists;
-                if ($user->is_social_login && empty($user->social_provider)) {
-                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('google');
+                $canonicalProvider = OAuthAccountSecurity::canonicalOAuthProvider('google');
+                if (! $user->is_social_login) {
+                    $user->is_social_login = 1;
+                    $user->social_provider = $canonicalProvider;
+                } elseif (empty($user->social_provider)) {
+                    $user->social_provider = $canonicalProvider;
                 }
                 if (! $user->email_verified_at) {
                     $user->email_verified_at = \Carbon\Carbon::now();
@@ -396,8 +404,12 @@ class AuthController extends Controller
 
             if ($user_exists) :
                 $user = $user_exists;
-                if ($user->is_social_login && empty($user->social_provider)) {
-                    $user->social_provider = OAuthAccountSecurity::canonicalOAuthProvider('linkedin');
+                $canonicalProvider = OAuthAccountSecurity::canonicalOAuthProvider('linkedin');
+                if (!$user->is_social_login) {
+                    $user->is_social_login = 1;
+                    $user->social_provider = $canonicalProvider;
+                } elseif (empty($user->social_provider)) {
+                    $user->social_provider = $canonicalProvider;
                 }
                 // Auto-activate and verify existing users on SSO login
                 if (!$user->email_verified_at) {
