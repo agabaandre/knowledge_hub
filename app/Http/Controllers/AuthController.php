@@ -248,7 +248,9 @@ class AuthController extends Controller
                 $data = [];
             }
 
-            return redirect($redirect_to)->with($data);
+            return $redirect_to === '/account'
+                ? redirect($redirect_to)->with($data)
+                : redirect()->intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('Microsoft Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -347,7 +349,9 @@ class AuthController extends Controller
                 $data = [];
             }
 
-            return redirect($redirect_to)->with($data);
+            return $redirect_to === '/account'
+                ? redirect($redirect_to)->with($data)
+                : redirect()->intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('Google Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -490,7 +494,9 @@ class AuthController extends Controller
                 $data = [];
             }
 
-            return redirect($redirect_to)->with($data);
+            return $redirect_to === '/account'
+                ? redirect($redirect_to)->with($data)
+                : redirect()->intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('LinkedIn Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),

@@ -111,12 +111,12 @@ class CommunitiesController extends Controller
     public function myCommunities()
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
         
         $userId = Auth::id();
         if (!$userId) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
         
         $communities = $this->commsOfPracticeRepository->getByUser($userId, request());
@@ -163,6 +163,7 @@ class CommunitiesController extends Controller
     public function join(Request $request)
     {
         if (!Auth::check()) {
+            $request->session()->put('url.intended', url()->previous() ?: route('community.index'));
             return response()->json(['redirect' => url('/login')]);
         }
 
@@ -181,6 +182,7 @@ class CommunitiesController extends Controller
     public function leave(Request $request)
     {
         if (!Auth::check()) {
+            $request->session()->put('url.intended', url()->previous() ?: route('community.index'));
             return response()->json(['redirect' => url('/login')]);
         }
 
@@ -197,7 +199,7 @@ class CommunitiesController extends Controller
     {
         if (!Auth::check()) {
             session()->put('invitation_token', $token);
-            return redirect()->route('login')->with('info', 'Please login to accept the invitation.');
+            return redirect()->guest(route('login'))->with('info', 'Please login to accept the invitation.');
         }
 
         $invitation = CommunityInvitation::where('token', $token)->first();
@@ -242,12 +244,12 @@ class CommunitiesController extends Controller
     public function detail($id)
     {
         if (!Auth::check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         $userId = Auth::id();
         if (!$userId) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         // Get the community

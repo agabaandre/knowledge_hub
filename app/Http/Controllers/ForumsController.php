@@ -134,12 +134,12 @@ class ForumsController extends Controller
     public function myForums(Request $request)
     {
         if (!auth()->check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         $userId = auth()->id();
         if (!$userId) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         $data['forums'] = $this->forumsRepo->getByUser($userId, $request);
@@ -216,8 +216,9 @@ class ForumsController extends Controller
 
     public function join(Request $request)
     {
-        if(!@current_user()->id)
-         return redirect('login');
+        if(!@current_user()->id) {
+            return redirect()->guest(route('login'));
+        }
        
         $this->forumsRepo->join_forum($request);
 
@@ -232,7 +233,7 @@ class ForumsController extends Controller
     public function myDiscussions(Request $request)
     {
         if (! auth()->check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         $data['threads'] = $this->forumsRepo->getAuthoredForumThreads((int) auth()->id(), $request);
@@ -243,7 +244,7 @@ class ForumsController extends Controller
     public function editMyDiscussion(Forum $forum)
     {
         if (! auth()->check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
         if ((int) $forum->created_by !== (int) auth()->id()) {
             abort(403);
@@ -278,7 +279,7 @@ class ForumsController extends Controller
     public function saveMyDiscussion(Request $request, Forum $forum)
     {
         if (! auth()->check()) {
-            return redirect()->route('login');
+            return redirect()->guest(route('login'));
         }
 
         $request->validate(array_merge([
