@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
-use App\Rules\InternationalPhoneKnownCallingCode;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
 use Illuminate\Http\Request;
@@ -87,7 +86,7 @@ class AuthController extends Controller
             'preferences' => 'required',
             'country_id' => 'required',
             'id' => 'required',
-            'phone_number' => ['nullable', 'string', 'max:64', new InternationalPhoneKnownCallingCode()],
+            'phone_number' => ['nullable', 'string', 'max:64'],
         ];
 
         $request->validate($val_rules);

@@ -155,9 +155,8 @@
                                 <label class="form-label">Phone Number</label>
                             </div>
                             <div class="col-md-9">
-                                <input type="tel" class="form-control" placeholder="+251 11 551 7700 (include country code)"
+                                <input type="tel" class="form-control" placeholder="Phone number"
                                     name="phone_number" value="{{ $user->phone_number }}" inputmode="tel" autocomplete="tel">
-                                <small class="form-text text-muted">Use international format with a valid country calling code. Any code stored for a country in our database is accepted, including member states listed on <a href="{{ url('countries') }}">countries</a>.</small>
                                 @error('phone_number')
                                     <span class="invalid-feedback" role="alert">
                                         <strong>{{ $message }}</strong>
