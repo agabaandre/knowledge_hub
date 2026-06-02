@@ -804,6 +804,96 @@
         // Track if user has manually changed countries to prevent auto-override on subsequent region changes
         var userManuallyChangedCountries = false;
         var lastAutoSelectedCountries = null;
+
+        function wizardRebuildCountryOptions($select, countryList, includeAllOption) {
+            if (!$select.length) {
+                return;
+            }
+            var selectedBefore = $select.val();
+            $select.prop('disabled', false);
+            $select.empty();
+            if (includeAllOption) {
+                $select.append($('<option>', { value: 'all', text: 'All' }));
+            }
+            (countryList || []).forEach(function(country) {
+                $select.append($('<option>', { value: String(country.id), text: country.name }));
+            });
+            if (typeof $.fn.select2 !== 'undefined' && $select.data('select2')) {
+                $select.trigger('change.select2');
+            }
+        }
+
+        function wizardSetCountrySelection($select, values) {
+            if (!$select.length || !values || !values.length) {
+                return;
+            }
+            lastAutoSelectedCountries = values.slice();
+            if (typeof $.fn.select2 !== 'undefined' && $select.data('select2')) {
+                $select.val(values).trigger('change.select2');
+            } else {
+                $select.val(values).trigger('change');
+            }
+        }
+
+        window.wizardCountriesHasValue = function($select) {
+            if (!$select || !$select.length) {
+                return false;
+            }
+            $select.prop('disabled', false);
+            var val = $select.val();
+            var values = [];
+            if (val === null || val === undefined || val === '') {
+                $select.find('option:selected').each(function() {
+                    var v = $(this).val();
+                    if (v !== '' && v != null) {
+                        values.push(v);
+                    }
+                });
+            } else {
+                values = Array.isArray(val) ? val : [val];
+            }
+            values = values.filter(function(v) { return v !== '' && v != null; });
+            if (!values.length) {
+                return false;
+            }
+            return values.some(function(v) {
+                if (String(v).toLowerCase() === 'all') {
+                    return true;
+                }
+                return !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
+            });
+        };
+
+        window.wizardPrepareCountriesForSubmit = function() {
+            var $countries = $('select[name="countries[]"]');
+            var $region = $('select[name="rccs[]"]');
+            if (!$countries.length) {
+                return;
+            }
+            $countries.prop('disabled', false);
+            var regionVal = $region.val();
+            var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
+            var regionHasAll = regionValues.some(function(v) { return String(v).toLowerCase() === 'all'; });
+            var countryVal = $countries.val();
+            var countryValues = Array.isArray(countryVal) ? countryVal : (countryVal ? [countryVal] : []);
+            var countryHasAll = countryValues.some(function(v) { return String(v).toLowerCase() === 'all'; });
+            if (regionHasAll && (countryHasAll || !countryValues.length)) {
+                if ($countries.find('option[value="all"]').length === 0) {
+                    $countries.prepend($('<option>', { value: 'all', text: 'All' }));
+                }
+                wizardSetCountrySelection($countries, ['all']);
+            }
+        };
+
+        // Publication wizard: do not use search fields_js region handler (it disables countries).
+        $('.rcc').off('change');
+
+        setTimeout(function() {
+            var $region = $('select[name="rccs[]"]');
+            if ($region.length && $region.val() && ($region.val().length || $region.val() === 'all')) {
+                $region.trigger('change');
+            }
+        }, 600);
         
         // Handle region selection logic:
         // - If "all" is selected (alone or with regions) → auto-select all countries
@@ -840,48 +930,18 @@
                 return !isNaN(parseFloat(value)) && isFinite(value);
             }
             
-            // Case 1: "all" is selected (alone or with other regions) → auto-select all countries
+            // Case 1: "all" regions → member states "All" (server links every member state)
             if (hasAll) {
-                // Auto-select all countries
-                var allCountryIds = [];
-                countrySelect.find('option').each(function() {
-                    var value = $(this).val();
-                    if (value && value !== '' && value !== null) {
-                        allCountryIds.push(value);
-                    }
-                });
-                
-                // Select all countries using Select2 if available
-                if (allCountryIds.length > 0) {
-                    lastAutoSelectedCountries = allCountryIds.slice(); // Store what was auto-selected
-                    if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
-                        countrySelect.val(allCountryIds).trigger('change.select2');
-                    } else {
-                        countrySelect.val(allCountryIds).trigger('change');
-                    }
-                }
+                wizardRebuildCountryOptions(countrySelect, allCountries, true);
+                wizardSetCountrySelection(countrySelect, ['all']);
             }
-            // Case 2: One or more specific regions selected (not "all")
+            // Case 2: Specific region(s) → default to All member states in those regions
             else if (regionIds.length > 0) {
-                // Auto-select all countries in all selected regions (one or multiple)
-                var regionCountryIds = [];
-                
-                // Find all countries that belong to the selected region(s) using our countries map
-                allCountries.forEach(function(country) {
-                    if (regionIds.includes(country.region_id)) {
-                        regionCountryIds.push(country.id.toString());
-                    }
+                var regionCountries = allCountries.filter(function(country) {
+                    return regionIds.includes(country.region_id);
                 });
-                
-                // Select all countries in the selected regions
-                if (regionCountryIds.length > 0) {
-                    lastAutoSelectedCountries = regionCountryIds.slice(); // Store what was auto-selected
-                    if (typeof $.fn.select2 !== 'undefined' && countrySelect.data('select2')) {
-                        countrySelect.val(regionCountryIds).trigger('change.select2');
-                    } else {
-                        countrySelect.val(regionCountryIds).trigger('change');
-                    }
-                }
+                wizardRebuildCountryOptions(countrySelect, regionCountries, true);
+                wizardSetCountrySelection(countrySelect, ['all']);
             }
         });
         
@@ -1575,10 +1635,16 @@
                 fail(regionWrap, 'Please select at least one region (or choose All).');
             }
 
+            if (typeof window.wizardPrepareCountriesForSubmit === 'function') {
+                window.wizardPrepareCountriesForSubmit();
+            }
             var $countries = $('select[name="countries[]"]');
             var countriesWrap = $('[data-wizard-field="countries"]');
-            if (!wizardSelectHasValue($countries)) {
-                fail(countriesWrap, 'Please select at least one member state.');
+            var countriesValid = typeof window.wizardCountriesHasValue === 'function'
+                ? window.wizardCountriesHasValue($countries)
+                : wizardSelectHasValue($countries);
+            if (!countriesValid) {
+                fail(countriesWrap, 'Please select at least one member state (or choose All).');
             }
 
             @if(is_admin())
@@ -1661,6 +1727,9 @@
         }
 
         function validatePublicationWizardFull() {
+            if (typeof window.wizardPrepareCountriesForSubmit === 'function') {
+                window.wizardPrepareCountriesForSubmit();
+            }
             var step1 = validateWizardStep1();
             var step2 = validateWizardStep2();
             if (!step1.ok) {

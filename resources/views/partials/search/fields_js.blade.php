@@ -1,5 +1,9 @@
 <script>
     $('.rcc').on('change', function(e) {
+        // Publication wizard has its own region → member state linking (supports All for both).
+        if ($('#publication_form').length || $('#smartwizard').length) {
+            return;
+        }
 
         console.log($(this).val());
 

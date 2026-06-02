@@ -57,8 +57,28 @@ final class PublicationSubmissionValidation
             'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
             'license_id' => ($requiredFields['license_id'] ?? false) ? 'required|exists:licenses,id' : 'nullable|exists:licenses,id',
             'copyright_info' => ($requiredFields['copyright_info'] ?? false) ? 'required|string' : 'nullable|string',
-            'countries' => 'required|array|min:1',
-            'countries.*' => 'exists:country,id',
+            'countries' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
+                if (! is_array($value) || $value === []) {
+                    $fail('Please select at least one member state.');
+
+                    return;
+                }
+                $hasAll = collect($value)->contains(fn ($v) => is_string($v) && strtolower(trim($v)) === 'all');
+                $hasCountry = collect($value)->contains(fn ($v) => is_numeric($v) && (int) $v > 0);
+                if (! $hasAll && ! $hasCountry) {
+                    $fail('Please select at least one member state.');
+                }
+            }],
+            'countries.*' => [
+                function ($attribute, $value, $fail) {
+                    if (is_string($value) && strtolower(trim($value)) === 'all') {
+                        return;
+                    }
+                    if (! is_numeric($value) || ! \App\Models\Country::where('id', (int) $value)->exists()) {
+                        $fail('One or more selected member states are invalid.');
+                    }
+                },
+            ],
             'category_id' => 'required|integer|min:1',
             'publication_sub_category_id' => 'nullable|integer',
             'rccs' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
