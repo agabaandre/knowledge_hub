@@ -207,7 +207,18 @@
     });
 
     $(document).ready(function () {
-        filterSearchFileCategoriesByDataCategory();
-        setTimeout(filterSearchFileCategoriesByDataCategory, 450);
+        var isPublishWizard = !!(document.getElementById('smartwizard') && document.getElementById('category_id'));
+        if (!isPublishWizard) {
+            filterSearchFileCategoriesByDataCategory();
+            setTimeout(filterSearchFileCategoriesByDataCategory, 450);
+            return;
+        }
+        // Let Select2 finish init before rebuilding sub-categories on edit/create wizard.
+        setTimeout(function () {
+            var dataCategoryEl = document.getElementById('data_category_id');
+            if (dataCategoryEl && dataCategoryEl.value) {
+                filterSearchFileCategoriesByDataCategory();
+            }
+        }, 800);
     });
 </script>

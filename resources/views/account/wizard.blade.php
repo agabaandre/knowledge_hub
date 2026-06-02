@@ -835,64 +835,28 @@
             }
         }
 
-        window.wizardCountriesHasValue = function($select) {
-            if (!$select || !$select.length) {
-                return false;
-            }
-            $select.prop('disabled', false);
-            var val = $select.val();
-            var values = [];
-            if (val === null || val === undefined || val === '') {
-                $select.find('option:selected').each(function() {
-                    var v = $(this).val();
-                    if (v !== '' && v != null) {
-                        values.push(v);
-                    }
-                });
-            } else {
-                values = Array.isArray(val) ? val : [val];
-            }
-            values = values.filter(function(v) { return v !== '' && v != null; });
-            if (!values.length) {
-                return false;
-            }
-            return values.some(function(v) {
-                if (String(v).toLowerCase() === 'all') {
-                    return true;
-                }
-                return !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
-            });
-        };
-
-        window.wizardPrepareCountriesForSubmit = function() {
-            var $countries = $('select[name="countries[]"]');
-            var $region = $('select[name="rccs[]"]');
-            if (!$countries.length) {
-                return;
-            }
-            $countries.prop('disabled', false);
-            var regionVal = $region.val();
-            var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
-            var regionHasAll = regionValues.some(function(v) { return String(v).toLowerCase() === 'all'; });
-            var countryVal = $countries.val();
-            var countryValues = Array.isArray(countryVal) ? countryVal : (countryVal ? [countryVal] : []);
-            var countryHasAll = countryValues.some(function(v) { return String(v).toLowerCase() === 'all'; });
-            if (regionHasAll && (countryHasAll || !countryValues.length)) {
-                if ($countries.find('option[value="all"]').length === 0) {
-                    $countries.prepend($('<option>', { value: 'all', text: 'All' }));
-                }
-                wizardSetCountrySelection($countries, ['all']);
-            }
-        };
-
         // Publication wizard: do not use search fields_js region handler (it disables countries).
         $('.rcc').off('change');
 
         setTimeout(function() {
-            var $region = $('select[name="rccs[]"]');
-            if ($region.length && $region.val() && ($region.val().length || $region.val() === 'all')) {
-                $region.trigger('change');
+            $('#step-1 select.select2').each(function() {
+                wizardSyncSelect2FromDom($(this));
+            });
+            var $region = wizardStep1Field('select[name="rccs[]"]');
+            if (!$region.length || !$region.val()) {
+                return;
             }
+            var $countries = wizardStep1Field('select[name="countries[]"]');
+            var countryVal = wizardGetSelectValue($countries);
+            var countryValues = Array.isArray(countryVal) ? countryVal : (countryVal ? [countryVal] : []);
+            var hasSavedCountries = countryValues.some(function(v) {
+                return v && String(v).toLowerCase() !== 'all' && !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
+            });
+            if (hasSavedCountries) {
+                userManuallyChangedCountries = true;
+                return;
+            }
+            $region.trigger('change');
         }, 600);
         
         // Handle region selection logic:
@@ -1518,20 +1482,185 @@
             }
         }
 
-        function wizardSelectHasValue($select) {
-            if (!$select.length) return true;
+        function wizardGetSelectValue($select) {
+            if (!$select || !$select.length) {
+                return '';
+            }
             var val = $select.val();
-            if (val === null || val === undefined || val === '') return false;
+            if (val !== null && val !== undefined && val !== '') {
+                if (Array.isArray(val)) {
+                    val = val.filter(function(v) { return v !== '' && v !== null && v !== undefined; });
+                    if (val.length) {
+                        return val;
+                    }
+                } else {
+                    return val;
+                }
+            }
+            var fromSelectedOptions = [];
+            $select.find('option:selected').each(function() {
+                var v = $(this).val();
+                if (v !== '' && v !== null && v !== undefined) {
+                    fromSelectedOptions.push(v);
+                }
+            });
+            if (fromSelectedOptions.length) {
+                return fromSelectedOptions.length === 1 ? fromSelectedOptions[0] : fromSelectedOptions;
+            }
+            if (typeof $.fn.select2 !== 'undefined' && $select.hasClass('select2-hidden-accessible')) {
+                try {
+                    var s2data = $select.select2('data');
+                    if (s2data && s2data.length) {
+                        var ids = s2data.map(function(item) { return item.id; })
+                            .filter(function(id) { return id !== '' && id !== null && id !== undefined; });
+                        if (ids.length) {
+                            return ids.length === 1 ? ids[0] : ids;
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+            return '';
+        }
+
+        function wizardSyncSelect2FromDom($select) {
+            if (!$select.length || typeof $.fn.select2 === 'undefined' || !$select.hasClass('select2-hidden-accessible')) {
+                return;
+            }
+            var current = wizardGetSelectValue($select);
+            if (current !== '' && current !== null && !(Array.isArray(current) && !current.length)) {
+                $select.val(current).trigger('change.select2');
+                return;
+            }
+            var selected = [];
+            $select.find('option[selected]').each(function() {
+                var v = $(this).attr('value');
+                if (v !== '' && v != null) {
+                    selected.push(v);
+                }
+            });
+            if (!selected.length) {
+                $select.find('option:selected').each(function() {
+                    var v = $(this).val();
+                    if (v !== '' && v != null) {
+                        selected.push(v);
+                    }
+                });
+            }
+            if (selected.length) {
+                $select.val(selected.length === 1 ? selected[0] : selected).trigger('change.select2');
+            }
+        }
+
+        function wizardSelectHasValue($select) {
+            if (!$select.length) {
+                return true;
+            }
+            var val = wizardGetSelectValue($select);
+            if (val === null || val === undefined || val === '') {
+                return false;
+            }
             if (Array.isArray(val)) {
-                val = val.filter(function(v) { return v !== '' && v !== null && v !== undefined; });
                 return val.length > 0;
             }
             return String(val).trim() !== '';
         }
 
+        function wizardStep1Field(selector) {
+            return $('#step-1').find(selector).first();
+        }
+
+        function wizardSelectionIncludesAll(values) {
+            var list = Array.isArray(values) ? values : (values !== '' && values != null ? [values] : []);
+            return list.some(function(v) {
+                return String(v).toLowerCase() === 'all';
+            });
+        }
+
+        function wizardValuesAreNumericIds(values) {
+            var list = Array.isArray(values) ? values : (values !== '' && values != null ? [values] : []);
+            return list.some(function(v) {
+                return !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
+            });
+        }
+
+        window.wizardCountriesHasValue = function($select) {
+            if (!$select || !$select.length) {
+                return false;
+            }
+            $select.prop('disabled', false);
+            var val = wizardGetSelectValue($select);
+            if (val === '' || val === null) {
+                return false;
+            }
+            var values = Array.isArray(val) ? val : [val];
+            values = values.filter(function(v) { return v !== '' && v != null; });
+            if (!values.length) {
+                return false;
+            }
+            return wizardSelectionIncludesAll(values) || wizardValuesAreNumericIds(values);
+        };
+
+        window.wizardPrepareCountriesForSubmit = function() {
+            var $countries = wizardStep1Field('select[name="countries[]"]');
+            var $region = wizardStep1Field('select[name="rccs[]"]');
+            if (!$countries.length) {
+                return;
+            }
+            $countries.prop('disabled', false);
+            $('#wizard-countries-all-hidden, #wizard-rccs-all-hidden').remove();
+
+            var regionVal = wizardGetSelectValue($region);
+            var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
+            var regionHasAll = wizardSelectionIncludesAll(regionValues);
+
+            var countryVal = wizardGetSelectValue($countries);
+            var countryValues = Array.isArray(countryVal) ? countryVal : (countryVal ? [countryVal] : []);
+            var countryHasAll = wizardSelectionIncludesAll(countryValues);
+
+            if (regionHasAll) {
+                if ($countries.find('option[value="all"]').length === 0) {
+                    $countries.prepend($('<option>', { value: 'all', text: 'All' }));
+                }
+                wizardSetCountrySelection($countries, ['all']);
+                $('#publication_form').append(
+                    '<input type="hidden" name="countries[]" value="all" id="wizard-countries-all-hidden">'
+                );
+                if (!$region.length || !wizardGetSelectValue($region)) {
+                    $('#publication_form').append(
+                        '<input type="hidden" name="rccs[]" value="all" id="wizard-rccs-all-hidden">'
+                    );
+                }
+            } else if (countryHasAll) {
+                if ($countries.find('option[value="all"]').length === 0) {
+                    $countries.prepend($('<option>', { value: 'all', text: 'All' }));
+                }
+                wizardSetCountrySelection($countries, ['all']);
+                $('#publication_form').append(
+                    '<input type="hidden" name="countries[]" value="all" id="wizard-countries-all-hidden">'
+                );
+            }
+        };
+
+        window.wizardMemberStatesValidForStep1 = function() {
+            var $region = wizardStep1Field('select[name="rccs[]"]');
+            var $countries = wizardStep1Field('select[name="countries[]"]');
+            if (typeof window.wizardPrepareCountriesForSubmit === 'function') {
+                window.wizardPrepareCountriesForSubmit();
+            }
+            if (!wizardRegionHasValue($region)) {
+                return false;
+            }
+            var regionVal = wizardGetSelectValue($region);
+            var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
+            if (wizardSelectionIncludesAll(regionValues)) {
+                return true;
+            }
+            return window.wizardCountriesHasValue($countries);
+        };
+
         function wizardRegionHasValue($select) {
             if (!$select.length) return false;
-            var val = $select.val();
+            var val = wizardGetSelectValue($select);
             if (!val || (Array.isArray(val) && val.length === 0)) return false;
             var values = Array.isArray(val) ? val : [val];
             return values.some(function(v) {
@@ -1578,8 +1707,12 @@
             $('#step-1 .has-error').removeClass('has-error');
             wizardShowStepSummary(0, []);
 
+            $('#step-1 select.select2').each(function() {
+                wizardSyncSelect2FromDom($(this));
+            });
+
             if (wizardRequiredFields.title !== false) {
-                var $title = $('#title');
+                var $title = wizardStep1Field('#title');
                 var titleWrap = $title.closest('.mb-3');
                 if (!$title.val() || !String($title.val()).trim()) {
                     fail(titleWrap, 'Resource title is required.');
@@ -1595,54 +1728,52 @@
             }
 
             if (wizardRequiredFields.year_published === true) {
-                var $year = $('#year_published');
+                var $year = wizardStep1Field('#year_published');
                 if (!wizardSelectHasValue($year)) {
                     fail($year.closest('.wizard-field-year'), 'Year of publication is required.');
                 }
             }
 
             if (wizardRequiredFields.data_category_id !== false) {
-                var $cat = $('#data_category_id');
-                var catWrap = $('[data-wizard-field="data_category_id"]');
+                var $cat = wizardStep1Field('select[name="data_category_id"]');
+                var catWrap = wizardStep1Field('[data-wizard-field="data_category_id"]');
                 if (!wizardSelectHasValue($cat)) {
                     fail(catWrap, 'Please select a category.');
                 }
             }
 
-            var $subCat = $('#category_id');
-            var subWrap = $('[data-wizard-field="category_id"]');
+            var $subCat = wizardStep1Field('#category_id');
+            var subWrap = wizardStep1Field('[data-wizard-field="category_id"]');
             if (!wizardSelectHasValue($subCat)) {
                 fail(subWrap, 'Please select a sub category.');
             }
 
             if (wizardRequiredFields.theme !== false) {
-                var $theme = $('select[name="theme"]');
+                var $theme = wizardStep1Field('select[name="theme"]');
                 if (!wizardSelectHasValue($theme)) {
                     fail($theme.closest('.col-md-6'), 'Please select a thematic area.');
                 }
             }
 
             if (wizardRequiredFields.sub_theme !== false) {
-                var $subTheme = $('select[name="sub_theme"]');
+                var $subTheme = wizardStep1Field('select[name="sub_theme"]');
                 if (!wizardSelectHasValue($subTheme)) {
                     fail($subTheme.closest('.col-md-6'), 'Please select a sub theme.');
                 }
             }
 
-            var $region = $('select[name="rccs[]"]');
-            var regionWrap = $('[data-wizard-field="rccs"]');
+            var $region = wizardStep1Field('select[name="rccs[]"]');
+            var regionWrap = wizardStep1Field('[data-wizard-field="rccs"]');
             if (!wizardRegionHasValue($region)) {
                 fail(regionWrap, 'Please select at least one region (or choose All).');
             }
 
-            if (typeof window.wizardPrepareCountriesForSubmit === 'function') {
-                window.wizardPrepareCountriesForSubmit();
-            }
-            var $countries = $('select[name="countries[]"]');
-            var countriesWrap = $('[data-wizard-field="countries"]');
-            var countriesValid = typeof window.wizardCountriesHasValue === 'function'
-                ? window.wizardCountriesHasValue($countries)
-                : wizardSelectHasValue($countries);
+            var countriesWrap = wizardStep1Field('[data-wizard-field="countries"]');
+            var countriesValid = typeof window.wizardMemberStatesValidForStep1 === 'function'
+                ? window.wizardMemberStatesValidForStep1()
+                : (typeof window.wizardCountriesHasValue === 'function'
+                    ? window.wizardCountriesHasValue(wizardStep1Field('select[name="countries[]"]'))
+                    : wizardSelectHasValue(wizardStep1Field('select[name="countries[]"]')));
             if (!countriesValid) {
                 fail(countriesWrap, 'Please select at least one member state (or choose All).');
             }

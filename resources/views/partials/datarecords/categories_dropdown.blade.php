@@ -23,7 +23,7 @@
     @endif
     @foreach ($data_categories as $category)
         @if (!empty($exclude_special))
-            @if (empty($category->is_special))
+            @if (empty($category->is_special) || ($__catSelected !== '' && (string) $category->id === $__catSelected))
                 <option {{ $__catSelected !== '' && $category->id == $__catSelected ? 'selected' : '' }} value="{{ $category->id }}">
                     {{ $category->category_name }}
                 </option>

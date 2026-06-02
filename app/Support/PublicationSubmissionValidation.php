@@ -57,21 +57,47 @@ final class PublicationSubmissionValidation
             'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
             'license_id' => ($requiredFields['license_id'] ?? false) ? 'required|exists:licenses,id' : 'nullable|exists:licenses,id',
             'copyright_info' => ($requiredFields['copyright_info'] ?? false) ? 'required|string' : 'nullable|string',
-            'countries' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
-                if (! is_array($value) || $value === []) {
-                    $fail('Please select at least one member state.');
+            'countries' => [
+                function ($attribute, $value, $fail) use ($request) {
+                    $rccs = $request->input('rccs', []);
+                    if (! is_array($rccs)) {
+                        $rccs = $rccs !== null && $rccs !== '' ? [$rccs] : [];
+                    }
+                    $regionsAll = collect($rccs)->contains(
+                        fn ($v) => strtolower(trim((string) $v)) === 'all'
+                    );
 
-                    return;
-                }
-                $hasAll = collect($value)->contains(fn ($v) => is_string($v) && strtolower(trim($v)) === 'all');
-                $hasCountry = collect($value)->contains(fn ($v) => is_numeric($v) && (int) $v > 0);
-                if (! $hasAll && ! $hasCountry) {
+                    if ($regionsAll) {
+                        return;
+                    }
+
+                    if (! is_array($value) || $value === []) {
+                        $fail('Please select at least one member state.');
+
+                        return;
+                    }
+                    $hasAll = collect($value)->contains(
+                        fn ($v) => strtolower(trim((string) $v)) === 'all'
+                    );
+                    $hasCountry = collect($value)->contains(
+                        fn ($v) => is_numeric($v) && (int) $v > 0
+                    );
+                    if ($hasAll || $hasCountry) {
+                        return;
+                    }
                     $fail('Please select at least one member state.');
-                }
-            }],
+                },
+            ],
             'countries.*' => [
-                function ($attribute, $value, $fail) {
-                    if (is_string($value) && strtolower(trim($value)) === 'all') {
+                function ($attribute, $value, $fail) use ($request) {
+                    if (strtolower(trim((string) $value)) === 'all') {
+                        return;
+                    }
+                    $rccs = $request->input('rccs', []);
+                    if (! is_array($rccs)) {
+                        $rccs = $rccs !== null && $rccs !== '' ? [$rccs] : [];
+                    }
+                    if (collect($rccs)->contains(fn ($v) => strtolower(trim((string) $v)) === 'all')) {
                         return;
                     }
                     if (! is_numeric($value) || ! \App\Models\Country::where('id', (int) $value)->exists()) {
