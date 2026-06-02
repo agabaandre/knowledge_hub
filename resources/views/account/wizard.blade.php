@@ -163,6 +163,46 @@
                 grid-template-columns: 1fr;
             }
         }
+        /* SmartWizard v6 layout stability */
+        #smartwizard.sw {
+            width: 100%;
+            max-width: 100%;
+        }
+        #smartwizard > .nav {
+            flex-wrap: wrap;
+            margin-bottom: 1rem;
+        }
+        #smartwizard .tab-content {
+            width: 100%;
+            clear: both;
+            overflow: visible;
+        }
+        #smartwizard .tab-content > .tab-pane {
+            width: 100%;
+        }
+        #smartwizard .tab-content > .tab-pane > .row {
+            margin-left: -12px;
+            margin-right: -12px;
+        }
+        #smartwizard .sw-toolbar-elm {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 0.5rem;
+            padding: 0.75rem 16px;
+            margin-top: 0.5rem;
+            clear: both;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        #smartwizard .sw-toolbar-elm .sw-btn {
+            min-width: 6rem;
+        }
+        /* Legacy progress bar duplicate below wizard */
+        #smartwizard + .progress {
+            display: none !important;
+        }
     </style>
     <ul class="nav">
         <li>
@@ -386,12 +426,8 @@
 
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
             <div id="wizard-step-2-errors" class="alert alert-danger wizard-step-error-summary mb-3" role="alert"></div>
-            <br>
-            <div class="col-md-12 mt-3">
-                <input type="hidden" name="id" id="id" class="newform"
-                    value="{{ @$row->id ?? old('id') }}">
-            </div>
-            <h3 class="mb-2" style="font-weight:600;">Attachments & Additional Details</h3>
+            <input type="hidden" name="id" id="id" class="newform" value="{{ @$row->id ?? old('id') }}">
+            <h3 class="mb-2 mt-2" style="font-weight:600;">Attachments & Additional Details</h3>
             <div class="row" style="min-height: 0;">
 
 
@@ -409,9 +445,9 @@
                                             <a href="{{ $pub_file->file }}" target="_blank" title="{{ e($pub_file->original_filename ?? $pub_file->description ?? '') }}"><i class="fa fa-paperclip text-muted"></i> {{ Str::limit($pub_file->original_filename ?? $pub_file->description ?? 'Attachment', 90) }}</a>
                                             <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
                                         </li>
-                            @endforeach
+                                    @endforeach
                                 </ul>
-                </div>
+                            </div>
                         @endif
 
                         <div class="custom-file">
@@ -423,7 +459,7 @@
                             <div id="attachment-security-error" class="alert alert-danger mt-2 py-2 px-3 small" style="display:none;" role="alert"></div>
                         </div>
                         <div class="preview py-2" style="min-height: 24px;"></div>
-            </div>
+                    </div>
 
                     <div class="form-group mt-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
@@ -446,22 +482,22 @@
                             <div onclick="$('#cover').click()" class="cover_preview py-2"
                                 style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
                             </div>
-                </div>
-            </div>
-        </div>
-
-            </div>
-            <div class="col-md-6 justify-content-center video" style="display: none;">
-                <label class="form-label" for="publication">Video</label>
-                <div class="mb-3">
-                    <iframe width="450" height="260"class="vid" src="">
-                    </iframe>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <br>
-            <h3 class="mb-2" style="font-weight:600;">Publication Details</h3>
-            
+            <div class="row" style="display: none;">
+                <div class="col-md-6 justify-content-center video">
+                    <label class="form-label" for="publication">Video</label>
+                    <div class="mb-3">
+                        <iframe width="450" height="260" class="vid" src=""></iframe>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Details</h3>
+
             <!-- AI Description Loader -->
             <div id="ai-description-loader" style="display: none; margin-top: 10px; margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #119A48; border-radius: 4px;">
                 <div class="d-flex align-items-center">
@@ -475,7 +511,6 @@
                     </div>
                 </div>
             </div>
-        </div>
 
             <div class="row">
                 <div class="col-md-12">
@@ -717,15 +752,14 @@
                     </div>
                 </div>
             </div>
-        </div>
 
-        <div class="row mt-3 mb-3 submit">
-            <div class="col-lg-8 mt-5  float-end">
-            </div>
-            <div class="col-lg-3 mt-5  float-end">
-                <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
-                    {{ @$row ? 'Save Changes' : 'Submit' }}
-                </button>
+            <div class="row mt-3 mb-3 submit">
+                <div class="col-lg-8 mt-5 float-end"></div>
+                <div class="col-lg-3 mt-5 float-end">
+                    <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
+                        {{ @$row ? 'Save Changes' : 'Submit' }}
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -735,8 +769,6 @@
     <div class="progress-bar" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0"
         aria-valuemax="100"></div>
 </div>
-
-<br>
 
 <div id="publication-processing-overlay" role="status" aria-live="polite" aria-busy="false">
     <div class="processing-card">
@@ -1059,6 +1091,9 @@
 
         window.wizardShowProcessingOverlay = function(show, message) {
             var $overlay = $('#publication-processing-overlay');
+            if ($overlay.length && !$overlay.parent().is('body')) {
+                $overlay.appendTo('body');
+            }
             if (!$overlay.length) {
                 return;
             }
@@ -1391,7 +1426,7 @@
             selected: 0,
             theme: 'dots',
             toolbar: {
-                position: 'both',
+                position: 'bottom',
                 showNextButton: true,
                 showPreviousButton: true,
             },
