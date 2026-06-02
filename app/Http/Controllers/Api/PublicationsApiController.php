@@ -717,6 +717,16 @@ class PublicationsApiController extends ApiController
             ], 422);
         }
 
+        try {
+            PublicationSubmissionValidation::assertAttachmentFilesAllowed($request);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
         if (! $request->has('show_disclaimer')) {
             $request->merge(['show_disclaimer' => 1]);
         }
@@ -924,6 +934,16 @@ class PublicationsApiController extends ApiController
                 PublicationSubmissionValidation::rules($request),
                 PublicationSubmissionValidation::messages($request)
             );
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => 422,
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
+
+        try {
+            PublicationSubmissionValidation::assertAttachmentFilesAllowed($request);
         } catch (ValidationException $e) {
             return response()->json([
                 'status' => 422,

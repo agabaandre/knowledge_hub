@@ -1361,6 +1361,16 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
 
             try {
+                if (! \App\Support\PublicationAttachmentSecurity::isAllowedUpload($file)) {
+                    \Log::warning('Blocked unsafe publication attachment upload', [
+                        'publication_id' => $publication_id,
+                        'file_name' => $file->getClientOriginalName(),
+                        'mime' => $file->getMimeType(),
+                    ]);
+                    $errorCount++;
+                    continue;
+                }
+
                 $storagePath = storage_path().'/app/public/uploads/publications/';
                 if (!is_dir($storagePath)) {
                     mkdir($storagePath, 0755, true);

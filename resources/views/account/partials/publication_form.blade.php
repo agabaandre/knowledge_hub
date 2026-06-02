@@ -98,7 +98,8 @@
 								@endif
 
                                 <div class="custom-file">
-                                    <input  type="file" class="custom-file-input" name="files" id="attachments">
+                                    <input type="file" class="custom-file-input" name="files" id="attachments" multiple
+                                           accept="{{ \App\Support\PublicationAttachmentSecurity::htmlAcceptAttribute() }}">
                                     <label class="custom-file-label" for="validatedCustomFile">Choose file.s..</label>
                                     <div class="preview py-2"></div>
                                 </div>

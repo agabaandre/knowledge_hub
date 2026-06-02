@@ -153,7 +153,7 @@
                         <div class="container-fluid mt-1" style="line-height:1.3; padding-left:0; padding-right:0;">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file from your device. <strong>PDF is recommended</strong> for documents; Word, Excel, PowerPoint, images, audio, and video files are also supported.</small>
+                                    <small class="text-muted d-block"><strong>Attachment</strong>: Upload a file from your device. <strong>PDF is recommended</strong> for documents; Word, Excel, PowerPoint, images, audio, and video are supported. Scripts and executables (e.g. .php, .js, .exe) are not allowed.</small>
                                     <small class="text-muted d-block"><strong>External Link</strong>: Paste a URL to content hosted elsewhere (e.g. a YouTube or Vimeo page). Required when you are not uploading a file.</small>
                                     <small class="text-muted d-block"><strong>Embedded On Page</strong>: Show the linked content inside the resource page — use this for videos and other embeddable content so users can view it without leaving the Hub.</small>
                                 </div>
@@ -331,10 +331,11 @@
 
                         <div class="custom-file">
                             <input type="file" class="form-control" name="files" id="attachments" multiple
-                                   accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,audio/*,video/*">
+                                   accept="{{ \App\Support\PublicationAttachmentSecurity::htmlAcceptAttribute() }}">
                             <label class="form-label mt-2" for="attachments">
-                                <small class="text-muted">Click to select files (you can add more files by clicking again)</small>
+                                <small class="text-muted">Click to select files (you can add more files by clicking again). Executable and script files are blocked for security.</small>
                             </label>
+                            <div id="attachment-security-error" class="alert alert-danger mt-2 py-2 px-3 small" style="display:none;" role="alert"></div>
                         </div>
                         <div class="preview py-2" style="min-height: 24px;"></div>
             </div>
@@ -876,7 +877,89 @@
         // File input with ability to add multiple files incrementally
         var $input = $('#attachments');
         var existingFiles = []; // Store existing files
-        
+        var blockedAttachmentExt = @json(\App\Support\PublicationAttachmentSecurity::blockedExtensionsForJs());
+        var allowedAttachmentExt = @json(\App\Support\PublicationAttachmentSecurity::allowedExtensionsForJs());
+
+        function attachmentExtension(name) {
+            var parts = String(name || '').toLowerCase().split('.');
+            return parts.length > 1 ? parts.pop() : '';
+        }
+
+        function isBlockedAttachmentName(name) {
+            var lower = String(name || '').toLowerCase();
+            if (!lower || lower.indexOf('.') === -1) return true;
+            for (var i = 0; i < blockedAttachmentExt.length; i++) {
+                var re = new RegExp('\\.' + blockedAttachmentExt[i].replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '(\\.|$)', 'i');
+                if (re.test(lower)) return true;
+            }
+            return false;
+        }
+
+        function isAllowedAttachmentFile(file) {
+            if (!file || !file.name) return false;
+            if (isBlockedAttachmentName(file.name)) return false;
+            var ext = attachmentExtension(file.name);
+            return ext && allowedAttachmentExt.indexOf(ext) !== -1;
+        }
+
+        function showAttachmentSecurityError(message) {
+            var $box = $('#attachment-security-error');
+            if (!$box.length) return;
+            if (message) {
+                $box.text(message).show();
+                $box[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            } else {
+                $box.hide().text('');
+            }
+        }
+
+        function findInvalidAttachments(fileList) {
+            var rejected = [];
+            if (!fileList || !fileList.length) {
+                return rejected;
+            }
+            Array.from(fileList).forEach(function(file) {
+                if (!isAllowedAttachmentFile(file)) {
+                    rejected.push(file.name || 'Unknown file');
+                }
+            });
+            return rejected;
+        }
+
+        function validateSelectedAttachments() {
+            var input = document.getElementById('attachments');
+            if (!input || !input.files || !input.files.length) {
+                showAttachmentSecurityError('');
+                return { ok: true, rejected: [] };
+            }
+            var rejected = findInvalidAttachments(input.files);
+            if (rejected.length) {
+                var msg = 'These file types are not allowed and were not added (scripts and executables are blocked): ' + rejected.join(', ');
+                showAttachmentSecurityError(msg);
+                return { ok: false, rejected: rejected, message: msg };
+            }
+            showAttachmentSecurityError('');
+            return { ok: true, rejected: [] };
+        }
+
+        function goToAttachmentsStep() {
+            if ($('#smartwizard').length && typeof $('#smartwizard').smartWizard === 'function') {
+                $('#smartwizard').smartWizard('goToStep', 1);
+            }
+            var $step2 = $('#step-2');
+            if ($step2.length) {
+                $('html, body').animate({ scrollTop: $step2.offset().top - 80 }, 300);
+            }
+        }
+
+        function handleAttachmentValidationFailure(result) {
+            var msg = (result && result.message) ? result.message : 'One or more attachments use a file type that is not allowed.';
+            showAttachmentSecurityError(msg);
+            goToAttachmentsStep();
+            alert(msg);
+            return false;
+        }
+
         if ($input.length) {
             // Clear any existing preview icons from attachment_js.blade.php
             $input.closest('.mb-2').find('.preview').empty();
@@ -888,10 +971,35 @@
             
             $input.on('change', function() {
                 var newFiles = Array.from(this.files);
-                
+                var rejected = [];
+                var acceptedNew = [];
+                newFiles.forEach(function(newFile) {
+                    if (!isAllowedAttachmentFile(newFile)) {
+                        rejected.push(newFile.name);
+                        return;
+                    }
+                    acceptedNew.push(newFile);
+                });
+                if (rejected.length) {
+                    showAttachmentSecurityError('These file types are not allowed and were not added (scripts and executables are blocked): ' + rejected.join(', '));
+                } else {
+                    showAttachmentSecurityError('');
+                }
+
+                if (rejected.length && acceptedNew.length === 0) {
+                    // Clear disallowed selection from the native picker
+                    const emptyDt = new DataTransfer();
+                    existingFiles.forEach(function(file) {
+                        emptyDt.items.add(file);
+                    });
+                    this.files = emptyDt.files;
+                    updateFilePreview();
+                    return;
+                }
+
                 // Merge new files with existing files (avoid duplicates)
                 var mergedFiles = [...existingFiles];
-                newFiles.forEach(function(newFile) {
+                acceptedNew.forEach(function(newFile) {
                     // Check if file already exists (by name and size)
                     var exists = mergedFiles.some(function(existingFile) {
                         return existingFile.name === newFile.name && existingFile.size === newFile.size;
@@ -1224,6 +1332,12 @@
                     alert('Please select at least one tag/health topic to help categorize your publication.');
                     return false;
                 }
+
+                var attachmentCheck = validateSelectedAttachments();
+                if (!attachmentCheck.ok) {
+                    e.preventDefault();
+                    return handleAttachmentValidationFailure(attachmentCheck);
+                }
                 
                 // Intercept form submission to manually add files
                 var fileInput = $('#attachments');
@@ -1238,8 +1352,11 @@
                     formData.delete('files'); // Remove any existing files entry
                     formData.delete('files[]'); // Remove any existing files[] entry
                     
-                    // Add each file individually
+                    // Add each allowed file only
                     Array.from(fileInput[0].files).forEach(function(file, index) {
+                        if (!isAllowedAttachmentFile(file)) {
+                            return;
+                        }
                         formData.append('files[]', file);
                         console.log('Added file to FormData:', file.name, '(' + (file.size / 1024).toFixed(2) + ' KB)');
                     });
@@ -1295,12 +1412,26 @@
                         error: function(xhr) {
                             console.error('Form submission error:', xhr);
                             var errorMsg = 'An error occurred while submitting the form.';
-                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                            if (xhr.status === 422 && xhr.responseJSON) {
+                                if (xhr.responseJSON.errors && xhr.responseJSON.errors.files) {
+                                    var fileErrs = xhr.responseJSON.errors.files;
+                                    errorMsg = Array.isArray(fileErrs) ? fileErrs.join(' ') : String(fileErrs);
+                                    showAttachmentSecurityError(errorMsg);
+                                    goToAttachmentsStep();
+                                } else if (xhr.responseJSON.message) {
+                                    errorMsg = xhr.responseJSON.message;
+                                }
+                            } else if (xhr.responseJSON && xhr.responseJSON.message) {
                                 errorMsg = xhr.responseJSON.message;
                             } else if (xhr.responseText) {
                                 try {
                                     var errorResponse = JSON.parse(xhr.responseText);
-                                    if (errorResponse.message) {
+                                    if (errorResponse.errors && errorResponse.errors.files) {
+                                        var fe = errorResponse.errors.files;
+                                        errorMsg = Array.isArray(fe) ? fe.join(' ') : String(fe);
+                                        showAttachmentSecurityError(errorMsg);
+                                        goToAttachmentsStep();
+                                    } else if (errorResponse.message) {
                                         errorMsg = errorResponse.message;
                                     }
                                 } catch(e) {
@@ -1342,6 +1473,11 @@
             
             form.off('submit').on('submit', function(e) {
                 e.preventDefault();
+
+                var attachmentCheck = validateSelectedAttachments();
+                if (!attachmentCheck.ok) {
+                    return handleAttachmentValidationFailure(attachmentCheck);
+                }
                 
                 var formEl = $(this);
                 var formData = new FormData(formEl[0]);
@@ -1360,8 +1496,11 @@
                     formData.delete('files'); // Remove any existing files entry
                     formData.delete('files[]'); // Remove any existing files[] entry
                     
-                    // Add each file individually
+                    // Add each allowed file individually (never upload blocked types)
                     Array.from(fileInput[0].files).forEach(function(file, index) {
+                        if (!isAllowedAttachmentFile(file)) {
+                            return;
+                        }
                         formData.append('files[]', file);
                         console.log('Frontend form: Added file to FormData:', file.name, '(' + (file.size / 1024).toFixed(2) + ' KB)');
                     });
@@ -1469,6 +1608,12 @@
                             if (xhr.responseJSON.errors) {
                                 // Laravel validation errors
                                 var errors = xhr.responseJSON.errors;
+                                if (errors.files) {
+                                    var fileErrs = errors.files;
+                                    errorMsg = Array.isArray(fileErrs) ? fileErrs.join(' ') : String(fileErrs);
+                                    showAttachmentSecurityError(errorMsg);
+                                    goToAttachmentsStep();
+                                }
                                 for (var field in errors) {
                                     if (errors.hasOwnProperty(field)) {
                                         if (Array.isArray(errors[field])) {

@@ -2,7 +2,10 @@
 
 namespace App\Support;
 
+use App\Rules\SafePublicationAttachment;
 use Illuminate\Http\Request;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Validation rules and messages for publication create/update (web wizard and API).
@@ -76,6 +79,7 @@ final class PublicationSubmissionValidation
             'cover' => 'nullable|file|image|max:10240',
             'cover_url' => 'nullable|string|max:2048',
             'files' => 'nullable',
+            'files.*' => ['file', 'max:102400', new SafePublicationAttachment()],
             'remove_attachments' => 'nullable|array',
             'remove_attachments.*' => 'integer|exists:publication_attachments,id',
         ];
@@ -93,6 +97,46 @@ final class PublicationSubmissionValidation
         }
 
         return $val_rules;
+    }
+
+    /**
+     * Extra pass for single-file uploads and any edge cases not covered by files.* rules.
+     */
+    public static function assertAttachmentFilesAllowed(Request $request): void
+    {
+        $messages = [];
+        foreach (self::iterAttachmentFiles($request) as $file) {
+            if (! $file instanceof UploadedFile || ! $file->isValid()) {
+                continue;
+            }
+            if (! PublicationAttachmentSecurity::isAllowedUpload($file)) {
+                $messages[] = PublicationAttachmentSecurity::rejectionMessage($file->getClientOriginalName());
+            }
+        }
+
+        if ($messages !== []) {
+            throw ValidationException::withMessages([
+                'files' => array_values(array_unique($messages)),
+            ]);
+        }
+    }
+
+    /**
+     * @return list<UploadedFile>
+     */
+    public static function iterAttachmentFiles(Request $request): array
+    {
+        if (! $request->hasFile('files')) {
+            return [];
+        }
+
+        $files = $request->file('files');
+
+        if (is_array($files)) {
+            return array_values(array_filter($files, fn ($f) => $f instanceof UploadedFile));
+        }
+
+        return $files instanceof UploadedFile ? [$files] : [];
     }
 
     public static function messages(Request $request): array
@@ -128,6 +172,7 @@ final class PublicationSubmissionValidation
             'countries.min' => 'Please select at least one member state.',
             'link.required' => 'Please provide the external link URL for your resource.',
             'link.url' => 'Please provide a valid URL (starting with http:// or https://).',
+            'files.*.max' => 'Each attachment may not be larger than 100 MB.',
         ];
     }
 }

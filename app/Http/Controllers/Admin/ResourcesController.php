@@ -7,6 +7,8 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Http\Controllers\Controller;
+use App\Support\PublicationSubmissionValidation;
+use Illuminate\Validation\ValidationException;
 
 class ResourcesController extends Controller
 {
@@ -85,6 +87,20 @@ class ResourcesController extends Controller
             }
             return back()->with(['message' => 'Please select a Corporate Source or Member State (author).', 'status' => 'failure']);
         }
+        try {
+            PublicationSubmissionValidation::assertAttachmentFilesAllowed($request);
+        } catch (ValidationException $e) {
+            if ($request->ajax()) {
+                return response()->json([
+                    'message' => 'Invalid attachment file type.',
+                    'status' => 'failure',
+                    'errors' => $e->errors(),
+                ], 422);
+            }
+
+            return back()->withErrors($e->errors())->withInput();
+        }
+
         $saved = $this->publicationsRepo->save($request);
 
         if($saved):

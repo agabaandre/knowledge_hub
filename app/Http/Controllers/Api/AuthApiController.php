@@ -7,6 +7,7 @@ use Illuminate\Validation\Rule;
 use App\Models\User;
 use App\Repositories\UsersRepository;
 use App\Rules\InternationalPhoneKnownCallingCode;
+use App\Rules\NotDisposableEmail;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
 use Auth;
@@ -112,7 +113,7 @@ class AuthApiController extends ApiController
         $request->validate([
             'firstname' => ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users', new NotDisposableEmail()],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'phone' => ['required', 'string', 'min:10'],
             'country_id' => ['required', 'integer', 'exists:country,id'],

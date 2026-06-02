@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Rules\NotDisposableEmail;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
@@ -29,7 +30,7 @@ class AuthController extends Controller
         $request->validate([
             'firstname'=> ['required', 'string', 'max:255'],
             'lastname' => ['required', 'string', 'max:255'],
-            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'email'    => ['required', 'string', 'email', 'max:255', 'unique:users', new NotDisposableEmail()],
             'password' => ['required', 'string', 'min:8', 'confirmed'],
             'country_id' => ['required'],
             'preferences' => ['required', 'array', 'min:1'],

@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use App\Models\AccessLevel;
 use App\Models\PdfChatSession;
 use App\Support\PublicationSubmissionValidation;
+use Illuminate\Validation\ValidationException;
 
 class AccountController extends Controller
 {
@@ -241,7 +242,23 @@ class AccountController extends Controller
         $val_rules = PublicationSubmissionValidation::rules($request);
         $messages = PublicationSubmissionValidation::messages($request);
 
-        $request->validate($val_rules, $messages);
+        try {
+            $request->validate($val_rules, $messages);
+            PublicationSubmissionValidation::assertAttachmentFilesAllowed($request);
+        } catch (ValidationException $e) {
+            if ($request->ajax()) {
+                $flat = collect($e->errors())->flatten();
+
+                return response()->json([
+                    'status' => 'error',
+                    'message' => $flat->first() ?: 'Please fix the errors below.',
+                    'errors' => $e->errors(),
+                    'alert_class' => 'danger',
+                ], 422);
+            }
+
+            throw $e;
+        }
 
         // Default: show disclaimer if checkbox not sent
         if (!$request->has('show_disclaimer')) {

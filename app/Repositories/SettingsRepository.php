@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Setting;
+use App\Support\DisposableEmailChecker;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -290,6 +291,14 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
             $settings->allow_email_password_accounts_social_login = (bool)$request->boolean('allow_email_password_accounts_social_login', true);
         }
+        if (Schema::hasColumn('setting', 'block_disposable_email_registration')) {
+            $settings->block_disposable_email_registration = (bool) $request->boolean('block_disposable_email_registration', true);
+        }
+        if (Schema::hasColumn('setting', 'blocked_email_domains')) {
+            $settings->blocked_email_domains = self::normalizeBlockedEmailDomainsInput(
+                (string) $request->input('blocked_email_domains', '')
+            );
+        }
 
         // Publication form settings
         if (Schema::hasColumn('setting', 'publication_min_words')) {
@@ -403,9 +412,27 @@ class SettingsRepository
 
         $settings->save();
 
+        DisposableEmailChecker::forgetCache();
         clear_cache();
 
         return $settings;
+    }
+
+    /**
+     * One domain per line for admin textarea storage.
+     */
+    public static function normalizeBlockedEmailDomainsInput(string $raw): string
+    {
+        $domains = DisposableEmailChecker::parseDomainList($raw);
+        $normalized = [];
+        foreach ($domains as $domain) {
+            $d = DisposableEmailChecker::normalizeDomain($domain);
+            if ($d !== '') {
+                $normalized[$d] = true;
+            }
+        }
+
+        return implode("\n", array_keys($normalized));
     }
 
     private function save_attachments($files)

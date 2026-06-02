@@ -1477,6 +1477,25 @@
                                     <small class="info-text d-block">When enabled, users who originally registered with email/password can use social login if the email matches. A successful social login verifies unverified accounts and updates sign-in method to social.</small>
                                     <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
                                 </div>
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'block_disposable_email_registration'))
+                                <hr class="my-3">
+                                <div class="form-group mb-2">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="block_disposable_email_registration" name="block_disposable_email_registration" value="1" @if(!isset($settings->block_disposable_email_registration) || $settings->block_disposable_email_registration) checked @endif>
+                                        <label class="form-check-label" for="block_disposable_email_registration">
+                                            Block temporary / disposable email addresses at registration
+                                        </label>
+                                    </div>
+                                    <small class="info-text d-block">Rejects sign-ups from known throwaway providers (built-in list plus domains below). Applies to web <code>/register</code> and API registration.</small>
+                                </div>
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'blocked_email_domains'))
+                                <div class="form-group mb-0">
+                                    <label for="blocked_email_domains">Additional blocked email domains</label>
+                                    <textarea name="blocked_email_domains" id="blocked_email_domains" rows="8" class="form-control font-monospace" placeholder="hidingmail.net&#10;example-temp-mail.com">{{ $settings->blocked_email_domains ?? '' }}</textarea>
+                                    <small class="info-text d-block mt-1">One domain per line (or comma-separated). Subdomains are blocked too (e.g. <code>mail.hidingmail.net</code> when <code>hidingmail.net</code> is listed). Example disposable provider: <a href="https://fidro.io/disposable-emails/hidingmail.net" target="_blank" rel="noopener">hidingmail.net</a>.</small>
+                                </div>
+                                @endif
+                                @endif
                             </div>
                         </div>
 
