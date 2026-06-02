@@ -86,6 +86,18 @@
         #smartwizard .mt-2 { margin-top: 8px !important; }
         /* Ensure consistent horizontal padding on all steps so first controls aren't clipped */
         #smartwizard .tab-content .tab-pane { padding-left: 16px; padding-right: 16px; }
+        /* Step 1: wide + narrow field pairs (80% / 20%) */
+        #smartwizard .wizard-inline-80-20 {
+            display: grid;
+            grid-template-columns: minmax(0, 4fr) minmax(0, 1fr);
+            gap: 12px 16px;
+            align-items: start;
+        }
+        @media (max-width: 767.98px) {
+            #smartwizard .wizard-inline-80-20 {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     <ul class="nav">
         <li>
@@ -183,50 +195,55 @@
                     </div>
                 </div>
 
-                <div class="col-md-12 url_wrapper">
-                    <div class="mb-3">
-                        <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
-                        <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                            name="link" value="{{ @$row->publication ?? old('publication') }}">
-                        <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
+                <div class="col-md-12 mb-2">
+                    <div class="wizard-inline-80-20">
+                        <div class="mb-0 url_wrapper">
+                            <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
+                            <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                                name="link" value="{{ @$row->publication ?? old('publication') }}">
+                            <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
+                        </div>
+                        <div class="mb-0 wizard-field-year">
+                            <label class="form-label" for="year_published">Year of Publication
+                                @if(($requiredFields['year_published'] ?? false) == true)
+                                    <span class="text-danger">*</span>
+                                @endif
+                            </label>
+                            <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
+                                @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
+                                @for($y = $start; $y >= $end; $y--)
+                                    <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
+                                @endfor
+                            </select>
+                            <small class="text-muted d-block">Year published</small>
+                        </div>
                     </div>
                 </div>
 
-                <div class="col-md-6 mb-2">
-                    <label class="form-label" for="year_published">Year of Publication
-                        @if(($requiredFields['year_published'] ?? false) == true)
-                            <span class="text-danger">*</span>
-                    @endif
-                    </label>
-                    <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
-                        @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
-                        @for($y = $start; $y >= $end; $y--)
-                            <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
-                        @endfor
-                    </select>
-                    <small class="text-muted">Select the year this resource was published.</small>
-                </div>
-
-                <div class="col-md-6 mb-2">
-                    <label>Category
-                        @if(($requiredFields['data_category_id'] ?? true) == true)
-                            <span class="text-danger">*</span>
-                        @endif
-                    </label>
-                        @include('partials.datarecords.categories_dropdown', [
-                            'field' => 'data_category_id',
-                        'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
-                            'exclude_special' => true,
-                        'selected' => old('data_category_id', optional($publication)->publication_catgory_id ?? ''),
-                        ])
+                <div class="col-md-12 mb-2">
+                    <div class="wizard-inline-80-20">
+                        <div class="mb-0">
+                            <label class="form-label">Category
+                                @if(($requiredFields['data_category_id'] ?? true) == true)
+                                    <span class="text-danger">*</span>
+                                @endif
+                            </label>
+                            @include('partials.datarecords.categories_dropdown', [
+                                'field' => 'data_category_id',
+                                'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
+                                'exclude_special' => true,
+                                'selected' => old('data_category_id', optional($publication)->publication_catgory_id ?? ''),
+                            ])
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label" for="category_id">Sub Category</label>
+                            @include('partials.publications.filecategory_dropdown', [
+                                'field' => 'category_id',
+                                'selected' => old('category_id', optional($publication)->data_category_id ?? ''),
+                            ])
+                        </div>
                     </div>
-                <div class="col-md-6 mb-2">
-                        <label class="form-label" for="publication">Sub Category</label>
-                        @include('partials.publications.filecategory_dropdown', [
-                            'field' => 'category_id',
-                            'selected' => old('category_id', optional($publication)->data_category_id ?? ''),
-                        ])
-            </div>
+                </div>
 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Thematic Area
