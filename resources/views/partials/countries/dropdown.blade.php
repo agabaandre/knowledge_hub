@@ -6,8 +6,19 @@
         ? (empty($selected) || (is_array($selected) && count($selected) === 0))
         : ($selected === null || $selected === '' || ! is_numeric($selected));
 @endphp
+@php
+    $selectedValues = $isMultiple && is_array($selected) ? $selected : [];
+    $hasAllSelected = ! empty($all_option) && (
+        (is_array($selected) && in_array('all', array_map('strval', $selectedValues), true))
+        || $selected === 'all'
+    );
+@endphp
 <select class="form-control {{ $class ?? 'select2' }} text-left form-select" name="{{ $field ?? 'country_id' }}" id="{{ $id ?? ($field ?? 'country_id') }}" {{ $required ?? '' }} {{ $multiple ?? '' }} {{ $onclick ?? '' }} data-placeholder="{{ $allfield ?? 'Select Country' }}">
-    <option value="" {{ $noCountryChosen ? 'selected' : '' }}>{{ $allfield ?? 'Select Country' }}</option>
+    @if (!empty($all_option))
+        <option value="all" {{ $hasAllSelected ? 'selected' : '' }}>{{ $allfield ?? 'All' }}</option>
+    @else
+        <option value="" {{ $noCountryChosen ? 'selected' : '' }}>{{ $allfield ?? 'Select Country' }}</option>
+    @endif
 
     @foreach ($countries as $country)
         @php
