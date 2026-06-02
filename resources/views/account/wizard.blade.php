@@ -111,6 +111,52 @@
         #smartwizard .wizard-step-error-summary.is-visible {
             display: block;
         }
+        #publication-processing-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            z-index: 10050;
+            background: rgba(15, 23, 42, 0.55);
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+        }
+        #publication-processing-overlay.is-visible {
+            display: flex;
+        }
+        #publication-processing-overlay .processing-card {
+            background: #fff;
+            color: #0f172a;
+            border-radius: 8px;
+            padding: 1.5rem 2rem;
+            max-width: 420px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        #publication-processing-overlay .processing-spinner {
+            font-size: 2rem;
+            color: #119A48;
+            margin-bottom: 0.75rem;
+        }
+        body.publication-form-busy {
+            overflow: hidden;
+        }
+        #ai-description-loader.is-processing {
+            display: block !important;
+        }
+        .attachment.wizard-ai-busy {
+            position: relative;
+        }
+        .attachment.wizard-ai-busy::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.75);
+            z-index: 5;
+            border-radius: 4px;
+        }
         @media (max-width: 767.98px) {
             #smartwizard .wizard-inline-80-20,
             #smartwizard .wizard-inline-50-50 {
@@ -419,12 +465,14 @@
             <!-- AI Description Loader -->
             <div id="ai-description-loader" style="display: none; margin-top: 10px; margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #119A48; border-radius: 4px;">
                 <div class="d-flex align-items-center">
-                    <div class="spinner-border spinner-border-sm text-success mr-2" role="status" style="width: 1.5rem; height: 1.5rem;">
-                        <span class="sr-only">Loading...</span>
+                    <div class="mr-3 text-center" style="min-width: 2.5rem;">
+                        <i class="fa fa-spinner fa-spin processing-spinner" style="font-size: 1.75rem; color: #119A48;" aria-hidden="true"></i>
+                        <span class="sr-only">Processing</span>
                     </div>
                     <div>
-                        <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is generating description and extracting metadata...</strong>
-                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation from your uploaded document. This is only a draft to help you publish faster—always review and edit before you submit.</p>
+                        <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is extracting data from your document…</strong>
+                        <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation. This is only a draft to help you publish faster—always review and edit before you submit.</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -689,6 +737,14 @@
 </div>
 
 <br>
+
+<div id="publication-processing-overlay" role="status" aria-live="polite" aria-busy="false">
+    <div class="processing-card">
+        <div class="processing-spinner"><i class="fa fa-spinner fa-spin" aria-hidden="true"></i></div>
+        <strong class="d-block processing-message">Submitting your publication…</strong>
+        <p class="mb-0 mt-2 small text-muted">Please do not close this page.</p>
+    </div>
+</div>
 
 @include('partials.search.fields_js')
 
@@ -995,6 +1051,72 @@
             return false;
         }
 
+        window.validateSelectedAttachments = validateSelectedAttachments;
+        window.isAllowedAttachmentFile = isAllowedAttachmentFile;
+        window.handleAttachmentValidationFailure = handleAttachmentValidationFailure;
+        window.goToAttachmentsStep = goToAttachmentsStep;
+        window.showAttachmentSecurityError = showAttachmentSecurityError;
+
+        window.wizardShowProcessingOverlay = function(show, message) {
+            var $overlay = $('#publication-processing-overlay');
+            if (!$overlay.length) {
+                return;
+            }
+            if (message) {
+                $overlay.find('.processing-message').text(message);
+            }
+            if (show) {
+                $overlay.attr('aria-busy', 'true').addClass('is-visible');
+                $('body').addClass('publication-form-busy');
+            } else {
+                $overlay.attr('aria-busy', 'false').removeClass('is-visible');
+                $('body').removeClass('publication-form-busy');
+            }
+        };
+
+        window.wizardSetSubmittingState = function(isSubmitting, message) {
+            var $form = $('#publication_form');
+            var $submitBtn = $('#submit, .savebtn[type="submit"]');
+            $form.data('wizard-submitting', !!isSubmitting);
+            if (isSubmitting) {
+                if (!$submitBtn.data('wizard-original-html')) {
+                    $submitBtn.data('wizard-original-html', $submitBtn.first().html());
+                }
+                $submitBtn.prop('disabled', true);
+                $submitBtn.html('<i class="fa fa-spinner fa-spin mr-1"></i> Submitting…');
+                window.wizardShowProcessingOverlay(true, message || 'Submitting your publication…');
+            } else {
+                var original = $submitBtn.data('wizard-original-html');
+                $submitBtn.prop('disabled', false);
+                if (original) {
+                    $submitBtn.html(original);
+                }
+                window.wizardShowProcessingOverlay(false);
+            }
+        };
+
+        window.wizardIsSubmitting = function() {
+            return !!$('#publication_form').data('wizard-submitting');
+        };
+
+        window.wizardSetAiProcessingState = function(isProcessing) {
+            var $loader = $('#ai-description-loader');
+            var $attachmentCol = $('.attachment');
+            var $fileInput = $('#attachments');
+            if (isProcessing) {
+                $loader.addClass('is-processing').slideDown(250);
+                $attachmentCol.addClass('wizard-ai-busy');
+                $fileInput.prop('disabled', true);
+                if ($loader.length && $loader[0].scrollIntoView) {
+                    $loader[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                }
+            } else {
+                $loader.removeClass('is-processing').slideUp(200);
+                $attachmentCol.removeClass('wizard-ai-busy');
+                $fileInput.prop('disabled', false);
+            }
+        };
+
         if ($input.length) {
             // Clear any existing preview icons from attachment_js.blade.php
             $input.closest('.mb-2').find('.preview').empty();
@@ -1111,8 +1233,7 @@
 
         // AI summary extraction from first selected file
         function extractSummaryFromFile(file){
-            // Show loader
-            $('#ai-description-loader').slideDown(300);
+            window.wizardSetAiProcessingState(true);
             
             var formData = new FormData();
             formData.append('file', file);
@@ -1126,8 +1247,7 @@
                 processData: false,
                 contentType: false,
                 success: function(resp){
-                    // Hide loader
-                    $('#ai-description-loader').slideUp(300);
+                    window.wizardSetAiProcessingState(false);
                     
                     if(!resp || !resp.content) return;
                     
@@ -1166,9 +1286,18 @@
                     }
                 },
                 error: function(xhr, status, error){
-                    // Hide loader on error
-                    $('#ai-description-loader').slideUp(300);
+                    window.wizardSetAiProcessingState(false);
                     console.error('AI extraction error:', error);
+                    if (typeof Lobibox !== 'undefined') {
+                        Lobibox.notify('warning', {
+                            size: 'mini',
+                            sound: false,
+                            delay: 5000,
+                            title: 'AI extraction',
+                            position: 'top right',
+                            msg: 'We could not extract data from this file automatically. You can still fill in the form manually.'
+                        });
+                    }
                 }
             });
         }
@@ -1674,10 +1803,10 @@
                     return false;
                 }
 
-                var attachmentCheck = validateSelectedAttachments();
+                var attachmentCheck = window.validateSelectedAttachments();
                 if (!attachmentCheck.ok) {
                     e.preventDefault();
-                    return handleAttachmentValidationFailure(attachmentCheck);
+                    return window.handleAttachmentValidationFailure(attachmentCheck);
                 }
                 
                 // Intercept form submission to manually add files
@@ -1695,7 +1824,7 @@
                     
                     // Add each allowed file only
                     Array.from(fileInput[0].files).forEach(function(file, index) {
-                        if (!isAllowedAttachmentFile(file)) {
+                        if (!window.isAllowedAttachmentFile(file)) {
                             return;
                         }
                         formData.append('files[]', file);
@@ -1704,14 +1833,7 @@
                     
                     // Prevent default form submission
                     e.preventDefault();
-                    
-                    // Show loading indicator
-                    var submitBtn = form.querySelector('button[type="submit"]');
-                    var originalBtnText = submitBtn ? submitBtn.innerHTML : '';
-                    if (submitBtn) {
-                        submitBtn.disabled = true;
-                        submitBtn.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Submitting...';
-                    }
+                    window.wizardSetSubmittingState(true);
                     
                     // Submit via AJAX with FormData
                     $.ajax({
@@ -1742,12 +1864,8 @@
                                     window.location.href = '{{ route("account.publications") }}';
                                 }
                             } else {
-                                // Show error message
                                 alert(response.message || 'An error occurred. Please try again.');
-                                if (submitBtn) {
-                                    submitBtn.disabled = false;
-                                    submitBtn.innerHTML = originalBtnText;
-                                }
+                                window.wizardSetSubmittingState(false);
                             }
                         },
                         error: function(xhr) {
@@ -1759,8 +1877,8 @@
                                 if (validationErrors && validationErrors.files) {
                                     var fileErrs = validationErrors.files;
                                     errorMsg = Array.isArray(fileErrs) ? fileErrs.join(' ') : String(fileErrs);
-                                    showAttachmentSecurityError(errorMsg);
-                                    goToAttachmentsStep();
+                                    window.showAttachmentSecurityError(errorMsg);
+                                    window.goToAttachmentsStep();
                                 } else if (xhr.responseJSON.message) {
                                     errorMsg = xhr.responseJSON.message;
                                 }
@@ -1773,8 +1891,8 @@
                                     if (validationErrors && validationErrors.files) {
                                         var fe = validationErrors.files;
                                         errorMsg = Array.isArray(fe) ? fe.join(' ') : String(fe);
-                                        showAttachmentSecurityError(errorMsg);
-                                        goToAttachmentsStep();
+                                        window.showAttachmentSecurityError(errorMsg);
+                                        window.goToAttachmentsStep();
                                     } else if (errorResponse.message) {
                                         errorMsg = errorResponse.message;
                                     }
@@ -1786,18 +1904,50 @@
                                 window.applyServerValidationErrors(validationErrors);
                             }
                             alert(errorMsg);
-                            if (submitBtn) {
-                                submitBtn.disabled = false;
-                                submitBtn.innerHTML = originalBtnText;
-                            }
+                            window.wizardSetSubmittingState(false);
+                        },
+                        complete: function() {
+                            // Success path redirects; errors reset above
                         }
                     });
                     
                     return false; // Prevent default form submission
                 } else {
-                    console.log('No files attached to input - submitting normally');
-                    // No files, submit normally
-                    return true;
+                    e.preventDefault();
+                    window.wizardSetSubmittingState(true);
+                    var formNoFiles = document.getElementById('publication_form');
+                    var formDataNoFiles = new FormData(formNoFiles);
+                    $.ajax({
+                        url: formNoFiles.action,
+                        method: 'POST',
+                        data: formDataNoFiles,
+                        processData: false,
+                        contentType: false,
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                        success: function(response) {
+                            if (response.status === 200 && response.alert_class === 'success') {
+                                if (response.message) {
+                                    alert(response.message);
+                                }
+                                window.location.href = '{{ route("account.publications") }}';
+                            } else {
+                                alert(response.message || 'An error occurred. Please try again.');
+                                window.wizardSetSubmittingState(false);
+                            }
+                        },
+                        error: function(xhr) {
+                            var errorMsg = 'An error occurred while submitting the form.';
+                            if (xhr.responseJSON && xhr.responseJSON.message) {
+                                errorMsg = xhr.responseJSON.message;
+                            }
+                            if (xhr.responseJSON && xhr.responseJSON.errors && typeof window.applyServerValidationErrors === 'function') {
+                                window.applyServerValidationErrors(xhr.responseJSON.errors);
+                            }
+                            alert(errorMsg);
+                            window.wizardSetSubmittingState(false);
+                        }
+                    });
+                    return false;
                 }
             });
     });
@@ -1821,13 +1971,17 @@
             form.off('submit').on('submit', function(e) {
                 e.preventDefault();
 
+                if (window.wizardIsSubmitting && window.wizardIsSubmitting()) {
+                    return false;
+                }
+
                 if (!window.validatePublicationWizardFull()) {
                     return false;
                 }
 
-                var attachmentCheck = validateSelectedAttachments();
+                var attachmentCheck = window.validateSelectedAttachments();
                 if (!attachmentCheck.ok) {
-                    return handleAttachmentValidationFailure(attachmentCheck);
+                    return window.handleAttachmentValidationFailure(attachmentCheck);
                 }
                 
                 var formEl = $(this);
@@ -1849,7 +2003,7 @@
                     
                     // Add each allowed file individually (never upload blocked types)
                     Array.from(fileInput[0].files).forEach(function(file, index) {
-                        if (!isAllowedAttachmentFile(file)) {
+                        if (!window.isAllowedAttachmentFile(file)) {
                             return;
                         }
                         formData.append('files[]', file);
@@ -1860,14 +2014,7 @@
                 }
                 
                 var url = formEl.attr('action');
-                
-                // Show loading indicator
-                var submitBtn = formEl.find('button[type="submit"]');
-                var originalBtnText = submitBtn.length ? submitBtn.html() : '';
-                if (submitBtn.length) {
-                    submitBtn.prop('disabled', true);
-                    submitBtn.html('<i class="fa fa-spinner fa-spin"></i> Submitting...');
-                }
+                window.wizardSetSubmittingState(true);
                 
                 $.ajax({
                     url: url,
@@ -1942,10 +2089,7 @@
                             } else {
                                 alert(errorMsg);
                             }
-                            if (submitBtn.length) {
-                                submitBtn.prop('disabled', false);
-                                submitBtn.html(originalBtnText);
-                            }
+                            window.wizardSetSubmittingState(false);
                         }
                     },
                     error: function(xhr) {
@@ -1962,8 +2106,8 @@
                                 if (errors.files) {
                                     var fileErrs = errors.files;
                                     errorMsg = Array.isArray(fileErrs) ? fileErrs.join(' ') : String(fileErrs);
-                                    showAttachmentSecurityError(errorMsg);
-                                    goToAttachmentsStep();
+                                    window.showAttachmentSecurityError(errorMsg);
+                                    window.goToAttachmentsStep();
                                 }
                                 for (var field in errors) {
                                     if (errors.hasOwnProperty(field)) {
@@ -2027,11 +2171,7 @@
                             alert(errorMsg);
                         }
                         
-                        // Re-enable submit button
-                        if (submitBtn.length) {
-                            submitBtn.prop('disabled', false);
-                            submitBtn.html(originalBtnText);
-                        }
+                        window.wizardSetSubmittingState(false);
                     }
                 });
                 
