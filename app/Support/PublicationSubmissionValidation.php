@@ -57,11 +57,22 @@ final class PublicationSubmissionValidation
             'isbn' => ($requiredFields['isbn'] ?? false) ? 'required|string|max:50' : 'nullable|string|max:50',
             'license_id' => ($requiredFields['license_id'] ?? false) ? 'required|exists:licenses,id' : 'nullable|exists:licenses,id',
             'copyright_info' => ($requiredFields['copyright_info'] ?? false) ? 'required|string' : 'nullable|string',
-            'countries' => 'nullable|array',
+            'countries' => 'required|array|min:1',
             'countries.*' => 'exists:country,id',
-            'category_id' => 'nullable|integer',
+            'category_id' => 'required|integer|min:1',
             'publication_sub_category_id' => 'nullable|integer',
-            'rccs' => 'nullable|array',
+            'rccs' => ['required', 'array', 'min:1', function ($attribute, $value, $fail) {
+                if (! is_array($value) || $value === []) {
+                    $fail('Please select at least one region.');
+
+                    return;
+                }
+                $hasAll = collect($value)->contains(fn ($v) => is_string($v) && strtolower(trim($v)) === 'all');
+                $hasRegion = collect($value)->contains(fn ($v) => is_numeric($v) && (int) $v > 0);
+                if (! $hasAll && ! $hasRegion) {
+                    $fail('Please select at least one region.');
+                }
+            }],
             'communities' => 'nullable|array',
             'upload_type' => 'nullable|in:upload,link',
             'link' => 'nullable|string|max:2048',
@@ -170,6 +181,11 @@ final class PublicationSubmissionValidation
             'countries.required' => 'Please select at least one member state.',
             'countries.array' => 'Please select at least one member state.',
             'countries.min' => 'Please select at least one member state.',
+            'category_id.required' => 'Please select a sub category for your resource.',
+            'category_id.integer' => 'Please select a valid sub category.',
+            'category_id.min' => 'Please select a sub category for your resource.',
+            'rccs.required' => 'Please select at least one region.',
+            'rccs.min' => 'Please select at least one region.',
             'link.required' => 'Please provide the external link URL for your resource.',
             'link.url' => 'Please provide a valid URL (starting with http:// or https://).',
             'files.*.max' => 'Each attachment may not be larger than 100 MB.',

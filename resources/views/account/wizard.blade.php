@@ -70,7 +70,9 @@
         ];
     }
 
-    // dd($row->country_ids);
+    $publicationMinWords = (int) (settings()->publication_min_words ?? 150);
+    $publicationMinChars = $publicationMinWords * 5;
+    $adminMustSelectAuthor = is_admin() && ! optional(current_user())->author_id;
 
 @endphp
 
@@ -93,8 +95,25 @@
             gap: 12px 16px;
             align-items: start;
         }
+        /* Equal-width pairs (e.g. Category / Sub Category) */
+        #smartwizard .wizard-inline-50-50 {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            gap: 12px 16px;
+            align-items: start;
+        }
+        #smartwizard .wizard-field-wrap.has-error .select2-container .select2-selection {
+            border-color: #dc3545 !important;
+        }
+        #smartwizard .wizard-step-error-summary {
+            display: none;
+        }
+        #smartwizard .wizard-step-error-summary.is-visible {
+            display: block;
+        }
         @media (max-width: 767.98px) {
-            #smartwizard .wizard-inline-80-20 {
+            #smartwizard .wizard-inline-80-20,
+            #smartwizard .wizard-inline-50-50 {
                 grid-template-columns: 1fr;
             }
         }
@@ -119,6 +138,7 @@
                 <i class="fa fa-info-circle mr-2" style="color: #119A48;"></i>
                 <strong>Please Note:</strong> All fields marked with a <span class="text-danger">*</span> (red asterisk) are <strong>required</strong>. Please ensure you fill in all required fields before proceeding to Step 2.
                 </div>
+            <div id="wizard-step-1-errors" class="alert alert-danger wizard-step-error-summary mb-3" role="alert"></div>
 
             <div class="alert mb-3" style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-left: 4px solid #119A48; padding: 14px 18px; border-radius: 4px;">
                 <div class="mb-3">
@@ -221,8 +241,8 @@
                 </div>
 
                 <div class="col-md-12 mb-2">
-                    <div class="wizard-inline-80-20">
-                        <div class="mb-0">
+                    <div class="wizard-inline-50-50">
+                        <div class="mb-0 wizard-field-wrap" data-wizard-field="data_category_id">
                             <label class="form-label">Category
                                 @if(($requiredFields['data_category_id'] ?? true) == true)
                                     <span class="text-danger">*</span>
@@ -235,10 +255,11 @@
                                 'selected' => old('data_category_id', optional($publication)->publication_catgory_id ?? ''),
                             ])
                         </div>
-                        <div class="mb-0">
-                            <label class="form-label" for="category_id">Sub Category</label>
+                        <div class="mb-0 wizard-field-wrap" data-wizard-field="category_id">
+                            <label class="form-label" for="category_id">Sub Category <span class="text-danger">*</span></label>
                             @include('partials.publications.filecategory_dropdown', [
                                 'field' => 'category_id',
+                                'required' => 'required',
                                 'selected' => old('category_id', optional($publication)->data_category_id ?? ''),
                             ])
                         </div>
@@ -272,10 +293,11 @@
                         ])
                 </div>
 
-                <div class="col-md-6 mb-2">
-                    <label class="form-label" for="publication">Region</label>
+                <div class="col-md-6 mb-2 wizard-field-wrap" data-wizard-field="rccs">
+                    <label class="form-label" for="publication">Region <span class="text-danger">*</span></label>
                         @include('partials.regions.dropdown', [
                             'field' => 'rccs[]',
+                            'required' => 'required',
                             'class' => 'rcc select2',
                             'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : null),
                             'multiple' => 'multiple',
@@ -283,7 +305,7 @@
                         ])
                         <small class="text-muted d-block mt-1">Tip: If this resource applies to every member state, choose <strong>All</strong>.</small>
                     </div>
-                <div class="col-md-6 mb-2">
+                <div class="col-md-6 mb-2 wizard-field-wrap" data-wizard-field="countries">
                     <label class="form-label" for="publication">Member States <span class="text-danger">*</span></label>
                         @include('partials.countries.dropdown', [
                             'field' => 'countries[]',
@@ -295,7 +317,6 @@
             </div>
 
             @if (is_admin())
-                @php $adminMustSelectAuthor = !current_user()->author_id; @endphp
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Corporate Source or Member State
                         @if(($requiredFields['author'] ?? false) == true || $adminMustSelectAuthor)
@@ -318,6 +339,7 @@
         </div>
 
         <div id="step-2" class="tab-pane" role="tabpanel" aria-labelledby="step-2">
+            <div id="wizard-step-2-errors" class="alert alert-danger wizard-step-error-summary mb-3" role="alert"></div>
             <br>
             <div class="col-md-12 mt-3">
                 <input type="hidden" name="id" id="id" class="newform"
@@ -420,11 +442,7 @@
                             If you use automatically generated text, it is only there to help you publish faster. You are responsible for the final content—<strong>please read it carefully, correct any errors, and add anything missing</strong>. Inaccurate, incomplete, or generic descriptions are a common reason resources are <strong>rejected</strong> during review.
                         </div>
                         <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" {{ ($requiredFields['description'] ?? true) ? 'required=""' : '' }}>{!! $row->description ?? old('description') !!}</textarea>
-                        @php
-                            $minWords = settings()->publication_min_words ?? 150;
-                            $minChars = $minWords * 5;
-                        @endphp
-                        <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum {{ $minWords }} words required (approximately {{ $minChars }} characters). Please provide a detailed description of your publication.</small>
+                        <small class="text-muted"><i class="fa fa-info-circle"></i> Minimum {{ $publicationMinWords }} words required (approximately {{ $publicationMinChars }} characters). Please provide a detailed description of your publication.</small>
                     </div>
                 </div>
             </div>
@@ -1248,12 +1266,305 @@
             },
         });
 
-        // Clear error message when tags are selected
-        $('select[name="tags[]"]').on('change', function() {
-            if ($(this).val() && $(this).val().length > 0) {
-                $(this).closest('.form-group').removeClass('has-error');
-                $(this).closest('.mb-2').find('.text-danger').remove();
+        var publicationMinChars = {{ $publicationMinChars }};
+        var wizardRequiredFields = @json($requiredFields);
+
+        function wizardEscapeHtml(text) {
+            return $('<div>').text(text || '').html();
+        }
+
+        function wizardClearFieldError($wrap) {
+            if (!$wrap || !$wrap.length) return;
+            $wrap.removeClass('has-error is-invalid');
+            $wrap.find('.wizard-field-error').remove();
+        }
+
+        function wizardShowFieldError($wrap, message) {
+            if (!$wrap || !$wrap.length) return;
+            wizardClearFieldError($wrap);
+            $wrap.addClass('has-error');
+            if ($wrap.find('.wizard-field-error').length === 0) {
+                $wrap.append('<small class="text-danger d-block mt-1 wizard-field-error">' + wizardEscapeHtml(message) + '</small>');
             }
+        }
+
+        function wizardSelectHasValue($select) {
+            if (!$select.length) return true;
+            var val = $select.val();
+            if (val === null || val === undefined || val === '') return false;
+            if (Array.isArray(val)) {
+                val = val.filter(function(v) { return v !== '' && v !== null && v !== undefined; });
+                return val.length > 0;
+            }
+            return true;
+        }
+
+        function wizardRegionHasValue($select) {
+            if (!$select.length) return false;
+            var val = $select.val();
+            if (!val || (Array.isArray(val) && val.length === 0)) return false;
+            var values = Array.isArray(val) ? val : [val];
+            return values.some(function(v) {
+                if (v === '' || v === null || v === undefined) return false;
+                if (String(v).toLowerCase() === 'all') return true;
+                return !isNaN(parseInt(v, 10)) && parseInt(v, 10) > 0;
+            });
+        }
+
+        function wizardShowStepSummary(stepNumber, messages) {
+            var $box = stepNumber === 0 ? $('#wizard-step-1-errors') : $('#wizard-step-2-errors');
+            if (!messages || !messages.length) {
+                $box.removeClass('is-visible').empty();
+                return;
+            }
+            var html = '<strong>Please fix the following before continuing:</strong><ul class="mb-0 mt-2 pl-3">';
+            messages.forEach(function(msg) {
+                html += '<li>' + wizardEscapeHtml(msg) + '</li>';
+            });
+            html += '</ul>';
+            $box.html(html).addClass('is-visible');
+            if ($box.length && $box[0].scrollIntoView) {
+                $box[0].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        }
+
+        function wizardGoToStep(stepIndex) {
+            if ($('#smartwizard').length && typeof $('#smartwizard').smartWizard === 'function') {
+                $('#smartwizard').smartWizard('goToStep', stepIndex);
+            }
+        }
+
+        function validateWizardStep1() {
+            var errors = [];
+            var firstInvalid = null;
+
+            function fail($wrap, message) {
+                errors.push(message);
+                wizardShowFieldError($wrap, message);
+                if (!firstInvalid && $wrap && $wrap.length) firstInvalid = $wrap;
+            }
+
+            $('#step-1 .wizard-field-wrap').each(function() { wizardClearFieldError($(this)); });
+            wizardShowStepSummary(0, []);
+
+            if (wizardRequiredFields.title !== false) {
+                var $title = $('#title');
+                var titleWrap = $title.closest('.mb-3');
+                if (!$title.val() || !String($title.val()).trim()) {
+                    fail(titleWrap, 'Resource title is required.');
+                }
+            }
+
+            if ($('input[name="upload_type"]:checked').val() === 'link') {
+                var $link = $('#publication');
+                var linkWrap = $link.closest('.url_wrapper');
+                if (!$link.val() || !String($link.val()).trim()) {
+                    fail(linkWrap, 'Publication URL is required when using External Link.');
+                }
+            }
+
+            if (wizardRequiredFields.year_published === true) {
+                var $year = $('#year_published');
+                if (!wizardSelectHasValue($year)) {
+                    fail($year.closest('.wizard-field-year'), 'Year of publication is required.');
+                }
+            }
+
+            if (wizardRequiredFields.data_category_id !== false) {
+                var $cat = $('#data_category_id');
+                var catWrap = $('[data-wizard-field="data_category_id"]');
+                if (!wizardSelectHasValue($cat)) {
+                    fail(catWrap, 'Please select a category.');
+                }
+            }
+
+            var $subCat = $('#category_id');
+            var subWrap = $('[data-wizard-field="category_id"]');
+            if (!wizardSelectHasValue($subCat)) {
+                fail(subWrap, 'Please select a sub category.');
+            }
+
+            if (wizardRequiredFields.theme !== false) {
+                var $theme = $('select[name="theme"]');
+                if (!wizardSelectHasValue($theme)) {
+                    fail($theme.closest('.col-md-6'), 'Please select a thematic area.');
+                }
+            }
+
+            if (wizardRequiredFields.sub_theme !== false) {
+                var $subTheme = $('select[name="sub_theme"]');
+                if (!wizardSelectHasValue($subTheme)) {
+                    fail($subTheme.closest('.col-md-6'), 'Please select a sub theme.');
+                }
+            }
+
+            var $region = $('select[name="rccs[]"]');
+            var regionWrap = $('[data-wizard-field="rccs"]');
+            if (!wizardRegionHasValue($region)) {
+                fail(regionWrap, 'Please select at least one region (or choose All).');
+            }
+
+            var $countries = $('select[name="countries[]"]');
+            var countriesWrap = $('[data-wizard-field="countries"]');
+            if (!wizardSelectHasValue($countries)) {
+                fail(countriesWrap, 'Please select at least one member state.');
+            }
+
+            @if(is_admin())
+            if (wizardRequiredFields.author === true || {{ $adminMustSelectAuthor ? 'true' : 'false' }}) {
+                var $author = $('select[name="author"]');
+                if ($author.length && !wizardSelectHasValue($author)) {
+                    fail($author.closest('.col-md-6, .mb-2').first(), 'Please select a corporate source or member state.');
+                }
+            }
+            @endif
+
+            if (errors.length) {
+                wizardShowStepSummary(0, errors);
+                if (firstInvalid && firstInvalid[0].scrollIntoView) {
+                    firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            return { ok: errors.length === 0, errors: errors };
+        }
+
+        function validateWizardStep2() {
+            var errors = [];
+            var firstInvalid = null;
+
+            function fail($wrap, message) {
+                errors.push(message);
+                wizardShowFieldError($wrap, message);
+                if (!firstInvalid && $wrap && $wrap.length) firstInvalid = $wrap;
+            }
+
+            $('#step-2 .wizard-field-error').remove();
+            $('#step-2 .has-error').removeClass('has-error');
+            wizardShowStepSummary(1, []);
+
+            if (wizardRequiredFields.description !== false) {
+                var descText = $('#summernote').val() || '';
+                var plain = $('<div>').html(descText).text().replace(/\s+/g, ' ').trim();
+                var descWrap = $('#summernote').closest('.mb-2');
+                if (!plain) {
+                    fail(descWrap, 'Publication description is required.');
+                } else if (plain.length < publicationMinChars) {
+                    fail(descWrap, 'Description must be at least approximately ' + Math.ceil(publicationMinChars / 5) + ' words (' + publicationMinChars + ' characters).');
+                }
+            }
+
+            if (wizardRequiredFields.associated_authors !== false) {
+                var $authors = $('#associated_authors');
+                if (!$authors.val() || !String($authors.val()).trim()) {
+                    fail($authors.closest('.mb-2'), 'Associated authors are required.');
+                }
+            }
+
+            var $affiliation = $('#author_affiliation');
+            if (!$affiliation.val() || !String($affiliation.val()).trim()) {
+                fail($affiliation.closest('.mb-2'), 'Author affiliation/institution is required.');
+            }
+
+            var $tags = $('select[name="tags[]"]');
+            if (wizardRequiredFields.tags !== false && !wizardSelectHasValue($tags)) {
+                fail($tags.closest('.mb-2'), 'Please select at least one tag/health topic.');
+            }
+
+            ['doi', 'issn', 'isbn', 'license_id', 'copyright_info'].forEach(function(field) {
+                if (wizardRequiredFields[field] !== true) return;
+                var $el = $('[name="' + field + '"]');
+                if ($el.length && (!$el.val() || !String($el.val()).trim())) {
+                    fail($el.closest('.mb-2'), 'This field is required.');
+                }
+            });
+
+            if (errors.length) {
+                wizardShowStepSummary(1, errors);
+                if (firstInvalid && firstInvalid[0].scrollIntoView) {
+                    firstInvalid[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            }
+
+            return { ok: errors.length === 0, errors: errors };
+        }
+
+        function validatePublicationWizardFull() {
+            var step1 = validateWizardStep1();
+            var step2 = validateWizardStep2();
+            if (!step1.ok) {
+                wizardGoToStep(0);
+                return false;
+            }
+            if (!step2.ok) {
+                wizardGoToStep(1);
+                return false;
+            }
+            return true;
+        }
+
+        window.validateWizardStep1 = validateWizardStep1;
+        window.validateWizardStep2 = validateWizardStep2;
+        window.validatePublicationWizardFull = validatePublicationWizardFull;
+
+        function applyServerValidationErrors(errors) {
+            if (!errors || typeof errors !== 'object') {
+                return;
+            }
+            var step1Keys = ['title', 'link', 'publication', 'year_published', 'data_category_id', 'category_id', 'theme', 'sub_theme', 'rccs', 'countries', 'author'];
+            var step2Keys = ['description', 'associated_authors', 'author_affiliation', 'tags', 'doi', 'issn', 'isbn', 'license_id', 'copyright_info', 'files'];
+            var onStep1 = false;
+            var onStep2 = false;
+            var summary1 = [];
+            var summary2 = [];
+
+            Object.keys(errors).forEach(function(key) {
+                var base = key.split('.')[0];
+                var msgs = errors[key];
+                var msg = Array.isArray(msgs) ? msgs[0] : String(msgs);
+                if (step1Keys.indexOf(base) !== -1) {
+                    onStep1 = true;
+                    summary1.push(msg);
+                } else if (step2Keys.indexOf(base) !== -1) {
+                    onStep2 = true;
+                    summary2.push(msg);
+                }
+                var $wrap = $('[data-wizard-field="' + base + '"]');
+                if (!$wrap.length && base === 'title') {
+                    $wrap = $('#title').closest('.mb-3');
+                }
+                if (!$wrap.length && (base === 'link' || base === 'publication')) {
+                    $wrap = $('#publication').closest('.url_wrapper');
+                }
+                if ($wrap.length) {
+                    wizardShowFieldError($wrap, msg);
+                }
+            });
+
+            if (onStep1) {
+                wizardShowStepSummary(0, summary1);
+                wizardGoToStep(0);
+            } else if (onStep2) {
+                wizardShowStepSummary(1, summary2);
+                wizardGoToStep(1);
+            }
+        }
+        window.applyServerValidationErrors = applyServerValidationErrors;
+
+        $('#step-1 select, #step-1 input').on('change input', function() {
+            var $wrap = $(this).closest('.wizard-field-wrap, .mb-3, .url_wrapper, .wizard-field-year');
+            wizardClearFieldError($wrap);
+            if ($('#wizard-step-1-errors').hasClass('is-visible')) {
+                validateWizardStep1();
+                if ($('#wizard-step-1-errors ul li').length === 0) {
+                    wizardShowStepSummary(0, []);
+                }
+            }
+        });
+
+        $('#step-2 select, #step-2 input, #summernote').on('change input', function() {
+            var $wrap = $(this).closest('.mb-2');
+            wizardClearFieldError($wrap);
         });
 
         // Step show event
@@ -1290,30 +1601,18 @@
         });
 
 
-        $("#next-btn").on("click", function() {
-            // Validate required fields before proceeding
-            var isValid = true;
-            var errorMessage = '';
-            
-            // Check tags selection
-            var tagsSelect = $('select[name="tags[]"]');
-            if (tagsSelect.length && (!tagsSelect.val() || tagsSelect.val().length === 0)) {
-                isValid = false;
-                errorMessage = 'Please select at least one tag/health topic before proceeding.';
-                tagsSelect.closest('.form-group').addClass('has-error');
-                if (tagsSelect.closest('.mb-2').find('.text-danger').length === 0) {
-                    tagsSelect.closest('.mb-2').append('<small class="text-danger d-block mt-1">' + errorMessage + '</small>');
-                }
-            } else {
-                tagsSelect.closest('.form-group').removeClass('has-error');
-                tagsSelect.closest('.mb-2').find('.text-danger').remove();
+        $("#smartwizard").on("leaveStep", function(e, anchorObject, stepNumber, stepDirection) {
+            if (stepDirection === 'forward' && stepNumber === 0) {
+                return validateWizardStep1().ok;
             }
-            
-            if (!isValid) {
-                alert(errorMessage || 'Please fill in all required fields marked with a red asterisk (*) before proceeding.');
+            return true;
+        });
+
+        $("#next-btn").on("click", function() {
+            var currentStep = $('#smartwizard').smartWizard('getStepIndex');
+            if (currentStep === 0 && !validateWizardStep1().ok) {
                 return false;
             }
-
             $('#smartwizard').smartWizard("next");
             return true;
         });
@@ -1343,10 +1642,8 @@
 
             })
             .on('form:submit', function(e) {
-                // Additional validation for tags before form submission
-                var tagsSelect = $('select[name="tags[]"]');
-                if (tagsSelect.length && (!tagsSelect.val() || tagsSelect.val().length === 0)) {
-                    alert('Please select at least one tag/health topic to help categorize your publication.');
+                if (!window.validatePublicationWizardFull()) {
+                    e.preventDefault();
                     return false;
                 }
 
@@ -1429,9 +1726,11 @@
                         error: function(xhr) {
                             console.error('Form submission error:', xhr);
                             var errorMsg = 'An error occurred while submitting the form.';
+                            var validationErrors = null;
                             if (xhr.status === 422 && xhr.responseJSON) {
-                                if (xhr.responseJSON.errors && xhr.responseJSON.errors.files) {
-                                    var fileErrs = xhr.responseJSON.errors.files;
+                                validationErrors = xhr.responseJSON.errors || null;
+                                if (validationErrors && validationErrors.files) {
+                                    var fileErrs = validationErrors.files;
                                     errorMsg = Array.isArray(fileErrs) ? fileErrs.join(' ') : String(fileErrs);
                                     showAttachmentSecurityError(errorMsg);
                                     goToAttachmentsStep();
@@ -1443,8 +1742,9 @@
                             } else if (xhr.responseText) {
                                 try {
                                     var errorResponse = JSON.parse(xhr.responseText);
-                                    if (errorResponse.errors && errorResponse.errors.files) {
-                                        var fe = errorResponse.errors.files;
+                                    validationErrors = errorResponse.errors || null;
+                                    if (validationErrors && validationErrors.files) {
+                                        var fe = validationErrors.files;
                                         errorMsg = Array.isArray(fe) ? fe.join(' ') : String(fe);
                                         showAttachmentSecurityError(errorMsg);
                                         goToAttachmentsStep();
@@ -1454,6 +1754,9 @@
                                 } catch(e) {
                                     // Use default error message
                                 }
+                            }
+                            if (validationErrors && typeof window.applyServerValidationErrors === 'function') {
+                                window.applyServerValidationErrors(validationErrors);
                             }
                             alert(errorMsg);
                             if (submitBtn) {
@@ -1490,6 +1793,10 @@
             
             form.off('submit').on('submit', function(e) {
                 e.preventDefault();
+
+                if (!window.validatePublicationWizardFull()) {
+                    return false;
+                }
 
                 var attachmentCheck = validateSelectedAttachments();
                 if (!attachmentCheck.ok) {
@@ -1671,6 +1978,11 @@
                             } catch(e) {
                                 // Use default error message
                             }
+                        }
+
+                        if (xhr.status === 422 && xhr.responseJSON && xhr.responseJSON.errors
+                            && typeof window.applyServerValidationErrors === 'function') {
+                            window.applyServerValidationErrors(xhr.responseJSON.errors);
                         }
                         
                         // Display error using LobiBox
