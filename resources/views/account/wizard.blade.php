@@ -1256,13 +1256,19 @@
             $('#publication').prop('required', true);
         }
 
-        // Smart Wizard
+        // Smart Wizard (v5+ API: toolbar.anchor, events leaveStep/showStep)
         $('#smartwizard').smartWizard({
             autoAdjustHeight: false,
             selected: 0,
             theme: 'dots',
-            toolbarSettings: {
-                toolbarPosition: 'both', // both bottom
+            toolbar: {
+                position: 'both',
+                showNextButton: true,
+                showPreviousButton: true,
+            },
+            anchor: {
+                enableNavigation: true,
+                enableNavigationAlways: false,
             },
         });
 
@@ -1296,7 +1302,7 @@
                 val = val.filter(function(v) { return v !== '' && v !== null && v !== undefined; });
                 return val.length > 0;
             }
-            return true;
+            return String(val).trim() !== '';
         }
 
         function wizardRegionHasValue($select) {
@@ -1344,7 +1350,8 @@
                 if (!firstInvalid && $wrap && $wrap.length) firstInvalid = $wrap;
             }
 
-            $('#step-1 .wizard-field-wrap').each(function() { wizardClearFieldError($(this)); });
+            $('#step-1 .wizard-field-error').remove();
+            $('#step-1 .has-error').removeClass('has-error');
             wizardShowStepSummary(0, []);
 
             if (wizardRequiredFields.title !== false) {
@@ -1567,54 +1574,74 @@
             wizardClearFieldError($wrap);
         });
 
-        // Step show event
-        $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, stepDirection, stepPosition) {
+        function wizardGetCurrentStepIndex() {
+            var sw = $('#smartwizard').data('smartWizard');
+            if (sw && typeof sw.getStepInfo === 'function') {
+                return sw.getStepInfo().currentStep;
+            }
+            return 0;
+        }
 
-            console.log('Step Position', stepNumber);
-
-            $("#prev-btn").removeClass('disabled');
-            $("#next-btn").removeClass('disabled');
+        function wizardSetNavButtons(stepPosition) {
+            var $prev = $('#smartwizard .sw-btn-prev');
+            var $next = $('#smartwizard .sw-btn-next');
+            $prev.removeClass('disabled anchor-disabled');
+            $next.removeClass('disabled anchor-disabled');
             $("#submit").addClass('disabled');
             $(".submit").hide();
 
             if (stepPosition === 'first') {
-                $("#prev-btn").addClass('disabled');
-                $("#submit").addClass('disabled');
+                $prev.addClass('disabled');
             } else if (stepPosition === 'last') {
-                $("#next-btn").addClass('disabled');
+                $next.addClass('disabled');
                 $("#submit").removeClass('disabled');
                 $(".submit").show();
-            } else {
-                $("#prev-btn").removeClass('disabled');
-                $("#next-btn").removeClass('disabled');
-                $("#submit").addClass('disabled');
-                $(".submit").hide();
             }
+        }
 
-        });
-
-
-        $("#prev-btn").on("click", function() {
-            // Navigate previous
-            $('#smartwizard').smartWizard("prev");
-            return true;
-        });
-
-
-        $("#smartwizard").on("leaveStep", function(e, anchorObject, stepNumber, stepDirection) {
-            if (stepDirection === 'forward' && stepNumber === 0) {
-                return validateWizardStep1().ok;
+        // leaveStep: (anchor, currentStep, nextStep, direction) — NOT (step, direction)
+        $("#smartwizard").on("leaveStep", function(e, anchorObject, currentStep, nextStep, direction) {
+            if (direction === 'forward' && currentStep === 0) {
+                if (!validateWizardStep1().ok) {
+                    e.preventDefault();
+                    return false;
+                }
             }
             return true;
         });
 
-        $("#next-btn").on("click", function() {
-            var currentStep = $('#smartwizard').smartWizard('getStepIndex');
-            if (currentStep === 0 && !validateWizardStep1().ok) {
+        // Backup guard on Next (capture phase, before SmartWizard's handler)
+        var smartWizardEl = document.getElementById('smartwizard');
+        if (smartWizardEl) {
+            smartWizardEl.addEventListener('click', function(e) {
+                var nextBtn = e.target.closest('.sw-btn-next');
+                if (!nextBtn || nextBtn.classList.contains('disabled')) {
+                    return;
+                }
+                if (wizardGetCurrentStepIndex() === 0 && !validateWizardStep1().ok) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    e.stopImmediatePropagation();
+                }
+            }, true);
+        }
+
+        // Block clicking Step 2 in the nav until Step 1 validates
+        $('#smartwizard').on('click', '.nav-link', function(e) {
+            if (wizardGetCurrentStepIndex() !== 0) {
+                return true;
+            }
+            var clickedIndex = $('#smartwizard .nav-link').index(this);
+            if (clickedIndex > 0 && !validateWizardStep1().ok) {
+                e.preventDefault();
+                e.stopImmediatePropagation();
                 return false;
             }
-            $('#smartwizard').smartWizard("next");
-            return true;
+        });
+
+        // Step show event
+        $("#smartwizard").on("showStep", function(e, anchorObject, stepNumber, direction, stepPosition) {
+            wizardSetNavButtons(stepPosition);
         });
 
     });
