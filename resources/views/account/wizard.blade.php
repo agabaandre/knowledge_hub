@@ -296,8 +296,9 @@
                                 <span class="text-danger">*</span>
                             @endif
                         </label>
-                        <input placeholder="Resource Title" class="form-control newform" id="title" name="title"
+                        <input placeholder="Resource Title" class="form-control newform js-format-title-case" id="title" name="title"
                             value="{{ @$publication->title ?? old('title') }}" {{ ($requiredFields['title'] ?? true) ? 'required=""' : '' }}>
+                        <small class="text-muted d-block mt-1">Title is formatted automatically to title case when you leave this field.</small>
                     </div>
                 </div>
 
@@ -1909,6 +1910,9 @@
         }
 
         function validatePublicationWizardFull() {
+            if (typeof window.applyTitleCaseToForm === 'function') {
+                window.applyTitleCaseToForm('#publication_form');
+            }
             if (typeof window.wizardPrepareCountriesForSubmit === 'function') {
                 window.wizardPrepareCountriesForSubmit();
             }

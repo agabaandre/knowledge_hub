@@ -80,6 +80,7 @@
 @section('scripts')
 
     @include('common.select2')
+    @include('partials.title_case_js')
     @include('account.partials.create_js')
     @include('account.partials.wizard_js')
     

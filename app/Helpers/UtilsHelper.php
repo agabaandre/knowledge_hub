@@ -236,13 +236,16 @@ if (!function_exists('_normalize_title_case_word')) {
                 continue;
             }
 
-            $isAcronym = preg_match('/^[A-Z0-9][A-Z0-9\-&]{1,}$/u', $trimmed) && mb_strlen($trimmed) <= 12;
+            $lower = mb_strtolower($trimmed);
+            $isAcronym = preg_match('/^[A-Z0-9][A-Z0-9\-&]{1,}$/u', $trimmed)
+                && mb_strlen($trimmed) <= 12
+                && !isset($minorMap[$lower])
+                && (preg_match('/[0-9&]/u', $trimmed) || mb_strlen($trimmed) === 3);
             if ($isAcronym) {
                 $parts[$i] = $trimmed;
                 continue;
             }
 
-            $lower = mb_strtolower($trimmed);
             if (!$isEdgeWord && isset($minorMap[$lower])) {
                 $parts[$i] = $lower;
                 continue;

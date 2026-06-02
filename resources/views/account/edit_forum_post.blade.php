@@ -52,8 +52,9 @@
                             <div class="col-md-12">
                                 <div class="mb-3">
                                     <label class="form-label" for="title">Forum title</label>
-                                    <input type="text" placeholder="Forum title" class="form-control url" id="title" name="title" required
+                                    <input type="text" placeholder="Forum title" class="form-control url js-format-title-case" id="title" name="title" required
                                            value="{{ old('title', $forum->forum_title) }}">
+                                    <small class="text-muted d-block mt-1">Title is formatted automatically to title case when you leave this field.</small>
                                 </div>
                             </div>
 
@@ -128,6 +129,7 @@
 @endsection
 
 @section('scripts')
+    @include('partials.title_case_js')
     @include('account.partials.create_js')
     @include('common.select2')
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -181,6 +183,12 @@
     }
 
     $(function(){
+        $('#forum-resubmit-form').on('submit', function () {
+            if (typeof window.applyTitleCaseToForm === 'function') {
+                window.applyTitleCaseToForm(this);
+            }
+        });
+
         $('#forum_attachments').on('change', async function(){
             forumPreviewFiles(this, '.forum_preview');
             const files = this.files;
