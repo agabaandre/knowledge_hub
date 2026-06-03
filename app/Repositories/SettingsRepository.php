@@ -343,6 +343,14 @@ class SettingsRepository
             }
         }
 
+        if (Schema::hasColumn('setting', 'auto_profile_completion_reminder')) {
+            $settings->auto_profile_completion_reminder = (bool) $request->boolean('auto_profile_completion_reminder', false);
+        }
+        if (Schema::hasColumn('setting', 'profile_reminder_day_of_month')) {
+            $day = (int) $request->input('profile_reminder_day_of_month', 1);
+            $settings->profile_reminder_day_of_month = max(1, min(28, $day));
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings

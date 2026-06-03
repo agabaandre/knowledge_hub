@@ -69,5 +69,8 @@ class Kernel extends HttpKernel
         'verify_email' => \App\Http\Middleware\VerifyEmail::class,
         'auth.passport' => \App\Http\Middleware\AuthenticateWithPassportToken::class,
         'permission' => \App\Http\Middleware\PermissionMiddleware::class,
+        'installed' => \App\Http\Middleware\EnsureAppInstalled::class,
+        'install.guest' => \App\Http\Middleware\RedirectIfInstalled::class,
+        'prerequisites' => \App\Http\Middleware\EnsureApplicationPrerequisites::class,
     ];
 }

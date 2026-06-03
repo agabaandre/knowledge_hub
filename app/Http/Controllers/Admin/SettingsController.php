@@ -95,6 +95,36 @@ class SettingsController extends Controller
         return back()->with($data);
     }
 
+    public function sendProfileReminders(Request $request)
+    {
+        try {
+            \Artisan::call('profiles:remind-incomplete');
+            $output = trim((string) \Artisan::output());
+            $message = $output !== '' ? $output : 'Profile completion reminders have been queued.';
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'alert-success' => $message,
+                    'status' => 'success',
+                    'output' => $output,
+                ], 200);
+            }
+
+            return back()->with('alert-success', $message);
+        } catch (\Exception $e) {
+            $errorMessage = 'Failed to send profile reminders: ' . $e->getMessage();
+
+            if ($request->ajax() || $request->expectsJson()) {
+                return response()->json([
+                    'alert-danger' => $errorMessage,
+                    'status' => 'error',
+                ], 500);
+            }
+
+            return back()->with('alert-danger', $errorMessage);
+        }
+    }
+
     public function clearCache(Request $request){
         
         try {

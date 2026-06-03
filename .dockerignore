@@ -1,0 +1,20 @@
+.git
+.github
+node_modules
+vendor
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+bootstrap/cache/*
+.env
+.env.*
+!.env.docker.example
+*.md
+document_manager
+nifty-v4.2.0 2
+HTML
+Afcdc theme
+.phpunit.result.cache
+.idea
+.vscode

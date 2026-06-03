@@ -5,6 +5,20 @@ This guide covers the setup process for the Africa CDC Knowledge Hub on both Win
 
 ---
 
+## Docker deployment (recommended for new environments)
+
+See **[docs/DOCKER.md](docs/DOCKER.md)** for container setup, the web installer at `/install`, and PHP performance tuning based on the [enterprise PHP/Laravel optimisation guide](https://github.com/agabaandre/PHP_laravel_Codeigniter_wordpress_server_optimisation_enterprise).
+
+Quick start:
+
+```bash
+cp .env.docker.example .env
+docker compose up -d --build
+# Open http://localhost:8080/install — 5 steps (prerequisites → database → site → mail → admin)
+```
+
+---
+
 ## 1. Prerequisites
 
 Ensure you have the following installed:

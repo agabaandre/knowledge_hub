@@ -1499,6 +1499,62 @@
                             </div>
                         </div>
 
+                        @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'auto_profile_completion_reminder'))
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-user-edit"></i>
+                                    Profile completion reminders
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    Email users who are missing a job title or {{ admin_units_enabled() ? 'administrative unit' : 'country' }} on their profile.
+                                    Automatic reminders are <strong>off by default</strong>; use the manual action when you want to notify users.
+                                </p>
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="auto_profile_completion_reminder"
+                                               name="auto_profile_completion_reminder"
+                                               value="1"
+                                               @if(!empty($settings->auto_profile_completion_reminder)) checked @endif>
+                                        <label class="form-check-label" for="auto_profile_completion_reminder">
+                                            Enable automatic monthly reminders
+                                        </label>
+                                    </div>
+                                    <small class="info-text d-block">
+                                        When enabled, <code>profiles:remind-incomplete</code> runs on the chosen day each month at 09:00 (server time). Requires the Laravel scheduler (<code>schedule:run</code>) to be active.
+                                    </small>
+                                </div>
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'profile_reminder_day_of_month'))
+                                <div class="form-group" id="profile-reminder-day-wrap">
+                                    <label for="profile_reminder_day_of_month">Day of month (automatic run)</label>
+                                    <input type="number"
+                                           name="profile_reminder_day_of_month"
+                                           id="profile_reminder_day_of_month"
+                                           class="form-control"
+                                           min="1"
+                                           max="28"
+                                           value="{{ (int) ($settings->profile_reminder_day_of_month ?? 1) }}">
+                                    <small class="info-text">Use 1–28 so the job runs reliably in every month.</small>
+                                </div>
+                                @endif
+                                <div class="form-group mb-0">
+                                    <label class="d-block mb-2">Manual send</label>
+                                    <button type="button"
+                                            class="btn btn-outline-primary btn-sm"
+                                            id="send-profile-reminders-btn"
+                                            onclick="sendProfileReminders()">
+                                        <i class="fa fa-envelope me-1"></i> Send reminders now
+                                    </button>
+                                    <small class="info-text d-block mt-2">
+                                        Queues reminder emails for all users with incomplete profiles (same as the artisan command). Save settings first if you changed the automatic schedule.
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        @endif
+
                         <div class="col-lg-12">
                             <div class="settings-group-card">
                                 <div class="settings-group-title">
@@ -1683,6 +1739,51 @@
     @endif
 
     <script>
+        function toggleProfileReminderDayField() {
+            const auto = document.getElementById('auto_profile_completion_reminder');
+            const wrap = document.getElementById('profile-reminder-day-wrap');
+            if (!auto || !wrap) return;
+            wrap.style.display = auto.checked ? '' : 'none';
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleProfileReminderDayField();
+            const auto = document.getElementById('auto_profile_completion_reminder');
+            if (auto) {
+                auto.addEventListener('change', toggleProfileReminderDayField);
+            }
+        });
+
+        function sendProfileReminders() {
+            if (!confirm('Send profile completion reminder emails to all users with incomplete profiles now?')) {
+                return;
+            }
+            const btn = document.getElementById('send-profile-reminders-btn');
+            if (!btn) return;
+            const original = btn.innerHTML;
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa fa-spinner fa-spin me-1"></i> Sending...';
+
+            fetch('{{ route("admin.config.send-profile-reminders") }}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                const msg = data['alert-success'] || data['alert-danger'] || 'Done.';
+                alert(msg);
+            })
+            .catch(() => alert('Failed to send profile reminders. Please try again.'))
+            .finally(() => {
+                btn.disabled = false;
+                btn.innerHTML = original;
+            });
+        }
+
         function clearCache() {
             const btn = document.getElementById('clear-cache-btn');
             const originalText = btn.innerHTML;
