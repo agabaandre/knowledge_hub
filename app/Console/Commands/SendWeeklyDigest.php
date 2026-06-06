@@ -3,8 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Jobs\SendMailJob;
-use App\Models\CommunityOfPractice;
 use App\Models\CommunityOfPracticeMembers;
+use App\Services\ContributorBadgeAwardService;
 use App\Models\Forum;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\Publication;
@@ -66,12 +66,21 @@ class SendWeeklyDigest extends Command
             ->limit(15)
             ->get();
 
+        $badgeService = app(ContributorBadgeAwardService::class);
+        $badgeMonth = Carbon::now();
+        $badgeRecognitions = $badgeService->badgeRecognitionsForMonth(
+            (int) $badgeMonth->year,
+            (int) $badgeMonth->month
+        );
+
         // Build digest data for the view
         $digest = [
             'publications' => $publications,
             'forums' => $forums,
             'communityForumIds' => $communityForumIds,
             'newMembers' => $newMembers,
+            'badgeRecognitions' => $badgeRecognitions,
+            'badgeMonthLabel' => $badgeMonth->format('F Y'),
             'since' => $since,
             'sinceFormatted' => $since->format('F j, Y'),
             'weekEndFormatted' => Carbon::now()->format('F j, Y'),
@@ -114,7 +123,7 @@ class SendWeeklyDigest extends Command
             return Command::SUCCESS;
         }
 
-        $subject = 'Weekly Digest: New resources, forums & community activity – ' . $digest['sinceFormatted'] . ' to ' . $digest['weekEndFormatted'];
+        $subject = 'Weekly Digest: New resources, forums, community activity & contributor recognition – ' . $digest['sinceFormatted'] . ' to ' . $digest['weekEndFormatted'];
 
         $sentCount = 0;
         $failedCount = 0;

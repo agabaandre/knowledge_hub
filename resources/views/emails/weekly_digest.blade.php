@@ -56,6 +56,36 @@
     </div>
     @endif
 
+    @if(($digest['badgeRecognitions'] ?? collect())->count() > 0)
+    <div style="margin: 24px 0;">
+        <h3 style="color: #119A48; margin-bottom: 12px; font-size: 1.1em;">Contributor recognition — {{ $digest['badgeMonthLabel'] ?? 'this month' }}</h3>
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 6px; padding: 12px;">
+            <p style="margin: 0 0 12px 0; color: #64748b; font-size: 0.95em;">Congratulations to these hub contributors who earned or upgraded a lifetime contributor badge this month:</p>
+            @foreach(($digest['badgeRecognitions'] ?? collect())->take(12) as $recognition)
+            <div style="padding: 8px 0;">
+                @if(!$loop->first)
+                <div style="border-top: 1px solid #e2e8f0; margin-top: 8px; padding-top: 8px;"></div>
+                @endif
+                @php
+                    $recognisedUser = $recognition->user;
+                    $recognisedName = $recognisedUser->name ?? trim(($recognisedUser->first_name ?? '') . ' ' . ($recognisedUser->last_name ?? ''));
+                    $profileUrl = !empty($recognisedUser->author_id) ? author_publications_url((int) $recognisedUser->author_id) : null;
+                @endphp
+                @if($profileUrl)
+                <a href="{{ $profileUrl }}" style="color: #119A48; font-weight: 600; text-decoration: none;">{{ $recognisedName ?: 'Contributor' }}</a>
+                @else
+                <strong style="color: #334155;">{{ $recognisedName ?: 'Contributor' }}</strong>
+                @endif
+                <span style="color: #64748b; font-size: 0.95em;"> — {{ $recognition->badgeType->name ?? 'Contributor badge' }} ({{ number_format((int) $recognition->lifetime_contributions) }} contributions)</span>
+            </div>
+            @endforeach
+            <p style="margin: 12px 0 0 0; font-size: 0.9em;">
+                <a href="{{ url('authors') }}" style="color: #119A48;">Meet more contributors →</a>
+            </p>
+        </div>
+    </div>
+    @endif
+
     @if($digest['newMembers']->count() > 0 || count($digest['communityForumIds']) > 0)
     <div style="margin: 24px 0;">
         <h3 style="color: #119A48; margin-bottom: 12px; font-size: 1.1em;">Community activity</h3>
@@ -77,7 +107,7 @@
     </div>
     @endif
 
-    @if($digest['publications']->count() === 0 && $digest['forums']->count() === 0 && $digest['newMembers']->count() === 0 && count($digest['communityForumIds']) === 0)
+    @if($digest['publications']->count() === 0 && $digest['forums']->count() === 0 && $digest['newMembers']->count() === 0 && count($digest['communityForumIds']) === 0 && ($digest['badgeRecognitions'] ?? collect())->count() === 0)
     <p style="color: #64748b;">No new resources, forums, or community activity this week. Check back soon.</p>
     <p style="margin-top: 16px;">
         <a href="{{ url('/') }}" style="color: #119A48; font-weight: 600;">Visit the Knowledge Hub →</a>

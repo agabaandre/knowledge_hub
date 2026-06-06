@@ -8,11 +8,11 @@ use App\Models\CommunityOfPractice;
 use App\Models\Forum;
 use App\Models\ForumComment;
 use App\Models\ForumCommunityOfPractice;
-use App\Models\Publication;
 use App\Models\PublicationCommunityOfPractice;
 use App\Models\User;
 use App\Models\UserCommunityMonthlyContribution;
 use App\Models\UserLifetimeBadge;
+use App\Support\ContributorContributions;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -53,11 +53,15 @@ class ContributorBadgeAwardService
         ];
 
         try {
-            $userIds = $this->userIdsWithActivityInMonth($year, $month);
+            $userIds = $this->userIdsWithActivityInMonth($year, $month)
+                ->merge($this->userIdsWithExistingBadges())
+                ->filter()
+                ->unique()
+                ->values();
 
             if ($userIds->isEmpty()) {
                 $result['status'] = 'skipped';
-                $result['error'] = 'No contributor activity found for this period.';
+                $result['error'] = 'No contributor activity or existing badge holders found for this period.';
 
                 return $result;
             }
@@ -76,7 +80,13 @@ class ContributorBadgeAwardService
                 }
                 if ($upgrade['upgraded']) {
                     $result['badges_upgraded']++;
-                    if ($user->email && $upgrade['badge_type']) {
+                }
+
+                if ($user->email && $upgrade['badge_type']) {
+                    if ($upgrade['created']) {
+                        $this->queueLifetimeAwardEmail($user, $upgrade['badge_type'], (int) $upgrade['lifetime_contributions']);
+                        $result['emails_queued']++;
+                    } elseif ($upgrade['upgraded']) {
                         $this->queueLifetimeUpgradeEmail($user, $upgrade['badge_type'], (int) $upgrade['lifetime_contributions']);
                         $result['emails_queued']++;
                     }
@@ -113,33 +123,7 @@ class ContributorBadgeAwardService
 
     public function countLifetimeContributions(int $userId): int
     {
-        $authorId = User::query()->whereKey($userId)->value('author_id');
-
-        $publications = Publication::query()
-            ->where('is_version', 0)
-            ->where('is_approved', 1)
-            ->where(function ($q) use ($userId, $authorId) {
-                $q->where('user_id', $userId);
-                if ($authorId) {
-                    $q->orWhere('author_id', $authorId);
-                }
-            })
-            ->count();
-
-        $forumPosts = Forum::query()
-            ->where('created_by', $userId)
-            ->where('status', 1)
-            ->where('is_approved', 1)
-            ->count();
-
-        $forumComments = ForumComment::query()
-            ->where('created_by', $userId)
-            ->whereHas('forum', function ($q) {
-                $q->where('status', 1);
-            })
-            ->count();
-
-        return $publications + $forumPosts + $forumComments;
+        return ContributorContributions::countLifetimeForUser($userId);
     }
 
     /**
@@ -182,20 +166,21 @@ class ContributorBadgeAwardService
         $communities = CommunityOfPractice::query()->where('is_active', true)->get(['id']);
 
         foreach ($communities as $community) {
+            $keys = [
+                'user_id' => $user->id,
+                'community_of_practice_id' => $community->id,
+                'year' => $year,
+                'month' => $month,
+            ];
             $count = $this->countCommunityContributionsForMonth((int) $user->id, (int) $community->id, $year, $month);
+
             if ($count <= 0) {
+                UserCommunityMonthlyContribution::query()->where($keys)->delete();
+
                 continue;
             }
 
-            UserCommunityMonthlyContribution::query()->updateOrCreate(
-                [
-                    'user_id' => $user->id,
-                    'community_of_practice_id' => $community->id,
-                    'year' => $year,
-                    'month' => $month,
-                ],
-                ['contributions_count' => $count]
-            );
+            UserCommunityMonthlyContribution::query()->updateOrCreate($keys, ['contributions_count' => $count]);
             $synced++;
         }
 
@@ -219,55 +204,61 @@ class ContributorBadgeAwardService
 
     public function countCommunityContributionsForMonth(int $userId, int $communityId, int $year, int $month): int
     {
-        $count = 0;
-        $authorId = User::query()->whereKey($userId)->value('author_id');
+        $authorId = ContributorContributions::authorIdForUser($userId);
 
         $publicationIds = PublicationCommunityOfPractice::query()
             ->where('community_of_practice_id', $communityId)
             ->pluck('publication_id');
 
-        $count += Publication::query()
+        $publications = ContributorContributions::eligiblePublicationsQuery($userId, $authorId)
             ->whereIn('id', $publicationIds)
-            ->where(function ($q) use ($userId, $authorId) {
-                $q->where('user_id', $userId);
-                if ($authorId) {
-                    $q->orWhere('author_id', $authorId);
-                }
-            })
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
-            ->where('is_approved', 1)
             ->count();
 
         $forumIds = ForumCommunityOfPractice::query()
             ->where('community_of_practice_id', $communityId)
             ->pluck('forum_id');
 
-        try {
-            $count += Forum::query()
-                ->whereIn('id', $forumIds)
-                ->where('created_by', $userId)
-                ->where('is_approved', 1)
-                ->where('status', 1)
-                ->whereRaw('YEAR(created_at) = ? AND MONTH(created_at) = ?', [$year, $month])
-                ->count();
-        } catch (\Throwable $e) {
-            $count += Forum::query()
-                ->whereIn('id', $forumIds)
-                ->where('created_by', $userId)
-                ->where('is_approved', 1)
-                ->where('status', 1)
-                ->count();
-        }
-
-        $count += ForumComment::query()
-            ->whereIn('forum_id', $forumIds)
-            ->where('created_by', $userId)
+        $forumPosts = ContributorContributions::eligibleForumsQuery($userId)
+            ->whereIn('id', $forumIds)
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->count();
 
-        return $count;
+        $forumComments = ContributorContributions::eligibleForumCommentsQuery($userId)
+            ->whereIn('forum_id', $forumIds)
+            ->whereYear('created_at', $year)
+            ->whereMonth('created_at', $month)
+            ->count();
+
+        return $publications + $forumPosts + $forumComments;
+    }
+
+    /**
+     * Contributors recognised this calendar month (new badge or tier upgrade).
+     *
+     * @return Collection<int, UserLifetimeBadge>
+     */
+    public function badgeRecognitionsForMonth(?int $year = null, ?int $month = null): Collection
+    {
+        $year = $year ?? (int) now()->year;
+        $month = $month ?? (int) now()->month;
+
+        return UserLifetimeBadge::query()
+            ->with(['user:id,name,first_name,last_name,email,author_id', 'badgeType:id,name,slug'])
+            ->whereNotNull('badge_type_id')
+            ->whereNotNull('last_upgraded_at')
+            ->whereYear('last_upgraded_at', $year)
+            ->whereMonth('last_upgraded_at', $month)
+            ->orderByDesc('last_upgraded_at')
+            ->limit(25)
+            ->get();
+    }
+
+    private function userIdsWithExistingBadges(): Collection
+    {
+        return UserLifetimeBadge::query()->pluck('user_id');
     }
 
     private function userIdsWithActivityInMonth(int $year, int $month): Collection
@@ -275,14 +266,14 @@ class ContributorBadgeAwardService
         $ids = collect();
 
         $ids = $ids->merge(
-            Publication::query()
+            ContributorContributions::eligiblePublicationsQuery()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->whereNotNull('user_id')
                 ->pluck('user_id')
         );
 
-        $authorIds = Publication::query()
+        $authorIds = ContributorContributions::eligiblePublicationsQuery()
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->whereNotNull('author_id')
@@ -296,6 +287,11 @@ class ContributorBadgeAwardService
 
         $ids = $ids->merge(
             Forum::query()
+                ->where('status', 1)
+                ->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
                 ->pluck('created_by')
@@ -305,6 +301,13 @@ class ContributorBadgeAwardService
             ForumComment::query()
                 ->whereYear('created_at', $year)
                 ->whereMonth('created_at', $month)
+                ->whereHas('forum', function ($q) {
+                    $q->where('status', 1)
+                        ->where('is_approved', 1)
+                        ->where(function ($q) {
+                            $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                        });
+                })
                 ->pluck('created_by')
         );
 
@@ -320,6 +323,20 @@ class ContributorBadgeAwardService
         return (int) $next->contribution_threshold > (int) $previous->contribution_threshold;
     }
 
+    private function queueLifetimeAwardEmail(User $user, BadgeType $badgeType, int $lifetimeContributions): void
+    {
+        $subject = 'You earned a contributor badge — '.$badgeType->name;
+
+        $body = view('emails.badge_lifetime_awarded', [
+            'userName' => $user->name,
+            'badgeType' => $badgeType,
+            'lifetimeContributions' => $lifetimeContributions,
+            'profileUrl' => $user->author_id ? author_publications_url((int) $user->author_id) : url('/account'),
+        ])->render();
+
+        $this->dispatchBadgeEmail($user, $subject, $body);
+    }
+
     private function queueLifetimeUpgradeEmail(User $user, BadgeType $badgeType, int $lifetimeContributions): void
     {
         $subject = 'Your contributor badge has grown stronger — '.$badgeType->name;
@@ -331,6 +348,11 @@ class ContributorBadgeAwardService
             'profileUrl' => $user->author_id ? author_publications_url((int) $user->author_id) : url('/account'),
         ])->render();
 
+        $this->dispatchBadgeEmail($user, $subject, $body);
+    }
+
+    private function dispatchBadgeEmail(User $user, string $subject, string $body): void
+    {
         SendMailJob::dispatch((object) [
             'email' => $user->email,
             'subject' => $subject,

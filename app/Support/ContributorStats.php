@@ -3,9 +3,6 @@
 namespace App\Support;
 
 use App\Models\Author;
-use App\Models\Forum;
-use App\Models\ForumComment;
-use App\Models\Publication;
 use App\Models\User;
 
 class ContributorStats
@@ -33,29 +30,11 @@ class ContributorStats
             $author = Author::query()->find($user->author_id);
         }
 
-        $resourceContributions = 0;
-        if ($author) {
-            $resourceContributions = Publication::query()
-                ->where('is_version', 0)
-                ->where('is_approved', 1)
-                ->where('is_active', 'Active')
-                ->where('author_id', $author->id)
-                ->count();
-        }
-
-        $forumPosts = Forum::query()
-            ->where('created_by', $user->id)
-            ->where('status', 1)
-            ->count();
-
-        $forumComments = ForumComment::query()
-            ->where('created_by', $user->id)
-            ->whereHas('forum', function ($q) {
-                $q->where('status', 1);
-            })
-            ->count();
-
-        $forumContributions = $forumPosts + $forumComments;
+        $breakdown = ContributorContributions::breakdownForUser((int) $user->id);
+        $resourceContributions = $breakdown['resource_contributions'];
+        $forumPosts = $breakdown['forum_posts'];
+        $forumComments = $breakdown['forum_comments'];
+        $forumContributions = $breakdown['forum_contributions'];
 
         $user->loadMissing('lifetimeBadge.badgeType');
 
@@ -68,7 +47,7 @@ class ContributorStats
                 'forum_posts' => $forumPosts,
                 'forum_comments' => $forumComments,
                 'forum_contributions' => $forumContributions,
-                'total_contributions' => $resourceContributions + $forumContributions,
+                'total_contributions' => $breakdown['total_contributions'],
             ],
             'badge_count' => (int) optional($user->lifetimeBadge)->badge_type_id ? 1 : 0,
             'lifetime_badge' => $user->lifetimeBadge,
