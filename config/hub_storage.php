@@ -3,20 +3,15 @@
 return [
 
     /*
-    | Host paths for internal storage (outside the application / container tree).
-    | Override per environment with HUB_FILES_ROOT and HUB_SQL_BACKUP_ROOT in .env.
-    | In Docker, mount a host volume at /var/khubdata.
+    | Host data root. Each hub instance gets a subdirectory:
+    |   /var/khubdata/{site-id}/files
+    |   /var/khubdata/{site-id}/backups/sql
+    |
+    | site-id is derived from APP_URL (domain + path, e.g. khub.com/andrew → khub-com-andrew)
+    | or set explicitly with HUB_SITE_ID in .env. In Docker, mount ./khubdata:/var/khubdata.
     */
-    'default_paths' => [
-        'linux' => [
-            'files' => '/var/khubdata/files',
-            'sql_backups' => '/var/khubdata/backups/sql',
-        ],
-        'windows' => [
-            'files' => 'C:\\khubdata\\files',
-            'sql_backups' => 'C:\\khubdata\\backups\\sql',
-        ],
-    ],
+    'host_data_root' => '/var/khubdata',
+    'host_data_root_windows' => 'C:\\khubdata',
 
     'drivers' => [
         'internal' => 'Internal (application or host path)',

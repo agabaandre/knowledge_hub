@@ -5,10 +5,12 @@ namespace App\Services;
 use App\Filesystem\SharePointGraphAdapter;
 use App\Filesystem\SftpAdapter;
 use App\Models\HubStorageSetting;
+use App\Support\HubSiteIdentifier;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
@@ -28,18 +30,55 @@ class HubStorageService
         return HubStorageSetting::current();
     }
 
-    public function recommendedPaths(): array
+    public function siteStorageId(): string
     {
-        if (PHP_OS_FAMILY === 'Windows') {
-            return [
-                'files' => 'C:\\khubdata\\files',
-                'sql_backups' => 'C:\\khubdata\\backups\\sql',
-            ];
+        $override = trim((string) env('HUB_SITE_ID', ''));
+        if ($override !== '') {
+            return HubSiteIdentifier::sanitize($override);
         }
 
+        if (Schema::hasTable('hub_storage_settings')) {
+            $stored = HubStorageSetting::query()->value('site_storage_id');
+            if (is_string($stored) && $stored !== '') {
+                return $stored;
+            }
+        }
+
+        return HubSiteIdentifier::fromAppUrl();
+    }
+
+    public function persistSiteStorageId(): string
+    {
+        $id = $this->siteStorageId();
+
+        if (! Schema::hasTable('hub_storage_settings')) {
+            return $id;
+        }
+
+        $record = HubStorageSetting::query()->first();
+        if ($record === null) {
+            return $id;
+        }
+
+        if (empty($record->site_storage_id)) {
+            $record->forceFill(['site_storage_id' => $id])->save();
+        }
+
+        return (string) ($record->site_storage_id ?: $id);
+    }
+
+    /**
+     * @return array{files: string, sql_backups: string, site_root: string, site_id: string}
+     */
+    public function recommendedPaths(): array
+    {
+        $paths = HubSiteIdentifier::defaultPaths($this->siteStorageId());
+
         return [
-            'files' => '/var/khubdata/files',
-            'sql_backups' => '/var/khubdata/backups/sql',
+            'site_id' => $this->siteStorageId(),
+            'site_root' => $paths['site_root'],
+            'files' => $paths['files'],
+            'sql_backups' => $paths['sql_backups'],
         ];
     }
 
@@ -156,6 +195,7 @@ class HubStorageService
         }
 
         $cloud = $settings->cloud_config ?? [];
+        $scopedPrefix = $this->siteScopedPrefix((string) ($cloud['root_prefix'] ?? 'khub'));
 
         if ($driver === 's3') {
             Config::set('filesystems.disks.hub', [
@@ -167,7 +207,7 @@ class HubStorageService
                 'url' => $cloud['url'] ?? env('AWS_URL'),
                 'endpoint' => $cloud['endpoint'] ?? env('AWS_ENDPOINT'),
                 'use_path_style_endpoint' => (bool) ($cloud['use_path_style_endpoint'] ?? false),
-                'root' => $cloud['root_prefix'] ?? 'khub',
+                'root' => $scopedPrefix,
                 'visibility' => 'public',
             ]);
 
@@ -180,7 +220,7 @@ class HubStorageService
                 'project_id' => $cloud['project_id'] ?? env('GOOGLE_CLOUD_PROJECT_ID'),
                 'key_file_path' => $cloud['key_file_path'] ?? env('GOOGLE_CLOUD_KEY_FILE'),
                 'bucket' => $cloud['bucket'] ?? env('GOOGLE_CLOUD_STORAGE_BUCKET'),
-                'path_prefix' => $cloud['root_prefix'] ?? 'khub',
+                'path_prefix' => $scopedPrefix,
                 'storage_api_uri' => $cloud['storage_api_uri'] ?? env('GOOGLE_CLOUD_STORAGE_API_URI'),
             ]);
 
@@ -195,7 +235,7 @@ class HubStorageService
                 'key' => $cloud['account_key'] ?? env('AZURE_STORAGE_KEY'),
                 'container' => $cloud['container'] ?? env('AZURE_STORAGE_CONTAINER'),
                 'url' => $cloud['url'] ?? env('AZURE_STORAGE_URL'),
-                'prefix' => $cloud['root_prefix'] ?? 'khub',
+                'prefix' => $scopedPrefix,
             ]);
 
             return;
@@ -210,7 +250,7 @@ class HubStorageService
                 'private_key' => $cloud['private_key'] ?? null,
                 'passphrase' => $cloud['passphrase'] ?? null,
                 'port' => (int) ($cloud['port'] ?? 22),
-                'root' => $cloud['root_prefix'] ?? '/khub',
+                'root' => $this->siteScopedRemoteRoot((string) ($cloud['root_prefix'] ?? '/khub')),
                 'timeout' => 30,
             ]);
 
@@ -227,8 +267,43 @@ class HubStorageService
                 'drive_id' => $cloud['drive_id'] ?? null,
                 'site_hostname' => $cloud['site_hostname'] ?? null,
                 'site_path' => $cloud['site_path'] ?? null,
-                'prefix' => $cloud['root_prefix'] ?? 'khub',
+                'prefix' => $scopedPrefix,
             ]);
+        }
+    }
+
+    public function siteScopedPrefix(string $prefix = 'khub'): string
+    {
+        $prefix = trim($prefix, '/');
+        $siteId = $this->siteStorageId();
+        if ($prefix === $siteId || str_starts_with($prefix, $siteId.'/')) {
+            return $prefix;
+        }
+
+        return $prefix === '' ? $siteId : $siteId.'/'.$prefix;
+    }
+
+    public function siteScopedRemoteRoot(string $root): string
+    {
+        $root = rtrim($root, '/');
+        $siteId = $this->siteStorageId();
+        if ($root === '' || str_ends_with($root, '/'.$siteId) || $root === '/'.$siteId) {
+            return $root === '' ? '/'.$siteId : $root;
+        }
+
+        return $root.'/'.$siteId;
+    }
+
+    public function ensureHostDataDirectories(): void
+    {
+        $paths = $this->recommendedPaths();
+        $hostRoot = rtrim((string) config('hub_storage.host_data_root', '/var/khubdata'), '/\\');
+        if (PHP_OS_FAMILY === 'Windows') {
+            $hostRoot = rtrim((string) config('hub_storage.host_data_root_windows', 'C:\\khubdata'), '/\\');
+        }
+
+        foreach ([$hostRoot, $paths['site_root'], $paths['files'], $paths['sql_backups']] as $directory) {
+            File::ensureDirectoryExists($directory, 0775, true);
         }
     }
 
@@ -249,6 +324,9 @@ class HubStorageService
 
     public function ensureDirectories(): void
     {
+        $this->persistSiteStorageId();
+        $this->ensureHostDataDirectories();
+
         foreach (config('hub_storage.content_prefixes', []) as $prefix) {
             if ($this->usesExternalFiles()) {
                 if (! $this->disk()->exists($prefix)) {

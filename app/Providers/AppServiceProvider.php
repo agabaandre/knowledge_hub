@@ -69,8 +69,10 @@ class AppServiceProvider extends ServiceProvider
         }
 
         try {
+            $hubStorage = app(HubStorageService::class);
+            $hubStorage->ensureHostDataDirectories();
             if (Schema::hasTable('hub_storage_settings')) {
-                app(HubStorageService::class)->registerDiskConfig();
+                $hubStorage->registerDiskConfig();
             }
         } catch (\Throwable $e) {
             // Ignore during install / missing DB.

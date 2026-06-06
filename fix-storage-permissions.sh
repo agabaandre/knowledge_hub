@@ -17,8 +17,13 @@ else
   GROUP="${KHUB_STORAGE_GROUP:-www-data}"
 fi
 
-FILES_ROOT="${HUB_FILES_ROOT:-/var/khubdata/files}"
-SQL_ROOT="${HUB_SQL_BACKUP_ROOT:-/var/khubdata/backups/sql}"
+# Site ID defaults from APP_URL (domain + subfolder). Override: export HUB_SITE_ID=my-hub-id
+SITE_ID="${HUB_SITE_ID:-local}"
+if command -v php >/dev/null 2>&1 && [[ -f artisan ]]; then
+  SITE_ID="$(php -r "require 'vendor/autoload.php'; \$app=require 'bootstrap/app.php'; \$app->make('Illuminate\Contracts\Console\Kernel')->bootstrap(); echo app(\App\Services\HubStorageService::class)->siteStorageId();" 2>/dev/null || echo "$SITE_ID")"
+fi
+FILES_ROOT="${HUB_FILES_ROOT:-/var/khubdata/${SITE_ID}/files}"
+SQL_ROOT="${HUB_SQL_BACKUP_ROOT:-/var/khubdata/${SITE_ID}/backups/sql}"
 
 mkdir -p \
   storage/framework/cache/data \

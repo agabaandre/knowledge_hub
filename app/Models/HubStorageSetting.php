@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use App\Support\HubSiteIdentifier;
 use Illuminate\Database\Eloquent\Model;
 
 class HubStorageSetting extends Model
 {
     protected $fillable = [
         'files_driver',
+        'site_storage_id',
         'local_files_root',
         'sql_backup_root',
         'cloud_config',
@@ -34,17 +36,21 @@ class HubStorageSetting extends Model
             return $record;
         }
 
+        $siteId = trim((string) env('HUB_SITE_ID', ''));
+        $siteId = $siteId !== '' ? HubSiteIdentifier::sanitize($siteId) : HubSiteIdentifier::fromAppUrl();
+        $paths = HubSiteIdentifier::defaultPaths($siteId);
         $filesRoot = trim((string) env('HUB_FILES_ROOT', ''));
         if ($filesRoot === '') {
-            $filesRoot = PHP_OS_FAMILY === 'Windows' ? 'C:\\khubdata\\files' : '/var/khubdata/files';
+            $filesRoot = $paths['files'];
         }
         $sqlRoot = trim((string) env('HUB_SQL_BACKUP_ROOT', ''));
         if ($sqlRoot === '') {
-            $sqlRoot = PHP_OS_FAMILY === 'Windows' ? 'C:\\khubdata\\backups\\sql' : '/var/khubdata/backups/sql';
+            $sqlRoot = $paths['sql_backups'];
         }
 
         return static::query()->create([
             'files_driver' => 'internal',
+            'site_storage_id' => $siteId,
             'local_files_root' => $filesRoot,
             'sql_backup_root' => $sqlRoot,
             'auto_sql_backup' => true,

@@ -13,6 +13,7 @@
             Recommended host path: <code>{{ $defaults['files_root'] }}</code>
         @endif
         SQL backups are kept separately at <code>{{ $defaults['sql_backup_root'] }}</code>.
+        This hub's permanent storage ID is <code>{{ $siteStorageId }}</code> (from <code>APP_URL</code> domain and subfolder).
     </p>
 
     @if(($runtime ?? 'local') === 'docker')

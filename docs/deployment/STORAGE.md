@@ -9,15 +9,21 @@ The Knowledge Hub separates **application code** from **persistent data**. Publi
 ## Architecture
 
 ```
-/var/khubdata/                    ← host volume (outside container / git tree)
-├── files/                        ← HUB_FILES_ROOT (internal driver)
-│   └── uploads/
-│       ├── publications/
-│       ├── publications/summaries/
-│       ├── forums/
-│       └── forum/
-└── backups/
-    └── sql/                      ← HUB_SQL_BACKUP_ROOT
+/var/khubdata/                              ← host volume (mount in Docker)
+└── {site-id}/                              ← unique per hub (from APP_URL)
+    ├── files/                              ← uploads (auto-created)
+    │   └── uploads/
+    │       ├── publications/
+    │       ├── publications/summaries/
+    │       ├── forums/
+    │       └── forum/
+    └── backups/
+        └── sql/                            ← SQL dumps (auto-created)
+
+site-id examples:
+  https://khub.com/andrew  →  khub-com-andrew
+  https://hub.example.com  →  hub-example-com
+  http://localhost:8080      →  localhost-8080
 
 public/storage  →  symlink  →  /var/khubdata/files   (internal driver)
 /hub-media/{path}                 ← HTTP route when using custom host paths
@@ -32,15 +38,21 @@ Application code uses `hub_storage_path()` and `storage_link()` helpers — not 
 
 | OS | Files root | SQL backups |
 |----|------------|-------------|
-| Linux | `/var/khubdata/files` | `/var/khubdata/backups/sql` |
-| Windows | `C:\khubdata\files` | `C:\khubdata\backups\sql` |
+| Linux | `/var/khubdata/{site-id}/files` | `/var/khubdata/{site-id}/backups/sql` |
+| Windows | `C:\khubdata\{site-id}\files` | `C:\khubdata\{site-id}\backups\sql` |
+
+Directories are **created automatically** on boot and during install. The site ID is stored in `hub_storage_settings.site_storage_id` on first run.
 
 Override in `.env`:
 
 ```env
-HUB_FILES_ROOT=/var/khubdata/files
-HUB_SQL_BACKUP_ROOT=/var/khubdata/backups/sql
+APP_URL=https://khub.com/andrew
+HUB_SITE_ID=khub-com-andrew          # optional explicit ID
+HUB_FILES_ROOT=                      # optional full path override
+HUB_SQL_BACKUP_ROOT=
 ```
+
+Cloud drivers automatically prefix blobs with `{site-id}/` so shared buckets are not mixed between hubs.
 
 ---
 

@@ -445,15 +445,18 @@ class InstallerService
         $sqlRoot = trim((string) ($storage['sql_backup_root'] ?? $defaults['sql_backup_root']));
         $driver = (string) ($storage['files_driver'] ?? 'internal');
 
+        $hubStorage = app(HubStorageService::class);
+        $siteId = $hubStorage->siteStorageId();
+
         $this->writeEnvValues([
+            'HUB_SITE_ID' => $siteId,
             'HUB_FILES_ROOT' => $filesRoot,
             'HUB_SQL_BACKUP_ROOT' => $sqlRoot,
         ]);
 
-        File::ensureDirectoryExists($filesRoot, 0775, true);
-        File::ensureDirectoryExists($sqlRoot, 0775, true);
-
         if (! Schema::hasTable('hub_storage_settings')) {
+            $hubStorage->ensureHostDataDirectories();
+
             return;
         }
 
@@ -487,6 +490,7 @@ class InstallerService
         $record = HubStorageSetting::query()->first();
         $payload = [
             'files_driver' => $driver,
+            'site_storage_id' => $siteId,
             'local_files_root' => $driver === 'internal' ? $filesRoot : null,
             'sql_backup_root' => $sqlRoot,
             'cloud_config' => $cloud ?: null,
@@ -495,12 +499,15 @@ class InstallerService
         ];
 
         if ($record) {
+            if (empty($record->site_storage_id)) {
+                $payload['site_storage_id'] = $siteId;
+            }
             $record->forceFill($payload)->save();
         } else {
             HubStorageSetting::query()->create($payload);
         }
 
-        app(HubStorageService::class)->ensureDirectories();
+        $hubStorage->ensureDirectories();
         Artisan::call('config:clear');
     }
 

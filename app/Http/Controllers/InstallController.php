@@ -83,9 +83,11 @@ class InstallController extends Controller
 
         $defaults = $this->installer->storageDefaults();
         $runtime = $this->installer->runtimeEnvironment();
+        $storage = app(\App\Services\HubStorageService::class);
 
         return view('install.storage', [
             'defaults' => $defaults,
+            'siteStorageId' => $storage->siteStorageId(),
             'runtime' => $runtime,
             'drivers' => config('hub_storage.drivers', []),
             'driverSetup' => config('hub_storage.driver_setup', []),

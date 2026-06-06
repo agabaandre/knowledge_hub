@@ -28,6 +28,7 @@ class StorageManagementController extends Controller
             'filesRoot' => $storage->filesRoot(),
             'sqlBackupRoot' => $storage->sqlBackupRoot(),
             'usesExternal' => $storage->usesExternalFiles(),
+            'siteStorageId' => $storage->siteStorageId(),
         ]);
     }
 

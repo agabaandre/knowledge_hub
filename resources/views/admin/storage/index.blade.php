@@ -20,6 +20,12 @@
 @endif
 
 <div class="alert alert-info">
+    <strong>Site storage ID:</strong> <code>{{ $siteStorageId }}</code>
+    — paths are isolated under <code>/var/khubdata/{{ $siteStorageId }}/</code> so multiple hubs on one server or Docker host do not share files.
+    Override with <code>HUB_SITE_ID</code> in <code>.env</code> if needed.
+</div>
+
+<div class="alert alert-secondary">
     <strong>Recommendation:</strong> Keep <em>internal</em> files on a host path outside the application and container tree
     (Linux: <code>{{ $recommended['files'] }}</code>, Windows: <code>{{ $recommended['files'] }}</code>).
     SQL backups stay separate at <code>{{ $recommended['sql_backups'] }}</code>.
