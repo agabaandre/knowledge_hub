@@ -132,12 +132,19 @@ class AwardCommunityBadges extends Command
     {
         $count = 0;
 
+        $authorId = User::query()->whereKey($userId)->value('author_id');
+
         // Count publications attached to this community created by this user in the specified month/year
         $publicationIds = PublicationCommunityOfPractice::where('community_of_practice_id', $communityId)
             ->pluck('publication_id');
 
         $publications = Publication::whereIn('id', $publicationIds)
-            ->where('user_id', $userId)
+            ->where(function ($q) use ($userId, $authorId) {
+                $q->where('user_id', $userId);
+                if ($authorId) {
+                    $q->orWhere('author_id', $authorId);
+                }
+            })
             ->whereYear('created_at', $year)
             ->whereMonth('created_at', $month)
             ->where('is_approved', 1) // Only count approved publications

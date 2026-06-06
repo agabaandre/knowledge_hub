@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Support;
+
+use App\Models\Author;
+use App\Models\Forum;
+use App\Models\ForumComment;
+use App\Models\Publication;
+use App\Models\User;
+
+class ContributorStats
+{
+    /**
+     * Contribution metrics aligned with the public author profile page.
+     *
+     * @return array{
+     *     author: ?Author,
+     *     public_profile_url: ?string,
+     *     contribution_stats: array{
+     *         resource_contributions: int,
+     *         forum_posts: int,
+     *         forum_comments: int,
+     *         forum_contributions: int,
+     *         total_contributions: int
+     *     },
+     *     badge_count: int
+     * }
+     */
+    public static function forUser(User $user): array
+    {
+        $author = null;
+        if (! empty($user->author_id)) {
+            $author = Author::query()->find($user->author_id);
+        }
+
+        $resourceContributions = 0;
+        if ($author) {
+            $resourceContributions = Publication::query()
+                ->where('is_version', 0)
+                ->where('is_approved', 1)
+                ->where('is_active', 'Active')
+                ->where('author_id', $author->id)
+                ->count();
+        }
+
+        $forumPosts = Forum::query()
+            ->where('created_by', $user->id)
+            ->where('status', 1)
+            ->count();
+
+        $forumComments = ForumComment::query()
+            ->where('created_by', $user->id)
+            ->whereHas('forum', function ($q) {
+                $q->where('status', 1);
+            })
+            ->count();
+
+        $forumContributions = $forumPosts + $forumComments;
+
+        return [
+            'author' => $author,
+            'public_profile_url' => $author ? author_publications_url($author) : null,
+            'contribution_stats' => [
+                'resource_contributions' => $resourceContributions,
+                'forum_posts' => $forumPosts,
+                'forum_comments' => $forumComments,
+                'forum_contributions' => $forumContributions,
+                'total_contributions' => $resourceContributions + $forumContributions,
+            ],
+            'badge_count' => (int) $user->badges()->count(),
+        ];
+    }
+}

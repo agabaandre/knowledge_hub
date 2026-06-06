@@ -7,6 +7,7 @@ use App\Repositories\UsersRepository;
 use Illuminate\Http\Request;
 use App\Models\AccessLevel;
 use App\Models\PdfChatSession;
+use App\Support\ContributorStats;
 use App\Support\PublicationSubmissionValidation;
 use Illuminate\Validation\ValidationException;
 
@@ -32,6 +33,7 @@ class AccountController extends Controller
             $data['preferences'] = $user->preferences()->pluck('subtheme_id')->toArray();
         }
         $data['access_groups'] = AccessLevel::all();
+        $data['contributorPublicProfile'] = ContributorStats::forUser($user);
         
         return view('account.profile',$data);
     }

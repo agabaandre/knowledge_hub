@@ -51,6 +51,7 @@
         @include('publications.partials.contributor_profile', [
             'author' => $author,
             'contributionStats' => $contributionStats,
+            'contributorOrganization' => $contributorOrganization ?? null,
         ])
 
         <div class="row g-4">
@@ -94,6 +95,8 @@
             </div>
 
             <div class="col-lg-4 author-profile-sidebar">
+                @include('publications.partials.contributor_sidebar_styles')
+                @include('publications.partials.contributor_communities', ['authorCommunities' => $authorCommunities ?? collect()])
                 @include('publications.partials.facts')
             </div>
         </div>

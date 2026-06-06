@@ -17,9 +17,15 @@
     }
 
     $jobTitle = $user->job_title ?? null;
-    $organization = $user->organization_name ?? null;
+    $organization = $contributorOrganization ?? contributor_profile_organization($author, $user);
     $countryName = $user->country->name ?? null;
     $stats = $contributionStats ?? [];
+    $profileKicker = ($isOrganisation && ! $user) ? 'Contributing Organisation' : 'Contributor';
+    $participantBadges = $user
+        ? $user->badges->sortByDesc(function ($badge) {
+            return $badge->awarded_at ?? $badge->created_at;
+        })->values()
+        : collect();
 @endphp
 
 <style>
@@ -103,20 +109,85 @@
         color: {{ $primary }};
         margin-right: 0.35rem;
     }
-    .contributor-badges {
+    .contributor-org-block {
+        margin-bottom: 0.75rem;
+    }
+    .contributor-org-label {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin-bottom: 0.2rem;
+    }
+    .contributor-org-value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #334155;
+        line-height: 1.4;
+    }
+    .contributor-participant-badges {
+        margin-top: 0.85rem;
+    }
+    .contributor-participant-badges__title {
+        font-size: 0.7rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.55rem;
+    }
+    .contributor-participant-badges__grid {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.4rem;
+        gap: 0.55rem;
     }
-    .contributor-badge {
-        display: inline-flex;
+    .participant-badge-card {
+        display: flex;
         align-items: center;
-        gap: 0.25rem;
-        padding: 0.2rem 0.55rem;
-        border-radius: 999px;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: #fff;
+        gap: 0.55rem;
+        min-width: 0;
+        max-width: 100%;
+        padding: 0.45rem 0.65rem;
+        border-radius: 10px;
+        border: 1px solid rgba(15, 23, 42, 0.08);
+        background: #fff;
+        box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+    }
+    .participant-badge-card__icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        font-size: 1.1rem;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+    }
+    .participant-badge-card__icon img {
+        width: 24px;
+        height: 24px;
+        object-fit: contain;
+    }
+    .participant-badge-card__body {
+        min-width: 0;
+    }
+    .participant-badge-card__name {
+        font-size: 0.78rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.25;
+    }
+    .participant-badge-card__meta {
+        font-size: 0.68rem;
+        color: #64748b;
+        line-height: 1.3;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 220px;
     }
     .contributor-stats-grid {
         display: grid;
@@ -200,8 +271,11 @@
             text-align: center;
         }
         .contributor-meta-line,
-        .contributor-badges {
+        .contributor-participant-badges__grid {
             justify-content: center;
+        }
+        .contributor-participant-badges {
+            text-align: center;
         }
         .contributor-name {
             font-size: 1.4rem;
@@ -223,7 +297,7 @@
             @endif
         </div>
         <div class="contributor-hero-body">
-            <div class="contributor-kicker">{{ $isOrganisation ? 'Contributing Organisation' : 'Knowledge Hub Contributor' }}</div>
+            <div class="contributor-kicker">{{ $profileKicker }}</div>
             <h1 class="contributor-name">
                 @if(!empty($author->orcid))
                     <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile">
@@ -237,10 +311,13 @@
             @if($jobTitle)
                 <div class="contributor-title">{{ $jobTitle }}</div>
             @endif
+            @if($organization)
+                <div class="contributor-org-block">
+                    <span class="contributor-org-label">Organization / Institution</span>
+                    <div class="contributor-org-value"><i class="fa fa-building mr-1" style="color: {{ $primary }};"></i>{{ $organization }}</div>
+                </div>
+            @endif
             <div class="contributor-meta-line">
-                @if($organization)
-                    <span><i class="fa fa-building"></i>{{ $organization }}</span>
-                @endif
                 @if($countryName)
                     <span><i class="fa fa-map-marker-alt"></i>{{ $countryName }}</span>
                 @endif
@@ -248,15 +325,41 @@
                     <span><i class="fa fa-envelope"></i>{{ $author->email }}</span>
                 @endif
             </div>
-            @if($user && $user->badges && $user->badges->count() > 0)
-                <div class="contributor-badges">
-                    @foreach($user->badges->take(5) as $userBadge)
-                        <span class="contributor-badge"
-                              style="background-color: {{ $userBadge->badgeType->badge_color ?? '#64748b' }};"
-                              title="{{ $userBadge->badgeType->name ?? 'Badge' }}">
-                            {{ $userBadge->badgeType->name ?? 'Badge' }}
-                        </span>
-                    @endforeach
+            @if($participantBadges->isNotEmpty())
+                <div class="contributor-participant-badges">
+                    <div class="contributor-participant-badges__title">Participant badges</div>
+                    <div class="contributor-participant-badges__grid">
+                        @foreach($participantBadges->take(8) as $userBadge)
+                            @php
+                                $badgeType = $userBadge->badgeType;
+                                $badgeColor = $badgeType->badge_color ?? '#64748b';
+                                $badgeSlug = $badgeType->slug ?? null;
+                                $communityName = $userBadge->community->community_name ?? null;
+                                $period = $userBadge->year && $userBadge->month
+                                    ? \Carbon\Carbon::create((int) $userBadge->year, (int) $userBadge->month, 1)->format('M Y')
+                                    : null;
+                            @endphp
+                            <div class="participant-badge-card" title="{{ $badgeType->name ?? 'Badge' }}{{ $communityName ? ' · '.$communityName : '' }}{{ $period ? ' · '.$period : '' }}">
+                                <span class="participant-badge-card__icon" style="background: {{ $badgeColor }}22;">
+                                    @if(!empty($badgeType->image_path))
+                                        <img src="{{ asset($badgeType->image_path) }}" alt="">
+                                    @else
+                                        {{ participant_badge_emoji($badgeSlug) }}
+                                    @endif
+                                </span>
+                                <span class="participant-badge-card__body">
+                                    <span class="participant-badge-card__name">{{ $badgeType->name ?? 'Badge' }}</span>
+                                    @if($communityName || $period)
+                                        <span class="participant-badge-card__meta">
+                                            @if($communityName){{ Str::limit($communityName, 42) }}@endif
+                                            @if($communityName && $period) · @endif
+                                            @if($period){{ $period }}@endif
+                                        </span>
+                                    @endif
+                                </span>
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
             @endif
         </div>

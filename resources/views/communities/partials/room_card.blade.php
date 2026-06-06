@@ -82,14 +82,21 @@
                         $u = $face['user'];
                         $showImg = community_user_has_profile_image($u);
                         $jobTitle = community_user_display_job_title($u);
+                        $profileUrl = user_author_publications_url($u);
                         $hoverTip = $u->name;
                         if ($jobTitle !== '') {
                             $hoverTip .= ' — ' . $jobTitle;
                         }
                         $hoverTip .= ' · ' . $roleLabel($face['role']);
+                        if ($profileUrl) {
+                            $hoverTip .= ' · View profile';
+                        }
+                        $avatarTag = $profileUrl ? 'a' : 'span';
+                        $avatarAttrs = $profileUrl
+                            ? 'href="' . e($profileUrl) . '" title="' . e($hoverTip) . '" aria-label="' . e('View profile: ' . $u->name) . '"'
+                            : 'title="' . e($hoverTip) . '"';
                     @endphp
-                    <span class="community-room-card__avatar-wrap {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}"
-                        title="{{ e($hoverTip) }}">
+                    <{{ $avatarTag }} {!! $avatarAttrs !!} class="community-room-card__avatar-wrap {{ $profileUrl ? 'community-room-card__avatar-wrap--linked' : '' }} {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}">
                         @if($showImg)
                             <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
                                 onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
@@ -97,7 +104,7 @@
                         @else
                             <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
                         @endif
-                    </span>
+                    </{{ $avatarTag }}>
                 @endforeach
                 @if($moreMembers > 0)
                     <span class="community-room-card__more-members">+{{ $moreMembers }} more</span>

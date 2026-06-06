@@ -374,6 +374,7 @@ class PublicationsController extends Controller
         $request->merge(['author' => $author->id]);
 
         $data['author']       = $author;
+        $data['contributorOrganization'] = contributor_profile_organization($author, $author->user ?? null);
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['forumContributions'] = collect();
         $data['contributionStats'] = [
@@ -453,6 +454,23 @@ class PublicationsController extends Controller
             $data['canonicalUrl'],
             $data['pageDescription']
         );
+
+        $data['authorCommunities'] = collect();
+        if (! empty($data['author']->user)) {
+            $memberUserId = (int) $data['author']->user->id;
+            $data['authorCommunities'] = \App\Models\CommunityOfPractice::query()
+                ->select(['community_of_practices.id', 'community_of_practices.community_name', 'community_of_practices.slug'])
+                ->whereHas('membership', function ($q) use ($memberUserId) {
+                    $q->where('user_id', $memberUserId)
+                        ->where('is_approved', 1)
+                        ->where('is_active', 1);
+                })
+                ->withCount(['membership as approved_members_count' => function ($q) {
+                    $q->where('is_approved', 1)->where('is_active', 1);
+                }])
+                ->orderBy('community_name')
+                ->get();
+        }
 
         return view('publications.author_pubs',$data);
     }

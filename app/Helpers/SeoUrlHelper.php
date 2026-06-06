@@ -309,6 +309,28 @@ if (! function_exists('resolve_author_for_url')) {
     }
 }
 
+if (! function_exists('user_author_publications_url')) {
+    /**
+     * Profile URL for a hub user when they are linked to an author record.
+     */
+    function user_author_publications_url(?\App\Models\User $user, bool $absolute = true): ?string
+    {
+        if ($user === null) {
+            return null;
+        }
+
+        if (! empty($user->author_id)) {
+            return author_publications_url((int) $user->author_id, $absolute);
+        }
+
+        if ($user->relationLoaded('author') && $user->author) {
+            return author_publications_url($user->author, $absolute);
+        }
+
+        return null;
+    }
+}
+
 if (! function_exists('author_publications_url')) {
     /**
      * @param  Author|object|int|string|null  $author

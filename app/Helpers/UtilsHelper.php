@@ -1274,6 +1274,54 @@ function clear_cache(){
 /**
  * Two-letter initials for avatar fallback on community cards, etc.
  */
+/**
+ * Organization / institution label for a contributor profile (user profile field, then publication affiliation).
+ */
+function contributor_profile_organization(?\App\Models\Author $author, ?\App\Models\User $user = null): ?string
+{
+    if ($user !== null) {
+        $fromUser = trim((string) ($user->organization_name ?? ''));
+        if ($fromUser !== '') {
+            return $fromUser;
+        }
+    }
+
+    if ($author === null) {
+        return null;
+    }
+
+    $affiliation = \App\Models\Publication::query()
+        ->where('author_id', $author->id)
+        ->whereNotNull('author_affiliation')
+        ->where('author_affiliation', '!=', '')
+        ->orderByDesc('content_updated_at')
+        ->orderByDesc('updated_at')
+        ->value('author_affiliation');
+
+    $affiliation = trim((string) ($affiliation ?? ''));
+
+    return $affiliation !== '' ? $affiliation : null;
+}
+
+/**
+ * Emoji icon for a community participant badge slug.
+ */
+function participant_badge_emoji(?string $slug): string
+{
+    switch ($slug) {
+        case 'silver':
+            return '🥈';
+        case 'gold':
+            return '🥇';
+        case 'platinum':
+            return '💎';
+        case 'diamond':
+            return '💠';
+        default:
+            return '🏅';
+    }
+}
+
 function community_user_initials(?string $name): string
 {
     $name = trim((string) $name);

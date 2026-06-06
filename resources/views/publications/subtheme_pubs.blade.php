@@ -20,6 +20,7 @@
        
 	</div>
     <div class="col-lg-4">
+    @include('publications.partials.contributor_sidebar_styles')
     @include('publications.partials.facts')
     </div>
 </div>

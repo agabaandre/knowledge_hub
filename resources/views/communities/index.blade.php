@@ -179,6 +179,16 @@
             width: max-content;
             min-height: calc(28px * 1.32);
         }
+        a.community-room-card__avatar-wrap {
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+        }
+        a.community-room-card__avatar-wrap:hover,
+        a.community-room-card__avatar-wrap:focus-visible {
+            box-shadow: 0 0 0 2px var(--theme-color-primary, #119A48);
+            z-index: 3;
+        }
         .community-room-card__avatar-wrap {
             position: relative;
             box-sizing: border-box;

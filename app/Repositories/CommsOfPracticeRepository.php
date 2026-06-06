@@ -487,7 +487,7 @@ class CommsOfPracticeRepository{
         if ($allFaceUserIds !== []) {
             $userById = User::query()
                 ->whereIn('id', array_keys($allFaceUserIds))
-                ->get(['id', 'name', 'photo', 'updated_at', 'job_title', 'is_photo_external'])
+                ->get(['id', 'name', 'photo', 'updated_at', 'job_title', 'is_photo_external', 'author_id'])
                 ->keyBy('id');
         }
 
@@ -1236,7 +1236,7 @@ class CommsOfPracticeRepository{
             })
             ->where('m.community_of_practice_id', $communityId)
             ->where('m.is_approved', 1)
-            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title')
+            ->groupBy('m.id', 'm.user_id', 'm.is_active', 'm.is_admin', 'u.name', 'u.email', 'u.job_title', 'u.photo', 'u.author_id', 'u.is_photo_external')
             ->select(
                 'm.id as membership_id',
                 'm.user_id',
@@ -1245,6 +1245,9 @@ class CommsOfPracticeRepository{
                 'u.name',
                 'u.email',
                 'u.job_title',
+                'u.photo',
+                'u.author_id',
+                'u.is_photo_external',
                 DB::raw('COUNT(DISTINCT pcp.publication_id) as publication_count')
             );
 
@@ -1270,6 +1273,16 @@ class CommsOfPracticeRepository{
         $rankStart = (($page - 1) * $perPage) + 1;
         $items = [];
         foreach ($rows as $index => $row) {
+            $userForPhoto = new User([
+                'photo' => $row->photo,
+                'author_id' => $row->author_id,
+                'is_photo_external' => $row->is_photo_external,
+                'name' => $row->name,
+            ]);
+            $profileUrl = ! empty($row->author_id)
+                ? author_publications_url((int) $row->author_id)
+                : null;
+
             $items[] = [
                 'rank' => $rankStart + $index,
                 'membership_id' => (int) $row->membership_id,
@@ -1280,6 +1293,9 @@ class CommsOfPracticeRepository{
                 'publication_count' => (int) $row->publication_count,
                 'is_admin' => (bool) $row->is_admin,
                 'is_active' => (bool) $row->is_active,
+                'profile_url' => $profileUrl,
+                'photo_url' => community_user_has_profile_image($userForPhoto) ? (string) $row->photo : null,
+                'initials' => community_user_initials((string) $row->name),
             ];
         }
 

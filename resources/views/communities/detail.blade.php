@@ -93,6 +93,92 @@
     .publication-item a:hover, .forum-item a:hover {
         color: {{ settings()->primary_color ?? '#119A48' }};
     }
+    .member-item-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        overflow: hidden;
+        background: #e4e6e8;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.08);
+        text-decoration: none;
+        color: #3c4146;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .member-item-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .member-item-avatar:hover,
+    .member-item-avatar:focus-visible {
+        box-shadow: 0 0 0 2px var(--theme-color-primary, #119A48);
+    }
+    .member-name-link {
+        color: inherit;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .member-name-link:hover {
+        color: var(--theme-color-primary, #119A48);
+        text-decoration: underline;
+    }
+    .community-detail-participants {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #e2e8f0;
+    }
+    .community-detail-participants__label {
+        width: 100%;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #64748b;
+        margin-bottom: 0.25rem;
+    }
+    .community-detail-participants .community-room-card__avatar-wrap {
+        position: relative;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        min-height: 36px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid #fff;
+        border-radius: 50%;
+        overflow: hidden;
+        background: #e4e6e8;
+        box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.06);
+        text-decoration: none;
+        color: #3c4146;
+    }
+    .community-detail-participants a.community-room-card__avatar-wrap:hover,
+    .community-detail-participants a.community-room-card__avatar-wrap:focus-visible {
+        box-shadow: 0 0 0 2px var(--theme-color-primary, #119A48);
+    }
+    .community-detail-participants .community-room-card__avatar {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .community-detail-participants .community-room-card__avatar-initials {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        height: 100%;
+        font-size: 0.7rem;
+        font-weight: 700;
+    }
     .member-item {
         padding: 0.75rem 0;
         border-bottom: 1px solid #f1f5f9;
@@ -348,6 +434,9 @@
                         @if($community->organisation)<span class="mr-3"><i class="fa fa-building mr-1"></i>{{ $community->organisation }}</span>@endif
                         @if($community->department)<span><i class="fa fa-sitemap mr-1"></i>{{ $community->department }}</span>@endif
                     </p>
+                @endif
+                @if(communities_listing_show_participants() && collect($community->listing_contributor_faces ?? [])->isNotEmpty())
+                    @include('communities.partials.participant_faces', ['faces' => collect($community->listing_contributor_faces ?? [])->take(communities_listing_max_faces())])
                 @endif
             </div>
         </div>
@@ -740,11 +829,22 @@
                     actionHtml = '<div class="mt-2"><button class="btn btn-sm btn-outline-success js-member-toggle" data-member-id="' + item.membership_id + '" data-action="activate" type="button">Mark active</button></div>';
                 }
             }
+            var avatarInner = item.photo_url
+                ? '<img src="' + escapeHtml(item.photo_url) + '" alt="" onerror="this.style.display=\'none\';var s=this.nextElementSibling;if(s){s.style.display=\'flex\';}">'
+                    + '<span style="display:none;align-items:center;justify-content:center;width:100%;height:100%;">' + escapeHtml(item.initials || '?') + '</span>'
+                : escapeHtml(item.initials || '?');
+            var avatarHtml = item.profile_url
+                ? '<a href="' + escapeHtml(item.profile_url) + '" class="member-item-avatar mr-3" title="View profile: ' + escapeHtml(item.name) + '" aria-label="View profile: ' + escapeHtml(item.name) + '">' + avatarInner + '</a>'
+                : '<span class="member-item-avatar mr-3" aria-hidden="true">' + avatarInner + '</span>';
+            var nameHtml = item.profile_url
+                ? '<a href="' + escapeHtml(item.profile_url) + '" class="member-name-link">' + escapeHtml(item.name) + '</a>'
+                : escapeHtml(item.name);
             return '' +
                 '<li class="member-item">' +
-                '  <div class="d-flex justify-content-between align-items-start">' +
-                '    <div class="flex-grow-1">' +
-                '      <div class="member-name"><span class="badge badge-secondary mr-1">' + item.rank + '</span>' + escapeHtml(item.name) + '</div>' +
+                '  <div class="d-flex align-items-start">' +
+                avatarHtml +
+                '    <div class="flex-grow-1 min-width-0">' +
+                '      <div class="member-name"><span class="badge badge-secondary mr-1">' + item.rank + '</span>' + nameHtml + '</div>' +
                 '      <div class="member-title"><i class="fa fa-briefcase mr-1"></i>' + escapeHtml(item.job_title || 'Not specified') + '</div>' +
                 '      <div class="small text-muted mt-1"><i class="fa fa-envelope mr-1"></i>' + escapeHtml(item.email) + '</div>' +
                 '      <div class="mt-1">' + adminBadge + ' ' + activeBadge + ' <span class="badge badge-info">' + parseInt(item.publication_count, 10) + ' Publications</span></div>' +

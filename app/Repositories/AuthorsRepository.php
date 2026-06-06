@@ -90,7 +90,10 @@ class AuthorsRepository extends SharedRepo{
     }
 
     public function find($id){
-        $author = Author::with(['user.country', 'user.badges.badgeType'])->find($id);
+        $author = Author::with([
+            'user.country',
+            'user.badges' => fn ($q) => $q->with(['badgeType', 'community'])->orderByDesc('awarded_at'),
+        ])->find($id);
         if ($author) {
             $this->ensureSlug($author);
         }
@@ -100,7 +103,10 @@ class AuthorsRepository extends SharedRepo{
 
     public function findBySlug(string $slug): ?Author
     {
-        return Author::with(['user.country', 'user.badges.badgeType'])
+        return Author::with([
+            'user.country',
+            'user.badges' => fn ($q) => $q->with(['badgeType', 'community'])->orderByDesc('awarded_at'),
+        ])
             ->where('slug', $slug)
             ->first();
     }
