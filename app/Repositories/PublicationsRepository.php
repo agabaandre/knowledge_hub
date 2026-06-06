@@ -27,6 +27,7 @@ use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Schema;
 use App\Imports\PublicationImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Log;
@@ -528,6 +529,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     $pub->is_active   = 'Active';
                     $pub->is_approved = 1;
                     $pub->is_rejected = 0;
+                    if (Schema::hasColumn($pub->getTable(), 'approved_by') && current_user()) {
+                        $pub->approved_by = current_user()->id;
+                    }
+                    if (Schema::hasColumn($pub->getTable(), 'rejected_by')) {
+                        $pub->rejected_by = null;
+                    }
                 }
             } catch (\Throwable $e) {
                 // no-op; fallback to default behaviour
@@ -1521,10 +1528,18 @@ public function change_approval_status(Request $request){
 
      $publication->is_approved= 1;
      $publication->is_rejected= 0;
-     if(property_exists($publication, 'approved_by')){ $publication->approved_by = current_user()->id; }
-     if(property_exists($publication, 'rejected_by')){ $publication->rejected_by = null; }
-     if(property_exists($publication, 'rejected_reason')){ $publication->rejected_reason = null; }
-     if(property_exists($publication, 'rejected_at')){ $publication->rejected_at = null; }
+     if (Schema::hasColumn($publication->getTable(), 'approved_by')) {
+         $publication->approved_by = current_user() ? current_user()->id : null;
+     }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_by')) {
+         $publication->rejected_by = null;
+     }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_reason')) {
+         $publication->rejected_reason = null;
+     }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_at')) {
+         $publication->rejected_at = null;
+     }
 
      if(!$request->is_summary)
      $publication->is_active= 'Active';
@@ -1536,10 +1551,18 @@ public function change_approval_status(Request $request){
 
      $publication->is_rejected= 1;
      $publication->is_approved= 0;
-     if(property_exists($publication, 'rejected_by')){ $publication->rejected_by = current_user()->id; }
-     if(property_exists($publication, 'approved_by')){ $publication->approved_by = null; }
-     if(property_exists($publication, 'rejected_reason')){ $publication->rejected_reason = $request->input('rejected_reason'); }
-     if(property_exists($publication, 'rejected_at')){ $publication->rejected_at = now(); }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_by')) {
+         $publication->rejected_by = current_user() ? current_user()->id : null;
+     }
+     if (Schema::hasColumn($publication->getTable(), 'approved_by')) {
+         $publication->approved_by = null;
+     }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_reason')) {
+         $publication->rejected_reason = $request->input('rejected_reason');
+     }
+     if (Schema::hasColumn($publication->getTable(), 'rejected_at')) {
+         $publication->rejected_at = now();
+     }
 
      if(!$request->is_summary)
      $publication->is_active= 'In-Active';
@@ -1958,5 +1981,151 @@ public function bulkFeatured($ids)
 {
     Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
 }
+
+    /**
+     * Base query for admin "Manage Publications" (approved, non-version rows).
+     */
+    public function buildAdminApprovedQuery(Request $request)
+    {
+        $pubs = Publication::query()
+            ->with(['author', 'country', 'approver', 'rejector', 'user'])
+            ->where('is_version', 0)
+            ->where('is_approved', 1)
+            ->where('is_rejected', 0)
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('term')) {
+            $pubs->searchTerm($request->term);
+        }
+
+        $this->applyFilters($pubs, $request);
+        $this->access_filter($pubs);
+
+        $search = trim((string) $request->input('search.value', ''));
+        if ($search !== '') {
+            $pubs->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhere('author_affiliation', 'like', '%'.$search.'%')
+                    ->orWhereHas('author', function ($aq) use ($search) {
+                        $aq->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
+        return $pubs;
+    }
+
+    public function moderatorDisplayName(Publication $publication): string
+    {
+        if (!empty($publication->approved_by) && $publication->approver) {
+            return (string) ($publication->approver->name ?? '—');
+        }
+        if (!empty($publication->rejected_by) && $publication->rejector) {
+            return (string) ($publication->rejector->name ?? 'Rejected');
+        }
+        if ((int) ($publication->is_approved ?? 0) === 1 && $publication->user) {
+            return (string) ($publication->user->name ?? '—');
+        }
+
+        return '—';
+    }
+
+    /**
+     * Server-side DataTables payload for admin publications index.
+     */
+    public function adminApprovedDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = (int) $request->input('length', 20);
+        if ($length <= 0) {
+            $length = 20;
+        }
+        $length = min($length, 100);
+
+        $base = $this->buildAdminApprovedQuery($request);
+        $recordsTotal = Publication::query()
+            ->where('is_version', 0)
+            ->where('is_approved', 1)
+            ->where('is_rejected', 0)
+            ->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 2);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [
+            1 => 'id',
+            2 => 'title',
+            3 => 'description',
+            7 => 'is_active',
+            8 => 'date_created',
+        ];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        if ($orderCol === 'date_created') {
+            $base->orderByRaw('COALESCE(date_created, created_at) '.$orderDir);
+        } else {
+            $base->orderBy($orderCol, $orderDir);
+        }
+
+        $rows = $base->skip($start)->take($length)->get();
+        $canDelete = auth()->user() && auth()->user()->can('delete_publications');
+        $currentUserId = current_user() ? current_user()->id : null;
+        $isAdmin = is_admin();
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $publication) {
+            $isInactive = strtolower((string) ($publication->is_active ?? '')) !== 'active';
+            $isFeatured = (int) ($publication->is_featured ?? 0) === 1;
+            $rowClass = $isInactive ? 'pub-row-inactive' : ($isFeatured ? 'pub-row-featured' : '');
+
+            $dateCreated = '-';
+            if ($publication->date_created) {
+                $dateCreated = Carbon::parse($publication->date_created)->format('M d, Y');
+            } elseif ($publication->created_at) {
+                $dateCreated = Carbon::parse($publication->created_at)->format('M d, Y');
+            }
+
+            $title = '<a href="'.e($publication->publication).'" target="_blank" rel="noopener">'.truncate($publication->title, 30).'</a>';
+            $description = truncate(html_to_text($publication->description), 50);
+            $author = e($publication->author->name ?? '');
+            $affiliation = e($publication->author_affiliation ?: '-');
+            $memberState = e($publication->country->name ?? '');
+            $status = e(get_publication_state($publication->is_approved, $publication->is_rejected));
+            $moderator = e($this->moderatorDisplayName($publication));
+
+            $actions = '<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success mr-1" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
+                .'<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary mr-1" title="View"><i class="fa fa-eye"></i></a>';
+            if ($publication->user_id == $currentUserId || $isAdmin) {
+                $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Edit"><i class="fa fa-edit"></i></a>';
+            }
+            if ($canDelete) {
+                $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(\''.$publication->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>';
+            }
+
+            $data[] = [
+                'DT_RowClass' => trim($rowClass),
+                'checkbox' => '<input type="checkbox" name="selected_ids[]" value="'.$publication->id.'" class="publication-checkbox">',
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => $title,
+                'description' => $description,
+                'author' => $author,
+                'affiliation' => $affiliation,
+                'member_state' => $memberState,
+                'status' => $status,
+                'date_created' => $dateCreated,
+                'moderator' => '<span class="text-muted">'.$moderator.'</span>',
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
 
 }
