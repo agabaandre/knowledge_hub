@@ -242,8 +242,7 @@ class ResourcesController extends Controller
                 $this->publicationsRepo->bulkInactive($ids);
                 return back()->with('success', 'Selected publications unpublished.');
             case 'delete':
-                $this->publicationsRepo->bulkDelete($ids);
-                return back()->with('success', 'Selected publications deleted.');
+                return back()->with('error', 'Delete is only available from the pending publications page.');
             case 'featured':
                 $this->publicationsRepo->bulkFeatured($ids);
                 return back()->with('success', 'Selected publications marked as featured.');

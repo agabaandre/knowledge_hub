@@ -169,7 +169,6 @@
                             <select id="bulkActionSelect" class="form-control" style="width: auto; max-width: 260px;">
                                 <option value="">Bulk Actions</option>
                                 <option value="inactive">Inactive/Unpublish Selected</option>
-                                <option value="delete">Delete Selected</option>
                                 <option value="featured">Mark as Featured</option>
                             </select>
                             <button type="button" class="btn btn-sm btn-outline-primary" id="bulkActionButton" disabled>Apply</button>
@@ -205,7 +204,6 @@
     </div>
 
     @include('admin.publications.partials.edit-modal')
-    @include('admin.publications.partials.delete-modal')
 
     <div class="modal fade" id="pubDescriptionPreviewModal" tabindex="-1" role="dialog" aria-labelledby="pubDescriptionPreviewTitle" aria-hidden="true">
         <div class="modal-dialog modal-lg" role="document">
@@ -292,7 +290,6 @@ function submitBulkAction(action) {
     pendingBulkAction = action;
     let actionText = '';
     if (action === 'inactive') actionText = 'unpublish (set inactive)';
-    else if (action === 'delete') actionText = 'delete';
     else if (action === 'featured') actionText = 'mark as featured';
     document.getElementById('bulkActionConfirmText').textContent = `Are you sure you want to ${actionText} the selected publications?`;
     $('#bulkActionConfirmModal').modal('show');

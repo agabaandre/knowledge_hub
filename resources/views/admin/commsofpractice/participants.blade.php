@@ -66,14 +66,20 @@
                     <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
                 </div>
             </div>
+            <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#participantsAdvancedFilters" aria-expanded="{{ !empty($search->community_id) || !empty($search->badge_type_id) ? 'true' : 'false' }}" aria-controls="participantsAdvancedFilters">
+                <i class="fa fa-sliders mr-1"></i> Advanced Filters
+            </button>
         </div>
         <div class="pub-filters-card__body">
             <form id="participantsFiltersForm" method="GET" action="{{ route('admin.commsofpractice.participants') }}" class="mb-0">
-                <div class="pub-filters-grid">
+                <div class="pub-filters-grid pub-filters-grid--single" style="margin-bottom: 1rem;">
                     <div class="pub-filter-field">
                         <label class="pub-filter-label" for="filterQ">Search</label>
                         <input type="text" class="form-control pub-filter-input" id="filterQ" name="q" value="{{ $search->q ?? '' }}" placeholder="Name, email, title, organisation, {{ \Illuminate\Support\Str::lower($geoLabel) }}">
                     </div>
+                </div>
+
+                <div class="pub-filters-grid pub-filters-grid--primary">
                     <div class="pub-filter-field">
                         <label class="pub-filter-label" for="filterTitle">Title</label>
                         <input type="text" class="form-control pub-filter-input" id="filterTitle" name="title" value="{{ $search->title ?? '' }}" placeholder="Job title">
@@ -92,25 +98,32 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="pub-filter-field">
-                        <label class="pub-filter-label" for="filterCommunity">Community</label>
-                        <select class="form-control pub-filter-input" id="filterCommunity" name="community_id">
-                            <option value="">All communities</option>
-                            @foreach($communities as $c)
-                                <option value="{{ $c->id }}" {{ (string)($search->community_id ?? '') === (string)$c->id ? 'selected' : '' }}>{{ $c->community_name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="pub-filter-field">
-                        <label class="pub-filter-label" for="filterBadge">Badge</label>
-                        <select class="form-control pub-filter-input" id="filterBadge" name="badge_type_id">
-                            <option value="">Any badge</option>
-                            @foreach($badgeTypes as $b)
-                                <option value="{{ $b->id }}" {{ (string)($search->badge_type_id ?? '') === (string)$b->id ? 'selected' : '' }}>{{ $b->name }}</option>
-                            @endforeach
-                        </select>
+                </div>
+
+                <div id="participantsAdvancedFilters" class="collapse pub-filters-advanced {{ !empty($search->community_id) || !empty($search->badge_type_id) ? 'show' : '' }}">
+                    <span class="pub-filters-advanced__label"><i class="fa fa-sliders"></i> Advanced Filters</span>
+                    <div class="pub-filters-grid pub-filters-grid--primary">
+                        <div class="pub-filter-field">
+                            <label class="pub-filter-label" for="filterCommunity">Community</label>
+                            <select class="form-control pub-filter-input" id="filterCommunity" name="community_id">
+                                <option value="">All communities</option>
+                                @foreach($communities as $c)
+                                    <option value="{{ $c->id }}" {{ (string)($search->community_id ?? '') === (string)$c->id ? 'selected' : '' }}>{{ $c->community_name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="pub-filter-field">
+                            <label class="pub-filter-label" for="filterBadge">Badge</label>
+                            <select class="form-control pub-filter-input" id="filterBadge" name="badge_type_id">
+                                <option value="">Any badge</option>
+                                @foreach($badgeTypes as $b)
+                                    <option value="{{ $b->id }}" {{ (string)($search->badge_type_id ?? '') === (string)$b->id ? 'selected' : '' }}>{{ $b->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
                 </div>
+
                 <div class="pub-filters-actions">
                     <a href="{{ route('admin.commsofpractice.participants') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearParticipantsFilters">
                         <i class="fa fa-rotate-left"></i> Clear
@@ -220,7 +233,7 @@ $(function () {
     });
 
     $('#filterQ, #filterTitle, #filterOrganisation').on('input', scheduleParticipantsFilterReload);
-    $('#filterGeography, #filterCommunity, #filterBadge').on('change', reloadParticipantsTable);
+    $('#filterGeography, #filterCommunity, #filterBadge').on('change', scheduleParticipantsFilterReload);
 
     $('#participantsFiltersForm').on('submit', function (e) {
         e.preventDefault();

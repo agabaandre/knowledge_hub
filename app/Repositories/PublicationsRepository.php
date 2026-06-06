@@ -1169,7 +1169,23 @@ public function get(Request $request, $return_array = false, $featured = false,$
     }
 
     public function delete($id){
-        return Publication::find($id)->delete();
+        $publication = Publication::find($id);
+        if (!$publication) {
+            return false;
+        }
+
+        if (!$this->publicationIsPendingDeletion($publication)) {
+            return false;
+        }
+
+        return $publication->delete();
+    }
+
+    public function publicationIsPendingDeletion(Publication $publication): bool
+    {
+        return (int) ($publication->is_version ?? 0) === 0
+            && (int) ($publication->is_approved ?? 0) === 0
+            && (int) ($publication->is_rejected ?? 0) === 0;
     }
 
     public function get_tags(){
@@ -2018,7 +2034,12 @@ public function bulkInactive($ids)
 
 public function bulkDelete($ids)
 {
-    Publication::whereIn('id', $ids)->delete();
+    Publication::query()
+        ->whereIn('id', $ids)
+        ->where('is_version', 0)
+        ->where('is_approved', 0)
+        ->where('is_rejected', 0)
+        ->delete();
 }
 
 public function bulkFeatured($ids)
@@ -2233,7 +2254,6 @@ public function togglePublicationActive(int $id): ?Publication
         }
 
         $rows = $base->skip($start)->take($length)->get();
-        $canDelete = auth()->user() && auth()->user()->can('delete_publications');
         $currentUserId = current_user() ? current_user()->id : null;
         $isAdmin = is_admin();
 
@@ -2276,10 +2296,6 @@ public function togglePublicationActive(int $id): ?Publication
             $activeBtnClass = $isInactive ? 'btn-outline-success' : 'btn-outline-secondary';
             $activeIcon = $isInactive ? 'fa-upload' : 'fa-ban';
             $actions .= '<button type="button" class="btn btn-sm '.$activeBtnClass.' pub-toggle-active" data-id="'.$publication->id.'" data-active="'.($isInactive ? '0' : '1').'" title="'.$activeTitle.'"><i class="fa '.$activeIcon.'"></i></button>';
-
-            if ($canDelete) {
-                $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(\''.$publication->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>';
-            }
             $actions .= '</div>';
 
             $data[] = [
