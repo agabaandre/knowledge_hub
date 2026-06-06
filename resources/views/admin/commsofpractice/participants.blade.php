@@ -1,27 +1,107 @@
 @extends(admin_layout())
 
+@php
+    $green = settings()->au_corporate_green ?? '#1A5632';
+    $gold = settings()->au_gold ?? '#B4A269';
+    $pendingCount = (int) ($stats['pending_memberships'] ?? 0);
+@endphp
+
 @section('styles')
     @include('common.table')
     @include('admin.publications.partials.filter_styles')
     <style>
-        .stat-card-mini {
+        .cop-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.25rem;
+        }
+        .cop-stat-card {
             background: #fff;
             border: 1px solid #e2e8f0;
-            border-radius: 0;
+            border-radius: 12px;
+            padding: 1rem 1.15rem;
+            box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+            position: relative;
+            overflow: hidden;
         }
-        #participants-table_wrapper table.dataTable { table-layout: fixed !important; }
-        #participants-table .part-col-index { width: 3rem; min-width: 3rem; }
+        .cop-stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, {{ $green }}, {{ $gold }});
+        }
+        .cop-stat-card__label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+        }
+        .cop-stat-card__value {
+            font-size: 1.65rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1.1;
+        }
+        .cop-stat-card__meta {
+            font-size: 0.78rem;
+            color: #64748b;
+            margin-top: 0.35rem;
+        }
+        .cop-pending-panel {
+            border: 1px solid #f59e0b66;
+            border-radius: 14px;
+            background: linear-gradient(180deg, #fffbeb 0%, #fff 100%);
+            margin-bottom: 1.25rem;
+            overflow: hidden;
+        }
+        .cop-pending-panel__head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 0.9rem 1.15rem;
+            cursor: pointer;
+            user-select: none;
+        }
+        .cop-pending-panel__head h3 {
+            margin: 0;
+            font-size: 1rem;
+            font-weight: 700;
+            color: #92400e;
+        }
+        .cop-pending-panel__body {
+            padding: 0 1.15rem 1.15rem;
+        }
+        .cop-pending-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        #participants-table_wrapper table.dataTable,
+        #pending-participants-table_wrapper table.dataTable { table-layout: fixed !important; }
+        #participants-table .part-col-index,
+        #pending-participants-table .part-col-index { width: 3rem; min-width: 3rem; }
         #participants-table .part-col-name { width: 12%; }
-        #participants-table .part-col-contact { width: 14%; }
-        #participants-table .part-col-status { width: 8rem; text-align: center; }
+        #participants-table .part-col-contact,
+        #pending-participants-table .part-col-contact { width: 14%; }
         #participants-table .part-col-title { width: 10%; }
-        #participants-table .part-col-org { width: 12%; }
-        #participants-table .part-col-geo { width: 9%; }
+        #participants-table .part-col-org { width: 11%; }
+        #participants-table .part-col-geo,
+        #pending-participants-table .part-col-geo { width: 9%; }
         #participants-table .part-col-pub,
         #participants-table .part-col-forum { width: 5rem; text-align: center; }
-        #participants-table .part-col-badges,
-        #participants-table .part-col-community { width: 14%; }
-        /* DataTables 2.x pseudo-arrows + theme background icons = double sort glyphs */
+        #participants-table .part-col-badges { width: 11%; }
+        #participants-table .part-col-communities,
+        #pending-participants-table .part-col-community { width: 16%; }
+        #pending-participants-table .part-col-select { width: 2.5rem; text-align: center; }
+        #pending-participants-table .part-col-actions { width: 7rem; text-align: center; }
+        #pending-participants-table_wrapper table.dataTable thead > tr > th.sorting:before,
+        #pending-participants-table_wrapper table.dataTable thead > tr > th.sorting:after,
         #participants-table_wrapper table.dataTable thead > tr > th.sorting:before,
         #participants-table_wrapper table.dataTable thead > tr > th.sorting:after,
         #participants-table_wrapper table.dataTable thead > tr > th.sorting_asc:before,
@@ -36,38 +116,43 @@
 
 @section('content')
 <div class="container-fluid">
-    <div class="row mb-3">
-        <div class="col-md-4">
-            <div class="card border-left-primary shadow-sm h-100 stat-card-mini">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Total Communities</div>
-                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ number_format((int) $totalCommunities) }}</div>
-                </div>
-            </div>
+    <div class="cop-stats-grid">
+        <div class="cop-stat-card">
+            <div class="cop-stat-card__label">Communities</div>
+            <div class="cop-stat-card__value">{{ number_format((int) ($stats['total_communities'] ?? 0)) }}</div>
+            <div class="cop-stat-card__meta">{{ number_format((int) ($stats['active_communities'] ?? 0)) }} active</div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-left-success shadow-sm h-100 stat-card-mini">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Approved Memberships</div>
-                    <div class="h4 mb-0 font-weight-bold text-gray-800">{{ number_format((int) $totalUniqueMemberships) }}</div>
-                    <div class="small text-muted mt-1">{{ number_format((int) ($totalPendingMemberships ?? 0)) }} pending approval</div>
-                </div>
-            </div>
+        <div class="cop-stat-card">
+            <div class="cop-stat-card__label">Approved Participants</div>
+            <div class="cop-stat-card__value">{{ number_format((int) ($stats['unique_participants'] ?? 0)) }}</div>
+            <div class="cop-stat-card__meta">Unique members across communities</div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-left-info shadow-sm h-100 stat-card-mini">
-                <div class="card-body">
-                    <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Memberships by {{ $geoLabel }}</div>
-                    <div class="h4 mb-2 font-weight-bold text-gray-800">{{ number_format((int) $totalMembershipsByGeography) }}</div>
-                    <div class="small text-muted">
-                        @foreach($membershipsByGeography->take(5) as $g)
-                            <div>{{ $g->geography_name ?: 'Unspecified' }}: {{ (int) $g->total }}</div>
-                        @endforeach
-                    </div>
-                </div>
+        <div class="cop-stat-card">
+            <div class="cop-stat-card__label">Approved Memberships</div>
+            <div class="cop-stat-card__value">{{ number_format((int) ($stats['approved_memberships'] ?? 0)) }}</div>
+            <div class="cop-stat-card__meta">Total community subscriptions</div>
+        </div>
+        <div class="cop-stat-card">
+            <div class="cop-stat-card__label">Pending Approvals</div>
+            <div class="cop-stat-card__value" style="color: {{ $pendingCount > 0 ? '#b45309' : '#0f172a' }}">{{ number_format($pendingCount) }}</div>
+            <div class="cop-stat-card__meta">Awaiting moderator action</div>
+        </div>
+    </div>
+
+    @if(($stats['participants_by_geography'] ?? collect())->isNotEmpty())
+    <div class="card border-0 shadow-sm mb-3" style="border-radius: 12px;">
+        <div class="card-body py-3">
+            <div class="small text-muted text-uppercase fw-bold mb-2">Top participants by {{ \Illuminate\Support\Str::lower($geoLabel) }}</div>
+            <div class="d-flex flex-wrap gap-2">
+                @foreach($stats['participants_by_geography'] as $geoRow)
+                    <span class="badge rounded-pill" style="background:#f0f7f4;color:{{ $green }};font-weight:600;padding:0.5rem 0.75rem;">
+                        {{ $geoRow->geography_name }}: {{ number_format((int) $geoRow->total) }}
+                    </span>
+                @endforeach
             </div>
         </div>
     </div>
+    @endif
 
     <div class="pub-filters-card mb-3">
         <div class="pub-filters-card__header">
@@ -75,7 +160,7 @@
                 <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                 <div>
                     <h3 class="pub-filters-card__title">Filter Participants</h3>
-                    <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                    <p class="pub-filters-card__subtitle">Filters apply to both pending approvals and the approved directory</p>
                 </div>
             </div>
             <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#participantsAdvancedFilters" aria-expanded="{{ !empty($search->community_id) || !empty($search->badge_type_id) ? 'true' : 'false' }}" aria-controls="participantsAdvancedFilters">
@@ -87,10 +172,9 @@
                 <div class="pub-filters-grid pub-filters-grid--single" style="margin-bottom: 1rem;">
                     <div class="pub-filter-field">
                         <label class="pub-filter-label" for="filterQ">Search</label>
-                        <input type="text" class="form-control pub-filter-input" id="filterQ" name="q" value="{{ $search->q ?? '' }}" placeholder="Name, email, title, organisation, {{ \Illuminate\Support\Str::lower($geoLabel) }}">
+                        <input type="text" class="form-control pub-filter-input" id="filterQ" name="q" value="{{ $search->q ?? '' }}" placeholder="Name, email, phone, community, organisation, {{ \Illuminate\Support\Str::lower($geoLabel) }}">
                     </div>
                 </div>
-
                 <div class="pub-filters-grid pub-filters-grid--primary">
                     <div class="pub-filter-field">
                         <label class="pub-filter-label" for="filterTitle">Title</label>
@@ -111,7 +195,6 @@
                         </select>
                     </div>
                 </div>
-
                 <div id="participantsAdvancedFilters" class="collapse pub-filters-advanced {{ !empty($search->community_id) || !empty($search->badge_type_id) ? 'show' : '' }}">
                     <span class="pub-filters-advanced__label"><i class="fa fa-sliders"></i> Advanced Filters</span>
                     <div class="pub-filters-grid pub-filters-grid--primary">
@@ -135,7 +218,6 @@
                         </div>
                     </div>
                 </div>
-
                 <div class="pub-filters-actions">
                     <a href="{{ route('admin.commsofpractice.participants') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearParticipantsFilters">
                         <i class="fa fa-rotate-left"></i> Clear
@@ -145,13 +227,52 @@
         </div>
     </div>
 
+    <div class="cop-pending-panel">
+        <div class="cop-pending-panel__head" data-toggle="collapse" data-target="#pendingApprovalsCollapse" aria-expanded="{{ $pendingCount > 0 ? 'true' : 'false' }}">
+            <h3><i class="fa fa-hourglass-half mr-2"></i>Pending membership approvals ({{ number_format($pendingCount) }})</h3>
+            <i class="fa fa-chevron-down text-muted"></i>
+        </div>
+        <div id="pendingApprovalsCollapse" class="collapse {{ $pendingCount > 0 ? 'show' : '' }}">
+            <div class="cop-pending-panel__body">
+                <p class="text-muted small mb-2">Review join requests below. Each row is one subscription awaiting approval. Use bulk actions or approve individually.</p>
+                <div class="cop-pending-actions">
+                    <button type="button" class="btn btn-success btn-sm" id="bulkApprovePending" disabled>
+                        <i class="fa fa-check mr-1"></i> Approve selected
+                    </button>
+                    <button type="button" class="btn btn-outline-danger btn-sm" id="bulkRejectPending" disabled>
+                        <i class="fa fa-times mr-1"></i> Reject selected
+                    </button>
+                </div>
+                <div class="publication-table-wrap">
+                    <table id="pending-participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
+                        <thead>
+                            <tr>
+                                <th class="part-col-select"><input type="checkbox" id="pendingSelectAll" class="form-check-input" aria-label="Select all pending"></th>
+                                <th class="part-col-index">#</th>
+                                <th class="part-col-name">Applicant</th>
+                                <th class="part-col-contact">Email / Phone</th>
+                                <th class="part-col-community">Community</th>
+                                <th class="part-col-geo">{{ $geoLabel }}</th>
+                                <th>Requested</th>
+                                <th class="part-col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="card pub-list-card">
-        <div class="card-header">
+        <div class="card-header d-flex align-items-center justify-content-between">
             <h3 class="card-title mb-0">
-                <i class="fa fa-users mr-2"></i>Community Participants Directory
+                <i class="fa fa-users mr-2"></i>Approved participants directory
             </h3>
+            <span class="badge" style="background:#f0f7f4;color:{{ $green }};">One row per member</span>
         </div>
         <div class="card-body">
+            <p class="text-muted small mb-3">Approved members appear once. All communities they belong to are listed in the <strong>Communities subscribed</strong> column.</p>
             <div class="publication-table-wrap">
                 <table id="participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
                     <thead>
@@ -165,8 +286,7 @@
                             <th class="part-col-pub">Publication Contributions</th>
                             <th class="part-col-forum">Forum Contributions</th>
                             <th class="part-col-badges">Badge(s)</th>
-                            <th class="part-col-community">Community</th>
-                            <th class="part-col-status">Membership Status</th>
+                            <th class="part-col-communities">Communities Subscribed</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -181,7 +301,9 @@
 @include('admin.publications.partials.datatable_assets')
 <script>
 let participantsTable = null;
+let pendingTable = null;
 let participantsFilterTimer = null;
+const memberActionUrl = @json(route('admin.commsofpractice.memberAction'));
 
 function collectParticipantsFilterParams() {
     const params = {};
@@ -197,22 +319,103 @@ function collectParticipantsFilterParams() {
     return params;
 }
 
-function reloadParticipantsTable() {
+function reloadParticipantTables() {
+    if (pendingTable) pendingTable.ajax.reload();
     if (participantsTable) participantsTable.ajax.reload();
 }
 
 function scheduleParticipantsFilterReload() {
     clearTimeout(participantsFilterTimer);
-    participantsFilterTimer = setTimeout(reloadParticipantsTable, 350);
+    participantsFilterTimer = setTimeout(reloadParticipantTables, 350);
+}
+
+function selectedPendingRows() {
+    const rows = [];
+    $('.js-pending-select:checked').each(function () {
+        rows.push({
+            member_id: parseInt(this.value, 10),
+            community_id: parseInt($(this).data('community-id'), 10)
+        });
+    });
+    return rows;
+}
+
+function updatePendingBulkButtons() {
+    const hasSelection = $('.js-pending-select:checked').length > 0;
+    $('#bulkApprovePending, #bulkRejectPending').prop('disabled', !hasSelection);
+}
+
+function runMemberAction(action, memberIds, communityId) {
+    return $.ajax({
+        url: memberActionUrl,
+        method: 'POST',
+        data: {
+            _token: @json(csrf_token()),
+            action: action,
+            community_id: communityId,
+            member_ids: memberIds
+        }
+    });
+}
+
+function handlePendingAction(action, rows) {
+    if (!rows.length) return;
+    const grouped = {};
+    rows.forEach(function (row) {
+        if (!grouped[row.community_id]) grouped[row.community_id] = [];
+        grouped[row.community_id].push(row.member_id);
+    });
+    const requests = Object.keys(grouped).map(function (communityId) {
+        return runMemberAction(action, grouped[communityId], communityId);
+    });
+    $.when.apply($, requests).done(function () {
+        reloadParticipantTables();
+        $('#pendingSelectAll').prop('checked', false);
+        updatePendingBulkButtons();
+    }).fail(function (xhr) {
+        alert((xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Action failed.');
+    });
 }
 
 $(function () {
+    pendingTable = $('#pending-participants-table').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        ordering: false,
+        autoWidth: false,
+        pageLength: 10,
+        lengthMenu: [[10, 25, 50], [10, 25, 50]],
+        ajax: {
+            url: '{{ route('admin.commsofpractice.participants') }}',
+            data: function (d) {
+                d.datatable = 1;
+                d.scope = 'pending';
+                return Object.assign(d, collectParticipantsFilterParams());
+            }
+        },
+        columns: [
+            { data: 'select', orderable: false, searchable: false, className: 'part-col-select text-center' },
+            { data: 'index', orderable: false, searchable: false, className: 'part-col-index text-center' },
+            { data: 'name', orderable: false, className: 'part-col-name' },
+            { data: 'contact', orderable: false, className: 'part-col-contact' },
+            { data: 'community', orderable: false, className: 'part-col-community' },
+            { data: 'geography', orderable: false, className: 'part-col-geo' },
+            { data: 'requested', orderable: false },
+            { data: 'actions', orderable: false, searchable: false, className: 'part-col-actions text-center' }
+        ],
+        language: {
+            processing: '<i class="fa fa-spinner fa-spin"></i> Loading pending requests...',
+            emptyTable: 'No pending membership requests match your filters.',
+            zeroRecords: 'No matching pending requests found.'
+        }
+    });
+
     participantsTable = $('#participants-table').DataTable({
         processing: true,
         serverSide: true,
         searching: false,
         autoWidth: false,
-        scrollX: false,
         pageLength: 20,
         lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
         order: [[1, 'asc']],
@@ -220,6 +423,7 @@ $(function () {
             url: '{{ route('admin.commsofpractice.participants') }}',
             data: function (d) {
                 d.datatable = 1;
+                d.scope = 'approved';
                 return Object.assign(d, collectParticipantsFilterParams());
             }
         },
@@ -233,17 +437,48 @@ $(function () {
             { data: 'publications', orderable: false, searchable: false, className: 'part-col-pub text-center' },
             { data: 'forums', orderable: false, searchable: false, className: 'part-col-forum text-center' },
             { data: 'badges', orderable: false, searchable: false, className: 'part-col-badges' },
-            { data: 'community', orderable: true, className: 'part-col-community' },
-            { data: 'status', orderable: true, className: 'part-col-status text-center' }
+            { data: 'communities', orderable: false, searchable: false, className: 'part-col-communities' }
         ],
         columnDefs: [
-            { targets: [0, 6, 7, 8], orderable: false }
+            { targets: [0, 6, 7, 8, 9], orderable: false }
         ],
         language: {
             processing: '<i class="fa fa-spinner fa-spin"></i> Loading participants...',
-            emptyTable: 'No participants match your filters.',
+            emptyTable: 'No approved participants match your filters.',
             zeroRecords: 'No matching participants found.'
         }
+    });
+
+    $(document).on('change', '.js-pending-select, #pendingSelectAll', function () {
+        if (this.id === 'pendingSelectAll') {
+            $('.js-pending-select').prop('checked', this.checked);
+        }
+        updatePendingBulkButtons();
+    });
+
+    pendingTable.on('draw', function () {
+        $('#pendingSelectAll').prop('checked', false);
+        updatePendingBulkButtons();
+    });
+
+    $('#bulkApprovePending').on('click', function () {
+        handlePendingAction('approve', selectedPendingRows());
+    });
+    $('#bulkRejectPending').on('click', function () {
+        if (!confirm('Reject the selected membership requests?')) return;
+        handlePendingAction('reject', selectedPendingRows());
+    });
+
+    $(document).on('click', '.js-pending-approve', function () {
+        const memberId = parseInt($(this).data('member-id'), 10);
+        const communityId = parseInt($(this).data('community-id'), 10);
+        handlePendingAction('approve', [{ member_id: memberId, community_id: communityId }]);
+    });
+    $(document).on('click', '.js-pending-reject', function () {
+        if (!confirm('Reject this membership request?')) return;
+        const memberId = parseInt($(this).data('member-id'), 10);
+        const communityId = parseInt($(this).data('community-id'), 10);
+        handlePendingAction('reject', [{ member_id: memberId, community_id: communityId }]);
     });
 
     $('#filterQ, #filterTitle, #filterOrganisation').on('input', scheduleParticipantsFilterReload);
@@ -251,7 +486,7 @@ $(function () {
 
     $('#participantsFiltersForm').on('submit', function (e) {
         e.preventDefault();
-        reloadParticipantsTable();
+        reloadParticipantTables();
     });
 
     $('#clearParticipantsFilters').on('click', function (e) {

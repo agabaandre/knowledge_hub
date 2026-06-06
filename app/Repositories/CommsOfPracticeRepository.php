@@ -1430,20 +1430,142 @@ class CommsOfPracticeRepository{
         ];
     }
 
-    public function buildAdminParticipantsQuery(Request $request, array $geo): \Illuminate\Database\Eloquent\Builder
+    public function participantsDashboardStats(array $geo): array
+    {
+        $geoTable = $geo['geoTable'];
+        $geoForeignKey = $geo['geoForeignKey'];
+
+        $approvedMemberships = CommunityOfPracticeMembers::query()
+            ->where('is_active', 1)
+            ->where('is_approved', 1)
+            ->count();
+
+        $pendingMemberships = CommunityOfPracticeMembers::query()
+            ->where('is_active', 1)
+            ->where('is_approved', 0)
+            ->count();
+
+        $uniqueParticipants = CommunityOfPracticeMembers::query()
+            ->where('is_active', 1)
+            ->where('is_approved', 1)
+            ->distinct('user_id')
+            ->count('user_id');
+
+        $totalCommunities = CommunityOfPractice::query()->count();
+        $activeCommunities = CommunityOfPractice::query()->where('is_active', 1)->count();
+
+        $participantsByGeography = CommunityOfPracticeMembers::query()
+            ->from('community_of_practice_members as copm')
+            ->join('users', 'users.id', '=', 'copm.user_id')
+            ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey)
+            ->where('copm.is_active', 1)
+            ->where('copm.is_approved', 1)
+            ->select(
+                DB::raw('COALESCE('.$geoTable.'.name, \'Unspecified\') as geography_name'),
+                DB::raw('COUNT(DISTINCT users.id) as total')
+            )
+            ->groupBy(DB::raw('COALESCE('.$geoTable.'.name, \'Unspecified\')'))
+            ->orderByDesc('total')
+            ->limit(6)
+            ->get();
+
+        return [
+            'total_communities' => $totalCommunities,
+            'active_communities' => $activeCommunities,
+            'approved_memberships' => $approvedMemberships,
+            'pending_memberships' => $pendingMemberships,
+            'unique_participants' => $uniqueParticipants,
+            'participants_by_geography' => $participantsByGeography,
+        ];
+    }
+
+    public function applyAdminParticipantsFilters($query, Request $request, array $geo, string $userAlias = 'users'): void
     {
         $geoTable = $geo['geoTable'];
         $geoForeignKey = $geo['geoForeignKey'];
         $geoFilterId = (int) ($request->input('geography_id') ?: $request->input('country_id'));
 
-        return CommunityOfPracticeMembers::query()
+        $query->when($request->filled('q'), function ($q) use ($request, $geoTable, $userAlias) {
+            $term = trim((string) $request->q);
+            $q->where(function ($qq) use ($term, $geoTable, $userAlias) {
+                $qq->where($userAlias.'.name', 'like', '%'.$term.'%')
+                    ->orWhere($userAlias.'.email', 'like', '%'.$term.'%')
+                    ->orWhere($userAlias.'.phone_number', 'like', '%'.$term.'%')
+                    ->orWhere($userAlias.'.job_title', 'like', '%'.$term.'%')
+                    ->orWhere($userAlias.'.organization_name', 'like', '%'.$term.'%')
+                    ->orWhere($geoTable.'.name', 'like', '%'.$term.'%')
+                    ->orWhereExists(function ($sub) use ($term, $userAlias) {
+                        $sub->from('community_of_practice_members as cm')
+                            ->join('community_of_practices as cp', 'cp.id', '=', 'cm.community_of_practice_id')
+                            ->whereColumn('cm.user_id', $userAlias.'.id')
+                            ->where('cm.is_active', 1)
+                            ->whereIn('cm.is_approved', [0, 1])
+                            ->where('cp.community_name', 'like', '%'.$term.'%');
+                    });
+            });
+        })
+            ->when($geoFilterId > 0, function ($q) use ($geoForeignKey, $geoFilterId) {
+                $q->where($geoForeignKey, $geoFilterId);
+            })
+            ->when($request->filled('title'), function ($q) use ($request, $userAlias) {
+                $q->where($userAlias.'.job_title', 'like', '%'.trim((string) $request->title).'%');
+            })
+            ->when($request->filled('organisation'), function ($q) use ($request, $userAlias) {
+                $q->where($userAlias.'.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
+            })
+            ->when($request->filled('badge_type_id'), function ($q) use ($request, $userAlias) {
+                $badgeTypeId = (int) $request->badge_type_id;
+                $q->whereExists(function ($sub) use ($badgeTypeId, $userAlias) {
+                    $sub->select(DB::raw(1))
+                        ->from('user_badges as ub')
+                        ->whereColumn('ub.user_id', $userAlias.'.id')
+                        ->where('ub.badge_type_id', $badgeTypeId);
+                });
+            });
+    }
+
+    public function buildAdminApprovedParticipantsQuery(Request $request, array $geo): \Illuminate\Database\Eloquent\Builder
+    {
+        $geoTable = $geo['geoTable'];
+        $geoForeignKey = $geo['geoForeignKey'];
+
+        $query = User::query()
+            ->select('users.*', DB::raw($geoTable.'.name as geo_name'))
+            ->join('community_of_practice_members as copm', function ($join) {
+                $join->on('copm.user_id', '=', 'users.id')
+                    ->where('copm.is_approved', 1)
+                    ->where('copm.is_active', 1);
+            })
+            ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey);
+
+        $this->applyAdminParticipantsFilters($query, $request, $geo);
+
+        if ($request->filled('community_id')) {
+            $communityId = (int) $request->community_id;
+            $query->whereExists(function ($sub) use ($communityId) {
+                $sub->from('community_of_practice_members as cx')
+                    ->whereColumn('cx.user_id', 'users.id')
+                    ->where('cx.community_of_practice_id', $communityId)
+                    ->where('cx.is_approved', 1)
+                    ->where('cx.is_active', 1);
+            });
+        }
+
+        return $query->groupBy('users.id', $geoTable.'.name');
+    }
+
+    public function buildAdminPendingParticipantsQuery(Request $request, array $geo): \Illuminate\Database\Eloquent\Builder
+    {
+        $geoTable = $geo['geoTable'];
+        $geoForeignKey = $geo['geoForeignKey'];
+
+        $query = CommunityOfPracticeMembers::query()
             ->from('community_of_practice_members as copm')
             ->select([
                 'copm.id as membership_id',
                 'copm.user_id',
                 'copm.community_of_practice_id',
-                'copm.is_approved',
-                'copm.is_active',
+                'copm.created_at as requested_at',
                 'users.name',
                 'users.email',
                 'users.phone_number',
@@ -1456,40 +1578,15 @@ class CommsOfPracticeRepository{
             ->join('community_of_practices as cop', 'cop.id', '=', 'copm.community_of_practice_id')
             ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey)
             ->where('copm.is_active', 1)
-            ->whereIn('copm.is_approved', [0, 1])
-            ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
-                $term = trim((string) $request->q);
-                $q->where(function ($qq) use ($term, $geoTable) {
-                    $qq->where('users.name', 'like', '%'.$term.'%')
-                        ->orWhere('users.email', 'like', '%'.$term.'%')
-                        ->orWhere('users.phone_number', 'like', '%'.$term.'%')
-                        ->orWhere('users.job_title', 'like', '%'.$term.'%')
-                        ->orWhere('users.organization_name', 'like', '%'.$term.'%')
-                        ->orWhere('cop.community_name', 'like', '%'.$term.'%')
-                        ->orWhere($geoTable.'.name', 'like', '%'.$term.'%');
-                });
-            })
-            ->when($geoFilterId > 0, function ($q) use ($geoForeignKey, $geoFilterId) {
-                $q->where($geoForeignKey, $geoFilterId);
-            })
-            ->when($request->filled('title'), function ($q) use ($request) {
-                $q->where('users.job_title', 'like', '%'.trim((string) $request->title).'%');
-            })
-            ->when($request->filled('organisation'), function ($q) use ($request) {
-                $q->where('users.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
-            })
-            ->when($request->filled('community_id'), function ($q) use ($request) {
-                $q->where('copm.community_of_practice_id', (int) $request->community_id);
-            })
-            ->when($request->filled('badge_type_id'), function ($q) use ($request) {
-                $badgeTypeId = (int) $request->badge_type_id;
-                $q->whereExists(function ($sub) use ($badgeTypeId) {
-                    $sub->select(DB::raw(1))
-                        ->from('user_badges as ub')
-                        ->whereColumn('ub.user_id', 'users.id')
-                        ->where('ub.badge_type_id', $badgeTypeId);
-                });
-            });
+            ->where('copm.is_approved', 0);
+
+        $this->applyAdminParticipantsFilters($query, $request, $geo);
+
+        if ($request->filled('community_id')) {
+            $query->where('copm.community_of_practice_id', (int) $request->community_id);
+        }
+
+        return $query;
     }
 
     private function formatParticipantContact(?string $email, ?string $phone): string
@@ -1504,11 +1601,11 @@ class CommsOfPracticeRepository{
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, object>  $participants
+     * @param  \Illuminate\Support\Collection<int, User>  $participants
      */
     public function enrichParticipantsCollection($participants): void
     {
-        $userIds = $participants->pluck('user_id')->unique()->filter()->map(fn ($id) => (int) $id)->all();
+        $userIds = $participants->pluck('id')->unique()->filter()->map(fn ($id) => (int) $id)->all();
         if ($userIds === []) {
             return;
         }
@@ -1548,15 +1645,29 @@ class CommsOfPracticeRepository{
             ->get()
             ->groupBy('user_id');
 
+        $communitiesByUser = DB::table('community_of_practice_members as m')
+            ->join('community_of_practices as c', 'c.id', '=', 'm.community_of_practice_id')
+            ->whereIn('m.user_id', $userIds)
+            ->where('m.is_approved', 1)
+            ->where('m.is_active', 1)
+            ->orderBy('c.community_name')
+            ->select('m.user_id', 'c.community_name')
+            ->get()
+            ->groupBy('user_id')
+            ->map(function ($rows) {
+                return $rows->pluck('community_name')->unique()->filter()->implode(', ');
+            });
+
         $participants->transform(function ($row) use (
             $publicationsByUser,
             $publicationsByAuthor,
             $authorByUser,
             $forumPostsByUser,
             $forumCommentsByUser,
-            $badgesByUser
+            $badgesByUser,
+            $communitiesByUser
         ) {
-            $uid = (int) $row->user_id;
+            $uid = (int) $row->id;
             $authorId = $authorByUser[$uid] ?? null;
             $pubByUser = (int) ($publicationsByUser[$uid] ?? 0);
             $pubByAuthor = $authorId ? (int) ($publicationsByAuthor[$authorId] ?? 0) : 0;
@@ -1569,6 +1680,8 @@ class CommsOfPracticeRepository{
                 ->filter()
                 ->unique()
                 ->implode(', ');
+
+            $row->community_labels = (string) ($communitiesByUser[$uid] ?? '');
 
             return $row;
         });
@@ -1583,8 +1696,11 @@ class CommsOfPracticeRepository{
         $start = max(0, (int) $request->input('start', 0));
         $length = min(max(1, (int) $request->input('length', 20)), 100);
 
-        $base = $this->buildAdminParticipantsQuery($request, $geo);
-        $recordsTotal = (clone $base)->count();
+        $base = $this->buildAdminApprovedParticipantsQuery($request, $geo);
+        $countQuery = clone $base;
+        $recordsTotal = (int) DB::table(DB::raw('('.$countQuery->toSql().') as approved_participant_rows'))
+            ->mergeBindings($countQuery->getQuery())
+            ->count();
         $recordsFiltered = $recordsTotal;
 
         $orderColIndex = (int) $request->input('order.0.column', 1);
@@ -1595,23 +1711,21 @@ class CommsOfPracticeRepository{
             3 => 'users.job_title',
             4 => 'users.organization_name',
             5 => 'geo_name',
-            9 => 'cop.community_name',
-            10 => 'copm.is_approved',
         ];
         if (isset($orderMap[$orderColIndex])) {
             $base->orderBy($orderMap[$orderColIndex], $orderDir);
         } else {
-            $base->orderBy('users.name', 'asc')->orderBy('cop.community_name', 'asc');
+            $base->orderBy('users.name', 'asc');
         }
 
         $rows = $base->skip($start)->take($length)->get();
         $this->enrichParticipantsCollection($rows);
 
         $cell = static fn (?string $value) => '<div class="pub-cell-wrap">'.e($value ?: '—').'</div>';
-        $contactCell = function (?string $email, ?string $phone) use ($cell) {
+        $contactCell = function (?string $email, ?string $phone) {
             $formatted = $this->formatParticipantContact($email, $phone);
             if ($formatted === '') {
-                return $cell(null);
+                return '<div class="pub-cell-wrap">—</div>';
             }
             $lines = array_map('trim', explode("\n", $formatted));
 
@@ -1621,11 +1735,6 @@ class CommsOfPracticeRepository{
         $index = $start + 1;
 
         foreach ($rows as $participant) {
-            $isApproved = (int) ($participant->is_approved ?? 0) === 1;
-            $statusHtml = $isApproved
-                ? '<span class="badge bg-success">Approved</span>'
-                : '<span class="badge bg-warning text-dark">Pending approval</span>';
-
             $data[] = [
                 'index' => '<span class="text-muted">'.$index++.'</span>',
                 'name' => $cell($participant->name),
@@ -1636,8 +1745,67 @@ class CommsOfPracticeRepository{
                 'publications' => (int) ($participant->publication_contributions ?? 0),
                 'forums' => (int) ($participant->forum_contributions ?? 0),
                 'badges' => $cell($participant->badge_labels ?? null),
-                'community' => $cell($participant->community_name ?? null),
-                'status' => '<div class="pub-cell-wrap">'.$statusHtml.'</div>',
+                'communities' => $cell($participant->community_labels ?? null),
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function adminPendingParticipantsDatatable(Request $request): array
+    {
+        $geo = $this->participantsGeoContext();
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 10)), 50);
+
+        $base = $this->buildAdminPendingParticipantsQuery($request, $geo);
+        $recordsTotal = (clone $base)->count();
+        $recordsFiltered = $recordsTotal;
+
+        $rows = $base
+            ->orderByDesc('copm.created_at')
+            ->skip($start)
+            ->take($length)
+            ->get();
+
+        $cell = static fn (?string $value) => '<div class="pub-cell-wrap">'.e($value ?: '—').'</div>';
+        $contactCell = function (?string $email, ?string $phone) {
+            $formatted = $this->formatParticipantContact($email, $phone);
+            if ($formatted === '') {
+                return '<div class="pub-cell-wrap">—</div>';
+            }
+            $lines = array_map('trim', explode("\n", $formatted));
+
+            return '<div class="pub-cell-wrap">'.implode('<br>', array_map(static fn ($line) => e($line), $lines)).'</div>';
+        };
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $row) {
+            $membershipId = (int) $row->membership_id;
+            $communityId = (int) $row->community_of_practice_id;
+            $requested = $row->requested_at ? Carbon::parse($row->requested_at)->format('M j, Y') : '—';
+            $actions = '<div class="d-flex flex-wrap gap-1 justify-content-center">'
+                .'<button type="button" class="btn btn-success btn-sm js-pending-approve" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Approve"><i class="fa fa-check"></i></button>'
+                .'<button type="button" class="btn btn-outline-danger btn-sm js-pending-reject" data-member-id="'.$membershipId.'" data-community-id="'.$communityId.'" title="Reject"><i class="fa fa-times"></i></button>'
+                .'<a href="'.e(route('admin.commsofpractice.details', $communityId)).'" class="btn btn-outline-secondary btn-sm" title="View community"><i class="fa fa-external-link-alt"></i></a>'
+                .'</div>';
+
+            $data[] = [
+                'select' => '<input type="checkbox" class="form-check-input js-pending-select" value="'.$membershipId.'" data-community-id="'.$communityId.'">',
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'name' => $cell($row->name),
+                'contact' => $contactCell($row->email ?? null, $row->phone_number ?? null),
+                'community' => $cell($row->community_name ?? null),
+                'geography' => $cell($row->geo_name ?? null),
+                'requested' => $cell($requested),
+                'actions' => $actions,
             ];
         }
 

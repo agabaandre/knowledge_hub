@@ -192,66 +192,17 @@ class CommsOfPracticeController extends Controller
     public function participants(Request $request)
     {
         if ($request->ajax() && $request->boolean('datatable')) {
+            if ($request->input('scope') === 'pending') {
+                return response()->json($this->commsOfPracticeRepository->adminPendingParticipantsDatatable($request));
+            }
+
             return response()->json($this->commsOfPracticeRepository->adminParticipantsDatatable($request));
         }
 
         $geo = $this->commsOfPracticeRepository->participantsGeoContext();
-        $geoTable = $geo['geoTable'];
         $geoLabel = $geo['geoLabel'];
-        $geoFilterId = (int) ($request->input('geography_id') ?: $request->input('country_id'));
-
-        $baseMembershipQuery = CommunityOfPracticeMembers::query()
-            ->join('users', 'users.id', '=', 'community_of_practice_members.user_id')
-            ->leftJoin($geoTable, $geoTable.'.id', '=', $geo['usesAdministrativeUnits'] ? 'users.administrative_unit_id' : 'users.country_id')
-            ->where('community_of_practice_members.is_approved', 1)
-            ->where('community_of_practice_members.is_active', 1)
-            ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
-                $term = trim((string) $request->q);
-                $q->where(function ($qq) use ($term, $geoTable) {
-                    $qq->where('users.name', 'like', '%'.$term.'%')
-                        ->orWhere('users.email', 'like', '%'.$term.'%')
-                        ->orWhere('users.job_title', 'like', '%'.$term.'%')
-                        ->orWhere('users.organization_name', 'like', '%'.$term.'%')
-                        ->orWhere($geoTable.'.name', 'like', '%'.$term.'%');
-                });
-            })
-            ->when($request->filled('title'), function ($q) use ($request) {
-                $q->where('users.job_title', 'like', '%'.trim((string) $request->title).'%');
-            })
-            ->when($request->filled('organisation'), function ($q) use ($request) {
-                $q->where('users.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
-            })
-            ->when($geoFilterId > 0, function ($q) use ($geo, $geoFilterId) {
-                $q->where($geo['usesAdministrativeUnits'] ? 'users.administrative_unit_id' : 'users.country_id', $geoFilterId);
-            })
-            ->when($request->filled('community_id'), function ($q) use ($request) {
-                $q->where('community_of_practice_members.community_of_practice_id', (int) $request->community_id);
-            })
-            ->when($request->filled('badge_type_id'), function ($q) use ($request) {
-                $badgeTypeId = (int) $request->badge_type_id;
-                $q->whereExists(function ($sub) use ($badgeTypeId) {
-                    $sub->select(DB::raw(1))
-                        ->from('user_badges as ub')
-                        ->whereColumn('ub.user_id', 'users.id')
-                        ->where('ub.badge_type_id', $badgeTypeId);
-                });
-            });
-
-        $totalCommunities = CommunityOfPractice::query()->count();
-        $totalUniqueMemberships = (clone $baseMembershipQuery)->count('community_of_practice_members.id');
-        $totalPendingMemberships = CommunityOfPracticeMembers::query()
-            ->where('is_active', 1)
-            ->where('is_approved', 0)
-            ->count();
-        $membershipsByGeography = (clone $baseMembershipQuery)
-            ->select(
-                DB::raw($geoTable.'.name as geography_name'),
-                DB::raw('COUNT(DISTINCT users.id) as total')
-            )
-            ->groupBy(DB::raw($geoTable.'.name'))
-            ->orderByDesc('total')
-            ->get();
-        $totalMembershipsByGeography = (int) $membershipsByGeography->sum('total');
+        $stats = $this->commsOfPracticeRepository->participantsDashboardStats($geo);
+        $geoTable = $geo['geoTable'];
 
         $geographies = DB::table($geoTable)->orderBy('name')->get(['id', 'name']);
         $communities = CommunityOfPractice::query()->orderBy('community_name')->get(['id', 'community_name']);
@@ -264,11 +215,7 @@ class CommsOfPracticeController extends Controller
             'badgeTypes',
             'search',
             'geoLabel',
-            'totalCommunities',
-            'totalUniqueMemberships',
-            'totalPendingMemberships',
-            'totalMembershipsByGeography',
-            'membershipsByGeography',
+            'stats',
         ));
     }
 
