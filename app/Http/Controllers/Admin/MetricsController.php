@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Region;
 use App\Repositories\GraphsRepository;
 use App\Repositories\MetricsRepository;
+use App\Support\MetricsCache;
 use Illuminate\Http\Request;
 
 class MetricsController extends Controller
@@ -22,17 +23,76 @@ class MetricsController extends Controller
 
     private function africaMapContext(): array
     {
+        $cache = MetricsCache::store();
+        $ttl = MetricsCache::ttl('map_context');
         $indicators = $this->graphsRepository->get_published_map_indicators();
         $defaultKpiId = (int) ($indicators->first()->id ?? 0);
+
+        $initialKpiMap = null;
+        if ($defaultKpiId > 0) {
+            $initialKpiMap = $cache->remember(
+                'metrics_initial_kpi_map_'.$defaultKpiId,
+                $ttl,
+                fn () => $this->graphsRepository->get_indicator_map_values($defaultKpiId, null)
+            );
+        }
+
+        $continentalIndicators = $cache->remember(
+            'metrics_continental_indicators',
+            $ttl,
+            fn () => $this->graphsRepository->get_continental_indicator_summaries()
+        );
 
         return [
             'map_indicators' => $indicators,
             'map_regions' => Region::query()->orderBy('region_name')->get(['id', 'region_name']),
-            'initial_kpi_map' => $defaultKpiId > 0
-                ? $this->graphsRepository->get_indicator_map_values($defaultKpiId, null)
-                : null,
-            'continental_indicators' => $this->graphsRepository->get_continental_indicator_summaries(),
+            'initial_kpi_map' => $initialKpiMap,
+            'continental_indicators' => $continentalIndicators,
             'map_data_url' => route('countries.map-data'),
+        ];
+    }
+
+    private function chartData(?string $from, ?string $to, ?string $country): array
+    {
+        $useFilters = $from || $to || $country;
+        $cacheKey = 'metrics_chart_data'.($useFilters ? '_'.md5(serialize([$from, $to, $country])) : '_all');
+        $ttl = MetricsCache::ttl($useFilters ? 'filtered' : 'default');
+
+        return MetricsCache::store()->remember($cacheKey, $ttl, function () use ($from, $to, $country) {
+            return [
+                'visits_over_time' => $this->metricsRepository->visits_over_time($from, $to, $country),
+                'visits_by_country' => $this->metricsRepository->country_access($from, $to, $country),
+                'signups_over_time' => $this->metricsRepository->signups_over_time($from, $to, $country),
+                'signups_by_country' => $this->metricsRepository->country_signups($from, $to, $country),
+                'monthly_signups' => $this->metricsRepository->monthly_signups($from, $to, $country),
+                'monthly_publications' => $this->metricsRepository->monthly_publications($from, $to),
+            ];
+        });
+    }
+
+    private function liveChartData(?string $from, ?string $to, ?string $country): array
+    {
+        $cacheKey = 'metrics_live_'.md5(serialize([$from, $to, $country]));
+        $ttl = MetricsCache::ttl('live');
+
+        return MetricsCache::store()->remember($cacheKey, $ttl, function () use ($from, $to, $country) {
+            return [
+                'visits_over_time' => $this->metricsRepository->visits_over_time($from, $to, $country),
+                'signups_over_time' => $this->metricsRepository->signups_over_time($from, $to, $country),
+            ];
+        });
+    }
+
+    private function summaryTotals(array $chartData): array
+    {
+        $visits = $chartData['visits_over_time']['values'] ?? [];
+        $signups = $chartData['signups_over_time']['values'] ?? [];
+
+        return [
+            'total_visits' => array_sum($visits),
+            'total_signups' => array_sum($signups),
+            'countries_with_visits' => count($chartData['visits_by_country']['values'] ?? []),
+            'countries_with_signups' => count($chartData['signups_by_country']['values'] ?? []),
         ];
     }
 
@@ -42,18 +102,8 @@ class MetricsController extends Controller
         $to = $request->input('to');
         $country = $request->input('country');
 
-        $useFilters = $from || $to || $country;
-        $cacheKey = 'metrics_chart_data' . ($useFilters ? '_' . md5(serialize([$from, $to, $country])) : '');
-
-        $minutes = 60 * 6;
-        $chart_data = cache()->remember($cacheKey, $useFilters ? 1 : $minutes, function () use ($from, $to, $country) {
-            $data['visits_over_time'] = $this->metricsRepository->visits_over_time($from, $to, $country);
-            $data['visits_by_country'] = $this->metricsRepository->country_access($from, $to, $country);
-            $data['signups_by_country'] = $this->metricsRepository->country_signups($from, $to, $country);
-            $data['monthly_signups'] = $this->metricsRepository->monthly_signups($from, $to);
-            $data['monthly_publications'] = $this->metricsRepository->monthly_publications($from, $to);
-            return $data;
-        });
+        $chart_data = $this->chartData($from, $to, $country);
+        $mapContext = $this->africaMapContext();
 
         if ($request->ajax()) {
             return response()->json([
@@ -61,18 +111,49 @@ class MetricsController extends Controller
                     'from' => $from,
                     'to' => $to,
                     'country' => $country,
-                ], $this->africaMapContext()))->render(),
+                ], $mapContext))->render(),
                 'chart_data' => $chart_data,
+                'summary' => $this->summaryTotals($chart_data),
                 'visit_countries' => $this->metricsRepository->listVisitCountries($from, $to),
                 'filters' => [
                     'from' => $from,
                     'to' => $to,
                     'country' => $country,
                 ],
-                'africa_map' => $this->africaMapContext(),
+                'africa_map' => $mapContext,
+                'cache' => [
+                    'redis' => MetricsCache::redisAvailable(),
+                ],
             ]);
         }
 
-        return view('admin.metrics.index', ['chart_data' => $chart_data]);
+        return view('admin.metrics.index', array_merge([
+            'chart_data' => $chart_data,
+            'summary' => $this->summaryTotals($chart_data),
+        ], $mapContext));
+    }
+
+    /**
+     * Lightweight endpoint for live chart polling (short TTL, Redis when available).
+     */
+    public function live(Request $request)
+    {
+        $from = $request->input('from');
+        $to = $request->input('to');
+        $country = $request->input('country');
+
+        $chart_data = $this->liveChartData($from, $to, $country);
+
+        return response()->json([
+            'chart_data' => $chart_data,
+            'summary' => [
+                'total_visits' => array_sum($chart_data['visits_over_time']['values'] ?? []),
+                'total_signups' => array_sum($chart_data['signups_over_time']['values'] ?? []),
+            ],
+            'refreshed_at' => now()->toIso8601String(),
+            'cache' => [
+                'redis' => MetricsCache::redisAvailable(),
+            ],
+        ]);
     }
 }

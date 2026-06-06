@@ -2,6 +2,7 @@
 (function () {
     var MAP_TOPOLOGY_URL = 'https://code.highcharts.com/mapdata/custom/world-highres3.topo.json';
     var mapDataUrl = @json(route('countries.map-data'));
+    var indicatorSummariesUrl = @json(route('countries.indicator-summaries'));
     var countryDetailUrls = @json(
         collect($countries ?? [])->mapWithKeys(fn ($country) => [(string) $country->id => country_detail_url($country)])->all()
     );
@@ -93,6 +94,91 @@
         document.querySelectorAll('.js-map-indicator-select').forEach(function (btn) {
             btn.classList.toggle('is-active', parseInt(btn.getAttribute('data-kpi-id'), 10) === kpiId);
         });
+    }
+
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+    }
+
+    function formatIndicatorValue(display) {
+        display = display || {};
+        if (display.type === 'percent') {
+            return escapeHtml(String(display.value || '').replace(/%$/, '')) + '%';
+        }
+        return escapeHtml(display.value || '—');
+    }
+
+    function buildIndicatorCardHtml(indicator) {
+        var display = indicator.display || {};
+        var denom = display.unit_plain ? '<div class="continental-indicator-card__denom">' + escapeHtml(display.unit_plain) + '</div>' : '';
+        return '<button type="button" class="continental-indicator-card js-map-indicator-select"'
+            + ' data-kpi-id="' + escapeHtml(indicator.kpi_id) + '"'
+            + ' data-kpi-name="' + escapeHtml(indicator.name) + '">'
+            + '<div class="continental-indicator-card__head">'
+            + '<span class="continental-indicator-card__subject">' + escapeHtml(indicator.subject_area || 'Other indicators') + '</span>'
+            + '<span class="continental-indicator-card__agg">' + escapeHtml(indicator.aggregation_label || '') + '</span>'
+            + '</div>'
+            + '<div class="continental-indicator-card__name">' + escapeHtml(indicator.name) + '</div>'
+            + '<div class="continental-indicator-card__value">' + formatIndicatorValue(display) + '</div>'
+            + denom
+            + '<div class="continental-indicator-card__meta text-muted">'
+            + escapeHtml(indicator.country_count) + ' member states with data'
+            + '</div></button>';
+    }
+
+    function bindIndicatorCardClicks() {
+        document.querySelectorAll('.js-map-indicator-select').forEach(function (btn) {
+            if (btn.dataset.bound === '1') return;
+            btn.dataset.bound = '1';
+            btn.addEventListener('click', function () {
+                setIndicator(this.getAttribute('data-kpi-id'));
+                var mapEl = document.getElementById('countriesMapChart');
+                if (mapEl) {
+                    mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+            });
+        });
+    }
+
+    function renderIndicatorSummaries(summaries, scope) {
+        var listEl = document.getElementById('indicatorSummariesList');
+        var titleTextEl = document.getElementById('indicatorSummariesTitleText');
+        var subtitleEl = document.getElementById('indicatorSummariesSubtitle');
+        if (!listEl) return;
+
+        if (scope) {
+            if (titleTextEl) titleTextEl.textContent = scope.title || 'Continental indicators';
+            if (subtitleEl) subtitleEl.textContent = scope.subtitle || '';
+        }
+
+        if (!summaries || !summaries.length) {
+            listEl.innerHTML = '<div class="text-muted text-center py-4" style="font-size:0.85rem;">No indicator data for this region.</div>';
+            return;
+        }
+
+        listEl.innerHTML = summaries.map(buildIndicatorCardHtml).join('');
+        bindIndicatorCardClicks();
+        setActiveIndicatorButton(currentKpiId);
+    }
+
+    function fetchScopeSummaries(regionId) {
+        var url = indicatorSummariesUrl + (regionId ? '?region_id=' + encodeURIComponent(regionId) : '');
+        var listEl = document.getElementById('indicatorSummariesList');
+        if (listEl) {
+            listEl.innerHTML = '<div class="text-muted text-center py-4"><i class="fa fa-spinner fa-spin me-1"></i> Updating indicators…</div>';
+        }
+        return fetch(url, { headers: { 'Accept': 'application/json' } })
+            .then(function (r) { return r.json(); })
+            .then(function (json) {
+                renderIndicatorSummaries(json.summaries || [], json.scope || null);
+            })
+            .catch(function () {
+                if (listEl) {
+                    listEl.innerHTML = '<div class="text-muted text-center py-4">Could not load indicators for this region.</div>';
+                }
+            });
     }
 
     function setActiveRegionCard(regionId) {
@@ -245,6 +331,7 @@
                 scopeLabel.textContent = region ? region.name : 'Region';
             }
         }
+        fetchScopeSummaries(currentRegionId);
         if (currentKpiId > 0) {
             fetchMapData(currentKpiId, currentRegionId);
         }
@@ -270,15 +357,7 @@
             });
         }
 
-        document.querySelectorAll('.js-map-indicator-select').forEach(function (btn) {
-            btn.addEventListener('click', function () {
-                setIndicator(this.getAttribute('data-kpi-id'));
-                var mapEl = document.getElementById('countriesMapChart');
-                if (mapEl) {
-                    mapEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                }
-            });
-        });
+        bindIndicatorCardClicks();
 
         document.querySelectorAll('.js-map-region-filter').forEach(function (btn) {
             btn.addEventListener('click', function (e) {

@@ -5,21 +5,24 @@
     @include('admin.publications.partials.filter_styles')
 <style>
     .stat-card {
-        background: #fff;
+        background: linear-gradient(145deg, #fff 0%, #f8fafc 100%);
         border: 1px solid #e2e8f0;
-        border-radius: 0;
-        padding: 1rem;
+        border-radius: 14px;
+        padding: 1.1rem 1.15rem;
         margin-bottom: 1rem;
-        transition: all 0.3s ease;
+        transition: all 0.25s ease;
         display: block;
         text-decoration: none;
         color: inherit;
+        box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
+        height: 100%;
     }
     .stat-card:hover {
         text-decoration: none;
         color: inherit;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+        transform: translateY(-3px);
+        border-color: rgba(26, 86, 50, 0.25);
     }
     .stat-card .stat-value {
         font-size: 2rem;
@@ -46,8 +49,9 @@
     }
     .card {
         border: 1px solid #e2e8f0;
-        border-radius: 0;
+        border-radius: 14px;
         margin-bottom: 1.5rem;
+        box-shadow: 0 2px 12px rgba(15, 23, 42, 0.04);
     }
     .card-header {
         background: #f8fafc;
@@ -229,10 +233,13 @@
                             // Default image
                             $default_image = asset('assets/images/cover.png');
                             
-                            // Final image to use
-                            $final_image = (!empty($image_link) && filter_var($image_link, FILTER_VALIDATE_URL)) 
-                                ? $image_link 
-                                : $default_image;
+                            // Final image — only http(s) or app storage paths (skip malformed data URIs)
+                            $final_image = $default_image;
+                            if (!empty($image_link) && !str_starts_with($image_link, 'data:')) {
+                                if (preg_match('#^https?://#i', $image_link) || str_starts_with($image_link, '/')) {
+                                    $final_image = $image_link;
+                                }
+                            }
                             
                             $statusText = $db->is_approved ? 'Approved' : ($db->is_rejected ? 'Rejected' : 'Pending');
                             $statusClass = $db->is_approved ? 'badge-success' : ($db->is_rejected ? 'badge-danger' : 'badge-secondary');
@@ -361,8 +368,7 @@
 
 
 @section('scripts')
-<script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>
-<script src="{{ asset('assets/plugins/highcharts/highmaps.js') }}"></script>
+{{-- Highcharts core is loaded in admin header; map module loads on demand via charts_script --}}
 @include('admin.metrics.charts_script')
 @include('admin.publications.partials.datatable_assets')
 <script>
@@ -470,9 +476,17 @@
                         $('.charts').html(response.html);
                     }
                     if (response && response.chart_data && typeof window.renderMetricsCharts === 'function') {
+                        var filters = response.filters || params || {};
                         window.renderMetricsCharts(response.chart_data, {
                             visitCountries: response.visit_countries || [],
-                            selectedCountry: (response.filters && response.filters.country) || (params && params.country) || ''
+                            selectedCountry: filters.country || '',
+                            summary: response.summary || null,
+                            cache: response.cache || null,
+                            liveParams: {
+                                from: filters.from || undefined,
+                                to: filters.to || undefined,
+                                country: filters.country || undefined
+                            }
                         });
                     }
                 },

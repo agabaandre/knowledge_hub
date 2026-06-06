@@ -1,4 +1,4 @@
-{{-- Defines window.renderMetricsCharts(chartData) for dashboard AJAX. Requires Highcharts + Maps. --}}
+{{-- Defines window.renderMetricsCharts(chartData) for dashboard AJAX. Highcharts core is loaded in admin header. --}}
 <script>
 (function() {
     var auColors = {
@@ -14,6 +14,11 @@
     var HIGHCHARTS_MAP_TOPOLOGY = 'https://code.highcharts.com/mapdata/custom/world-highres3.topo.json';
     var mapTopologyCache = null;
     var mapTopologyPromise = null;
+    var mapModulePromise = null;
+    var visitsTimelineChart = null;
+    var signupsTimelineChart = null;
+    var livePollTimer = null;
+    var lastLiveParams = null;
 
     function lightenColor(color, amount) {
         if (color.startsWith('#')) {
@@ -38,46 +43,49 @@
         return 'Showing all recorded visits';
     }
 
+    /**
+     * Load map module only — never load full highmaps.js when Highcharts core exists (error #16).
+     */
     function ensureHighchartsMapsLoaded(callback) {
         if (typeof Highcharts !== 'undefined' && typeof Highcharts.mapChart === 'function') {
             callback();
             return;
         }
-        var localMaps = '{{ asset('assets/plugins/highcharts/highmaps.js') }}';
-        var cdnMaps = 'https://code.highcharts.com/maps/highmaps.js';
-        var scripts = [localMaps, cdnMaps];
-        var index = 0;
-        function loadNext() {
-            if (typeof Highcharts !== 'undefined' && typeof Highcharts.mapChart === 'function') {
-                callback();
-                return;
-            }
-            if (index >= scripts.length) {
-                console.error('Highcharts Maps could not be loaded');
-                callback();
-                return;
-            }
-            var src = scripts[index++];
-            var existing = document.querySelector('script[src="' + src + '"]');
+        if (typeof Highcharts === 'undefined') {
+            console.error('Highcharts core not loaded');
+            callback();
+            return;
+        }
+        if (mapModulePromise) {
+            mapModulePromise.then(function() { callback(); }).catch(function() { callback(); });
+            return;
+        }
+        var mapModuleUrl = window.__metricsMapModuleUrl || '{{ asset('assets/plugins/highcharts/modules/map.js') }}';
+        mapModulePromise = new Promise(function(resolve, reject) {
+            var existing = document.querySelector('script[data-kh-map-module="1"]');
             if (existing) {
                 if (existing.getAttribute('data-loaded') === '1') {
-                    loadNext();
+                    resolve();
                     return;
                 }
-                existing.addEventListener('load', loadNext);
-                existing.addEventListener('error', loadNext);
+                existing.addEventListener('load', function() { existing.setAttribute('data-loaded', '1'); resolve(); });
+                existing.addEventListener('error', reject);
                 return;
             }
             var s = document.createElement('script');
-            s.src = src;
+            s.src = mapModuleUrl;
+            s.setAttribute('data-kh-map-module', '1');
             s.onload = function() {
                 s.setAttribute('data-loaded', '1');
-                loadNext();
+                resolve();
             };
-            s.onerror = loadNext;
+            s.onerror = reject;
             document.head.appendChild(s);
-        }
-        loadNext();
+        });
+        mapModulePromise.then(function() { callback(); }).catch(function(err) {
+            console.error('Highcharts map module failed to load', err);
+            callback();
+        });
     }
 
     function loadMapTopology() {
@@ -103,52 +111,114 @@
         return mapTopologyPromise;
     }
 
-    function renderVisitsTimeline(jsonData) {
+    function timelineChartOptions(title, color, data) {
+        var granularity = data.granularity === 'daily' ? 'Daily' : 'Monthly';
+        return {
+            chart: { type: 'areaspline', backgroundColor: 'transparent', height: 240 },
+            title: { text: granularity + ' ' + title, style: { fontSize: '13px', color: auColors.greyText } },
+            credits: { enabled: false },
+            xAxis: {
+                categories: data.labels,
+                lineColor: '#e2e8f0',
+                tickColor: '#e2e8f0',
+                labels: { style: { color: auColors.greyText, fontSize: '10px' } }
+            },
+            yAxis: {
+                title: { text: null },
+                gridLineColor: '#e2e8f0',
+                labels: { style: { color: auColors.greyText } },
+                min: 0
+            },
+            legend: { enabled: false },
+            tooltip: {
+                shared: true,
+                backgroundColor: auColors.white,
+                borderColor: color,
+                borderRadius: 8
+            },
+            plotOptions: {
+                areaspline: {
+                    fillOpacity: 0.18,
+                    marker: { enabled: data.labels.length <= 31, radius: 3 },
+                    animation: { duration: 400 }
+                },
+                series: { animation: { duration: 400 } }
+            },
+            series: [{
+                name: title,
+                color: color,
+                data: data.values
+            }]
+        };
+    }
+
+    function renderVisitsTimeline(jsonData, animate) {
         var container = document.getElementById('visits-over-time-chart');
         if (!container || typeof Highcharts === 'undefined') return;
 
         var data = jsonData.visits_over_time;
         if (!data || !data.labels || !data.values || data.labels.length === 0) {
             container.innerHTML = '<div class="text-muted text-center p-4">No visit trend data for the selected period.</div>';
+            visitsTimelineChart = null;
+            return;
+        }
+
+        if (visitsTimelineChart && visitsTimelineChart.renderTo === container) {
+            visitsTimelineChart.xAxis[0].setCategories(data.labels, false);
+            visitsTimelineChart.series[0].setData(data.values, animate !== false);
+            visitsTimelineChart.redraw();
             return;
         }
 
         container.innerHTML = '';
-        var granularity = data.granularity === 'daily' ? 'Daily' : 'Monthly';
-        Highcharts.chart('visits-over-time-chart', {
-            chart: { type: 'areaspline', backgroundColor: 'transparent' },
-            title: { text: granularity + ' visits over time', style: { fontSize: '14px', color: auColors.greyText } },
-            credits: { enabled: false },
-            xAxis: {
-                categories: data.labels,
-                lineColor: '#e2e8f0',
-                tickColor: '#e2e8f0',
-                labels: { style: { color: auColors.greyText } }
-            },
-            yAxis: {
-                title: { text: 'Visits' },
-                gridLineColor: '#e2e8f0',
-                labels: { style: { color: auColors.greyText } }
-            },
-            legend: { enabled: false },
-            tooltip: {
-                shared: true,
-                backgroundColor: auColors.white,
-                borderColor: auColors.corporateGreen,
-                borderRadius: 8
-            },
-            plotOptions: {
-                areaspline: {
-                    fillOpacity: 0.2,
-                    marker: { enabled: data.labels.length <= 31, radius: 3 }
-                }
-            },
-            series: [{
-                name: 'Visits',
-                color: auColors.corporateGreen,
-                data: data.values
-            }]
+        visitsTimelineChart = Highcharts.chart('visits-over-time-chart', timelineChartOptions('visits', auColors.corporateGreen, data));
+    }
+
+    function renderSignupsTimeline(jsonData, animate) {
+        var container = document.getElementById('signups-over-time-chart');
+        if (!container || typeof Highcharts === 'undefined') return;
+
+        var data = jsonData.signups_over_time;
+        if (!data || !data.labels || !data.values || data.labels.length === 0) {
+            container.innerHTML = '<div class="text-muted text-center p-4">No signup trend data for the selected period.</div>';
+            signupsTimelineChart = null;
+            return;
+        }
+
+        if (signupsTimelineChart && signupsTimelineChart.renderTo === container) {
+            signupsTimelineChart.xAxis[0].setCategories(data.labels, false);
+            signupsTimelineChart.series[0].setData(data.values, animate !== false);
+            signupsTimelineChart.redraw();
+            return;
+        }
+
+        container.innerHTML = '';
+        signupsTimelineChart = Highcharts.chart('signups-over-time-chart', timelineChartOptions('signups', auColors.red, data));
+    }
+
+    function updateKpiSummary(summary) {
+        if (!summary) return;
+        var map = {
+            kpiTotalVisits: summary.total_visits,
+            kpiTotalSignups: summary.total_signups,
+            kpiVisitCountries: summary.countries_with_visits,
+            kpiSignupCountries: summary.countries_with_signups
+        };
+        Object.keys(map).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && map[id] !== undefined && map[id] !== null) {
+                el.textContent = Number(map[id]).toLocaleString();
+            }
         });
+    }
+
+    function updateCacheHint(cacheInfo) {
+        var el = document.getElementById('metricsCacheHint');
+        if (!el || !cacheInfo) return;
+        el.textContent = cacheInfo.redis
+            ? 'Metrics cached via Redis for faster loads · live charts refresh every 60s'
+            : 'Live charts refresh every 60s';
+        el.classList.toggle('is-redis', !!cacheInfo.redis);
     }
 
     var adminMapChart = null;
@@ -157,7 +227,7 @@
 
     function destroyAdminMap() {
         if (adminMapChart) {
-            adminMapChart.destroy();
+            try { adminMapChart.destroy(); } catch (e) { /* ignore */ }
             adminMapChart = null;
         }
     }
@@ -189,7 +259,7 @@
     function africaMapChartOptions(topology, mapData, config) {
         config = config || {};
         return {
-            chart: { map: topology, backgroundColor: 'transparent', height: 500, style: { fontFamily: 'inherit' } },
+            chart: { map: topology, backgroundColor: 'transparent', height: 480, style: { fontFamily: 'inherit' } },
             title: { text: null },
             credits: { enabled: true, text: config.credits || 'Map © Natural Earth · Highcharts', style: { fontSize: '10px', color: '#94a3b8' } },
             mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
@@ -212,6 +282,10 @@
     function renderAdminAfricaMap(topology, mapData, config) {
         var mapContainer = document.getElementById('admin-africa-map');
         if (!mapContainer || typeof Highcharts === 'undefined') return;
+        if (typeof Highcharts.mapChart !== 'function') {
+            mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map module not loaded.</div>';
+            return;
+        }
         mapContainer.innerHTML = '';
         destroyAdminMap();
         adminMapChart = Highcharts.mapChart('admin-africa-map', africaMapChartOptions(topology, mapData, config));
@@ -268,7 +342,7 @@
                     tooltip: { useHTML: true, pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits' }
                 });
             }).catch(function() {
-                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable.</div>';
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Check network access to Highcharts map data.</div>';
             });
         });
     }
@@ -316,6 +390,8 @@
                         }
                     }
                 });
+            }).catch(function() {
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable.</div>';
             });
         });
     }
@@ -386,6 +462,12 @@
         });
     }
 
+    var chartTitleMap = {
+        signups_by_country: 'Signups by country',
+        monthly_signups: 'Monthly signups',
+        monthly_publications: 'Monthly publications'
+    };
+
     window.renderMetricsCharts = function(chartData, options) {
         options = options || {};
         if (!chartData || typeof Highcharts === 'undefined') return;
@@ -393,10 +475,14 @@
         var jsonData = chartData;
         var container = document.getElementById('chart-container');
         if (!container) return;
+
+        updateKpiSummary(options.summary);
+        updateCacheHint(options.cache);
+
         container.innerHTML = '';
 
         function shouldRenderChart(key, data) {
-            if (key === 'visits_by_country' || key === 'visits_over_time') return false;
+            if (key === 'visits_by_country' || key === 'visits_over_time' || key === 'signups_over_time') return false;
             if (data && data.renderAsChart === false) return false;
             return true;
         }
@@ -407,23 +493,21 @@
             var chartType = data.chartType;
             var labels = data.labels;
             var values = data.values;
-            var title = key.replace(/_/g, ' ').toUpperCase();
+            var title = chartTitleMap[key] || key.replace(/_/g, ' ').replace(/\b\w/g, function(c) { return c.toUpperCase(); });
             var col = document.createElement('div');
-            col.className = 'col-xl-6 col-lg-6 col-md-12 mb-4';
-            col.style.cssText = 'padding-left: 15px; padding-right: 15px;';
+            col.className = 'col-xl-4 col-lg-6 col-md-12 mb-3';
+            col.style.cssText = 'padding-left: 12px; padding-right: 12px;';
             var card = document.createElement('div');
             card.className = 'card h-100';
-            card.style.cssText = 'border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 0;';
             var header = document.createElement('div');
             header.className = 'card-header';
-            header.style.cssText = 'background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem;';
-            header.innerHTML = '<h3 class="card-title mb-0" style="font-size: 1rem; font-weight: 600;">' + title + '</h3>';
+            header.innerHTML = '<h3 class="card-title mb-0" style="font-size: 0.95rem; font-weight: 600;">' + title + '</h3>';
             var body = document.createElement('div');
             body.className = 'card-body';
-            body.style.cssText = 'padding: 1.5rem;';
+            body.style.cssText = 'padding: 1rem;';
             var chartContainer = document.createElement('div');
             chartContainer.id = key + '-chart';
-            chartContainer.style.cssText = 'height:360px;';
+            chartContainer.style.cssText = 'height:320px;';
             body.appendChild(chartContainer);
             card.appendChild(header);
             card.appendChild(body);
@@ -439,19 +523,20 @@
                     categories: categories,
                     lineColor: '#e2e8f0',
                     tickColor: '#e2e8f0',
-                    labels: { style: { color: auColors.greyText } }
+                    labels: { style: { color: auColors.greyText, fontSize: '10px' } }
                 },
                 yAxis: {
                     title: { text: null },
                     gridLineColor: '#e2e8f0',
                     lineColor: '#e2e8f0',
-                    labels: { style: { color: auColors.greyText } }
+                    labels: { style: { color: auColors.greyText } },
+                    min: 0
                 },
                 legend: { enabled: chartType !== 'pie', itemStyle: { color: auColors.greyText } },
                 plotOptions: {
-                    bar: { colorByPoint: true, dataLabels: { style: { color: '#0f172a', fontWeight: '600' } } },
-                    pie: { allowPointSelect: true, cursor: 'pointer', dataLabels: { style: { color: '#0f172a', fontWeight: '600' } }, colors: africaCDCColors },
-                    line: { marker: { fillColor: auColors.corporateGreen, lineColor: auColors.plum, lineWidth: 2 }, dataLabels: { style: { color: '#0f172a', fontWeight: '600' } } }
+                    bar: { colorByPoint: true, borderRadius: 4, dataLabels: { enabled: false } },
+                    pie: { allowPointSelect: true, cursor: 'pointer', dataLabels: { style: { color: '#0f172a', fontWeight: '600', fontSize: '10px' } }, colors: africaCDCColors },
+                    line: { marker: { fillColor: auColors.corporateGreen, radius: 3 } }
                 },
                 series: [{
                     name: title,
@@ -459,17 +544,12 @@
                     data: chartType === 'pie' ? labels.map(function(label, index) {
                         return { name: label, y: values[index], color: africaCDCColors[index % africaCDCColors.length] };
                     }) : chartType === 'line' ? values.map(function(value, index) {
-                        return { name: labels[index], y: value, color: africaCDCColors[index % africaCDCColors.length] };
-                    }) : values.map(function(value, index) {
-                        return { y: value, color: africaCDCColors[index % africaCDCColors.length] };
-                    }),
-                    dataLabels: {
-                        enabled: true,
-                        format: chartType === 'pie' ? '{point.name}: {point.percentage:.1f}%' : '{point.y}',
-                        style: { color: '#0f172a', fontWeight: '600' }
-                    }
+                        return { name: labels[index], y: value };
+                    }) : values.map(function(value) {
+                        return { y: value };
+                    })
                 }],
-                tooltip: { shared: chartType !== 'pie', backgroundColor: auColors.white, borderColor: auColors.corporateGreen, borderRadius: 8, style: { color: '#0f172a' } }
+                tooltip: { shared: chartType !== 'pie', backgroundColor: auColors.white, borderColor: auColors.corporateGreen, borderRadius: 8 }
             });
         }
 
@@ -495,22 +575,60 @@
                     countrySelect.appendChild(opt);
                 });
             }
-            if (selected) {
-                countrySelect.value = selected;
-            }
+            if (selected) countrySelect.value = selected;
         }
 
-        renderVisitsTimeline(jsonData);
+        renderVisitsTimeline(jsonData, false);
+        renderSignupsTimeline(jsonData, false);
         bindAdminMapUi(jsonData);
+
         if (adminMapMode === 'indicators') {
-            var kpiId = parseInt(document.getElementById('adminMapIndicatorSelect')?.value || '0', 10);
-            if (kpiId > 0) {
-                fetchAdminKpiMap(kpiId, adminKpiRegionId);
-            } else if (window.__adminInitialKpiMap) {
-                renderKpiMap(window.__adminInitialKpiMap);
-            }
+            var kpiId = parseInt((document.getElementById('adminMapIndicatorSelect') || {}).value || '0', 10);
+            if (kpiId > 0) fetchAdminKpiMap(kpiId, adminKpiRegionId);
+            else if (window.__adminInitialKpiMap) renderKpiMap(window.__adminInitialKpiMap);
         } else {
             renderVisitsMap(jsonData);
+        }
+
+        lastLiveParams = options.liveParams || null;
+        window.startLiveMetricsPolling(lastLiveParams);
+    };
+
+    window.updateLiveMetricsCharts = function(payload) {
+        if (!payload || !payload.chart_data) return;
+        renderVisitsTimeline(payload.chart_data, true);
+        renderSignupsTimeline(payload.chart_data, true);
+        if (payload.summary) updateKpiSummary(payload.summary);
+    };
+
+    window.startLiveMetricsPolling = function(params) {
+        if (livePollTimer) {
+            clearInterval(livePollTimer);
+            livePollTimer = null;
+        }
+        lastLiveParams = params || lastLiveParams || {};
+        var liveUrl = window.__metricsLiveUrl;
+        if (!liveUrl) return;
+
+        livePollTimer = setInterval(function() {
+            if (!document.getElementById('visits-over-time-chart')) return;
+            var url = liveUrl;
+            var q = [];
+            if (lastLiveParams.from) q.push('from=' + encodeURIComponent(lastLiveParams.from));
+            if (lastLiveParams.to) q.push('to=' + encodeURIComponent(lastLiveParams.to));
+            if (lastLiveParams.country) q.push('country=' + encodeURIComponent(lastLiveParams.country));
+            if (q.length) url += (url.indexOf('?') === -1 ? '?' : '&') + q.join('&');
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } })
+                .then(function(r) { return r.json(); })
+                .then(function(data) { window.updateLiveMetricsCharts(data); })
+                .catch(function() { /* silent */ });
+        }, 60000);
+    };
+
+    window.stopLiveMetricsPolling = function() {
+        if (livePollTimer) {
+            clearInterval(livePollTimer);
+            livePollTimer = null;
         }
     };
 

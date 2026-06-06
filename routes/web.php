@@ -144,6 +144,7 @@ if(states_enabled()):
     Route::group(["prefix" => "countries"], function () {
             Route::get('/', [CountriesController::class, 'index'])->name('countries');
             Route::get('/map-data', [CountriesController::class, 'mapData'])->name('countries.map-data');
+            Route::get('/indicator-summaries', [CountriesController::class, 'indicatorSummaries'])->name('countries.indicator-summaries');
             Route::get('/details/{slug}', [CountriesController::class, 'country'])->where('slug', '[\w\-]+')->name('countries.details');
             Route::get('/details', [CountriesController::class, 'country']);
     });
@@ -614,6 +615,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::group(["prefix" => "metrics"], function () {
 
         Route::get("/", [MetricsController::class, 'index']);
+        Route::get("/live", [MetricsController::class, 'live']);
     });
 
     Route::group(["prefix" => "mailing_list"], function () {

@@ -40,13 +40,13 @@
                 @can('view_rcc_dashboard')
                     @if (states_enabled())
                         @can('view_performance')
-                            <li aria-haspopup="true"><a href="{{ url('admin/rccdashboards') }}" class="sub-icon"><i
+                            <li aria-haspopup="true"><a href="#" class="sub-icon"><i
                                         class=""></i>KPIs<i class="fe fe-chevron-down horizontal-icon"></i></a>
                                 <ul class="sub-menu">
-                                    <li aria-haspopup="true"><a href="{{ url('admin/kpi') }}" class="slide-item">Add
-                                            Indicator</a></li>
-                                    <li aria-haspopup="true"><a href="{{ url('admin/kpi/data') }}" class="slide-item">Inidicator
-                                            Data</a></li>
+                                    <li aria-haspopup="true"><a href="{{ route('admin.rccdashboards') }}" class="slide-item">{{ __('admin_nav.rcc_dashboard') }}</a></li>
+                                    <li aria-haspopup="true"><a href="{{ url('admin/kpi') }}" class="slide-item">{{ __('admin_nav.manage_indicators') }}</a></li>
+                                    <li aria-haspopup="true"><a href="{{ url('admin/kpi/subject-areas') }}" class="slide-item">{{ __('admin_nav.subject_areas') }}</a></li>
+                                    <li aria-haspopup="true"><a href="{{ url('admin/kpi/data') }}" class="slide-item">{{ __('admin_nav.country_values') }}</a></li>
                                 </ul>
                             </li>
                         @endcan

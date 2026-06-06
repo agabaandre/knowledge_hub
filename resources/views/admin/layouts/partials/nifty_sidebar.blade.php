@@ -24,11 +24,12 @@
             @if (states_enabled())
                 @can('view_performance')
                 <li class="nav-item has-sub">
-                    <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-kpis"><i class="fa fa-chart-bar fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.kpis') }}</span></a>
-                    <ul class="mininav-content nav collapse" id="nav-kpis">
-                        <li class="nav-item"><a href="{{ url('admin/kpi') }}" class="nav-link">Manage indicators</a></li>
-                        <li class="nav-item"><a href="{{ url('admin/kpi/subject-areas') }}" class="nav-link">Subject areas</a></li>
-                        <li class="nav-item"><a href="{{ url('admin/kpi/data') }}" class="nav-link">Country values</a></li>
+                    <a href="#" class="mininav-toggle nav-link {{ request()->is('admin/rccdashboards*') || request()->is('admin/kpi*') ? 'active' : '' }} collapsed" data-bs-toggle="collapse" data-bs-target="#nav-kpis"><i class="fa fa-chart-bar fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.kpis') }}</span></a>
+                    <ul class="mininav-content nav collapse {{ request()->is('admin/rccdashboards*') || request()->is('admin/kpi*') ? 'show' : '' }}" id="nav-kpis">
+                        <li class="nav-item"><a href="{{ route('admin.rccdashboards') }}" class="nav-link {{ request()->is('admin/rccdashboards*') ? 'active' : '' }}">{{ __('admin_nav.rcc_dashboard') }}</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi') }}" class="nav-link {{ request()->is('admin/kpi') && !request()->is('admin/kpi/*') ? 'active' : '' }}">{{ __('admin_nav.manage_indicators') }}</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi/subject-areas') }}" class="nav-link {{ request()->is('admin/kpi/subject-areas*') ? 'active' : '' }}">{{ __('admin_nav.subject_areas') }}</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi/data') }}" class="nav-link {{ request()->is('admin/kpi/data*') ? 'active' : '' }}">{{ __('admin_nav.country_values') }}</a></li>
                     </ul>
                 </li>
                 @endcan

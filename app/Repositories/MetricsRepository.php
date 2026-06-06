@@ -10,6 +10,39 @@ use Illuminate\Http\Request;
 
 class MetricsRepository
 {
+    /**
+     * Best-effort signup instant: created_at, falling back to email_verified_at for legacy rows.
+     */
+    private function signupTimestampSql(): string
+    {
+        return 'COALESCE(users.created_at, users.email_verified_at)';
+    }
+
+    private function applySignupDateFilters($query, ?string $from, ?string $to): void
+    {
+        $ts = $this->signupTimestampSql();
+        if ($from) {
+            $query->whereRaw("DATE({$ts}) >= ?", [$from]);
+        }
+        if ($to) {
+            $query->whereRaw("DATE({$ts}) <= ?", [$to]);
+        }
+    }
+
+    private function applySignupCountryFilter($query, ?string $country): void
+    {
+        if (! $country) {
+            return;
+        }
+        $code = strtoupper(trim($country));
+        if ($code === '') {
+            return;
+        }
+        $query->whereHas('country', function ($q) use ($code) {
+            $q->where('iso_code', $code);
+        });
+    }
+
     public function country_access($from = null, $to = null, $country = null)
     {
         $query = AccessLog::query();
@@ -103,47 +136,102 @@ class MetricsRepository
         ];
     }
 
-    public function country_signups($from = null, $to = null, $country = null)
+    public function signups_over_time($from = null, $to = null, $country = null)
     {
-        $query = User::query()
-            ->groupBy('country_id')
-            ->select('country_id', 'country.name', DB::raw('count(users.id) as count'))
-            ->join('country', 'country.id', '=', 'users.country_id')
-            ->where('country.national', 'National');
-        if ($from) {
-            $query->whereDate('users.created_at', '>=', $from);
+        $ts = $this->signupTimestampSql();
+        $query = User::query()->whereRaw("{$ts} IS NOT NULL");
+        $this->applySignupDateFilters($query, $from, $to);
+        $this->applySignupCountryFilter($query, $country);
+
+        $minTs = User::query()
+            ->whereRaw("{$ts} IS NOT NULL")
+            ->selectRaw("MIN({$ts}) as min_ts")
+            ->value('min_ts');
+        $start = $from ? Carbon::parse($from) : Carbon::parse($minTs ?: now());
+        $end = $to ? Carbon::parse($to) : now();
+        $days = max(1, $start->diffInDays($end) + 1);
+        $useDaily = $days <= 90;
+
+        if ($useDaily) {
+            $records = $query
+                ->groupBy(DB::raw("DATE({$ts})"))
+                ->select(DB::raw("DATE({$ts}) as period"), DB::raw('count(users.id) as count'))
+                ->orderBy('period')
+                ->get();
+            $labels = $records->map(function ($row) {
+                return Carbon::parse($row->period)->format('M j, Y');
+            })->toArray();
+        } else {
+            $records = $query
+                ->groupBy(DB::raw("DATE_FORMAT({$ts}, '%Y-%m')"))
+                ->select(DB::raw("DATE_FORMAT({$ts}, '%Y-%m') as period"), DB::raw('count(users.id) as count'))
+                ->orderBy('period')
+                ->get();
+            $labels = $records->map(function ($row) {
+                return Carbon::parse($row->period.'-01')->format('M Y');
+            })->toArray();
         }
-        if ($to) {
-            $query->whereDate('users.created_at', '<=', $to);
-        }
-        if ($country) {
-            $query->where('country.name', $country);
-        }
-        $records = $query->get();
+
         return [
-            'labels' => $records->pluck('name')->toArray(),
-            'values' => $records->pluck('count')->toArray(),
-            'chartType' => 'pie',
+            'labels' => $labels,
+            'values' => $records->pluck('count')->map(fn ($v) => (int) $v)->toArray(),
+            'chartType' => 'line',
+            'granularity' => $useDaily ? 'daily' : 'monthly',
+            'period' => [
+                'from' => $from,
+                'to' => $to,
+            ],
         ];
     }
 
-    public function monthly_signups($from = null, $to = null)
+    public function country_signups($from = null, $to = null, $country = null)
     {
-        $query = User::query();
-        if ($from) {
-            $query->whereDate('created_at', '>=', $from);
-        }
-        if ($to) {
-            $query->whereDate('created_at', '<=', $to);
+        $ts = $this->signupTimestampSql();
+        $query = User::query()
+            ->join('country', 'country.id', '=', 'users.country_id')
+            ->where('country.national', 'National')
+            ->whereRaw("{$ts} IS NOT NULL");
+        $this->applySignupDateFilters($query, $from, $to);
+        if ($country) {
+            $query->where('country.iso_code', strtoupper(trim($country)));
         }
         $records = $query
-            ->groupBy(DB::raw("CONCAT(MONTHNAME(users.created_at),',',YEAR(users.created_at))"))
-            ->select(DB::raw("CONCAT(MONTHNAME(users.created_at),',',YEAR(users.created_at)) as month"), DB::raw('count(users.id) as count'))
+            ->groupBy('country_id', 'country.name')
+            ->select('country_id', 'country.name', DB::raw('count(users.id) as count'))
+            ->orderByDesc('count')
             ->get();
+
         return [
-            'labels' => $records->pluck('month')->toArray(),
-            'values' => $records->pluck('count')->toArray(),
+            'labels' => $records->pluck('name')->toArray(),
+            'values' => $records->pluck('count')->map(fn ($v) => (int) $v)->toArray(),
             'chartType' => 'pie',
+            'period' => [
+                'from' => $from,
+                'to' => $to,
+            ],
+        ];
+    }
+
+    public function monthly_signups($from = null, $to = null, $country = null)
+    {
+        $ts = $this->signupTimestampSql();
+        $query = User::query()->whereRaw("{$ts} IS NOT NULL");
+        $this->applySignupDateFilters($query, $from, $to);
+        $this->applySignupCountryFilter($query, $country);
+        $records = $query
+            ->groupBy(DB::raw("DATE_FORMAT({$ts}, '%Y-%m')"))
+            ->select(DB::raw("DATE_FORMAT({$ts}, '%Y-%m') as period"), DB::raw('count(users.id) as count'))
+            ->orderBy('period')
+            ->get();
+
+        return [
+            'labels' => $records->map(fn ($row) => Carbon::parse($row->period.'-01')->format('M Y'))->toArray(),
+            'values' => $records->pluck('count')->map(fn ($v) => (int) $v)->toArray(),
+            'chartType' => 'bar',
+            'period' => [
+                'from' => $from,
+                'to' => $to,
+            ],
         ];
     }
 

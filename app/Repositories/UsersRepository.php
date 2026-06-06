@@ -184,6 +184,10 @@ class UsersRepository {
             }
         }
 
+        if (! $user->exists && ! $user->created_at) {
+            $user->created_at = Carbon::now();
+        }
+
         $user_saved = ($user->id)?$user->update():$user->save();
         $user = User::find($user->id);
 

@@ -663,14 +663,14 @@ class GraphsRepository extends SharedRepo{
     }
 
     /**
-     * Continental summaries for sidebar (all AU member states).
+     * Indicator aggregate cards for map sidebar (continental or regional scope).
      */
-    public function get_continental_indicator_summaries(): array
+    public function get_indicator_summaries_for_scope(?int $regionId = null): array
     {
         $summaries = [];
 
         foreach ($this->get_published_map_indicators() as $kpi) {
-            $data = $this->get_indicator_map_values((int) $kpi->id, null);
+            $data = $this->get_indicator_map_values((int) $kpi->id, $regionId);
             if ($data['country_count'] === 0 || empty($data['aggregate'])) {
                 continue;
             }
@@ -687,6 +687,14 @@ class GraphsRepository extends SharedRepo{
         }
 
         return $summaries;
+    }
+
+    /**
+     * Continental summaries for sidebar (all AU member states).
+     */
+    public function get_continental_indicator_summaries(): array
+    {
+        return $this->get_indicator_summaries_for_scope(null);
     }
 
     /**

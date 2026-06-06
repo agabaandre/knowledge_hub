@@ -12,6 +12,7 @@ use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use Illuminate\Http\Request;
 use App\Models\KpiNarration;
+use App\Models\Region;
 
 class CountriesController extends Controller
 {
@@ -75,7 +76,38 @@ class CountriesController extends Controller
         return response()->json([
             'map' => $mapData,
             'regional_summaries' => $this->dashRepo->get_regional_indicator_summaries($kpiId),
+            'indicator_summaries' => $this->dashRepo->get_indicator_summaries_for_scope($regionId),
+            'scope' => $this->indicatorScopeMeta($regionId),
         ]);
+    }
+
+    public function indicatorSummaries(Request $request)
+    {
+        $regionId = $request->filled('region_id') ? (int) $request->input('region_id') : null;
+
+        return response()->json([
+            'summaries' => $this->dashRepo->get_indicator_summaries_for_scope($regionId),
+            'scope' => $this->indicatorScopeMeta($regionId),
+        ]);
+    }
+
+    private function indicatorScopeMeta(?int $regionId): array
+    {
+        $regionName = null;
+        if ($regionId) {
+            $regionName = Region::query()->whereKey($regionId)->value('region_name');
+        }
+
+        $scopeName = $regionName ?: 'Africa (all member states)';
+
+        return [
+            'region_id' => $regionId,
+            'name' => $scopeName,
+            'title' => $regionId ? 'Regional indicators' : 'Continental indicators',
+            'subtitle' => $regionId
+                ? 'Regional averages or totals for '.$scopeName.'. Click any card to explore it on the map.'
+                : 'Africa-wide averages or totals from published indicators. Click any card to explore it on the map.',
+        ];
     }
 
 
