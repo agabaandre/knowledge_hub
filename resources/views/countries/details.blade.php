@@ -42,82 +42,54 @@
         padding: 0.25rem 0.75rem;
         white-space: nowrap;
     }
-    .country-kpi-tile {
+    .country-kpi-subject .dro_140.country-kpi-tile {
         background: #ffffff;
         border-radius: 10px;
-        padding: 1.25rem 1rem;
+        padding: 1.5rem 1rem;
         box-shadow: 0 0 20px 0 rgb(62 28 131 / 10%);
         border: 1px solid transparent;
         transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .country-kpi-tile .dro_141.country-kpi-tile__icon {
-        margin-right: 0;
-        margin-bottom: 0.75rem;
-        align-self: flex-start;
+        align-items: center;
     }
     .country-kpi-tile .country-kpi-tile__body {
-        padding-right: 0;
-        width: 100%;
-    }
-    .country-kpi-tile__head {
-        display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
-        gap: 0.5rem;
-        margin-bottom: 0.35rem;
+        flex: 1;
+        min-width: 0;
+        padding-right: 6px;
     }
     .country-kpi-tile__title {
-        font-size: 0.95rem !important;
-        line-height: 1.35 !important;
-        margin: 0 !important;
-        color: #172228;
-        font-weight: 600 !important;
+        font-size: 11pt !important;
+        line-height: 1.25 !important;
+        margin: 0 0 5px !important;
+        font-weight: 500 !important;
     }
     .country-kpi-tile__drill-badge {
         flex-shrink: 0;
-        width: 26px;
-        height: 26px;
+        width: 24px;
+        height: 24px;
         border-radius: 50%;
         display: inline-flex;
         align-items: center;
         justify-content: center;
         background: rgba(26, 86, 50, 0.1);
         color: #1A5632;
-        font-size: 0.7rem;
+        font-size: 0.65rem;
+        margin-left: 4px;
     }
     .country-kpi-tile__value {
-        font-size: 1.5rem !important;
-        line-height: 1.2;
+        font-size: 14px;
+        line-height: 1.6;
+        margin: 0;
     }
     .country-kpi-tile__unit {
-        font-size: 0.8rem;
+        font-size: 0.85rem;
         color: #64748b;
         font-weight: 500;
         margin-left: 0.25rem;
     }
     .country-kpi-tile__period {
         display: block;
-        margin-top: 0.15rem;
-        font-size: 0.78rem;
-    }
-    .country-kpi-sparkline {
-        margin-top: 0.65rem;
-        height: 52px;
-        width: 100%;
-        border-radius: 6px;
-        overflow: hidden;
-        background: linear-gradient(180deg, rgba(26, 86, 50, 0.04) 0%, rgba(255,255,255,0) 100%);
-    }
-    .country-kpi-tile__cta {
-        display: inline-flex;
-        align-items: center;
-        margin-top: 0.65rem;
-        font-size: 0.78rem;
-        font-weight: 600;
-        color: #1A5632;
-        letter-spacing: 0.01em;
+        font-size: 0.75rem;
+        line-height: 1.3;
     }
     .country-kpi-tile--drilldown {
         cursor: pointer;
@@ -144,10 +116,10 @@
         border: none;
         padding: 1.25rem 1.5rem;
     }
-    .country-kpi-modal__header .close {
-        color: #fff;
-        opacity: 0.85;
-        text-shadow: none;
+    .country-kpi-modal__header .close,
+    .country-kpi-modal__header .btn-close {
+        opacity: 0.9;
+        filter: brightness(0) invert(1);
     }
     .country-kpi-modal__eyebrow {
         font-size: 0.75rem;
@@ -205,11 +177,6 @@
     .country-kpi-modal__footer {
         background: #f8fafc;
         border-top: 1px solid #e2e8f0;
-    }
-    @media (max-width: 767px) {
-        .country-kpi-tile__value {
-            font-size: 1.35rem !important;
-        }
     }
 </style>
 @endsection
@@ -305,10 +272,12 @@
                     <h4 class="country-kpi-subject__title">{{ $group['subject_area_name'] }}</h4>
                     <span class="country-kpi-subject__count">{{ count($group['items']) }} indicator{{ count($group['items']) === 1 ? '' : 's' }}</span>
                 </div>
-                <div class="row">
-                    @foreach($group['items'] as $kpi)
-                        @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
-                    @endforeach
+                <div class="crp_box fl_color" style="margin-top:0;padding:0.5rem 0.75rem 0.25rem;background:transparent;box-shadow:none;">
+                    <div class="row align-items-center">
+                        @foreach($group['items'] as $kpi)
+                            @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
@@ -326,18 +295,16 @@
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12">
             <div class="country-kpi-subject">
-                <div class="row">
-                    @foreach($kpis as $kpi)
-                        @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
-                    @endforeach
+                <div class="crp_box fl_color" style="margin-top:0;padding:0.5rem 0.75rem 0.25rem;background:transparent;box-shadow:none;">
+                    <div class="row align-items-center">
+                        @foreach($kpis as $kpi)
+                            @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
+                        @endforeach
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    @endif
-
-    @if((!empty($kpi_groups) || count($kpis) > 0) && !empty($kpi_chart_payload))
-        @include('countries.partials.kpi_drilldown_modal')
     @endif
 
     @if(count($publications)>0)
@@ -358,6 +325,10 @@
         
     </div>
 </section>
+
+@if((!empty($kpi_groups) || count($kpis ?? []) > 0) && !empty($kpi_chart_payload))
+    @include('countries.partials.kpi_drilldown_modal')
+@endif
 <!-- ======================= Countries ======================== -->
 @endsection
 @section('scripts')
@@ -368,10 +339,56 @@
     var kpiPayload = @json($kpi_chart_payload ?? []);
     var auGreen = '{{ settings()->au_corporate_green ?? '#1A5632' }}';
     var auRed = '{{ settings()->au_red ?? '#9F2241' }}';
-    var auGold = '{{ settings()->au_gold ?? '#B4A269' }}';
     var owidSite = @json(owid_site_url());
     var owidLicense = @json(owid_license_url());
     var modalChart = null;
+    var kpiModalInstance = null;
+    var suppressCardOpenUntil = 0;
+
+    function getModalElement() {
+        return document.getElementById('countryKpiModal');
+    }
+
+    function ensureModalOnBody() {
+        var modalEl = getModalElement();
+        if (modalEl && modalEl.parentElement !== document.body) {
+            document.body.appendChild(modalEl);
+        }
+        return modalEl;
+    }
+
+    function getKpiModal() {
+        var modalEl = ensureModalOnBody();
+        if (!modalEl || typeof bootstrap === 'undefined' || !bootstrap.Modal) {
+            return null;
+        }
+        if (!kpiModalInstance) {
+            kpiModalInstance = bootstrap.Modal.getOrCreateInstance(modalEl, {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+        }
+        return kpiModalInstance;
+    }
+
+    function closeKpiModal() {
+        var modal = getKpiModal();
+        if (modal) {
+            modal.hide();
+        } else if (typeof $ !== 'undefined') {
+            $('#countryKpiModal').modal('hide');
+        }
+    }
+
+    function cleanupModalArtifacts() {
+        document.querySelectorAll('.modal-backdrop').forEach(function (backdrop) {
+            backdrop.remove();
+        });
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('overflow');
+        document.body.style.removeProperty('padding-right');
+    }
 
     function formatValue(value) {
         var n = Number(value);
@@ -379,60 +396,6 @@
         var abs = Math.abs(n);
         var decimals = abs >= 100 ? 0 : (abs >= 10 ? 1 : 2);
         return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-    }
-
-    function sparklineOptions(kpiId) {
-        var data = kpiPayload[kpiId];
-        if (!data || !data.has_chart) return null;
-        return {
-            chart: {
-                backgroundColor: 'transparent',
-                margin: [4, 4, 4, 4],
-                height: 52,
-                spacing: [0, 0, 0, 0]
-            },
-            title: { text: null },
-            credits: { enabled: false },
-            legend: { enabled: false },
-            xAxis: {
-                categories: data.labels,
-                visible: false
-            },
-            yAxis: {
-                visible: false,
-                title: { text: null }
-            },
-            tooltip: {
-                outside: true,
-                shared: true,
-                headerFormat: '<span style="font-size:11px">{point.key}</span><br/>',
-                pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>'
-            },
-            series: [{
-                name: data.name,
-                data: data.values,
-                color: auGreen,
-                lineWidth: 2,
-                marker: { enabled: false, states: { hover: { enabled: true, radius: 3 } } }
-            }],
-            plotOptions: {
-                series: {
-                    animation: false,
-                    states: { hover: { lineWidthPlus: 0 } }
-                }
-            }
-        };
-    }
-
-    function renderSparklines() {
-        if (typeof Highcharts === 'undefined') return;
-        document.querySelectorAll('.kpi-sparkline').forEach(function (el) {
-            var kpiId = el.getAttribute('data-kpi-id');
-            var opts = sparklineOptions(kpiId);
-            if (opts) {
-                Highcharts.chart(el, opts);
-            }
-        });
     }
 
     function buildAttributionHtml(owidUrl) {
@@ -443,6 +406,10 @@
     }
 
     function openKpiModal(kpiId, subjectName) {
+        if (Date.now() < suppressCardOpenUntil) {
+            return;
+        }
+
         var data = kpiPayload[kpiId];
         if (!data) return;
 
@@ -528,7 +495,12 @@
             owidLink.style.display = 'none';
         }
 
-        $('#countryKpiModal').modal('show');
+        var modal = getKpiModal();
+        if (modal) {
+            modal.show();
+        } else if (typeof $ !== 'undefined') {
+            $('#countryKpiModal').modal('show');
+        }
     }
 
     function subjectForTrigger(trigger) {
@@ -539,10 +511,27 @@
     }
 
     document.addEventListener('click', function (e) {
+        if (e.target.closest('.modal') || e.target.closest('.modal-backdrop')) {
+            return;
+        }
+
+        var modalEl = getModalElement();
+        if (modalEl && modalEl.classList.contains('show')) {
+            return;
+        }
+
+        if (Date.now() < suppressCardOpenUntil) {
+            return;
+        }
+
         var trigger = e.target.closest('.kpi-drilldown-trigger');
         if (!trigger) return;
+
         var kpiId = trigger.getAttribute('data-kpi-id');
         if (!kpiId) return;
+
+        e.preventDefault();
+        e.stopPropagation();
         openKpiModal(kpiId, subjectForTrigger(trigger));
     });
 
@@ -557,17 +546,35 @@
         }
     });
 
-    $('#countryKpiModal').on('hidden.bs.modal', function () {
-        if (modalChart) {
-            modalChart.destroy();
-            modalChart = null;
-        }
-    });
+    function bindModalLifecycle() {
+        var modalEl = ensureModalOnBody();
+        if (!modalEl) return;
+
+        modalEl.addEventListener('hide.bs.modal', function () {
+            suppressCardOpenUntil = Date.now() + 400;
+        });
+
+        modalEl.addEventListener('hidden.bs.modal', function () {
+            if (modalChart) {
+                modalChart.destroy();
+                modalChart = null;
+            }
+            cleanupModalArtifacts();
+        });
+
+        modalEl.querySelectorAll('.country-kpi-modal__close, [data-bs-dismiss="modal"]').forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                closeKpiModal();
+            });
+        });
+    }
 
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', renderSparklines);
+        document.addEventListener('DOMContentLoaded', bindModalLifecycle);
     } else {
-        renderSparklines();
+        bindModalLifecycle();
     }
 })();
 </script>
