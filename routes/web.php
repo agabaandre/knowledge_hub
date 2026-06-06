@@ -143,6 +143,7 @@ if(states_enabled()):
 
     Route::group(["prefix" => "countries"], function () {
             Route::get('/', [CountriesController::class, 'index'])->name('countries');
+            Route::get('/map-data', [CountriesController::class, 'mapData'])->name('countries.map-data');
             Route::get('/details/{slug}', [CountriesController::class, 'country'])->where('slug', '[\w\-]+')->name('countries.details');
             Route::get('/details', [CountriesController::class, 'country']);
     });

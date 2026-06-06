@@ -554,6 +554,167 @@ class GraphsRepository extends SharedRepo{
 	}
 
 
+    /**
+     * Published indicators that have country-level data (for member-states map).
+     */
+    public function get_published_map_indicators()
+    {
+        $kpiIds = $this->get_data_kpis([], true);
+
+        if (count($kpiIds) === 0) {
+            return collect();
+        }
+
+        return Kpi::query()
+            ->with('subjectArea')
+            ->where('status', 'published')
+            ->whereIn('id', $kpiIds->toArray())
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
+     * Choropleth data for one indicator, optionally scoped to a region.
+     */
+    public function get_indicator_map_values(int $kpiId, ?int $regionId = null): array
+    {
+        if ($kpiId <= 0) {
+            return [
+                'kpi_id' => 0,
+                'kpi_name' => '',
+                'unit_label' => '',
+                'aggregation' => 'average',
+                'country_count' => 0,
+                'aggregate' => null,
+                'points' => [],
+                'min' => null,
+                'max' => null,
+            ];
+        }
+
+        $filter = ['kpi_id' => $kpiId];
+        if ($regionId) {
+            $filter['region_id'] = $regionId;
+        }
+
+        $rows = $this->get_country_kpis($filter, false, true);
+        $kpi = Kpi::query()->find($kpiId);
+        $kpiName = $kpi->name ?? '';
+        $unitLabel = $kpi->unit_label ?? '';
+
+        $countryQuery = Country::query()
+            ->where('region_id', '>', 0)
+            ->whereNotNull('iso_code')
+            ->where('iso_code', '!=', '');
+
+        if ($regionId) {
+            $countryQuery->where('region_id', $regionId);
+        }
+
+        $countriesById = $countryQuery->get(['id', 'name', 'iso_code', 'slug', 'region_id'])->keyBy('id');
+        $rowsByCountry = collect($rows)->map(fn ($row) => (object) $row)->keyBy('country_id');
+
+        $points = [];
+        $numericValues = [];
+
+        foreach ($countriesById as $countryId => $country) {
+            $row = $rowsByCountry->get($countryId);
+            if (! $row) {
+                continue;
+            }
+
+            $value = (float) $row->kpi_value;
+            $numericValues[] = $value;
+            $display = kpi_indicator_display($value, $row->unit_label ?? $unitLabel, $row->kpi_name ?? $kpiName);
+
+            $points[] = [
+                'hc-key' => strtolower((string) $country->iso_code),
+                'country_id' => (int) $countryId,
+                'name' => $country->name,
+                'value' => $value,
+                'display_value' => $display['value_with_unit'],
+                'unit_plain' => $display['unit_plain'],
+                'period' => substr((string) ($row->period ?? ''), 0, 4),
+                'detail_url' => country_detail_url($country),
+            ];
+        }
+
+        $aggregation = kpi_aggregate_method($kpiName, $unitLabel);
+        $aggregateValue = $numericValues === []
+            ? null
+            : ($aggregation === 'sum'
+                ? array_sum($numericValues)
+                : array_sum($numericValues) / count($numericValues));
+
+        return [
+            'kpi_id' => $kpiId,
+            'kpi_name' => $kpiName,
+            'unit_label' => $unitLabel,
+            'aggregation' => $aggregation,
+            'aggregation_label' => kpi_aggregate_label($aggregation),
+            'country_count' => count($numericValues),
+            'aggregate' => $aggregateValue !== null
+                ? kpi_indicator_display($aggregateValue, $unitLabel, $kpiName)
+                : null,
+            'points' => $points,
+            'min' => $numericValues === [] ? null : min($numericValues),
+            'max' => $numericValues === [] ? null : max($numericValues),
+        ];
+    }
+
+    /**
+     * Continental summaries for sidebar (all AU member states).
+     */
+    public function get_continental_indicator_summaries(): array
+    {
+        $summaries = [];
+
+        foreach ($this->get_published_map_indicators() as $kpi) {
+            $data = $this->get_indicator_map_values((int) $kpi->id, null);
+            if ($data['country_count'] === 0 || empty($data['aggregate'])) {
+                continue;
+            }
+
+            $summaries[] = [
+                'kpi_id' => (int) $kpi->id,
+                'name' => $kpi->name,
+                'subject_area' => $kpi->subjectArea->name ?? 'Other indicators',
+                'aggregation' => $data['aggregation'],
+                'aggregation_label' => $data['aggregation_label'],
+                'country_count' => $data['country_count'],
+                'display' => $data['aggregate'],
+            ];
+        }
+
+        return $summaries;
+    }
+
+    /**
+     * Regional summaries for one indicator across all regions.
+     */
+    public function get_regional_indicator_summaries(int $kpiId): array
+    {
+        $summaries = [];
+
+        foreach (Region::query()->orderBy('region_name')->get() as $region) {
+            $data = $this->get_indicator_map_values($kpiId, (int) $region->id);
+            if ($data['country_count'] === 0 || empty($data['aggregate'])) {
+                continue;
+            }
+
+            $summaries[] = [
+                'region_id' => (int) $region->id,
+                'region_name' => $region->region_name,
+                'country_count' => $data['country_count'],
+                'aggregation' => $data['aggregation'],
+                'aggregation_label' => $data['aggregation_label'],
+                'display' => $data['aggregate'],
+            ];
+        }
+
+        return $summaries;
+    }
+
 	// Call stored Prodcedure
 	 // Call stored Prodcedure
      public  function callProcedure($name, $paramsArray=[]) {

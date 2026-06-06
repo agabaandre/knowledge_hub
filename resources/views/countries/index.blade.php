@@ -1,7 +1,7 @@
 @extends('layouts.plain')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('assets/css/map.css')}}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
 <style>
     .countries-page-wrapper {
         background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
@@ -300,76 +300,201 @@
         color: var(--theme-color-primary, #119A48);
     }
 
-    /* SVG Map Styling - Override map.css */
-    .map-section-container {
+    .map-controls {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: flex-end;
+        margin-bottom: 1rem;
+    }
+    .map-control-group {
+        flex: 1;
+        min-width: 200px;
+    }
+    .map-control-group label {
+        display: block;
+        font-size: 0.78rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+    .map-control-group select,
+    .map-scope-reset {
         width: 100%;
-        min-height: 600px;
-        position: relative;
-        overflow: visible;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 0.65rem 0.85rem;
+        font-size: 0.95rem;
+        background: #f8fafc;
     }
-
-    .map-wrapper {
-        width: 100% !important;
-        min-height: 600px !important;
-        position: relative;
-        display: block !important;
-        overflow: visible;
+    .map-scope-reset {
+        width: auto;
+        cursor: pointer;
+        background: #fff;
+        color: #1A5632;
+        font-weight: 600;
     }
-
-    .map-wrapper svg {
-        width: 100% !important;
-        height: auto !important;
-        min-height: 600px !important;
-        max-height: 700px !important;
-        display: block !important;
-        padding: 1rem !important;
-        padding-bottom: 2rem !important;
-        float: none !important;
-        visibility: visible !important;
-        opacity: 1 !important;
-        overflow: visible !important;
+    .map-scope-reset:hover {
+        border-color: #1A5632;
+        background: #f0f7f4;
     }
-
-    .map-wrapper #admin0 {
-        position: relative !important;
-        width: 100% !important;
-        height: 100% !important;
+    .map-scope-summary {
+        background: linear-gradient(135deg, #f0f7f4 0%, #fff 100%);
+        border: 1px solid rgba(26, 86, 50, 0.15);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        margin-bottom: 1rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.5rem 1rem;
+        font-size: 0.9rem;
     }
-
-    .map-wrapper .st0.our-member {
-        fill: var(--theme-color-primary, #119A48) !important;
-        stroke: rgba(255, 255, 255, 0.9) !important;
-        stroke-width: 2px !important;
-        transition: all 0.3s ease !important;
-        cursor: pointer !important;
-        opacity: 0.75;
-        visibility: visible !important;
-        display: block !important;
+    .map-scope-summary__value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #9F2241;
     }
-
-    .map-wrapper .st0.our-member:hover {
-        fill: var(--theme-color-primary, #119A48) !important;
-        stroke: #ffffff !important;
-        stroke-width: 2.5px !important;
-        filter: brightness(1.2) !important;
-        opacity: 1 !important;
-        z-index: 10;
+    .map-scope-summary__value em {
+        font-style: normal;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
     }
-
-    .map-wrapper .st0.our-member.active {
-        fill: var(--theme-color-primary, #119A48) !important;
-        stroke: #ffffff !important;
-        stroke-width: 2.5px !important;
-        opacity: 1 !important;
-        filter: brightness(1.15) !important;
+    .map-scope-summary__meta {
+        font-size: 0.78rem;
+        color: #64748b;
+        width: 100%;
     }
-
-    /* Secondary color for focused countries */
-    .map-wrapper .st0.our-member-focused {
-        fill: var(--theme-color-secondary, #0d7a3a) !important;
-        stroke: #ffffff !important;
-        stroke-width: 2.5px !important;
-        opacity: 1 !important;
+    #countriesMapChart {
+        min-height: 520px;
+        border-radius: 12px;
+        overflow: hidden;
+        background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
+        border: 1px solid #e2e8f0;
+    }
+    .map-legend {
+        margin-top: 1rem;
+        padding: 1rem 1.1rem;
+        border-radius: 12px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+    }
+    .map-legend__title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: #475569;
+        margin-bottom: 0.65rem;
+    }
+    .map-legend__bar {
+        height: 14px;
+        border-radius: 999px;
+        background: linear-gradient(90deg, #f0f7f4 0%, #1A5632 100%);
+        border: 1px solid rgba(26, 86, 50, 0.2);
+        margin-bottom: 0.5rem;
+    }
+    .map-legend__labels {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.78rem;
+        color: #64748b;
+        font-weight: 600;
+    }
+    .region-card.map-region-active {
+        border-color: #1A5632;
+        box-shadow: 0 4px 16px rgba(26, 86, 50, 0.18);
+    }
+    .region-map-filter {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #1A5632;
+        background: rgba(26, 86, 50, 0.1);
+        border: none;
+        border-radius: 999px;
+        padding: 0.2rem 0.55rem;
+        margin-left: 0.5rem;
+        cursor: pointer;
+    }
+    .region-map-filter:hover {
+        background: rgba(26, 86, 50, 0.2);
+    }
+    .continental-indicators__title {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.35rem;
+    }
+    .continental-indicators__subtitle {
+        font-size: 0.8rem;
+        margin-bottom: 1rem;
+    }
+    .continental-indicators__list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.65rem;
+        max-height: 420px;
+        overflow-y: auto;
+        padding-right: 0.25rem;
+    }
+    .continental-indicator-card {
+        text-align: left;
+        width: 100%;
+        border: 2px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        background: #fff;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    .continental-indicator-card:hover,
+    .continental-indicator-card.is-active {
+        border-color: #1A5632;
+        background: #f8fdf9;
+        box-shadow: 0 4px 12px rgba(26, 86, 50, 0.12);
+    }
+    .continental-indicator-card__head {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+    }
+    .continental-indicator-card__subject {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #1A5632;
+    }
+    .continental-indicator-card__agg {
+        font-size: 0.65rem;
+        color: #94a3b8;
+        text-align: right;
+    }
+    .continental-indicator-card__name {
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #1e293b;
+        line-height: 1.35;
+        margin-bottom: 0.25rem;
+    }
+    .continental-indicator-card__value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #9F2241;
+        line-height: 1.2;
+    }
+    .continental-indicator-card__denom {
+        font-size: 0.72rem;
+        color: #64748b;
+    }
+    .continental-indicator-card__meta {
+        font-size: 0.7rem;
+        margin-top: 0.35rem;
     }
 
     /* Search Filter */
@@ -505,17 +630,51 @@
             <!-- Map Section -->
             <div class="col-lg-8 col-md-12 mb-4">
                 <div class="map-container-wrapper">
-                    <h3><i class="fa fa-map me-2"></i>Interactive Map</h3>
+                    <h3><i class="fa fa-map me-2"></i>Indicator Map</h3>
+                    <div class="map-controls">
+                        <div class="map-control-group">
+                            <label for="mapIndicatorSelect">Indicator</label>
+                            <select id="mapIndicatorSelect" class="search-input" style="padding-left:0.85rem;">
+                                @forelse($map_indicators as $indicator)
+                                    <option value="{{ $indicator->id }}" @if(($initial_map_data['kpi_id'] ?? null) == $indicator->id) selected @endif>
+                                        {{ $indicator->name }}
+                                    </option>
+                                @empty
+                                    <option value="">No published indicators</option>
+                                @endforelse
+                            </select>
+                        </div>
+                        <div class="map-control-group" style="flex:0 0 auto; min-width:140px;">
+                            <label>Map scope</label>
+                            <button type="button" class="map-scope-reset" id="mapResetRegion">
+                                <i class="fa fa-globe-africa me-1"></i> <span id="mapScopeLabel">All Africa</span>
+                            </button>
+                        </div>
+                    </div>
                     <div class="country-search">
                         <div class="search-input-wrapper">
                             <i class="fa fa-search search-icon"></i>
-                            <input type="text" 
-                                   id="countrySearch" 
-                                   class="search-input" 
-                                   placeholder="Search for a country...">
+                            <input type="text"
+                                   id="countrySearch"
+                                   class="search-input"
+                                   placeholder="Search for a country in the list…">
                         </div>
                     </div>
-                @include('countries.map')
+                    <div id="mapScopeSummary" class="map-scope-summary"></div>
+                    <div id="countriesMapChart">
+                        @if($map_indicators->isEmpty())
+                            <div class="text-muted text-center p-5">Publish KPI indicators to enable the interactive map.</div>
+                        @endif
+                    </div>
+                    <div class="map-legend" aria-hidden="false">
+                        <div class="map-legend__title" id="mapLegendTitle">Indicator scale</div>
+                        <div class="map-legend__bar" id="mapLegendBar"></div>
+                        <div class="map-legend__labels">
+                            <span id="mapLegendMin">—</span>
+                            <span>Low → High</span>
+                            <span id="mapLegendMax">—</span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -547,8 +706,11 @@
                                     <h5>
                                         <i class="fa fa-globe region-icon"></i>
                                         {{ $region->region_name }}
+                                        <button type="button" class="region-map-filter js-map-region-filter" data-region-id="{{ $region->id }}" title="Show regional indicators on map">
+                                            <i class="fa fa-map-marked-alt"></i> Map
+                                        </button>
                                         <span class="region-resources">{{ $regionalResources }} Resources</span>
-                                                </h5>
+                                    </h5>
                                     <i class="fa fa-chevron-down chevron"></i>
                                             </div>
                                 <div id="region{{$region->id}}" 
@@ -580,17 +742,17 @@
                                     @endif
                                                                                                 </div>
                                                                                         </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                        @endforeach
+                    </div>
+
+                    @include('countries.partials.continental_indicators')
+                </div>
+            </div>
         </div>
 </div>
 @endsection
 
 @section('scripts')
-<script src="{{ asset('assets/js/map.js')}}"></script>
 <script>
     const countryDetailUrls = @json(
         collect($countries ?? [])->mapWithKeys(fn ($country) => [(string) $country->id => country_detail_url($country)])->all()
@@ -598,7 +760,10 @@
 
     $(document).ready(function() {
         // Toggle region cards
-        $('.region-card-header').on('click', function() {
+        $('.region-card-header').on('click', function(e) {
+            if ($(e.target).closest('.js-map-region-filter').length) {
+                return;
+            }
             const card = $(this).closest('.region-card');
             const isActive = card.hasClass('active');
             
@@ -652,81 +817,9 @@
             });
         });
 
-        // Track active country for click optimization
-        let activeCountryId = null;
-
-        // Map country hover interaction
-        $('.country-card').on('mouseenter', function() {
-            const countryId = $(this).data('country-id');
-            $('#admin0 path[id="' + countryId + '"]').addClass('active');
-        }).on('mouseleave', function() {
-            const countryId = $(this).data('country-id');
-            // Only remove active if it's not the clicked country
-            if (activeCountryId !== countryId) {
-                $('#admin0 path[id="' + countryId + '"]').removeClass('active');
-            }
-        });
-
-        // SVG path hover interaction
-        $('#admin0 path.our-member').on('mouseenter', function() {
-            const countryId = $(this).attr('id');
-            // Skip if this is the active clicked country
-            if (activeCountryId !== countryId) {
-                $('.country-card[data-country-id="' + countryId + '"]').css({
-                    'border-color': 'var(--theme-color-primary, #119A48)',
-                    'box-shadow': '0 4px 12px rgba(17, 154, 72, 0.2)'
-                });
-            }
-        }).on('mouseleave', function() {
-            const countryId = $(this).attr('id');
-            // Keep styling if it's the active clicked country
-            if (activeCountryId !== countryId) {
-                $('.country-card[data-country-id="' + countryId + '"]').css({
-                    'border-color': '#e2e8f0',
-                    'box-shadow': 'none'
-                });
-            }
-        }).on('click', function(e) {
-            e.preventDefault();
-            const countryId = $(this).attr('id');
-            
-            // Remove previous active country styling
-            if (activeCountryId && activeCountryId !== countryId) {
-                $('#admin0 path[id="' + activeCountryId + '"]').removeClass('active');
-                $('.country-card[data-country-id="' + activeCountryId + '"]').css({
-                    'border-color': '#e2e8f0',
-                    'box-shadow': 'none'
-                }).removeClass('country-selected');
-            }
-            
-            // Set new active country
-            activeCountryId = countryId;
-            
-            // Add active styling
-            $(this).addClass('active');
-            $('.country-card[data-country-id="' + countryId + '"]').css({
-                'border-color': 'var(--theme-color-primary, #119A48)',
-                'box-shadow': '0 6px 16px rgba(17, 154, 72, 0.3)'
-            }).addClass('country-selected');
-            
-            const countryCard = $('.country-card[data-country-id="' + countryId + '"]');
-            if (countryCard.length) {
-                // Expand the region containing this country
-                countryCard.closest('.region-card').addClass('active');
-                countryCard.closest('.region-countries').collapse('show');
-                
-                // Scroll to the country card
-                $('html, body').animate({
-                    scrollTop: countryCard.offset().top - 100
-                }, 500);
-            }
-            
-            // Navigate after a short delay for visual feedback
-            setTimeout(() => {
-                const targetUrl = countryDetailUrls[String(countryId)] || ('{{ url('countries/details') }}?state=' + countryId);
-                window.location.href = targetUrl;
-            }, 300);
-        });
     });
 </script>
+@if($map_indicators->isNotEmpty())
+    @include('countries.partials.map_script')
+@endif
 @endsection

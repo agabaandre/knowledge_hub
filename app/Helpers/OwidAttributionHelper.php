@@ -377,6 +377,29 @@ if (! function_exists('kpi_build_value_with_unit')) {
     }
 }
 
+if (! function_exists('kpi_aggregate_method')) {
+    /**
+     * How to combine country values into regional / continental figures.
+     */
+    function kpi_aggregate_method(?string $kpiName, ?string $unitLabel): string
+    {
+        $hay = strtolower(trim(($kpiName ?? '').' '.($unitLabel ?? '')));
+
+        if (preg_match('/\b(population|births|deaths|cases|incidence count|number of)\b/', $hay)) {
+            return 'sum';
+        }
+
+        return 'average';
+    }
+}
+
+if (! function_exists('kpi_aggregate_label')) {
+    function kpi_aggregate_label(string $method): string
+    {
+        return $method === 'sum' ? 'Total across member states' : 'Average across member states';
+    }
+}
+
 if (! function_exists('kpi_indicator_display')) {
     /**
      * Format a KPI value with unit metadata from OWID.
