@@ -1601,6 +1601,35 @@ class CommsOfPracticeRepository{
     }
 
     /**
+     * @param  array<int, string>  $communities
+     */
+    private function formatParticipantCommunitiesCell(array $communities, string $participantName): string
+    {
+        $communities = array_values(array_filter(array_map(static fn ($name) => trim((string) $name), $communities)));
+        if ($communities === []) {
+            return '<div class="pub-cell-wrap">—</div>';
+        }
+
+        $visible = array_slice($communities, 0, 5);
+        $html = '<ol class="cop-community-list mb-0">';
+        foreach ($visible as $name) {
+            $html .= '<li>'.e($name).'</li>';
+        }
+        $html .= '</ol>';
+
+        $remaining = count($communities) - count($visible);
+        if ($remaining > 0) {
+            $payload = htmlspecialchars(json_encode($communities, JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8');
+            $html .= '<button type="button" class="btn btn-link btn-sm p-0 mt-1 js-view-all-communities"'
+                .' data-member-name="'.e($participantName).'"'
+                .' data-communities="'.$payload.'"'
+                .'>+ '.$remaining.' more</button>';
+        }
+
+        return '<div class="pub-cell-wrap cop-communities-cell">'.$html.'</div>';
+    }
+
+    /**
      * @param  \Illuminate\Support\Collection<int, User>  $participants
      */
     public function enrichParticipantsCollection($participants): void
@@ -1655,7 +1684,7 @@ class CommsOfPracticeRepository{
             ->get()
             ->groupBy('user_id')
             ->map(function ($rows) {
-                return $rows->pluck('community_name')->unique()->filter()->implode(', ');
+                return $rows->pluck('community_name')->unique()->filter()->values()->all();
             });
 
         $participants->transform(function ($row) use (
@@ -1681,7 +1710,7 @@ class CommsOfPracticeRepository{
                 ->unique()
                 ->implode(', ');
 
-            $row->community_labels = (string) ($communitiesByUser[$uid] ?? '');
+            $row->community_names = $communitiesByUser[$uid] ?? [];
 
             return $row;
         });
@@ -1745,7 +1774,10 @@ class CommsOfPracticeRepository{
                 'publications' => (int) ($participant->publication_contributions ?? 0),
                 'forums' => (int) ($participant->forum_contributions ?? 0),
                 'badges' => $cell($participant->badge_labels ?? null),
-                'communities' => $cell($participant->community_labels ?? null),
+                'communities' => $this->formatParticipantCommunitiesCell(
+                    is_array($participant->community_names ?? null) ? $participant->community_names : [],
+                    (string) ($participant->name ?? '')
+                ),
             ];
         }
 
@@ -1798,7 +1830,7 @@ class CommsOfPracticeRepository{
                 .'</div>';
 
             $data[] = [
-                'select' => '<input type="checkbox" class="form-check-input js-pending-select" value="'.$membershipId.'" data-community-id="'.$communityId.'">',
+                'select' => '<span class="cop-pending-checkbox-wrap"><input type="checkbox" class="cop-pending-checkbox js-pending-select" value="'.$membershipId.'" data-community-id="'.$communityId.'" aria-label="Select request"></span>',
                 'index' => '<span class="text-muted">'.$index++.'</span>',
                 'name' => $cell($row->name),
                 'contact' => $contactCell($row->email ?? null, $row->phone_number ?? null),

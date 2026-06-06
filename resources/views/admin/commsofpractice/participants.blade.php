@@ -97,9 +97,60 @@
         #participants-table .part-col-forum { width: 5rem; text-align: center; }
         #participants-table .part-col-badges { width: 11%; }
         #participants-table .part-col-communities,
-        #pending-participants-table .part-col-community { width: 16%; }
-        #pending-participants-table .part-col-select { width: 2.5rem; text-align: center; }
+        #pending-participants-table .part-col-community { width: 18%; min-width: 180px; }
+        .cop-community-list,
+        .cop-community-list-modal {
+            padding-left: 1.2rem;
+            margin: 0;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            color: #334155;
+        }
+        .cop-community-list li,
+        .cop-community-list-modal li {
+            margin-bottom: 0.2rem;
+        }
+        .cop-communities-cell .js-view-all-communities {
+            font-size: 0.78rem;
+            font-weight: 600;
+            text-decoration: none;
+            color: {{ $green }};
+        }
+        .cop-communities-cell .js-view-all-communities:hover {
+            text-decoration: underline;
+        }
+        #pending-participants-table .part-col-select {
+            width: 2.75rem;
+            min-width: 2.75rem;
+            max-width: 2.75rem;
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 12px 8px !important;
+        }
         #pending-participants-table .part-col-actions { width: 7rem; text-align: center; }
+        #pending-participants-table .cop-pending-checkbox-wrap {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            min-height: 18px;
+            margin: 0;
+            line-height: 1;
+        }
+        #pending-participants-table .cop-pending-checkbox {
+            width: 18px;
+            height: 18px;
+            margin: 0 !important;
+            padding: 0;
+            position: static;
+            float: none;
+            vertical-align: middle;
+            cursor: pointer;
+            accent-color: {{ $green }};
+        }
+        #pending-participants-table thead th.part-col-select .cop-pending-checkbox-wrap {
+            padding-top: 0;
+        }
         #pending-participants-table_wrapper table.dataTable thead > tr > th.sorting:before,
         #pending-participants-table_wrapper table.dataTable thead > tr > th.sorting:after,
         #participants-table_wrapper table.dataTable thead > tr > th.sorting:before,
@@ -247,7 +298,11 @@
                     <table id="pending-participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
                         <thead>
                             <tr>
-                                <th class="part-col-select"><input type="checkbox" id="pendingSelectAll" class="form-check-input" aria-label="Select all pending"></th>
+                                <th class="part-col-select">
+                                    <span class="cop-pending-checkbox-wrap">
+                                        <input type="checkbox" id="pendingSelectAll" class="cop-pending-checkbox" aria-label="Select all pending">
+                                    </span>
+                                </th>
                                 <th class="part-col-index">#</th>
                                 <th class="part-col-name">Applicant</th>
                                 <th class="part-col-contact">Email / Phone</th>
@@ -272,7 +327,7 @@
             <span class="badge" style="background:#f0f7f4;color:{{ $green }};">One row per member</span>
         </div>
         <div class="card-body">
-            <p class="text-muted small mb-3">Approved members appear once. All communities they belong to are listed in the <strong>Communities subscribed</strong> column.</p>
+            <p class="text-muted small mb-3">Approved members appear once. Up to five communities are shown per member; click <strong>+ N more</strong> to preview the full numbered list.</p>
             <div class="publication-table-wrap">
                 <table id="participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
                     <thead>
@@ -291,6 +346,23 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="participantCommunitiesModal" tabindex="-1" role="dialog" aria-labelledby="participantCommunitiesModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="background: linear-gradient(135deg, #f0f7f4 0%, #fff 100%);">
+                <h5 class="modal-title" id="participantCommunitiesModalTitle">Communities subscribed</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="text-muted small mb-2" id="participantCommunitiesModalMember"></p>
+                <ol id="participantCommunitiesModalList" class="cop-community-list-modal mb-0"></ol>
             </div>
         </div>
     </div>
@@ -395,7 +467,7 @@ $(function () {
             }
         },
         columns: [
-            { data: 'select', orderable: false, searchable: false, className: 'part-col-select text-center' },
+            { data: 'select', orderable: false, searchable: false, className: 'part-col-select' },
             { data: 'index', orderable: false, searchable: false, className: 'part-col-index text-center' },
             { data: 'name', orderable: false, className: 'part-col-name' },
             { data: 'contact', orderable: false, className: 'part-col-contact' },
@@ -492,6 +564,27 @@ $(function () {
     $('#clearParticipantsFilters').on('click', function (e) {
         e.preventDefault();
         window.location.href = '{{ route('admin.commsofpractice.participants') }}';
+    });
+
+    $(document).on('click', '.js-view-all-communities', function () {
+        const memberName = $(this).attr('data-member-name') || 'Participant';
+        let communities = [];
+        try {
+            communities = JSON.parse($(this).attr('data-communities') || '[]');
+        } catch (e) {
+            communities = [];
+        }
+        const $list = $('#participantCommunitiesModalList').empty();
+        if (!communities.length) {
+            $list.append('<li class="text-muted">No communities found.</li>');
+        } else {
+            communities.forEach(function (name) {
+                $list.append($('<li>').text(name));
+            });
+        }
+        $('#participantCommunitiesModalMember').text(memberName);
+        $('#participantCommunitiesModalTitle').text('Communities subscribed (' + communities.length + ')');
+        $('#participantCommunitiesModal').modal('show');
     });
 });
 </script>
