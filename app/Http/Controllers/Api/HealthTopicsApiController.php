@@ -269,8 +269,8 @@ class HealthTopicsApiController extends ApiController
             'related_forums' => $relatedForums->map(fn ($f) => $f->toArray())->values()->all(),
             'related_communities' => $relatedCommunities->map(fn ($c) => $c->toArray())->values()->all(),
             'web' => [
-                'health_topic_page' => url('/health-topics/'.$tag->id),
-                'records_search_by_tag' => url('/records?'.http_build_query(['tag' => $tag->id])),
+                'health_topic_page' => health_topic_url($tag),
+                'records_search_by_tag' => tag_records_url($tag),
             ],
         ];
     }

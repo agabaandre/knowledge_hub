@@ -56,7 +56,7 @@
                 $authorName = @$row->author->name ?: 'Unknown Author';
                 // Description is HTML content, will be displayed directly with CSS truncation
                 $description = !empty($row->description) ? $row->description : '';
-                $detailsUrl = url('records/resource') . '?id=' . $row->id;
+                $detailsUrl = publication_url($row);
                 $publicationUrl = $row->publication ?? null;
                 $theme = $row->theme->description ?? '';
                 $subTheme = $row->sub_theme->description ?? '';

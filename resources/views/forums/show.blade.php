@@ -28,7 +28,7 @@
         $forumImage = filter_var($forum->forum_image, FILTER_VALIDATE_URL) ? $forum->forum_image : asset($forum->forum_image);
     }
     $pageImage = $forumImage ?? settings()->logo ?? asset('assets/images/logo.png');
-    $canonicalUrl = url('forums/thread?id=' . $forum->id);
+    $canonicalUrl = forum_thread_url($forum);
     $ogType = 'article';
 
     // Article dates for OG
@@ -1040,7 +1040,7 @@
                             : collect($forums)->take(5);
                     @endphp
                     @foreach ($sidebarForums as $other)
-                    <a href="{{ url('forums/thread') }}?id={{ $other->id }}" class="forum-sidebar-item">
+                    <a href="{{ forum_thread_url($other) }}" class="forum-sidebar-item">
                         <div>
                                         @if (is_image($other->forum_image))
                                 <img class="forum-sidebar-img" src="{{ $other->forum_image }}" alt="{{ $other->forum_title ?? 'Forum Discussion' }}" loading="lazy">

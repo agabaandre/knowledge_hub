@@ -182,7 +182,7 @@
             @include('partials.publications.file_type_corner_badge', ['row' => $row])
             <!-- Title for Mobile (shown only on mobile, above image) -->
             <h5 class="text-bold text-lg publication-title-mobile" style="display: none;">
-                <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                <a href="{{ publication_url($row)}}">
                     {!! truncate(clean_unicode($row->title), 500) !!}
                 </a>
             </h5>
@@ -216,7 +216,7 @@
                          : $default_image;
                  @endphp
                  <div class="col-md-3 publication-image-col" style="min-height: 150px; overflow: hidden; display: flex; align-items: center; justify-content: center; background-color: transparent; width: 35%; flex: 0 0 35%; max-width: 35%; padding-right: 0; position: relative; border: none;">
-                     <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
+                     <a href="{{ publication_url($row)}}" class="publication-image-link" style="display: block; width: 100%; height: 100%; cursor: pointer;">
                          <img src="{{ $final_image }}" 
                               alt="{{ clean_unicode($row->title) }}" 
                               class="publication-image"
@@ -229,12 +229,12 @@
                  <div class="col-md-9 publication-content-col" style="width: 65%; flex: 1 1 65%; max-width: 65%; padding-left: 1rem;">
                      <!-- Title for Desktop/Tablet (shown on tablets and desktops, hidden on mobile) -->
                      <h5 class="text-bold text-lg publication-title-desktop">
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                         <a href="{{ publication_url($row)}}">
                              {!! truncate(clean_unicode($row->title), 500) !!}
                          </a>
                      </h5>
                      
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
+                         <a href="{{ publication_url($row)}}" style="text-align: justify; overflow-wrap: break-word; white-space: normal !important; justify-content: center; margin-bottom: 10px;">
                              {!! Str::words(strip_tags(clean_unicode(publication_description_for_list($row->description ?? ''))), 40, '...') !!}
                          </a>
                      
@@ -259,7 +259,7 @@
                      <span class="text-muted medium d-block mt-1">
                          <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated:
                              {{ time_ago($row->updated_at) }} </span>
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                         <a href="{{ publication_url($row)}}">
                              <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits ?? 0 }} Visits</span>
                              <span class=" mr-1 ml-2 comments{{ $i }}" data-bs-toggle="popover"
                                  data-bs-placement="bottom"><i class="fa fa-comments"></i>
@@ -290,13 +290,13 @@
                                  <i class="fa fa-heart-o mr-1"></i> Add favorite
                              </a>
                          @endauth
-                         <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                         <a href="{{ publication_url($row)}}" 
                             class="btn btn-sm btn-primary" 
                             style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
                              <i class="fa fa-eye mr-1"></i> Read more
                          </a>
                          @auth
-                             <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
+                             <a href="{{ publication_url($row)}}" class="btn btn-sm btn-primary" style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500;">
                                  <i class="fa-solid fa-microchip"></i> Khub AI
                              </a>
                          @else

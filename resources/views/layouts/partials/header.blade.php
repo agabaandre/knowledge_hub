@@ -480,7 +480,7 @@
                               data-tag-id="{{ $tag->id }}" 
                               class="{{ $loop->first ? 'active' : '' }}"
                             >
-                              <a href="{{ url('records') }}?tag={{ $tag->id }}">
+                              <a href="{{ tag_records_url($tag) }}">
                                 {{ $tag->tag_text }}
                               </a>
                             </li>

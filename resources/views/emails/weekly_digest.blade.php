@@ -17,7 +17,7 @@
                 @if(!$loop->first)
                 <div style="border-top: 1px solid #e2e8f0; margin-top: 8px; padding-top: 8px;"></div>
                 @endif
-                <a href="{{ url('records/resource?id=' . $pub->id) }}" style="color: #119A48; font-weight: 600; text-decoration: none;">{{ \Illuminate\Support\Str::limit(strip_tags($pub->title ?? 'Untitled'), 80) }}</a>
+                <a href="{{ publication_url($pub) }}" style="color: #119A48; font-weight: 600; text-decoration: none;">{{ \Illuminate\Support\Str::limit(strip_tags($pub->title ?? 'Untitled'), 80) }}</a>
                 @if($pub->author)
                 <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9em;">{{ $pub->author->name ?? '' }}</p>
                 @endif
@@ -45,7 +45,7 @@
                 @if(!$loop->first)
                 <div style="border-top: 1px solid #e2e8f0; margin-top: 8px; padding-top: 8px;"></div>
                 @endif
-                <a href="{{ url('forums/thread?id=' . $forum->id) }}" style="color: #119A48; font-weight: 600; text-decoration: none;">{{ \Illuminate\Support\Str::limit(strip_tags($forum->forum_title ?? 'Untitled'), 80) }}</a>
+                <a href="{{ forum_thread_url($forum) }}" style="color: #119A48; font-weight: 600; text-decoration: none;">{{ \Illuminate\Support\Str::limit(strip_tags($forum->forum_title ?? 'Untitled'), 80) }}</a>
                 <p style="margin: 4px 0 0 0; color: #64748b; font-size: 0.9em;">{{ $forum->user->name ?? 'Unknown' }}</p>
             </div>
             @endforeach

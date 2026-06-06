@@ -50,7 +50,7 @@
             "item": {
                 "@type": "ScholarlyArticle",
                 "name": "{{ addslashes($pub->title) }}",
-                "url": "{{ url('records/resource?id=' . $pub->id) }}",
+                "url": "{{ publication_url($pub) }}",
                 "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}",
                 @if($pub->author)
                 "author": {

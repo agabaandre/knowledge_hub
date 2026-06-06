@@ -48,7 +48,7 @@
 
                             <div class="jbl_button mb-2">
 
-                                <a href="{{ url('records/resource') }}?id={{ $publication->id }}"
+                                <a href="{{ publication_url($publication)}}"
                                     class="btn btn-md rounded bg-white border fs-sm ft-medium"><i class="fa fa-link"></i>
                                     View Original Resource</a>
 

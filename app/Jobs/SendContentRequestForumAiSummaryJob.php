@@ -43,7 +43,7 @@ class SendContentRequestForumAiSummaryJob implements ShouldQueue
                 'title' => 'Discussion overview',
                 'body' => view('emails.content_request_forum_ai_summary', [
                     'contentRequest' => $cr,
-                    'forumUrl' => url('forums/thread?id='.$forumId),
+                    'forumUrl' => forum_thread_url($forumId),
                     'summaryHtml' => $html,
                 ])->render(),
             ])->onQueue('default');

@@ -228,7 +228,7 @@ class AccountController extends Controller
         if($request->ajax())
            return response($data);
 
-        return redirect(url('records/resource?id='.$request->original_id))->with($data);
+        return redirect(publication_url($request->original_id))->with($data);
 
     }
 

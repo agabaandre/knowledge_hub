@@ -86,7 +86,7 @@
                     @foreach($forumContributions as $forum)
                         <div class="forum-contrib-card">
                             <div class="d-flex justify-content-between align-items-start flex-wrap">
-                                <a href="{{ url('forums/thread?id=' . $forum->id) }}" class="fw-bold text-dark mb-1">
+                                <a href="{{ forum_thread_url($forum) }}" class="fw-bold text-dark mb-1">
                                     {!! strip_tags($forum->forum_title ?? 'Untitled discussion') !!}
                                 </a>
                                 <div>

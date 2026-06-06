@@ -8,7 +8,7 @@
         ? Str::limit($overviewPlain, 160)
         : Str::limit('Resources, publications, and discussions for '.clean_unicode($tag->tag_text).' on '.$siteName.'.', 160);
     $pageKeywords = trim(clean_unicode($tag->tag_text).', health topic, public health, '.(settings()->seo_keywords ?? ''));
-    $canonicalUrl = route('health-topics.show', $tag->id);
+    $canonicalUrl = health_topic_url($tag);
     $pageImage = settings()->logo ?? asset('assets/images/logo.png');
     $ogType = 'website';
 
@@ -179,7 +179,7 @@
                     @foreach($relatedCommunities->take(5) as $community)
                     <div class="community-item">
                         <div class="community-item-title">
-                            <a href="{{ url('communities/detail/' . $community->id) }}">
+                            <a href="{{ community_detail_url($community) }}">
                                 {{ Str::limit(strip_tags($community->community_name), 80) }}
                             </a>
                         </div>
@@ -235,7 +235,7 @@
                     @foreach($relatedForums->take(5) as $forum)
                     <div class="forum-item">
                         <div class="forum-item-title">
-                            <a href="{{ url('forums/thread?id=' . $forum->id) }}">
+                            <a href="{{ forum_thread_url($forum) }}">
                                 {{ Str::limit(strip_tags($forum->forum_title), 80) }}
                             </a>
                         </div>

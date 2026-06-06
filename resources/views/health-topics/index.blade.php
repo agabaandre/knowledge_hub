@@ -65,7 +65,7 @@
                         </div>
                         <div class="topics-grid">
                             @foreach($tags as $tag)
-                                <a href="{{ route('health-topics.show', $tag->id) }}" class="topic-card">
+                                <a href="{{ health_topic_url($tag) }}" class="topic-card">
                                     <div class="topic-card-inner">
                                         <div class="topic-icon">
                                             <i class="fa fa-exclamation-triangle"></i>

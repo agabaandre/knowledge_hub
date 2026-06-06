@@ -10,7 +10,7 @@
     <div class="card col-lg-12 single-border mb-1" data-aos="{{ $i > 2 ? 'zoom-in' : '' }}" data-aos-delay="100">
         <div class="card-body text-left">
             <div class="row">
-                <!--<a href="{{ url('records/resource') }}?id={{ $row->id }}">-->
+                <!--<a href="{{ publication_url($row)}}">-->
                 @php
                     if (is_valid_image(storage_link('uploads/publications/' . $row->cover))):
                         $image_link = storage_link('uploads/publications/' . $row->cover);
@@ -24,11 +24,11 @@
                 </div>
                 <div class="col-md-10">
                     <h5>
-                        <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                        <a href="{{ publication_url($row)}}">
                             {{ truncate($row->title, 500) }}</a>
                     </h5>
                     <p class="text-nothern p-0">
-                        <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                        <a href="{{ publication_url($row)}}">
                             {{ nl2br(truncate($row->description, 100)) }}
                         </a>
                     </p>
@@ -46,7 +46,7 @@
                     <span class="text-muted medium d-block mt-1">
                         <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated:
                             {{ time_ago($row->updated_at) }} </span>
-                        <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                        <a href="{{ publication_url($row)}}">
                             <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits }} Views </span>
                             <span class=" mr-1 ml-2 comments{{ $i }}" data-bs-toggle="popover"
                                 data-bs-placement="bottom"><i class="fa fa-comments"></i> {{ count($row->comments) }}

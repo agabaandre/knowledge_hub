@@ -19,7 +19,7 @@
             <ul class="list-unstyled small mb-0">
                 @foreach($forumIds as $fid)
                     <li class="mb-2">
-                        <a href="{{ url('forums/thread?id='.$fid) }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Open forum thread #{{ $loop->iteration }}</a>
+                        <a href="{{ forum_thread_url($fid) }}" class="btn btn-primary btn-sm" target="_blank" rel="noopener">Open forum thread #{{ $loop->iteration }}</a>
                     </li>
                 @endforeach
             </ul>

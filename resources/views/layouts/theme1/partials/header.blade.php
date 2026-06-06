@@ -93,7 +93,7 @@
                         <a class="nav-link dropdown-toggle {{ request()->has('tag') ? 'active' : '' }}" href="#" data-bs-toggle="dropdown">Health Emergencies</a>
                         <ul class="dropdown-menu">
                             @foreach($filteredTags as $tag)
-                                <li><a class="dropdown-item" href="{{ url('records') }}?tag={{ $tag->id }}">{{ $tag->tag_text }}</a></li>
+                                <li><a class="dropdown-item" href="{{ tag_records_url($tag) }}">{{ $tag->tag_text }}</a></li>
                             @endforeach
                         </ul>
                     </li>

@@ -149,14 +149,23 @@ class ForumsController extends Controller
         return view('forums.index', $data);
     }
 
-    public function thread(Request $request)
+    public function thread(Request $request, ?string $slug = null)
     {
-        $request->validate([
-            'id' => 'required|integer|min:1',
-        ]);
+        if ($slug) {
+            $data['forum'] = $this->forumsRepo->findBySlug($slug);
+            $forumId = $data['forum'] ? (int) $data['forum']->id : 0;
+        } else {
+            $request->validate([
+                'id' => 'required|integer|min:1',
+            ]);
 
-        $forumId = (int) $request->id;
-        $data['forum'] = $this->forumsRepo->find($forumId);
+            $forumId = (int) $request->id;
+            $data['forum'] = $this->forumsRepo->find($forumId);
+
+            if ($data['forum'] && seo_friendly_urls_enabled() && ! empty($data['forum']->slug)) {
+                return redirect()->to(forum_thread_url($data['forum']), 301);
+            }
+        }
 
         if (! $data['forum']) {
             abort(404);
@@ -204,7 +213,7 @@ class ForumsController extends Controller
                 $forumImage = filter_var($forum->forum_image, FILTER_VALIDATE_URL) ? $forum->forum_image : asset($forum->forum_image);
             }
             $data['pageImage'] = $forumImage ?? settings()->logo ?? asset('assets/images/logo.png');
-            $data['canonicalUrl'] = url('forums/thread?id=' . $forum->id);
+            $data['canonicalUrl'] = forum_thread_url($forum);
             $data['ogType'] = 'article';
         }
         $request->merge(['rows' => 6]);
@@ -222,7 +231,7 @@ class ForumsController extends Controller
        
         $this->forumsRepo->join_forum($request);
 
-       return redirect('forums/thread?id='.$request->id);
+       return redirect(forum_thread_url((int) $request->id));
     }
 
     public function create(Request $request)

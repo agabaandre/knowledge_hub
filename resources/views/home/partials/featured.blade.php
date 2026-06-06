@@ -106,7 +106,7 @@
 
                                   <div class="cats-box-caption featured-content" style="flex: 1; overflow: hidden;">
                                        <h4 class="fs-md mb-0 ft-medium" style="text-align: justify; overflow-wrap: break-word;"><a
-                                               href="{{ url('records/resource') }}?id={{ $row->id }}"
+                                               href="{{ publication_url($row)}}"
                                                title="{!! clean_unicode($row->title) !!}">{!! truncate(clean_unicode($row->title), 40) !!}</a></h4>
                                        <div class="d-block mb-2 position-relative" style="text-align: justify; overflow-wrap: break-word;">
                                            <span class="text-muted medium" style="display: block;">
@@ -171,7 +171,7 @@
                                                         <i class="fa fa-star mr-1"></i> Add to Favourites
                                                     </a>
                                                 @endauth
-                                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                                                <a href="{{ publication_url($row)}}" 
                                                    class="btn btn-sm btn-primary" 
                                                    style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
                                                     <i class="fa fa-eye mr-1"></i> Browse Resource

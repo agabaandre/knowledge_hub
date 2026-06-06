@@ -102,7 +102,7 @@
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($publications as $pub)
                                                     <li class="mb-2">
-                                                        <a href="{{ url('records/resource') }}?id={{ $pub->id }}">{!! truncate($pub->title, 80) !!}</a>
+                                                        <a href="{{ publication_url($pub)}}">{!! truncate($pub->title, 80) !!}</a>
                                                         <div class="text-muted" style="font-size:.85rem;">{{ time_ago($pub->created_at) }}</div>
                                                     </li>
                                                 @endforeach
@@ -121,7 +121,7 @@
                                             <ul class="list-unstyled mb-0">
                                                 @foreach($forums as $f)
                                                     <li class="mb-2">
-                                                        <a href="{{ url('forums/thread') }}?id={{ $f->id }}">{!! truncate($f->forum_title, 80) !!}</a>
+                                                        <a href="{{ forum_thread_url($f)}}">{!! truncate($f->forum_title, 80) !!}</a>
                                                         <div class="text-muted" style="font-size:.85rem;">by {{ $f->user->name ?? 'Unknown' }} · {{ time_ago($f->created_at) }}</div>
                                                     </li>
                                                 @endforeach

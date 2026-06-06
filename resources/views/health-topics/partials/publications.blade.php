@@ -57,7 +57,7 @@
             @endphp
             
             <!-- Cover Image as Dropcap -->
-            <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
+            <a href="{{ publication_url($row)}}" style="float: left; display: inline-block; cursor: pointer; margin-right: 12px; margin-bottom: 8px; margin-left: 2px; margin-top: 2px;">
                 <img src="{{ $final_image }}" 
                      alt="{{ clean_unicode($row->title) }}" 
                      style="width: 96px; height: 96px; object-fit: contain; transition: transform 0.3s ease; background-color: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 4px; padding: 2px; display: block;"
@@ -68,7 +68,7 @@
             
             <!-- Title -->
             <h5 class="text-bold text-lg" style="margin-bottom: 0.75rem; text-align: justify; overflow-wrap: break-word;">
-                <a href="{{ url('records/resource') }}?id={{ $row->id }}" style="color: {{ $textColor }}; text-decoration: none;">
+                <a href="{{ publication_url($row)}}" style="color: {{ $textColor }}; text-decoration: none;">
                     {!! truncate(clean_unicode($row->title), 30) !!}
                 </a>
             </h5>
@@ -104,7 +104,7 @@
             </p>
             
             <div class="d-flex align-items-center mt-3" style="flex-wrap: wrap; gap: 8px; clear: left;">
-                <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                <a href="{{ publication_url($row)}}" 
                    class="btn btn-sm btn-primary" 
                    style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.5rem 1rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
                     <i class="fa fa-eye mr-1"></i> Browse Resource

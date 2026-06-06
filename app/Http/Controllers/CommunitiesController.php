@@ -224,7 +224,7 @@ class CommunitiesController extends Controller
 
         if ($result['status'] === 'success') {
             if ($communityId > 0) {
-                return redirect()->route('community.detail', ['id' => $communityId])
+                return redirect()->to(community_detail_url($communityId))
                     ->with('alert-success', $result['message']);
             }
 
@@ -233,7 +233,7 @@ class CommunitiesController extends Controller
         }
 
         if ($communityId > 0) {
-            return redirect()->route('community.detail', ['id' => $communityId])
+            return redirect()->to(community_detail_url($communityId))
                 ->with('alert-danger', $result['message']);
         }
 
@@ -241,7 +241,7 @@ class CommunitiesController extends Controller
             ->with('alert-danger', $result['message']);
     }
 
-    public function detail($id)
+    public function detail($key)
     {
         if (!Auth::check()) {
             return redirect()->guest(route('login'));
@@ -252,11 +252,19 @@ class CommunitiesController extends Controller
             return redirect()->guest(route('login'));
         }
 
-        // Get the community
-        $community = $this->commsOfPracticeRepository->find($id);
+        $community = ctype_digit((string) $key)
+            ? $this->commsOfPracticeRepository->find((int) $key)
+            : $this->commsOfPracticeRepository->findBySlug((string) $key);
+
         if (!$community) {
             return redirect()->route('account.my-communities')->with('error', 'Community not found.');
         }
+
+        if (ctype_digit((string) $key) && seo_friendly_urls_enabled() && ! empty($community->slug)) {
+            return redirect()->to(community_detail_url($community), 301);
+        }
+
+        $id = (int) $community->id;
 
         if (community_is_africa_cdc_staff_restricted($community) && ! user_email_allows_africa_cdc_staff_community(Auth::user())) {
             return redirect()->route('account.my-communities')->with('error', 'You do not have access to this community.');
@@ -320,7 +328,7 @@ class CommunitiesController extends Controller
         $pageDescription = \Illuminate\Support\Str::limit(strip_tags($community->description ?? ''), 160) ?: ($community->community_name . ' - A professional community of practice focused on public health topics.');
         $pageKeywords = 'community of practice, ' . ($community->community_name ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
         $pageImage = settings()->logo ?? asset('assets/images/logo.png');
-        $canonicalUrl = url('communities/detail/' . $community->id);
+        $canonicalUrl = community_detail_url($community);
         $ogType = 'profile';
 
         // Get forum engagements (forums in this community)
@@ -412,7 +420,7 @@ class CommunitiesController extends Controller
             $org = [
                 '@type' => 'Organization',
                 'name' => $c->community_name,
-                'url' => url('communities/detail/'.$c->id),
+                'url' => community_detail_url($c),
                 'description' => Str::limit(strip_tags($c->description ?? ''), 200),
             ];
             if ($members !== []) {

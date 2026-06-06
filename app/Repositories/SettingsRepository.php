@@ -118,6 +118,9 @@ class SettingsRepository
         $settings->title                = $request->title;
         $settings->site_description     = $request->site_description;
         $settings->seo_keywords         = $request->seo_keywords;
+        if (Schema::hasColumn('setting', 'use_seo_friendly_urls')) {
+            $settings->use_seo_friendly_urls = (bool) $request->boolean('use_seo_friendly_urls', true);
+        }
         $settings->address           = $request->address;
         $settings->phone             = $request->phone;
         $settings->email             = $request->email;

@@ -26,6 +26,7 @@ use App\Services\ContentRequestReferralNotifier;
 use App\Services\ForumThreadActivityNotifier;
 use App\Services\OfficeDocumentToPdfService;
 use App\Support\CommunityTargeting;
+use App\Support\SeoSlugger;
 
 class ForumsRepository extends SharedRepo{
 
@@ -346,6 +347,8 @@ class ForumsRepository extends SharedRepo{
             $forum->forum_image     = $file_path;
 
         endif;
+
+        $this->assignForumSlug($forum);
 
         $forum->save();
 
@@ -730,6 +733,17 @@ class ForumsRepository extends SharedRepo{
 
 
 
+    public function findBySlug(string $slug, $update_views = true)
+    {
+        $id = Forum::query()->where('slug', $slug)->value('id');
+
+        if (! $id) {
+            return null;
+        }
+
+        return $this->find($id, $update_views);
+    }
+
     public function find($id, $update_views = true){
         // Eager load comments with attachments - trigger the accessor by loading comments first
         $forum = Forum::with([
@@ -842,6 +856,7 @@ class ForumsRepository extends SharedRepo{
 
         $forum->forum_title = format_title_with_ai_fallback($title);
         $forum->forum_description = sanitize_rich_text_for_storage(clean_unicode($descriptionHtml));
+        $this->assignForumSlug($forum);
         $forum->save();
 
         return true;
@@ -900,6 +915,8 @@ class ForumsRepository extends SharedRepo{
             $file->move(storage_path() . '/app/public/uploads/forums/', $file_path);
             $forum->forum_image = $file_path;
         }
+
+        $this->assignForumSlug($forum);
 
         $forum->save();
 
@@ -1485,7 +1502,7 @@ class ForumsRepository extends SharedRepo{
             }
             $actions .= '<a href="'.url('admin/forums/details').'?id='.$forum->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Details"><i class="fa fa-info-circle"></i></a>'
                 .'<button type="button" class="btn btn-sm btn-outline-danger mr-1" onclick="openDeleteModal(\''.$forum->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>'
-                .'<a href="'.url('forums/thread').'?id='.$forum->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="View on site"><i class="fa fa-external-link-alt"></i></a>'
+                .'<a href="'.e(forum_thread_url($forum)).'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="View on site"><i class="fa fa-external-link-alt"></i></a>'
                 .'</div>';
 
             $data[] = [
@@ -1505,6 +1522,18 @@ class ForumsRepository extends SharedRepo{
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
         ];
+    }
+
+    private function assignForumSlug(Forum $forum): void
+    {
+        if (! DBSchema::hasColumn('forums', 'slug') || ! empty($forum->slug)) {
+            return;
+        }
+
+        $forum->slug = SeoSlugger::forForum(
+            (string) ($forum->forum_title ?? ''),
+            $forum->id ?: null
+        );
     }
 
 }

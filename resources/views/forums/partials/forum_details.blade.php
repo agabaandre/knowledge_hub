@@ -152,7 +152,7 @@
             <span>Khub AI</span>
         </a>
         @endauth
-        @php $shareUrl = url('forums/thread').'?id='.$forum->id; $shareText = urlencode(strip_tags($forum->forum_title)); @endphp
+        @php $shareUrl = forum_thread_url($forum); $shareText = urlencode(strip_tags($forum->forum_title)); @endphp
         <a class="forum-action-btn" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" title="Share on LinkedIn">
             <i class="fab fa-linkedin-in"></i>
         </a>
@@ -320,7 +320,7 @@
                                 <i class="fa fa-reply"></i>
                                 <span>Reply</span>
                             </button>
-                            @php $commentShareUrl = url('forums/thread').'?id='.$forum->id.'#comment-'.$comment->id; @endphp
+                            @php $commentShareUrl = forum_thread_url($forum).'#comment-'.$comment->id; @endphp
                             <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $commentShareUrl }}" title="Share comment" style="cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; background: transparent; border: none; color: #64748b;">
                                 <i class="fa fa-share-alt"></i>
                                 <span>Share</span>
@@ -507,7 +507,7 @@
                                         <i class="fa fa-heart{{ $replyIsLiked ? '' : '-o' }}" style="color: {{ $replyIsLiked ? '#ef4444' : 'inherit' }};"></i>
                                         <span class="like-count">{{ $replyLikeCount }} {{ $replyLikeCount === 1 ? 'like' : 'likes' }}</span>
                                     </button>
-                                    @php $replyShareUrl = url('forums/thread').'?id='.$forum->id.'#reply-'.$reply->id; @endphp
+                                    @php $replyShareUrl = forum_thread_url($forum).'#reply-'.$reply->id; @endphp
                                     <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $replyShareUrl }}" title="Share reply" style="cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; background: transparent; border: none; color: #64748b;">
                                         <i class="fa fa-share-alt"></i>
                                         <span>Share</span>

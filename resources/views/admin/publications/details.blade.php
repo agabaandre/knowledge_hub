@@ -88,7 +88,7 @@
                        class="btn btn-outline-dark btn-sm ml-1">
                         <i class="fa fa-edit mr-1"></i>Edit
                     </a>
-                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}"
+                    <a href="{{ publication_url($publication)}}"
                        target="_blank"
                        rel="noopener noreferrer"
                        class="btn btn-outline-success btn-sm ml-1">

@@ -170,7 +170,7 @@ class ContentRequestReferralNotifier
             'body' => view('emails.content_request_forum_new_comment', [
                 'contentRequest' => $contentRequest,
                 'comment' => $comment,
-                'forumUrl' => url('forums/thread?id='.$fid),
+                'forumUrl' => forum_thread_url($fid),
             ])->render(),
         ])->onQueue('default');
     }

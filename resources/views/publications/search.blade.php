@@ -25,7 +25,7 @@
                     "item": {
                         "@type": "Article",
                         "name": "{{ addslashes(Str::limit(strip_tags($pub->title ?? ''), 100)) }}",
-                        "url": "{{ url('records/resource?id=' . $pub->id) }}",
+                        "url": "{{ publication_url($pub) }}",
                         "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}"
                     }
                 }@if(!$loop->last || (isset($searchForums) && $searchForums->count() > 0) || (isset($searchCommunities) && $searchCommunities->count() > 0)),@endif
@@ -39,7 +39,7 @@
                     "item": {
                         "@type": "DiscussionForumPosting",
                         "name": "{{ addslashes(Str::limit(strip_tags($forum->forum_title ?? ''), 100)) }}",
-                        "url": "{{ url('forums/thread?id=' . $forum->id) }}",
+                        "url": "{{ forum_thread_url($forum) }}",
                         "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 200)) }}",
                         "author": {
                             "@type": "Person",
@@ -57,7 +57,7 @@
                     "item": {
                         "@type": "Organization",
                         "name": "{{ addslashes(Str::limit($community->community_name ?? '', 100)) }}",
-                        "url": "{{ url('communities/detail/' . $community->id) }}",
+                        "url": "{{ community_detail_url($community) }}",
                         "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 200)) }}"
                     }
                 }@if(!$loop->last),@endif
@@ -123,8 +123,7 @@
                       <div class="sidebar-tags">
                             @foreach($sidebarTagsList as $tag)
                                 @php
-                                    $tagQuery = array_merge($recordsSearchTagQuery, ['tag' => $tag->id]);
-                                    $tagHref = url('records/search?' . http_build_query($tagQuery, '', '&', PHP_QUERY_RFC3986));
+                                    $tagHref = tag_records_url($tag, true, $recordsSearchTagQuery);
                                     $tagActive = request('tag') !== null && request('tag') !== '' && (string) request('tag') === (string) $tag->id;
                     @endphp
                                 <a href="{{ $tagHref }}"

@@ -169,7 +169,9 @@ Route::group(["prefix" => "browse"], function () {
 
 Route::group(["prefix" => "records"], function () {
 
+    Route::get("/tag/{slug}", [PublicationsController::class, 'searchByTag'])->where('slug', '[\w\-]+')->name('records.tag');
     Route::get("/", [PublicationsController::class, 'search']);
+    Route::get("/resource/{slug}", [PublicationsController::class, 'show'])->where('slug', '[\w\-]+');
     Route::get("/resource", [PublicationsController::class, 'show']);
     Route::get("/search/fragment", [PublicationsController::class, 'searchFragment']);
     Route::get("/search", [PublicationsController::class, 'search']);
@@ -224,7 +226,7 @@ Route::middleware(['auth', 'web'])->group(function () {
 // Health Topics routes
 Route::group(["prefix" => "health-topics"], function () {
     Route::get("/", [HealthTopicsController::class, 'index'])->name('health-topics.index');
-    Route::get("/{id}", [HealthTopicsController::class, 'show'])->name('health-topics.show');
+    Route::get("/{key}", [HealthTopicsController::class, 'show'])->where('key', '[\w\-]+')->name('health-topics.show');
 });
 
 Route::get("/verify", [AccountController::class, 'verifyAccount'])->name('account_verify');
@@ -672,6 +674,7 @@ Route::group(["prefix" => "forums"], function () {
 
     Route::get("/", [ForumsController::class, 'index'])->name('forums.index');
     Route::get("/create", [ForumsController::class, 'create'])->name('forums.create');
+    Route::get("/thread/{slug}", [ForumsController::class, 'thread'])->where('slug', '[\w\-]+');
     Route::get("/thread", [ForumsController::class, 'thread'])->name('forums.thread');
     Route::get("/join", [ForumsController::class, 'join'])->name('forums.join');
     Route::get('/comment-attachment/{attachment}/pdf', [ForumsController::class, 'commentAttachmentPdf'])->name('forums.comment-attachment.pdf');
@@ -736,12 +739,12 @@ Route::group(["prefix" => "communities"], function () {
     Route::get('/', [CommunitiesController::class, 'index'])->name('community.index');
     Route::post('/join', [CommunitiesController::class, 'join'])->name('community.join');
     Route::post('/leave', [CommunitiesController::class, 'leave'])->name('community.leave');
-    Route::post('/detail/{id}/invite', [CommunitiesController::class, 'inviteColleagues'])->middleware('auth')->name('community.invite');
-    Route::post('/detail/{id}/member-status', [CommunitiesController::class, 'updateMemberStatus'])->middleware('auth')->name('community.member-status');
-    Route::get('/detail/{id}/members-data', [CommunitiesController::class, 'membersData'])->middleware('auth')->name('community.members-data');
-    Route::post('/detail/{id}/events', [CommunitiesController::class, 'createCommunityEvent'])->middleware('auth')->name('community.events.create');
+    Route::post('/detail/{id}/invite', [CommunitiesController::class, 'inviteColleagues'])->middleware('auth')->whereNumber('id')->name('community.invite');
+    Route::post('/detail/{id}/member-status', [CommunitiesController::class, 'updateMemberStatus'])->middleware('auth')->whereNumber('id')->name('community.member-status');
+    Route::get('/detail/{id}/members-data', [CommunitiesController::class, 'membersData'])->middleware('auth')->whereNumber('id')->name('community.members-data');
+    Route::post('/detail/{id}/events', [CommunitiesController::class, 'createCommunityEvent'])->middleware('auth')->whereNumber('id')->name('community.events.create');
     Route::get('/accept-invitation/{token}', [CommunitiesController::class, 'acceptInvitation'])->name('community.accept-invitation');
-    Route::get('/detail/{id}', [CommunitiesController::class, 'detail'])->name('community.detail');
+    Route::get('/detail/{key}', [CommunitiesController::class, 'detail'])->where('key', '[\w\-]+')->name('community.detail');
 });
 
 Route::middleware('throttle:oauth')->group(function () {

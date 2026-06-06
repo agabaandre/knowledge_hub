@@ -5,7 +5,7 @@
     $pageDescription = Str::limit(strip_tags($community->description ?? ''), 160) ?: ($community->community_name . ' - A professional community of practice focused on public health topics.');
     $pageKeywords = 'community of practice, ' . ($community->community_name ?? '') . ', public health, ' . (settings()->seo_keywords ?? '');
     $pageImage = settings()->logo ?? asset('assets/images/logo.png');
-    $canonicalUrl = url('communities/detail/' . $community->id);
+    $canonicalUrl = community_detail_url($community);
     $ogType = 'profile';
 
     $detailFaceLimit = communities_listing_show_participants() ? communities_listing_max_faces() : 0;
@@ -382,11 +382,11 @@
                                 $imageLink = resolve_publication_card_cover($publication);
                             @endphp
                             <div class="community-featured-card community-detail-card">
-                                <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                                <a href="{{ publication_url($publication)}}">
                                     <img src="{{ $imageLink }}" alt="{{ $publication->title }}" class="community-featured-image" onerror="this.onerror=null;this.src='{{ $defaultImage }}';">
                                 </a>
                                 <h5 class="community-featured-title">
-                                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                                    <a href="{{ publication_url($publication)}}">
                                             {{ $publication->title }}
                                         </a>
                                     </h5>
@@ -402,7 +402,7 @@
                                         </p>
                                     @endif
                                 <div class="community-featured-actions">
-                                    <a href="{{ url('records/resource') }}?id={{ $publication->id }}">Read More <i class="fa fa-arrow-right"></i></a>
+                                    <a href="{{ publication_url($publication)}}">Read More <i class="fa fa-arrow-right"></i></a>
                                     <span class="text-muted small"><i class="fa fa-eye mr-1"></i>{{ $publication->visits ?? 0 }} Visits</span>
                                 </div>
                                 <div style="clear: both;"></div>
@@ -489,7 +489,7 @@
                     @foreach($forums as $forum)
                         <div class="forum-item">
                             <h6>
-                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">
+                                <a href="{{ forum_thread_url($forum)}}">
                                     {{ \Illuminate\Support\Str::limit($forum->forum_title ?? 'Untitled', 60) }}
                                 </a>
                             </h6>
@@ -515,7 +515,7 @@
                     @foreach($otherCommunities as $otherCommunity)
                         <div class="community-summary">
                             <h6>
-                                <a href="{{ route('community.detail', $otherCommunity->id) }}">
+                                <a href="{{ community_detail_url($otherCommunity) }}">
                                     {{ $otherCommunity->community_name }}
                                 </a>
                             </h6>

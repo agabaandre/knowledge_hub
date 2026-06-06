@@ -16,6 +16,8 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Schema;
+use App\Support\SeoSlugger;
 
 class CommsOfPracticeRepository{
 
@@ -559,6 +561,13 @@ class CommsOfPracticeRepository{
         $access_grp->organisation = $request->organisation ?: null;
         $access_grp->department = $request->department ?: null;
         $access_grp->is_public = $request->has('is_public') ? (bool)$request->is_public : true;
+
+        if (Schema::hasColumn('community_of_practices', 'slug') && empty($access_grp->slug)) {
+            $access_grp->slug = SeoSlugger::forCommunity(
+                (string) ($access_grp->community_name ?? ''),
+                $access_grp->id ?: null
+            );
+        }
         
         $access_grp->save();
 
@@ -574,6 +583,17 @@ class CommsOfPracticeRepository{
         clear_cache();
         
         return $access_grp;
+    }
+
+    public function findBySlug(string $slug, $withRelated = false)
+    {
+        $id = CommunityOfPractice::query()->where('slug', $slug)->value('id');
+
+        if (! $id) {
+            return null;
+        }
+
+        return $this->find($id, $withRelated);
     }
 
     public function find($id, $withRelated = false)

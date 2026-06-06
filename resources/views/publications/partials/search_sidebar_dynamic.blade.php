@@ -4,7 +4,7 @@
   <h5 class="mb-3">Related Resources</h5>
   @foreach($relatedPublications->take(5) as $pub)
   <div class="mb-3 pb-3 border-bottom">
-    <a href="{{ url('records/resource?id=' . $pub->id) }}" class="text-decoration-none">
+    <a href="{{ publication_url($pub) }}" class="text-decoration-none">
       <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
     </a>
     <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>
@@ -34,7 +34,7 @@
   <h5 class="mb-3">Latest Publications</h5>
   @foreach($latestPublications->take(5) as $pub)
   <div class="mb-3 pb-3 border-bottom">
-    <a href="{{ url('records/resource?id=' . $pub->id) }}" class="text-decoration-none">
+    <a href="{{ publication_url($pub) }}" class="text-decoration-none">
       <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
     </a>
     <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>

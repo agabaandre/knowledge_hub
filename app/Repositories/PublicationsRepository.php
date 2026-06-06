@@ -23,6 +23,7 @@ use App\Models\Tag;
 use App\Models\CommunityOfPracticeMembers;
 use App\Models\User;
 use App\Support\CommunityTargeting;
+use App\Support\SeoSlugger;
 use App\Models\ContentRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -611,6 +612,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
             endif;
         endif;
 
+        if ((int) ($pub->is_version ?? 0) === 0 && Schema::hasColumn('publication', 'slug') && empty($pub->slug)) {
+            $pub->slug = SeoSlugger::forPublication((string) ($pub->title ?? ''), $pub->id ?: null);
+        }
+
         $saved = ($request->id)?$pub->update():$pub->save();
 
         $id = ($request->id)?$request->id:$pub->id;
@@ -1128,6 +1133,20 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'publication_id' => $publication->id ?? null,
             'final_countries_count' => $publication->countries()->count(),
         ]);
+    }
+
+    public function findBySlug(string $slug, $update_visits = true)
+    {
+        $id = Publication::query()
+            ->where('slug', $slug)
+            ->where('is_version', 0)
+            ->value('id');
+
+        if (! $id) {
+            return null;
+        }
+
+        return $this->find($id, $update_visits);
     }
 
     public function find($id,$update_visits=true){
@@ -1659,7 +1678,7 @@ public function change_approval_status(Request $request){
             $subject = 'Publication Approved: ' . ($publication->title ?? 'Your Resource');
             
             $publicationUrl = !$request->is_summary 
-                ? url('records/resource') . '?id=' . $publication->id
+                ? publication_url($publication)
                 : url('admin/publications/summaries');
             
             $body = view('emails.publication_approved', [
@@ -2300,7 +2319,7 @@ public function togglePublicationActive(int $id): ?Publication
                 .' <a href="'.url('admin/publications/details').'?id='.$publication->id.'#approval-trail" class="small" title="View approval trail">Trail</a></div>';
 
             $actions = '<div class="pub-actions-group">'
-                .'<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
+                .'<a href="'.publication_url($publication).'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
                 .'<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary" title="View"><i class="fa fa-eye"></i></a>';
             if ($publication->user_id == $currentUserId || $isAdmin) {
                 $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark" title="Edit"><i class="fa fa-edit"></i></a>';
@@ -2649,7 +2668,7 @@ public function togglePublicationActive(int $id): ?Publication
             $created = $publication->created_at
                 ? Carbon::parse($publication->created_at)->format('M d, Y')
                 : '-';
-            $title = '<div class="pub-cell-wrap"><a href="'.e($publication->publication ?? url('records/resource?id='.$publication->id)).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a></div>';
+            $title = '<div class="pub-cell-wrap"><a href="'.e($publication->publication ?? publication_url($publication)).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a></div>';
             $description = $this->adminPublicationDescriptionCell($publication->title, $publication->description);
             $author = '<div class="pub-cell-wrap">'.e($publication->author->name ?? '-').'</div>';
 
@@ -2665,7 +2684,7 @@ public function togglePublicationActive(int $id): ?Publication
             }
             $status = '<span class="badge badge-'.$statusClass.'">'.e($statusLabel).'</span>';
 
-            $actions = '<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="Preview"><i class="fa fa-eye mr-1"></i>Preview</a>';
+            $actions = '<a href="'.publication_url($publication).'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="Preview"><i class="fa fa-eye mr-1"></i>Preview</a>';
 
             $data[] = [
                 'index' => '<span class="text-muted">'.$index++.'</span>',
@@ -2761,7 +2780,7 @@ public function togglePublicationActive(int $id): ?Publication
             $isApproved = (int) ($row->is_approved ?? 0) === 1;
 
             $actions = '<div class="btn-group btn-group-sm" role="group" aria-label="Actions">'
-                .'<a href="'.url('records/resource').'?id='.$row->id.'" class="btn btn-outline-secondary" target="_blank" rel="noopener"><i class="fa fa-eye"></i> Preview</a>';
+                .'<a href="'.publication_url($row).'" class="btn btn-outline-secondary" target="_blank" rel="noopener"><i class="fa fa-eye"></i> Preview</a>';
             if (!$isApproved) {
                 $actions .= '<a href="'.route('account.publications.edit').'?ref='.$row->id.'" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>'
                     .'<a href="javascript:void(0);" onclick="openDeleteModal('.$row->id.')" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>';

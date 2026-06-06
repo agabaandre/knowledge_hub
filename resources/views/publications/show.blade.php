@@ -52,7 +52,7 @@
         $pageImage = asset('assets/images/cover.png');
     }
 
-    $canonicalUrl = url('records/resource?id='.$publication->id);
+    $canonicalUrl = publication_url($publication);
     $ogType = 'article';
     
     $publishDate = $publication->created_at ? $publication->created_at->toIso8601String() : now()->toIso8601String();
@@ -700,7 +700,7 @@
                                         <strong style="color: #5F5F5F; font-size: 0.9rem;">Share This Resource:</strong>
                                         <div class="btn-group" role="group" aria-label="Share">
                                             @php 
-                                                $shareUrl = url('records/resource') . '?id=' . $publication->id; 
+                                                $shareUrl = publication_url($publication); 
                                                 $shareText = urlencode(strip_tags($publication->title)); 
                                             @endphp
                                             <a class="btn btn-sm btn-outline-secondary" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" title="Share on LinkedIn"><i class="fab fa-linkedin-in"></i></a>
@@ -747,7 +747,7 @@
                         <i class="fa-solid fa-microchip"></i> Khub AI
                     </button>
                 @else
-                    <a href="{{ url('login') }}?redirect={{ urlencode(url('records/resource?id='.$publication->id)) }}" class="btn btn-au btn-sm">
+                    <a href="{{ url('login') }}?redirect={{ urlencode(publication_url($publication)) }}" class="btn btn-au btn-sm">
                         <i class="fa-solid fa-microchip"></i> Khub AI <small>(login required)</small>
                     </a>
                 @endauth
@@ -925,7 +925,7 @@
                         @php
                             // Publication::getCoverAttribute already resolves local covers to full URLs.
                             $cover = $relatedPub->cover ?? $relatedPub->image_url ?? asset('assets/images/cover.png');
-                            $detailsUrl = url('records/resource?id=' . $relatedPub->id);
+                            $detailsUrl = publication_url($relatedPub);
                         @endphp
                         <div class="related-resource-card" onclick="window.open('{{ $detailsUrl }}','_blank')">
                             <div class="related-resource-cover">
@@ -1106,7 +1106,7 @@
                         <ul class="list-group">
                             @foreach ($publication->versioning as $version)
                                 <li class="list-group-item" style="word-wrap: break-word; overflow-wrap: break-word;">
-                                    <a href="{{ url('records/resource') }}?id={{ $version->id }}" style="text-decoration: none; color: inherit; display: block;">
+                                    <a href="{{ publication_url($version)}}" style="text-decoration: none; color: inherit; display: block;">
                                         <span style="word-break: break-word; white-space: normal;">
                                             {{ Str::limit(strip_tags($version->title ?? 'Untitled'), 60) }} 
                                             <span class="text-muted">(Version {{ $version->version_no }})</span>
@@ -1116,7 +1116,7 @@
                             @endforeach
                             @if ($publication->parent_id > 0)
                                 <li class="list-group-item" style="word-wrap: break-word; overflow-wrap: break-word;">
-                                    <a href="{{ url('records/resource') }}?id={{ $publication->parent_id }}" style="text-decoration: none; color: inherit; display: block;">
+                                    <a href="{{ publication_url($publication->parent_id) }}" style="text-decoration: none; color: inherit; display: block;">
                                         <span style="word-break: break-word; white-space: normal;">
                                         <i class="fa fa-link"></i> Original Version
                                         </span>
@@ -1142,7 +1142,7 @@
                             <div class="d-flex flex-wrap publication-tags-list mt-1 mb-3">
                                 @foreach($publication->tags as $pubTag)
                                     @if($pubTag->tag)
-                                        <a href="{{ url('records?tag=' . $pubTag->tag_id) }}" class="badge badge-secondary publication-tag-pill">{{ $pubTag->tag->tag_text }}</a>
+                                        <a href="{{ tag_records_url($pubTag->tag_id) }}" class="badge badge-secondary publication-tag-pill">{{ $pubTag->tag->tag_text }}</a>
                                     @endif
                                 @endforeach
                             </div>

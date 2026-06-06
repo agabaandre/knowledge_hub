@@ -236,6 +236,7 @@ DROP TABLE IF EXISTS `community_of_practices`;
 CREATE TABLE `community_of_practices` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `community_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `region_id` bigint unsigned DEFAULT NULL,
   `country_id` bigint unsigned DEFAULT NULL,
@@ -247,6 +248,7 @@ CREATE TABLE `community_of_practices` (
   `created_at` timestamp NULL DEFAULT NULL,
   `updated_at` timestamp NULL DEFAULT NULL,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `community_of_practices_slug_unique` (`slug`),
   KEY `community_of_practices_created_by_foreign` (`created_by`),
   CONSTRAINT `community_of_practices_created_by_foreign` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -752,6 +754,7 @@ DROP TABLE IF EXISTS `forums`;
 CREATE TABLE `forums` (
   `id` int NOT NULL AUTO_INCREMENT,
   `forum_title` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `forum_image` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'forum.jpg',
   `forum_description` longtext COLLATE utf8mb4_unicode_ci,
   `created_by` int NOT NULL,
@@ -766,6 +769,7 @@ CREATE TABLE `forums` (
   `is_resubmission_pending` tinyint(1) NOT NULL DEFAULT '0',
   `also_public_on_hub` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `forums_slug_unique` (`slug`),
   FULLTEXT KEY `ft_forum_search` (`forum_title`,`forum_description`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -1298,6 +1302,7 @@ CREATE TABLE `publication` (
   `publication` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `year_published` int DEFAULT NULL,
   `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `description` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
   `publication_catgory_id` int NOT NULL,
   `publication_sub_category_id` bigint unsigned DEFAULT NULL,
@@ -1348,6 +1353,7 @@ CREATE TABLE `publication` (
   `show_disclaimer` tinyint(1) NOT NULL DEFAULT '1',
   `also_public_on_hub` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
+  UNIQUE KEY `publication_slug_unique` (`slug`),
   KEY `publication_geographical_scope_id_foreign` (`geographical_scope_id`),
   KEY `publication_year_published_index` (`year_published`),
   KEY `publication_license_id_foreign` (`license_id`),
@@ -1747,6 +1753,7 @@ CREATE TABLE `setting` (
   `title` varchar(255) DEFAULT NULL,
   `site_name` varchar(100) NOT NULL,
   `seo_keywords` text NOT NULL,
+  `use_seo_friendly_urls` tinyint(1) NOT NULL DEFAULT '1',
   `site_description` text NOT NULL,
   `address` text,
   `email` varchar(50) DEFAULT NULL,
@@ -1955,10 +1962,12 @@ DROP TABLE IF EXISTS `tags`;
 CREATE TABLE `tags` (
   `id` int NOT NULL AUTO_INCREMENT,
   `tag_text` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `slug` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `is_health_topic` tinyint(1) NOT NULL DEFAULT '1',
   `is_health_emergency` tinyint(1) NOT NULL DEFAULT '0',
   `overview` text COLLATE utf8mb4_unicode_ci,
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `tags_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `telescope_entries`;
@@ -2505,3 +2514,7 @@ INSERT INTO `migrations` VALUES (276,'2026_06_02_120000_add_installer_lock_to_se
 INSERT INTO `migrations` VALUES (277,'2026_05_20_100000_backfill_publication_approval_logs',156);
 INSERT INTO `migrations` VALUES (278,'2026_05_20_100001_create_forum_approval_logs_table',157);
 INSERT INTO `migrations` VALUES (279,'2026_05_20_100002_backfill_forum_approval_logs',158);
+INSERT INTO `migrations` VALUES (280,'2026_05_20_110000_add_slugs_to_publications_and_forums',159);
+INSERT INTO `migrations` VALUES (281,'2026_05_20_110001_backfill_publication_and_forum_slugs',160);
+INSERT INTO `migrations` VALUES (282,'2026_05_20_120000_add_slugs_to_tags_and_communities',161);
+INSERT INTO `migrations` VALUES (283,'2026_05_20_120001_backfill_tag_and_community_slugs',162);

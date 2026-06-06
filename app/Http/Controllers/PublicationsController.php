@@ -28,8 +28,20 @@ class PublicationsController extends Controller
         $this->commsRepo        = $commsRepo;
     }
 
-    public function show(Request $request){
-        $data['publication'] = $this->publicationsRepo->find($request->id);
+    public function show(Request $request, ?string $slug = null){
+        if ($slug) {
+            $data['publication'] = $this->publicationsRepo->findBySlug($slug);
+        } else {
+            if (! $request->id) {
+                abort(404);
+            }
+
+            $data['publication'] = $this->publicationsRepo->find($request->id);
+
+            if ($data['publication'] && seo_friendly_urls_enabled() && ! empty($data['publication']->slug)) {
+                return redirect()->to(publication_url($data['publication']), 301);
+            }
+        }
 
         if(!$data['publication'])
             abort(404);
@@ -128,6 +140,34 @@ class PublicationsController extends Controller
     }
 
     public function search(Request $request)
+    {
+        if ($request->filled('tag') && seo_friendly_urls_enabled()) {
+            $tagModel = Tag::find((int) $request->tag);
+            if ($tagModel && ! empty($tagModel->slug)) {
+                $query = $request->query();
+                unset($query['tag']);
+                $target = tag_records_url($tagModel, true, $query);
+
+                return redirect()->to($target, 301);
+            }
+        }
+
+        return $this->searchWithoutLegacyTagRedirect($request);
+    }
+
+    public function searchByTag(Request $request, string $slug)
+    {
+        $tag = Tag::query()->where('slug', $slug)->first();
+        if (! $tag) {
+            abort(404);
+        }
+
+        $request->merge(['tag' => $tag->id]);
+
+        return $this->searchWithoutLegacyTagRedirect($request);
+    }
+
+    protected function searchWithoutLegacyTagRedirect(Request $request)
     {
         $this->prepareRecordsSearchRequest($request);
         $this->validateRecordsSearchRequest($request);
@@ -311,7 +351,13 @@ class PublicationsController extends Controller
             'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id', 'sub_thematic_area_id', 'subtheme',
             'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag', 'page',
         ]));
-        $data['canonicalUrl'] = url('records/search?'.http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
+        if ($tagModel && seo_friendly_urls_enabled() && ! empty($tagModel->slug)) {
+            $tagQuery = $canonicalQuery;
+            unset($tagQuery['tag']);
+            $data['canonicalUrl'] = tag_records_url($tagModel, true, $tagQuery);
+        } else {
+            $data['canonicalUrl'] = url('records/search?'.http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
+        }
         $data['ogType'] = 'website';
 
         return $data;

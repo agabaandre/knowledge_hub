@@ -67,7 +67,7 @@
                             <td>{{ $log->model_name }}</td>
                             <td>
                                 @if(!empty($log->publication_id))
-                                    <a href="{{ url('records/resource') }}?id={{ $log->publication_id }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open</a>
+                                    <a href="{{ publication_url($log->publication_id) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open</a>
                                 @else
                                     -
                                 @endif

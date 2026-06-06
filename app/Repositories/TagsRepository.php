@@ -6,6 +6,7 @@ use App\Models\ForumTag;
 use App\Models\PublicationTag;
 use App\Models\Tag;
 use App\View\Composers\TagsViewComposer;
+use App\Support\SeoSlugger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -48,6 +49,9 @@ class TagsRepository{
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
         }
+        if (Schema::hasColumn('tags', 'slug') && empty($tag->slug)) {
+            $tag->slug = SeoSlugger::forTag((string) ($tag->tag_text ?? ''), null);
+        }
         $tag->save();
         TagsViewComposer::forgetTagListCache();
 
@@ -76,6 +80,9 @@ class TagsRepository{
         }
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
+        }
+        if (Schema::hasColumn('tags', 'slug') && empty($tag->slug)) {
+            $tag->slug = SeoSlugger::forTag((string) ($tag->tag_text ?? ''), (int) $tag->id);
         }
         $tag->save();
         TagsViewComposer::forgetTagListCache();

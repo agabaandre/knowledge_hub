@@ -86,6 +86,11 @@ class AccessLogJob implements ShouldQueue
                         $path = $this->request->path();
                         if (stripos($path, 'records/resource') !== false) {
                             $publicationId = $this->request->query('id');
+                            if (! $publicationId && preg_match('#records/resource/([\w\-]+)#', $path, $matches)) {
+                                $publicationId = \App\Models\Publication::query()
+                                    ->where('slug', $matches[1])
+                                    ->value('id');
+                            }
                         }
                     }
                 }

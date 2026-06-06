@@ -21,7 +21,7 @@
     <p>Your request is also being discussed in <strong>dedicated community forum thread(s)</strong> on the Knowledge Hub (members comment there; you may need to sign in to read everything).</p>
     @foreach($forumIds as $fid)
     <p style="margin: 12px 0;">
-        <a href="{{ url('forums/thread?id='.$fid) }}" style="display: inline-block; background-color: #0d7a3a; color: #ffffff !important; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Open forum thread @if($forumIds->count() > 1)#{{ $loop->iteration }}@endif</a>
+        <a href="{{ forum_thread_url($fid) }}" style="display: inline-block; background-color: #0d7a3a; color: #ffffff !important; padding: 12px 20px; text-decoration: none; border-radius: 4px; font-weight: bold;">Open forum thread @if($forumIds->count() > 1)#{{ $loop->iteration }}@endif</a>
     </p>
     @endforeach
     <p style="font-size: 13px; color: #666;">You may receive separate email(s) with an AI-generated overview of each discussion.</p>

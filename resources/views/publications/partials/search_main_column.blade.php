@@ -33,7 +33,7 @@
                 <div class="col-12 mb-3">
                     <div class="card border rounded" style="border-color:#e2e8f0;">
                         <div class="card-body py-3">
-                            <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="text-decoration-none">
+                            <a href="{{ forum_thread_url($forum)}}" class="text-decoration-none">
                                 <h6 class="mb-1" style="color:#0f172a;font-size:1rem;">{!! Str::limit(strip_tags($forum->forum_title ?? ''), 120) !!}</h6>
                             </a>
                             @if(!empty($forum->forum_description))
@@ -47,7 +47,7 @@
                                 <span class="mr-3"><i class="fa fa-comments mr-1"></i>{{ $forum->total_comments ?? 0 }} Comments</span>
                                 <span><i class="fa fa-eye mr-1"></i>{{ $forum->views ?? 0 }} Views</span>
                             </div>
-                            <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-primary mt-2">
+                            <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-primary mt-2">
                                 <i class="fa fa-arrow-right mr-1"></i>View Discussion
                             </a>
                         </div>
@@ -72,7 +72,7 @@
                 <div class="col-12 mb-3">
                     <div class="card border rounded" style="border-color:#e2e8f0;">
                         <div class="card-body py-3">
-                            <a href="{{ url('communities/detail/' . $community->id) }}" class="text-decoration-none">
+                            <a href="{{ community_detail_url($community) }}" class="text-decoration-none">
                                 <h6 class="mb-1" style="color:#0f172a;font-size:1rem;">{{ Str::limit($community->community_name ?? '', 120) }}</h6>
                             </a>
                             @if(!empty($community->description))
@@ -86,7 +86,7 @@
                                 <span class="mr-3"><i class="fa fa-globe mr-1"></i>{{ $community->region->name ?? '' }}</span>
                                 @endif
                             </div>
-                            <a href="{{ url('communities/detail/' . $community->id) }}" class="btn btn-sm btn-primary mt-2">
+                            <a href="{{ community_detail_url($community) }}" class="btn btn-sm btn-primary mt-2">
                                 <i class="fa fa-arrow-right mr-1"></i>View Community
                             </a>
                         </div>

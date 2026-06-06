@@ -218,7 +218,7 @@ class ForumThreadActivityNotifier
             return;
         }
 
-        $threadUrl = url('forums/thread?id='.$forum->id);
+        $threadUrl = forum_thread_url($forum);
 
         $users = User::query()
             ->whereIn('id', $userIds)

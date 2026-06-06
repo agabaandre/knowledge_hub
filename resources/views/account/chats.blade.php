@@ -106,7 +106,7 @@
         @else
             @foreach ($chatsByDocument as $doc)
                 @php
-                    $resourceUrl = url('records/resource?id=' . $doc['publication_id']);
+                    $resourceUrl = publication_url($doc['publication_id']);
                     if (!empty($doc['attachment_id'])) {
                         $resourceUrl .= '&attachment_id=' . $doc['attachment_id'];
                     }

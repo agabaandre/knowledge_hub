@@ -287,7 +287,7 @@ class MeApiController extends Controller
                         'title' => ($forum && $forum->forum_title !== null && $forum->forum_title !== '')
                             ? $forum->forum_title
                             : ('Forum #'.$forumId),
-                        'thread_url' => url('forums/thread?id='.$forumId),
+                        'thread_url' => forum_thread_url($forumId),
                         'sessions' => [],
                     ];
                 }
@@ -299,7 +299,7 @@ class MeApiController extends Controller
                     $publicationId = $session->publication_id !== null ? (int) $session->publication_id : null;
                     $attachmentId = $session->attachment_id !== null ? (int) $session->attachment_id : null;
                     $resourceUrl = $publicationId !== null
-                        ? url('records/resource?id='.$publicationId.($attachmentId ? '&attachment_id='.$attachmentId : ''))
+                        ? publication_url($publicationId, true, $attachmentId ? ['attachment_id' => $attachmentId] : [])
                         : null;
                     $byPublication[$key] = [
                         'publication_id' => $publicationId,

@@ -1,6 +1,6 @@
 @php
     $pinned = $pinned ?? false;
-    $detailUrl = route('community.detail', $community->id);
+    $detailUrl = community_detail_url($community);
     $descPlain = strip_tags($community->description ?? '');
     $lastAt = $community->listing_last_activity ?? null;
     $faces = $community->listing_contributor_faces ?? collect();

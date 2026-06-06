@@ -182,6 +182,6 @@ class ContentRequestReferralForumService
             return '';
         }
 
-        return url('forums/thread?id='.$forumId);
+        return forum_thread_url($forumId);
     }
 }

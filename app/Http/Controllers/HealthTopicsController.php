@@ -59,7 +59,7 @@ class HealthTopicsController extends Controller
                 '@type' => 'ListItem',
                 'position' => $pos++,
                 'name' => $topicTag->tag_text,
-                'item' => route('health-topics.show', $topicTag->id),
+                'item' => health_topic_url($topicTag),
             ];
         }
 
@@ -107,17 +107,26 @@ class HealthTopicsController extends Controller
         ));
     }
 
-    public function show($id)
+    public function show($key)
     {
-        // Find the tag (health topic)
-        $tag = Tag::where(function($q){
-                    if (DBSchema::hasColumn('tags','is_health_topic')) {
-                        $q->where('is_health_topic', true);
-                    } else {
-                        $q->where('is_health_emergency', true);
-                    }
-                 })
-                 ->findOrFail($id);
+        $baseQuery = Tag::where(function ($q) {
+            if (DBSchema::hasColumn('tags', 'is_health_topic')) {
+                $q->where('is_health_topic', true);
+            } else {
+                $q->where('is_health_emergency', true);
+            }
+        });
+
+        if (ctype_digit((string) $key)) {
+            $tag = (clone $baseQuery)->findOrFail((int) $key);
+            if (seo_friendly_urls_enabled() && ! empty($tag->slug)) {
+                return redirect()->to(health_topic_url($tag), 301);
+            }
+        } else {
+            $tag = (clone $baseQuery)->where('slug', $key)->firstOrFail();
+        }
+
+        $id = (int) $tag->id;
 
         // Get publications tagged with this tag
         $publicationIds = PublicationTag::where('tag_id', $id)

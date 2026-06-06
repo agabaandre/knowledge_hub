@@ -169,7 +169,7 @@
 				<div class="card-body p-0">
 					<div class="list-group list-group-flush">
 						@foreach($recommendedByPreferences->take(10) as $pub)
-						<a href="{{ url('records/resource') }}?id={{ $pub->id }}" class="list-group-item list-group-item-action border-0 px-3 py-2" style="transition: all 0.3s ease;">
+						<a href="{{ publication_url($pub)}}" class="list-group-item list-group-item-action border-0 px-3 py-2" style="transition: all 0.3s ease;">
 							<div class="d-flex align-items-start">
 								@php
 									$raw_cover = $pub->getRawOriginal('cover');
@@ -223,7 +223,7 @@
 				<div class="card-body p-0">
 					<div class="list-group list-group-flush">
 						@foreach($relatedByFavoriteTags->take(10) as $pub)
-						<a href="{{ url('records/resource') }}?id={{ $pub->id }}" class="list-group-item list-group-item-action border-0 px-3 py-2" style="transition: all 0.3s ease;">
+						<a href="{{ publication_url($pub)}}" class="list-group-item list-group-item-action border-0 px-3 py-2" style="transition: all 0.3s ease;">
 							<div class="d-flex align-items-start">
 								@php
 									$raw_cover = $pub->getRawOriginal('cover');

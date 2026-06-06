@@ -146,7 +146,7 @@
 									$colors = [settings()->primary_color,settings()->primary_text_color,settings()->icon_font_color];
 								@endphp
 								@foreach($tags->take(5) as $tag)
-								<a href="{{ url('records')}}?tag={{$tag->id}}" 
+								<a href="{{ tag_records_url($tag) }}" 
 								   class="tag-pill" 
 								   title="{{$tag->tag_text}}">
 									{{ truncate($tag->tag_text,15) }}

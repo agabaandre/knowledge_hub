@@ -53,7 +53,7 @@
                         <h6 class="h6 fw-bold mb-2">Tags</h6>
                         <div class="d-flex flex-wrap gap-1">
                             @foreach($tags->take(8) as $tag)
-                                <a href="{{ url('records') }}?tag={{ $tag->id }}" class="badge bg-primary text-decoration-none">{{ truncate($tag->tag_text, 12) }}</a>
+                                <a href="{{ tag_records_url($tag) }}" class="badge bg-primary text-decoration-none">{{ truncate($tag->tag_text, 12) }}</a>
                             @endforeach
                         </div>
                     </div>

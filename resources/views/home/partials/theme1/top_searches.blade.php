@@ -126,11 +126,11 @@
                             </div>
                         </div>
                         <div class="forum-content">
-                            <a href="{{ url('records/resource') }}?id={{ $row->id }}">
+                            <a href="{{ publication_url($row)}}">
                                 <img src="{{ $image_link }}" alt="" class="forum-thread-image" loading="lazy" onerror="this.src='{{ $default_image }}';">
                             </a>
                             <h3 class="forum-title">
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}">{{ $row->title }}</a>
+                                <a href="{{ publication_url($row)}}">{{ $row->title }}</a>
                             </h3>
                             <p class="mb-0" style="text-align: justify;">{{ Str::words(strip_tags($row->description ?? 'No description.'), 40) }}</p>
                             <div class="forum-actions">
@@ -147,10 +147,10 @@
                                 @else
                                 <a href="{{ url('login') }}?redirect={{ urlencode(request()->fullUrl()) }}" class="forum-action-btn me-2" style="color: #ef4444;"><i class="fa fa-heart-o me-1"></i> Add favorite</a>
                                 @endauth
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                <a href="{{ publication_url($row)}}" class="forum-action-btn">
                                     Read More <i class="fa fa-arrow-right"></i>
                                 </a>
-                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" class="forum-action-btn">
+                                <a href="{{ publication_url($row)}}" class="forum-action-btn">
                                     <i class="fa-solid fa-microchip me-1"></i> Khub AI
                                 </a>
                                 <span class="text-muted small"><i class="fa fa-eye me-1"></i>{{ $row->visits ?? 0 }} Visits</span>

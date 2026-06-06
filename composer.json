@@ -56,7 +56,8 @@
         },
         "files": [
             "app/Helpers/UtilsHelper.php",
-            "app/Helpers/MenuCacheHelper.php"
+            "app/Helpers/MenuCacheHelper.php",
+            "app/Helpers/SeoUrlHelper.php"
         ]
     },
     "autoload-dev": {

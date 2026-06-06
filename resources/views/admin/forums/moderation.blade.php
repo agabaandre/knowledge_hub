@@ -67,7 +67,7 @@
 							<td>{!! time_ago($row->created_at) !!}</td>
 							<td>
 								<a class="btn btn-sm btn-outline-primary mr-1" href="#details{{$row->id}}" data-toggle="modal"><i class="fa fa-eye mr-1"></i> Review</a>
-								<a class="btn btn-sm btn-outline-secondary" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"><i class="fa fa-external-link mr-1"></i> Preview</a>
+								<a class="btn btn-sm btn-outline-secondary" target="_blank" href="{{ forum_thread_url($row)}}"><i class="fa fa-external-link mr-1"></i> Preview</a>
 							</td>
 						</tr>
 

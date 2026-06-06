@@ -56,7 +56,7 @@
                 </button>
                 @php 
                     $forumId = isset($forum) && isset($forum->id) ? $forum->id : ($comment->forum_id ?? 0);
-                    $commentShareUrl = url('forums/thread').'?id='.$forumId.'#comment-'.$comment->id; 
+                    $commentShareUrl = forum_thread_url($forumId).'#comment-'.$comment->id; 
                 @endphp
                 <button type="button" class="comment-action-btn share-comment-btn" data-share-url="{{ $commentShareUrl }}" title="Share comment" style="cursor: pointer; padding: 0.25rem 0.5rem; font-size: 0.8125rem; background: transparent; border: none; color: #64748b;">
                     <i class="fa fa-share-alt"></i>

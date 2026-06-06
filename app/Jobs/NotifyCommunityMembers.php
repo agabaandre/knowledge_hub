@@ -79,9 +79,9 @@ class NotifyCommunityMembers implements ShouldQueue
 
             $contentUrl = '';
             if ($this->contentType === 'publication') {
-                $contentUrl = url('records/resource').'?id='.$this->contentId;
+                $contentUrl = publication_url($this->contentId);
             } elseif ($this->contentType === 'forum') {
-                $contentUrl = url('forums/thread').'?id='.$this->contentId;
+                $contentUrl = forum_thread_url($this->contentId);
             }
 
             $subject = 'New '.ucfirst($this->contentType).' in Your Community';

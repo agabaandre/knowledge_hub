@@ -106,10 +106,10 @@
 
                                   <div class="cats-box-caption top-searches-content" style="flex: 1; overflow: hidden;">
                                        <h4 class="fs-md mb-0 ft-medium" style="text-align: justify; overflow-wrap: break-word;"><a
-                                               href="{{ url('records/resource') }}?id={{ $row->id }}"
+                                               href="{{ publication_url($row)}}"
                                                title="{!! $row->title !!}">{!! truncate($row->title, 40) !!}</a></h4>
                                        <div class="d-block mb-2 position-relative" style="text-align: justify; overflow-wrap: break-word;">
-                                           <!-- <p class="text-nothern p-0"><a href="{{ url('records/resource') }}?id={{ $row->id }}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description, 60))) !!}</a></p> -->
+                                           <!-- <p class="text-nothern p-0"><a href="{{ publication_url($row)}}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description, 60))) !!}</a></p> -->
                                            <span class="text-muted medium" style="display: block;">
                                                Source: <i
                                                    class="fa fa-bank mr-1"></i>{{ truncate($row->author->name ?? '', 40) }}</span>
@@ -172,7 +172,7 @@
                                                         <i class="fa fa-star mr-1"></i> Add to Favourites
                                                     </a>
                                                 @endauth
-                                                <a href="{{ url('records/resource') }}?id={{ $row->id }}" 
+                                                <a href="{{ publication_url($row)}}" 
                                                    class="btn btn-sm btn-primary" 
                                                    style="background-color: var(--theme-color-primary, #119A48); border-color: var(--theme-color-primary, #119A48); color: white; text-decoration: none; padding: 0.375rem 0.75rem; border-radius: 0.25rem; font-size: 0.875rem; font-weight: 500; transition: all 0.3s ease;">
                                                     <i class="fa fa-eye mr-1"></i> Browse Resource

@@ -35,7 +35,7 @@
                     "item": {
                         "@type": "DiscussionForumPosting",
                         "headline": "{{ addslashes($forum->forum_title ?? 'Forum') }}",
-                        "url": "{{ url('forums/thread?id=' . $forum->id) }}",
+                        "url": "{{ forum_thread_url($forum) }}",
                         "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 200)) }}",
                         "author": {
                             "@type": "Person",
@@ -662,7 +662,7 @@
                                 }
                             @endphp
                             <h2 class="forum-title" itemprop="headline">
-                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}">{!! $forum->forum_title !!}</a>
+                                <a href="{{ forum_thread_url($forum)}}">{!! $forum->forum_title !!}</a>
                             </h2>
                             <p class="forum-description">
                                 @php
@@ -737,12 +737,12 @@
                             </div>
 
                             <div class="forum-actions">
-                                <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm btn-outline-secondary">
+                                <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-outline-secondary">
                                     <i class="fa fa-info-circle"></i> Details
                                 </a>
                                 @auth
                                     @if(in_array($forum->id, $my_forums))
-                                        <a href="{{ url('forums/thread') }}?id={{ $forum->id }}" class="btn btn-sm theme-bg text-white">
+                                        <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm theme-bg text-white">
                                             <i class="fa fa-comments"></i> View Discussion
                                         </a>
                                         <button type="button" class="btn btn-sm theme-bg text-white" 
@@ -924,7 +924,7 @@
                     @foreach($relatedForums as $forum)
                     <div class="sidebar-item">
                         <div class="sidebar-item-title">
-                            <a href="{{ url('forums/thread?id=' . $forum->id) }}">
+                            <a href="{{ forum_thread_url($forum) }}">
                                 {{ Str::limit(strip_tags($forum->forum_title), 80) }}
                             </a>
                         </div>
@@ -952,7 +952,7 @@
                     @foreach($relatedPublications as $publication)
                     <div class="sidebar-item">
                         <div class="sidebar-item-title">
-                            <a href="{{ url('records/resource') }}?id={{ $publication->id }}">
+                            <a href="{{ publication_url($publication)}}">
                                 {{ Str::limit(strip_tags($publication->title), 80) }}
                             </a>
                         </div>
@@ -980,7 +980,7 @@
                     @foreach($relatedCommunities as $community)
                     <div class="sidebar-item">
                         <div class="sidebar-item-title">
-                            <a href="{{ route('community.detail', $community->id) }}">
+                            <a href="{{ community_detail_url($community) }}">
                                 {{ Str::limit(strip_tags($community->community_name), 80) }}
                             </a>
                         </div>

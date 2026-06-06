@@ -477,6 +477,16 @@
                         <small class="info-text">Separate keywords with commas.</small>
                     </div>
 
+                <div class="form-group">
+                        <label class="d-block">SEO-friendly URLs</label>
+                        <input type="hidden" name="use_seo_friendly_urls" value="0">
+                        <label class="mb-0">
+                            <input type="checkbox" name="use_seo_friendly_urls" value="1" {{ ($settings->use_seo_friendly_urls ?? true) ? 'checked' : '' }}>
+                            Use title-based URLs for publications, forums, communities, tags, and health topics (instead of <code>?id=</code> links)
+                        </label>
+                        <small class="info-text d-block">When enabled, links use readable slugs and legacy ID URLs redirect to the slug URL.</small>
+                </div>
+
                     <div class="form-section-title mt-4">
                         <i class="fa fa-images"></i>
                         Branding
