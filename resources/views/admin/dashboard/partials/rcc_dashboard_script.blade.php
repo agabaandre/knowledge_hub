@@ -3,8 +3,11 @@
     var colors = window.__rccColors || {};
     var mapChart = null;
     var mainChart = null;
+    var subjectCharts = [];
     var topologyCache = null;
     var debounceTimer = null;
+    var lastPayload = null;
+    var chartsTabRendered = false;
 
     function ensureMapModule() {
         return new Promise(function (resolve, reject) {
@@ -35,10 +38,28 @@
         var form = document.getElementById('rccFilterForm');
         if (!form) return {};
         var data = {};
+        if (window.jQuery) {
+            jQuery(form).find('select, input').each(function () {
+                var name = this.name;
+                if (!name) return;
+                var val = jQuery(this).val();
+                if (val !== null && val !== '' && val !== undefined) {
+                    data[name] = val;
+                }
+            });
+            return data;
+        }
         new FormData(form).forEach(function (value, key) {
             if (value !== '') data[key] = value;
         });
         return data;
+    }
+
+    function syncFilterUrl() {
+        var params = new URLSearchParams(filterParams());
+        var qs = params.toString();
+        var url = window.location.pathname + (qs ? '?' + qs : '');
+        window.history.replaceState({}, '', url);
     }
 
     function fetchPayload() {
@@ -53,23 +74,96 @@
         debounceTimer = setTimeout(refreshDashboard, 350);
     }
 
+    function escapeHtml(text) {
+        var div = document.createElement('div');
+        div.textContent = text == null ? '' : String(text);
+        return div.innerHTML;
+    }
+
+    function reflowVisibleCharts(targetId) {
+        setTimeout(function () {
+            if (targetId === '#rccTabCharts') {
+                if (mainChart && mainChart.reflow) mainChart.reflow();
+                subjectCharts.forEach(function (c) {
+                    if (c && c.reflow) c.reflow();
+                });
+            }
+            if (targetId === '#rccTabOverview' && mapChart && mapChart.reflow) {
+                mapChart.reflow();
+            }
+        }, 60);
+    }
+
+    function initTabs() {
+        var tabList = document.getElementById('rccTabs');
+        if (!tabList) return;
+
+        function activateTab(link) {
+            var targetId = link.getAttribute('href');
+            if (!targetId || targetId.charAt(0) !== '#') return;
+
+            tabList.querySelectorAll('.nav-link').forEach(function (el) {
+                el.classList.remove('active');
+                el.setAttribute('aria-selected', 'false');
+            });
+            document.querySelectorAll('#rccTabs + .tab-content .tab-pane, .rcc-panel__body > .tab-content .tab-pane').forEach(function (pane) {
+                pane.classList.remove('show', 'active');
+            });
+
+            link.classList.add('active');
+            link.setAttribute('aria-selected', 'true');
+            var pane = document.querySelector(targetId);
+            if (pane) {
+                pane.classList.add('show', 'active');
+            }
+
+            if (targetId === '#rccTabCharts' && lastPayload) {
+                renderChartsTab(lastPayload, true);
+            }
+            reflowVisibleCharts(targetId);
+        }
+
+        tabList.querySelectorAll('a[role="tab"]').forEach(function (link) {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                activateTab(link);
+            });
+        });
+
+        if (typeof bootstrap !== 'undefined' && bootstrap.Tab) {
+            tabList.querySelectorAll('a[role="tab"]').forEach(function (link) {
+                link.addEventListener('shown.bs.tab', function () {
+                    var targetId = link.getAttribute('href');
+                    if (targetId === '#rccTabCharts' && lastPayload) {
+                        renderChartsTab(lastPayload, true);
+                    }
+                    reflowVisibleCharts(targetId);
+                });
+            });
+        }
+    }
+
     function renderScopeBanner(payload) {
         var el = document.getElementById('rccScopeBanner');
         if (!el) return;
         var map = payload.map || {};
-        var regionId = document.getElementById('rccRegion')?.value;
+        var meta = payload.meta || {};
         var scopeName = 'Africa (all member states)';
-        if (regionId && window.__rccRegions) {
-            var region = window.__rccRegions.find(function (r) { return String(r.id) === String(regionId); });
+        if (meta.country_name) {
+            scopeName = meta.country_name;
+        } else if (meta.region_name) {
+            scopeName = meta.region_name;
+        } else if (meta.region_id && window.__rccRegions) {
+            var region = window.__rccRegions.find(function (r) { return String(r.id) === String(meta.region_id); });
             if (region) scopeName = region.name;
         }
         var agg = map.aggregate || {};
-        el.innerHTML = '<strong>' + (map.kpi_name || 'Indicator') + '</strong> · ' + scopeName
+        el.innerHTML = '<strong>' + escapeHtml(map.kpi_name || 'Indicator') + '</strong> · ' + escapeHtml(scopeName)
             + '<span style="font-size:1.1rem;font-weight:700;color:' + colors.red + ';margin-left:0.5rem">'
-            + (agg.value_with_unit || agg.value || '—') + '</span>'
+            + escapeHtml(agg.value_with_unit || agg.value || '—') + '</span>'
             + '<span class="text-muted d-block mt-1" style="font-size:0.8rem">'
-            + (map.aggregation_label || '') + ' · ' + (map.country_count || 0) + ' countries · Year '
-            + (payload.meta?.period_year || '') + '</span>';
+            + escapeHtml(map.aggregation_label || '') + ' · ' + (map.country_count || 0) + ' countries · Year '
+            + escapeHtml(meta.period_year || '') + '</span>';
     }
 
     function renderSummaryChips(summaries) {
@@ -83,7 +177,7 @@
             var d = item.display || {};
             var val = d.type === 'percent' ? (d.value + '%') : (d.value_with_unit || d.value || '—');
             return '<button type="button" class="rcc-summary-chip js-rcc-kpi-chip" data-kpi-id="' + item.kpi_id + '">'
-                + item.name.substring(0, 36) + ': <strong>' + val + '</strong></button>';
+                + escapeHtml(item.name.substring(0, 36)) + ': <strong>' + escapeHtml(val) + '</strong></button>';
         }).join('');
         el.querySelectorAll('.js-rcc-kpi-chip').forEach(function (chip) {
             chip.addEventListener('click', function () {
@@ -102,15 +196,15 @@
         }
         var html = '';
         groups.forEach(function (group) {
-            html += '<h4 class="rcc-subject-title">' + group.subject_area_name + '</h4><div class="rcc-kpi-grid">';
+            html += '<h4 class="rcc-subject-title">' + escapeHtml(group.subject_area_name) + '</h4><div class="rcc-kpi-grid">';
             (group.items || []).slice(0, 12).forEach(function (item) {
                 var d = item.display || {};
                 var prev = item.prev_display || {};
                 html += '<div class="rcc-kpi-card">'
-                    + '<div class="rcc-kpi-card__name">' + item.kpi_name + '</div>'
-                    + '<div class="rcc-kpi-card__value">' + (d.value_with_unit || d.value || '—') + '</div>'
-                    + (d.unit_plain ? '<div class="rcc-kpi-card__unit">' + d.unit_plain + '</div>' : '')
-                    + '<div class="rcc-kpi-card__yoy">vs ' + (year - 1) + ': ' + (prev.value_with_unit || prev.value || '—') + '</div>'
+                    + '<div class="rcc-kpi-card__name">' + escapeHtml(item.kpi_name) + '</div>'
+                    + '<div class="rcc-kpi-card__value">' + escapeHtml(d.value_with_unit || d.value || '—') + '</div>'
+                    + (d.unit_plain ? '<div class="rcc-kpi-card__unit">' + escapeHtml(d.unit_plain) + '</div>' : '')
+                    + '<div class="rcc-kpi-card__yoy">vs ' + (year - 1) + ': ' + escapeHtml(prev.value_with_unit || prev.value || '—') + '</div>'
                     + '</div>';
             });
             html += '</div>';
@@ -132,21 +226,25 @@
             var mapData = mapPayload.points.map(function (p) {
                 return { 'hc-key': p['hc-key'], value: p.value, name: p.name, display_value: p.display_value, period: p.period };
             });
+            var mapSeriesName = mapPayload.kpi_name || 'Indicator value';
             mapChart = Highcharts.mapChart('rccMapChart', {
                 chart: { map: topology, backgroundColor: 'transparent', height: 460 },
-                title: { text: null },
+                title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
                 credits: { enabled: true, text: 'Map © Natural Earth · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
                 mapNavigation: { enabled: true },
                 mapView: { zoom: 2.8, center: [20, 2] },
                 colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
                 legend: { enabled: false },
                 series: [{
-                    type: 'map', data: mapData, joinBy: 'hc-key',
+                    name: mapSeriesName,
+                    type: 'map',
+                    data: mapData,
+                    joinBy: 'hc-key',
                     tooltip: {
                         useHTML: true,
                         formatter: function () {
                             var p = this.point;
-                            return '<b>' + p.name + '</b><br/>' + (p.display_value || p.value);
+                            return '<b>' + escapeHtml(p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
                         }
                     }
                 }]
@@ -156,7 +254,17 @@
         });
     }
 
-    function renderMainChart(chartPayload) {
+    function buildChartSeries(chartPayload) {
+        return (chartPayload.data || []).map(function (s, i) {
+            return {
+                name: s.name || ('Indicator ' + (i + 1)),
+                data: s.data || [],
+                color: colors.palette[i % colors.palette.length]
+            };
+        });
+    }
+
+    function renderMainChart(chartPayload, deferReflow) {
         var container = document.getElementById('rccMainChart');
         if (!container) return;
         if (!chartPayload || !chartPayload.data || !chartPayload.data.length) {
@@ -168,14 +276,7 @@
         if (chartType === 'bar' && chartPayload.mode === 'countries') chartType = 'bar';
         if (chartPayload.mode === 'timeline') chartType = chartType === 'column' ? 'line' : chartType;
 
-        var series = chartPayload.data.map(function (s, i) {
-            return {
-                name: s.name,
-                data: s.data,
-                color: colors.palette[i % colors.palette.length]
-            };
-        });
-
+        var series = buildChartSeries(chartPayload);
         if (mainChart) { mainChart.destroy(); mainChart = null; }
         mainChart = Highcharts.chart('rccMainChart', {
             chart: { type: chartType, backgroundColor: 'transparent', height: 420 },
@@ -183,18 +284,82 @@
             credits: { enabled: false },
             colors: colors.palette,
             xAxis: {
-                categories: chartPayload.labels,
-                labels: { style: { fontSize: '10px', color: '#64748b' }, rotation: chartPayload.labels.length > 12 ? -45 : 0 }
+                categories: chartPayload.labels || [],
+                labels: { style: { fontSize: '10px', color: '#64748b' }, rotation: (chartPayload.labels || []).length > 12 ? -45 : 0 }
             },
-            yAxis: { title: { text: null }, gridLineColor: '#e2e8f0' },
-            legend: { enabled: series.length > 1 },
-            tooltip: { shared: true, valueDecimals: 2 },
+            yAxis: {
+                title: { text: chartPayload.y_axis_title || 'Value', style: { color: '#64748b' } },
+                gridLineColor: '#e2e8f0'
+            },
+            legend: { enabled: series.length > 1, itemStyle: { fontSize: '11px' } },
+            tooltip: {
+                shared: true,
+                valueDecimals: 2,
+                pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>'
+            },
             plotOptions: {
                 column: { borderRadius: 4, dataLabels: { enabled: false } },
+                bar: { borderRadius: 4, dataLabels: { enabled: false } },
                 series: { animation: { duration: 500 } }
             },
             series: series
         });
+        if (!deferReflow && mainChart.reflow) mainChart.reflow();
+    }
+
+    function destroySubjectCharts() {
+        subjectCharts.forEach(function (c) {
+            if (c && c.destroy) c.destroy();
+        });
+        subjectCharts = [];
+    }
+
+    function renderSubjectCharts(subjectChartsPayload) {
+        var container = document.getElementById('rccSubjectCharts');
+        if (!container) return;
+        destroySubjectCharts();
+        if (!subjectChartsPayload || !subjectChartsPayload.length) {
+            container.innerHTML = '';
+            return;
+        }
+        container.innerHTML = subjectChartsPayload.map(function (chart, idx) {
+            return '<div class="rcc-subject-chart" id="rccSubjectChart' + idx + '"></div>';
+        }).join('');
+
+        subjectChartsPayload.forEach(function (chartDef, idx) {
+            var chart = Highcharts.chart('rccSubjectChart' + idx, {
+                chart: { type: 'column', backgroundColor: 'transparent', height: 300 },
+                title: { text: chartDef.title || chartDef.subject_area_name, style: { fontSize: '12px', color: '#64748b' } },
+                credits: { enabled: false },
+                colors: [colors.green],
+                xAxis: {
+                    categories: chartDef.labels || [],
+                    labels: { style: { fontSize: '9px', color: '#64748b' }, rotation: (chartDef.labels || []).length > 6 ? -35 : 0 }
+                },
+                yAxis: { title: { text: chartDef.series_name || 'Value', style: { fontSize: '10px', color: '#94a3b8' } }, gridLineColor: '#e2e8f0' },
+                legend: { enabled: false },
+                tooltip: { valueDecimals: 2 },
+                plotOptions: { column: { borderRadius: 4 } },
+                series: [{ name: chartDef.series_name || 'Latest value', data: chartDef.data || [] }]
+            });
+            subjectCharts.push(chart);
+        });
+    }
+
+    function isChartsTabActive() {
+        var pane = document.getElementById('rccTabCharts');
+        return pane && pane.classList.contains('active');
+    }
+
+    function renderChartsTab(payload, force) {
+        if (!force && !isChartsTabActive()) {
+            chartsTabRendered = false;
+            return;
+        }
+        renderMainChart(payload.chart, false);
+        renderSubjectCharts(payload.subject_charts);
+        chartsTabRendered = true;
+        reflowVisibleCharts('#rccTabCharts');
     }
 
     function renderTable(rows) {
@@ -206,29 +371,32 @@
         }
         body.innerHTML = rows.map(function (row) {
             return '<tr>'
-                + '<td>' + row.country_name + '</td>'
-                + '<td>' + row.kpi_name + '</td>'
-                + '<td>' + row.period + '</td>'
-                + '<td><strong>' + row.display_value + '</strong></td>'
+                + '<td>' + escapeHtml(row.country_name) + '</td>'
+                + '<td>' + escapeHtml(row.kpi_name) + '</td>'
+                + '<td>' + escapeHtml(row.period) + '</td>'
+                + '<td><strong>' + escapeHtml(row.display_value) + '</strong></td>'
                 + '</tr>';
         }).join('');
     }
 
+    function applyPayload(payload) {
+        lastPayload = payload;
+        syncFilterUrl();
+        renderScopeBanner(payload);
+        renderSummaryChips(payload.indicator_summaries);
+        renderKpiCards(payload.subject_groups, payload.meta?.period_year || new Date().getFullYear());
+        renderMap(payload.map);
+        renderChartsTab(payload, isChartsTabActive() || chartsTabRendered);
+        renderTable(payload.table);
+    }
+
     function refreshDashboard() {
-        var overview = document.getElementById('rccTabOverview');
-        if (overview) {
-            var mapEl = document.getElementById('rccMapChart');
-            if (mapEl) mapEl.innerHTML = '<div class="rcc-empty"><i class="fa fa-spinner fa-spin"></i> Loading…</div>';
-        }
+        chartsTabRendered = false;
+        var mapEl = document.getElementById('rccMapChart');
+        if (mapEl) mapEl.innerHTML = '<div class="rcc-empty"><i class="fa fa-spinner fa-spin"></i> Loading…</div>';
         return fetchPayload().then(function (payload) {
-            renderScopeBanner(payload);
-            renderSummaryChips(payload.indicator_summaries);
-            renderKpiCards(payload.subject_groups, payload.meta?.period_year || new Date().getFullYear());
-            renderMap(payload.map);
-            renderMainChart(payload.chart);
-            renderTable(payload.table);
+            applyPayload(payload);
         }).catch(function () {
-            var mapEl = document.getElementById('rccMapChart');
             if (mapEl) mapEl.innerHTML = '<div class="rcc-empty text-danger">Failed to load dashboard data.</div>';
         });
     }
@@ -264,33 +432,34 @@
         });
     }
 
-    document.addEventListener('DOMContentLoaded', function () {
-        if (window.jQuery && jQuery.fn.select2) {
-            jQuery('.select2').select2({ width: '100%' });
-        }
-
+    function bindFilterHandlers() {
         var form = document.getElementById('rccFilterForm');
-        if (form) {
-            form.querySelectorAll('select').forEach(function (sel) {
-                sel.addEventListener('change', function () {
-                    if (sel.id === 'rccRegion') filterCountryOptions();
-                    if (sel.id === 'rccSubject') filterIndicatorOptions();
-                    scheduleRefresh();
-                });
+        if (!form) return;
+        var onFilterChange = function (sel) {
+            if (sel.id === 'rccRegion') filterCountryOptions();
+            if (sel.id === 'rccSubject') filterIndicatorOptions();
+            scheduleRefresh();
+        };
+        if (window.jQuery) {
+            jQuery(form).find('select').off('change.rcc').on('change.rcc', function () {
+                onFilterChange(this);
             });
+            return;
         }
+        form.querySelectorAll('select').forEach(function (sel) {
+            sel.addEventListener('change', function () { onFilterChange(sel); });
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        initTabs();
+        bindFilterHandlers();
 
         filterCountryOptions();
         filterIndicatorOptions();
 
         if (window.__rccInitialPayload) {
-            var p = window.__rccInitialPayload;
-            renderScopeBanner(p);
-            renderSummaryChips(p.indicator_summaries);
-            renderKpiCards(p.subject_groups, p.meta?.period_year || new Date().getFullYear());
-            renderMap(p.map);
-            renderMainChart(p.chart);
-            renderTable(p.table);
+            applyPayload(window.__rccInitialPayload);
         } else {
             refreshDashboard();
         }

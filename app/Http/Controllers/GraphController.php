@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 use App\Models\Region;
 use App\Models\SubjectArea;
 use App\Repositories\GraphsRepository;
+use App\Support\MetricsCache;
 use Illuminate\Http\Request;
 class GraphController extends Controller
 {
@@ -66,7 +67,7 @@ class GraphController extends Controller
 				? $years
 				: [(int) date('Y')],
 			'countries' => $this->dashRepo->get_countries($filter, true),
-			'initial_payload' => $this->dashRepo->get_rcc_dashboard_payload($filter),
+			'initial_payload' => $this->rccDashboardPayload($filter),
 			'regions_json' => Region::query()->orderBy('region_name')->get()->map(fn ($r) => [
 				'id' => (int) $r->id,
 				'name' => $r->region_name,
@@ -76,8 +77,25 @@ class GraphController extends Controller
 
 	public function rcc_data(Request $request)
 	{
-		return response()->json(
-			$this->dashRepo->get_rcc_dashboard_payload($request->all())
+		$filter = $request->all();
+		$payload = $this->rccDashboardPayload($filter);
+
+		return response()->json(array_merge($payload, [
+			'cache' => [
+				'redis' => MetricsCache::redisAvailable(),
+				'ttl_seconds' => MetricsCache::ttl('rcc'),
+			],
+		]));
+	}
+
+	private function rccDashboardPayload(array $filter): array
+	{
+		$cacheKey = 'rcc_dashboard_'.md5(serialize($filter));
+
+		return MetricsCache::store()->remember(
+			$cacheKey,
+			MetricsCache::ttl('rcc'),
+			fn () => $this->dashRepo->get_rcc_dashboard_payload($filter)
 		);
 	}
 

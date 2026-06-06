@@ -95,6 +95,19 @@
     }
     #rccMapChart { min-height: 460px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; }
     #rccMainChart { min-height: 420px; }
+    .rcc-subject-charts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 1rem;
+        margin-top: 1.25rem;
+    }
+    .rcc-subject-chart {
+        min-height: 300px;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        padding: 0.5rem;
+        background: #fafbfc;
+    }
     .rcc-summary-chips { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1rem; }
     .rcc-summary-chip {
         border: 1px solid #e2e8f0;
@@ -167,7 +180,7 @@
                     <select name="region_id" id="rccRegion" class="form-control select2">
                         <option value="">All Africa</option>
                         @foreach($regions as $region)
-                            <option value="{{ $region->id }}" @selected(($filter['region_id'] ?? '') == $region->id)>{{ $region->region_name }}</option>
+                            <option value="{{ $region->id }}" @if(!empty($filter['region_id']) && (int) $filter['region_id'] === (int) $region->id) selected @endif>{{ $region->region_name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -176,7 +189,7 @@
                     <select name="country_id" id="rccCountry" class="form-control select2">
                         <option value="">All in scope</option>
                         @foreach($countries as $country)
-                            <option value="{{ $country->id }}" data-region="{{ $country->region_id }}" @selected(($filter['country_id'] ?? '') == $country->id)>{{ $country->name }}</option>
+                            <option value="{{ $country->id }}" data-region="{{ $country->region_id }}" @if(!empty($filter['country_id']) && (int) $filter['country_id'] === (int) $country->id) selected @endif>{{ $country->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -184,7 +197,7 @@
                     <label for="rccYear">Year</label>
                     <select name="period_year" id="rccYear" class="form-control select2">
                         @foreach($years as $year)
-                            <option value="{{ $year }}" @selected(($filter['period_year'] ?? date('Y')) == $year)>{{ $year }}</option>
+                            <option value="{{ $year }}" @if((int) ($filter['period_year'] ?? date('Y')) === (int) $year) selected @endif>{{ $year }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -193,7 +206,7 @@
                     <select name="subject_area" id="rccSubject" class="form-control select2">
                         <option value="">All subject areas</option>
                         @foreach($subjectareas as $subject)
-                            <option value="{{ $subject->id }}" @selected(($filter['subject_area'] ?? '') == $subject->id)>{{ $subject->name }}</option>
+                            <option value="{{ $subject->id }}" @if(!empty($filter['subject_area']) && (int) $filter['subject_area'] === (int) $subject->id) selected @endif>{{ $subject->name }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -202,17 +215,17 @@
                     <select name="kpi_id" id="rccIndicator" class="form-control select2">
                         <option value="">All published indicators</option>
                         @foreach($indicators as $indicator)
-                            <option value="{{ $indicator->id }}" data-subject="{{ $indicator->subject_area }}" @selected(($filter['kpi_id'] ?? '') == $indicator->id)>{{ $indicator->name }}</option>
+                            <option value="{{ $indicator->id }}" data-subject="{{ $indicator->subject_area }}" @if(!empty($filter['kpi_id']) && (int) $filter['kpi_id'] === (int) $indicator->id) selected @endif>{{ $indicator->name }}</option>
                         @endforeach
                     </select>
                 </div>
                 <div>
                     <label for="rccChartType">Chart type</label>
                     <select name="chart_type" id="rccChartType" class="form-control select2">
-                        <option value="column" @selected(($filter['chart_type'] ?? 'column') === 'column')>Column</option>
-                        <option value="bar" @selected(($filter['chart_type'] ?? '') === 'bar')>Bar</option>
-                        <option value="line" @selected(($filter['chart_type'] ?? '') === 'line')>Line</option>
-                        <option value="areaspline" @selected(($filter['chart_type'] ?? '') === 'areaspline')>Area</option>
+                        <option value="column" @if(($filter['chart_type'] ?? 'column') === 'column') selected @endif>Column</option>
+                        <option value="bar" @if(($filter['chart_type'] ?? '') === 'bar') selected @endif>Bar</option>
+                        <option value="line" @if(($filter['chart_type'] ?? '') === 'line') selected @endif>Line</option>
+                        <option value="areaspline" @if(($filter['chart_type'] ?? '') === 'areaspline') selected @endif>Area</option>
                     </select>
                 </div>
             </form>
@@ -220,24 +233,31 @@
 
         <div class="rcc-panel__body">
             <ul class="nav rcc-nav-tabs" id="rccTabs" role="tablist">
-                <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#rccTabOverview" type="button">Overview</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rccTabCharts" type="button">Charts</button></li>
-                <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#rccTabData" type="button">Data table</button></li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link active" id="rccTabOverviewBtn" href="#rccTabOverview" role="tab" aria-controls="rccTabOverview" aria-selected="true">Overview</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="rccTabChartsBtn" href="#rccTabCharts" role="tab" aria-controls="rccTabCharts" aria-selected="false">Charts</a>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <a class="nav-link" id="rccTabDataBtn" href="#rccTabData" role="tab" aria-controls="rccTabData" aria-selected="false">Data table</a>
+                </li>
             </ul>
 
             <div class="tab-content">
-                <div class="tab-pane fade show active" id="rccTabOverview">
+                <div class="tab-pane fade show active" id="rccTabOverview" role="tabpanel" aria-labelledby="rccTabOverviewBtn">
                     <div id="rccScopeBanner" class="rcc-scope-banner"></div>
                     <div id="rccSummaryChips" class="rcc-summary-chips"></div>
                     <div id="rccKpiCards"></div>
                     <div id="rccMapChart"><div class="rcc-empty"><i class="fa fa-spinner fa-spin me-2"></i>Loading map…</div></div>
                     @include('common.owid_attribution', ['compact' => true])
                 </div>
-                <div class="tab-pane fade" id="rccTabCharts">
+                <div class="tab-pane fade" id="rccTabCharts" role="tabpanel" aria-labelledby="rccTabChartsBtn">
                     <div id="rccMainChart"><div class="rcc-empty">Select filters to load chart</div></div>
+                    <div id="rccSubjectCharts" class="rcc-subject-charts"></div>
                     @include('common.owid_attribution', ['compact' => true])
                 </div>
-                <div class="tab-pane fade" id="rccTabData">
+                <div class="tab-pane fade" id="rccTabData" role="tabpanel" aria-labelledby="rccTabDataBtn">
                     <div class="table-responsive">
                         <table class="table table-hover rcc-data-table" id="rccDataTable">
                             <thead>
