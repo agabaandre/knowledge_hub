@@ -176,7 +176,13 @@ class CommunitiesController extends Controller
             ], 403);
         }
 
-        return response()->json(['status' => 'success', 'message' => 'You request has been successfully submited to the community.']);
+        $community = \App\Models\CommunityOfPractice::find((int) $request->community_id);
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Your request has been submitted to the community.',
+            'redirect' => $community ? community_detail_url($community) : null,
+        ]);
     }
 
     public function leave(Request $request)
@@ -243,21 +249,12 @@ class CommunitiesController extends Controller
 
     public function detail($key)
     {
-        if (!Auth::check()) {
-            return redirect()->guest(route('login'));
-        }
-
-        $userId = Auth::id();
-        if (!$userId) {
-            return redirect()->guest(route('login'));
-        }
-
         $community = ctype_digit((string) $key)
             ? $this->commsOfPracticeRepository->find((int) $key)
             : $this->commsOfPracticeRepository->findBySlug((string) $key);
 
         if (!$community) {
-            return redirect()->route('account.my-communities')->with('error', 'Community not found.');
+            return redirect()->route('community.index')->with('error', 'Community not found.');
         }
 
         if (ctype_digit((string) $key) && seo_friendly_urls_enabled() && ! empty($community->slug)) {
@@ -266,8 +263,10 @@ class CommunitiesController extends Controller
 
         $id = (int) $community->id;
 
-        if (community_is_africa_cdc_staff_restricted($community) && ! user_email_allows_africa_cdc_staff_community(Auth::user())) {
-            return redirect()->route('account.my-communities')->with('error', 'You do not have access to this community.');
+        if (community_is_africa_cdc_staff_restricted($community)) {
+            if (! Auth::check() || ! user_email_allows_africa_cdc_staff_community(Auth::user())) {
+                return redirect()->route('community.index')->with('error', 'You do not have access to this community.');
+            }
         }
 
         // Load counts for the community
@@ -275,15 +274,41 @@ class CommunitiesController extends Controller
         $community->loadMissing('region', 'country');
         $this->commsOfPracticeRepository->attachListingMeta(collect([$community]));
 
-        // Check if user is a member
-        $isMember = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $id)
-            ->where('user_id', $userId)
-            ->where('is_approved', 1)
-            ->where('is_active', 1)
-            ->exists();
+        $userId = Auth::id();
+        $isCommunityMember = false;
+        $isPendingMember = false;
 
-        if (!$isMember) {
-            return redirect()->route('account.my-communities')->with('error', 'You are not a member of this community.');
+        if ($userId) {
+            $membership = CommunityOfPracticeMembers::where('community_of_practice_id', $id)
+                ->where('user_id', $userId)
+                ->first();
+
+            if ($membership && (int) $membership->is_approved === 1 && (int) $membership->is_active === 1) {
+                $isCommunityMember = true;
+            } elseif ($membership && (int) $membership->is_approved === 0) {
+                $isPendingMember = true;
+            }
+        }
+
+        $memberCountForSeo = (int) ($community->approved_members_count ?? $community->members_count ?? 0);
+        $canonicalUrl = community_detail_url($community);
+        $communityOrganizationLd = $this->buildCommunityDetailOrganizationSchema($community, $canonicalUrl, $memberCountForSeo);
+
+        if (! $isCommunityMember) {
+            return view('communities.detail', [
+                'community' => $community,
+                'isCommunityMember' => false,
+                'isPendingMember' => $isPendingMember,
+                'publications' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'pendingCommunityContentRequests' => collect(),
+                'processedCommunityContentRequests' => new \Illuminate\Pagination\LengthAwarePaginator([], 0, 10),
+                'forums' => collect(),
+                'otherCommunities' => collect(),
+                'badgeTypes' => collect(),
+                'isCommunityAdmin' => false,
+                'communityEvents' => collect(),
+                'communityOrganizationLd' => $communityOrganizationLd,
+            ]);
         }
 
         // Get community publications
@@ -371,9 +396,6 @@ class CommunitiesController extends Controller
         // Get all badge types for displaying requirements
         $badgeTypes = \App\Models\BadgeType::getAllBadgesInOrder();
 
-        $memberCountForSeo = (int) ($community->approved_members_count ?? $community->members_count ?? 0);
-        $communityOrganizationLd = $this->buildCommunityDetailOrganizationSchema($community, $canonicalUrl, $memberCountForSeo);
-
         return view('communities.detail', compact(
             'community',
             'publications',
@@ -385,7 +407,10 @@ class CommunitiesController extends Controller
             'isCommunityAdmin',
             'communityEvents',
             'communityOrganizationLd'
-        ));
+        ) + [
+            'isCommunityMember' => true,
+            'isPendingMember' => false,
+        ]);
     }
 
     /**

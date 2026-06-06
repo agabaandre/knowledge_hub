@@ -267,6 +267,10 @@
 @endphp
 
 @section('content')
+@php
+    $isCommunityMember = $isCommunityMember ?? true;
+    $isPendingMember = $isPendingMember ?? false;
+@endphp
 {{-- Custom Header Section (replaces search bar) --}}
 <div class="pt-5 pt-0 custom-bg">
     <div class="container">
@@ -290,6 +294,7 @@
                             <i class="fa fa-book mr-1"></i>{{ $community->community_publications_count ?? $community->publications_count ?? 0 }} Publications
                         </span>
                     </div>
+                    @if($isCommunityMember)
                     <div class="mt-3 d-flex justify-content-center flex-wrap" style="gap: 8px;">
                         <button type="button" class="btn btn-sm btn-light" data-toggle="modal" data-target="#inviteColleaguesModal">
                             <i class="fa fa-envelope mr-1"></i>Invite colleagues (max 5)
@@ -300,6 +305,7 @@
                         </button>
                         @endif
                     </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -310,6 +316,42 @@
 @include('partials.secondary_navigation', ['forceShow' => true])
 
 <div class="container community-detail-page">
+    @if(! $isCommunityMember)
+        <div class="alert {{ $isPendingMember ? 'alert-warning' : 'alert-info' }} mb-4">
+            @if($isPendingMember)
+                <strong><i class="fa fa-clock-o mr-1"></i>Membership pending.</strong>
+                Your join request is awaiting approval. You will see publications, forums, and member tools here once approved.
+            @elseif(Auth::check())
+                <strong><i class="fa fa-users mr-1"></i>Join this community</strong> to access publications, forum discussions, events, and member collaboration tools.
+                <div class="mt-3">
+                    <button type="button" class="btn btn-primary join-community-detail-btn" data-community-id="{{ $community->id }}">
+                        <i class="fa fa-plus-circle mr-1"></i>Request to join
+                    </button>
+                    <a href="{{ route('community.index') }}" class="btn btn-outline-secondary ml-2">Browse all communities</a>
+                </div>
+            @else
+                <strong><i class="fa fa-sign-in mr-1"></i>Sign in to join</strong> this community and access its resources and discussions.
+                <div class="mt-3">
+                    <a href="{{ route('login', ['redirect' => community_detail_url($community)]) }}" class="btn btn-primary">Log in to join</a>
+                    <a href="{{ route('community.index') }}" class="btn btn-outline-secondary ml-2">Browse communities</a>
+                </div>
+            @endif
+        </div>
+        <div class="card mb-4">
+            <div class="card-body">
+                <h2 class="h5 mb-3">About this community</h2>
+                <div class="community-preview-description" style="line-height: 1.7;">
+                    {!! detect_and_embed_video_links($community->description ?? '', 180, 180) !!}
+                </div>
+                @if($community->organisation || $community->department)
+                    <p class="text-muted small mt-3 mb-0">
+                        @if($community->organisation)<span class="mr-3"><i class="fa fa-building mr-1"></i>{{ $community->organisation }}</span>@endif
+                        @if($community->department)<span><i class="fa fa-sitemap mr-1"></i>{{ $community->department }}</span>@endif
+                    </p>
+                @endif
+            </div>
+        </div>
+    @else
     <div class="row">
         <!-- Main Content -->
         <div class="col-lg-8">
@@ -588,8 +630,10 @@
             </div>
         </div>
     </div>
+    @endif
 </div>
 
+@if($isCommunityMember)
 <div class="modal fade" id="inviteColleaguesModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -643,9 +687,27 @@
     </div>
 </div>
 @endif
+@else
+<div class="modal fade" id="joinCommunityDetailModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Join community</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body">Request to join <strong>{{ $community->community_name }}</strong>? An administrator may need to approve your membership.</div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmJoinCommunityDetail">Join</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endif
 @endsection
 
 @section('scripts')
+@if($isCommunityMember)
 <script>
     (function () {
         var membersState = {
@@ -809,5 +871,38 @@
 
     })();
 </script>
+@else
+<script>
+    (function () {
+        var communityId = {{ (int) $community->id }};
+        $('.join-community-detail-btn').on('click', function () {
+            $('#joinCommunityDetailModal').modal('show');
+        });
+        $('#confirmJoinCommunityDetail').on('click', function () {
+            $.ajax({
+                url: '{{ route('community.join') }}',
+                method: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    community_id: communityId
+                },
+                success: function (response) {
+                    $('#joinCommunityDetailModal').modal('hide');
+                    if (response.redirect) {
+                        window.location.href = response.redirect;
+                    } else {
+                        alert(response.message || 'Request submitted.');
+                        window.location.reload();
+                    }
+                },
+                error: function (xhr) {
+                    var msg = (xhr.responseJSON && xhr.responseJSON.message) ? xhr.responseJSON.message : 'Could not submit join request.';
+                    alert(msg);
+                }
+            });
+        });
+    })();
+</script>
+@endif
 @endsection
 

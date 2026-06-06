@@ -18,9 +18,10 @@
 
         return 'Member';
     };
+    $canEnterCommunity = Auth::check() && ($community->user_joined ?? false);
 @endphp
-<div class="community-room-card {{ (request()->routeIs('account.my-communities') && ($community->user_joined || $community->user_pending_approval)) ? 'community-room-card--clickable' : '' }}"
-    @if(request()->routeIs('account.my-communities') && ($community->user_joined || $community->user_pending_approval))
+<div class="community-room-card {{ $canEnterCommunity ? 'community-room-card--clickable' : '' }}"
+    @if($canEnterCommunity)
         onclick="window.location.href='{{ $detailUrl }}'"
         role="link"
         tabindex="0"
@@ -126,7 +127,7 @@
     <div class="community-room-card__actions" onclick="event.stopPropagation();">
         @if (Auth::check())
             @if (!$community->user_joined && !$community->user_pending_approval)
-                <button type="button" class="btn btn-sm community-room-card__btn-join join-btn" data-community-id="{{ $community->id }}">Join</button>
+                <button type="button" class="btn btn-sm community-room-card__btn-join join-btn" data-community-id="{{ $community->id }}" data-detail-url="{{ $detailUrl }}">Join</button>
             @elseif ($community->user_pending_approval)
                 <button type="button" class="btn btn-sm btn-warning" disabled>Pending</button>
             @else

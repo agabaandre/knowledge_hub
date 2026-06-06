@@ -126,12 +126,11 @@ class CommunityOfPractice extends Model
             return false;
         }
 
-        $isInMCommunity = CommunityOfPracticeMembers::where('user_id', auth()->id())
+        return CommunityOfPracticeMembers::where('user_id', auth()->id())
             ->where('community_of_practice_id', $this->id)
             ->where('is_approved', 1)
+            ->where('is_active', 1)
             ->exists();
-
-        return $isInMCommunity;
     }
 
     public function getUserPendingApprovalAttribute()

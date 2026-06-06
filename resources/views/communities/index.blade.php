@@ -753,6 +753,7 @@
         });
 
         $('#confirmJoin').on('click', function() {
+            var detailUrl = $('.join-btn[data-community-id="' + communityId + '"]').data('detail-url');
             $.ajax({
                 url: '{{ route('community.join') }}',
                 method: 'POST',
@@ -761,10 +762,12 @@
                     community_id: communityId
                 },
                 success: function(response) {
+                    $('#joinModal').modal('hide');
                     if (response.redirect) {
                         window.location.href = response.redirect;
+                    } else if (detailUrl) {
+                        window.location.href = detailUrl;
                     } else {
-                        $('#joinModal').modal('hide');
                         alert(response.message);
                         location.reload();
                     }
