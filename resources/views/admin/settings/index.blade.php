@@ -268,6 +268,199 @@
             box-shadow: 0 4px 12px rgba(100, 116, 139, 0.3);
         }
 
+        .settings-action-bar {
+            border-top: 2px solid #e2e8f0;
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 100%);
+            padding: 1.25rem 2rem 1rem;
+        }
+
+        .settings-action-bar__inner {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: stretch;
+            justify-content: space-between;
+            gap: 1.25rem;
+        }
+
+        .settings-action-bar__primary {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            gap: 0.35rem;
+            min-width: 220px;
+        }
+
+        .settings-action-bar__primary-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin: 0;
+        }
+
+        .settings-action-bar__primary-hint {
+            font-size: 0.8rem;
+            color: #94a3b8;
+            margin: 0;
+            max-width: 280px;
+            line-height: 1.4;
+        }
+
+        .settings-tools-panel {
+            flex: 1 1 420px;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 0.85rem 1rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+
+        .settings-tools-panel__title {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin: 0 0 0.65rem;
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .settings-tools-panel__title i {
+            color: var(--theme-color-primary, #119A48);
+        }
+
+        .settings-tools-panel__actions {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-tool {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.55rem 0.95rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #475569;
+            background: #fff;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .btn-tool:hover {
+            border-color: var(--theme-color-primary, #119A48);
+            color: var(--theme-color-primary, #119A48);
+            background: rgba(17, 154, 72, 0.06);
+            text-decoration: none;
+            transform: translateY(-1px);
+        }
+
+        .btn-tool--accent {
+            border-color: rgba(17, 154, 72, 0.35);
+            color: var(--theme-color-primary, #119A48);
+            background: rgba(17, 154, 72, 0.08);
+        }
+
+        .btn-tool--accent:hover {
+            background: var(--theme-color-primary, #119A48);
+            border-color: var(--theme-color-primary, #119A48);
+            color: #fff;
+        }
+
+        .btn-tool:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .settings-import-group {
+            display: inline-flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.35rem;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .settings-import-group input[type="file"] {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .settings-import-filename {
+            font-size: 0.78rem;
+            color: #64748b;
+            max-width: 160px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            padding: 0 0.25rem;
+        }
+
+        .settings-import-filename.has-file {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .settings-action-footnote {
+            margin: 0.85rem 0 0;
+            padding: 0.75rem 0.9rem;
+            font-size: 0.8rem;
+            color: #64748b;
+            background: #f1f5f9;
+            border-radius: 8px;
+            line-height: 1.5;
+        }
+
+        .settings-action-footnote i {
+            color: var(--theme-color-primary, #119A48);
+            margin-right: 0.35rem;
+        }
+
+        @media (max-width: 767px) {
+            .settings-action-bar {
+                padding: 1rem;
+            }
+
+            .settings-action-bar__inner {
+                flex-direction: column;
+            }
+
+            .settings-tools-panel {
+                flex-basis: 100%;
+            }
+
+            .settings-tools-panel__actions {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .settings-import-group {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .settings-import-filename {
+                max-width: 100%;
+                text-align: center;
+            }
+        }
+
         .info-text {
             font-size: 0.875rem;
             color: #64748b;
@@ -391,7 +584,7 @@
         </span>
     </div>
 
-    <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data">
+    <form action="{{ route('admin.config.save') }}" method="post" enctype="multipart/form-data" id="settings-main-form">
             @csrf
         <div class="settings-container {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}">
             <div class="settings-header">
@@ -1676,41 +1869,58 @@
                     </div>
                 </div>
                 </div>
+    </form>
 
-            <div class="settings-content" style="border-top: 2px solid #e2e8f0; padding: 1.5rem 2rem;">
-                <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
-                    <div>
-                        <button type="submit" class="btn btn-save">
+            <div class="settings-action-bar">
+                <div class="settings-action-bar__inner">
+                    <div class="settings-action-bar__primary">
+                        <p class="settings-action-bar__primary-label">Save configuration</p>
+                        <button type="submit" class="btn btn-save" form="settings-main-form">
                             <i class="fa fa-save me-2"></i>Save All Changes
                         </button>
+                        <p class="settings-action-bar__primary-hint">Applies updates from all tabs above.</p>
                     </div>
-                    <div class="d-flex flex-wrap align-items-center gap-2">
-                        <a href="{{ route('admin.config.export') }}" class="btn btn-outline-secondary" title="Download current configuration as XML (no images)">
-                            <i class="fa fa-download me-2"></i>Export Config (XML)
-                        </a>
-                        <form action="{{ route('admin.config.import') }}" method="post" enctype="multipart/form-data" class="d-inline-flex align-items-center gap-2" id="import-config-form">
-                            @csrf
-                            <input type="file" name="config_file" accept=".xml,application/xml,text/xml" required class="form-control form-control-sm" style="max-width: 220px;" title="Select a config XML file">
-                            <button type="submit" class="btn btn-outline-secondary" title="Import configuration from XML (overwrites current theme settings; images are not imported)">
-                                <i class="fa fa-upload me-2"></i>Import Config
+
+                    <div class="settings-tools-panel">
+                        <p class="settings-tools-panel__title">
+                            <i class="fa fa-wrench"></i>Backup &amp; maintenance
+                        </p>
+                        <div class="settings-tools-panel__actions">
+                            <a href="{{ route('admin.config.export') }}" class="btn-tool" title="Download current configuration as XML (no images)">
+                                <i class="fa fa-download"></i>Export Config (XML)
+                            </a>
+
+                            <form action="{{ route('admin.config.import') }}" method="post" enctype="multipart/form-data" class="settings-import-group" id="import-config-form">
+                                @csrf
+                                <input type="file" name="config_file" id="import-config-file" accept=".xml,application/xml,text/xml" required>
+                                <button type="button" class="btn-tool" id="import-config-choose" title="Select a config XML file">
+                                    <i class="fa fa-folder-open"></i>Choose XML
+                                </button>
+                                <span class="settings-import-filename" id="import-config-filename">No file selected</span>
+                                <button type="submit" class="btn-tool btn-tool--accent" id="import-config-submit" disabled title="Import configuration from XML (overwrites current theme settings; images are not imported)">
+                                    <i class="fa fa-upload"></i>Import Config
+                                </button>
+                            </form>
+
+                            <button type="button"
+                                    class="btn-tool"
+                                    onclick="clearCache()"
+                                    id="clear-cache-btn"
+                                    title="Clear all cached data including settings">
+                                <i class="fa fa-broom"></i>Clear Cache
                             </button>
-    </form>
-                        <button type="button" 
-                           class="btn btn-outline-secondary" 
-                           onclick="clearCache()"
-                           id="clear-cache-btn"
-                           title="Clear all cached data including settings">
-                            <i class="fa fa-broom me-2"></i>Clear Cache
-                        </button>
+                        </div>
                     </div>
                 </div>
-                <small class="text-muted d-block mt-2">
-                    <i class="fa fa-info-circle"></i> Settings are cached for 24 hours for better performance. Use "Clear Cache" to refresh settings immediately after making changes.
-                    Export saves the active theme configuration as XML (images excluded). Import overwrites the current active theme configuration from an XML file (images are not changed).
-                </small>
+
+                <p class="settings-action-footnote mb-0">
+                    <i class="fa fa-info-circle"></i>
+                    Settings are cached for 24 hours for better performance — use <strong>Clear Cache</strong> to apply changes immediately.
+                    <strong>Export</strong> saves the active theme as XML (images excluded).
+                    <strong>Import</strong> overwrites the active theme from XML (images are not changed).
+                </p>
             </div>
         </div>
-    </form>
 
     <!-- Cache Clear Output Modal -->
     <div class="modal fade" id="cacheOutputModal" tabindex="-1" aria-labelledby="cacheOutputModalLabel" aria-hidden="true">
@@ -1761,6 +1971,45 @@
             const auto = document.getElementById('auto_profile_completion_reminder');
             if (auto) {
                 auto.addEventListener('change', toggleProfileReminderDayField);
+            }
+
+            const importFileInput = document.getElementById('import-config-file');
+            const importChooseBtn = document.getElementById('import-config-choose');
+            const importFilename = document.getElementById('import-config-filename');
+            const importSubmitBtn = document.getElementById('import-config-submit');
+            const importForm = document.getElementById('import-config-form');
+
+            if (importChooseBtn && importFileInput) {
+                importChooseBtn.addEventListener('click', function () {
+                    importFileInput.click();
+                });
+            }
+
+            if (importFileInput && importFilename && importSubmitBtn) {
+                importFileInput.addEventListener('change', function () {
+                    const file = importFileInput.files && importFileInput.files[0];
+                    if (file) {
+                        importFilename.textContent = file.name;
+                        importFilename.classList.add('has-file');
+                        importSubmitBtn.disabled = false;
+                    } else {
+                        importFilename.textContent = 'No file selected';
+                        importFilename.classList.remove('has-file');
+                        importSubmitBtn.disabled = true;
+                    }
+                });
+            }
+
+            if (importForm) {
+                importForm.addEventListener('submit', function (e) {
+                    if (!importFileInput || !importFileInput.files || !importFileInput.files.length) {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (!confirm('Import configuration from this XML file? This will overwrite the current active theme settings (images are not changed).')) {
+                        e.preventDefault();
+                    }
+                });
             }
         });
 
