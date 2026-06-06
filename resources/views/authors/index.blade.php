@@ -282,11 +282,15 @@
                                 $lb = $author->user->lifetimeBadge;
                                 $bt = $lb->badgeType;
                                 $acquiredAt = $lb->last_upgraded_at ?? $lb->created_at;
+                                $badgeTitle = $bt->name.' — '.number_format((int) $lb->lifetime_contributions).' lifetime contributions';
+                                if ($acquiredAt) {
+                                    $badgeTitle .= ' · Acquired '.$acquiredAt->format('M j, Y');
+                                }
                             @endphp
                             <div class="author-badges">
                                 <span class="author-badge"
                                       style="background-color: {{ $bt->badge_color ?? '#C0C0C0' }};"
-                                      title="{{ $bt->name }} — {{ number_format((int) $lb->lifetime_contributions) }} lifetime contributions@if($acquiredAt) · Acquired {{ $acquiredAt->format('M j, Y') }}@endif">
+                                      title="{{ $badgeTitle }}">
                                     {{ participant_badge_emoji($bt->slug ?? null) }}
                                     {{ $bt->name }}
                                 </span>
