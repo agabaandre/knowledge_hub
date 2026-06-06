@@ -67,6 +67,7 @@
 
     <!-- DataTables js -->
     <script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+    @include('common.datatable_defaults')
 
 
     <script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>

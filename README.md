@@ -19,6 +19,93 @@ docker compose up -d --build
 
 ---
 
+## Web installer (recommended for bare-metal / LAMP)
+
+After cloning the repository and running `composer install`, open **`{APP_URL}/install`** in a browser. The installer walks through five steps:
+
+| Step | Route | What it does |
+|------|-------|--------------|
+| 1. Prerequisites | `/install` | PHP version, extensions, writable paths, `vendor/` presence |
+| 2. Database | `/install/database` | Saves `DB_*` to `.env`, runs migrations (optional — see below) |
+| 3. Site settings | `/install/site` | Active row in the `setting` table (name, description, timezone, contact) |
+| 4. Mail | `/install/mail` | SMTP or log driver saved to `.env` |
+| 5. Administrator | `/install/admin` | Creates the first admin user and locks the installer |
+
+Docker and local hosts are detected automatically (Docker defaults to database host `mysql`; local defaults to `127.0.0.1` and database name `knowledge_hub`).
+
+### Optional migrations (existing database)
+
+On the **database** step, if the target database already contains tables, a checkbox appears:
+
+**Skip migrations (use existing database schema and data)**
+
+- **Checked (default when the database already has data):** saves the connection to `.env`, generates `APP_KEY` and the storage symlink if needed, and **does not** run `migrate`, baseline seed, or Passport install.
+- **Unchecked:** runs a full fresh setup (migrations, roles/permissions baseline when empty, Passport when needed).
+
+Use this when reconnecting an imported or restored database, or when the schema is already present and you only need to finish site/mail/admin setup.
+
+### Existing deployments (installer auto-block)
+
+The web installer is **blocked** when **both** are true:
+
+1. Composer dependencies are present (`vendor/autoload.php` exists)
+2. The configured database has **tables with data**
+
+In that case, visiting `/install` returns **403 Forbidden** with instructions to mark the application as installed. This protects live sites (for example an already-running production hub) from being run through the installer by mistake.
+
+Mark an existing deployment as installed:
+
+```bash
+php artisan khub:mark-installed
+```
+
+This sets `APP_INSTALLED=true` and `INSTALLER_DISABLED=true` in `.env`, writes `storage/app/installed.lock`, and sets `installer_locked=1` on the active **setting** row. The installer stays disabled even if someone removes the lock file or edits `.env` without updating the database flag.
+
+You can also set `APP_INSTALLED=true` manually in `.env`, but the Artisan command is preferred because it updates all lock mechanisms.
+
+### CLI installation (non-interactive)
+
+For servers without browser access, use:
+
+```bash
+cp .env.example .env          # or .env.docker.example for Docker-style DB defaults
+composer install
+php artisan khub:install \
+  --email=admin@example.com \
+  --password='your-secure-password' \
+  --first-name=Admin \
+  --last-name=User \
+  --site-name='Knowledge Hub'
+```
+
+Use **`--skip-migrate`** when the database schema and data already exist (same behaviour as checking “Skip migrations” in the web installer):
+
+```bash
+php artisan khub:install --skip-migrate --email=admin@example.com --password='your-secure-password'
+```
+
+Other options: `--mail-driver=log|smtp`, `--first-name`, `--last-name`, `--site-name`.
+
+### After installation
+
+When setup completes (web or CLI), the application:
+
+- Sets `APP_INSTALLED=true` and `INSTALLER_DISABLED=true`
+- Verifies **database connection**, **active site settings**, and **writable storage** on each request (shows a prerequisites page instead of a broken layout if something fails)
+- Redirects `/install` to the home page, or returns **403** if the installer is locked
+
+Relevant `.env` keys:
+
+```env
+APP_INSTALLED=true
+INSTALLER_DISABLED=true
+APP_URL=https://your-hub.example
+```
+
+For Docker-specific notes (Meilisearch import, queue workers, production tuning), see **[docs/DOCKER.md](docs/DOCKER.md)**.
+
+---
+
 ## 1. Prerequisites
 
 Ensure you have the following installed:
@@ -111,6 +198,8 @@ For Linux:
 
 ## 5. Create Environment Configuration (.env)
 
+> **Recommended:** skip manual migration steps below and use the **[web installer](#web-installer-recommended-for-bare-metal--lamp)** at `/install` after `composer install`.
+
 1. Inside the project directory, create an .env file by copying the example file:
    ```bash
    cp .env.example .env
@@ -122,9 +211,11 @@ For Linux:
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
 DB_PORT=3306
-DB_DATABASE=khub
+DB_DATABASE=knowledge_hub
 DB_USERNAME=root
 DB_PASSWORD=
+APP_INSTALLED=false
+INSTALLER_DISABLED=false
 ```
 
 3. Configure other necessary environment settings:
@@ -142,17 +233,29 @@ APP_URL=http://localhost/knowledge_hub
 
 ## 6. Create and Import Database
 
-### Windows (phpMyAdmin):
+Create an empty MySQL/MariaDB database named **`knowledge_hub`** (or your chosen name — match `DB_DATABASE` in `.env`).
 
-1. Open phpMyAdmin and create a new database named `khub`.
-2. Import the starter SQL file via the phpMyAdmin interface.
+### Fresh install via web installer
 
-### Linux (MySQL CLI):
+Leave the database empty and complete **step 2 (Database)** at `/install`. Migrations, roles, permissions, and baseline settings are applied automatically unless you choose **Skip migrations**.
 
-1. Create the database and import the starter SQL file using the following command:
+### Restore from backup or SQL dump
+
+1. Import your dump into the database (phpMyAdmin, or `mysql -u root -p knowledge_hub < backup.sql`).
+2. Run `composer install` if not already done.
+3. Open `/install` and on the database step check **Skip migrations** so existing schema and data are preserved.
+4. If `vendor/` is present and the database already contains data, the installer may be blocked — run `php artisan khub:mark-installed` instead and use the admin UI for any remaining configuration.
+
+### Legacy starter SQL (manual path only)
+
+If you are **not** using the web installer and rely on the older manual flow:
+
+**Windows (phpMyAdmin):** create database `knowledge_hub`, import the starter SQL file.
+
+**Linux (MySQL CLI):**
 
 ```bash
-mysql -u root -p khub < path_to_starter_db.sql
+mysql -u root -p knowledge_hub < path_to_starter_db.sql
 ```
 
 ---
@@ -179,6 +282,8 @@ npm install
 
 ## 8. Run Database Migrations and Seeders
 
+> **Not needed** if you used the web installer or `php artisan khub:install`.
+
 Run the following commands to set up the database schema and populate it with initial data:
 
 ### 8.1 Migrate the database:
@@ -197,6 +302,12 @@ php artisan db:seed
 
 ```bash
 php artisan storage:link
+```
+
+### 8.4 Mark installation complete (manual path):
+
+```bash
+php artisan khub:mark-installed
 ```
 
 ---
@@ -230,6 +341,8 @@ For Linux, ensure the correct folder permissions:
    http://localhost/knowledge_hub
    ```
 
+   For a **new** installation, run `composer install` first, then open **`http://localhost/knowledge_hub/install`** to complete setup.
+
 ### For Linux:
 
 1. Start Apache:
@@ -243,6 +356,8 @@ For Linux, ensure the correct folder permissions:
    ```bash
    http://{server_ip}/knowledge_hub
    ```
+
+   For a **new** installation, run `composer install` first, then open **`http://{server_ip}/knowledge_hub/install`** to complete setup.
 
 ---
 
@@ -324,20 +439,34 @@ Authenticated routes (e.g. `POST /api/login`, `auth:api` groups) are documented 
 
 ## Troubleshooting
 
-### 1. 404 Not Found Errors:
+### 1. Installer returns 403 Forbidden
+
+The installer is locked when the application is already installed (`APP_INSTALLED=true`, lock file, or `installer_locked` in the database), or when **`vendor/` exists and the database already has data**. For an existing production deployment, run:
+
+```bash
+php artisan khub:mark-installed
+```
+
+To run the installer again on a development machine, set `APP_INSTALLED=false` in `.env`, remove `storage/app/installed.lock`, and clear `installer_locked` on the **setting** row — only do this on non-production environments.
+
+### 2. 404 Not Found Errors:
 Ensure that .htaccess files are enabled for Apache and that your virtual host configuration allows for URL rewrites.
 
-### 2. Database Connection Issues:
-Verify that the database credentials in the .env file are correct and that the MySQL/MariaDB server is running.
+### 3. Database Connection Issues:
+Verify that the database credentials in the .env file are correct and that the MySQL/MariaDB server is running. On the installer database step, use **Skip migrations** if you are pointing at an existing populated database and only need to save credentials.
 
-### 3. Permission Issues (Linux):
+### 4. Permission Issues (Linux):
 If you encounter permission errors, ensure the storage and public directories are writable by the web server:
 
 ```bash
 sudo chmod -R 777 storage public
 ```
 
-### 4. Repair Numeric Job Titles on Users
+### 5. Prerequisites page after install (503)
+
+If the site shows a prerequisites check page instead of the home page, verify database connectivity, that an active **setting** row exists with a site name, and that `storage/` is writable. Details are listed on the error page.
+
+### 6. Repair Numeric Job Titles on Users
 If some users have numeric IDs saved in `users.job_title` (instead of the job title text), use the maintenance command below:
 
 Dry run first:

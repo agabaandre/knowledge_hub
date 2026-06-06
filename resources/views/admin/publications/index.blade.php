@@ -20,6 +20,27 @@
         .pub-state-swatch-featured { background:#ecfdf3; }
         .pub-state-swatch-inactive { background:#fef2f2; }
         #publicationTable_wrapper .dataTables_length label { margin-bottom: 0; }
+        #publicationTable_wrapper,
+        #publicationTable_wrapper .dataTables_scroll,
+        .publication-table-wrap {
+            overflow-x: visible;
+            max-width: 100%;
+        }
+        #publicationTable .pub-col-checkbox { width: 2.5rem; }
+        #publicationTable .pub-col-index { width: 3rem; }
+        #publicationTable .pub-col-title { width: 14%; }
+        #publicationTable .pub-col-description { width: 12%; }
+        #publicationTable .pub-col-author { width: 8%; }
+        #publicationTable .pub-col-affiliation { width: 12%; }
+        #publicationTable .pub-col-member-state { width: 8%; }
+        #publicationTable .pub-col-status { width: 7%; }
+        #publicationTable .pub-col-date { width: 8%; }
+        #publicationTable .pub-col-moderator { width: 10%; }
+        #publicationTable .pub-col-actions { width: 9rem; white-space: nowrap; vertical-align: middle; }
+        #publicationTable .pub-title-link {
+            display: inline;
+            line-height: 1.35;
+        }
     </style>
 @endsection
 
@@ -147,23 +168,23 @@
                             <small class="text-muted">Select rows and an action in any order, then click Apply.</small>
                         </div>
 
-                        <div class="table-responsive">
-                            <table id="publicationTable" class="table table-striped table-bordered table-hover w-100">
+                        <div class="publication-table-wrap">
+                            <table id="publicationTable" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
                                 <thead>
                                     <tr>
-                                        <th width="30">
+                                        <th class="pub-col-checkbox">
                                             <input type="checkbox" id="selectAllPublications">
                                         </th>
-                                        <th style="width:60px;">#</th>
-                                        <th>Title</th>
-                                        <th>Description</th>
-                                        <th width="10%">Author</th>
-                                        <th width="10%">Affiliation</th>
-                                        <th width="10%">Member State</th>
-                                        <th>Status</th>
-                                        <th width="10%">Date Created</th>
-                                        <th style="width:16%">Approved/Rejected By</th>
-                                        <th width="18%">Actions</th>
+                                        <th class="pub-col-index">#</th>
+                                        <th class="pub-col-title">Title</th>
+                                        <th class="pub-col-description">Description</th>
+                                        <th class="pub-col-author">Author</th>
+                                        <th class="pub-col-affiliation">Affiliation</th>
+                                        <th class="pub-col-member-state">Member State</th>
+                                        <th class="pub-col-status">Status</th>
+                                        <th class="pub-col-date">Date Created</th>
+                                        <th class="pub-col-moderator">Approved/Rejected By</th>
+                                        <th class="pub-col-actions">Actions</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -255,6 +276,7 @@ $(function () {
         processing: true,
         serverSide: true,
         searching: false,
+        autoWidth: false,
         lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
         pageLength: 20,
         order: [[1, 'desc']],
@@ -279,16 +301,24 @@ $(function () {
             { data: 'actions', orderable: false, searchable: false }
         ],
         columnDefs: [
-            { targets: [0, 10], orderable: false }
+            { targets: [0, 10], orderable: false },
+            { targets: 0, className: 'pub-col-checkbox text-center' },
+            { targets: 1, className: 'pub-col-index' },
+            { targets: 2, className: 'pub-col-title' },
+            { targets: 3, className: 'pub-col-description' },
+            { targets: 4, className: 'pub-col-author' },
+            { targets: 5, className: 'pub-col-affiliation' },
+            { targets: 6, className: 'pub-col-member-state' },
+            { targets: 7, className: 'pub-col-status' },
+            { targets: 8, className: 'pub-col-date' },
+            { targets: 9, className: 'pub-col-moderator' },
+            { targets: 10, className: 'pub-col-actions text-nowrap' }
         ],
         language: {
-            search: '',
-            searchPlaceholder: 'Quick search in loaded results...',
             processing: '<i class="fa fa-spinner fa-spin"></i> Loading publications...',
             emptyTable: 'No publications match your filters.',
             zeroRecords: 'No matching publications found.'
         },
-        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>rtip',
         createdRow: function (row, data) {
             if (data.DT_RowClass) {
                 $(row).addClass(data.DT_RowClass);

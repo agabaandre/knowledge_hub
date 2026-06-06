@@ -317,8 +317,7 @@ $(document).ready(function() {
             { data: 'status', orderable: false },
             { data: 'date' },
             { data: 'actions', orderable: false }
-        ],
-        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>rtip'
+        ]
     });
 
     function scheduleReload() {

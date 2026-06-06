@@ -13,11 +13,14 @@ Open **http://localhost:8080/install** and complete:
 
 1. **Prerequisites** — PHP, extensions, writable paths (Docker vs local detected automatically)  
 2. **Database** — Docker: host `mysql`; local: host `127.0.0.1`, user `root`, password `password`  
+   - If the database already has tables, check **Skip migrations (use existing database schema and data)** to save credentials without running `migrate` (default checked when data is present).  
 3. **Site settings** — site name, description, contact email, timezone (saved to `setting` table)  
 4. **Mail** — SMTP or log-only (saved to `.env`)  
 5. **Administrator** — locks the installer when finished  
 
 After installation, the app verifies **database**, **active site settings**, and **storage** on every request. Failed checks show a prerequisites page instead of a broken layout.  
+
+If **`vendor/` already exists** and the configured database **already contains data**, the web installer is blocked (403). Use `php artisan khub:mark-installed` for existing deployments instead of re-running `/install`.  
 
 ## Services
 
@@ -43,22 +46,29 @@ The **`queue`** service processes Scout index jobs when `SCOUT_QUEUE=true`.
 
 ## Existing installations
 
-If the app is already deployed, mark it installed so `/install` is disabled:
+If the app is already deployed (Composer packages installed and database populated), the web installer is **automatically blocked**. Mark the app installed so `/install` stays disabled:
 
 ```bash
 php artisan khub:mark-installed
 ```
 
-This sets `APP_INSTALLED=true`, writes `storage/app/installed.lock`, and sets `installer_locked=1` on the active **setting** row. The installer returns **403 Forbidden** if accessed again — even if someone removes the lock file or edits `.env`.
+This sets `APP_INSTALLED=true` and `INSTALLER_DISABLED=true`, writes `storage/app/installed.lock`, and sets `installer_locked=1` on the active **setting** row. The installer returns **403 Forbidden** if accessed again — even if someone removes the lock file or edits `.env`.
+
+To finish setup against an **existing database schema** without re-running migrations, use **Skip migrations** on the installer database step, or:
+
+```bash
+php artisan khub:install --skip-migrate --email=admin@example.com --password='your-secure-password'
+```
 
 ## CLI install (non-Docker)
 
 ```bash
 cp .env.docker.example .env   # edit DB_* for your server
 composer install
-php artisan key:generate
 php artisan khub:install --email=admin@example.com --password=secret --first-name=Admin --last-name=User
 ```
+
+Add `--skip-migrate` when the database already has tables and data. The command still writes DB credentials and generates `APP_KEY` / storage link when needed.
 
 ## Production Docker notes
 

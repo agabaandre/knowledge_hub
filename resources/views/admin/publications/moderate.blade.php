@@ -87,8 +87,7 @@ $(function () {
             { data: 'created_by', orderable: false },
             { data: 'created_at' },
             { data: 'actions', orderable: false }
-        ],
-        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>rtip'
+        ]
     });
 
     $('#filterTitle').on('input', function () {

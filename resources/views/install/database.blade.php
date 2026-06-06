@@ -11,7 +11,11 @@
         @else
             Use your local MySQL/MariaDB host (usually <code>127.0.0.1</code>). Create an empty database named <code>{{ $defaults['database'] }}</code> first if it does not exist.
         @endif
-        Migrations, roles, permissions, and baseline data are applied automatically.
+        @if($hasExistingTables ?? false)
+            Existing tables were detected in this database. You can skip migrations to keep the current schema and data.
+        @else
+            Migrations, roles, permissions, and baseline data are applied automatically unless you choose to skip them below.
+        @endif
     </p>
 
     <form method="post" action="{{ route('install.database.store') }}" class="row g-3">
@@ -36,9 +40,33 @@
             <label class="form-label">Password</label>
             <input type="password" name="db_password" class="form-control" value="{{ old('db_password', $defaults['password']) }}">
         </div>
+
+        @if($hasExistingTables ?? false)
+            <div class="col-12">
+                <div class="form-check">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        name="skip_migrations"
+                        id="skip_migrations"
+                        value="1"
+                        @checked(old('skip_migrations', $hasExistingData ?? false))
+                    >
+                    <label class="form-check-label" for="skip_migrations">
+                        Skip migrations (use existing database schema and data)
+                    </label>
+                </div>
+                <div class="form-text">
+                    Leave this checked when reconnecting an already-populated database. Uncheck only for a fresh install on an empty database.
+                </div>
+            </div>
+        @endif
+
         <div class="col-12 d-flex gap-2">
             <a href="{{ route('install.index') }}" class="btn btn-outline-secondary">Back</a>
-            <button type="submit" class="btn btn-success">Run migrations</button>
+            <button type="submit" class="btn btn-success">
+                {{ ($hasExistingTables ?? false) ? 'Save connection and continue' : 'Run migrations' }}
+            </button>
         </div>
     </form>
 @endsection

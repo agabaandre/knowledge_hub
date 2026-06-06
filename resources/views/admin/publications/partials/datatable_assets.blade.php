@@ -1,1 +1,1 @@
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+{{-- DataTables JS is loaded globally in the admin header; defaults are in common/datatable_defaults.blade.php --}}

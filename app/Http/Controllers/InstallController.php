@@ -24,9 +24,13 @@ class InstallController extends Controller
 
     public function showDatabase(): View
     {
+        $defaults = $this->installer->databaseDefaults();
+
         return view('install.database', [
-            'defaults' => $this->installer->databaseDefaults(),
+            'defaults' => $defaults,
             'runtime' => $this->installer->runtimeEnvironment(),
+            'hasExistingTables' => $this->installer->databaseHasExistingTables($defaults),
+            'hasExistingData' => $this->installer->databaseHasExistingData($defaults),
         ]);
     }
 
@@ -38,6 +42,7 @@ class InstallController extends Controller
             'db_database' => 'required|string|max:64',
             'db_username' => 'required|string|max:64',
             'db_password' => 'nullable|string|max:255',
+            'skip_migrations' => 'nullable|boolean',
         ]);
 
         $db = [
@@ -53,15 +58,21 @@ class InstallController extends Controller
             return back()->withInput()->with('error', 'Database connection failed: '.$test['message']);
         }
 
+        $skipMigrations = $request->boolean('skip_migrations');
+
         try {
-            $this->installer->runDatabaseSetup($db);
+            $this->installer->runDatabaseSetup($db, ! $skipMigrations);
         } catch (\Throwable $e) {
             return back()->withInput()->with('error', 'Setup failed: '.$e->getMessage());
         }
 
         $request->session()->put('installer.database_ready', true);
 
-        return redirect()->route('install.site')->with('status', 'Database migrated successfully.');
+        $status = $skipMigrations
+            ? 'Database connection saved. Existing schema and data were left unchanged.'
+            : 'Database migrated successfully.';
+
+        return redirect()->route('install.site')->with('status', $status);
     }
 
     public function showSite(Request $request): RedirectResponse|View

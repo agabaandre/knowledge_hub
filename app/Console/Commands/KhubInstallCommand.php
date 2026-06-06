@@ -35,6 +35,15 @@ class KhubInstallCommand extends Command
                 'username' => env('DB_USERNAME', 'root'),
                 'password' => env('DB_PASSWORD', ''),
             ]);
+        } else {
+            $this->info('Skipping migrations (existing database)...');
+            $installer->configureDatabaseConnection([
+                'host' => env('DB_HOST', '127.0.0.1'),
+                'port' => env('DB_PORT', '3306'),
+                'database' => env('DB_DATABASE', 'knowledge_hub'),
+                'username' => env('DB_USERNAME', 'root'),
+                'password' => env('DB_PASSWORD', ''),
+            ]);
         }
 
         $email = $this->option('email') ?: $this->ask('Admin email');

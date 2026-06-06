@@ -40,6 +40,54 @@ class InstallerService
         }
     }
 
+    public function hasVendorPackages(): bool
+    {
+        return File::isDirectory(base_path('vendor'))
+            && File::exists(base_path('vendor/autoload.php'));
+    }
+
+    /**
+     * True when Composer dependencies are present and the configured database has populated tables.
+     */
+    public function isExistingDeployment(): bool
+    {
+        if ($this->isInstalled()) {
+            return true;
+        }
+
+        if (! $this->hasVendorPackages()) {
+            return false;
+        }
+
+        return $this->databaseHasExistingData($this->databaseDefaults());
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $db
+     */
+    public function databaseHasExistingTables(?array $db = null): bool
+    {
+        return count($this->listDatabaseTables($db)) > 0;
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $db
+     */
+    public function databaseHasExistingData(?array $db = null): bool
+    {
+        try {
+            foreach ($this->listDatabaseTables($db) as $table) {
+                if ($this->tableRowCount($table, $db) > 0) {
+                    return true;
+                }
+            }
+        } catch (\Throwable) {
+            return false;
+        }
+
+        return false;
+    }
+
     public function runtimeEnvironment(): string
     {
         if (filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)) {
@@ -274,7 +322,7 @@ class InstallerService
     /**
      * @param  array<string, mixed>  $db
      */
-    public function runDatabaseSetup(array $db): void
+    public function configureDatabaseConnection(array $db): void
     {
         $this->writeEnvValues([
             'DB_CONNECTION' => 'mysql',
@@ -288,6 +336,27 @@ class InstallerService
 
         Artisan::call('config:clear');
 
+        if (! File::exists(public_path('storage'))) {
+            Artisan::call('storage:link');
+        }
+
+        $envContents = File::exists(base_path('.env')) ? File::get(base_path('.env')) : '';
+        if (! str_contains($envContents, 'APP_KEY=base64:')) {
+            Artisan::call('key:generate', ['--force' => true]);
+        }
+    }
+
+    /**
+     * @param  array<string, mixed>  $db
+     */
+    public function runDatabaseSetup(array $db, bool $runMigrations = true): void
+    {
+        $this->configureDatabaseConnection($db);
+
+        if (! $runMigrations) {
+            return;
+        }
+
         Artisan::call('migrate', ['--force' => true]);
 
         if (Schema::hasTable('roles') && Role::query()->count() === 0) {
@@ -298,17 +367,8 @@ class InstallerService
             Artisan::call('db:seed', ['--class' => 'Database\\Seeders\\AccessLevelsSeeder', '--force' => true]);
         }
 
-        if (! File::exists(public_path('storage'))) {
-            Artisan::call('storage:link');
-        }
-
         if (Schema::hasTable('oauth_clients') && DB::table('oauth_clients')->count() === 0) {
             Artisan::call('passport:install', ['--force' => true]);
-        }
-
-        $envContents = File::exists(base_path('.env')) ? File::get(base_path('.env')) : '';
-        if (! str_contains($envContents, 'APP_KEY=base64:')) {
-            Artisan::call('key:generate', ['--force' => true]);
         }
     }
 
@@ -473,6 +533,89 @@ class InstallerService
             'installer_locked' => 1,
             'installer_completed_at' => $completedAt,
         ]);
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $db
+     * @return array<int, string>
+     */
+    private function listDatabaseTables(?array $db = null): array
+    {
+        $pdo = $this->databasePdo($db);
+        if ($pdo === null) {
+            return [];
+        }
+
+        $database = $db !== null
+            ? (string) $db['database']
+            : (string) config('database.connections.mysql.database', '');
+
+        if ($database === '') {
+            return [];
+        }
+
+        $quoted = str_replace('`', '``', $database);
+        $statement = $pdo->query('SHOW TABLES FROM `'.$quoted.'`');
+
+        if ($statement === false) {
+            return [];
+        }
+
+        return array_values(array_filter(array_map(
+            static fn ($row) => is_array($row) ? (string) reset($row) : null,
+            $statement->fetchAll(\PDO::FETCH_ASSOC)
+        )));
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $db
+     */
+    private function tableRowCount(string $table, ?array $db = null): int
+    {
+        $pdo = $this->databasePdo($db);
+        if ($pdo === null) {
+            return 0;
+        }
+
+        $quotedTable = str_replace('`', '``', $table);
+        $statement = $pdo->query('SELECT COUNT(*) FROM `'.$quotedTable.'`');
+
+        return $statement === false ? 0 : (int) $statement->fetchColumn();
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $db
+     */
+    private function databasePdo(?array $db = null): ?\PDO
+    {
+        try {
+            if ($db !== null) {
+                return new \PDO(
+                    sprintf(
+                        'mysql:host=%s;port=%s;dbname=%s',
+                        $db['host'],
+                        $db['port'],
+                        $db['database']
+                    ),
+                    (string) $db['username'],
+                    (string) ($db['password'] ?? ''),
+                    [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+                );
+            }
+
+            if ((string) config('database.default') !== 'mysql') {
+                return null;
+            }
+
+            $connection = config('database.connections.mysql');
+            if (empty($connection['database'])) {
+                return null;
+            }
+
+            return DB::connection('mysql')->getPdo();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 
     private function importBaselineSeed(): void

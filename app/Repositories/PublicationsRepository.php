@@ -2087,8 +2087,8 @@ public function bulkFeatured($ids)
                 $dateCreated = Carbon::parse($publication->created_at)->format('M d, Y');
             }
 
-            $title = '<a href="'.e($publication->publication).'" target="_blank" rel="noopener">'.truncate($publication->title, 30).'</a>';
-            $description = truncate(html_to_text($publication->description), 50);
+            $title = '<a href="'.e($publication->publication).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a>';
+            $description = e(html_to_text($publication->description));
             $author = e($publication->author->name ?? '');
             $affiliation = e($publication->author_affiliation ?: '-');
             $memberState = e($publication->country->name ?? '');

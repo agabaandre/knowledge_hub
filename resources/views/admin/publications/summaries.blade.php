@@ -111,8 +111,7 @@ $(function () {
             { data: 'author', orderable: false },
             { data: 'status', orderable: true },
             { data: 'actions', orderable: false }
-        ],
-        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>rtip'
+        ]
     });
 
     $('#filterTitle').on('input', function () {
