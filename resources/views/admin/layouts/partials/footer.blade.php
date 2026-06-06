@@ -217,10 +217,12 @@
     });
 
     $(document).ready(function() {
-        // Initialise publications table only if present
-        if ($('#publicationTable').length) {
+        // Legacy client-side publications table (skip when server-side DataTable is already active)
+        if ($('#publicationTable').length
+            && !$('#publicationTable').is('[data-kh-datatable]')
+            && !$.fn.DataTable.isDataTable('#publicationTable')) {
             var table = $('#publicationTable').DataTable({
-                "autoWidth": true,
+                "autoWidth": false,
                 "dom": 'bootstrap',
                 "buttons": [
                     'copy', 'csv', 'excel', 'pdf',

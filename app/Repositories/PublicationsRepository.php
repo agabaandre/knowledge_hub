@@ -2087,13 +2087,13 @@ public function bulkFeatured($ids)
                 $dateCreated = Carbon::parse($publication->created_at)->format('M d, Y');
             }
 
-            $title = '<a href="'.e($publication->publication).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a>';
-            $description = e(html_to_text($publication->description));
-            $author = e($publication->author->name ?? '');
-            $affiliation = e($publication->author_affiliation ?: '-');
+            $title = '<div class="pub-cell-wrap"><a href="'.e($publication->publication).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a></div>';
+            $description = '<div class="pub-cell-wrap">'.e(html_to_text($publication->description)).'</div>';
+            $author = '<div class="pub-cell-wrap">'.e($publication->author->name ?? '').'</div>';
+            $affiliation = '<div class="pub-cell-wrap">'.e($publication->author_affiliation ?: '-').'</div>';
             $memberState = e($publication->country->name ?? '');
             $status = e(get_publication_state($publication->is_approved, $publication->is_rejected));
-            $moderator = e($this->moderatorDisplayName($publication));
+            $moderator = '<div class="pub-cell-wrap"><span class="text-muted">'.e($this->moderatorDisplayName($publication)).'</span></div>';
 
             $actions = '<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success mr-1" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
                 .'<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary mr-1" title="View"><i class="fa fa-eye"></i></a>';
@@ -2115,7 +2115,7 @@ public function bulkFeatured($ids)
                 'member_state' => $memberState,
                 'status' => $status,
                 'date_created' => $dateCreated,
-                'moderator' => '<span class="text-muted">'.$moderator.'</span>',
+                'moderator' => $moderator,
                 'actions' => $actions,
             ];
         }

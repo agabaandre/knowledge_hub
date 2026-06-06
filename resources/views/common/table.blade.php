@@ -11,20 +11,17 @@
         --kh-table-footer: #f8fafc;
         --kh-table-text: #334155;
         --kh-table-muted: #64748b;
-        --kh-table-radius: 8px;
     }
 
-    /* Surface / card-like table container (Vuetify v-data-table inspired) */
+    /* Surface / card-like table container */
     .table,
     .dataTables_wrapper table.dataTable {
         background: var(--kh-table-surface);
         border: 1px solid var(--kh-table-border);
         border-top: 3px solid var(--kh-table-primary);
-        border-radius: var(--kh-table-radius);
-        overflow: hidden;
+        border-radius: 0;
         box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05), 0 4px 14px rgba(15, 23, 42, 0.04);
-        border-collapse: separate;
-        border-spacing: 0;
+        border-collapse: collapse;
         width: 100%;
         margin-bottom: 0;
     }
@@ -41,7 +38,9 @@
         text-transform: uppercase;
         padding: 12px 14px;
         vertical-align: middle;
-        white-space: nowrap;
+        white-space: normal;
+        word-break: break-word;
+        overflow-wrap: anywhere;
     }
 
     .table tbody td,
@@ -49,10 +48,26 @@
         border-top: 1px solid #eef2f7;
         color: var(--kh-table-text);
         padding: 12px 14px;
-        vertical-align: middle;
+        vertical-align: top;
         font-size: 0.875rem;
         line-height: 1.45;
         transition: background-color 0.15s ease;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    /* DataTables adds nowrap in some modes — force wrapping on wrap-enabled tables */
+    table.dataTable.nowrap th,
+    table.dataTable.nowrap td,
+    table.dataTable td.dt-nowrap,
+    table.dataTable th.dt-nowrap {
+        white-space: normal !important;
+    }
+
+    table.kh-table-wrap-cells.nowrap th,
+    table.kh-table-wrap-cells.nowrap td {
+        white-space: normal !important;
     }
 
     .table tbody tr:last-child td,
@@ -286,7 +301,7 @@
         padding: 14px 22px;
         background: rgba(255, 255, 255, 0.96);
         border: 1px solid var(--kh-table-border);
-        border-radius: var(--kh-table-radius);
+        border-radius: 0;
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
         color: var(--kh-table-primary);
         font-size: 0.875rem;
@@ -325,36 +340,66 @@
     }
 
     .kh-table-wrap-cells {
-        table-layout: fixed;
+        table-layout: fixed !important;
         width: 100% !important;
     }
 
+    .kh-table-wrap-cells thead th,
     .kh-table-wrap-cells tbody td {
-        white-space: normal;
-        word-wrap: break-word;
+        white-space: normal !important;
+        word-break: break-word;
         overflow-wrap: anywhere;
+        hyphens: auto;
         vertical-align: top;
     }
 
+    .kh-table-wrap-cells tbody td > *,
+    .kh-table-wrap-cells tbody td a {
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    .kh-table-wrap-cells .pub-col-title,
+    .kh-table-wrap-cells .pub-col-description,
+    .kh-table-wrap-cells .pub-col-author,
+    .kh-table-wrap-cells .pub-col-affiliation,
+    .kh-table-wrap-cells .pub-col-moderator {
+        max-width: 1px;
+    }
+
     .kh-table-wrap-cells .kh-col-actions,
-    .kh-table-wrap-cells .pub-col-actions {
-        white-space: nowrap;
+    .kh-table-wrap-cells .pub-col-actions,
+    .kh-table-wrap-cells .pub-col-checkbox,
+    .kh-table-wrap-cells .pub-col-index,
+    .kh-table-wrap-cells .pub-col-status,
+    .kh-table-wrap-cells .pub-col-date,
+    .kh-table-wrap-cells .pub-col-member-state {
+        max-width: none;
+        white-space: nowrap !important;
         vertical-align: middle;
     }
 
-    /* Responsive wrapper: prefer wrapping over horizontal scroll when possible */
+    .pub-cell-wrap {
+        display: block;
+        white-space: normal !important;
+        word-break: break-word;
+        overflow-wrap: anywhere;
+        line-height: 1.4;
+    }
+
+    /* Responsive wrapper */
     .table-responsive,
     .publication-table-wrap,
     .kh-table-wrap {
-        border-radius: var(--kh-table-radius);
-        overflow-x: auto;
-        -webkit-overflow-scrolling: touch;
+        overflow-x: visible;
+        max-width: 100%;
     }
 
     .table-responsive > .table,
     .kh-table-wrap > .table,
     .kh-table-wrap > .dataTables_wrapper > table {
-        border-radius: var(--kh-table-radius);
+        border-radius: 0;
     }
 
     /* Footer toolbar helper used by server-side tables */
@@ -367,7 +412,7 @@
         background: var(--kh-table-footer);
         border: 1px solid var(--kh-table-border);
         border-top: none;
-        border-radius: 0 0 var(--kh-table-radius) var(--kh-table-radius);
+        border-radius: 0;
         padding: 4px 8px;
     }
 

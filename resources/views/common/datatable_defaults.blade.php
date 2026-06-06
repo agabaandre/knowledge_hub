@@ -27,11 +27,16 @@
 
         $.extend(true, $.fn.dataTable.defaults, window.khDataTableDefaults);
 
-        $(document).on('init.dt', function (_e, settings) {
+        $(document).on('init.dt draw.dt', function (_e, settings) {
             var api = new $.fn.dataTable.Api(settings);
             var $wrapper = $(api.table().container());
+            var $table = $(api.table().node());
 
             $wrapper.addClass('kh-datatable-wrapper');
+
+            if ($table.hasClass('kh-table-wrap-cells')) {
+                $table.removeClass('nowrap');
+            }
 
             var $footer = $wrapper.find('.kh-dt-footer');
             if ($footer.length) {

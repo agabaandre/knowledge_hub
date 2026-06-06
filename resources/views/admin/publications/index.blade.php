@@ -26,20 +26,28 @@
             overflow-x: visible;
             max-width: 100%;
         }
-        #publicationTable .pub-col-checkbox { width: 2.5rem; }
-        #publicationTable .pub-col-index { width: 3rem; }
-        #publicationTable .pub-col-title { width: 14%; }
-        #publicationTable .pub-col-description { width: 12%; }
-        #publicationTable .pub-col-author { width: 8%; }
-        #publicationTable .pub-col-affiliation { width: 12%; }
+        #publicationTable_wrapper table.dataTable {
+            table-layout: fixed !important;
+        }
+        #publicationTable .pub-col-checkbox { width: 2.5rem; min-width: 2.5rem; }
+        #publicationTable .pub-col-index { width: 3rem; min-width: 3rem; }
+        #publicationTable .pub-col-title { width: 16%; }
+        #publicationTable .pub-col-description { width: 14%; }
+        #publicationTable .pub-col-author { width: 9%; }
+        #publicationTable .pub-col-affiliation { width: 14%; }
         #publicationTable .pub-col-member-state { width: 8%; }
         #publicationTable .pub-col-status { width: 7%; }
         #publicationTable .pub-col-date { width: 8%; }
         #publicationTable .pub-col-moderator { width: 10%; }
-        #publicationTable .pub-col-actions { width: 9rem; white-space: nowrap; vertical-align: middle; }
+        #publicationTable .pub-col-actions { width: 8.5rem; min-width: 8.5rem; }
         #publicationTable .pub-title-link {
-            display: inline;
-            line-height: 1.35;
+            word-break: break-word;
+            overflow-wrap: anywhere;
+        }
+        #publicationTable thead th {
+            white-space: normal !important;
+            line-height: 1.25;
+            font-size: 0.72rem;
         }
     </style>
 @endsection
@@ -169,7 +177,7 @@
                         </div>
 
                         <div class="publication-table-wrap">
-                            <table id="publicationTable" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
+                            <table id="publicationTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
                                 <thead>
                                     <tr>
                                         <th class="pub-col-checkbox">
@@ -277,6 +285,7 @@ $(function () {
         serverSide: true,
         searching: false,
         autoWidth: false,
+        scrollX: false,
         lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
         pageLength: 20,
         order: [[1, 'desc']],
