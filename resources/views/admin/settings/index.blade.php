@@ -230,6 +230,223 @@
             display: block;
         }
 
+        .branding-section-intro {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 1rem;
+            margin-bottom: 1.25rem;
+            font-size: 0.85rem;
+            color: #64748b;
+            line-height: 1.5;
+        }
+
+        .branding-section-intro i {
+            color: var(--theme-color-primary, #119A48);
+            margin-right: 0.35rem;
+        }
+
+        .branding-asset-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            overflow: hidden;
+            height: 100%;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .branding-asset-card:hover {
+            border-color: rgba(17, 154, 72, 0.25);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+        }
+
+        .branding-asset-card__header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.1rem 0.75rem;
+            border-bottom: 1px solid #f1f5f9;
+            background: linear-gradient(180deg, #fafbfc 0%, #fff 100%);
+        }
+
+        .branding-asset-card__title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.35rem;
+        }
+
+        .branding-asset-spec {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+            color: #64748b;
+            background: #f1f5f9;
+            border-radius: 999px;
+            padding: 0.2rem 0.55rem;
+        }
+
+        .branding-asset-preview {
+            flex-shrink: 0;
+            width: 112px;
+            height: 72px;
+            border-radius: 10px;
+            border: 1px dashed #cbd5e1;
+            background: #f8fafc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 0.35rem;
+        }
+
+        .branding-asset-preview--square {
+            width: 72px;
+            height: 72px;
+        }
+
+        .branding-asset-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            width: auto;
+            height: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .branding-asset-preview__placeholder {
+            font-size: 0.68rem;
+            color: #94a3b8;
+            text-align: center;
+            line-height: 1.3;
+            padding: 0.25rem;
+        }
+
+        .branding-asset-card__body {
+            padding: 1rem 1.1rem 1.1rem;
+        }
+
+        .branding-field-label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+            display: block;
+        }
+
+        .branding-upload-row {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.65rem;
+            padding: 0.55rem;
+            border: 1px dashed #cbd5e1;
+            border-radius: 10px;
+            background: #f8fafc;
+        }
+
+        .branding-upload-row input[type="file"] {
+            position: absolute;
+            width: 0.1px;
+            height: 0.1px;
+            opacity: 0;
+            overflow: hidden;
+            z-index: -1;
+        }
+
+        .branding-upload-btn {
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            padding: 0.45rem 0.8rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #475569;
+            background: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .branding-upload-btn:hover {
+            border-color: var(--theme-color-primary, #119A48);
+            color: var(--theme-color-primary, #119A48);
+            background: rgba(17, 154, 72, 0.06);
+        }
+
+        .branding-upload-filename {
+            font-size: 0.78rem;
+            color: #94a3b8;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            flex: 1 1 120px;
+            min-width: 0;
+        }
+
+        .branding-upload-filename.has-file {
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .branding-options-panel {
+            margin-top: 1.25rem;
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 1rem 1.1rem;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
+        }
+
+        .branding-options-panel__title {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin: 0 0 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+        }
+
+        .branding-options-panel__title i {
+            color: var(--theme-color-primary, #119A48);
+        }
+
+        .branding-toggle-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 0.85rem 0.95rem;
+            background: #f8fafc;
+            height: 100%;
+        }
+
+        .branding-toggle-card .form-check {
+            margin-bottom: 0.35rem;
+        }
+
+        .branding-toggle-card .info-text {
+            margin-top: 0;
+        }
+
+        @media (max-width: 767px) {
+            .branding-asset-card__header {
+                flex-direction: column;
+            }
+
+            .branding-asset-preview {
+                width: 100%;
+                max-width: 180px;
+            }
+        }
+
         .btn-save {
             background: var(--theme-color-primary, #119A48);
             border: none;
@@ -680,53 +897,128 @@
                         <small class="info-text d-block">When enabled, links use readable slugs and legacy ID URLs redirect to the slug URL.</small>
                 </div>
 
+                    @php
+                        $currentLogoFile = settings()->logo ? basename(parse_url(settings()->logo, PHP_URL_PATH)) : '';
+                        $currentFaviconFile = settings()->favicon ? basename(parse_url(settings()->favicon, PHP_URL_PATH)) : '';
+                    @endphp
+
                     <div class="form-section-title mt-4">
                         <i class="fa fa-images"></i>
                         Branding
                     </div>
-                    <small class="info-text mb-2 d-block">Choose from existing config gallery or upload a new image. Saved per theme when using Theme1.</small>
+
+                    <div class="branding-section-intro">
+                        <i class="fa fa-info-circle"></i>
+                        Manage site logo, favicon, and how the logo appears in the header and footer. Pick from the config gallery or upload a new image. Settings are saved per theme when using Theme1.
+                    </div>
 
                     <div class="row">
-                        <div class="col-md-6">
-                <div class="form-group">
-                                <label>Site Logo</label>
-                                <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
-                                <select name="logo_existing" id="logo_existing" class="form-control mb-2">
-                                    <option value="">— Keep current / upload new —</option>
-                                    @php $currentLogoFile = settings()->logo ? basename(parse_url(settings()->logo, PHP_URL_PATH)) : ''; @endphp
-                                    @foreach($configGalleryImages ?? [] as $f)
-                                        <option value="{{ $f }}" @if($f === $currentLogoFile) selected @endif>{{ $f }}</option>
-                                    @endforeach
-                                </select>
-                                <label class="small text-muted d-block mb-1">Or upload new file</label>
-                                <input type="file" name="logo" id="logo" class="form-control" accept="image/*">
-                                <small class="info-text">Recommended: 500x230 pixels</small>
-                                @if(settings()->logo)
-                                    <div class="image-preview mt-2">
-                                        <img src="{{ settings()->logo }}" alt="Logo Preview">
+                        <div class="col-lg-6 mb-3 mb-lg-0">
+                            <div class="branding-asset-card" data-branding-asset="logo">
+                                <div class="branding-asset-card__header">
+                                    <div>
+                                        <h4 class="branding-asset-card__title">Site Logo</h4>
+                                        <span class="branding-asset-spec"><i class="fa fa-arrows-alt"></i> 500 × 230 px</span>
+                                        <small class="info-text d-block mt-2 mb-0">Displayed in the site header and footer.</small>
                                     </div>
-                                @endif
+                                    <div class="branding-asset-preview js-branding-preview">
+                                        @if(settings()->logo)
+                                            <img src="{{ settings()->logo }}" alt="Logo preview">
+                                        @else
+                                            <span class="branding-asset-preview__placeholder">No logo set</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="branding-asset-card__body">
+                                    <label class="branding-field-label" for="logo_existing">Config gallery</label>
+                                    <select name="logo_existing" id="logo_existing" class="form-control">
+                                        <option value="">— Keep current / upload new —</option>
+                                        @foreach($configGalleryImages ?? [] as $f)
+                                            <option value="{{ $f }}" @if($f === $currentLogoFile) selected @endif>{{ $f }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <div class="branding-upload-row">
+                                        <input type="file" name="logo" id="logo" accept="image/*">
+                                        <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="logo">
+                                            <i class="fa fa-upload mr-1"></i>Choose image
+                                        </button>
+                                        <span class="branding-upload-filename js-branding-filename" id="logo-filename">No file chosen</span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label>Favicon</label>
-                                <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
-                                <select name="favicon_existing" id="favicon_existing" class="form-control mb-2">
-                                    <option value="">— Keep current / upload new —</option>
-                                    @php $currentFaviconFile = settings()->favicon ? basename(parse_url(settings()->favicon, PHP_URL_PATH)) : ''; @endphp
-                                    @foreach($configGalleryImages ?? [] as $f)
-                                        <option value="{{ $f }}" @if($f === $currentFaviconFile) selected @endif>{{ $f }}</option>
-                                    @endforeach
-                                </select>
-                                <label class="small text-muted d-block mb-1">Or upload new file</label>
-                                <input type="file" name="favicon" id="favicon" class="form-control" accept="image/*">
-                                <small class="info-text">Recommended: 350x350 pixels</small>
-                                @if(settings()->favicon)
-                                    <div class="image-preview mt-2">
-                                        <img src="{{ settings()->favicon }}" alt="Favicon Preview">
+
+                        <div class="col-lg-6">
+                            <div class="branding-asset-card" data-branding-asset="favicon">
+                                <div class="branding-asset-card__header">
+                                    <div>
+                                        <h4 class="branding-asset-card__title">Favicon</h4>
+                                        <span class="branding-asset-spec"><i class="fa fa-arrows-alt"></i> 350 × 350 px</span>
+                                        <small class="info-text d-block mt-2 mb-0">Browser tab icon shown across the site.</small>
                                     </div>
-                                @endif
+                                    <div class="branding-asset-preview branding-asset-preview--square js-branding-preview">
+                                        @if(settings()->favicon)
+                                            <img src="{{ settings()->favicon }}" alt="Favicon preview">
+                                        @else
+                                            <span class="branding-asset-preview__placeholder">No favicon</span>
+                                        @endif
+                                    </div>
+                                </div>
+                                <div class="branding-asset-card__body">
+                                    <label class="branding-field-label" for="favicon_existing">Config gallery</label>
+                                    <select name="favicon_existing" id="favicon_existing" class="form-control">
+                                        <option value="">— Keep current / upload new —</option>
+                                        @foreach($configGalleryImages ?? [] as $f)
+                                            <option value="{{ $f }}" @if($f === $currentFaviconFile) selected @endif>{{ $f }}</option>
+                                        @endforeach
+                                    </select>
+
+                                    <div class="branding-upload-row">
+                                        <input type="file" name="favicon" id="favicon" accept="image/*">
+                                        <button type="button" class="branding-upload-btn js-branding-upload-trigger" data-target="favicon">
+                                            <i class="fa fa-upload mr-1"></i>Choose image
+                                        </button>
+                                        <span class="branding-upload-filename js-branding-filename" id="favicon-filename">No file chosen</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="branding-options-panel">
+                        <h4 class="branding-options-panel__title">
+                            <i class="fa fa-sliders"></i>Logo display options
+                        </h4>
+                        <div class="row">
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="branding-toggle-card h-100">
+                                    <label class="branding-field-label" for="logo_scale">Logo size</label>
+                                    <select name="logo_scale" id="logo_scale" class="form-control">
+                                        @foreach([40, 50, 60, 70, 80, 100, 120] as $px)
+                                            <option value="{{ $px }}" @if((settings()->logo_scale ?? 80) == $px) selected @endif>{{ $px }}px height</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="info-text d-block mt-2">Header and footer logo height on front and admin.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 mb-3 mb-md-0">
+                                <div class="branding-toggle-card h-100">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="header_logo_inverse" name="header_logo_inverse" value="1" @if(settings()->header_logo_inverse ?? false) checked @endif>
+                                        <label class="form-check-label" for="header_logo_inverse">Inverse logo in header</label>
+                                    </div>
+                                    <small class="info-text">Shows a light/inverted logo style in the header on front and admin.</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="branding-toggle-card h-100">
+                                    <div class="form-check">
+                                        <input type="checkbox" class="form-check-input" id="footer_logo_inverse" name="footer_logo_inverse" value="1" @if(settings()->footer_logo_inverse ?? false) checked @endif>
+                                        <label class="form-check-label" for="footer_logo_inverse">Inverse logo in footer</label>
+                                    </div>
+                                    <small class="info-text">Shows a light/inverted logo style in the site footer.</small>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1303,42 +1595,6 @@
                             </div>
                     </div>
                 </div>
-
-                    <div class="form-section-title mt-4">
-                        <i class="fa fa-image"></i>
-                        Logo display
-                    </div>
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <label>Logo size (px)</label>
-                                <select name="logo_scale" class="form-control">
-                                    @foreach([40, 50, 60, 70, 80, 100, 120] as $px)
-                                    <option value="{{ $px }}" @if((settings()->logo_scale ?? 80) == $px) selected @endif>{{ $px }}px</option>
-                                    @endforeach
-                                </select>
-                                <small class="info-text">Height of the logo in header/footer (both front and admin).</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <div class="form-check mt-4">
-                                    <input type="checkbox" class="form-check-input" id="header_logo_inverse" name="header_logo_inverse" value="1" @if(settings()->header_logo_inverse ?? false) checked @endif>
-                                    <label class="form-check-label" for="header_logo_inverse">Use inverse logo in header</label>
-                                </div>
-                                <small class="info-text">When enabled, the header logo is shown in inverse (light) style on both front and admin.</small>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="form-group">
-                                <div class="form-check mt-4">
-                                    <input type="checkbox" class="form-check-input" id="footer_logo_inverse" name="footer_logo_inverse" value="1" @if(settings()->footer_logo_inverse ?? false) checked @endif>
-                                    <label class="form-check-label" for="footer_logo_inverse">Use inverse logo in footer</label>
-                                </div>
-                                <small class="info-text">When enabled, the footer logo is shown in inverse (light) style.</small>
-                            </div>
-                        </div>
-                    </div>
 
                     <div class="form-section-title mt-4">
                         <i class="fa fa-font"></i>
@@ -2245,8 +2501,46 @@
                 updateGradientPreview();
             });
 
-            // Image preview on file selection
-            $('#logo, #favicon, #spotlight_banner').on('change', function(e) {
+            $('.js-branding-upload-trigger').on('click', function () {
+                var targetId = $(this).data('target');
+                if (targetId) {
+                    document.getElementById(targetId).click();
+                }
+            });
+
+            function updateBrandingAssetPreview($input, dataUrl, fileName) {
+                var $card = $input.closest('.branding-asset-card');
+                var $preview = $card.find('.js-branding-preview');
+                var $filename = $card.find('.js-branding-filename');
+
+                if (dataUrl) {
+                    $preview.html('<img src="' + dataUrl + '" alt="Preview">');
+                }
+                if (fileName) {
+                    $filename.text(fileName).addClass('has-file');
+                }
+            }
+
+            $('#logo, #favicon').on('change', function (e) {
+                var file = e.target.files[0];
+                if (!file) return;
+                var $input = $(this);
+                var reader = new FileReader();
+                reader.onload = function (event) {
+                    updateBrandingAssetPreview($input, event.target.result, file.name);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            $('#logo_existing, #favicon_existing').on('change', function () {
+                var selected = $(this).val();
+                if (!selected) return;
+                var $card = $(this).closest('.branding-asset-card');
+                $card.find('.js-branding-filename').text('Gallery: ' + selected).addClass('has-file');
+            });
+
+            // Spotlight banner preview (legacy layout)
+            $('#spotlight_banner').on('change', function(e) {
                 var file = e.target.files[0];
                 if (file) {
                     var reader = new FileReader();
