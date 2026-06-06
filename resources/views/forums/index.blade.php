@@ -315,6 +315,46 @@
     flex-wrap: wrap;
 }
 
+.forum-share-actions--inline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-left: auto;
+    flex-wrap: wrap;
+}
+
+.forum-share-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    color: #64748b;
+    background: #fff;
+    text-decoration: none;
+    font-size: 0.875rem;
+    padding: 0;
+    cursor: pointer;
+    transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.forum-share-btn:hover {
+    color: var(--theme-color-primary, #119A48);
+    border-color: var(--theme-color-primary, #119A48);
+    background: rgba(17, 154, 72, 0.05);
+    text-decoration: none;
+}
+
+@media (max-width: 768px) {
+    .forum-share-actions--inline {
+        margin-left: 0;
+        width: 100%;
+        margin-top: 0.35rem;
+    }
+}
+
 /* Comments Panel Styles */
 .comments-panel {
     margin-top: 1rem;
@@ -765,6 +805,7 @@
                                         <i class="fa fa-link"></i> Join Discussion
                                     </a>
                                 @endauth
+                                @include('forums.partials.share_buttons', ['forum' => $forum, 'variant' => 'inline'])
                             </div>
                                 </div>
                             </div>
@@ -1722,6 +1763,56 @@ document.addEventListener('DOMContentLoaded', function() {
         const tags = Array.from(card.querySelectorAll('.tag')).map(t => t.textContent.toLowerCase()).join(' ');
         return title.includes(searchTerm) || description.includes(searchTerm) || tags.includes(searchTerm);
     }
+
+    function copyForumShareLink(url) {
+        if (!url) return;
+        if (navigator.clipboard && window.isSecureContext) {
+            navigator.clipboard.writeText(url).then(function () {
+                if (typeof showLobiboxNotification === 'function') {
+                    showLobiboxNotification('success', 'Link copied to clipboard!');
+                } else if (typeof Lobibox !== 'undefined') {
+                    Lobibox.notify('success', { size: 'mini', msg: 'Link copied to clipboard!' });
+                }
+            }).catch(function () {
+                fallbackCopyForumLink(url);
+            });
+        } else {
+            fallbackCopyForumLink(url);
+        }
+    }
+
+    function fallbackCopyForumLink(url) {
+        const el = document.createElement('textarea');
+        el.value = url;
+        el.style.position = 'fixed';
+        el.style.left = '-9999px';
+        document.body.appendChild(el);
+        el.select();
+        try {
+            document.execCommand('copy');
+            if (typeof showLobiboxNotification === 'function') {
+                showLobiboxNotification('success', 'Link copied to clipboard!');
+            } else if (typeof Lobibox !== 'undefined') {
+                Lobibox.notify('success', { size: 'mini', msg: 'Link copied to clipboard!' });
+            }
+        } catch (err) {
+            window.prompt('Copy this link:', url);
+        } finally {
+            document.body.removeChild(el);
+        }
+    }
+
+    document.addEventListener('click', function (e) {
+        const btn = e.target.closest('.copy-link-btn');
+        if (!btn) return;
+        e.preventDefault();
+        const url = btn.getAttribute('data-share-url');
+        if (typeof window.copyForumLink === 'function') {
+            window.copyForumLink(url);
+        } else {
+            copyForumShareLink(url);
+        }
+    });
 
     function applyFilter(filter) {
         const searchTerm = searchInput ? searchInput.value.trim().toLowerCase() : '';

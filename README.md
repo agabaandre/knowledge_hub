@@ -108,6 +108,7 @@ For Docker-specific notes (Meilisearch import, queue workers, production tuning)
 
 | Document | Audience | Topic |
 |----------|----------|--------|
+| [docs/FEATURE_ENHANCEMENTS.md](docs/FEATURE_ENHANCEMENTS.md) | Admin, users, dev | Recent features: tags AI, WHO descriptions, email configure, forum sharing, CoP participants |
 | [docs/DOCKER.md](docs/DOCKER.md) | Dev / ops | Container deploy, queue, Meilisearch |
 | [docs/KPI_INDICATORS_OWID.md](docs/KPI_INDICATORS_OWID.md) | Users, admin, dev | Country indicators, OWID import, KPI settings, queue tasks |
 | [docs/CONTENT_REQUEST_REFERRALS.md](docs/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |

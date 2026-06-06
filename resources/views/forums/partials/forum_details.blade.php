@@ -152,22 +152,7 @@
             <span>Khub AI</span>
         </a>
         @endauth
-        @php $shareUrl = forum_thread_url($forum); $shareText = urlencode(strip_tags($forum->forum_title)); @endphp
-        <a class="forum-action-btn" target="_blank" href="https://www.linkedin.com/sharing/share-offsite/?url={{ urlencode($shareUrl) }}" title="Share on LinkedIn">
-            <i class="fab fa-linkedin-in"></i>
-        </a>
-        <a class="forum-action-btn" target="_blank" href="https://twitter.com/intent/tweet?url={{ urlencode($shareUrl) }}&text={{ $shareText }}" title="Share on X">
-            <i class="fab fa-x-twitter"></i>
-        </a>
-        <a class="forum-action-btn" target="_blank" href="https://www.facebook.com/sharer/sharer.php?u={{ urlencode($shareUrl) }}" title="Share on Facebook">
-            <i class="fab fa-facebook-f"></i>
-        </a>
-        <a class="forum-action-btn" target="_blank" href="https://api.whatsapp.com/send?text={{ $shareText }}%20{{ urlencode($shareUrl) }}" title="Share on WhatsApp">
-            <i class="fab fa-whatsapp"></i>
-        </a>
-        <button type="button" class="forum-action-btn copy-link-btn" data-share-url="{{ $shareUrl }}" title="Copy link" style="background: none; border: none; padding: 0.5rem; cursor: pointer;">
-            <i class="fa fa-link"></i>
-        </button>
+        @include('forums.partials.share_buttons', ['forum' => $forum])
     </div>
     </div>
 
