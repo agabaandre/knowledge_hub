@@ -15,6 +15,7 @@ use App\Models\UserLifetimeBadge;
 use App\Support\ContributorContributions;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
 class ContributorBadgeAwardService
@@ -66,6 +67,9 @@ class ContributorBadgeAwardService
                 return $result;
             }
 
+            $totalUsers = $userIds->count();
+            $this->updateJobProgress(0, $totalUsers, $year, $month, $triggeredBy);
+
             foreach ($userIds as $userId) {
                 $user = User::query()->find($userId);
                 if (! $user) {
@@ -73,6 +77,7 @@ class ContributorBadgeAwardService
                 }
 
                 $result['users_processed']++;
+                $this->updateJobProgress($result['users_processed'], $totalUsers, $year, $month, $triggeredBy);
 
                 $upgrade = $this->recalculateLifetimeBadge($user);
                 if ($upgrade['created']) {
@@ -95,6 +100,8 @@ class ContributorBadgeAwardService
                 $result['community_rows_synced'] += $this->syncCommunityMonthlyContributions($user, $year, $month);
             }
         } catch (\Throwable $e) {
+            Cache::forget('badges_award_job_progress');
+
             Log::error('ContributorBadgeAwardService failed', [
                 'year' => $year,
                 'month' => $month,
@@ -107,8 +114,68 @@ class ContributorBadgeAwardService
         }
 
         $result['finished_at'] = now()->toIso8601String();
+        Cache::forget('badges_award_job_progress');
 
         return $result;
+    }
+
+    /**
+     * @return array{
+     *     total: int,
+     *     mismatches: int,
+     *     rows: list<array<string, mixed>>
+     * }
+     */
+    public function auditBadgeHolders(bool $onlyMismatches = true, int $limit = 200): array
+    {
+        $rows = [];
+        $mismatches = 0;
+
+        $query = UserLifetimeBadge::query()
+            ->with(['user.author', 'badgeType'])
+            ->whereNotNull('badge_type_id')
+            ->orderByDesc('lifetime_contributions');
+
+        $limitReached = false;
+        $query->chunk(100, function ($badges) use (&$rows, &$mismatches, $onlyMismatches, $limit, &$limitReached) {
+            if ($limitReached) {
+                return false;
+            }
+
+            foreach ($badges as $badge) {
+                if (count($rows) >= $limit) {
+                    $limitReached = true;
+
+                    return false;
+                }
+
+                if (! $badge->user) {
+                    continue;
+                }
+
+                $audit = ContributorContributions::auditForUser($badge->user);
+                if ($onlyMismatches && $audit['status'] === 'ok') {
+                    continue;
+                }
+
+                if ($audit['status'] !== 'ok') {
+                    $mismatches++;
+                }
+
+                $rows[] = array_merge($audit, [
+                    'name' => $badge->user->name,
+                    'email' => $badge->user->email,
+                    'author_name' => $badge->user->author->name ?? null,
+                    'last_upgraded_at' => optional($badge->last_upgraded_at)->toDateTimeString(),
+                ]);
+            }
+        });
+
+        return [
+            'total' => UserLifetimeBadge::query()->whereNotNull('badge_type_id')->count(),
+            'mismatches' => $mismatches,
+            'rows' => $rows,
+        ];
     }
 
     public function defaultPeriod(): array
@@ -210,11 +277,15 @@ class ContributorBadgeAwardService
             ->where('community_of_practice_id', $communityId)
             ->pluck('publication_id');
 
-        $publications = ContributorContributions::eligiblePublicationsQuery($userId, $authorId)
-            ->whereIn('id', $publicationIds)
-            ->whereYear('created_at', $year)
-            ->whereMonth('created_at', $month)
-            ->count();
+        $publications = ContributorContributions::countDistinctPublications(
+            $userId,
+            $authorId,
+            function ($query) use ($publicationIds, $year, $month) {
+                $query->whereIn('id', $publicationIds)
+                    ->whereYear('created_at', $year)
+                    ->whereMonth('created_at', $month);
+            }
+        );
 
         $forumIds = ForumCommunityOfPractice::query()
             ->where('community_of_practice_id', $communityId)
@@ -359,5 +430,18 @@ class ContributorBadgeAwardService
             'body' => $body,
             'title' => $subject,
         ])->onQueue('default');
+    }
+
+    private function updateJobProgress(int $processed, int $total, int $year, int $month, string $triggeredBy): void
+    {
+        Cache::put('badges_award_job_progress', [
+            'total' => $total,
+            'processed' => $processed,
+            'percent' => $total > 0 ? (int) round(($processed / $total) * 100) : 0,
+            'year' => $year,
+            'month' => $month,
+            'triggered_by' => $triggeredBy,
+            'updated_at' => now()->toIso8601String(),
+        ], now()->addHours(2));
     }
 }

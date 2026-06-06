@@ -28,20 +28,61 @@
         $queueHealth = $queueHealth ?? [];
         $lastAwardRun = $lastAwardRun ?? null;
         $awardJobRunning = $awardJobRunning ?? null;
+        $awardJobProgress = $awardJobProgress ?? null;
+        $badgeAudit = $badgeAudit ?? ['total' => 0, 'mismatches' => 0, 'rows' => []];
+        $initialProgressPercent = (int) ($awardJobProgress['percent'] ?? 0);
+        $initialProgressProcessed = (int) ($awardJobProgress['processed'] ?? 0);
+        $initialProgressTotal = (int) ($awardJobProgress['total'] ?? 0);
     @endphp
 
-    {{-- Automated award job + queue health --}}
+    {{-- Automated award job + queue health + audit (collapsed) --}}
     <div class="card mb-4">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
-            <div>
-                <h3 class="card-title mb-0">Automated badge awarding</h3>
-                <p class="text-muted small mb-0 mt-1">Recalculates <strong>lifetime</strong> hub badges from all contributions and syncs <strong>community monthly</strong> activity for the selected period. Scheduled: 1st of each month at 01:00.</p>
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center"
+             id="badgeAutomationHeading"
+             data-toggle="collapse"
+             data-target="#badgeAutomationPanel"
+             aria-expanded="false"
+             aria-controls="badgeAutomationPanel"
+             style="cursor: pointer;">
+            <div class="pr-3">
+                <h3 class="card-title mb-0">
+                    <i class="fa fa-chevron-{{ ($awardJobRunning || ($badgeAudit['mismatches'] ?? 0) > 0) ? 'down' : 'right' }} mr-2 badge-automation-chevron" aria-hidden="true"></i>
+                    Automated badge awarding &amp; audit
+                </h3>
+                <p class="text-muted small mb-0 mt-1">Recalculates lifetime badges from current approved hub content (duplicate publications deduped). Scheduled: 1st of each month at 01:00.</p>
             </div>
-            @if($awardJobRunning)
-                <span class="badge badge-warning text-dark mt-2 mt-md-0">Job running…</span>
-            @endif
+            <div class="d-flex flex-wrap align-items-center mt-2 mt-md-0">
+                @if(($badgeAudit['mismatches'] ?? 0) > 0)
+                    <span class="badge badge-danger mr-2">{{ number_format((int) $badgeAudit['mismatches']) }} audit mismatch(es)</span>
+                @endif
+                @if($awardJobRunning)
+                    <span class="badge badge-warning text-dark" id="badgeJobRunningBadge">Job running…</span>
+                @endif
+            </div>
         </div>
-        <div class="card-body">
+        <div id="badgeAutomationPanel" class="collapse {{ ($awardJobRunning || ($badgeAudit['mismatches'] ?? 0) > 0) ? 'show' : '' }}" aria-labelledby="badgeAutomationHeading">
+        <div class="card-body border-top">
+            <div id="badgeAwardProgressWrap" class="mb-4 {{ ($awardJobRunning || $initialProgressPercent > 0) ? '' : 'd-none' }}">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong class="small mb-0">Award job progress</strong>
+                    <span class="small text-muted" id="badgeAwardProgressLabel">
+                        @if($initialProgressTotal > 0)
+                            {{ number_format($initialProgressProcessed) }} / {{ number_format($initialProgressTotal) }} users ({{ $initialProgressPercent }}%)
+                        @else
+                            Starting…
+                        @endif
+                    </span>
+                </div>
+                <div class="progress" style="height: 1.25rem;">
+                    <div id="badgeAwardProgressBar"
+                         class="progress-bar progress-bar-striped {{ $awardJobRunning ? 'progress-bar-animated' : '' }} bg-success"
+                         role="progressbar"
+                         style="width: {{ max(2, $initialProgressPercent) }}%;"
+                         aria-valuenow="{{ $initialProgressPercent }}"
+                         aria-valuemin="0"
+                         aria-valuemax="100"></div>
+                </div>
+            </div>
             <div class="row mb-4">
                 <div class="col-lg-6 mb-3 mb-lg-0">
                     <h5 class="h6 font-weight-bold">Queue status</h5>
@@ -127,9 +168,86 @@
                     </button>
                 </div>
             </form>
-            <p class="text-muted small mb-0">
+            <p class="text-muted small mb-4">
                 CLI: <code>php artisan badges:award-community</code> · <code>php artisan badges:recalculate-lifetime</code> (full lifetime recalc).
             </p>
+
+            <hr>
+
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="h6 font-weight-bold mb-1">Badge audit</h5>
+                    <p class="text-muted small mb-0">Compares stored badge data with a live recount of approved publications, forums, and comments. Duplicate publications (same DOI, link, or title) count once.</p>
+                </div>
+                <div class="mt-2 mt-md-0">
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="badgeAuditRefreshBtn">
+                        <i class="fa fa-refresh mr-1"></i> Refresh audit
+                    </button>
+                    <label class="small mb-0 ml-2">
+                        <input type="checkbox" id="badgeAuditOnlyMismatches" checked> Only mismatches
+                    </label>
+                </div>
+            </div>
+
+            <div class="alert alert-light border small mb-3">
+                <strong>{{ number_format((int) ($badgeAudit['total'] ?? 0)) }}</strong> badge holder(s) tracked.
+                <span id="badgeAuditMismatchSummary">
+                    @if(($badgeAudit['mismatches'] ?? 0) > 0)
+                        <span class="text-danger font-weight-bold">{{ number_format((int) $badgeAudit['mismatches']) }} need correction</span> — run <code>php artisan badges:recalculate-lifetime</code> or the award job above.
+                    @else
+                        No mismatches in the current sample.
+                    @endif
+                </span>
+            </div>
+
+            <div class="table-responsive">
+                <table class="table table-sm table-bordered table-hover mb-0" id="badgeAuditTable">
+                    <thead>
+                        <tr>
+                            <th>Participant</th>
+                            <th>Status</th>
+                            <th class="text-right">Stored</th>
+                            <th class="text-right">Live</th>
+                            <th class="text-right">Δ</th>
+                            <th>Stored tier</th>
+                            <th>Earned tier</th>
+                            <th class="text-right">Dup. pubs</th>
+                        </tr>
+                    </thead>
+                    <tbody id="badgeAuditTableBody">
+                        @forelse($badgeAudit['rows'] ?? [] as $row)
+                            <tr>
+                                <td>
+                                    <div>{{ $row['name'] ?? '—' }}</div>
+                                    <div class="small text-muted">{{ $row['email'] ?? '' }}</div>
+                                </td>
+                                <td>
+                                    @if(($row['status'] ?? '') === 'over_awarded')
+                                        <span class="badge badge-danger">Over-awarded</span>
+                                    @elseif(($row['status'] ?? '') === 'stale')
+                                        <span class="badge badge-warning text-dark">Stale</span>
+                                    @elseif(($row['status'] ?? '') === 'under_awarded')
+                                        <span class="badge badge-info">Under-awarded</span>
+                                    @else
+                                        <span class="badge badge-success">OK</span>
+                                    @endif
+                                </td>
+                                <td class="text-right">{{ number_format((int) ($row['stored_contributions'] ?? 0)) }}</td>
+                                <td class="text-right">{{ number_format((int) ($row['live_contributions'] ?? 0)) }}</td>
+                                <td class="text-right {{ ($row['contribution_delta'] ?? 0) > 0 ? 'text-danger' : '' }}">{{ ($row['contribution_delta'] ?? 0) > 0 ? '+' : '' }}{{ number_format((int) ($row['contribution_delta'] ?? 0)) }}</td>
+                                <td>{{ $row['stored_badge_name'] ?? '—' }}</td>
+                                <td>{{ $row['earned_badge_name'] ?? '—' }}</td>
+                                <td class="text-right">{{ number_format((int) ($row['breakdown']['duplicate_publications_excluded'] ?? 0)) }}</td>
+                            </tr>
+                        @empty
+                            <tr id="badgeAuditEmptyRow">
+                                <td colspan="8" class="text-center text-muted">No audit rows to show.</td>
+                            </tr>
+                        @endforelse
+                    </tbody>
+                </table>
+            </div>
+        </div>
         </div>
     </div>
 
@@ -313,5 +431,123 @@
     if (typeof $.fn.select2 === 'function') {
         $('.select2').select2({ width: '100%' });
     }
+
+    (function () {
+        var jobStatusUrl = @json(route('admin.participant-badges.job-status'));
+        var auditUrl = @json(route('admin.participant-badges.audit'));
+        var pollTimer = null;
+
+        function statusBadgeHtml(status) {
+            if (status === 'over_awarded') return '<span class="badge badge-danger">Over-awarded</span>';
+            if (status === 'stale') return '<span class="badge badge-warning text-dark">Stale</span>';
+            if (status === 'under_awarded') return '<span class="badge badge-info">Under-awarded</span>';
+            return '<span class="badge badge-success">OK</span>';
+        }
+
+        function renderAuditRows(rows) {
+            var $body = $('#badgeAuditTableBody');
+            $body.empty();
+            if (!rows || !rows.length) {
+                $body.append('<tr><td colspan="8" class="text-center text-muted">No audit rows to show.</td></tr>');
+                return;
+            }
+            rows.forEach(function (row) {
+                var delta = parseInt(row.contribution_delta || 0, 10);
+                var deltaClass = delta > 0 ? 'text-danger' : '';
+                var deltaPrefix = delta > 0 ? '+' : '';
+                $body.append(
+                    '<tr>' +
+                    '<td><div>' + (row.name || '—') + '</div><div class="small text-muted">' + (row.email || '') + '</div></td>' +
+                    '<td>' + statusBadgeHtml(row.status) + '</td>' +
+                    '<td class="text-right">' + Number(row.stored_contributions || 0).toLocaleString() + '</td>' +
+                    '<td class="text-right">' + Number(row.live_contributions || 0).toLocaleString() + '</td>' +
+                    '<td class="text-right ' + deltaClass + '">' + deltaPrefix + Number(delta).toLocaleString() + '</td>' +
+                    '<td>' + (row.stored_badge_name || '—') + '</td>' +
+                    '<td>' + (row.earned_badge_name || '—') + '</td>' +
+                    '<td class="text-right">' + Number((row.breakdown && row.breakdown.duplicate_publications_excluded) || 0).toLocaleString() + '</td>' +
+                    '</tr>'
+                );
+            });
+        }
+
+        function refreshAudit() {
+            var onlyMismatches = $('#badgeAuditOnlyMismatches').is(':checked') ? 1 : 0;
+            $.get(auditUrl, { only_mismatches: onlyMismatches, limit: 200 })
+                .done(function (data) {
+                    renderAuditRows(data.rows || []);
+                    var mismatches = parseInt(data.mismatches || 0, 10);
+                    var total = parseInt(data.total || 0, 10);
+                    var summary = mismatches > 0
+                        ? '<span class="text-danger font-weight-bold">' + mismatches.toLocaleString() + ' need correction</span> — run <code>php artisan badges:recalculate-lifetime</code> or the award job above.'
+                        : 'No mismatches in the current sample.';
+                    $('#badgeAuditMismatchSummary').html(summary);
+                });
+        }
+
+        function updateProgress(progress, running) {
+            var $wrap = $('#badgeAwardProgressWrap');
+            var $bar = $('#badgeAwardProgressBar');
+            var $label = $('#badgeAwardProgressLabel');
+            var $runningBadge = $('#badgeJobRunningBadge');
+
+            if (!progress && !running) {
+                return;
+            }
+
+            $wrap.removeClass('d-none');
+            var percent = progress ? parseInt(progress.percent || 0, 10) : 0;
+            var processed = progress ? parseInt(progress.processed || 0, 10) : 0;
+            var total = progress ? parseInt(progress.total || 0, 10) : 0;
+
+            $bar.css('width', Math.max(2, percent) + '%').attr('aria-valuenow', percent);
+            if (running) {
+                $bar.addClass('progress-bar-animated');
+            } else {
+                $bar.removeClass('progress-bar-animated');
+            }
+
+            if (total > 0) {
+                $label.text(processed.toLocaleString() + ' / ' + total.toLocaleString() + ' users (' + percent + '%)');
+            } else if (running) {
+                $label.text('Starting…');
+            }
+
+            if (running) {
+                if (!$runningBadge.length) {
+                    $('#badgeAutomationHeading .d-flex.flex-wrap.align-items-center').append('<span class="badge badge-warning text-dark" id="badgeJobRunningBadge">Job running…</span>');
+                }
+            } else {
+                $runningBadge.remove();
+            }
+        }
+
+        function pollJobStatus() {
+            $.get(jobStatusUrl)
+                .done(function (data) {
+                    updateProgress(data.progress, data.running);
+                    if (data.running) {
+                        pollTimer = window.setTimeout(pollJobStatus, 2000);
+                    } else {
+                        pollTimer = null;
+                        if (data.last_run && data.last_run.status === 'completed') {
+                            refreshAudit();
+                        }
+                    }
+                });
+        }
+
+        $('#badgeAutomationPanel').on('show.bs.collapse', function () {
+            $('.badge-automation-chevron').removeClass('fa-chevron-right').addClass('fa-chevron-down');
+        }).on('hide.bs.collapse', function () {
+            $('.badge-automation-chevron').removeClass('fa-chevron-down').addClass('fa-chevron-right');
+        });
+
+        $('#badgeAuditRefreshBtn').on('click', refreshAudit);
+        $('#badgeAuditOnlyMismatches').on('change', refreshAudit);
+
+        @if($awardJobRunning || (session('success') && str_contains((string) session('success'), 'queued')))
+            pollJobStatus();
+        @endif
+    })();
 </script>
 @endsection

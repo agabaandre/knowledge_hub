@@ -50,6 +50,7 @@ class AwardCommunityBadgesJob implements ShouldQueue
 
         Cache::put('badges_last_award_run', $result, now()->addDays(120));
         Cache::forget('badges_award_job_running');
+        Cache::forget('badges_award_job_progress');
 
         Log::info('AwardCommunityBadgesJob finished', $result);
     }
@@ -57,6 +58,7 @@ class AwardCommunityBadgesJob implements ShouldQueue
     public function failed(\Throwable $exception): void
     {
         Cache::forget('badges_award_job_running');
+        Cache::forget('badges_award_job_progress');
 
         $payload = [
             'status' => 'failed',

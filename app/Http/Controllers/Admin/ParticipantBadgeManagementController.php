@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Cache;
 
 class ParticipantBadgeManagementController extends Controller
 {
-    public function index(Request $request)
+    public function index(Request $request, ContributorBadgeAwardService $service)
     {
         $badgeTypes = BadgeType::query()
             ->orderBy('sort_order')
@@ -47,6 +47,8 @@ class ParticipantBadgeManagementController extends Controller
         $queueHealth = QueueHealth::snapshot();
         $lastAwardRun = Cache::get('badges_last_award_run');
         $awardJobRunning = Cache::get('badges_award_job_running');
+        $awardJobProgress = Cache::get('badges_award_job_progress');
+        $badgeAudit = $service->auditBadgeHolders(true, 100);
 
         return view('admin.participant-badges.index', compact(
             'badgeTypes',
@@ -56,8 +58,28 @@ class ParticipantBadgeManagementController extends Controller
             'defaultPeriod',
             'queueHealth',
             'lastAwardRun',
-            'awardJobRunning'
+            'awardJobRunning',
+            'awardJobProgress',
+            'badgeAudit'
         ));
+    }
+
+    public function jobStatus()
+    {
+        return response()->json([
+            'running' => (bool) Cache::get('badges_award_job_running'),
+            'progress' => Cache::get('badges_award_job_progress'),
+            'last_run' => Cache::get('badges_last_award_run'),
+        ]);
+    }
+
+    public function audit(Request $request, ContributorBadgeAwardService $service)
+    {
+        $onlyMismatches = $request->boolean('only_mismatches', true);
+
+        return response()->json(
+            $service->auditBadgeHolders($onlyMismatches, (int) $request->input('limit', 200))
+        );
     }
 
     public function runAwardJob(Request $request, ContributorBadgeAwardService $service)
@@ -79,8 +101,16 @@ class ParticipantBadgeManagementController extends Controller
         $triggeredBy = 'admin:'.(auth()->id() ?? 'unknown');
 
         if ($validated['run_mode'] === 'sync') {
+            Cache::put('badges_award_job_running', [
+                'started_at' => now()->toIso8601String(),
+                'year' => $year,
+                'month' => $month,
+                'triggered_by' => $triggeredBy,
+            ], now()->addHours(2));
+
             $result = $service->awardForPeriod($year, $month, $triggeredBy);
             Cache::put('badges_last_award_run', $result, now()->addDays(120));
+            Cache::forget('badges_award_job_running');
 
             if ($result['status'] === 'failed') {
                 return redirect()
@@ -98,6 +128,13 @@ class ParticipantBadgeManagementController extends Controller
                     (int) ($result['community_rows_synced'] ?? 0)
                 ));
         }
+
+        Cache::put('badges_award_job_running', [
+            'started_at' => now()->toIso8601String(),
+            'year' => $year,
+            'month' => $month,
+            'triggered_by' => $triggeredBy,
+        ], now()->addHours(2));
 
         AwardCommunityBadgesJob::dispatch($year, $month, $triggeredBy);
 
