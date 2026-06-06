@@ -134,8 +134,7 @@
                                            @endif
 
                                            <span class="text-muted medium d-block mt-1">
-                                               <span class=" mr-2"><i class="lni lni-calendar mr-1"></i>Last updated:
-                                                   {{ time_ago($row->updated_at) }} </span>
+                                               @include('partials.publications.card_timestamps', ['row' => $row])
                                                <span class=" mr-2"><i class="fa fa-eye mr-1"></i>{{ $row->visits }}
                                                    Views </span>
 

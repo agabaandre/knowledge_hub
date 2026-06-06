@@ -394,7 +394,10 @@
                                     @if($publication->author)
                                         <span><i class="fa fa-user mr-1"></i>{{ $publication->author->name ?? 'Unknown' }}</span>
                                     @endif
-                                    <span class="ml-2"><i class="fa fa-clock-o mr-1"></i>{{ time_ago($publication->updated_at ?? $publication->created_at) }}</span>
+                                    <span class="ml-2"><i class="fa fa-clock-o mr-1"></i>Updated {{ publication_content_updated_ago($publication) }}</span>
+                                    @if(publication_last_visited_at($publication))
+                                    <span class="ml-2"><i class="fa fa-history mr-1"></i>Last visit {{ time_ago(publication_last_visited_at($publication)) }}</span>
+                                    @endif
                                 </div>
                                     @if($publication->description)
                                     <p class="mb-0" style="text-align: justify;">

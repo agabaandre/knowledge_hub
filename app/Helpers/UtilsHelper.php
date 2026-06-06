@@ -294,6 +294,87 @@ if (!function_exists('format_title_with_ai_fallback')) {
 }
 
 
+if (!function_exists('publication_content_updated_at')) {
+    /**
+     * When the publication content was last meaningfully changed (not view counts).
+     */
+    function publication_content_updated_at($publication)
+    {
+        if (! $publication) {
+            return null;
+        }
+        if (! empty($publication->content_updated_at)) {
+            return $publication->content_updated_at;
+        }
+        if (! empty($publication->date_created)) {
+            return $publication->date_created;
+        }
+        if (! empty($publication->created_at)) {
+            return $publication->created_at;
+        }
+
+        return null;
+    }
+}
+
+if (!function_exists('publication_content_updated_ago')) {
+    function publication_content_updated_ago($publication)
+    {
+        $at = publication_content_updated_at($publication);
+
+        return $at ? time_ago($at) : '—';
+    }
+}
+
+if (!function_exists('publication_last_visited_at')) {
+    function publication_last_visited_at($publication)
+    {
+        if (! $publication || empty($publication->last_visited_at)) {
+            return null;
+        }
+
+        return $publication->last_visited_at;
+    }
+}
+
+if (!function_exists('publication_touch_last_visited')) {
+    function publication_touch_last_visited(int $publicationId): void
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasColumn('publication', 'last_visited_at')) {
+            return;
+        }
+        $update = ['last_visited_at' => now()];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'updated_at')) {
+            $update['updated_at'] = \Illuminate\Support\Facades\DB::raw('`updated_at`');
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'content_updated_at')) {
+            $update['content_updated_at'] = \Illuminate\Support\Facades\DB::raw('`content_updated_at`');
+        }
+        \Illuminate\Support\Facades\DB::table('publication')->where('id', $publicationId)->update($update);
+    }
+}
+
+if (!function_exists('publication_record_visit_metrics')) {
+  function publication_record_visit_metrics(int $publicationId, bool $incrementMonthlyView = true): void
+    {
+        if ($incrementMonthlyView) {
+            \App\Models\PublicationView::incrementView($publicationId);
+        }
+        $totalViews = \App\Models\PublicationView::getTotalViews($publicationId);
+        $update = ['visits' => $totalViews];
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'last_visited_at')) {
+            $update['last_visited_at'] = now();
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'updated_at')) {
+            $update['updated_at'] = \Illuminate\Support\Facades\DB::raw('`updated_at`');
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'content_updated_at')) {
+            $update['content_updated_at'] = \Illuminate\Support\Facades\DB::raw('`content_updated_at`');
+        }
+        \Illuminate\Support\Facades\DB::table('publication')->where('id', $publicationId)->update($update);
+    }
+}
+
 if (!function_exists('time_ago')) {
 
     function time_ago($timestamp)

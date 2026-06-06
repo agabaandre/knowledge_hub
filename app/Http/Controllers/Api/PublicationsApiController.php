@@ -165,7 +165,7 @@ class PublicationsApiController extends ApiController
      *     operationId="PublicationsSectionRecommended",
      *     tags={"Publications"},
      *     summary="Home-style recommended publications (paginated)",
-     *     description="Matches the web home **Recommended** strip: strictly featured pool plus preference- and favorite-tag–based publications when a Bearer token is sent (`auth.passport` optional). Paginate with `page` and `per_page` (aliases: `page_size`, `limit`) for infinite scroll. Defaults: page=1, per_page=20 (max 100). `data.meta`: `has_more`, `ranking_total` (size of diversified ranking window, not full DB count). `data.visible` follows `settings.show_featured`.",
+     *     description="Matches the web home **Recommended** strip: strictly featured pool plus preference- and favorite-tag–based publications when a Bearer token is sent (`auth.passport` optional), ordered newest first. Paginate with `page` and `per_page` (aliases: `page_size`, `limit`) for infinite scroll. Defaults: page=1, per_page=20 (max 100). `data.meta`: `has_more`, `ranking_total` (size of merged ranking window, not full DB count). `data.visible` follows `settings.show_featured`.",
      *     @OA\Parameter(name="page", in="query", description="1-based page index", @OA\Schema(type="integer", default=1)),
      *     @OA\Parameter(name="per_page", in="query", description="Page size (default 20)", @OA\Schema(type="integer")),
      *     @OA\Parameter(name="page_size", in="query", @OA\Schema(type="integer")),
@@ -176,7 +176,7 @@ class PublicationsApiController extends ApiController
      *     )
      * )
      *
-     * Same pool and ordering as the web home "Recommended" strip (featured + preferences when logged in),
+     * Same pool and newest-first ordering as the web home "Recommended" strip (featured + preferences when logged in),
      * shown only when settings.show_featured is on and there is at least one item (matches web).
      */
     public function sectionRecommended(Request $request): JsonResponse

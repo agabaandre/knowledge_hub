@@ -122,7 +122,12 @@
                         <div class="forum-header">
                             <div class="forum-author-name-container">
                                 <span class="forum-author-name">{{ $row->author->name ?? '—' }}</span>
-                                <span class="forum-post-time"><i class="fa fa-clock me-1"></i>{{ time_ago($row->updated_at) }}</span>
+                                <span class="forum-post-time">
+                                    <i class="fa fa-clock me-1"></i>Updated {{ publication_content_updated_ago($row) }}
+                                    @if(publication_last_visited_at($row))
+                                        · Last visit {{ time_ago(publication_last_visited_at($row)) }}
+                                    @endif
+                                </span>
                             </div>
                         </div>
                         <div class="forum-content">

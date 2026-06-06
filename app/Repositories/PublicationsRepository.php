@@ -47,7 +47,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
     }
     $pubs = Publication::with($with)
     ->where('is_version', 0);
-    if ($request->order_by_visits) {
+    if ($request->order_by_latest) {
+        $pubs->orderByRaw('COALESCE(date_created, created_at) DESC')->orderByDesc('id');
+    } elseif ($request->order_by_visits) {
         $pubs->orderBy('visits', 'desc')->orderBy('id', 'desc');
     } else {
         $pubs->orderBy('id', 'desc');
@@ -234,11 +236,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pubs->where('is_admin_only_access', 0);
         }
 
-        if ($stableRanking) {
-            return $pubs->orderByDesc('visits')->orderByDesc('id')->take($limit)->get();
-        }
-
-        return $pubs->inRandomOrder()->take($limit)->get();
+        return $pubs->orderByRaw('COALESCE(date_created, created_at) DESC')->orderByDesc('id')->take($limit)->get();
     }
 
     public function relatedByFavoriteTags($user_id, $limit = 10, bool $stableRanking = false){
@@ -269,16 +267,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $pubs->where('is_admin_only_access', 0);
         }
 
-        if ($stableRanking) {
-            return $pubs->orderByDesc('visits')->orderByDesc('id')->take($limit)->get();
-        }
-
-        return $pubs->inRandomOrder()->take($limit)->get();
+        return $pubs->orderByRaw('COALESCE(date_created, created_at) DESC')->orderByDesc('id')->take($limit)->get();
     }
 
     /**
-     * Homepage "Recommended" strip: priority = strictly featured → preference-based → favorite-tag–based,
-     * then diversified across parent thematic areas (not six items from the same theme / recent-id ordering).
+     * Homepage "Recommended" strip: featured plus preference- and favorite-tag–based pools when logged in,
+     * merged and ordered newest first.
      */
     public function homeRecommendedPublications(Request $request, ?int $userId, int $limit = 6): Collection
     {
@@ -288,7 +282,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $featuredRequest->merge([
             'is_featured' => 1,
             'rows' => $poolSize,
-            'order_by_visits' => true,
+            'order_by_latest' => true,
             'homepage_featured_strict' => true,
         ]);
 
@@ -302,12 +296,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $merged = $featuredPool;
         }
 
-        return $this->diversifyPublicationsByThematicArea($merged, $limit);
+        return $this->sortPublicationsByLatest($merged)->take($limit)->values();
     }
 
     /**
      * Recommended feed for infinite scroll: same merge rules as {@see homeRecommendedPublications} but returns one page
-     * with stable preference/tag ordering so page N is reproducible. Pool size is capped per request for performance.
+     * with stable newest-first ordering. Pool size is capped per request for performance.
      *
      * @return array{items: Collection, has_more: bool, ranking_total: int}
      */
@@ -323,7 +317,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $featuredRequest->merge([
             'is_featured' => 1,
             'rows' => $poolSize,
-            'order_by_visits' => true,
+            'order_by_latest' => true,
             'homepage_featured_strict' => true,
         ]);
 
@@ -337,9 +331,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $merged = $featuredPool;
         }
 
-        $diversified = $this->diversifyPublicationsByThematicArea($merged, $need);
-        $rankingTotal = $diversified->count();
-        $pageItems = $diversified->slice($offset, $perPage)->values();
+        $sorted = $this->sortPublicationsByLatest($merged);
+        $rankingTotal = $sorted->count();
+        $pageItems = $sorted->slice($offset, $perPage)->values();
         $hasMore = $rankingTotal > ($page * $perPage);
 
         return [
@@ -347,6 +341,23 @@ public function get(Request $request, $return_array = false, $featured = false,$
             'has_more' => $hasMore,
             'ranking_total' => $rankingTotal,
         ];
+    }
+
+    /**
+     * @param  Collection|array<int, Publication>  $publications
+     */
+    protected function sortPublicationsByLatest($publications): Collection
+    {
+        return Collection::make($publications)->sort(function ($a, $b) {
+            $aTime = Carbon::parse($a->date_created ?? $a->created_at ?? 0)->timestamp;
+            $bTime = Carbon::parse($b->date_created ?? $b->created_at ?? 0)->timestamp;
+
+            if ($aTime !== $bTime) {
+                return $bTime <=> $aTime;
+            }
+
+            return ($b->id ?? 0) <=> ($a->id ?? 0);
+        })->values();
     }
 
     /**
@@ -614,6 +625,10 @@ public function get(Request $request, $return_array = false, $featured = false,$
 
         if ((int) ($pub->is_version ?? 0) === 0 && Schema::hasColumn('publication', 'slug') && empty($pub->slug)) {
             $pub->slug = SeoSlugger::forPublication((string) ($pub->title ?? ''), $pub->id ?: null);
+        }
+
+        if (Schema::hasColumn('publication', 'content_updated_at')) {
+            $pub->content_updated_at = now();
         }
 
         $saved = ($request->id)?$pub->update():$pub->save();
@@ -1166,22 +1181,12 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $cookie_name = "Viewed".$pub->id.((auth()->user() && auth()->user()->id)?auth()->user()->id :'');
             $viewed      = get_cookie($cookie_name);
 
-            if(!$viewed && $pub):
-                // Track monthly views in the publication_views table
-                // This does NOT update the publication's updated_at timestamp
-                \App\Models\PublicationView::incrementView($pub->id);
-                
-                // Optionally update visits column for backward compatibility without touching updated_at
-                // We use updateQuietly or a direct query to avoid triggering updated_at
-                $totalViews = \App\Models\PublicationView::getTotalViews($pub->id);
-                
-                // Update only the visits column without updating timestamps
-                \DB::table('publication')
-                    ->where('id', $pub->id)
-                    ->update(['visits' => $totalViews]);
-                
-                set_cookie("Viewed".$pub->id,'yes');
-            endif;
+            if (! $viewed) {
+                publication_record_visit_metrics((int) $pub->id, true);
+                set_cookie('Viewed'.$pub->id, 'yes');
+            } else {
+                publication_touch_last_visited((int) $pub->id);
+            }
         endif;
 
         return $pub;

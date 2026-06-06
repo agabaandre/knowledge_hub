@@ -97,10 +97,8 @@
             </p>
             @endif
             
-            <!-- Last Updated -->
             <p class="text-muted medium d-block mt-2" style="font-size: 0.875rem; text-align: justify; clear: left; overflow-wrap: break-word;">
-                <i class="fa fa-clock me-1" style="color: var(--theme-color-primary, #119A48);"></i>
-                <strong>Last updated:</strong> {{ time_ago($row->updated_at) }}
+                @include('partials.publications.card_timestamps', ['row' => $row])
             </p>
             
             <div class="d-flex align-items-center mt-3" style="flex-wrap: wrap; gap: 8px; clear: left;">

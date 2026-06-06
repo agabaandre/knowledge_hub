@@ -18,7 +18,7 @@ class Publication extends Model
     protected $appends = ['theme','label','value','is_favourite','approved_comments',
     'pending_comments','has_attachments','tag_ids','image_url',
     'publication_countries','publication_regions','country_ids','region_ids'];
-    protected $dates = ['created_at', 'updated_at', 'date_created'];
+    protected $dates = ['created_at', 'updated_at', 'date_created', 'content_updated_at', 'last_visited_at'];
 
   
     public function toSearchableArray()

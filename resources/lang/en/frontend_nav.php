@@ -21,5 +21,9 @@ return [
     'create' => 'Create',
     'forum_discussion' => 'Forum Discussion',
     'resource_publication' => 'Resource Publication',
+    'featured_resources' => 'Featured resources',
+    'view_all_resources' => 'View all resources',
+    'no_resources_for_topic' => 'No resources available for this topic yet.',
+    'browse_topic' => 'Browse topic',
 
 ];

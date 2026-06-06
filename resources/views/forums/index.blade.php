@@ -961,8 +961,11 @@
                             <span><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
                             @endif
                             <span><i class="fa fa-eye"></i> {{ $publication->visits ?? 0 }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
-                            @if($publication->updated_at)
-                            <span><i class="fa fa-clock"></i> {{ $publication->updated_at->diffForHumans() }}</span>
+                            @if(publication_content_updated_at($publication))
+                            <span><i class="fa fa-calendar"></i> Updated {{ publication_content_updated_ago($publication) }}</span>
+                            @endif
+                            @if(publication_last_visited_at($publication))
+                            <span><i class="fa fa-history"></i> Last visit {{ time_ago(publication_last_visited_at($publication)) }}</span>
                             @endif
                         </div>
                     </div>

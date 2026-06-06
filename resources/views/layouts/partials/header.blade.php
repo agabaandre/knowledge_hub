@@ -14,28 +14,41 @@
     left: 0;
     width: 100%;
     background-color: #fff;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
     display: none;
     z-index: 10000;
-    border-top: 3px solid #00a651;
+    border-top: 3px solid var(--theme-color-primary, #119A48);
 }
 
 .mega-menu-container {
     width: 100%;
-    min-width: 100%;
-    max-width: 100%;
+    max-width: 1280px;
     margin: 0 auto;
-    padding: 30px 20px;
+    padding: 28px 24px 32px;
 }
 
 .mega-menu-grid {
     display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-height: 380px;
 }
 
 .mega-menu-sidebar {
-    width: 220px;
-    padding-right: 20px;
-    border-right: 1px solid #f0f0f0;
+    width: 240px;
+    flex-shrink: 0;
+    padding-right: 24px;
+    border-right: 1px solid #e8ecef;
+}
+
+.mega-sidebar-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6b7280;
+    margin: 0 0 12px;
+    padding: 0 12px;
 }
 
 .mega-menu-sidebar ul {
@@ -44,104 +57,242 @@
     margin: 0;
 }
 
-.mega-menu-sidebar ul li {
-    margin-bottom: 10px;
+.mega-sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-bottom: 4px;
+    border-radius: 6px;
+    transition: background-color 0.15s ease;
 }
 
-.mega-menu-sidebar ul li a {
+.mega-sidebar-item.active {
+    background-color: #f0fdf4;
+}
+
+.mega-sidebar-btn {
+    flex: 1;
     display: block;
-    padding: 8px 15px;
-    color: #333;
-    text-decoration: none;
+    padding: 10px 12px;
+    color: #374151;
+    background: none;
+    border: none;
+    text-align: left;
     font-size: 14px;
-    border-radius: 4px;
-    transition: all 0.2s ease;
+    font-weight: 500;
+    line-height: 1.35;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: color 0.15s ease;
 }
 
-.mega-menu-sidebar ul li a:hover,
-.mega-menu-sidebar ul li a.active {
-    background-color: #f5f5f5;
-    color: #00a651;
+.mega-sidebar-item.active .mega-sidebar-btn {
+    color: var(--theme-color-primary, #119A48);
+    font-weight: 600;
+}
+
+.mega-sidebar-btn:hover {
+    color: var(--theme-color-primary, #119A48);
+}
+
+.mega-sidebar-link {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #9ca3af;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 12px;
+    opacity: 0;
+    transition: opacity 0.15s ease, color 0.15s ease, background 0.15s ease;
+}
+
+.mega-sidebar-item:hover .mega-sidebar-link,
+.mega-sidebar-item.active .mega-sidebar-link {
+    opacity: 1;
+}
+
+.mega-sidebar-link:hover {
+    color: var(--theme-color-primary, #119A48);
+    background: #e5e7eb;
 }
 
 .mega-menu-content {
     flex: 1;
-    padding-left: 30px;
+    min-width: 0;
+    padding-left: 28px;
+    display: flex;
+    flex-direction: column;
 }
 
-.mega-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
+.mega-grid-content {
+    display: none;
+    flex-direction: column;
+    height: 100%;
 }
 
-.mega-item {
-    background-color: #fff;
+.mega-grid-content.active {
+    display: flex;
+}
+
+.mega-panel-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e8ecef;
+}
+
+.mega-panel-title {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+    color: #111827;
+    line-height: 1.3;
+}
+
+.mega-panel-subtitle {
+    margin: 0;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.mega-view-all {
+    flex-shrink: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--theme-color-primary, #119A48);
+    text-decoration: none;
+    border: 1px solid var(--theme-color-primary, #119A48);
     border-radius: 6px;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.mega-view-all:hover {
+    background: var(--theme-color-primary, #119A48);
+    color: #fff;
+    text-decoration: none;
+}
+
+.mega-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    flex: 1;
+    align-items: stretch;
+}
+
+.mega-card {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 280px;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
     overflow: hidden;
-    transition: all 0.3s ease;
+    text-decoration: none;
+    color: inherit;
+    transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
-.mega-item:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+.mega-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border-color: #d1d5db;
+    text-decoration: none;
+    color: inherit;
 }
 
-.mega-image {
-    height: 150px;
+.mega-card-image {
+    height: 140px;
+    flex-shrink: 0;
     overflow: hidden;
+    background: #f3f4f6;
 }
 
-.mega-image img {
+.mega-card-image img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     object-position: center;
-    transition: all 0.5s ease;
+    transition: transform 0.35s ease;
 }
 
-.mega-item:hover .mega-image img {
-    transform: scale(1.05);
+.mega-card:hover .mega-card-image img {
+    transform: scale(1.04);
 }
 
-.mega-info {
-    padding: 15px;
-}
-
-.mega-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin: 0 0 10px;
-    color: #00a651;
-    line-height: 1.4;
-}
-
-.mega-meta {
+.mega-card-body {
+    flex: 1;
     display: flex;
-    font-size: 12px;
-    color: #777;
+    flex-direction: column;
+    padding: 14px;
+    min-height: 140px;
 }
 
-.mega-date {
-    margin-right: 15px;
+.mega-card-title {
+    flex: 1;
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    line-height: 1.45;
+    color: var(--theme-color-primary, #119A48);
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.mega-comments {
-    margin-right: 15px;
+.mega-card-meta {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 11px;
+    color: #6b7280;
+    line-height: 1.35;
 }
 
-.mega-comments:before {
-    content: '💬 ';
+.mega-card-theme {
+    font-weight: 600;
+    color: #374151;
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-.mega-views:before {
-    content: '👁️ ';
+.mega-empty {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 240px;
+    text-align: center;
+    color: #6b7280;
+    font-size: 14px;
 }
 
-/* Show mega menu on hover */
-.has-mega-menu:hover .mega-menu {
+.mega-empty p {
+    margin: 0 0 12px;
+}
+
+/* Show mega menu on hover or click */
+.has-mega-menu:hover .mega-menu,
+.has-mega-menu.mega-open .mega-menu {
     display: block;
-    animation: fadeInDown 0.3s ease;
+    animation: fadeInDown 0.25s ease;
 }
 
 
@@ -331,8 +482,11 @@
 }
 
 @media (max-width: 1200px) {
-    .mega-grid {
-        grid-template-columns: repeat(3, 1fr);
+    .mega-cards-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    .mega-card {
+        min-height: 260px;
     }
 }
 @media (max-width: 992px) {
@@ -593,3 +747,40 @@
     </div>
 </div>
 <div class="clearfix"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    document.querySelectorAll('.has-mega-menu').forEach(function (item) {
+        const trigger = item.querySelector(':scope > a');
+        if (!trigger) return;
+
+        trigger.addEventListener('click', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            const isOpen = item.classList.contains('mega-open');
+            document.querySelectorAll('.has-mega-menu').forEach(function (el) {
+                el.classList.remove('mega-open');
+            });
+            if (!isOpen) {
+                item.classList.add('mega-open');
+            }
+        });
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.has-mega-menu')) {
+            document.querySelectorAll('.has-mega-menu').forEach(function (el) {
+                el.classList.remove('mega-open');
+            });
+        }
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') {
+            document.querySelectorAll('.has-mega-menu').forEach(function (el) {
+                el.classList.remove('mega-open');
+            });
+        }
+    });
+});
+</script>

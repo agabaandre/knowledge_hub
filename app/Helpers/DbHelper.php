@@ -12,7 +12,10 @@ function get_tag_ublications($tag){
                                 $query->where('id', $tag->id);
                             })->pluck('publication_id');
 
-            $publications = Publication::whereIn('id', $taggedpubs)->take(4)->get();
+            $publications = Publication::whereIn('id', $taggedpubs)
+                ->orderByDesc('created_at')
+                ->take(4)
+                ->get();
             return   $publications;
         });
 

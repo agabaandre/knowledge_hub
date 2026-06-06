@@ -109,7 +109,12 @@ class AccessLogJob implements ShouldQueue
             $locationLog->user_id = $uid !== null && $uid !== '' ? (string) $uid : null;
 
             // Best-effort save without crashing
-            try { $locationLog->save(); } catch (\Throwable $e) {
+            try {
+                $locationLog->save();
+                if ($publicationId && is_numeric($publicationId)) {
+                    publication_touch_last_visited((int) $publicationId);
+                }
+            } catch (\Throwable $e) {
                 Log::debug('AccessLog save failed', ['error' => $e->getMessage()]);
             }
 

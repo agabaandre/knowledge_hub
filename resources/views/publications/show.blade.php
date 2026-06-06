@@ -56,7 +56,10 @@
     $ogType = 'article';
     
     $publishDate = $publication->created_at ? $publication->created_at->toIso8601String() : now()->toIso8601String();
-    $modifiedDate = $publication->updated_at ? $publication->updated_at->toIso8601String() : $publishDate;
+    $contentUpdated = publication_content_updated_at($publication);
+    $modifiedDate = $contentUpdated
+        ? (\Carbon\Carbon::parse($contentUpdated)->toIso8601String())
+        : $publishDate;
     $articlePublishedTime = $publishDate;
     $articleModifiedTime = $modifiedDate;
     
@@ -596,7 +599,19 @@
                                     <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
                                         <i class="fa fa-eye mr-1"></i>Visits: {{ $publication->visits }}
                                     </span>
-            </div>
+                                </div>
+                                <div class="mb-2 ml-2">
+                                    <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
+                                        <i class="fa fa-calendar mr-1"></i>Updated: {{ publication_content_updated_ago($publication) }}
+                                    </span>
+                                </div>
+                                @if(publication_last_visited_at($publication))
+                                <div class="mb-2 ml-2">
+                                    <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
+                                        <i class="fa fa-history mr-1"></i>Last visit: {{ time_ago(publication_last_visited_at($publication)) }}
+                                    </span>
+                                </div>
+                                @endif
                                 @if(!empty($publication->year_published))
                                 <div class="mb-2 ml-2">
                                     <span class="badge" style="background-color: #6c757d; color: #ffffff; padding: 0.35em 0.65em; font-size: 0.875em;">
