@@ -94,15 +94,19 @@ class GraphsRepository extends SharedRepo{
 		return Country::find($id);
 	}
 
-	public function get_countries($filter=null)
+	public function get_countries($filter=null, $publishedOnly = false)
 	{
 		$use_filters = (isset($filter['region_id']) && $filter['region_id']>0)?true:false;
 
 		// Use a more efficient query to get countries that have KPI data
-		$data_countries = DB::table('kpi_data_view')
-			->select('country_id')
+		$data_countries = DB::table('kpi_data_view as kdv')
+			->when($publishedOnly, function ($query) {
+				$query->join('kpi', 'kpi.id', '=', 'kdv.kpi_id')
+					->where('kpi.status', 'published');
+			})
+			->select('kdv.country_id')
 			->distinct()
-			->pluck('country_id');
+			->pluck('kdv.country_id');
 
 		$countries = DB::table('country')
 			->where('national','National')
@@ -197,7 +201,7 @@ class GraphsRepository extends SharedRepo{
 		return $results;
 	}
 
-	public function kpi_data($filter = [])
+	public function kpi_data($filter = [], $publishedOnly = false)
 	{
 
 		$countries = [];
@@ -205,10 +209,10 @@ class GraphsRepository extends SharedRepo{
 		$count     = 0;
 
 		//get kpis that have data
-		foreach ($this->get_kpis($filter) as $kpi) :
+		foreach ($this->get_kpis($filter, false, $publishedOnly) as $kpi) :
 
 			//for each country, get value for the select kpi
-			foreach ($this->get_countries($filter) as $country) {
+			foreach ($this->get_countries($filter, $publishedOnly) as $country) {
 
 				$filter['kpi_id']     = $kpi->id;
 				$filter['country_id'] = $country->id;
@@ -231,7 +235,7 @@ class GraphsRepository extends SharedRepo{
 	}
 
 	//country wise graph
-	public function countries_data($filter = [])
+	public function countries_data($filter = [], $publishedOnly = false)
 	{
 
 		$periods = [];
@@ -240,7 +244,7 @@ class GraphsRepository extends SharedRepo{
 		foreach ($this->get_periods_years() as $period) :
 			$count   = 0;
 
-			foreach ($this->get_kpis($filter) as $kpi) {
+			foreach ($this->get_kpis($filter, false, $publishedOnly) as $kpi) {
 
 				$filter['kpi_id']      = $kpi->id;
 				$filter['period_year'] = $period;
@@ -404,14 +408,14 @@ class GraphsRepository extends SharedRepo{
     }
 
 	// Optimized method to get country KPIs with previous year data in a single query
-	public function get_country_kpis_with_previous_year($filter = [], $current_year = null)
+	public function get_country_kpis_with_previous_year($filter = [], $current_year = null, $publishedOnly = false)
 	{
 		if (!$current_year) {
 			$current_year = date('Y');
 		}
 		$previous_year = $current_year - 1;
 
-		$kpi_ids = $this->get_kpis($filter, true);
+		$kpi_ids = $this->get_kpis($filter, true, $publishedOnly);
 
 		if(count($kpi_ids) == 0)
 			return [];
@@ -422,6 +426,7 @@ class GraphsRepository extends SharedRepo{
 		
 		$current_query = DB::table('kpi_data_view as kdv1')
 			->join('kpi', 'kpi.id', '=', 'kdv1.kpi_id')
+			->when($publishedOnly, fn ($q) => $q->where('kpi.status', 'published'))
 			->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
 				return $query->whereIn('kdv1.kpi_id',$kpi_ids->toArray());
 			});
@@ -721,6 +726,85 @@ class GraphsRepository extends SharedRepo{
         }
 
         return $summaries;
+    }
+
+    /**
+     * RCC admin dashboard: map, charts, KPI cards, and table (published indicators only).
+     */
+    public function get_rcc_dashboard_payload(array $filter): array
+    {
+        $regionId = ! empty($filter['region_id']) ? (int) $filter['region_id'] : null;
+        $countryId = ! empty($filter['country_id']) ? (int) $filter['country_id'] : null;
+        $subjectAreaId = ! empty($filter['subject_area']) ? (int) $filter['subject_area'] : null;
+        $kpiId = ! empty($filter['kpi_id']) ? (int) $filter['kpi_id'] : null;
+        $periodYear = ! empty($filter['period_year']) ? (int) $filter['period_year'] : (int) date('Y');
+
+        $kpiFilter = array_filter([
+            'region_id' => $regionId,
+            'country_id' => $countryId,
+            'subject_area' => $subjectAreaId,
+            'kpi_id' => $kpiId,
+        ], fn ($v) => $v !== null && $v !== '');
+
+        $mapKpiId = $kpiId ?: (int) ($this->get_published_map_indicators()->first()->id ?? 0);
+        $map = $mapKpiId > 0 ? $this->get_indicator_map_values($mapKpiId, $regionId) : null;
+
+        $chartFilter = $kpiFilter;
+        if ($countryId) {
+            $chart = $this->countries_data($chartFilter, true);
+            $chart['mode'] = 'timeline';
+            $chart['title'] = 'Indicator trends over time';
+        } else {
+            $chartFilter['period_year'] = $periodYear;
+            $chart = $this->kpi_data($chartFilter, true);
+            $chart['mode'] = 'countries';
+            $chart['title'] = 'Published indicators by member state ('.$periodYear.')';
+        }
+
+        $tableRows = collect($this->get_country_kpis($kpiFilter, false, true))
+            ->map(function ($row) {
+                $row = (object) $row;
+                $country = Country::query()->find($row->country_id);
+                $display = kpi_indicator_display((float) $row->kpi_value, $row->unit_label ?? null, $row->kpi_name ?? null);
+
+                return [
+                    'country_id' => (int) $row->country_id,
+                    'country_name' => $country->name ?? '—',
+                    'kpi_id' => (int) $row->kpi_id,
+                    'kpi_name' => $row->kpi_name,
+                    'period' => substr((string) $row->period, 0, 4),
+                    'value' => (float) $row->kpi_value,
+                    'display_value' => $display['value_with_unit'],
+                    'unit_plain' => $display['unit_plain'],
+                ];
+            })
+            ->sortBy(['country_name', 'kpi_name'])
+            ->values()
+            ->all();
+
+        $rawSnapshots = $this->get_country_kpis_with_previous_year($kpiFilter, $periodYear, true);
+        $subjectGroups = $this->group_country_kpis_by_subject($rawSnapshots);
+        foreach ($subjectGroups as &$group) {
+            foreach ($group['items'] as &$item) {
+                $item = is_array($item) ? (object) $item : $item;
+                $item->display = kpi_indicator_display((float) $item->kpi_value, $item->unit_label ?? null, $item->kpi_name ?? null);
+                $item->prev_display = kpi_indicator_display((float) ($item->previous_year ?? 0), $item->unit_label ?? null, $item->kpi_name ?? null);
+            }
+        }
+        unset($group, $item);
+
+        return [
+            'map' => $map,
+            'indicator_summaries' => $this->get_indicator_summaries_for_scope($regionId),
+            'chart' => $chart,
+            'table' => $tableRows,
+            'subject_groups' => $subjectGroups,
+            'meta' => [
+                'period_year' => $periodYear,
+                'map_kpi_id' => $mapKpiId,
+                'row_count' => count($tableRows),
+            ],
+        ];
     }
 
 	// Call stored Prodcedure

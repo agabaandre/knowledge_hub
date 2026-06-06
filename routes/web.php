@@ -272,6 +272,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/dashboard", [AdminController::class, 'dashboards'])->name('admin.dashboard');
     if(states_enabled())
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
+    Route::get("/rccdashboards/data", [GraphController::class, 'rcc_data'])->name('admin.rccdashboards.data');
     Route::get('/dashboards', [DashboardsController::class, 'details'])->name('admin.dashboard.details');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');

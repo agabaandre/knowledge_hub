@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 
+use App\Models\Region;
+use App\Models\SubjectArea;
 use App\Repositories\GraphsRepository;
 use Illuminate\Http\Request;
 class GraphController extends Controller
@@ -52,38 +54,31 @@ class GraphController extends Controller
 
 	public function rcc_admin(Request $request)
 	{
-		
-		$data['title']   = "RRC Dashboards";
-		$data['uptitle'] = "RCC Dashboards";
-
 		$filter = $request->all();
-		$current_year   = date('Y');
 
-		$data['countries']    = $this->dashRepo->get_countries($filter)->toArray();
-		$data['subjectareas'] = $this->dashRepo->get_subjectareas();
+		return view('admin.dashboard.rcc', [
+			'title' => 'RCC Dashboard',
+			'filter' => $filter,
+			'regions' => Region::query()->orderBy('region_name')->get(),
+			'subjectareas' => SubjectArea::query()->where('is_active', true)->orderBy('name')->get(),
+			'indicators' => $this->dashRepo->get_published_map_indicators(),
+			'years' => ($years = array_values(array_filter($this->dashRepo->get_periods_years()))) !== []
+				? $years
+				: [(int) date('Y')],
+			'countries' => $this->dashRepo->get_countries($filter, true),
+			'initial_payload' => $this->dashRepo->get_rcc_dashboard_payload($filter),
+			'regions_json' => Region::query()->orderBy('region_name')->get()->map(fn ($r) => [
+				'id' => (int) $r->id,
+				'name' => $r->region_name,
+			])->values(),
+		]);
+	}
 
-        $data['filter']       = $filter;
-		$data['year']         = $current_year;
-
-		$subject_area_id      = (isset($filter['subject_area']))?$filter['subject_area']:null;//subject area option
-
-		foreach ($this->dashRepo->get_subject_area($subject_area_id) as $key=>$subject_area):
-
-			$filter['subject_area']  = $subject_area->id;
-			
-			$data['years_data'][$key]['subject_area']    = $subject_area->name;
-			$data['years_data'][$key]['subject_area_id'] = $subject_area->id;
-			$data['years_data'][$key]['data'] = $this->get_year_data($filter, $current_year);
-
-			$graph_filter = $filter;
-			$graph_filter['period_year'] = $current_year;
-
-	    endforeach;
-
-        $data['years']     =  $this->dashRepo->get_periods_years();
-
-		return view('admin.dashboard.rcc', $data);
-
+	public function rcc_data(Request $request)
+	{
+		return response()->json(
+			$this->dashRepo->get_rcc_dashboard_payload($request->all())
+		);
 	}
 
 	public function get_year_data($filter, $current_year)
