@@ -464,6 +464,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/owid/fresh-fetch", [KpiController::class, 'freshFetch'])->middleware('permission:manage_kpis');
         Route::post("/owid/approve-defaults", [KpiController::class, 'approveDefaults'])->middleware('permission:manage_kpis');
         Route::post("/owid/generate-narrations", [KpiController::class, 'generateNarrations'])->middleware('permission:manage_kpis');
+        Route::post("/settings/save", [KpiController::class, 'saveSettings'])->middleware('permission:manage_kpis');
+        Route::get("/owid/task/{id}", [KpiController::class, 'taskStatus'])->middleware('permission:manage_kpis');
         Route::post("/approve", [KpiController::class, 'approve'])->middleware('permission:manage_kpis');
         Route::post("/recall", [KpiController::class, 'recall'])->middleware('permission:manage_kpis');
         Route::get("/get", [KpiController::class, 'get']);

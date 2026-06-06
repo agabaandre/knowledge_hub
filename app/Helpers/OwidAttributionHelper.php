@@ -77,3 +77,27 @@ if (! function_exists('kpi_admin_stats')) {
         ];
     }
 }
+
+if (! function_exists('kpi_owid_auto_fetch_enabled')) {
+    function kpi_owid_auto_fetch_enabled(): bool
+    {
+        if (! function_exists('settings')) {
+            return true;
+        }
+
+        $value = settings()->kpi_owid_auto_fetch_enabled ?? null;
+
+        return $value === null ? true : (bool) $value;
+    }
+}
+
+if (! function_exists('kpi_manual_data_only')) {
+    function kpi_manual_data_only(): bool
+    {
+        if (! function_exists('settings')) {
+            return false;
+        }
+
+        return (bool) (settings()->kpi_manual_data_only ?? false);
+    }
+}

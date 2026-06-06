@@ -20,7 +20,7 @@ class OwidIndicatorSyncService
     /**
      * @return array{discovered: int, skipped: int, subject_areas: int}
      */
-    public function discoverIndicators(?int $subjectAreaId = null): array
+    public function discoverIndicators(?int $subjectAreaId = null, ?callable $onProgress = null): array
     {
         $areas = SubjectArea::query()
             ->when($subjectAreaId, fn ($q) => $q->where('id', $subjectAreaId))
@@ -38,8 +38,13 @@ class OwidIndicatorSyncService
         $discovered = 0;
         $skipped = 0;
         $errors = [];
+        $areaTotal = max(1, $areas->count());
 
-        foreach ($areas as $area) {
+        foreach ($areas as $index => $area) {
+            if ($onProgress) {
+                $onProgress($index + 1, $areaTotal, 'Searching: '.$area->name);
+            }
+
             try {
                 $payload = $this->client->searchChartsForSubject(
                     topic: $area->owid_topic ?: null,
@@ -104,7 +109,7 @@ class OwidIndicatorSyncService
     /**
      * @return array{indicators: int, rows: int, errors: array<int, string>}
      */
-    public function syncIndicatorData(?int $kpiId = null, bool $publishedOnly = false): array
+    public function syncIndicatorData(?int $kpiId = null, bool $publishedOnly = false, ?callable $onProgress = null): array
     {
         $countries = $this->memberStatesByIso3();
         $iso3List = array_keys($countries);
@@ -120,8 +125,13 @@ class OwidIndicatorSyncService
         $indicators = $query->get();
         $rows = 0;
         $errors = [];
+        $indicatorTotal = max(1, $indicators->count());
 
-        foreach ($indicators as $indicator) {
+        foreach ($indicators as $index => $indicator) {
+            if ($onProgress) {
+                $onProgress($index + 1, $indicatorTotal, 'Syncing: '.$indicator->name);
+            }
+
             try {
                 $csv = $this->client->fetchChartCsv((string) $indicator->owid_chart_slug);
                 $values = $this->client->parseLatestValuesByIso3($csv, $iso3List);
@@ -197,7 +207,7 @@ class OwidIndicatorSyncService
     /**
      * @return array{approved: int, already_published: int, missing: int, errors: array<int, string>, kpi_ids: array<int, int>}
      */
-    public function approveDefaultIndicators(?int $userId = null): array
+    public function approveDefaultIndicators(?int $userId = null, ?callable $onProgress = null): array
     {
         $slugs = array_values(array_unique(array_filter(
             config('owid.default_published_chart_slugs', []),
@@ -209,8 +219,13 @@ class OwidIndicatorSyncService
         $missing = 0;
         $errors = [];
         $kpiIds = [];
+        $slugTotal = max(1, count($slugs));
 
-        foreach ($slugs as $slug) {
+        foreach ($slugs as $index => $slug) {
+            if ($onProgress) {
+                $onProgress($index + 1, $slugTotal, 'Publishing: '.$slug);
+            }
+
             $kpi = Kpi::query()->where('owid_chart_slug', $slug)->first();
             if (! $kpi) {
                 $missing++;

@@ -44,8 +44,10 @@ class Kernel extends ConsoleKernel
             $day = max(1, min(28, $day));
             $schedule->command('profiles:remind-incomplete')->monthlyOn($day, '09:00');
         }
-        // Refresh published OWID indicator values weekly (ISO3-matched member states)
-        $schedule->command('kpi:sync-owid --sync --published-only')->weeklyOn(0, '04:30');
+        // Refresh published OWID indicator values weekly when automatic fetch is enabled
+        if (kpi_owid_auto_fetch_enabled() && ! kpi_manual_data_only()) {
+            $schedule->command('kpi:sync-owid --discover --sync --published-only')->weeklyOn(0, '04:30');
+        }
         // Clean up PDF chat sessions older than 7 days (when enabled in admin settings)
         if (settings()->enable_ai_chat_prune ?? true) {
             $schedule->command('pdf-chat:prune --days=7')->dailyAt('03:30');

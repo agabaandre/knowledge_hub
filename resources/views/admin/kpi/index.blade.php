@@ -83,6 +83,9 @@
                     @if(session('alert-success'))
                         <div class="alert alert-success">{{ session('alert-success') }}</div>
                     @endif
+                    @if(session('alert-info'))
+                        <div class="alert alert-info">{{ session('alert-info') }}</div>
+                    @endif
                     @if(session('alert-warning'))
                         <div class="alert alert-warning">{{ session('alert-warning') }}</div>
                     @endif
@@ -127,7 +130,7 @@
                                     </td>
                                     <td class="text-nowrap">
                                         @if(($row->status ?? '') !== 'published')
-                                        <form method="POST" action="{{ url('admin/kpi/approve') }}" class="d-inline" onsubmit="return confirm('Publish this indicator on member state pages?');">
+                                        <form method="POST" action="{{ url('admin/kpi/approve') }}" class="d-inline js-kpi-queued-task" data-confirm="Publish this indicator on member state pages?">
                                             @csrf
                                             <input type="hidden" name="id" value="{{ $row->id }}">
                                             <button type="submit" class="btn btn-sm btn-success mr-1" title="Approve for publication"><i class="fa fa-check"></i> Publish</button>
@@ -140,8 +143,8 @@
                                             <button type="submit" class="btn btn-sm btn-warning mr-1" title="Recall from publication"><i class="fa fa-undo"></i> Recall</button>
                                         </form>
                                         @endif
-                                        @if(($row->source ?? '') === 'owid')
-                                        <form method="POST" action="{{ url('admin/kpi/owid/sync-one') }}" class="d-inline" onsubmit="return confirm('Refresh country values for this indicator?');">
+                                        @if(($row->source ?? '') === 'owid' && !kpi_manual_data_only())
+                                        <form method="POST" action="{{ url('admin/kpi/owid/sync-one') }}" class="d-inline js-kpi-queued-task" data-confirm="Refresh country values for this indicator?">
                                             @csrf
                                             <input type="hidden" name="id" value="{{ $row->id }}">
                                             <button type="submit" class="btn btn-sm btn-outline-secondary mr-1" title="Refresh values"><i class="fa fa-sync"></i></button>

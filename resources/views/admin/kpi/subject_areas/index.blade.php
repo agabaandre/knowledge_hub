@@ -56,7 +56,7 @@
                         <td>{{ $area->sort_order }}</td>
                         <td>{{ $area->is_active ? 'Yes' : 'No' }}</td>
                         <td class="text-nowrap">
-                            <form method="POST" action="{{ url('admin/kpi/owid/discover') }}" class="d-inline" onsubmit="return confirm('Fetch new indicators for {{ $area->name }}?');">
+                            <form method="POST" action="{{ url('admin/kpi/owid/discover') }}" class="d-inline js-kpi-queued-task" data-confirm="Fetch new indicators for {{ $area->name }}?">
                                 @csrf
                                 <input type="hidden" name="subject_area_id" value="{{ $area->id }}">
                                 <button type="submit" class="btn btn-sm btn-outline-success" title="Fetch indicators for this area"><i class="fa fa-cloud-download-alt"></i></button>

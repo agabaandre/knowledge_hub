@@ -2,13 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\GenerateKpiNarrationsJob;
-use App\Models\Country;
+use App\Jobs\ProcessKpiOwidActionJob;
 use App\Models\Kpi;
-use App\Models\KpiNarration;
+use App\Models\KpiSyncRun;
+use App\Models\Setting;
+use App\Services\Kpi\KpiSyncRunService;
 use App\Services\Owid\OwidIndicatorSyncService;
 use Illuminate\Http\Request;
 use App\Repositories\IndicatorsRepository;
+use Illuminate\Support\Facades\Schema;
 
 
 class KpiController extends Controller
@@ -22,13 +24,10 @@ class KpiController extends Controller
 
     public function index(Request $request)
     {
-        $request['rows'] = $request->rows ?? 20; // Set pagination to 20 per page
+        $request['rows'] = $request->rows ?? 20;
         $data['search'] = (object) $request->all();
         $data['indicators'] = $this->indicatorsRepo->get($request);
-
-        $subject_areas = $this->indicatorsRepo->get_subject_areas();
-
-        $data['subject_areas'] = $subject_areas;
+        $data['subject_areas'] = $this->indicatorsRepo->get_subject_areas();
         $data['kpi_stats'] = kpi_admin_stats();
 
         return view('admin.kpi.index', $data);
@@ -36,36 +35,34 @@ class KpiController extends Controller
 
     public function save(Request $request)
     {
-        $result = $this->indicatorsRepo->save($request);
-        if ($request->id) {
-            return back()->with('alert-success', 'Indicator updated successfully.');
-        } else {
-            return back()->with('alert-success', 'Indicator created successfully.');
-        }
+        $this->indicatorsRepo->save($request);
+
+        return back()->with('alert-success', $request->id ? 'Indicator updated successfully.' : 'Indicator created successfully.');
     }
 
     public function save_data(Request $request)
     {
         $result = $this->indicatorsRepo->save_data($request);
-        
+
         if ($result['count'] > 0) {
-            $message = $result['count'] . ' record(s) saved successfully.';
-            if (!empty($result['errors'])) {
-                $message .= ' However, ' . count($result['errors']) . ' error(s) occurred: ' . implode('; ', $result['errors']);
+            $message = $result['count'].' record(s) saved successfully.';
+            if (! empty($result['errors'])) {
+                $message .= ' However, '.count($result['errors']).' error(s) occurred: '.implode('; ', $result['errors']);
             }
+
             return back()->with('alert-success', $message);
-        } else {
-            return back()->with('alert-danger', 'No records were saved. Please ensure all required fields are filled.');
         }
+
+        return back()->with('alert-danger', 'No records were saved. Please ensure all required fields are filled.');
     }
 
     public function data(Request $request)
     {
-        $request['rows'] = $request->rows ?? 20; // Set pagination to 20 per page
+        $request['rows'] = $request->rows ?? 20;
         $data['search'] = (object) $request->all();
-        $data['kpis']      = $this->indicatorsRepo->get_kpis();
-        $data['countries'] = Country::where('national','National')->get();
-        $data['kpi_data']  = $this->indicatorsRepo->get_kpi_data($request);
+        $data['kpis'] = $this->indicatorsRepo->get_kpis();
+        $data['countries'] = \App\Models\Country::where('national', 'National')->get();
+        $data['kpi_data'] = $this->indicatorsRepo->get_kpi_data($request);
         $data['kpi_stats'] = kpi_admin_stats();
 
         return view('admin.kpi.data', $data);
@@ -73,14 +70,9 @@ class KpiController extends Controller
 
     public function get_data(Request $request)
     {
-        $kpi_id = $request->kpi_id;
-        $country_id = $request->country_id;
-        $period = $request->period;
-        
-        $record = $this->indicatorsRepo->find_data($kpi_id, $country_id, $period);
-        
+        $record = $this->indicatorsRepo->find_data($request->kpi_id, $request->country_id, $request->period);
+
         if ($record) {
-            // Parse period to get year and month
             $periodStr = $record->period ?? '';
             $year = '';
             $month = '';
@@ -89,10 +81,12 @@ class KpiController extends Controller
                 if (count($parts) >= 2) {
                     $year = $parts[0];
                     $month = ltrim($parts[1], '0');
-                    if (empty($month)) $month = '0';
+                    if (empty($month)) {
+                        $month = '0';
+                    }
                 }
             }
-            
+
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -102,114 +96,133 @@ class KpiController extends Controller
                     'period' => $record->period,
                     'year' => $year,
                     'month' => $month,
-                    // Store old values for update
                     'old_kpi_id' => $record->kpi_id,
                     'old_country_id' => $record->country_id,
                     'old_period' => $record->period,
-                ]
+                ],
             ]);
         }
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Record not found'
-        ], 404);
+
+        return response()->json(['success' => false, 'message' => 'Record not found'], 404);
     }
 
     public function update_data(Request $request)
     {
         $result = $this->indicatorsRepo->update_data($request);
-        
+
         if ($result['success']) {
             $message = 'Indicator data updated successfully.';
             if (isset($result['count']) && $result['count'] > 1) {
-                $message .= ' (' . $result['count'] . ' records updated)';
+                $message .= ' ('.$result['count'].' records updated)';
             }
+
             return back()->with('alert-success', $message);
-        } else {
-            return back()->with('alert-danger', $result['message'] ?? 'Failed to update indicator data.');
         }
+
+        return back()->with('alert-danger', $result['message'] ?? 'Failed to update indicator data.');
     }
 
     public function destroy_data(Request $request)
     {
-        $kpi_id = $request->kpi_id;
-        $country_id = $request->country_id;
-        $period = $request->period;
-        
-        $deleted = $this->indicatorsRepo->delete_data($kpi_id, $country_id, $period);
-        
-        if ($deleted) {
-            return back()->with('alert-success', 'Indicator data deleted successfully.');
-        } else {
-            return back()->with('alert-danger', 'Failed to delete indicator data.');
-        }
+        $deleted = $this->indicatorsRepo->delete_data($request->kpi_id, $request->country_id, $request->period);
+
+        return back()->with(
+            $deleted ? 'alert-success' : 'alert-danger',
+            $deleted ? 'Indicator data deleted successfully.' : 'Failed to delete indicator data.'
+        );
     }
 
     public function get(Request $request)
     {
-        $id = $request->id;
-        $indicator = $this->indicatorsRepo->find($id);
-        
+        $indicator = $this->indicatorsRepo->find($request->id);
+
         if ($indicator) {
-            return response()->json([
-                'success' => true,
-                'indicator' => $indicator
-            ]);
+            return response()->json(['success' => true, 'indicator' => $indicator]);
         }
-        
-        return response()->json([
-            'success' => false,
-            'message' => 'Indicator not found'
-        ], 404);
+
+        return response()->json(['success' => false, 'message' => 'Indicator not found'], 404);
     }
 
     public function destroy(Request $request)
     {
-        $id = $request->id;
-        $this->indicatorsRepo->delete($id);
+        $this->indicatorsRepo->delete($request->id);
+
         return true;
     }
 
-    public function discoverOwid(Request $request, OwidIndicatorSyncService $sync)
+    public function saveSettings(Request $request)
     {
-        $result = $sync->discoverIndicators($request->filled('subject_area_id') ? (int) $request->subject_area_id : null);
-
-        $message = sprintf(
-            'Discovered %d OWID indicators across %d subject areas (%d skipped as duplicates).',
-            $result['discovered'],
-            $result['subject_areas'],
-            $result['skipped']
-        );
-        if (! empty($result['errors'])) {
-            $message .= ' Warnings: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        if (! Schema::hasTable('setting')) {
+            return back()->with('alert-danger', 'Settings table is not available.');
         }
 
-        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
-    }
+        $settings = Setting::query()->where('status', 'active')->first()
+            ?? Setting::query()->first();
 
-    public function syncOwid(Request $request, OwidIndicatorSyncService $sync)
-    {
-        $result = $sync->syncIndicatorData(
-            $request->filled('kpi_id') ? (int) $request->kpi_id : null,
-            (bool) $request->boolean('published_only')
-        );
-
-        $message = sprintf('Synced %d indicators (%d country values).', $result['indicators'], $result['rows']);
-        if (! empty($result['errors'])) {
-            $message .= ' Errors: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        if (! $settings) {
+            return back()->with('alert-danger', 'No active site settings row found.');
         }
 
-        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+        if (Schema::hasColumn('setting', 'kpi_owid_auto_fetch_enabled')) {
+            $settings->kpi_owid_auto_fetch_enabled = (bool) $request->boolean('kpi_owid_auto_fetch_enabled');
+        }
+        if (Schema::hasColumn('setting', 'kpi_manual_data_only')) {
+            $settings->kpi_manual_data_only = (bool) $request->boolean('kpi_manual_data_only');
+        }
+
+        $settings->save();
+
+        return back()->with('alert-success', 'KPI indicator settings saved.');
     }
 
-    public function approve(Request $request, OwidIndicatorSyncService $sync)
+    public function taskStatus(int $id, KpiSyncRunService $runs)
     {
-        $kpi = Kpi::query()->findOrFail((int) $request->id);
-        $sync->approve($kpi, auth()->id());
-        GenerateKpiNarrationsJob::dispatch($kpi->id);
+        $run = KpiSyncRun::query()->findOrFail($id);
 
-        return back()->with('alert-success', 'Indicator approved and data synced from Our World in Data.');
+        return response()->json($runs->toStatusArray($run));
+    }
+
+    public function discoverOwid(Request $request)
+    {
+        if (kpi_manual_data_only()) {
+            return $this->rejectOwidImport($request);
+        }
+
+        return $this->queueTask($request, 'discover', [
+            'subject_area_id' => $request->filled('subject_area_id') ? (int) $request->subject_area_id : null,
+        ], 'Fetching new indicators from Our World in Data…');
+    }
+
+    public function syncOwid(Request $request)
+    {
+        if (kpi_manual_data_only()) {
+            return $this->rejectOwidImport($request);
+        }
+
+        return $this->queueTask($request, 'sync', [
+            'kpi_id' => $request->filled('kpi_id') ? (int) $request->kpi_id : null,
+            'published_only' => (bool) $request->boolean('published_only'),
+        ], 'Refreshing indicator country values…');
+    }
+
+    public function approve(Request $request)
+    {
+        if (kpi_manual_data_only()) {
+            $kpi = Kpi::query()->findOrFail((int) $request->id);
+            $kpi->status = 'published';
+            $kpi->approved_by = auth()->id();
+            $kpi->approved_at = now();
+            $kpi->recalled_at = null;
+            $kpi->save();
+
+            return back()->with('alert-success', 'Indicator published. Add country values manually under Country values.');
+        }
+
+        return $this->queueTask($request, 'approve', [
+            'kpi_id' => (int) $request->id,
+            'user_id' => auth()->id(),
+            'narrations' => true,
+        ], 'Publishing indicator and syncing country data…');
     }
 
     public function recall(Request $request, OwidIndicatorSyncService $sync)
@@ -220,76 +233,70 @@ class KpiController extends Controller
         return back()->with('alert-success', 'Indicator recalled and hidden from public country pages.');
     }
 
-    public function approveDefaults(Request $request, OwidIndicatorSyncService $sync)
+    public function approveDefaults(Request $request)
     {
-        $result = $sync->approveDefaultIndicators(auth()->id());
-
-        if ($request->boolean('narrations')) {
-            foreach ($result['kpi_ids'] as $kpiId) {
-                GenerateKpiNarrationsJob::dispatch($kpiId);
-            }
+        if (kpi_manual_data_only()) {
+            return $this->rejectOwidImport($request);
         }
 
-        $message = sprintf(
-            'Published %d recommended indicators (%d were already live, %d not yet discovered).',
-            $result['approved'],
-            $result['already_published'],
-            $result['missing']
-        );
-        if (! empty($result['errors'])) {
-            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
-        }
-
-        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+        return $this->queueTask($request, 'approve_defaults', [
+            'user_id' => auth()->id(),
+            'narrations' => (bool) $request->boolean('narrations'),
+        ], 'Publishing recommended indicators…');
     }
 
-    public function freshFetch(OwidIndicatorSyncService $sync)
+    public function freshFetch(Request $request)
     {
-        $discover = $sync->discoverIndicators();
-        $syncResult = $sync->syncIndicatorData(null, true);
-
-        $message = sprintf(
-            'Full refresh complete. Fetched %d new indicators; refreshed %d published indicators (%d country values updated).',
-            $discover['discovered'],
-            $syncResult['indicators'],
-            $syncResult['rows']
-        );
-
-        $errors = array_merge($discover['errors'] ?? [], $syncResult['errors']);
-        if (! empty($errors)) {
-            $message .= ' Notes: '.implode(' | ', array_slice($errors, 0, 3));
+        if (kpi_manual_data_only()) {
+            return $this->rejectOwidImport($request);
         }
 
-        return back()->with(empty($errors) ? 'alert-success' : 'alert-warning', $message);
+        return $this->queueTask($request, 'fresh_fetch', [], 'Running full Our World in Data refresh…');
     }
 
-    public function generateNarrations()
+    public function generateNarrations(Request $request)
     {
-        $kpiIds = Kpi::query()->where('status', 'published')->pluck('id');
-        foreach ($kpiIds as $kpiId) {
-            GenerateKpiNarrationsJob::dispatch((int) $kpiId);
-        }
-
-        return back()->with(
-            'alert-success',
-            sprintf('Queued AI summary generation for %d published indicators.', $kpiIds->count())
-        );
+        return $this->queueTask($request, 'generate_narrations', [], 'Queueing AI country summaries…');
     }
 
-    public function syncOne(Request $request, OwidIndicatorSyncService $sync)
+    public function syncOne(Request $request)
     {
-        $kpi = Kpi::query()->findOrFail((int) $request->id);
-        $result = $sync->syncIndicatorData($kpi->id);
-
-        $message = sprintf(
-            'Refreshed "%s" with %d country values.',
-            $kpi->name,
-            $result['rows']
-        );
-        if (! empty($result['errors'])) {
-            $message .= ' '.$result['errors'][0];
+        if (kpi_manual_data_only()) {
+            return $this->rejectOwidImport($request);
         }
 
-        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+        return $this->queueTask($request, 'sync_one', [
+            'kpi_id' => (int) $request->id,
+        ], 'Refreshing indicator values…');
+    }
+
+    protected function queueTask(Request $request, string $action, array $payload, string $queuedMessage)
+    {
+        $runs = app(KpiSyncRunService::class);
+        $run = $runs->create($action, $payload, auth()->id());
+        ProcessKpiOwidActionJob::dispatch($run->id);
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'run_id' => $run->id,
+                'message' => $queuedMessage,
+            ]);
+        }
+
+        return back()
+            ->with('kpi_sync_run_id', $run->id)
+            ->with('alert-info', $queuedMessage.' Track progress below.');
+    }
+
+    protected function rejectOwidImport(Request $request)
+    {
+        $message = 'Our World in Data import is disabled. Use manual indicators and country values instead.';
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => false, 'message' => $message], 422);
+        }
+
+        return back()->with('alert-warning', $message);
     }
 }
