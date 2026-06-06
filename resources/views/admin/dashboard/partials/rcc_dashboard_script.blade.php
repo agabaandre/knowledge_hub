@@ -458,6 +458,11 @@
         filterCountryOptions();
         filterIndicatorOptions();
 
+        var mainChartEl = document.getElementById('rccMainChart');
+        if (mainChartEl) {
+            mainChartEl.innerHTML = '<div class="rcc-empty"><i class="fa fa-spinner fa-spin me-2"></i>Loading chart…</div>';
+        }
+
         if (window.__rccInitialPayload) {
             applyPayload(window.__rccInitialPayload);
         } else {

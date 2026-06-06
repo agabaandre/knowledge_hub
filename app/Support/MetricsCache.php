@@ -42,7 +42,8 @@ final class MetricsCache
         return match ($bucket) {
             'live' => 45,
             'filtered' => 60,
-            'rcc' => self::redisAvailable() ? 300 : 120,
+            'rcc' => self::redisAvailable() ? 900 : 180,
+            'rcc_meta' => self::redisAvailable() ? 3600 : 1800,
             'map_context' => self::redisAvailable() ? 3600 : 1800,
             'default' => self::redisAvailable() ? 21600 : 3600,
         };

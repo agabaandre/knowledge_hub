@@ -209,24 +209,24 @@ class GraphsRepository extends SharedRepo{
 			$labels[] = $country->name;
 		}
 
+		$kpis = $this->get_kpis($filter, false, $publishedOnly);
+		$kpiIds = $kpis->pluck('id')->map(fn ($id) => (int) $id)->all();
+		$countryIds = collect($countryList)->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+		if ($kpiIds === [] || $countryIds === []) {
+			return ['labels' => $labels, 'data' => []];
+		}
+
+		$periodYear = ! empty($filter['period_year']) ? (int) $filter['period_year'] : (int) date('Y');
+		$valueMap = $this->latestKpiValuesForYear($kpiIds, $countryIds, $periodYear, $publishedOnly);
+
 		$data = [];
-		$count = 0;
-
-		foreach ($this->get_kpis($filter, false, $publishedOnly) as $kpi) {
-			$rowFilter = $filter;
+		foreach ($kpis as $kpi) {
 			$series = ['name' => (string) $kpi->name, 'kpi_id' => (int) $kpi->id, 'data' => []];
-
 			foreach ($countryList as $country) {
-				$rowFilter['kpi_id'] = $kpi->id;
-				$rowFilter['country_id'] = $country->id;
-				$results = $this->get($rowFilter, 'country_id');
-				$dataValue = array_column($results, 'kpi_value');
-				$series['data'][] = (count($dataValue) > 0)
-					? (float) (array_sum($dataValue) / count($dataValue))
-					: 0.0;
+				$series['data'][] = (float) ($valueMap[$kpi->id][$country->id] ?? 0.0);
 			}
-
-			$data[$count++] = $series;
+			$data[] = $series;
 		}
 
 		return ['labels' => $labels, 'data' => array_values($data)];
@@ -235,48 +235,88 @@ class GraphsRepository extends SharedRepo{
 	//country wise graph
 	public function countries_data($filter = [], $publishedOnly = false)
 	{
+		$countryId = (int) ($filter['country_id'] ?? 0);
+		$kpis = $this->get_kpis($filter, false, $publishedOnly);
+		$kpiIds = $kpis->pluck('id')->map(fn ($id) => (int) $id)->all();
+
+		if ($countryId <= 0 || $kpiIds === []) {
+			return ['labels' => [], 'data' => []];
+		}
+
+		$query = DB::table('kpi_data_view as kdv')
+			->join('kpi', 'kpi.id', '=', 'kdv.kpi_id')
+			->when($publishedOnly, fn ($q) => $q->where('kpi.status', 'published'))
+			->where('kdv.country_id', $countryId)
+			->whereIn('kdv.kpi_id', $kpiIds)
+			->selectRaw('kdv.kpi_id, YEAR(kdv.period) as period_year, AVG(kdv.kpi_value) as kpi_value')
+			->groupBy('kdv.kpi_id', DB::raw('YEAR(kdv.period)'))
+			->orderBy('period_year')
+			->get();
 
 		$periods = [];
-		$data    = [];
-
-		foreach ($this->get_periods_years() as $period) :
-			$count   = 0;
-
-			foreach ($this->get_kpis($filter, false, $publishedOnly) as $kpi) {
-
-				$filter['kpi_id']      = $kpi->id;
-				$filter['period_year'] = $period;
-
-				$results    = $this->get($filter, "period_year");
-
-				$data_value = array_column($results, 'kpi_value');
-
-				$kpi_avg = (count($data_value) > 0) ? array_sum($data_value) / count($data_value) : 0;
-
-				if (isset($data[$count])) {
-
-					array_push($data[$count]["data"], $kpi_avg);
-
-				} else {
-
-					$data[$count]["name"]   = $kpi->name;
-					$data[$count]["data"][] = $kpi_avg;
-				}
-
-				$count++;
+		$seriesByKpi = [];
+		foreach ($query as $row) {
+			$year = (int) $row->period_year;
+			if (! in_array($year, $periods, true)) {
+				$periods[] = $year;
 			}
+			$seriesByKpi[(int) $row->kpi_id][(int) $year] = (float) $row->kpi_value;
+		}
+		sort($periods);
 
-			$periods[] = $period;
+		$data = [];
+		foreach ($kpis as $kpi) {
+			$series = ['name' => (string) $kpi->name, 'kpi_id' => (int) $kpi->id, 'data' => []];
+			foreach ($periods as $period) {
+				$series['data'][] = (float) ($seriesByKpi[$kpi->id][$period] ?? 0.0);
+			}
+			$data[] = $series;
+		}
 
-		endforeach;
-
-		return array('labels' => $periods, 'data' => array_values($data));
+		return ['labels' => $periods, 'data' => array_values($data)];
 	}
 
 	public function region_countries($region_id){
 
 	  return Country::where('region_id',$region_id)->get()->pluck('id');
 	}
+
+    /**
+     * Latest KPI value per indicator and member state for a calendar year.
+     *
+     * @param  list<int>  $kpiIds
+     * @param  list<int>  $countryIds
+     * @return array<int, array<int, float>>
+     */
+    private function latestKpiValuesForYear(array $kpiIds, array $countryIds, int $periodYear, bool $publishedOnly = false): array
+    {
+        if ($kpiIds === [] || $countryIds === []) {
+            return [];
+        }
+
+        $rows = DB::table('kpi_data_view as kdv1')
+            ->join('kpi', 'kpi.id', '=', 'kdv1.kpi_id')
+            ->when($publishedOnly, fn ($q) => $q->where('kpi.status', 'published'))
+            ->whereIn('kdv1.kpi_id', $kpiIds)
+            ->whereIn('kdv1.country_id', $countryIds)
+            ->whereRaw('YEAR(kdv1.period) = ?', [$periodYear])
+            ->whereRaw('kdv1.period = (
+                SELECT MAX(kdv2.period)
+                FROM kpi_data_view kdv2
+                WHERE kdv2.kpi_id = kdv1.kpi_id
+                AND kdv2.country_id = kdv1.country_id
+                AND YEAR(kdv2.period) = ?
+            )', [$periodYear])
+            ->select(['kdv1.kpi_id', 'kdv1.country_id', 'kdv1.kpi_value'])
+            ->get();
+
+        $valueMap = [];
+        foreach ($rows as $row) {
+            $valueMap[(int) $row->kpi_id][(int) $row->country_id] = (float) $row->kpi_value;
+        }
+
+        return $valueMap;
+    }
 
 	//get country kpi performance
 	public function get_country_kpis($filter = [], $get_row = false, $publishedOnly = true)
@@ -670,24 +710,46 @@ class GraphsRepository extends SharedRepo{
      */
     public function get_indicator_summaries_for_scope(?int $regionId = null): array
     {
+        $indicators = $this->get_published_map_indicators()->keyBy('id');
+        if ($indicators->isEmpty()) {
+            return [];
+        }
+
+        $filter = $regionId ? ['region_id' => $regionId] : [];
+        $rows = collect($this->get_country_kpis($filter, false, true));
         $summaries = [];
 
-        foreach ($this->get_published_map_indicators() as $kpi) {
-            $data = $this->get_indicator_map_values((int) $kpi->id, $regionId);
-            if ($data['country_count'] === 0 || empty($data['aggregate'])) {
+        foreach ($rows->groupBy('kpi_id') as $kpiId => $kpiRows) {
+            $kpi = $indicators->get((int) $kpiId);
+            if (! $kpi) {
                 continue;
             }
+
+            $numericValues = $kpiRows
+                ->map(fn ($row) => (float) (is_array($row) ? $row['kpi_value'] : $row->kpi_value))
+                ->all();
+
+            if ($numericValues === []) {
+                continue;
+            }
+
+            $aggregation = kpi_aggregate_method($kpi->name, $kpi->unit_label ?? '');
+            $aggregateValue = $aggregation === 'sum'
+                ? array_sum($numericValues)
+                : array_sum($numericValues) / count($numericValues);
 
             $summaries[] = [
                 'kpi_id' => (int) $kpi->id,
                 'name' => $kpi->name,
                 'subject_area' => $kpi->subjectArea->name ?? 'Other indicators',
-                'aggregation' => $data['aggregation'],
-                'aggregation_label' => $data['aggregation_label'],
-                'country_count' => $data['country_count'],
-                'display' => $data['aggregate'],
+                'aggregation' => $aggregation,
+                'aggregation_label' => kpi_aggregate_label($aggregation),
+                'country_count' => count($numericValues),
+                'display' => kpi_indicator_display($aggregateValue, $kpi->unit_label ?? '', $kpi->name),
             ];
         }
+
+        usort($summaries, fn ($a, $b) => strcmp($a['name'], $b['name']));
 
         return $summaries;
     }
@@ -769,15 +831,25 @@ class GraphsRepository extends SharedRepo{
             return $series;
         }, $chart['data'] ?? []));
 
-        $tableRows = collect($this->get_country_kpis($kpiFilter, false, true))
-            ->map(function ($row) {
+        $rawTableRows = collect($this->get_country_kpis($kpiFilter, false, true));
+        $countryIds = $rawTableRows
+            ->map(fn ($row) => (int) ((object) $row)->country_id)
+            ->unique()
+            ->filter()
+            ->values()
+            ->all();
+        $countryNames = $countryIds === []
+            ? collect()
+            : Country::query()->whereIn('id', $countryIds)->pluck('name', 'id');
+
+        $tableRows = $rawTableRows
+            ->map(function ($row) use ($countryNames) {
                 $row = (object) $row;
-                $country = Country::query()->find($row->country_id);
                 $display = kpi_indicator_display((float) $row->kpi_value, $row->unit_label ?? null, $row->kpi_name ?? null);
 
                 return [
                     'country_id' => (int) $row->country_id,
-                    'country_name' => $country->name ?? '—',
+                    'country_name' => $countryNames[(int) $row->country_id] ?? '—',
                     'kpi_id' => (int) $row->kpi_id,
                     'kpi_name' => $row->kpi_name,
                     'period' => substr((string) $row->period, 0, 4),

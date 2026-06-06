@@ -56,19 +56,19 @@ class GraphController extends Controller
 	public function rcc_admin(Request $request)
 	{
 		$filter = $request->all();
+		$meta = $this->rccPageMetadata($filter);
+		$regions = $meta['regions'];
 
 		return view('admin.dashboard.rcc', [
 			'title' => 'RCC Dashboard',
 			'filter' => $filter,
-			'regions' => Region::query()->orderBy('region_name')->get(),
-			'subjectareas' => SubjectArea::query()->where('is_active', true)->orderBy('name')->get(),
-			'indicators' => $this->dashRepo->get_published_map_indicators(),
-			'years' => ($years = array_values(array_filter($this->dashRepo->get_periods_years()))) !== []
-				? $years
-				: [(int) date('Y')],
-			'countries' => $this->dashRepo->get_countries($filter, true),
-			'initial_payload' => $this->rccDashboardPayload($filter),
-			'regions_json' => Region::query()->orderBy('region_name')->get()->map(fn ($r) => [
+			'regions' => $regions,
+			'subjectareas' => $meta['subjectareas'],
+			'indicators' => $meta['indicators'],
+			'years' => $meta['years'],
+			'countries' => $meta['countries'],
+			'initial_payload' => null,
+			'regions_json' => $regions->map(fn ($r) => [
 				'id' => (int) $r->id,
 				'name' => $r->region_name,
 			])->values(),
@@ -88,14 +88,61 @@ class GraphController extends Controller
 		]));
 	}
 
+	private function rccPageMetadata(array $filter): array
+	{
+		$store = MetricsCache::store();
+		$ttl = MetricsCache::ttl('rcc_meta');
+
+		$regions = $store->remember('rcc_meta_regions', $ttl, fn () => Region::query()
+			->orderBy('region_name')
+			->get(['id', 'region_name']));
+
+		$subjectareas = $store->remember('rcc_meta_subjectareas', $ttl, fn () => SubjectArea::query()
+			->where('is_active', true)
+			->orderBy('name')
+			->get(['id', 'name']));
+
+		$years = $store->remember('rcc_meta_years', $ttl, function () {
+			$years = array_values(array_filter($this->dashRepo->get_periods_years()));
+
+			return $years !== [] ? $years : [(int) date('Y')];
+		});
+
+		$indicators = $store->remember('rcc_meta_indicators', $ttl, fn () => $this->dashRepo->get_published_map_indicators());
+
+		$countriesKey = 'rcc_meta_countries_'.md5(serialize([
+			'region_id' => (int) ($filter['region_id'] ?? 0),
+		]));
+		$countries = $store->remember($countriesKey, MetricsCache::ttl('rcc'), fn () => $this->dashRepo->get_countries($filter, true));
+
+		return compact('regions', 'subjectareas', 'years', 'indicators', 'countries');
+	}
+
+	private function normalizedRccFilter(array $filter): array
+	{
+		$normalized = [];
+		foreach (['region_id', 'country_id', 'subject_area', 'kpi_id', 'period_year'] as $key) {
+			if (! empty($filter[$key])) {
+				$normalized[$key] = (int) $filter[$key];
+			}
+		}
+
+		if (empty($normalized['period_year'])) {
+			$normalized['period_year'] = (int) date('Y');
+		}
+
+		return $normalized;
+	}
+
 	private function rccDashboardPayload(array $filter): array
 	{
-		$cacheKey = 'rcc_dashboard_'.md5(serialize($filter));
+		$normalized = $this->normalizedRccFilter($filter);
+		$cacheKey = 'rcc_dashboard_v2_'.md5(json_encode($normalized));
 
 		return MetricsCache::store()->remember(
 			$cacheKey,
 			MetricsCache::ttl('rcc'),
-			fn () => $this->dashRepo->get_rcc_dashboard_payload($filter)
+			fn () => $this->dashRepo->get_rcc_dashboard_payload($normalized)
 		);
 	}
 
