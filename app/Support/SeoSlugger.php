@@ -32,6 +32,11 @@ class SeoSlugger
         return self::uniqueSlug('country', self::baseSlug($name, 'country'), $excludeId);
     }
 
+    public static function forAuthor(string $name, ?int $excludeId = null): string
+    {
+        return self::uniqueSlug('author', self::baseSlug($name, 'contributor'), $excludeId);
+    }
+
     public static function baseSlug(string $title, string $fallback): string
     {
         $slug = Str::slug(Str::limit(trim($title), 120, ''));

@@ -1,79 +1,33 @@
 @extends('layouts.app')
 
 @php
+    use App\Support\HomePageSeo;
+
     $theme = site_theme();
-    // SEO Meta Tags for Homepage
-    $pageTitle = settings()->title ?? 'Africa CDC Knowledge Hub - Knowledge Repository for Public Health Resources';
-    $pageDescription = 'Discover flagship initiatives, health topics, publications, forums, courses, and communities on '.(settings()->site_name ?? 'Africa Health Knowledge Hub').' — Africa CDC’s continental public health knowledge platform.';
-    $pageKeywords = settings()->seo_keywords ?? 'Africa CDC, public health, health research, publications, knowledge hub, Africa, health data, medical research, public health resources';
+    $healthEmergencies = $healthEmergencies ?? collect();
+    $canonicalUrl = url('/');
+
+    $pageTitle = HomePageSeo::pageTitle();
+    $pageDescription = HomePageSeo::pageDescription($healthEmergencies);
+    $pageKeywords = HomePageSeo::pageKeywords($healthEmergencies);
     $pageImage = settings()->logo ?? asset('assets/images/logo.png');
+
+    $homeStructuredData = [
+        '@context' => 'https://schema.org',
+        '@graph' => HomePageSeo::structuredDataGraph([
+            'healthEmergencies' => $healthEmergencies,
+            'initiatives' => $initiatives ?? null,
+            'featured' => $featured ?? null,
+            'recent' => $recent ?? null,
+            'categories' => $categories ?? [],
+            'events' => $events ?? null,
+        ]),
+    ];
 @endphp
 
 @section('structured_data')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "WebPage",
-    "name": "{{ $pageTitle }}",
-    "description": "{{ strip_tags($pageDescription) }}",
-    "url": "{{ url('/') }}",
-    "mainEntity": {
-        "@type": "CollectionPage",
-        "name": "Public Health Resources",
-        "description": "Comprehensive collection of public health publications, research, and resources from Africa CDC"
-    },
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [{
-            "@type": "ListItem",
-            "position": 1,
-            "name": "Home",
-            "item": "{{ url('/') }}"
-        }]
-    }
-}
-</script>
-
-@if(isset($recent) && count($recent) > 0)
-{{-- ItemList Schema for Featured Publications --}}
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "Top Publications",
-    "description": "Top searched and featured public health publications from Africa CDC",
-    "itemListElement": [
-        @foreach($recent->take(10) as $index => $pub)
-        {
-            "@type": "ListItem",
-            "position": {{ $index + 1 }},
-            "item": {
-                "@type": "ScholarlyArticle",
-                "name": "{{ addslashes($pub->title) }}",
-                "url": "{{ publication_url($pub) }}",
-                "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}",
-                @if($pub->author)
-                "author": {
-                    "@type": "Organization",
-                    "name": "{{ addslashes($pub->author->name) }}"
-                },
-                @endif
-                @if($pub->created_at)
-                "datePublished": "{{ $pub->created_at->toIso8601String() }}",
-                @endif
-                @if($pub->cover || $pub->image_url)
-                "image": "{{ filter_var($pub->cover ?? $pub->image_url, FILTER_VALIDATE_URL) ? ($pub->cover ?? $pub->image_url) : asset($pub->cover ?? $pub->image_url) }}",
-                @endif
-                "keywords": "{{ addslashes($pub->tags->pluck('tag_text')->implode(', ')) }}"
-            }
-        }@if(!$loop->last),@endif
-        @endforeach
-    ]
-}
-</script>
-@endif
+<script type="application/ld+json">{!! json_encode($homeStructuredData, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
 @endsection
-
 
 @section('styles')
     @if (empty($theme))
@@ -189,6 +143,8 @@
 
 @section('content')
     @include('home.partials.' . $theme . 'spotlight')
+
+    @include('home.partials.' . $theme . 'health_emergencies_links')
 
     @if((settings()->show_events ?? false) && isset($events) && count($events) > 0)
         {{-- Events section header (same style as Explore Key Sections) --}}

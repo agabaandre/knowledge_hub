@@ -12,6 +12,7 @@ class Author extends Model
 
     protected $fillable = [
         'name',
+        'slug',
         'icon',
         'is_organsiation',
         'address',

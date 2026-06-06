@@ -5,9 +5,8 @@
 @extends('layouts.app')
 
 @section('structured_data')
-@if(!empty($authorsIndexJsonLd) && !empty($authorsBreadcrumbJsonLd))
-<script type="application/ld+json">{!! json_encode($authorsIndexJsonLd, $jsonLdFlags) !!}</script>
-<script type="application/ld+json">{!! json_encode($authorsBreadcrumbJsonLd, $jsonLdFlags) !!}</script>
+@if(!empty($authorsIndexJsonLd))
+<script type="application/ld+json">{!! json_encode($authorsIndexJsonLd, $jsonLdFlags ?? (JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)) !!}</script>
 @endif
 @endsection
 
@@ -22,17 +21,19 @@
         margin-bottom: 2.5rem;
     }
 
-    .authors-header h2 {
+    .authors-header h1 {
         font-size: 2rem;
         font-weight: 700;
         color: #2d3748;
         margin-bottom: 0.5rem;
     }
 
-    .authors-header p {
+    .authors-header .authors-lead {
         color: #64748b;
         font-size: 1rem;
-        margin: 0;
+        margin: 0 auto;
+        max-width: 42rem;
+        line-height: 1.6;
     }
 
     .author-card {
@@ -204,32 +205,50 @@
 @section('content')
 <div class="authors-wrapper">
 <div class="container">
-        <div class="authors-header">
-            <h2>
-                <i class="fa fa-users me-2"></i>Contributors
-                @if(isset($authors) && method_exists($authors, 'total'))
+        <header class="authors-header">
+            <h1>
+                <i class="fa fa-users me-2" aria-hidden="true"></i>Contributors &amp; Authors
+                @if(isset($authorsTotal) && $authorsTotal > 0)
+                    <small class="text-muted">({{ number_format($authorsTotal) }} total)</small>
+                @elseif(isset($authors) && method_exists($authors, 'total'))
                     <small class="text-muted">({{ number_format($authors->total()) }} total)</small>
                 @endif
-            </h2>
-            <p>Browse our community of knowledge contributors</p>
-</div>
+            </h1>
+            <p class="authors-lead">
+                @if(!empty($authorsSearchTerm))
+                    Showing contributors matching <strong>{{ $authorsSearchTerm }}</strong>.
+                @else
+                    Discover researchers, clinicians, ministries, and institutions sharing verified public health publications, resources, and forum expertise across Africa.
+                @endif
+            </p>
+        </header>
 					
         @if(isset($authors) && $authors->count() > 0)
         <div class="row">
 @foreach($authors as $author)
             <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-4">
-                <div class="author-card">
+                @php
+                    $isOrg = strtolower((string) ($author->is_organsiation ?? '')) === 'yes';
+                    $avatarUrl = null;
+                    if (!empty($author->logo) && $author->logo !== 'author.png') {
+                        $avatarUrl = filter_var($author->logo, FILTER_VALIDATE_URL) ? $author->logo : asset(ltrim($author->logo, '/'));
+                    } elseif ($author->user && !empty($author->user->photo)) {
+                        $avatarUrl = $author->user->photo;
+                    }
+                    $cardId = 'contributor-card-'.$author->id;
+                @endphp
+                <article class="author-card" aria-labelledby="{{ $cardId }}">
                     <div class="author-header">
                         <div class="author-avatar">
-                            @if($author->user && $author->user->photo)
-                                <img src="{{ $author->user->photo }}" alt="{{ $author->name }}" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fa fa-user author-avatar-icon\'></i>';">
+                            @if($avatarUrl)
+                                <img src="{{ $avatarUrl }}" alt="{{ $author->name }} — {{ $isOrg ? 'organisation' : 'contributor' }} profile" onerror="this.onerror=null; this.parentElement.innerHTML='<i class=\'fa {{ $isOrg ? 'fa-building' : 'fa-user' }} author-avatar-icon\'></i>';">
                             @else
-                                <i class="fa fa-user author-avatar-icon"></i>
+                                <i class="fa {{ $isOrg ? 'fa-building' : 'fa-user' }} author-avatar-icon" aria-hidden="true"></i>
                             @endif
                         </div>
                         <div class="author-info">
-                            <div class="author-name">
-                                <a href="{{ url('authors/publications')}}?author={{$author->id}}">
+                            <h2 class="author-name" id="{{ $cardId }}">
+                                <a href="{{ author_publications_url($author) }}" title="View profile and publications for {{ $author->name }}">
                                     @if(!empty($author->orcid))
                                         <span title="View {{ $author->name }}'s ORCID profile">
                                             {{ truncate($author->name, 25) }}
@@ -239,7 +258,7 @@
                                         {{ truncate($author->name, 25) }}
                                     @endif
                                 </a>
-                            </div>
+                            </h2>
                             @if($author->user && $author->user->job_title)
                             <div class="author-title">
                                 <i class="fa fa-briefcase me-1" style="font-size: 0.8em;"></i>
@@ -292,11 +311,11 @@
                             @endphp
                             {{ $totalContributions }} {{ $totalContributions == 1 ? 'Contribution' : 'Contributions' }}
                         </span>
-                        <a href="{{ url('authors/publications')}}?author={{$author->id}}" class="view-link">
-                            View Resources <i class="fa fa-arrow-right ms-1"></i>
+                        <a href="{{ author_publications_url($author) }}" class="view-link" title="View all resources by {{ $author->name }}">
+                            View profile <i class="fa fa-arrow-right ms-1" aria-hidden="true"></i>
 			</a>
 		</div>
-	</div>
+	</article>
             </div>
 @endforeach
 </div>

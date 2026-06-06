@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Tag;
+use App\Support\ContributorsSeo;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
@@ -363,9 +364,31 @@ class PublicationsController extends Controller
         return $data;
     }
 
-    public function author_pubs(Request $request){
+    public function author_pubs(Request $request, ?string $slug = null){
 
-        $data['author']       = $this->authorsRepo->find($request->author);
+        if ($slug) {
+            $author = $this->authorsRepo->findBySlug($slug);
+        } elseif ($request->filled('author')) {
+            $author = $this->authorsRepo->find($request->author);
+            if ($author && seo_friendly_urls_enabled() && ! empty($author->slug)) {
+                $redirectQuery = $request->except('author');
+                $target = author_publications_url($author, true, $redirectQuery);
+
+                if ($target !== $request->fullUrl()) {
+                    return redirect()->to($target, 301);
+                }
+            }
+        } else {
+            abort(404);
+        }
+
+        if (! $author) {
+            abort(404);
+        }
+
+        $request->merge(['author' => $author->id]);
+
+        $data['author']       = $author;
         $data['publications'] = $this->publicationsRepo->get($request);
         $data['forumContributions'] = collect();
         $data['contributionStats'] = [
@@ -420,6 +443,31 @@ class PublicationsController extends Controller
         } else {
             $data['contributionStats']['total_contributions'] = $data['contributionStats']['resource_contributions'];
         }
+
+        $stats = $data['contributionStats'];
+        $canonicalQuery = [];
+        if ($request->filled('page') && (int) $request->page > 1) {
+            $canonicalQuery['page'] = (int) $request->page;
+        }
+        $data['canonicalUrl'] = author_publications_url($author, true, $canonicalQuery);
+        $data['pageTitle'] = ContributorsSeo::authorProfileTitle($author, $stats);
+        $data['pageDescription'] = ContributorsSeo::authorProfileDescription($author, $stats);
+        $data['pageKeywords'] = ContributorsSeo::authorProfileKeywords($author, $stats);
+        $data['ogType'] = 'profile';
+
+        $logoRaw = settings()->logo ?? '';
+        $data['pageImage'] = ContributorsSeo::contributorImageUrl($author)
+            ?: ($logoRaw && filter_var($logoRaw, FILTER_VALIDATE_URL)
+                ? $logoRaw
+                : ($logoRaw ? asset(ltrim($logoRaw, '/')) : asset('assets/images/logo.png')));
+
+        $data['authorProfileJsonLd'] = ContributorsSeo::authorProfileGraph(
+            $author,
+            $stats,
+            $data['publications'],
+            $data['canonicalUrl'],
+            $data['pageDescription']
+        );
 
         return view('publications.author_pubs',$data);
     }

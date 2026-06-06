@@ -189,6 +189,9 @@ Route::get('/events/{id}', [PublicEventsController::class, 'show'])->name('event
 
 Route::group(["prefix" => "authors"], function () {
     Route::get("/", [AuthorsController::class, 'index']);
+    Route::get("publications/{slug}", [PublicationsController::class, 'author_pubs'])
+        ->where('slug', '[\w\-]+')
+        ->name('authors.publications');
     Route::get("publications", [PublicationsController::class, 'author_pubs']);
 });
 

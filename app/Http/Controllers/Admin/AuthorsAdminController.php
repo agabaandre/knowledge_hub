@@ -57,6 +57,9 @@ class AuthorsAdminController extends Controller
             'logo' => ($validated['logo'] ?? '') !== '' ? $validated['logo'] : 'author.png',
         ]);
         $saved = $author->save();
+        if ($saved) {
+            $this->authorsRepo->ensureSlug($author);
+        }
         $data = $saved ? ['message' => 'Author saved successfully', 'status' => 'success'] : ['message' => 'Operation failed', 'status' => 'failure'];
 
         return back()->with($data);

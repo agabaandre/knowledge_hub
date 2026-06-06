@@ -63,10 +63,12 @@
                 $visits = $row->visits ?? 0;
                 $commentsCount = count($row->comments ?? []);
             @endphp
-            <div class="initiative-card initiative-slide" style="cursor:pointer;" onclick="window.open('{{ $detailsUrl }}','_blank')">
+            <article class="initiative-card initiative-slide">
                 <div class="initiative-cover"><img src="{{ $imageUrl }}" alt="{{ $row->title }}" onerror="this.onerror=null;this.src='{{ asset('assets/images/cover.png') }}'"/></div>
                 <div class="initiative-body">
-                    <div class="initiative-title" style="overflow-wrap: break-word; word-wrap: break-word;">{{ Str::limit(strip_tags(clean_unicode($row->title)),70) }}</div>
+                    <h3 class="initiative-title" style="overflow-wrap: break-word; word-wrap: break-word;">
+                        <a href="{{ $detailsUrl }}" class="text-decoration-none text-reset">{{ Str::limit(strip_tags(clean_unicode($row->title)),70) }}</a>
+                    </h3>
                     <div class="initiative-meta">
                         <span><i class="fa fa-user"></i> {{ clean_unicode($authorName) }}</span>
                         @if($publicationUrl)
@@ -87,7 +89,7 @@
                     <div class="initiative-desc">{!! Str::words(strip_tags($description), 30, '...') !!}</div>
                     @endif
                 </div>
-            </div>
+            </article>
             @endforeach
         </div>
     </div>

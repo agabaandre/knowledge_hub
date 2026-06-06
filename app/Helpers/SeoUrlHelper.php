@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Author;
 use App\Models\CommunityOfPractice;
 use App\Models\Country;
 use App\Models\Forum;
@@ -280,6 +281,64 @@ if (! function_exists('resolve_country_for_url')) {
         }
 
         return ['id' => $id, 'slug' => $slug];
+    }
+}
+
+if (! function_exists('resolve_author_for_url')) {
+    /**
+     * @param  Author|object|int|string|null  $author
+     * @return array{id: ?int, slug: ?string}
+     */
+    function resolve_author_for_url($author): array
+    {
+        $id = null;
+        $slug = null;
+
+        if ($author instanceof Author) {
+            $id = (int) $author->id;
+            $slug = $author->slug ?? null;
+        } elseif (is_object($author) && isset($author->id)) {
+            $id = (int) $author->id;
+            $slug = $author->slug ?? null;
+        } elseif (is_numeric($author)) {
+            $id = (int) $author;
+            $slug = Author::query()->whereKey($id)->value('slug');
+        }
+
+        return ['id' => $id, 'slug' => $slug];
+    }
+}
+
+if (! function_exists('author_publications_url')) {
+    /**
+     * @param  Author|object|int|string|null  $author
+     */
+    function author_publications_url($author, bool $absolute = true, array $query = []): string
+    {
+        ['id' => $id, 'slug' => $slug] = resolve_author_for_url($author);
+
+        if (! $id) {
+            $path = 'authors/publications';
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+
+            return $absolute ? url($path) : $path;
+        }
+
+        if (seo_friendly_urls_enabled() && ! empty($slug)) {
+            $path = 'authors/publications/'.$slug;
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+        } else {
+            $path = 'authors/publications?author='.$id;
+            if ($query) {
+                $path .= '&'.http_build_query($query);
+            }
+        }
+
+        return $absolute ? url($path) : $path;
     }
 }
 

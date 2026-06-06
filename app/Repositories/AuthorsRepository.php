@@ -4,6 +4,7 @@ namespace App\Repositories;
 use App\Models\Author;
 use App\Models\Publication;
 use App\Models\User;
+use App\Support\SeoSlugger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -83,13 +84,35 @@ class AuthorsRepository extends SharedRepo{
         $author = new Author();
         $author->name = $name;
         $author->save();
+        $this->ensureSlug($author);
 
         return $author;
     }
 
     public function find($id){
+        $author = Author::with(['user.country', 'user.badges.badgeType'])->find($id);
+        if ($author) {
+            $this->ensureSlug($author);
+        }
 
-        return Author::find($id);
+        return $author;
+    }
+
+    public function findBySlug(string $slug): ?Author
+    {
+        return Author::with(['user.country', 'user.badges.badgeType'])
+            ->where('slug', $slug)
+            ->first();
+    }
+
+    public function ensureSlug(Author $author): void
+    {
+        if (! Schema::hasColumn('author', 'slug') || ! empty($author->slug)) {
+            return;
+        }
+
+        $author->slug = SeoSlugger::forAuthor((string) ($author->name ?? ''), $author->id ?: null);
+        $author->saveQuietly();
     }
 
     public function delete($id): bool

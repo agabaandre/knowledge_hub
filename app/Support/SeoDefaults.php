@@ -32,7 +32,8 @@ class SeoDefaults
             $name === 'password.request' => "Request a password reset link for your {$site} account.",
             $name === 'password.reset' => "Set a new password for your {$site} account.",
             $name === 'privacy' => "Privacy policy and data practices for {$site} and the Africa CDC knowledge platform.",
-            $name === 'browse.authors' => "Browse organisations and authors contributing publications and resources to {$site}.",
+            $name === 'browse.authors' => "Browse contributors, researchers, clinicians, and institutions sharing public health publications and forum expertise on {$site}.",
+            $name === 'authors.publications' => "Contributor profile with publications, resources, and forum activity on {$site}.",
             $name === 'health-topics.index' => "Browse health topics, emergencies, and thematic areas with linked publications and resources on {$site}.",
             $name === 'health-topics.show' => "Publications, resources, and discussions for this health topic on {$site}.",
             $name === 'countries' => "Explore public health resources and coverage by member state on {$site}.",
@@ -73,7 +74,7 @@ class SeoDefaults
 
     private static function homeBody(string $site): string
     {
-        return "Discover flagship initiatives, health topics, publications, forums, courses, and communities on {$site} — Africa CDC’s continental public health knowledge platform.";
+        return "Discover publications, health emergencies, flagship initiatives, health topics, forums, courses, and communities on {$site} — Africa CDC’s continental public health knowledge platform.";
     }
 
     private static function genericFromPath(string $path, string $site): string

@@ -89,12 +89,13 @@
 {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "{{ $siteUrl }}#website",
     "name": "{{ $siteName }}",
     "url": "{{ $siteUrl }}",
     "description": "{{ strip_tags($pageDescription) }}",
     "potentialAction": {
         "@type": "SearchAction",
-        "target": "{{ url('records') }}?term={search_term_string}",
+        "target": "{{ url('records/search') }}?term={search_term_string}",
         "query-input": "required name=search_term_string"
     }
 }

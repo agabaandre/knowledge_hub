@@ -65,6 +65,9 @@ class HomeController extends Controller
             ->take(12)
             ->get();
         $data['is_home']      = true;
+        $data['healthEmergencies'] = collect($data['tags'] ?? [])
+            ->filter(fn ($tag) => ! empty($tag->is_health_emergency))
+            ->values();
 
         return view('home.index',$data);
     }
