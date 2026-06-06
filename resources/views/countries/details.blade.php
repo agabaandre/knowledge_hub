@@ -390,14 +390,6 @@
         document.body.style.removeProperty('padding-right');
     }
 
-    function formatValue(value) {
-        var n = Number(value);
-        if (!isFinite(n)) return '—';
-        var abs = Math.abs(n);
-        var decimals = abs >= 100 ? 0 : (abs >= 10 ? 1 : 2);
-        return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
-    }
-
     function buildAttributionHtml(owidUrl) {
         var explore = owidUrl || (owidSite + '/');
         return 'Data from <a href="' + owidSite + '/" target="_blank" rel="noopener noreferrer">Our World in Data</a> ' +
@@ -415,11 +407,16 @@
 
         document.getElementById('countryKpiModalSubject').textContent = subjectName || 'Country indicator';
         document.getElementById('countryKpiModalLabel').textContent = data.name || '';
-        document.getElementById('countryKpiModalValue').textContent = formatValue(data.latest_value);
+        document.getElementById('countryKpiModalValue').textContent = data.display_value || String(data.latest_value);
         document.getElementById('countryKpiModalUnit').textContent = data.unit ? data.unit : '';
-        document.getElementById('countryKpiModalPeriod').textContent = data.latest_period
-            ? 'Latest period: ' + data.latest_period
-            : '';
+        var periodParts = [];
+        if (data.latest_period) {
+            periodParts.push('Latest period: ' + data.latest_period);
+        }
+        if (data.unit_full && data.unit_full !== data.unit) {
+            periodParts.push('Unit: ' + data.unit_full);
+        }
+        document.getElementById('countryKpiModalPeriod').textContent = periodParts.join(' · ');
 
         var chartWrap = document.getElementById('countryKpiModalChartWrap');
         if (data.has_chart && typeof Highcharts !== 'undefined') {
@@ -444,7 +441,7 @@
                     labels: { style: { color: '#64748b' } }
                 },
                 yAxis: {
-                    title: { text: data.unit || 'Value' },
+                    title: { text: data.chart_unit || data.unit_full || data.unit || 'Value' },
                     gridLineColor: '#e2e8f0'
                 },
                 tooltip: {

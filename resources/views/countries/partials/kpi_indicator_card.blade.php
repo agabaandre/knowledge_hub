@@ -1,13 +1,10 @@
 @php
     $kpiId = (int) ($kpi->kpi_id ?? 0);
     $value = (float) ($kpi->kpi_value ?? 0);
-    $decimals = abs($value) >= 100 ? 0 : (abs($value) >= 10 ? 1 : 2);
-    $formattedValue = number_format($value, $decimals);
+    $kpiName = trim((string) ($kpi->kpi_name ?? ''));
+    $display = $kpi->display ?? kpi_indicator_display($value, $kpi->unit_label ?? null, $kpiName);
     $periodLabel = substr((string) ($kpi->period ?? ''), 0, 4);
     $hasDrilldown = ! empty($kpi->has_drilldown);
-    $unit = trim((string) ($kpi->unit_label ?? ''));
-    $kpiName = trim((string) ($kpi->kpi_name ?? ''));
-    $showUnit = $unit !== '' && strcasecmp($unit, $kpiName) !== 0;
 @endphp
 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mt-2">
     <div class="dro_140 country-kpi-tile {{ $hasDrilldown ? 'country-kpi-tile--drilldown kpi-drilldown-trigger' : '' }}"
@@ -24,7 +21,7 @@
         <div class="dro_142 country-kpi-tile__body">
             <h6 class="country-kpi-tile__title">{{ $kpiName }}</h6>
             <p class="color-red text-bold country-kpi-tile__value mb-0">
-                {{ $formattedValue }}@if($showUnit)<span class="country-kpi-tile__unit">{{ $unit }}</span>@endif
+                {{ $display['value'] }}@if(!empty($display['unit']))<span class="country-kpi-tile__unit" @if(!empty($display['unit_full']) && $display['unit_full'] !== $display['unit']) title="{{ $display['unit_full'] }}" @endif>{{ $display['unit'] }}</span>@endif
             </p>
             @if($periodLabel !== '')
                 <small class="text-muted country-kpi-tile__period">Latest: {{ $periodLabel }}</small>

@@ -101,6 +101,11 @@ class CountriesController extends Controller
             $item->has_chart = $item->period_count > 1;
             $item->narration = $narrationMap[$key]->narration ?? null;
             $item->owid_chart_url = owid_chart_url($item);
+            $item->display = kpi_indicator_display(
+                (float) ($item->kpi_value ?? 0),
+                $item->unit_label ?? null,
+                $item->kpi_name ?? null
+            );
             $item->has_drilldown = $item->has_chart
                 || ! empty($item->narration)
                 || ! empty($item->owid_chart_url);
@@ -109,7 +114,11 @@ class CountriesController extends Controller
                 $data['kpi_chart_payload'][$kpiId] = [
                     'kpi_id' => $kpiId,
                     'name' => $item->kpi_name ?? '',
-                    'unit' => $item->unit_label ?? '',
+                    'unit' => $item->display['unit'] ?? '',
+                    'unit_full' => $item->display['unit_full'] ?? '',
+                    'display_value' => $item->display['value'] ?? '',
+                    'chart_unit' => $item->display['chart_unit'] ?? 'Value',
+                    'value_type' => $item->display['type'] ?? 'other',
                     'latest_value' => (float) ($item->kpi_value ?? 0),
                     'latest_period' => substr((string) ($item->period ?? ''), 0, 4),
                     'labels' => $series['labels'],
