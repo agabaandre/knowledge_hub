@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Services\ChatGPTService;
 use App\Services\HealthTopicSourceFetcher;
+use App\Services\WhoFactsheetFetcher;
 use App\Support\HealthTopicSourceCatalog;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -24,6 +25,7 @@ class TagsController extends Controller
         $data['allTagsForMapping'] = $this->tagsRepo->allTagsForMapping();
         $data['search']    = (Object) $request->all();
         $data['healthTopicSources'] = HealthTopicSourceCatalog::sources();
+        $data['missingOverviewCount'] = $this->tagsRepo->countTagsNeedingOverview();
         return view('admin.tags.index',$data);
     }
     
@@ -165,5 +167,108 @@ class TagsController extends Controller
         $result = $this->tagsRepo->deduplicateTags();
 
         return response()->json($result, 200);
+    }
+
+    public function aiDescribe(Request $request, WhoFactsheetFetcher $whoFetcher, ChatGPTService $chatGpt)
+    {
+        $request->validate([
+            'tag_id' => 'nullable|integer|exists:tags,id',
+            'tag_ids' => 'nullable|array|max:10',
+            'tag_ids.*' => 'integer|exists:tags,id',
+            'only_missing' => 'nullable|boolean',
+            'limit' => 'nullable|integer|min:1|max:10',
+        ]);
+
+        $tagIds = [];
+        if ($request->filled('tag_id')) {
+            $tagIds[] = (int) $request->input('tag_id');
+        }
+        if ($request->filled('tag_ids')) {
+            foreach ($request->input('tag_ids', []) as $id) {
+                $tagIds[] = (int) $id;
+            }
+        }
+
+        $explicitSelection = $request->filled('tag_id') || $request->filled('tag_ids');
+        $onlyMissing = $request->boolean('only_missing', ! $explicitSelection);
+        $limit = (int) $request->input('limit', 5);
+
+        if ($tagIds === []) {
+            $tags = $this->tagsRepo->tagsNeedingOverview(120, $limit);
+            $payload = $tags->map(fn ($tag) => [
+                'tag_id' => (int) $tag->id,
+                'tag_text' => (string) $tag->tag_text,
+                'overview' => (string) ($tag->overview ?? ''),
+            ])->all();
+        } else {
+            $payload = [];
+            foreach (array_unique($tagIds) as $id) {
+                $full = $this->tagsRepo->find((int) $id);
+                if (! $full) {
+                    continue;
+                }
+                if ($onlyMissing && ! $this->tagsRepo->tagNeedsOverview($full->overview ?? null)) {
+                    continue;
+                }
+                $payload[] = [
+                    'tag_id' => (int) $full->id,
+                    'tag_text' => (string) $full->tag_text,
+                    'overview' => (string) ($full->overview ?? ''),
+                ];
+            }
+        }
+
+        if ($payload === []) {
+            return response()->json([
+                'status' => 'failure',
+                'message' => 'No tags need descriptions (or selected tags already have content).',
+            ], 422);
+        }
+
+        $result = $chatGpt->generateHealthTopicOverviewsForTags($payload, $whoFetcher);
+        if (! ($result['ok'] ?? false)) {
+            return response()->json([
+                'status' => 'failure',
+                'message' => $result['error'] ?? 'Description generation failed.',
+                'items' => $result['items'] ?? [],
+            ], 422);
+        }
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Generated '.count($result['items']).' description preview(s) from WHO factsheets.',
+            'items' => $result['items'],
+        ]);
+    }
+
+    public function aiApplyOverviews(Request $request)
+    {
+        $request->validate([
+            'updates' => 'required|array|min:1',
+            'updates.*.tag_id' => 'required|integer|exists:tags,id',
+            'updates.*.overview' => 'required|string',
+            'updates.*.force' => 'nullable|boolean',
+            'only_if_longer' => 'nullable|boolean',
+        ]);
+
+        $updates = [];
+        foreach ($request->input('updates', []) as $row) {
+            $updates[] = [
+                'tag_id' => (int) ($row['tag_id'] ?? 0),
+                'overview' => (string) ($row['overview'] ?? ''),
+                'force' => (bool) ($row['force'] ?? false),
+            ];
+        }
+
+        $result = $this->tagsRepo->applyTagOverviews(
+            $updates,
+            $request->boolean('only_if_longer', true)
+        );
+
+        return response()->json([
+            'status' => 'success',
+            'message' => "Updated {$result['updated']} tag description(s). Skipped {$result['skipped']}.",
+            'data' => $result,
+        ]);
     }
 }

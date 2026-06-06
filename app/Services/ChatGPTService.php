@@ -829,7 +829,7 @@ class ChatGPTService implements AIModel{
                 $existingSample[] = $tagText;
                 $normalized[] = [
                     'tag_text' => $tagText,
-                    'overview' => Str::limit($overview, 12000, ''),
+                    'overview' => Str::limit($overview, 16000, ''),
                 ];
                 $addedInBatch++;
             }
@@ -849,6 +849,240 @@ class ChatGPTService implements AIModel{
     }
 
     /**
+     * Build a rich HTML overview for an existing health topic using WHO factsheet material.
+     *
+     * @param  array{
+     *     excerpt?: string,
+     *     sections?: list<array{heading: string, body: string}>,
+     *     references?: list<array{label: string, url: string}>,
+     *     fact_sheet_url?: ?string,
+     *     health_topic_url?: ?string
+     * }  $whoSource
+     * @return array{ok: true, overview: string, references: list<array{label: string, url: string}>}|array{ok: false, error: string}
+     */
+    public function generateHealthTopicOverview(string $tagText, array $whoSource, ?string $existingOverview = null): array
+    {
+        $tagText = trim($tagText);
+        if ($tagText === '') {
+            return ['ok' => false, 'error' => 'Topic name is required.'];
+        }
+
+        $apiKey = config('ai.open_api_key');
+        if (empty($apiKey)) {
+            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        }
+
+        $excerpt = trim((string) ($whoSource['excerpt'] ?? ''));
+        if ($excerpt === '') {
+            return ['ok' => false, 'error' => 'No WHO factsheet content found for this topic.'];
+        }
+
+        $references = $whoSource['references'] ?? [];
+        if ($references === []) {
+            $references = [
+                ['label' => 'WHO Health Topics', 'url' => 'https://www.who.int/health-topics'],
+            ];
+        }
+
+        $instruction = 'You write comprehensive health topic overviews for the Africa CDC Knowledge Hub. '
+            .'Use ONLY the WHO source material provided — do not invent statistics, case counts, or study names. '
+            .'Frame content for African public health audiences where relevant (burden, prevention, health systems) but stay factual. '
+            .'If the source lacks Africa-specific data, say so briefly without fabricating numbers. '
+            .$this->healthTopicOverviewHtmlGuide()
+            .' Return ONLY valid JSON: {"overview":"<div>...</div>"}.';
+
+        $userParts = [
+            'Topic: '.$tagText,
+            'WHO source material:',
+            Str::limit($excerpt, 10000, ''),
+            'Include these reference links in the References section:',
+            json_encode($references, JSON_UNESCAPED_UNICODE),
+        ];
+
+        if ($existingOverview && trim(strip_tags($existingOverview)) !== '') {
+            $userParts[] = 'Existing overview (improve and expand — keep accurate facts, add structure and references):';
+            $userParts[] = Str::limit(strip_tags($existingOverview), 2000, '');
+        }
+
+        $messages = [
+            ['role' => 'system', 'content' => $instruction],
+            ['role' => 'user', 'content' => implode("\n\n", $userParts)],
+        ];
+
+        $result = $this->chatCompletionJson($messages, 4096, config('ai.openai_model', 'gpt-3.5-turbo'));
+        if (! ($result['ok'] ?? false)) {
+            return ['ok' => false, 'error' => $result['error'] ?? 'OpenAI request failed.'];
+        }
+
+        $overview = $this->parseHealthTopicOverviewJson($result['content']);
+        if ($overview === '') {
+            return ['ok' => false, 'error' => 'Could not parse overview HTML from OpenAI.'];
+        }
+
+        $overview = $this->ensureReferencesSection($overview, $references);
+
+        return [
+            'ok' => true,
+            'overview' => Str::limit($overview, 16000, ''),
+            'references' => $references,
+        ];
+    }
+
+    /**
+     * @param  list<array{tag_id: int, tag_text: string, overview?: ?string}>  $tags
+     * @return array{ok: true, items: list<array<string, mixed>>}|array{ok: false, error: string, items?: list<array<string, mixed>>}
+     */
+    public function generateHealthTopicOverviewsForTags(array $tags, WhoFactsheetFetcher $whoFetcher): array
+    {
+        if ($tags === []) {
+            return ['ok' => false, 'error' => 'No tags selected.'];
+        }
+
+        $items = [];
+        $errors = [];
+
+        foreach ($tags as $row) {
+            $tagId = (int) ($row['tag_id'] ?? 0);
+            $tagText = trim((string) ($row['tag_text'] ?? ''));
+            $existing = (string) ($row['overview'] ?? '');
+
+            if ($tagId <= 0 || $tagText === '') {
+                continue;
+            }
+
+            $who = $whoFetcher->fetchForTopic($tagText);
+            if (! ($who['ok'] ?? false)) {
+                $errors[] = $tagText.': WHO factsheet not found.';
+                $items[] = [
+                    'tag_id' => $tagId,
+                    'tag_text' => $tagText,
+                    'ok' => false,
+                    'error' => 'WHO factsheet not found.',
+                    'existing_length' => mb_strlen(trim(strip_tags($existing))),
+                ];
+                continue;
+            }
+
+            $generated = $this->generateHealthTopicOverview($tagText, $who, $existing);
+            if (! ($generated['ok'] ?? false)) {
+                $errors[] = $tagText.': '.($generated['error'] ?? 'Generation failed.');
+                $items[] = [
+                    'tag_id' => $tagId,
+                    'tag_text' => $tagText,
+                    'ok' => false,
+                    'error' => $generated['error'] ?? 'Generation failed.',
+                    'existing_length' => mb_strlen(trim(strip_tags($existing))),
+                ];
+                continue;
+            }
+
+            $newOverview = (string) ($generated['overview'] ?? '');
+            $items[] = [
+                'tag_id' => $tagId,
+                'tag_text' => $tagText,
+                'ok' => true,
+                'overview' => $newOverview,
+                'references' => $generated['references'] ?? ($who['references'] ?? []),
+                'who_fact_sheet_url' => $who['fact_sheet_url'] ?? null,
+                'who_health_topic_url' => $who['health_topic_url'] ?? null,
+                'existing_overview' => $existing,
+                'existing_length' => mb_strlen(trim(strip_tags($existing))),
+                'new_length' => mb_strlen(trim(strip_tags($newOverview))),
+            ];
+        }
+
+        if ($items === []) {
+            return ['ok' => false, 'error' => 'No tags could be processed.'];
+        }
+
+        $anyOk = false;
+        foreach ($items as $item) {
+            if ($item['ok'] ?? false) {
+                $anyOk = true;
+                break;
+            }
+        }
+
+        if (! $anyOk) {
+            return [
+                'ok' => false,
+                'error' => $errors !== [] ? implode(' ', array_unique($errors)) : 'All generations failed.',
+                'items' => $items,
+            ];
+        }
+
+        return ['ok' => true, 'items' => $items];
+    }
+
+    private function healthTopicOverviewHtmlGuide(): string
+    {
+        return 'overview must be rich HTML inside a single <div> (no html/head/body). '
+            .'Use <h3 style="color:#119A48;"> for section headings (never h1/h2). '
+            .'Include sections such as Overview, Key facts, Signs and symptoms (when relevant), Prevention and control, and Africa relevance. '
+            .'Use multiple <p> paragraphs and <ul>/<li> lists where helpful. '
+            .'End with <h3 style="color:#119A48;">References</h3><ul><li><a href="URL" target="_blank" rel="noopener noreferrer">Source label</a></li></ul>. '
+            .'Target 8–14 sentences of substantive content (roughly 1500–4500 characters). '
+            .'Cite WHO and other provided URLs in References; do not invent sources.';
+    }
+
+    private function parseHealthTopicOverviewJson(string $raw): string
+    {
+        $text = function_exists('clean_unicode') ? clean_unicode($raw) : $raw;
+        $text = preg_replace('/```json\s*/i', '', (string) $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
+
+        $decoded = json_decode($text, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+        if (! is_array($decoded) || json_last_error() !== JSON_ERROR_NONE) {
+            $start = strpos($text, '{');
+            $end = strrpos($text, '}');
+            if ($start !== false && $end !== false && $end > $start) {
+                $decoded = json_decode(substr($text, $start, $end - $start + 1), true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+            }
+        }
+
+        if (! is_array($decoded)) {
+            return '';
+        }
+
+        $overview = trim((string) ($decoded['overview'] ?? ''));
+
+        return $overview;
+    }
+
+    /**
+     * @param  list<array{label: string, url: string}>  $references
+     */
+    private function ensureReferencesSection(string $overview, array $references): string
+    {
+        if ($references === []) {
+            return $overview;
+        }
+
+        if (stripos($overview, 'references') !== false && stripos($overview, '<a ') !== false) {
+            return $overview;
+        }
+
+        $lis = '';
+        foreach ($references as $ref) {
+            $url = trim((string) ($ref['url'] ?? ''));
+            $label = trim((string) ($ref['label'] ?? 'Reference'));
+            if ($url === '') {
+                continue;
+            }
+            $lis .= '<li><a href="'.htmlspecialchars($url, ENT_QUOTES, 'UTF-8').'" target="_blank" rel="noopener noreferrer">'
+                .htmlspecialchars($label, ENT_QUOTES, 'UTF-8').'</a></li>';
+        }
+
+        if ($lis === '') {
+            return $overview;
+        }
+
+        return rtrim($overview)
+            .'<h3 style="color:#119A48;">References</h3><ul>'.$lis.'</ul>';
+    }
+
+    /**
      * @param  list<string>  $existingKeys lower-case tag keys already used
      * @param  list<string>  $referenceTopics
      * @param  list<string>  $blockedKeys lower-case keys to avoid (existing + generated)
@@ -863,8 +1097,8 @@ class ChatGPTService implements AIModel{
             .'Create NEW health topic tags (diseases, conditions) for a public health portal focused on Africa. '
             .'Use WHO, CDC, MedlinePlus, and university health topic lists only as naming inspiration. '
             .'Each tag must be unique (case-insensitive) vs blocked names. '
-            .'Return ONLY valid JSON: {"topics":[{"tag_text":"Name","overview":"<p>2-3 short paragraphs</p>"}]}. '
-            .'tag_text max 255 chars. overview uses <p> tags only, max 1200 chars, no invented statistics.';
+            .'Return ONLY valid JSON: {"topics":[{"tag_text":"Name","overview":"<div>...</div>"}]}. '
+            .'tag_text max 255 chars. '.$this->healthTopicOverviewHtmlGuide();
 
         $user = 'Generate exactly '.$count.' topics. '
             .'Blocked names (do not reuse): '.json_encode(array_slice($blockedKeys, 0, 120)).'. '

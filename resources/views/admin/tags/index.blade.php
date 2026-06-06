@@ -60,6 +60,7 @@
                         <th>Health Topic</th>
                         <th>Health Emergency</th>
                         <th>Description</th>
+                        <th style="width:100px;">Desc. status</th>
                         <th>Actions</th>
                     </tr>
                     </thead>
@@ -75,13 +76,48 @@
                             <td>{{ $row->tag_text }}</td>
                             <td>{{ ($row->is_health_topic ?? 1) ? 'Yes':'No' }}</td>
                             <td>{{ ($row->is_health_emergency ?? 0) ? 'Yes':'No' }}</td>
+                            @php
+                                $overviewPlain = trim(preg_replace('/\s+/u', ' ', strip_tags($row->overview ?? '')));
+                                $overviewLen = mb_strlen($overviewPlain);
+                                $needsOverview = $overviewLen < 120;
+                            @endphp
                             <td style="max-width:420px;">
-                                {!! Str::limit(strip_tags($row->overview ?? ''), 140) ?: '<span class="text-muted">—</span>' !!}
+                                @if($overviewLen > 0)
+                                    <div class="small text-muted mb-1">{{ number_format($overviewLen) }} chars (plain text)</div>
+                                    <div class="tag-desc-preview">{!! Str::limit(strip_tags($row->overview ?? ''), 160) !!}</div>
+                                @else
+                                    <span class="text-muted">—</span>
+                                @endif
                             </td>
                             <td>
+                                @if($needsOverview)
+                                    <span class="badge badge-warning">Missing</span>
+                                @elseif($overviewLen < 400)
+                                    <span class="badge badge-info">Short</span>
+                                @else
+                                    <span class="badge badge-success">OK</span>
+                                @endif
+                            </td>
+                            <td style="white-space:nowrap;">
+                                @if($needsOverview)
+                                    <button type="button"
+                                            class="btn btn-sm btn-success js-describe-tag"
+                                            data-tag-id="{{ $row->id }}"
+                                            data-tag-text="{{ $row->tag_text }}">
+                                        WHO describe
+                                    </button>
+                                @else
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-success js-describe-tag"
+                                            data-tag-id="{{ $row->id }}"
+                                            data-tag-text="{{ $row->tag_text }}"
+                                            title="Regenerate from WHO factsheet (apply only if longer)">
+                                        Enhance
+                                    </button>
+                                @endif
                                 <a href="#edit-tag-modal" data-toggle="modal" data-id="{{ $row->id }}" data-tag="{{ $row->tag_text }}" 
                                     data-is_health_topic="{{$row->is_health_topic ?? 1 }}" data-is_health_emergency="{{$row->is_health_emergency ?? 0 }}"
-                                    data-overview="{{$row->overview }}"
+                                    data-overview="{{ e($row->overview ?? '') }}"
                                     class="btn btn-sm btn-primary ml-1">Edit</a>
                                 @canany(['delete_publication_metadata', 'delete_meta_data'])
                                 <a href="javascript:void(0);" class="btn btn-sm btn-danger ml-1"

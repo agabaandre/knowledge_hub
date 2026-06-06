@@ -402,6 +402,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/delete", [TagsController::class, 'destroy']);
         Route::post('/ai-generate', [TagsController::class, 'aiGenerate'])->name('ai-generate');
         Route::post('/ai-import', [TagsController::class, 'aiImport'])->name('ai-import');
+        Route::post('/ai-describe', [TagsController::class, 'aiDescribe'])->name('ai-describe');
+        Route::post('/ai-apply-overviews', [TagsController::class, 'aiApplyOverviews'])->name('ai-apply-overviews');
         Route::post('/deduplicate', [TagsController::class, 'deduplicate'])->name('deduplicate');
     });
 

@@ -337,6 +337,119 @@ class TagsRepository{
         ];
     }
 
+    public function overviewPlainLength(?string $overview): int
+    {
+        $plain = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $overview)) ?? '');
+
+        return mb_strlen($plain);
+    }
+
+    public function tagNeedsOverview(?string $overview, int $minChars = 120): bool
+    {
+        return $this->overviewPlainLength($overview) < $minChars;
+    }
+
+    /**
+     * @return \Illuminate\Database\Eloquent\Collection<int, Tag>
+     */
+    public function tagsNeedingOverview(int $minChars = 120, int $limit = 50): Collection
+    {
+        return Tag::query()
+            ->orderBy('tag_text')
+            ->get(['id', 'tag_text', 'overview', 'is_health_topic', 'is_health_emergency'])
+            ->filter(function (Tag $tag) use ($minChars) {
+                return $this->tagNeedsOverview($tag->overview, $minChars);
+            })
+            ->take($limit)
+            ->values();
+    }
+
+    public function countTagsNeedingOverview(int $minChars = 120): int
+    {
+        return Tag::query()
+            ->get(['id', 'overview'])
+            ->filter(fn (Tag $tag) => $this->tagNeedsOverview($tag->overview, $minChars))
+            ->count();
+    }
+
+    public function updateOverviewOnly(int $tagId, string $overview): ?Tag
+    {
+        $tag = Tag::find($tagId);
+        if (! $tag) {
+            return null;
+        }
+
+        $tag->overview = $overview;
+        $tag->save();
+        TagsViewComposer::forgetTagListCache();
+
+        return $tag;
+    }
+
+    /**
+     * @param  list<array{tag_id: int, overview: string, force?: bool}>  $updates
+     * @return array{updated: int, skipped: int, details: list<array<string, mixed>>}
+     */
+    public function applyTagOverviews(array $updates, bool $onlyIfLonger = true): array
+    {
+        $updated = 0;
+        $skipped = 0;
+        $details = [];
+
+        foreach ($updates as $row) {
+            $tagId = (int) ($row['tag_id'] ?? 0);
+            $overview = trim((string) ($row['overview'] ?? ''));
+            $force = (bool) ($row['force'] ?? false);
+
+            if ($tagId <= 0 || $overview === '') {
+                $skipped++;
+                continue;
+            }
+
+            $tag = Tag::find($tagId);
+            if (! $tag) {
+                $skipped++;
+                continue;
+            }
+
+            $existingLen = $this->overviewPlainLength($tag->overview);
+            $newLen = $this->overviewPlainLength($overview);
+
+            if ($onlyIfLonger && ! $force && $existingLen >= 120 && $newLen <= $existingLen) {
+                $skipped++;
+                $details[] = [
+                    'tag_id' => $tagId,
+                    'tag_text' => $tag->tag_text,
+                    'status' => 'skipped_shorter',
+                    'existing_length' => $existingLen,
+                    'new_length' => $newLen,
+                ];
+                continue;
+            }
+
+            $tag->overview = $overview;
+            $tag->save();
+            $updated++;
+            $details[] = [
+                'tag_id' => $tagId,
+                'tag_text' => $tag->tag_text,
+                'status' => 'updated',
+                'existing_length' => $existingLen,
+                'new_length' => $newLen,
+            ];
+        }
+
+        if ($updated > 0) {
+            TagsViewComposer::forgetTagListCache();
+        }
+
+        return [
+            'updated' => $updated,
+            'skipped' => $skipped,
+            'details' => $details,
+        ];
+    }
+
     /**
      * @param  list<array{tag_text: string, overview: string}>  $topics
      * @return list<array{tag_text: string, overview: string, is_duplicate: bool}>
