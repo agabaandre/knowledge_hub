@@ -11,6 +11,7 @@
     $communitiesUrl = $author->slug
         ? route('authors.badge-communities', $author->slug)
         : url('authors/publications/badge-communities').'?author='.$author->id;
+    $badgeAcquiredAt = $lifetimeBadge->last_upgraded_at ?? $lifetimeBadge->created_at ?? null;
 @endphp
 @if($lifetimeBadge && $badgeType && $user)
 <div class="contributor-lifetime-badge-wrap">
@@ -42,6 +43,13 @@
                     · {{ $starCount }} {{ Str::plural('community', $starCount) }} in {{ $periodLabel }}
                 @endif
             </span>
+            @if($badgeAcquiredAt)
+                <span class="contributor-lifetime-badge-btn__acquired">
+                    <i class="fa fa-calendar-check-o" aria-hidden="true"></i>
+                    Acquired {{ $badgeAcquiredAt->format('M j, Y') }}
+                    <span class="contributor-lifetime-badge-btn__acquired-relative">({{ $badgeAcquiredAt->diffForHumans() }})</span>
+                </span>
+            @endif
             <span class="contributor-lifetime-badge-btn__hint">Click for community breakdown</span>
         </span>
     </button>
@@ -51,7 +59,12 @@
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="contributorCommunityBadgeModalLabel">Community contributions</h5>
+                <h5 class="modal-title" id="contributorCommunityBadgeModalLabel">
+                    {{ $badgeType->name }}
+                    @if($badgeAcquiredAt)
+                        <span class="d-block text-muted small font-weight-normal mt-1">Acquired {{ $badgeAcquiredAt->format('F j, Y') }}</span>
+                    @endif
+                </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -130,6 +143,17 @@
         font-size: 0.78rem;
         color: #64748b;
         margin-top: 0.15rem;
+    }
+    .contributor-lifetime-badge-btn__acquired {
+        display: block;
+        font-size: 0.75rem;
+        color: #475569;
+        margin-top: 0.3rem;
+        font-weight: 500;
+    }
+    .contributor-lifetime-badge-btn__acquired-relative {
+        color: #94a3b8;
+        font-weight: 400;
     }
     .contributor-lifetime-badge-btn__hint {
         display: block;

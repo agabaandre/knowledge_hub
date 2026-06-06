@@ -38,9 +38,20 @@
                     <div class="account-contributor-stat__label">Forum comments</div>
                 </div>
                 @if($badgeCount > 0)
+                @php
+                    $lb = $contributorPublicProfile['lifetime_badge'] ?? null;
+                    $acquiredAt = $lb ? ($lb->last_upgraded_at ?? $lb->created_at) : null;
+                @endphp
                 <div class="account-contributor-stat">
-                    <div class="account-contributor-stat__value">{{ optional($contributorPublicProfile['lifetime_badge'] ?? null)->badgeType->name ?? '1' }}</div>
-                    <div class="account-contributor-stat__label">Lifetime badge tier</div>
+                    <div class="account-contributor-stat__value" style="font-size:1.05rem;">{{ optional($lb)->badgeType->name ?? '—' }}</div>
+                    <div class="account-contributor-stat__label">
+                        Lifetime badge
+                        @if($acquiredAt)
+                            <span class="d-block text-muted" style="font-size:0.7rem;font-weight:500;margin-top:0.15rem;">
+                                Acquired {{ $acquiredAt->format('M j, Y') }}
+                            </span>
+                        @endif
+                    </div>
                 </div>
                 @endif
             </div>
