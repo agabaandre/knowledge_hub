@@ -162,6 +162,33 @@
                     <a href="{{ url('admin/kpi/data') }}" class="btn btn-outline-info btn-sm">Enter country values</a>
                 </div>
             </div>
+            <div class="col-lg-6 mb-3">
+                <div class="border rounded p-3 h-100">
+                    <h6 class="mb-1"><i class="fa fa-clone text-danger"></i> Duplicate cleanup</h6>
+                    <p class="text-muted small mb-2">
+                        Detect duplicate indicators and subject areas by OWID slug, normalized name, or matching search settings.
+                        @if(($stats['indicator_duplicate_groups'] ?? 0) + ($stats['subject_area_duplicate_groups'] ?? 0) > 0)
+                            <strong class="text-danger d-block mt-1">
+                                {{ $stats['indicator_duplicate_groups'] ?? 0 }} indicator group(s),
+                                {{ $stats['subject_area_duplicate_groups'] ?? 0 }} subject area group(s) found.
+                            </strong>
+                        @else
+                            <span class="d-block mt-1 text-success">No duplicate groups detected right now.</span>
+                        @endif
+                    </p>
+                    <a href="{{ url('admin/kpi/duplicates') }}" class="btn btn-outline-danger btn-sm mr-2 mb-2">
+                        <i class="fa fa-search"></i> Review duplicates
+                    </a>
+                    <form method="POST" action="{{ url('admin/kpi/dedupe/indicators/auto') }}" class="d-inline js-kpi-queued-task mb-2" data-confirm="Automatically merge duplicate indicators?">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm">Auto-merge indicators</button>
+                    </form>
+                    <form method="POST" action="{{ url('admin/kpi/subject-areas/dedupe/auto') }}" class="d-inline js-kpi-queued-task mb-2" data-confirm="Automatically merge duplicate subject areas?">
+                        @csrf
+                        <button type="submit" class="btn btn-warning btn-sm">Auto-merge subject areas</button>
+                    </form>
+                </div>
+            </div>
         </div>
 
         @include('common.owid_attribution', ['compact' => true])

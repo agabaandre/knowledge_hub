@@ -6,6 +6,7 @@ use App\Models\Country;
 use App\Models\Kpi;
 use App\Models\KpiDataRecord;
 use App\Models\SubjectArea;
+use App\Services\Kpi\KpiDeduplicationService;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,12 +14,14 @@ use Illuminate\Support\Str;
 
 class OwidIndicatorSyncService
 {
-    public function __construct(private OwidApiClient $client)
-    {
+    public function __construct(
+        private OwidApiClient $client,
+        private KpiDeduplicationService $dedupe
+    ) {
     }
 
     /**
-     * @return array{discovered: int, skipped: int, subject_areas: int}
+     * @return array{discovered: int, skipped: int, duplicates: int, subject_areas: int, errors: array<int, string>}
      */
     public function discoverIndicators(?int $subjectAreaId = null, ?callable $onProgress = null): array
     {
@@ -37,6 +40,7 @@ class OwidIndicatorSyncService
 
         $discovered = 0;
         $skipped = 0;
+        $duplicates = 0;
         $errors = [];
         $areaTotal = max(1, $areas->count());
 
@@ -74,8 +78,20 @@ class OwidIndicatorSyncService
                     continue;
                 }
 
-                if (Kpi::query()->where('owid_chart_slug', $slug)->exists()) {
+                if (Kpi::query()->whereRaw('LOWER(owid_chart_slug) = ?', [strtolower($slug)])->exists()) {
                     $skipped++;
+                    $duplicates++;
+                    continue;
+                }
+
+                $existing = $this->dedupe->findExistingIndicatorForChart($chart);
+                if ($existing) {
+                    if ((int) $existing->subject_area !== (int) $area->id && empty($existing->subject_area)) {
+                        $existing->subject_area = $area->id;
+                        $existing->save();
+                    }
+                    $skipped++;
+                    $duplicates++;
                     continue;
                 }
 
@@ -101,6 +117,7 @@ class OwidIndicatorSyncService
         return [
             'discovered' => $discovered,
             'skipped' => $skipped,
+            'duplicates' => $duplicates,
             'subject_areas' => $areas->count(),
             'errors' => $errors,
         ];

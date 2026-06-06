@@ -15,7 +15,7 @@ class IndicatorsRepository
     public function get(Request $request)
     {
         $rows_count = ($request->rows) ? $request->rows : 20;
-        $kpis = Kpi::with('subjectArea');
+        $kpis = Kpi::query()->with('subjectArea')->withCount(['dataRecords', 'narrations']);
 
         if ($request->status) {
             $kpis->where('status', $request->status);
@@ -30,6 +30,15 @@ class IndicatorsRepository
                 $query->where('name', 'like', '%' . $request->term . '%')
                       ->orWhere('description', 'like', '%' . $request->term . '%');
             });
+        }
+
+        if ($request->boolean('duplicates')) {
+            $duplicateIds = collect(app(\App\Services\Kpi\KpiDeduplicationService::class)->findIndicatorDuplicateGroups())
+                ->flatMap(fn ($group) => collect($group['members'])->pluck('id'))
+                ->unique()
+                ->values()
+                ->all();
+            $kpis->whereIn('id', $duplicateIds ?: [0]);
         }
 
         $kpis->orderBy('id', 'desc');

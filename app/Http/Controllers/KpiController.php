@@ -6,6 +6,7 @@ use App\Jobs\ProcessKpiOwidActionJob;
 use App\Models\Kpi;
 use App\Models\KpiSyncRun;
 use App\Models\Setting;
+use App\Services\Kpi\KpiDeduplicationService;
 use App\Services\Kpi\KpiSyncRunService;
 use App\Services\Owid\OwidIndicatorSyncService;
 use Illuminate\Http\Request;
@@ -29,6 +30,7 @@ class KpiController extends Controller
         $data['indicators'] = $this->indicatorsRepo->get($request);
         $data['subject_areas'] = $this->indicatorsRepo->get_subject_areas();
         $data['kpi_stats'] = kpi_admin_stats();
+        $data['indicator_duplicate_groups'] = app(KpiDeduplicationService::class)->findIndicatorDuplicateGroups();
 
         return view('admin.kpi.index', $data);
     }
@@ -268,6 +270,53 @@ class KpiController extends Controller
         return $this->queueTask($request, 'sync_one', [
             'kpi_id' => (int) $request->id,
         ], 'Refreshing indicator values…');
+    }
+
+    public function duplicateScan(Request $request, KpiDeduplicationService $dedupe)
+    {
+        return response()->json([
+            'success' => true,
+            'indicator_groups' => $dedupe->findIndicatorDuplicateGroups(),
+            'subject_area_groups' => $dedupe->findSubjectAreaDuplicateGroups(),
+            'stats' => kpi_admin_stats(),
+        ]);
+    }
+
+    public function dedupeIndicatorsAuto(Request $request)
+    {
+        return $this->queueTask($request, 'dedupe_indicators', [], 'Merging duplicate indicators…');
+    }
+
+    public function mergeIndicators(Request $request, KpiDeduplicationService $dedupe)
+    {
+        $request->validate([
+            'keep_id' => 'required|integer|min:1',
+            'duplicate_ids' => 'required|array|min:1',
+            'duplicate_ids.*' => 'integer|min:1',
+        ]);
+
+        $result = $dedupe->mergeIndicators((int) $request->keep_id, $request->duplicate_ids);
+        $message = sprintf(
+            'Merged %d duplicate indicator(s). Moved %d country values and %d narrations.',
+            $result['removed'],
+            $result['moved_data'],
+            $result['moved_narrations']
+        );
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $message, 'result' => $result]);
+        }
+
+        return back()->with('alert-success', $message);
+    }
+
+    public function duplicates(Request $request, KpiDeduplicationService $dedupe)
+    {
+        return view('admin.kpi.duplicates', [
+            'indicator_groups' => $dedupe->findIndicatorDuplicateGroups(),
+            'subject_area_groups' => $dedupe->findSubjectAreaDuplicateGroups(),
+            'kpi_stats' => kpi_admin_stats(),
+        ]);
     }
 
     protected function queueTask(Request $request, string $action, array $payload, string $queuedMessage)

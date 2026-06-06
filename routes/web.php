@@ -458,12 +458,18 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/subject-areas/save", [\App\Http\Controllers\KpiSubjectAreaController::class, 'save'])->middleware('permission:manage_kpis');
         Route::get("/subject-areas/get", [\App\Http\Controllers\KpiSubjectAreaController::class, 'get'])->middleware('permission:manage_kpis');
         Route::get("/subject-areas/delete", [\App\Http\Controllers\KpiSubjectAreaController::class, 'destroy'])->middleware('permission:manage_kpis');
+        Route::post("/subject-areas/dedupe/auto", [\App\Http\Controllers\KpiSubjectAreaController::class, 'dedupeAuto'])->middleware('permission:manage_kpis');
+        Route::post("/subject-areas/dedupe/merge", [\App\Http\Controllers\KpiSubjectAreaController::class, 'merge'])->middleware('permission:manage_kpis');
         Route::post("/owid/discover", [KpiController::class, 'discoverOwid'])->middleware('permission:manage_kpis');
         Route::post("/owid/sync", [KpiController::class, 'syncOwid'])->middleware('permission:manage_kpis');
         Route::post("/owid/sync-one", [KpiController::class, 'syncOne'])->middleware('permission:manage_kpis');
         Route::post("/owid/fresh-fetch", [KpiController::class, 'freshFetch'])->middleware('permission:manage_kpis');
         Route::post("/owid/approve-defaults", [KpiController::class, 'approveDefaults'])->middleware('permission:manage_kpis');
         Route::post("/owid/generate-narrations", [KpiController::class, 'generateNarrations'])->middleware('permission:manage_kpis');
+        Route::get("/duplicates", [KpiController::class, 'duplicates'])->middleware('permission:manage_kpis');
+        Route::get("/dedupe/scan", [KpiController::class, 'duplicateScan'])->middleware('permission:manage_kpis');
+        Route::post("/dedupe/indicators/auto", [KpiController::class, 'dedupeIndicatorsAuto'])->middleware('permission:manage_kpis');
+        Route::post("/dedupe/indicators/merge", [KpiController::class, 'mergeIndicators'])->middleware('permission:manage_kpis');
         Route::post("/settings/save", [KpiController::class, 'saveSettings'])->middleware('permission:manage_kpis');
         Route::get("/owid/task/{id}", [KpiController::class, 'taskStatus'])->middleware('permission:manage_kpis');
         Route::post("/approve", [KpiController::class, 'approve'])->middleware('permission:manage_kpis');

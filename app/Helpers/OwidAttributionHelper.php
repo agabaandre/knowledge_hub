@@ -74,6 +74,8 @@ if (! function_exists('kpi_admin_stats')) {
             'country_values' => \App\Models\KpiDataRecord::query()->count(),
             'narrations' => \App\Models\KpiNarration::query()->count(),
             'default_set_size' => count(config('owid.default_published_chart_slugs', [])),
+            'indicator_duplicate_groups' => count(app(\App\Services\Kpi\KpiDeduplicationService::class)->findIndicatorDuplicateGroups()),
+            'subject_area_duplicate_groups' => count(app(\App\Services\Kpi\KpiDeduplicationService::class)->findSubjectAreaDuplicateGroups()),
         ];
     }
 }

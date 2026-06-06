@@ -53,6 +53,7 @@ Requires permission **`manage_kpis`** (under **KPIs** in the admin menu when mem
 |-----------|-----|---------|
 | Manage indicators | `/admin/kpi` | List, filter, publish, recall, edit indicators |
 | Subject areas | `/admin/kpi/subject-areas` | OWID topic/search mappings for discovery |
+| Review duplicates | `/admin/kpi/duplicates` | Inspect and merge duplicate indicators or subject areas |
 | Country values | `/admin/kpi/data` | View or manually add/edit per-country values |
 
 ### Indicator data management panel
@@ -104,8 +105,34 @@ On Docker, the `queue` service should be enabled. With `QUEUE_CONNECTION=sync` (
 | **Recall** (per row) | Hides indicator from public pages (`recalled` status) |
 | **Refresh** (sync icon) | Refreshes one OWID indicator’s country values (queued) |
 | **Country values** (table icon) | Opens `/admin/kpi/data?kpi_id=…` |
+| **Review duplicates** | Opens `/admin/kpi/duplicates` to inspect duplicate groups |
+| **Auto-merge indicators / subject areas** | Queued merge; keeps the best record and moves linked data |
 
 Subject areas also have a **fetch** button per row (discover for that topic only).
+
+### Duplicate prevention and cleanup
+
+Duplicates can appear when the same OWID chart is discovered under multiple subject areas, when names differ slightly, or when subject areas are created twice.
+
+**Automatic (on fetch):**
+
+- During **Run fetch** and **Run full refresh**, new charts are skipped if the OWID slug, URL, or normalized name already exists.
+- After fetch completes, duplicate indicators are **auto-merged** (country values and narrations move to the keeper record).
+
+**Manual review:**
+
+- Open **Review duplicates** from the data management panel or go to `/admin/kpi/duplicates`.
+- Each group shows a suggested **keeper** (prefers published indicators with more country data).
+- Use **Merge group** per group, or **Auto-merge all** for indicators or subject areas.
+
+**Detection rules:**
+
+| Entity | Treated as duplicate when |
+|--------|---------------------------|
+| Indicator | Same OWID chart slug, same OWID URL, same normalized name, or same name + subject area |
+| Subject area | Same slug, same normalized name, or same OWID topic + search query |
+
+**Database safeguards:** unique `owid_chart_slug` on indicators, unique `slug` on subject areas, and unique `(kpi_id, country_id, period)` on country values (migration `2026_05_22_120000_add_kpi_deduplication_indexes`).
 
 ### Recommended workflow
 

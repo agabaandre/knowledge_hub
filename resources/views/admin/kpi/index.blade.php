@@ -63,6 +63,9 @@
                                 <div class="form-group mb-2 w-100">
                                     <button type="submit" class="btn btn-primary btn-sm mr-1">Filter</button>
                                     <a href="{{ url('admin/kpi') }}" class="btn btn-secondary btn-sm">Clear</a>
+                                    @if(($kpi_stats['indicator_duplicate_groups'] ?? 0) > 0)
+                                        <a href="{{ url('admin/kpi?duplicates=1') }}" class="btn btn-outline-danger btn-sm d-block mt-1">Duplicates only</a>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -89,8 +92,11 @@
                     @if(session('alert-warning'))
                         <div class="alert alert-warning">{{ session('alert-warning') }}</div>
                     @endif
-                    @if(session('alert-danger'))
-                        <div class="alert alert-danger">{{ session('alert-danger') }}</div>
+                    @if(($kpi_stats['indicator_duplicate_groups'] ?? 0) > 0)
+                    <div class="alert alert-warning">
+                        {{ $kpi_stats['indicator_duplicate_groups'] }} duplicate indicator group(s) detected.
+                        <a href="{{ url('admin/kpi/duplicates') }}" class="alert-link">Review and merge duplicates</a>.
+                    </div>
                     @endif
 
                     <div class="table-responsive">

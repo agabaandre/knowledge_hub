@@ -26,6 +26,7 @@ class MetricsController extends Controller
 
         $minutes = 60 * 6;
         $chart_data = cache()->remember($cacheKey, $useFilters ? 1 : $minutes, function () use ($from, $to, $country) {
+            $data['visits_over_time'] = $this->metricsRepository->visits_over_time($from, $to, $country);
             $data['visits_by_country'] = $this->metricsRepository->country_access($from, $to, $country);
             $data['signups_by_country'] = $this->metricsRepository->country_signups($from, $to, $country);
             $data['monthly_signups'] = $this->metricsRepository->monthly_signups($from, $to);
@@ -35,8 +36,18 @@ class MetricsController extends Controller
 
         if ($request->ajax()) {
             return response()->json([
-                'html' => view('admin.metrics.graphs_html')->render(),
+                'html' => view('admin.metrics.graphs_html', [
+                    'from' => $from,
+                    'to' => $to,
+                    'country' => $country,
+                ])->render(),
                 'chart_data' => $chart_data,
+                'visit_countries' => $this->metricsRepository->listVisitCountries($from, $to),
+                'filters' => [
+                    'from' => $from,
+                    'to' => $to,
+                    'country' => $country,
+                ],
             ]);
         }
 

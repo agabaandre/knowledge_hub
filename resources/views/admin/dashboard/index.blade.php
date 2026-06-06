@@ -104,6 +104,10 @@
         height: 36px; border-radius: 10px; background: {{ settings()->au_corporate_green ?? '#1A5632' }}; color: #fff; padding: 6px 14px; border: 1px solid {{ settings()->au_corporate_green ?? '#1A5632' }};
     }
     .charts .btn-apply:hover { opacity: 0.9; color: #fff; }
+    .charts .metrics-period-presets { display: flex; flex-wrap: wrap; gap: 6px; }
+    .charts .metrics-period-presets .metrics-preset { border-radius: 8px; }
+    .pub-filters-grid--single { grid-template-columns: 1fr; }
+    .pub-filter-field--wide { grid-column: 1 / -1; }
 </style>
 @endsection
 
@@ -297,18 +301,10 @@
                         </div>
                         <div class="pub-filters-card__body">
                             <form id="dashboardResourcesFiltersForm" method="GET" action="{{ url('admin') }}" class="mb-0">
-                                <div class="pub-filters-grid">
-                                    <div class="pub-filter-field">
-                                        <label class="pub-filter-label" for="filterResourceTitle">Title</label>
-                                        <input type="text" name="search[title]" id="filterResourceTitle" class="form-control pub-filter-input" placeholder="Filter by title" value="{{ request('search.title') }}">
-                                    </div>
-                                    <div class="pub-filter-field">
-                                        <label class="pub-filter-label" for="filterResourceAuthor">Author</label>
-                                        <input type="text" name="search[author]" id="filterResourceAuthor" class="form-control pub-filter-input" placeholder="Filter by author" value="{{ request('search.author') }}">
-                                    </div>
-                                    <div class="pub-filter-field">
-                                        <label class="pub-filter-label" for="filterResourceDescription">Description</label>
-                                        <input type="text" name="search[description]" id="filterResourceDescription" class="form-control pub-filter-input" placeholder="Filter by description" value="{{ request('search.description') }}">
+                                <div class="pub-filters-grid pub-filters-grid--single">
+                                    <div class="pub-filter-field pub-filter-field--wide">
+                                        <label class="pub-filter-label" for="filterResourceSearch">Search resources</label>
+                                        <input type="text" name="search[q]" id="filterResourceSearch" class="form-control pub-filter-input" placeholder="Search by title, author, description, geography, region, theme, category, or tag" value="{{ request('search.q', request('search.title')) }}">
                                     </div>
                                 </div>
                                 <div class="pub-filters-actions">
@@ -366,6 +362,7 @@
 
 @section('scripts')
 <script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>
+<script src="{{ asset('assets/plugins/highcharts/highmaps.js') }}"></script>
 @include('admin.metrics.charts_script')
 @include('admin.publications.partials.datatable_assets')
 <script>
@@ -431,7 +428,7 @@
             }
         });
 
-        $('#filterResourceTitle, #filterResourceAuthor, #filterResourceDescription').on('input', scheduleDashboardFilterReload);
+        $('#filterResourceSearch').on('input', scheduleDashboardFilterReload);
 
         $('#dashboardResourcesFiltersForm').on('submit', function (e) {
             e.preventDefault();
@@ -467,12 +464,16 @@
                 method: 'GET',
                 url: url,
                 dataType: 'json',
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success: function(response) {
                     if (response && response.html) {
                         $('.charts').html(response.html);
                     }
                     if (response && response.chart_data && typeof window.renderMetricsCharts === 'function') {
-                        window.renderMetricsCharts(response.chart_data);
+                        window.renderMetricsCharts(response.chart_data, {
+                            visitCountries: response.visit_countries || [],
+                            selectedCountry: (response.filters && response.filters.country) || (params && params.country) || ''
+                        });
                     }
                 },
                 error: function(xhr) {
@@ -484,12 +485,23 @@
                 }
             });
         }
+        function currentMetricsParams() {
+            return {
+                from: $('#fromDate').val() || undefined,
+                to: $('#toDate').val() || undefined,
+                country: $('#countryFilter').val() || undefined
+            };
+        }
         loadMetrics();
         $(document).on('click', '#applyFilters', function() {
-            var from = $('#fromDate').val();
-            var to = $('#toDate').val();
-            var country = $('#countryFilter').val() || '';
-            loadMetrics({ from: from || undefined, to: to || undefined, country: country || undefined });
+            loadMetrics(currentMetricsParams());
+        });
+        $(document).on('click', '.metrics-preset', function() {
+            var preset = $(this).data('preset');
+            if (typeof window.applyMetricsDatePreset === 'function') {
+                window.applyMetricsDatePreset(preset);
+            }
+            loadMetrics(currentMetricsParams());
         });
     });
 </script>

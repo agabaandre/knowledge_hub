@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\Kpi;
 use App\Models\KpiSyncRun;
+use App\Services\Kpi\KpiDeduplicationService;
 use App\Services\Kpi\KpiSyncRunService;
 use App\Services\Owid\OwidIndicatorSyncService;
 use Illuminate\Bus\Queueable;
@@ -25,7 +26,8 @@ class ProcessKpiOwidActionJob implements ShouldQueue
 
     public function handle(
         OwidIndicatorSyncService $sync,
-        KpiSyncRunService $runs
+        KpiSyncRunService $runs,
+        KpiDeduplicationService $dedupe
     ): void {
         $run = KpiSyncRun::query()->find($this->runId);
         if (! $run || $run->isFinished()) {
@@ -43,6 +45,8 @@ class ProcessKpiOwidActionJob implements ShouldQueue
                 'generate_narrations' => $this->runGenerateNarrations($run, $runs),
                 'sync_one' => $this->runSyncOne($run, $sync, $runs),
                 'approve' => $this->runApprove($run, $sync, $runs),
+                'dedupe_indicators' => $this->runDedupeIndicators($run, $dedupe, $runs),
+                'dedupe_subject_areas' => $this->runDedupeSubjectAreas($run, $dedupe, $runs),
                 default => throw new \RuntimeException('Unknown KPI task action: '.$run->action),
             };
         } catch (Throwable $e) {
@@ -60,16 +64,25 @@ class ProcessKpiOwidActionJob implements ShouldQueue
         });
 
         $message = sprintf(
-            'Discovered %d indicators across %d subject areas (%d skipped).',
+            'Discovered %d indicators across %d subject areas (%d skipped, %d duplicates).',
             $result['discovered'],
             $result['subject_areas'],
-            $result['skipped']
+            $result['skipped'],
+            $result['duplicates'] ?? 0
         );
         if (! empty($result['errors'])) {
             $message .= ' Warnings: '.implode(' | ', array_slice($result['errors'], 0, 3));
         }
 
-        $runs->complete($run, $message, $result);
+        $runs->updateProgress($run, 92, 'Checking for duplicate indicators…');
+        $dedupeResult = app(KpiDeduplicationService::class)->autoDedupeIndicators(function (int $current, int $total, string $label) use ($run, $runs) {
+            $runs->updateProgress($run, 92 + (int) round(($current / max(1, $total)) * 6), $label);
+        });
+        if (($dedupeResult['removed'] ?? 0) > 0) {
+            $message .= sprintf(' Auto-merged %d duplicate indicator(s).', $dedupeResult['removed']);
+        }
+
+        $runs->complete($run, $message, array_merge($result, ['dedupe' => $dedupeResult]));
     }
 
     protected function runSync(KpiSyncRun $run, OwidIndicatorSyncService $sync, KpiSyncRunService $runs): void
@@ -118,9 +131,22 @@ class ProcessKpiOwidActionJob implements ShouldQueue
             $message .= ' Notes: '.implode(' | ', array_slice($errors, 0, 3));
         }
 
+        $runs->updateProgress($run, 96, 'Checking for duplicate indicators…');
+        $dedupeIndicators = app(KpiDeduplicationService::class)->autoDedupeIndicators();
+        $dedupeAreas = app(KpiDeduplicationService::class)->autoDedupeSubjectAreas();
+        if (($dedupeIndicators['removed'] ?? 0) > 0 || ($dedupeAreas['removed'] ?? 0) > 0) {
+            $message .= sprintf(
+                ' Auto-merged %d duplicate indicator(s) and %d subject area(s).',
+                $dedupeIndicators['removed'] ?? 0,
+                $dedupeAreas['removed'] ?? 0
+            );
+        }
+
         $runs->complete($run, $message, [
             'discover' => $discover,
             'sync' => $syncResult,
+            'dedupe_indicators' => $dedupeIndicators,
+            'dedupe_subject_areas' => $dedupeAreas,
         ]);
     }
 
@@ -212,5 +238,43 @@ class ProcessKpiOwidActionJob implements ShouldQueue
         $runs->complete($run, 'Indicator approved and country data synced from Our World in Data.', [
             'kpi_id' => $kpiId,
         ]);
+    }
+
+    protected function runDedupeIndicators(KpiSyncRun $run, KpiDeduplicationService $dedupe, KpiSyncRunService $runs): void
+    {
+        $result = $dedupe->autoDedupeIndicators(function (int $current, int $total, string $label) use ($run, $runs) {
+            $progress = 5 + (int) round(($current / max(1, $total)) * 90);
+            $runs->updateProgress($run, $progress, $label);
+        });
+
+        $message = sprintf(
+            'Merged duplicate indicators in %d group(s); removed %d duplicate record(s).',
+            $result['merged'],
+            $result['removed']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        $runs->complete($run, $message, $result);
+    }
+
+    protected function runDedupeSubjectAreas(KpiSyncRun $run, KpiDeduplicationService $dedupe, KpiSyncRunService $runs): void
+    {
+        $result = $dedupe->autoDedupeSubjectAreas(function (int $current, int $total, string $label) use ($run, $runs) {
+            $progress = 5 + (int) round(($current / max(1, $total)) * 90);
+            $runs->updateProgress($run, $progress, $label);
+        });
+
+        $message = sprintf(
+            'Merged duplicate subject areas in %d group(s); removed %d duplicate record(s).',
+            $result['merged'],
+            $result['removed']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        $runs->complete($run, $message, $result);
     }
 }

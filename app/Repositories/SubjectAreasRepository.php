@@ -3,11 +3,15 @@
 namespace App\Repositories;
 
 use App\Models\SubjectArea;
+use App\Services\Kpi\KpiDeduplicationService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 
 class SubjectAreasRepository
 {
+    public function __construct(private KpiDeduplicationService $dedupe)
+    {
+    }
+
     public function get(Request $request)
     {
         $rows = (int) ($request->rows ?? 50);
@@ -42,7 +46,7 @@ class SubjectAreasRepository
             : new SubjectArea();
 
         $area->name = clean_unicode($request->name ?? '');
-        $area->slug = Str::slug($area->name);
+        $area->slug = $this->dedupe->ensureUniqueSubjectAreaSlug($area->name, $request->id ? (int) $request->id : null);
         $area->owid_topic = $request->owid_topic ?: null;
         $area->owid_search_query = $request->owid_search_query ?: null;
         $area->description = clean_unicode($request->description ?? '');
