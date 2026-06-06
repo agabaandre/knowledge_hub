@@ -1,5 +1,9 @@
 @extends(admin_layout())
 
+@section('styles')
+    @include('common.table')
+@endsection
+
 @section('content')
 <div class="container-fluid">
     <div class="row">
@@ -10,8 +14,8 @@
                         <i class="fa fa-file-alt mr-2"></i>Content Requests
                     </h3>
                     
-                    <!-- Filters -->
-                    <form method="GET" action="{{ route('admin.content-requests.index') }}" class="mb-0">
+                    <!-- Filters (auto-apply) -->
+                    <form method="GET" action="{{ route('admin.content-requests.index') }}" id="contentRequestFiltersForm" class="mb-0">
                         <div class="row g-3">
                             <div class="col-md-2">
                                 <label for="status" class="form-label small font-weight-bold">Status</label>
@@ -61,9 +65,6 @@
                                        value="{{ request('date_to') }}">
                             </div>
                             <div class="col-md-2 d-flex align-items-end">
-                                <button type="submit" class="btn btn-primary btn-sm mr-1">
-                                    <i class="fa fa-filter mr-1"></i>Filter
-                                </button>
                                 <a href="{{ route('admin.content-requests.index') }}" class="btn btn-secondary btn-sm">
                                     <i class="fa fa-times mr-1"></i>Clear
                                 </a>
@@ -90,7 +91,7 @@
                     @endif
 
                     <div class="table-responsive">
-                        <table class="table table-bordered table-striped table-hover">
+                        <table id="contentRequestsTable" class="table table-bordered table-striped table-hover w-100">
         <thead>
             <tr>
                                     <th width="5%">#</th>
@@ -103,142 +104,8 @@
                                     <th width="18%">Actions</th>
             </tr>
         </thead>
-        <tbody>
-                                @forelse($contentRequests as $index => $request)
-                                    <tr>
-                                        <td>{{ $contentRequests->firstItem() + $index }}</td>
-                                        <td>
-                                            <strong>{{ $request->subject }}</strong>
-                                        </td>
-                                        <td>
-                                            <div style="max-height: 60px; overflow: hidden; text-overflow: ellipsis;">
-                                                {{ Str::limit(strip_tags($request->description), 100) }}
-                                            </div>
-                                        </td>
-                                        <td>{{ $request->country->name ?? 'N/A' }}</td>
-                                        <td>{{ $request->email ?? 'N/A' }}</td>
-                                        <td>
-                                            @if($request->isProcessed())
-                                                <span class="badge badge-success">
-                                                    <i class="fa fa-check-circle mr-1"></i>Processed
-                                                </span>
-                                                <br><small class="text-muted">Method: {{ $request->processingMethodLabel() }}</small>
-                                                @if($request->processedBy)
-                                                    <br><small class="text-muted">By: {{ $request->processedBy->name }}</small>
-                                                @endif
-                                            @else
-                                                <span class="badge badge-warning">
-                                                    <i class="fa fa-clock mr-1"></i>Pending
-                                                </span>
-                                            @endif
-                                            @if($request->isReferred())
-                                                <br><span class="badge badge-info mt-1">
-                                                    <i class="fa fa-share mr-1"></i>Referred
-                                                </span>
-                                                @php
-                                                    $rt = $request->referralTargets;
-                                                    $nUsers = $rt->whereNotNull('user_id')->count();
-                                                    $nComms = $rt->whereNotNull('community_of_practice_id')->count();
-                                                @endphp
-                                                @if($nUsers + $nComms > 0)
-                                                    <br><small class="text-muted">{{ $nUsers }} user(s), {{ $nComms }} comm.</small>
-                                                @elseif($request->referral_type === 'user' && $request->referredToUser)
-                                                    <br><small class="text-muted">To: {{ $request->referredToUser->name }}</small>
-                                                @elseif($request->referral_type === 'community' && $request->referredToCommunity)
-                                                    <br><small class="text-muted">CoP: {{ Str::limit($request->referredToCommunity->community_name, 28) }}</small>
-                                                @endif
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <small>{{ $request->created_at->format('M d, Y') }}</small>
-                                            @if($request->processed_at)
-                                                <br><small class="text-muted">Processed: {{ $request->processed_at->format('M d, Y') }}</small>
-                                            @endif
-                                        </td>
-                                        <td>
-                                            <div class="btn-group btn-group-sm flex-wrap" role="group" style="gap: 2px;">
-                                                @if(!$request->isProcessed())
-                                                    <button type="button" 
-                                                            class="btn btn-success btn-sm process-request-btn" 
-                                                            data-id="{{ $request->id }}"
-                                                            data-subject="{{ $request->subject }}"
-                                                            data-description="{{ strip_tags($request->description) }}"
-                                                            title="Process Request">
-                                                        <i class="fa fa-check mr-1"></i>Process
-                                                    </button>
-                                                @else
-                                                    <button type="button" 
-                                                            class="btn btn-info btn-sm view-processed-btn" 
-                                                            data-id="{{ $request->id }}"
-                                                            data-subject="{{ $request->subject }}"
-                                                            data-links="{{ $request->content_links }}"
-                                                            data-comments="{{ $request->admin_comments }}"
-                                                            data-processed-by="{{ $request->processedBy->name ?? 'Unknown' }}"
-                                                            data-processed-at="{{ $request->processed_at ? $request->processed_at->format('M d, Y H:i') : '' }}"
-                                                            data-process-method="{{ $request->processingMethodLabel() }}"
-                                                            title="View Processed Details">
-                                                        <i class="fa fa-eye mr-1"></i>View
-                                                    </button>
-                                                @endif
-                                                @can('manage_content_requests')
-                                                    @if(!$request->isReferred())
-                                                        <button type="button"
-                                                                class="btn btn-primary btn-sm refer-request-btn"
-                                                                data-id="{{ $request->id }}"
-                                                                data-subject="{{ $request->subject }}"
-                                                                title="Refer to user or community">
-                                                            <i class="fa fa-share mr-1"></i>Refer
-                                                        </button>
-                                                    @else
-                                                        <a href="{{ $request->discussionUrl() }}"
-                                                           class="btn btn-secondary btn-sm"
-                                                           title="Open discussion (forum or hub thread)">
-                                                            <i class="fa fa-comments mr-1"></i>Discuss
-                                                        </a>
-                                                        @if($request->trackUrl() !== '')
-                                                        <button type="button"
-                                                                class="btn btn-outline-secondary btn-sm copy-track-btn"
-                                                                data-url="{{ $request->trackUrl() }}"
-                                                                title="Copy requester tracking link">
-                                                            <i class="fa fa-link"></i>
-                                                        </button>
-                                                        @endif
-                                                    @endif
-                                                @endcan
-                                                <a href="{{ route('admin.content-requests.edit', $request->id) }}" 
-                                                   class="btn btn-warning btn-sm" 
-                                                   title="Edit">
-                                                    <i class="fa fa-edit"></i>
-                                                </a>
-                                                <form action="{{ route('admin.content-requests.destroy', $request->id) }}" 
-                                                      method="POST" 
-                                                      style="display:inline;"
-                                                      onsubmit="return confirm('Are you sure you want to delete this content request?');">
-                            @csrf
-                            @method('DELETE')
-                                                    <button type="submit" class="btn btn-danger btn-sm" title="Delete">
-                                                        <i class="fa fa-trash"></i>
-                                                    </button>
-                        </form>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="text-center">
-                                            <div class="py-4">
-                                                <i class="fa fa-inbox fa-3x text-muted mb-3"></i>
-                                                <p class="text-muted">No content requests found.</p>
-                                            </div>
-                    </td>
-                </tr>
-                                @endforelse
-        </tbody>
+        <tbody></tbody>
     </table>
-                    </div>
-
-                    <div class="d-flex justify-content-center mt-3">
-    {{ $contentRequests->links() }}
                     </div>
                 </div>
             </div>
@@ -419,10 +286,52 @@
 @endsection
 
 @section('scripts')
+@include('admin.publications.partials.datatable_assets')
 <script>
 $(document).ready(function() {
+    let filterReloadTimer = null;
+    let contentRequestsTable = $('#contentRequestsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        pageLength: 10,
+        order: [[6, 'desc']],
+        ajax: {
+            url: '{{ route('admin.content-requests.index') }}',
+            data: function (d) {
+                d.datatable = 1;
+                d.status = $('#status').val() || '';
+                d.country_id = $('#country_id').val() || '';
+                d.search = $('#search').val() || '';
+                d.date_from = $('#date_from').val() || '';
+                d.date_to = $('#date_to').val() || '';
+                return d;
+            }
+        },
+        columns: [
+            { data: 'index', orderable: false },
+            { data: 'subject' },
+            { data: 'description', orderable: false },
+            { data: 'country', orderable: false },
+            { data: 'email' },
+            { data: 'status', orderable: false },
+            { data: 'date' },
+            { data: 'actions', orderable: false }
+        ],
+        dom: '<"row mb-2"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"i>>rtip'
+    });
+
+    function scheduleReload() {
+        clearTimeout(filterReloadTimer);
+        filterReloadTimer = setTimeout(function () { contentRequestsTable.ajax.reload(); }, 350);
+    }
+
+    $('#contentRequestFiltersForm').on('change', 'select', scheduleReload);
+    $('#search').on('input', scheduleReload);
+    $('#date_from, #date_to').on('change', scheduleReload);
+
     // Handle Process button click
-    $('.process-request-btn').on('click', function() {
+    $(document).on('click', '.process-request-btn', function() {
         var requestId = $(this).data('id');
         var subject = $(this).data('subject');
         var description = $(this).data('description');
@@ -445,7 +354,7 @@ $(document).ready(function() {
     });
 
     // Handle View Processed button click
-    $('.view-processed-btn').on('click', function() {
+    $(document).on('click', '.view-processed-btn', function() {
         var subject = $(this).data('subject');
         var links = $(this).data('links') || 'No links provided';
         var comments = $(this).data('comments') || 'No comments provided';
@@ -519,7 +428,7 @@ $(document).ready(function() {
         }
     });
 
-    $('.refer-request-btn').on('click', function() {
+    $(document).on('click', '.refer-request-btn', function() {
         var requestId = $(this).data('id');
         var subject = $(this).data('subject');
         $('#referRequestForm').attr('action', {!! json_encode(url('admin/content-requests')) !!} + '/' + requestId + '/refer');
@@ -530,7 +439,7 @@ $(document).ready(function() {
         $('#referRequestModal').modal('show');
     });
 
-    $('.copy-track-btn').on('click', function() {
+    $(document).on('click', '.copy-track-btn', function() {
         var url = $(this).data('url');
         if (!url) return;
         if (navigator.clipboard && navigator.clipboard.writeText) {

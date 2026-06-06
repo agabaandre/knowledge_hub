@@ -20,54 +20,9 @@ class ContentRequestAdminController extends Controller
 {
     public function index(Request $request)
     {
-        // Start building the query
-        $query = ContentRequest::with([
-            'country',
-            'processedBy',
-            'referredToUser',
-            'referredToCommunity',
-            'referralTargets.user',
-            'referralTargets.community',
-        ]);
-
-        // Filter by status (processed/pending/referred)
-        if ($request->filled('status')) {
-            if ($request->status === 'processed') {
-                $query->whereNotNull('processed_at');
-            } elseif ($request->status === 'pending') {
-                $query->whereNull('processed_at');
-            } elseif ($request->status === 'referred') {
-                $query->whereNotNull('referral_type')->whereNotNull('referred_at');
-            }
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->contentRequestsDatatable($request));
         }
-
-        // Filter by country
-        if ($request->filled('country_id')) {
-            $query->where('country_id', $request->country_id);
-        }
-
-        // Search filter (subject, email, or description)
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function($q) use ($search) {
-                $q->where('subject', 'like', '%' . $search . '%')
-                  ->orWhere('email', 'like', '%' . $search . '%')
-                  ->orWhere('description', 'like', '%' . $search . '%');
-            });
-        }
-
-        // Date range filter
-        if ($request->filled('date_from')) {
-            $query->whereDate('created_at', '>=', $request->date_from);
-        }
-        if ($request->filled('date_to')) {
-            $query->whereDate('created_at', '<=', $request->date_to);
-        }
-
-        // Order and paginate
-        $contentRequests = $query->orderBy('created_at', 'desc')
-            ->paginate(10)
-            ->appends($request->except('page'));
 
         $referUsers = User::query()
             ->whereNotNull('email')
@@ -80,7 +35,155 @@ class ContentRequestAdminController extends Controller
             ->orderBy('community_name')
             ->get(['id', 'community_name']);
 
-        return view('admin.content_requests.index', compact('contentRequests', 'referUsers', 'referCommunities'));
+        return view('admin.content_requests.index', compact('referUsers', 'referCommunities'));
+    }
+
+    private function buildContentRequestsQuery(Request $request)
+    {
+        $query = ContentRequest::with([
+            'country',
+            'processedBy',
+            'referredToUser',
+            'referredToCommunity',
+            'referralTargets.user',
+            'referralTargets.community',
+        ]);
+
+        if ($request->filled('status')) {
+            if ($request->status === 'processed') {
+                $query->whereNotNull('processed_at');
+            } elseif ($request->status === 'pending') {
+                $query->whereNull('processed_at');
+            } elseif ($request->status === 'referred') {
+                $query->whereNotNull('referral_type')->whereNotNull('referred_at');
+            }
+        }
+
+        if ($request->filled('country_id')) {
+            $query->where('country_id', $request->country_id);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('subject', 'like', '%'.$search.'%')
+                    ->orWhere('email', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%');
+            });
+        }
+
+        if ($request->filled('date_from')) {
+            $query->whereDate('created_at', '>=', $request->date_from);
+        }
+        if ($request->filled('date_to')) {
+            $query->whereDate('created_at', '<=', $request->date_to);
+        }
+
+        return $query;
+    }
+
+    private function contentRequestsDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 10)), 100);
+
+        $base = $this->buildContentRequestsQuery($request);
+        $recordsTotal = ContentRequest::query()->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 6);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'subject', 5 => 'email', 6 => 'created_at'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'created_at';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+        $canManage = auth()->user() && auth()->user()->can('manage_content_requests');
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $row) {
+            $statusHtml = $this->contentRequestStatusHtml($row);
+            $dateHtml = '<small>'.$row->created_at->format('M d, Y').'</small>';
+            if ($row->processed_at) {
+                $dateHtml .= '<br><small class="text-muted">Processed: '.$row->processed_at->format('M d, Y').'</small>';
+            }
+
+            $data[] = [
+                'index' => $index++,
+                'subject' => '<strong>'.e($row->subject).'</strong>',
+                'description' => '<div style="max-height:60px;overflow:hidden;">'.e(Str::limit(strip_tags($row->description), 100)).'</div>',
+                'country' => e($row->country->name ?? 'N/A'),
+                'email' => e($row->email ?? 'N/A'),
+                'status' => $statusHtml,
+                'date' => $dateHtml,
+                'actions' => $this->contentRequestActionsHtml($row, $canManage),
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    private function contentRequestStatusHtml(ContentRequest $request): string
+    {
+        $html = '';
+        if ($request->isProcessed()) {
+            $html .= '<span class="badge badge-success"><i class="fa fa-check-circle mr-1"></i>Processed</span>';
+            $html .= '<br><small class="text-muted">Method: '.e($request->processingMethodLabel()).'</small>';
+            if ($request->processedBy) {
+                $html .= '<br><small class="text-muted">By: '.e($request->processedBy->name).'</small>';
+            }
+        } else {
+            $html .= '<span class="badge badge-warning"><i class="fa fa-clock mr-1"></i>Pending</span>';
+        }
+
+        if ($request->isReferred()) {
+            $html .= '<br><span class="badge badge-info mt-1"><i class="fa fa-share mr-1"></i>Referred</span>';
+            $rt = $request->referralTargets;
+            $nUsers = $rt->whereNotNull('user_id')->count();
+            $nComms = $rt->whereNotNull('community_of_practice_id')->count();
+            if ($nUsers + $nComms > 0) {
+                $html .= '<br><small class="text-muted">'.$nUsers.' user(s), '.$nComms.' comm.</small>';
+            }
+        }
+
+        return $html;
+    }
+
+    private function contentRequestActionsHtml(ContentRequest $request, bool $canManage): string
+    {
+        $html = '<div class="btn-group btn-group-sm flex-wrap" role="group" style="gap:2px;">';
+
+        if (!$request->isProcessed()) {
+            $html .= '<button type="button" class="btn btn-success btn-sm process-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-description="'.e(strip_tags($request->description)).'" title="Process Request"><i class="fa fa-check mr-1"></i>Process</button>';
+        } else {
+            $html .= '<button type="button" class="btn btn-info btn-sm view-processed-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" data-links="'.e($request->content_links ?? '').'" data-comments="'.e($request->admin_comments ?? '').'" data-processed-by="'.e($request->processedBy->name ?? 'Unknown').'" data-processed-at="'.e($request->processed_at ? $request->processed_at->format('M d, Y H:i') : '').'" data-process-method="'.e($request->processingMethodLabel()).'" title="View Processed Details"><i class="fa fa-eye mr-1"></i>View</button>';
+        }
+
+        if ($canManage) {
+            if (!$request->isReferred()) {
+                $html .= '<button type="button" class="btn btn-primary btn-sm refer-request-btn" data-id="'.$request->id.'" data-subject="'.e($request->subject).'" title="Refer to user or community"><i class="fa fa-share mr-1"></i>Refer</button>';
+            } else {
+                $html .= '<a href="'.e($request->discussionUrl()).'" class="btn btn-secondary btn-sm" title="Open discussion"><i class="fa fa-comments mr-1"></i>Discuss</a>';
+                if ($request->trackUrl() !== '') {
+                    $html .= '<button type="button" class="btn btn-outline-secondary btn-sm copy-track-btn" data-url="'.e($request->trackUrl()).'" title="Copy requester tracking link"><i class="fa fa-link"></i></button>';
+                }
+            }
+        }
+
+        $html .= '<a href="'.route('admin.content-requests.edit', $request->id).'" class="btn btn-warning btn-sm" title="Edit"><i class="fa fa-edit"></i></a>';
+        $html .= '<form action="'.route('admin.content-requests.destroy', $request->id).'" method="POST" style="display:inline;" onsubmit="return confirm(\'Are you sure you want to delete this content request?\');">'
+            .csrf_field().method_field('DELETE')
+            .'<button type="submit" class="btn btn-danger btn-sm" title="Delete"><i class="fa fa-trash"></i></button></form>';
+        $html .= '</div>';
+
+        return $html;
     }
 
     public function create()

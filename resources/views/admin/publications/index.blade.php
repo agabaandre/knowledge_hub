@@ -201,7 +201,7 @@
 
 @section('scripts')
 @include('common.select2')
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+@include('admin.publications.partials.datatable_assets')
 <script>
 let pendingBulkAction = null;
 let publicationTable = null;
