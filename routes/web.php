@@ -340,6 +340,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
     Route::get('/participant-badges', [ParticipantBadgeManagementController::class, 'index'])
         ->name('admin.participant-badges.index');
+    Route::post('/participant-badges/run-award-job', [ParticipantBadgeManagementController::class, 'runAwardJob'])
+        ->name('admin.participant-badges.run-award-job');
     Route::post('/participant-badges/award', [ParticipantBadgeManagementController::class, 'award'])
         ->name('admin.participant-badges.award');
     Route::delete('/participant-badges/{userBadge}', [ParticipantBadgeManagementController::class, 'revoke'])

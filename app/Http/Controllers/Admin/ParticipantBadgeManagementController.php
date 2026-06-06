@@ -3,12 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\AwardCommunityBadgesJob;
 use App\Models\Author;
 use App\Models\BadgeType;
 use App\Models\CommunityOfPractice;
 use App\Models\User;
 use App\Models\UserBadge;
+use App\Services\CommunityBadgeAwardService;
+use App\Support\QueueHealth;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class ParticipantBadgeManagementController extends Controller
 {
@@ -52,13 +57,70 @@ class ParticipantBadgeManagementController extends Controller
             ->limit(3000)
             ->get(['id', 'name', 'email']);
 
+        $defaultPeriod = app(CommunityBadgeAwardService::class)->defaultPeriod();
+        $queueHealth = QueueHealth::snapshot();
+        $lastAwardRun = Cache::get('badges_last_award_run');
+        $awardJobRunning = Cache::get('badges_award_job_running');
+
         return view('admin.participant-badges.index', compact(
             'badgeTypes',
             'communities',
             'badgeAwards',
             'authors',
-            'usersForAward'
+            'usersForAward',
+            'defaultPeriod',
+            'queueHealth',
+            'lastAwardRun',
+            'awardJobRunning'
         ));
+    }
+
+    public function runAwardJob(Request $request, CommunityBadgeAwardService $service)
+    {
+        $validated = $request->validate([
+            'year' => 'required|integer|min:2000|max:2100',
+            'month' => 'required|integer|min:1|max:12',
+            'run_mode' => 'required|in:queue,sync',
+        ]);
+
+        if (Cache::get('badges_award_job_running')) {
+            return redirect()
+                ->route('admin.participant-badges.index')
+                ->with('error', 'A badge awarding job is already running. Please wait for it to finish.');
+        }
+
+        $year = (int) $validated['year'];
+        $month = (int) $validated['month'];
+        $triggeredBy = 'admin:'.(auth()->id() ?? 'unknown');
+
+        if ($validated['run_mode'] === 'sync') {
+            $result = $service->awardForPeriod($year, $month, $triggeredBy);
+            Cache::put('badges_last_award_run', $result, now()->addDays(120));
+
+            if ($result['status'] === 'failed') {
+                return redirect()
+                    ->route('admin.participant-badges.index')
+                    ->with('error', 'Badge awarding failed: '.($result['error'] ?? 'unknown error'));
+            }
+
+            return redirect()
+                ->route('admin.participant-badges.index')
+                ->with('success', sprintf(
+                    'Badge run completed for %s: %d badge(s) awarded, %d notification email(s) queued.',
+                    $result['period_label'] ?? Carbon::create($year, $month, 1)->format('F Y'),
+                    (int) $result['badges_awarded'],
+                    (int) $result['emails_queued']
+                ));
+        }
+
+        AwardCommunityBadgesJob::dispatch($year, $month, $triggeredBy);
+
+        return redirect()
+            ->route('admin.participant-badges.index')
+            ->with('success', sprintf(
+                'Badge awarding job queued for %s. Refresh this page after the queue worker processes it.',
+                Carbon::create($year, $month, 1)->format('F Y')
+            ));
     }
 
     public function award(Request $request)

@@ -36,8 +36,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('rss:fetch')->weeklyOn(2, '03:00');
         // Refresh Africa health “Did you know?” facts (OpenAI + fallback) weekly
         $schedule->command('facts:refresh-ai')->weeklyOn(1, '05:30');
-        // Award community badges at the beginning of each month for the previous month
-        $schedule->command('badges:award-community')->monthlyOn(1, '01:00');
+        // Award community badges at the beginning of each month for the previous month (queued)
+        $schedule->job(new \App\Jobs\AwardCommunityBadgesJob(null, null, 'scheduler'))->monthlyOn(1, '01:00');
         // Monthly profile-completion reminder (optional; disabled by default in admin settings)
         if (settings()->auto_profile_completion_reminder ?? false) {
             $day = (int) (settings()->profile_reminder_day_of_month ?? 1);

@@ -23,6 +23,116 @@
         <div class="alert alert-danger">{{ session('error') }}</div>
     @endif
 
+    @php
+        $defaultPeriod = $defaultPeriod ?? ['year' => now()->subMonth()->year, 'month' => now()->subMonth()->month];
+        $queueHealth = $queueHealth ?? [];
+        $lastAwardRun = $lastAwardRun ?? null;
+        $awardJobRunning = $awardJobRunning ?? null;
+    @endphp
+
+    {{-- Automated award job + queue health --}}
+    <div class="card mb-4">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
+            <div>
+                <h3 class="card-title mb-0">Automated badge awarding</h3>
+                <p class="text-muted small mb-0 mt-1">Runs monthly for the previous calendar month. Scheduled: 1st of each month at 01:00 (server time).</p>
+            </div>
+            @if($awardJobRunning)
+                <span class="badge badge-warning text-dark mt-2 mt-md-0">Job running…</span>
+            @endif
+        </div>
+        <div class="card-body">
+            <div class="row mb-4">
+                <div class="col-lg-6 mb-3 mb-lg-0">
+                    <h5 class="h6 font-weight-bold">Queue status</h5>
+                    <ul class="list-unstyled small mb-0">
+                        <li><strong>Driver:</strong> <code>{{ $queueHealth['driver'] ?? 'unknown' }}</code>
+                            @if(!empty($queueHealth['driver_ok']))
+                                <span class="badge badge-success ml-1">OK</span>
+                            @else
+                                <span class="badge badge-danger ml-1">Unreachable</span>
+                            @endif
+                        </li>
+                        <li><strong>Pending jobs (default queue):</strong>
+                            @if(isset($queueHealth['pending_jobs']))
+                                {{ number_format((int) $queueHealth['pending_jobs']) }}
+                            @else
+                                <span class="text-muted">n/a</span>
+                            @endif
+                        </li>
+                        <li><strong>Failed jobs:</strong> {{ number_format((int) ($queueHealth['failed_jobs'] ?? 0)) }}</li>
+                    </ul>
+                    <p class="text-muted small mt-2 mb-0">{{ $queueHealth['worker_hint'] ?? '' }}</p>
+                    @if(!empty($queueHealth['error']))
+                        <p class="text-danger small mt-2 mb-0">{{ $queueHealth['error'] }}</p>
+                    @endif
+                </div>
+                <div class="col-lg-6">
+                    <h5 class="h6 font-weight-bold">Last award run</h5>
+                    @if($lastAwardRun)
+                        <ul class="list-unstyled small mb-0">
+                            <li><strong>Period:</strong> {{ $lastAwardRun['period_label'] ?? (($lastAwardRun['year'] ?? '?').'-'.str_pad((string) ($lastAwardRun['month'] ?? '?'), 2, '0', STR_PAD_LEFT)) }}</li>
+                            <li><strong>Status:</strong>
+                                @if(($lastAwardRun['status'] ?? '') === 'completed')
+                                    <span class="text-success">Completed</span>
+                                @elseif(($lastAwardRun['status'] ?? '') === 'failed')
+                                    <span class="text-danger">Failed</span>
+                                @else
+                                    {{ $lastAwardRun['status'] ?? '—' }}
+                                @endif
+                            </li>
+                            <li><strong>Badges awarded:</strong> {{ number_format((int) ($lastAwardRun['badges_awarded'] ?? 0)) }}</li>
+                            <li><strong>Emails queued:</strong> {{ number_format((int) ($lastAwardRun['emails_queued'] ?? 0)) }}</li>
+                            <li><strong>Finished:</strong> {{ isset($lastAwardRun['finished_at']) ? \Carbon\Carbon::parse($lastAwardRun['finished_at'])->format('Y-m-d H:i') : '—' }}</li>
+                            <li><strong>Triggered by:</strong> {{ $lastAwardRun['triggered_by'] ?? '—' }}</li>
+                        </ul>
+                        @if(!empty($lastAwardRun['error']))
+                            <p class="text-danger small mt-2 mb-0">{{ $lastAwardRun['error'] }}</p>
+                        @endif
+                    @else
+                        <p class="text-muted small mb-0">No automated run recorded yet.</p>
+                    @endif
+                </div>
+            </div>
+
+            <hr>
+
+            <h5 class="h6 font-weight-bold mb-3">Run badge awarding now</h5>
+            <form method="POST" action="{{ route('admin.participant-badges.run-award-job') }}" class="row align-items-end" onsubmit="return confirm('Run community badge awarding for the selected month?');">
+                @csrf
+                <div class="col-md-2 mb-3">
+                    <label class="form-label">Year</label>
+                    <input type="number" name="year" class="form-control" value="{{ old('year', $defaultPeriod['year']) }}" min="2000" max="2100" required>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Month</label>
+                    <select name="month" class="form-control" required>
+                        @for($m = 1; $m <= 12; $m++)
+                            <option value="{{ $m }}" {{ (int) old('month', $defaultPeriod['month']) === $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
+                        @endfor
+                    </select>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Run mode</label>
+                    <select name="run_mode" class="form-control" required>
+                        <option value="queue" {{ old('run_mode', 'queue') === 'queue' ? 'selected' : '' }}>Queue (background)</option>
+                        <option value="sync" {{ old('run_mode') === 'sync' ? 'selected' : '' }}>Run now (synchronous)</option>
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <button type="submit" class="btn btn-primary" {{ $awardJobRunning ? 'disabled' : '' }}>
+                        <i class="fa fa-play mr-1"></i> Run badge award job
+                    </button>
+                </div>
+            </form>
+            <p class="text-muted small mb-0">
+                CLI: <code>php artisan badges:award-community</code> (sync) or
+                <code>php artisan badges:award-community --queue</code> (background).
+                Defaults to the <strong>previous month</strong> when year/month are omitted.
+            </p>
+        </div>
+    </div>
+
     {{-- Badge key (legend) --}}
     <div class="card mb-4">
         <div class="card-header">
