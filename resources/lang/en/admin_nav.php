@@ -58,6 +58,7 @@ return [
     'privacy_policy' => 'Privacy Policy',
     'settings' => 'Settings',
     'storage_management' => 'Storage Management',
+    'federated_hubs' => 'Federated Knowledge Hubs',
     'system_configurations' => 'System Configurations',
     'language_management' => 'Language management',
     'site_languages' => 'Site languages',

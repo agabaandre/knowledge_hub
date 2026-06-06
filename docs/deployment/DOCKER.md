@@ -43,16 +43,17 @@ services:
 On the host before install:
 
 ```bash
-mkdir -p khubdata/files khubdata/backups/sql
+mkdir -p khubdata
 ```
 
-The installer defaults to `/var/khubdata/files` and `/var/khubdata/backups/sql`. See [STORAGE.md](STORAGE.md).
+The installer defaults to `/var/khubdata/{site-id}/files` and `.../backups/sql` (site ID from `APP_URL`). The container entrypoint runs `php artisan hub:link-storage` so `public/storage` points at the files root. See [STORAGE.md](STORAGE.md).
 
 Add to `.env` (set automatically by installer):
 
 ```env
-HUB_FILES_ROOT=/var/khubdata/files
-HUB_SQL_BACKUP_ROOT=/var/khubdata/backups/sql
+HUB_SITE_ID=localhost-8080
+HUB_FILES_ROOT=/var/khubdata/localhost-8080/files
+HUB_SQL_BACKUP_ROOT=/var/khubdata/localhost-8080/backups/sql
 ```
 
 ---

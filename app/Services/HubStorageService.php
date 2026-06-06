@@ -342,6 +342,33 @@ class HubStorageService
     }
 
     /**
+     * Whether public/storage resolves to the active hub files root (symlink, junction, or legacy path).
+     */
+    public function publicStorageLinkOk(?string $link = null, ?string $filesRoot = null): bool
+    {
+        if ($this->settings()->files_driver !== 'internal') {
+            return true;
+        }
+
+        $link = $link ?? public_path('storage');
+        $filesRoot = $filesRoot ?? $this->filesRoot();
+        $targetReal = $this->realpathOrNull($filesRoot);
+        $linkReal = $this->realpathOrNull($link);
+
+        if ($targetReal === null) {
+            return false;
+        }
+
+        if ($linkReal !== null && $linkReal === $targetReal) {
+            return true;
+        }
+
+        return $this->usesLegacyInternalRoot()
+            && (is_link($link) || is_dir($link))
+            && $linkReal === $this->realpathOrNull($this->legacyInternalRoot());
+    }
+
+    /**
      * Link public/storage to the active internal files root so /storage/... URLs keep working.
      */
     public function ensurePublicStorageSymlink(): void
@@ -353,6 +380,10 @@ class HubStorageService
         $target = $this->filesRoot();
         $link = public_path('storage');
 
+        if ($this->publicStorageLinkOk($link, $target)) {
+            return;
+        }
+
         if (realpath($target) === realpath($this->legacyInternalRoot())) {
             if (! File::exists($link)) {
                 Artisan::call('storage:link');
@@ -361,21 +392,85 @@ class HubStorageService
             return;
         }
 
-        if (File::exists($link) && ! is_link($link)) {
+        if (File::exists($link) && ! is_link($link) && ! is_dir($link)) {
             return;
         }
 
-        $linkedTarget = is_link($link) ? realpath($link) : null;
-        if ($linkedTarget && realpath($target) === $linkedTarget) {
-            return;
-        }
-
-        if (is_link($link) || File::exists($link)) {
-            @unlink($link);
-        }
-
+        $this->removePublicStorageLink($link);
         File::ensureDirectoryExists($target, 0775, true);
+
+        if (PHP_OS_FAMILY === 'Windows') {
+            $this->createWindowsPublicStorageLink($target, $link);
+
+            return;
+        }
+
         File::link($target, $link);
+    }
+
+    protected function realpathOrNull(string $path): ?string
+    {
+        $resolved = realpath($path);
+
+        return $resolved !== false ? $resolved : null;
+    }
+
+    protected function removePublicStorageLink(string $link): void
+    {
+        if (! File::exists($link) && ! is_link($link)) {
+            return;
+        }
+
+        if (PHP_OS_FAMILY === 'Windows' && is_dir($link)) {
+            $winLink = str_replace('/', '\\', $link);
+            exec('cmd /c rmdir '.escapeshellarg($winLink), $output, $code);
+
+            if ($code === 0 || ! File::exists($link)) {
+                return;
+            }
+        }
+
+        if (is_link($link)) {
+            @unlink($link);
+
+            return;
+        }
+
+        if (is_dir($link)) {
+            @rmdir($link);
+
+            return;
+        }
+
+        @unlink($link);
+    }
+
+    protected function createWindowsPublicStorageLink(string $target, string $link): void
+    {
+        $winTarget = str_replace('/', '\\', $target);
+        $winLink = str_replace('/', '\\', $link);
+
+        try {
+            File::link($target, $link);
+            if ($this->publicStorageLinkOk($link, $target)) {
+                return;
+            }
+        } catch (\Throwable) {
+            // Fall through to junction.
+        }
+
+        $this->removePublicStorageLink($link);
+        exec(
+            'cmd /c mklink /J '.escapeshellarg($winLink).' '.escapeshellarg($winTarget),
+            $output,
+            $code
+        );
+
+        if ($code !== 0 && ! $this->publicStorageLinkOk($link, $target)) {
+            throw new \RuntimeException(
+                'Could not link public/storage on Windows. Enable Developer Mode or run Command Prompt as Administrator, then run: php artisan hub:link-storage'
+            );
+        }
     }
 
     public function url(string $relative): string

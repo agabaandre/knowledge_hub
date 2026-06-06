@@ -169,7 +169,26 @@
 
  @php
      $i = 0;
+     $federatedPublications = $federatedPublications ?? collect();
  @endphp
+
+ @if($federatedPublications->count() > 0)
+     @if(request()->filled('term'))
+         <div class="mb-3">
+             <h5 style="color:var(--theme-color-primary,#119A48);font-size:1rem;">
+                 <i class="fa fa-globe-africa me-2"></i>From partner country hubs
+             </h5>
+         </div>
+     @endif
+     @foreach($federatedPublications as $row)
+         @include('partials.federation.publication_card', ['row' => $row])
+     @endforeach
+     <p class="mb-3">
+         <a href="{{ route('federation.browse', ['term' => request('term')]) }}" class="btn btn-sm btn-outline-primary">
+             Browse all partner hub resources
+         </a>
+     </p>
+ @endif
 
  @foreach ($publications as $row)
      @php
@@ -313,7 +332,7 @@
 
  <div class="py-4"> {{ $publications->links() }}</div>
 
- @if (count($publications) == 0)
+ @if (count($publications) == 0 && ($federatedPublications ?? collect())->count() == 0)
      <div class="row justify-content-center py-5">
          <i class="fa fa-info-circle fa-2x text-muted"></i>
          <h4 class="text-muted">No matching records found</h4>

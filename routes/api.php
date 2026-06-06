@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\HomeApiController;
 use App\Http\Controllers\Api\HealthTopicsApiController;
 use App\Http\Controllers\Api\MeApiController;
 use App\Http\Controllers\Api\CountriesApiController;
+use App\Http\Controllers\Api\FederatedHubApiController;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -29,6 +30,12 @@ use App\Http\Controllers\Api\CountriesApiController;
 */
 
 // Publications Routes
+
+Route::prefix('federation')->group(function () {
+    Route::get('/manifest', [FederatedHubApiController::class, 'manifest']);
+    Route::get('/public/publications', [FederatedHubApiController::class, 'publicPublications']);
+    Route::get('/public/forums', [FederatedHubApiController::class, 'publicForums']);
+});
 
 Route::post('login', [AuthApiController::class, 'login']);
 Route::post('register', [AuthApiController::class, 'register']);

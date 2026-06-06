@@ -156,25 +156,47 @@
                 </form>
                 <hr>
                 <h6 class="fw-bold">Restore from backup</h6>
-                <form method="post" action="{{ route('admin.storage.restore') }}">
+                <form method="post" action="{{ route('admin.storage.restore') }}" id="restoreBackupForm">
                     @csrf
                     <div class="mb-2">
-                        <label class="form-label">Backup folder path</label>
-                        <select name="backup_path" class="form-control" required>
+                        <label class="form-label">Backup folder</label>
+                        <select name="backup_path" id="restoreBackupPath" class="form-control" required>
                             <option value="">Select backup…</option>
                             @foreach($backups as $backup)
                                 <option value="{{ $backup['path'] }}">{{ $backup['type'] }} / {{ $backup['name'] }}</option>
                             @endforeach
                         </select>
                     </div>
+                    <div class="mb-2">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label mb-0">Tables to restore</label>
+                            <span class="small">
+                                <a href="#" id="restoreSelectAll">All</a> ·
+                                <a href="#" id="restoreSelectNone">None</a> ·
+                                <a href="#" id="restoreSelectInBackup">In backup only</a>
+                            </span>
+                        </div>
+                        <div class="border rounded p-2" style="max-height:220px;overflow:auto;" id="restoreTableList">
+                            @foreach($backupTableGroups as $group => $tables)
+                                <div class="small fw-bold text-muted mt-1 mb-1">{{ $group }}</div>
+                                @foreach($tables as $table => $label)
+                                    <div class="form-check restore-table-row" data-table="{{ $table }}">
+                                        <input class="form-check-input restore-table-cb" type="checkbox" name="restore_tables[]" value="{{ $table }}" id="restore_{{ $table }}" checked>
+                                        <label class="form-check-label small" for="restore_{{ $table }}">{{ $label }} <code class="text-muted">{{ $table }}</code></label>
+                                    </div>
+                                @endforeach
+                            @endforeach
+                        </div>
+                        <p class="small text-muted mb-0 mt-1">KPI / OWID tables are <strong>not</strong> backed up (re-sync from OWID): <code>{{ implode('</code>, <code>', $kpiExcludedTables) }}</code></p>
+                    </div>
                     <div class="form-check mb-2">
                         <input type="hidden" name="only_empty_tables" value="0">
                         <input class="form-check-input" type="checkbox" name="only_empty_tables" value="1" id="onlyEmptyTables" checked>
                         <label class="form-check-label" for="onlyEmptyTables">Only restore into empty tables (recommended)</label>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Restore database tables from this backup?');">Restore</button>
+                    <button type="submit" class="btn btn-sm btn-danger" id="restoreSubmitBtn">Restore selected tables</button>
                 </form>
-                <p class="small text-muted mt-2 mb-0">Tables: users, authors, thematic areas, geography, publications, forums, communities, approvals, and related pivot tables.</p>
+                <p class="small text-muted mt-2 mb-0">Backups include site settings, roles, badges, taxonomy, publications, forums, communities, and more. Select only the tables you need when restoring.</p>
             </div>
         </div>
 
@@ -278,6 +300,59 @@
     }
     document.getElementById('browseArea').addEventListener('change', function () { loadBrowse(''); });
     loadBrowse('');
+
+    var backupTablesInDir = [];
+    var restorePath = document.getElementById('restoreBackupPath');
+    function setRestoreCheckboxes(checked) {
+        document.querySelectorAll('.restore-table-cb').forEach(function (cb) { cb.checked = checked; });
+    }
+    function highlightBackupAvailability() {
+        document.querySelectorAll('.restore-table-row').forEach(function (row) {
+            var table = row.getAttribute('data-table');
+            var inBackup = backupTablesInDir.indexOf(table) !== -1;
+            row.style.opacity = restorePath.value && !inBackup ? '0.45' : '1';
+        });
+    }
+    function loadBackupTables() {
+        var path = restorePath.value;
+        backupTablesInDir = [];
+        if (!path) {
+            highlightBackupAvailability();
+            return;
+        }
+        fetch('{{ route('admin.storage.backup-tables') }}?path=' + encodeURIComponent(path))
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                backupTablesInDir = data.tables || [];
+                highlightBackupAvailability();
+            });
+    }
+    if (restorePath) {
+        restorePath.addEventListener('change', loadBackupTables);
+    }
+    document.getElementById('restoreSelectAll').addEventListener('click', function (e) {
+        e.preventDefault();
+        setRestoreCheckboxes(true);
+    });
+    document.getElementById('restoreSelectNone').addEventListener('click', function (e) {
+        e.preventDefault();
+        setRestoreCheckboxes(false);
+    });
+    document.getElementById('restoreSelectInBackup').addEventListener('click', function (e) {
+        e.preventDefault();
+        document.querySelectorAll('.restore-table-cb').forEach(function (cb) {
+            cb.checked = backupTablesInDir.indexOf(cb.value) !== -1;
+        });
+    });
+    document.getElementById('restoreBackupForm').addEventListener('submit', function (e) {
+        var selected = document.querySelectorAll('.restore-table-cb:checked').length;
+        if (selected === 0) {
+            e.preventDefault();
+            alert('Select at least one table to restore.');
+            return false;
+        }
+        return confirm('Restore ' + selected + ' selected table(s) from this backup?');
+    });
 
     @if($settings->migration_status === 'running')
     function pollMigration() {

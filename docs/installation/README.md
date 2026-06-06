@@ -17,12 +17,12 @@ All paths run the same **six-step** configuration (prerequisites through adminis
 1. **PHP 8.0+** with extensions listed in the installer prerequisites step.
 2. **MySQL or MariaDB** — create an empty database (default name `knowledge_hub`) unless restoring an existing dump.
 3. **Composer** — run `composer install` in the project root.
-4. **Host data directory** (Linux example):
+4. **Host data directory** — from the project root:
    ```bash
-   sudo mkdir -p /var/khubdata/files /var/khubdata/backups/sql
-   sudo chown -R www-data:www-data /var/khubdata
+   ./fix-storage-permissions.sh          # Linux/macOS: dirs, permissions, public/storage link
+   php artisan hub:link-storage          # all platforms (or link-hub-storage.bat on Windows)
    ```
-   See [../deployment/STORAGE.md](../deployment/STORAGE.md) and [../deployment/PERMISSIONS.md](../deployment/PERMISSIONS.md).
+   Paths default to `/var/khubdata/{site-id}/files` (Linux) or `C:\khubdata\{site-id}\files` (Windows). See [../deployment/STORAGE.md](../deployment/STORAGE.md) and [../deployment/PERMISSIONS.md](../deployment/PERMISSIONS.md).
 
 ---
 

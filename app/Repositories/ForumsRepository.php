@@ -336,6 +336,10 @@ class ForumsRepository extends SharedRepo{
         CommunityTargeting::mergeTagAllIntoRequest($request);
         $forum->also_public_on_hub = CommunityTargeting::wantsAlsoPublicOnHubWithCommunities($request) ? 1 : 0;
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('forums', 'public_availability')) {
+            $forum->public_availability = resolve_public_availability_from_request($request);
+        }
+
         if($request->hasFile('image')):
 
             $file           = $request->file('image');  
@@ -884,6 +888,10 @@ class ForumsRepository extends SharedRepo{
         CommunityTargeting::mergeTagAllIntoRequest($request);
         if ($request->has('community_targeting_options')) {
             $forum->also_public_on_hub = CommunityTargeting::wantsAlsoPublicOnHubWithCommunities($request) ? 1 : 0;
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('forums', 'public_availability') && $request->has('public_availability')) {
+            $forum->public_availability = resolve_public_availability_from_request($request, $forum->public_availability ?? null);
         }
 
         $forum->forum_title = format_title_with_ai_fallback($request->title ?? '');

@@ -24,7 +24,8 @@ open http://localhost:8080/install
 git clone https://github.com/Africa-cdc-Khub/knowledge_hub.git
 cd knowledge_hub
 composer install
-sudo mkdir -p /var/khubdata/files /var/khubdata/backups/sql
+sudo mkdir -p /var/khubdata
+./fix-storage-permissions.sh
 open http://localhost/knowledge_hub/install
 ```
 
@@ -87,7 +88,7 @@ Details: [docs/installation/WEB_INSTALLER.md](docs/installation/WEB_INSTALLER.md
 | Node.js | 16.x+ (front-end assets) |
 | Redis | Optional; recommended for cache, sessions, queues |
 | LibreOffice | Recommended for forum attachment PDF conversion |
-| Host data path | `/var/khubdata` (Linux) — outside app/container tree |
+| Host data path | `/var/khubdata` (Linux), `C:\khubdata` (Windows) — outside app tree |
 
 Manual LAMP setup steps: [docs/installation/README.md](docs/installation/README.md#before-you-start)
 
@@ -105,9 +106,10 @@ DB_DATABASE=knowledge_hub
 DB_USERNAME=root
 DB_PASSWORD=
 
-# Persistent uploads & SQL backups (outside container)
-HUB_FILES_ROOT=/var/khubdata/files
-HUB_SQL_BACKUP_ROOT=/var/khubdata/backups/sql
+# Persistent uploads & SQL backups (outside container; {site-id} from APP_URL)
+HUB_SITE_ID=
+HUB_FILES_ROOT=/var/khubdata/{site-id}/files
+HUB_SQL_BACKUP_ROOT=/var/khubdata/{site-id}/backups/sql
 
 # Optional: LibreOffice for forum PDF conversion
 # LIBREOFFICE_BINARY=/usr/bin/soffice
@@ -119,9 +121,17 @@ After install: `APP_INSTALLED=true`, `INSTALLER_DISABLED=true`
 
 ## Storage & URLs
 
-- Uploads default to **`/var/khubdata/files`** (not `storage/app/public` inside the container).
-- `public/storage` is symlinked to the files root; `storage_link()` and `/hub-media/{path}` serve files.
+- Uploads default to **`/var/khubdata/{site-id}/files`** (not `storage/app/public` inside the container).
+- `public/storage` must link to that files root — created automatically on install and app boot.
 - Configure drivers and backups in **Settings → Storage Management**.
+
+**Link or repair `public/storage`:**
+
+```bash
+php artisan hub:link-storage          # all platforms
+./link-hub-storage.sh                 # macOS / Linux
+link-hub-storage.bat                  # Windows CMD
+```
 
 See [docs/deployment/STORAGE.md](docs/deployment/STORAGE.md).
 
@@ -162,6 +172,7 @@ Notable public endpoints: `GET /api/publications`, `GET /api/home`, `GET /api/he
 |-------|----------|
 | Installer 403 | Existing DB with data — [EXISTING_DEPLOYMENTS.md](docs/installation/EXISTING_DEPLOYMENTS.md) |
 | Prerequisites page (503) | Check DB, active `setting` row, writable `storage/` and `/var/khubdata` |
+| `public/storage symlink` failed | Run `php artisan hub:link-storage` — not `storage:link` alone — [STORAGE.md](docs/deployment/STORAGE.md) |
 | Permission denied on logs/cache | Run `./fix-storage-permissions.sh` — [PERMISSIONS.md](docs/deployment/PERMISSIONS.md) |
 | 404 on routes | Enable Apache `mod_rewrite` / Nginx try_files |
 | Numeric job titles on users | `php artisan users:fix-job-title-ids --dry-run` then apply |
@@ -178,6 +189,7 @@ composer install && npm install
 php artisan migrate
 php artisan db:seed
 php artisan khub:mark-installed
+php artisan hub:link-storage
 ```
 
 Configure storage in admin or set `HUB_FILES_ROOT` before uploading content.

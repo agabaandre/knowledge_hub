@@ -2288,6 +2288,73 @@
                             </div>
                         </div>
 
+                        @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'admin_units_enabled'))
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-globe-africa"></i>
+                                    Hub deployment &amp; federation
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    Configure whether this installation is a continental portal or a country hub, set the owner country/region defaults on publication forms, and optionally protect federation API endpoints with a token.
+                                    Manage remote hubs under <a href="{{ route('admin.federation.index') }}">Federated Knowledge Hubs</a>.
+                                </p>
+                                <div class="form-group">
+                                    <div class="form-check">
+                                        <input type="checkbox"
+                                               class="form-check-input"
+                                               id="admin_units_enabled"
+                                               name="admin_units_enabled"
+                                               value="1"
+                                               @if(old('admin_units_enabled', $settings->admin_units_enabled ?? (admin_units_enabled() ? 1 : 0))) checked @endif>
+                                        <label class="form-check-label" for="admin_units_enabled">
+                                            Use administrative units (country hub mode)
+                                        </label>
+                                    </div>
+                                    <small class="info-text d-block">
+                                        When unchecked, this hub behaves as a continental portal: new publications and forums are always publicly federated (<code>public_availability = 1</code>).
+                                        When checked, authors can limit content to this country hub only.
+                                    </small>
+                                </div>
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'default_owner_country_id'))
+                                <div class="form-group">
+                                    <label for="default_owner_country_id">Default owner country</label>
+                                    <select name="default_owner_country_id" id="default_owner_country_id" class="form-control select2">
+                                        <option value="">— Use .env <code>HUB_OWNER_COUNTRY_ID</code> —</option>
+                                        @foreach($hubCountries as $country)
+                                            <option value="{{ $country->id }}" {{ (int) old('default_owner_country_id', $settings->default_owner_country_id ?? 0) === (int) $country->id ? 'selected' : '' }}>{{ $country->name }}</option>
+                                        @endforeach
+                                    </select>
+                                    <small class="info-text">Pre-selected on publication forms for country hubs.</small>
+                                </div>
+                                @endif
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'default_owner_region_id'))
+                                <div class="form-group">
+                                    <label for="default_owner_region_id">Default owner region</label>
+                                    <select name="default_owner_region_id" id="default_owner_region_id" class="form-control select2">
+                                        <option value="">— Derive from country or <code>HUB_OWNER_REGION_ID</code> —</option>
+                                        @foreach($hubRegions as $region)
+                                            <option value="{{ $region->id }}" {{ (int) old('default_owner_region_id', $settings->default_owner_region_id ?? 0) === (int) $region->id ? 'selected' : '' }}>{{ $region->region_name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                @endif
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'federation_api_token'))
+                                <div class="form-group mb-0">
+                                    <label for="federation_api_token">Federation API token</label>
+                                    <input type="text"
+                                           name="federation_api_token"
+                                           id="federation_api_token"
+                                           class="form-control"
+                                           value="{{ old('federation_api_token', $settings->federation_api_token ?? '') }}"
+                                           placeholder="Optional — leave blank for open federation endpoints">
+                                    <small class="info-text">Remote hubs use this as <code>Authorization: Bearer …</code> when calling <code>/api/federation/*</code>.</small>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
                         @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'auto_profile_completion_reminder'))
                         <div class="col-lg-6">
                             <div class="settings-group-card">

@@ -115,6 +115,7 @@
             <a href="#" class="mininav-toggle nav-link {{ request()->is('admin/search-logs*') ? '' : 'collapsed' }}" data-bs-toggle="collapse" data-bs-target="#nav-settings"><i class="fa fa-cog fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.settings') }}</span></a>
             <ul class="mininav-content nav collapse {{ request()->is('admin/search-logs*') ? 'show' : '' }}" id="nav-settings">
                 <li class="nav-item"><a href="{{ route('admin.storage.index') }}" class="nav-link">{{ __('admin_nav.storage_management') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.federation.index') }}" class="nav-link">{{ __('admin_nav.federated_hubs') }}</a></li>
                 <li class="nav-item"><a href="{{ url('admin/configure') }}" class="nav-link">{{ __('admin_nav.system_configurations') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.site-languages.index') }}" class="nav-link">{{ __('admin_nav.site_languages') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.language-management.index') }}" class="nav-link">{{ __('admin_nav.language_management') }}</a></li>

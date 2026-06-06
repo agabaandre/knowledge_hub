@@ -9,6 +9,7 @@ use App\Services\HubDatabaseBackupService;
 use App\Services\HubStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Validation\Rule;
 
 class StorageManagementController extends Controller
 {
@@ -29,6 +30,8 @@ class StorageManagementController extends Controller
             'sqlBackupRoot' => $storage->sqlBackupRoot(),
             'usesExternal' => $storage->usesExternalFiles(),
             'siteStorageId' => $storage->siteStorageId(),
+            'backupTableGroups' => $backup->backupTableGroups(),
+            'kpiExcludedTables' => config('hub_storage.backup_kpi_tables', []),
         ]);
     }
 
@@ -178,6 +181,8 @@ class StorageManagementController extends Controller
         $validated = $request->validate([
             'backup_path' => 'required|string|max:1024',
             'only_empty_tables' => 'nullable|boolean',
+            'restore_tables' => 'required|array|min:1',
+            'restore_tables.*' => ['string', Rule::in($backup->backupTables())],
         ]);
 
         $path = $validated['backup_path'];
@@ -187,16 +192,40 @@ class StorageManagementController extends Controller
                 ->with('alert-danger', 'Backup path not found.');
         }
 
-        $result = $backup->restoreFromDirectory($path, $request->boolean('only_empty_tables', true));
+        $result = $backup->restoreFromDirectory(
+            $path,
+            $request->boolean('only_empty_tables', true),
+            $validated['restore_tables']
+        );
         $message = count($result['restored']).' table(s) restored.';
         if ($result['skipped']) {
             $message .= ' Skipped (not empty): '.implode(', ', $result['skipped']);
+        }
+        if ($result['missing']) {
+            $message .= ' Not in backup folder: '.implode(', ', $result['missing']);
         }
         if ($result['errors']) {
             return redirect()->route('admin.storage.index')->with('alert-danger', $message.' Errors: '.implode('; ', $result['errors']));
         }
 
         return redirect()->route('admin.storage.index')->with('alert-success', $message);
+    }
+
+    public function backupTablesInDirectory(Request $request, HubDatabaseBackupService $backup)
+    {
+        $path = (string) $request->input('path', '');
+        if ($path === '' || ! is_dir($path)) {
+            return response()->json(['tables' => []]);
+        }
+
+        $root = app(HubStorageService::class)->sqlBackupRoot();
+        if (! str_starts_with(realpath($path) ?: $path, realpath($root) ?: $root)) {
+            return response()->json(['tables' => []], 403);
+        }
+
+        return response()->json([
+            'tables' => $backup->tablesInBackupDirectory($path),
+        ]);
     }
 
     public function migrate(Request $request)

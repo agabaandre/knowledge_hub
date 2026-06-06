@@ -9,6 +9,8 @@
         Publication and forum uploads are stored <strong>outside</strong> the application tree so they survive container rebuilds and deployments.
         @if(($runtime ?? 'local') === 'docker')
             Mount a host volume at <code>/var/khubdata</code> in your compose file (see example below).
+        @elseif(($runtime ?? 'local') === 'windows')
+            Recommended host path on Windows: <code>{{ $defaults['files_root'] }}</code>
         @else
             Recommended host path: <code>{{ $defaults['files_root'] }}</code>
         @endif
@@ -38,7 +40,7 @@
         <div class="col-12" id="internalFilesRoot">
             <label class="form-label">Host files root</label>
             <input type="text" name="local_files_root" class="form-control" value="{{ old('local_files_root', $defaults['files_root']) }}">
-            <div class="form-text">Must be writable by the web server user. Not inside <code>storage/</code> or the git checkout.</div>
+            <div class="form-text">Must be writable by the web server user. Not inside <code>storage/</code> or the git checkout. The installer will link <code>public/storage</code> to this folder automatically.</div>
         </div>
         <div class="col-12">
             <label class="form-label">SQL backup root (always on host)</label>

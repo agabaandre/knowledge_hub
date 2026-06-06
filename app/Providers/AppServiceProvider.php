@@ -71,6 +71,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             $hubStorage = app(HubStorageService::class);
             $hubStorage->ensureHostDataDirectories();
+            $hubStorage->ensurePublicStorageSymlink();
             if (Schema::hasTable('hub_storage_settings')) {
                 $hubStorage->registerDiskConfig();
             }

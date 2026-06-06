@@ -21,12 +21,14 @@ Open **`{APP_URL}/install`** after `composer install`. Docker and bare-metal hos
 
 Publication and forum uploads are **not** stored inside the container or git tree by default.
 
-| Setting | Default (Linux) | Purpose |
-|---------|-----------------|--------|
-| Host files root | `/var/khubdata/files` | PDFs, covers, forum attachments |
-| SQL backup root | `/var/khubdata/backups/sql` | Daily incremental SQL dumps |
+| Setting | Default (Linux) | Default (Windows) | Purpose |
+|---------|-----------------|-------------------|--------|
+| Host files root | `/var/khubdata/{site-id}/files` | `C:\khubdata\{site-id}\files` | PDFs, covers, forum attachments |
+| SQL backup root | `/var/khubdata/{site-id}/backups/sql` | `C:\khubdata\{site-id}\backups\sql` | Daily incremental SQL dumps |
 
-These are written to `.env` as `HUB_FILES_ROOT` and `HUB_SQL_BACKUP_ROOT`.
+`{site-id}` is derived from `APP_URL` (e.g. `http://localhost/knowledge_hub` → `localhost-knowledge-hub`). Override with `HUB_SITE_ID` in `.env`.
+
+These paths are written to `.env` as `HUB_FILES_ROOT` and `HUB_SQL_BACKUP_ROOT`.
 
 **Docker:** mount a host volume before install:
 
@@ -39,7 +41,15 @@ services:
 
 **Drivers:** Internal (default) keeps files on the host. Cloud drivers (S3, GCS, Azure, SharePoint, SFTP) can be selected during install or configured later in admin. See [../deployment/STORAGE.md](../deployment/STORAGE.md).
 
-The installer creates upload subdirectories and symlinks `public/storage` → your files root so `/storage/...` URLs keep working.
+The installer creates upload subdirectories and links `public/storage` → your files root (symlink on Linux/macOS, symlink or junction on Windows) so `/storage/...` URLs keep working.
+
+If you need to repair the link after install:
+
+```bash
+php artisan hub:link-storage
+```
+
+Platform helpers: `./link-hub-storage.sh` (macOS/Linux), `link-hub-storage.bat` or `.\link-hub-storage.ps1` (Windows). See [../deployment/STORAGE.md#url-linkage-publicstorage](../deployment/STORAGE.md#url-linkage-publicstorage).
 
 ---
 
@@ -69,7 +79,13 @@ See [EXISTING_DEPLOYMENTS.md](EXISTING_DEPLOYMENTS.md) for `khub:mark-installed`
 
 ## Post-install checks
 
-Each request verifies database connectivity, active site settings, and writable storage. Failures show a prerequisites page instead of a broken layout.
+Each request verifies database connectivity, active site settings, writable storage, and that `public/storage` points at the hub files root. Failures show a prerequisites page instead of a broken layout.
+
+Fix a failed `public/storage symlink` check:
+
+```bash
+php artisan hub:link-storage
+```
 
 Relevant `.env` keys:
 
@@ -77,6 +93,7 @@ Relevant `.env` keys:
 APP_INSTALLED=true
 INSTALLER_DISABLED=true
 APP_URL=https://your-hub.example
-HUB_FILES_ROOT=/var/khubdata/files
-HUB_SQL_BACKUP_ROOT=/var/khubdata/backups/sql
+HUB_SITE_ID=your-hub-example          # optional; auto from APP_URL
+HUB_FILES_ROOT=/var/khubdata/your-hub-example/files
+HUB_SQL_BACKUP_ROOT=/var/khubdata/your-hub-example/backups/sql
 ```

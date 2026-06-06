@@ -12,6 +12,7 @@ Central index for operators, administrators, and developers. Start with [install
 | Install on LAMP / bare metal | [installation/WEB_INSTALLER.md](installation/WEB_INSTALLER.md) |
 | Configure file & backup storage | [deployment/STORAGE.md](deployment/STORAGE.md) |
 | Fix storage permissions | [deployment/PERMISSIONS.md](deployment/PERMISSIONS.md) |
+| Link `public/storage` to hub files root | `php artisan hub:link-storage` — [deployment/STORAGE.md](deployment/STORAGE.md#url-linkage-publicstorage) |
 | Mark an existing site as installed | [installation/EXISTING_DEPLOYMENTS.md](installation/EXISTING_DEPLOYMENTS.md) |
 | Run install from the CLI | [installation/CLI.md](installation/CLI.md) |
 

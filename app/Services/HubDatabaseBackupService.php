@@ -14,6 +14,50 @@ class HubDatabaseBackupService
     }
 
     /**
+     * @return array<string, array<string, string>>
+     */
+    public function backupTableGroups(): array
+    {
+        return config('hub_storage.backup_table_groups', []);
+    }
+
+    /**
+     * Ordered flat list of tables to back up / restore.
+     *
+     * @return list<string>
+     */
+    public function backupTables(): array
+    {
+        $tables = [];
+        foreach ($this->backupTableGroups() as $groupTables) {
+            foreach (array_keys($groupTables) as $table) {
+                $tables[] = $table;
+            }
+        }
+
+        return $tables;
+    }
+
+    /**
+     * @return list<string>
+     */
+    public function tablesInBackupDirectory(string $directory): array
+    {
+        if (! is_dir($directory)) {
+            return [];
+        }
+
+        $available = [];
+        foreach ($this->backupTables() as $table) {
+            if (File::exists($directory.DIRECTORY_SEPARATOR.$table.'.sql')) {
+                $available[] = $table;
+            }
+        }
+
+        return $available;
+    }
+
+    /**
      * @return array{path: string, tables: int, incremental: bool}
      */
     public function runBackup(bool $incremental = true): array
@@ -30,7 +74,7 @@ class HubDatabaseBackupService
             ? json_decode((string) File::get($manifestPath), true) ?: []
             : [];
 
-        $tables = config('hub_storage.backup_tables', []);
+        $tables = $this->backupTables();
         $exported = 0;
 
         foreach ($tables as $table) {
@@ -60,21 +104,32 @@ class HubDatabaseBackupService
     }
 
     /**
-     * @return array{restored: list<string>, skipped: list<string>, errors: list<string>}
+     * @param  list<string>|null  $selectedTables  Tables to restore (must be a subset of backupTables()). Null = all present in backup.
+     * @return array{restored: list<string>, skipped: list<string>, errors: list<string>, missing: list<string>}
      */
-    public function restoreFromDirectory(string $directory, bool $onlyEmptyTables = true): array
+    public function restoreFromDirectory(string $directory, bool $onlyEmptyTables = true, ?array $selectedTables = null): array
     {
-        $result = ['restored' => [], 'skipped' => [], 'errors' => []];
+        $result = ['restored' => [], 'skipped' => [], 'errors' => [], 'missing' => []];
         if (! is_dir($directory)) {
             $result['errors'][] = 'Backup directory not found.';
 
             return $result;
         }
 
-        $tables = config('hub_storage.backup_tables', []);
+        $allowed = array_flip($this->backupTables());
+        $tables = $selectedTables ?? $this->tablesInBackupDirectory($directory);
+
         foreach ($tables as $table) {
+            if (! isset($allowed[$table])) {
+                $result['errors'][] = "Table {$table} is not allowed for restore.";
+
+                continue;
+            }
+
             $file = $directory.DIRECTORY_SEPARATOR.$table.'.sql';
             if (! File::exists($file)) {
+                $result['missing'][] = $table;
+
                 continue;
             }
             if (! Schema::hasTable($table)) {

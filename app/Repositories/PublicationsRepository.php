@@ -452,12 +452,16 @@ public function get(Request $request, $return_array = false, $featured = false,$
         else:
             $pub->sub_thematic_area_id      = $request->sub_theme;
 
-            if(!$request->countries):
-                $geo_id = ($user->country_id)?$user->area->id:1;
-                $pub->geographical_coverage_id = $geo_id;
-            else:
-                $pub->geographical_coverage_id  = $request->countries[0];
-            endif;
+            if (! $request->countries) {
+                if (function_exists('hub_admin_units_enabled') && hub_admin_units_enabled() && function_exists('hub_owner_country_id') && hub_owner_country_id()) {
+                    $pub->geographical_coverage_id = hub_owner_country_id();
+                } else {
+                    $geo_id = ($user && $user->country_id && $user->area) ? $user->area->id : 1;
+                    $pub->geographical_coverage_id = $geo_id;
+                }
+            } else {
+                $pub->geographical_coverage_id = $request->countries[0];
+            }
             
             $pub->title                     = format_title_with_ai_fallback($request->title ?? '');
 
@@ -491,6 +495,13 @@ public function get(Request $request, $return_array = false, $featured = false,$
         CommunityTargeting::mergeTagAllIntoRequest($request);
         if (! $request->id || $request->has('community_targeting_options')) {
             $pub->also_public_on_hub = CommunityTargeting::wantsAlsoPublicOnHubWithCommunities($request) ? 1 : 0;
+        }
+
+        if (\Illuminate\Support\Facades\Schema::hasColumn('publication', 'public_availability')) {
+            $pub->public_availability = resolve_public_availability_from_request(
+                $request,
+                $request->id ? ($pub->public_availability ?? null) : null
+            );
         }
 
         // Publication metadata fields - clean Unicode

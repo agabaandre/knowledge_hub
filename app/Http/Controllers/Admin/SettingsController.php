@@ -46,6 +46,12 @@ class SettingsController extends Controller
         $data['emailFields'] = Schema::hasColumn('setting', 'email_driver')
             ? EmailConfig::fieldsForAdmin()
             : [];
+        $data['hubCountries'] = Schema::hasTable('country')
+            ? \App\Models\Country::orderBy('name')->get()
+            : collect();
+        $data['hubRegions'] = Schema::hasTable('region')
+            ? \App\Models\Region::orderBy('region_name')->get()
+            : collect();
         return view('admin.settings.index', $data);
     }
   

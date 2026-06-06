@@ -91,6 +91,14 @@ class InstallerService
 
     public function runtimeEnvironment(): string
     {
+        if (PHP_OS_FAMILY === 'Windows') {
+            if (filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)) {
+                return 'docker';
+            }
+
+            return 'windows';
+        }
+
         if (filter_var(env('DOCKER', false), FILTER_VALIDATE_BOOLEAN)) {
             return 'docker';
         }
@@ -235,7 +243,9 @@ class InstallerService
                     ? 'Writable'
                     : ($runtime === 'docker'
                         ? 'Create and mount a host volume at /var/khubdata (see docker-compose)'
-                        : 'Run: sudo mkdir -p '.$path.' && sudo chown www-data '.$path),
+                        : ($runtime === 'windows'
+                            ? 'Create the folder and grant the web server write access: '.$path
+                            : 'Run: sudo mkdir -p '.$path.' && sudo chown www-data '.$path)),
                 'required' => $runtime !== 'docker',
             ];
         }
@@ -285,13 +295,17 @@ class InstallerService
                 'message' => $filesWritable ? $filesRoot : 'Not writable: '.$filesRoot,
             ];
             $link = public_path('storage');
-            $linkOk = is_link($link) && realpath($link) === realpath($filesRoot);
+            $linkOk = $hubStorage->publicStorageLinkOk($link, $filesRoot);
             $checks[] = [
                 'label' => 'public/storage symlink',
                 'ok' => $linkOk || $hubStorage->usesLegacyInternalRoot(),
                 'message' => $linkOk
                     ? 'Linked to '.$filesRoot
-                    : ($hubStorage->usesLegacyInternalRoot() ? 'Using legacy storage/app/public' : 'Run installer storage step or php artisan storage:link'),
+                    : ($hubStorage->usesLegacyInternalRoot()
+                        ? 'Using legacy storage/app/public'
+                        : (PHP_OS_FAMILY === 'Windows'
+                            ? 'Run installer storage step or php artisan hub:link-storage (or link-hub-storage.bat)'
+                            : 'Run installer storage step, ./link-hub-storage.sh, or php artisan hub:link-storage')),
             ];
         } catch (\Throwable $e) {
             $checks[] = [
@@ -399,10 +413,6 @@ class InstallerService
 
         Artisan::call('config:clear');
 
-        if (! File::exists(public_path('storage'))) {
-            Artisan::call('storage:link');
-        }
-
         $envContents = File::exists(base_path('.env')) ? File::get(base_path('.env')) : '';
         if (! str_contains($envContents, 'APP_KEY=base64:')) {
             Artisan::call('key:generate', ['--force' => true]);
@@ -456,6 +466,8 @@ class InstallerService
 
         if (! Schema::hasTable('hub_storage_settings')) {
             $hubStorage->ensureHostDataDirectories();
+            $hubStorage->ensurePublicStorageSymlink();
+            Artisan::call('config:clear');
 
             return;
         }
@@ -635,8 +647,12 @@ class InstallerService
         $this->lockInstallerInSettings();
 
         try {
+            $hubStorage = app(HubStorageService::class);
             if (Schema::hasTable('hub_storage_settings')) {
-                app(HubStorageService::class)->ensureDirectories();
+                $hubStorage->ensureDirectories();
+            } else {
+                $hubStorage->ensureHostDataDirectories();
+                $hubStorage->ensurePublicStorageSymlink();
             }
         } catch (\Throwable) {
             // Storage paths may be configured on a later admin visit.

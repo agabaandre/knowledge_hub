@@ -355,6 +355,21 @@ class SettingsRepository
             $settings->profile_reminder_day_of_month = max(1, min(28, $day));
         }
 
+        if (Schema::hasColumn('setting', 'admin_units_enabled')) {
+            $settings->admin_units_enabled = (bool) $request->boolean('admin_units_enabled');
+        }
+        if (Schema::hasColumn('setting', 'default_owner_country_id')) {
+            $countryId = $request->input('default_owner_country_id');
+            $settings->default_owner_country_id = $countryId !== null && $countryId !== '' ? (int) $countryId : null;
+        }
+        if (Schema::hasColumn('setting', 'default_owner_region_id')) {
+            $regionId = $request->input('default_owner_region_id');
+            $settings->default_owner_region_id = $regionId !== null && $regionId !== '' ? (int) $regionId : null;
+        }
+        if (Schema::hasColumn('setting', 'federation_api_token') && $request->filled('federation_api_token')) {
+            $settings->federation_api_token = $request->input('federation_api_token');
+        }
+
         if (Schema::hasColumn('setting', 'email_driver')) {
             $driver = $request->input('email_driver', 'exchange');
             $settings->email_driver = in_array($driver, ['smtp', 'exchange'], true) ? $driver : 'exchange';

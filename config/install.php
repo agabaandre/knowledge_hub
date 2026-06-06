@@ -59,6 +59,23 @@ return [
             'username' => 'root',
             'password' => 'password',
         ],
+        'windows' => [
+            'host' => '127.0.0.1',
+            'port' => '3306',
+            'database' => 'knowledge_hub',
+            'username' => 'root',
+            'password' => '',
+        ],
+    ],
+
+    /*
+    | Host paths for hub files/SQL backups. Empty values use HubStorageService defaults
+    | (/var/khubdata/{site-id}/… on Linux/macOS, C:\khubdata\{site-id}\… on Windows).
+    */
+    'storage_defaults' => [
+        'local' => [],
+        'docker' => [],
+        'windows' => [],
     ],
 
     'timezones' => [

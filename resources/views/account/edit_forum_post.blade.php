@@ -108,6 +108,8 @@
                                     <textarea placeholder="Description" class="form-control newform" id="summernote" name="description" required>{!! old('description', $forum->forum_description) !!}</textarea>
                                 </div>
                             </div>
+
+                            @include('partials.publications.public_availability_toggle', ['forum' => $forum])
                         </div>
 
                         <div class="form-group mt-4" style="display: flex; gap: 1rem; justify-content: flex-end;">

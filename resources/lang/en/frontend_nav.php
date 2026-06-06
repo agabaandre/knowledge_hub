@@ -7,6 +7,7 @@ return [
     'health_topics' => 'Health Topics',
     'member_states' => 'Member States',
     'administrative_units' => 'Administrative Units',
+    'partner_hubs' => 'Partner Country Hubs',
     'health_emergencies' => 'Health Emergencies',
     'key_links' => 'Key Links',
     'tools' => 'Tools',

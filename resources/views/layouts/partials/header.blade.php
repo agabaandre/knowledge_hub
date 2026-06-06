@@ -610,6 +610,10 @@
                                 <li><a href="{{ url('adminunits') }}">{{ __('frontend_nav.administrative_units') }}</a></li>
                             @endif
 
+                            @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
+                                <li><a href="{{ route('federation.browse') }}">{{ __('frontend_nav.partner_hubs') }}</a></li>
+                            @endif
+
                         </ul>
                     </li>
                     

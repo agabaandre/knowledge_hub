@@ -139,7 +139,9 @@ if(!function_exists('states_enabled')){
 
 if(!function_exists('admin_units_enabled')){
 	function admin_units_enabled(){
-		return config('deployment.admin_units_enabled');
+		return function_exists('hub_admin_units_enabled')
+			? hub_admin_units_enabled()
+			: (bool) config('deployment.admin_units_enabled');
 	}
 }
 

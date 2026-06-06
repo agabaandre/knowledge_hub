@@ -39,6 +39,7 @@ use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\ParticipantBadgeManagementController;
 use App\Http\Controllers\Admin\StorageManagementController;
+use App\Http\Controllers\Admin\FederatedHubsController;
 use App\Http\Controllers\HubMediaController;
 use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
@@ -61,6 +62,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Controllers\CountriesController;
+use App\Http\Controllers\FederatedBrowseController;
 use App\Http\Controllers\ToolsController;
 use App\Http\Controllers\CoursesController;
 use App\Http\Controllers\Admin\AdminCoursesController;
@@ -172,6 +174,8 @@ Route::group(["prefix" => "browse"], function () {
     Route::get("areas", function(){ return redirect('countries'); });
 
 });
+
+Route::get('/federated', [FederatedBrowseController::class, 'index'])->name('federation.browse');
 
 Route::group(["prefix" => "records"], function () {
 
@@ -290,8 +294,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get('/storage-management/browse-backups', [StorageManagementController::class, 'browseBackups'])->name('admin.storage.browse-backups');
     Route::post('/storage-management/backup', [StorageManagementController::class, 'runBackup'])->name('admin.storage.backup');
     Route::post('/storage-management/restore', [StorageManagementController::class, 'restoreBackup'])->name('admin.storage.restore');
+    Route::get('/storage-management/backup-tables', [StorageManagementController::class, 'backupTablesInDirectory'])->name('admin.storage.backup-tables');
     Route::post('/storage-management/migrate', [StorageManagementController::class, 'migrate'])->name('admin.storage.migrate');
     Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
+
+    Route::get('/federated-hubs', [FederatedHubsController::class, 'index'])->name('admin.federation.index');
+    Route::post('/federated-hubs', [FederatedHubsController::class, 'store'])->name('admin.federation.store');
+    Route::put('/federated-hubs/{hub}', [FederatedHubsController::class, 'update'])->name('admin.federation.update');
+    Route::delete('/federated-hubs/{hub}', [FederatedHubsController::class, 'destroy'])->name('admin.federation.destroy');
+    Route::post('/federated-hubs/{hub}/connect', [FederatedHubsController::class, 'connect'])->name('admin.federation.connect');
+    Route::post('/federated-hubs/{hub}/sync', [FederatedHubsController::class, 'sync'])->name('admin.federation.sync');
 
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');

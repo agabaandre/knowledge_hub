@@ -124,6 +124,8 @@
                         </div>
                         @endif
 
+                        @include('partials.publications.public_availability_toggle', ['publication' => $publication ?? null])
+
                          <div class="col-md-12">
                             <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
                             @include('partials.publications.publication_communities_dropdown',['field'=>'communities[]',

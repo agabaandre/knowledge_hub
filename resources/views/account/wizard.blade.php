@@ -386,7 +386,7 @@
                             'field' => 'rccs[]',
                             'required' => 'required',
                             'class' => 'rcc select2',
-                            'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : null),
+                            'selected' => @$row->region_ids ?? (isset($row->geographical_coverage_id) ? [$row->geographical_coverage_id] : (hub_owner_region_id() ? [hub_owner_region_id()] : null)),
                             'multiple' => 'multiple',
                             'allfield' => 'All',
                         ])
@@ -398,12 +398,14 @@
                             'field' => 'countries[]',
                             'required' => 'required',
                             'class' => 'country select2',
-                            'selected' => $row->country_ids ?? null,
+                            'selected' => $row->country_ids ?? (hub_owner_country_id() ? [hub_owner_country_id()] : null),
                             'multiple' => 'multiple',
                             'all_option' => true,
                             'allfield' => 'All',
                         ])
             </div>
+
+            @include('partials.publications.public_availability_toggle', ['row' => $row ?? null])
 
             @if (is_admin())
                 <div class="col-md-6 mb-2">

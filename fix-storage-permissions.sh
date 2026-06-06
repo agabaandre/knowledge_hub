@@ -45,5 +45,10 @@ if [[ -d /var/khubdata ]]; then
   chmod -R ug+rwX /var/khubdata
 fi
 
+if [[ -f artisan ]] && command -v php >/dev/null 2>&1; then
+  echo "Linking public/storage to hub files root…"
+  php artisan hub:link-storage || ./link-hub-storage.sh
+fi
+
 echo "Done. Reload the site and clear compiled views if needed:"
 echo "  php artisan view:clear"

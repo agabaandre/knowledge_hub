@@ -15,21 +15,27 @@ use App\Repositories\QuotesRepository;
 use App\Repositories\ForumsRepository;
 use App\Repositories\CommsOfPracticeRepository;
 use App\Models\SearchLog;
+use App\Services\FederatedContentService;
 use Illuminate\Support\Facades\Log;
 
 class PublicationsController extends Controller
 {
-    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo,$commsRepo;
+    private $publicationsRepo,$authorsRepo,$quotesRepo,$forumsRepo,$commsRepo,$federationContent;
 
-    public function __construct(PublicationsRepository $publicationsRepo,
-    AuthorsRepository $authorsRepo, QuotesRepository $quotesRepo, ForumsRepository $forumsRepo,
-    CommsOfPracticeRepository $commsRepo)
-    {
+    public function __construct(
+        PublicationsRepository $publicationsRepo,
+        AuthorsRepository $authorsRepo,
+        QuotesRepository $quotesRepo,
+        ForumsRepository $forumsRepo,
+        CommsOfPracticeRepository $commsRepo,
+        FederatedContentService $federationContent
+    ) {
         $this->publicationsRepo = $publicationsRepo;
         $this->authorsRepo      = $authorsRepo;
         $this->quotesRepo       = $quotesRepo;
         $this->forumsRepo       = $forumsRepo;
         $this->commsRepo        = $commsRepo;
+        $this->federationContent = $federationContent;
     }
 
     public function show(Request $request, ?string $slug = null){
@@ -316,9 +322,25 @@ class PublicationsController extends Controller
             ? $this->commsRepo->searchForRecords($request, 5)
             : collect();
 
+        $data['federatedPublications'] = collect();
+        $data['federatedForums'] = collect();
+        $data['federationBrowseEnabled'] = $this->federationContent->federationConsumerEnabled();
+
+        if ($data['federationBrowseEnabled'] && $request->filled('term')) {
+            $federated = $this->federationContent->search($request->input('term'), 20);
+            $data['federatedPublications'] = $federated['publications'];
+            if (settings()->search_show_forums ?? true) {
+                $data['federatedForums'] = $federated['forums']->take(5);
+            }
+        }
+
         $endTime = microtime(true);
         $data['search_time'] = round(($endTime - $startTime) * 1000, 2);
-        $data['results_count'] = $data['publications']->total() + $data['searchForums']->count() + $data['searchCommunities']->count();
+        $data['results_count'] = $data['publications']->total()
+            + $data['searchForums']->count()
+            + $data['searchCommunities']->count()
+            + $data['federatedPublications']->count()
+            + $data['federatedForums']->count();
 
         $latestRequest = clone $request;
         $latestRequest->merge(['rows' => 5]);

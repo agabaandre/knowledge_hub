@@ -25,7 +25,7 @@ site-id examples:
   https://hub.example.com  →  hub-example-com
   http://localhost:8080      →  localhost-8080
 
-public/storage  →  symlink  →  /var/khubdata/files   (internal driver)
+public/storage  →  symlink/junction  →  /var/khubdata/{site-id}/files   (internal driver)
 /hub-media/{path}                 ← HTTP route when using custom host paths
 /storage/{path}                   ← works via symlink above
 ```
@@ -63,10 +63,37 @@ Stores files on the host filesystem. Best for single-server or Docker deployment
 ### Setup (Linux)
 
 ```bash
-sudo mkdir -p /var/khubdata/files /var/khubdata/backups/sql
-sudo chown -R www-data:www-data /var/khubdata
-./fix-storage-permissions.sh
+sudo mkdir -p /var/khubdata
+./fix-storage-permissions.sh    # creates {site-id}/files, permissions, and public/storage link
 ```
+
+Or manually (replace `{site-id}` with your hub ID, e.g. `localhost-knowledge-hub`):
+
+```bash
+sudo mkdir -p /var/khubdata/{site-id}/files /var/khubdata/{site-id}/backups/sql
+sudo chown -R www-data:www-data /var/khubdata
+php artisan hub:link-storage
+```
+
+### Setup (Windows)
+
+Default paths use `C:\khubdata\{site-id}\files`. From the project root in **Command Prompt** or **PowerShell**:
+
+```bat
+link-hub-storage.bat
+```
+
+```powershell
+.\link-hub-storage.ps1
+```
+
+Cross-platform (recommended):
+
+```bash
+php artisan hub:link-storage
+```
+
+If linking fails, enable **Developer Mode** in Windows Settings or run the terminal **as Administrator**, then retry.
 
 ### Docker
 
@@ -79,10 +106,30 @@ volumes:
 
 Configure during install step 3 or in Storage Management.
 
-### URL linkage
+### URL linkage (`public/storage`)
 
-- `public/storage` is symlinked to your files root automatically.
-- `storage_link()` returns `/storage/...` for legacy `storage/app/public` installs, or `/hub-media/...` for custom host paths (both work when symlink is present).
+For **internal** storage, `public/storage` must point at your **hub files root** (e.g. `/var/khubdata/{site-id}/files`), not Laravel’s default `storage/app/public`.
+
+| When | What happens |
+|------|----------------|
+| Install step 3 (storage) | Link created automatically |
+| App boot | `HubStorageService::ensurePublicStorageSymlink()` corrects a stale link |
+| Docker entrypoint | Runs `php artisan hub:link-storage` |
+| Manual fix | See commands below |
+
+**Do not rely on `php artisan storage:link` alone** when using `/var/khubdata` or `C:\khubdata` — it only targets `storage/app/public` and the prerequisites check will fail.
+
+#### Commands
+
+| Platform | Command |
+|----------|---------|
+| **All (Artisan)** | `php artisan hub:link-storage` |
+| **macOS / Linux** | `./link-hub-storage.sh` |
+| **Windows CMD** | `link-hub-storage.bat` |
+| **Windows PowerShell** | `.\link-hub-storage.ps1` |
+| **Permissions + link** | `./fix-storage-permissions.sh` (runs `hub:link-storage` at the end) |
+
+`storage_link()` returns `/storage/...` when the symlink/junction is correct, or `/hub-media/...` for custom host paths.
 
 ---
 
@@ -158,6 +205,24 @@ Configured separately from file storage (always on host by default).
 | Tables included | Users, authors, geography, publications, forums, communities, approvals, pivots |
 
 Backups are **not** stored in the cloud file driver unless you copy them manually.
+
+### Tables included
+
+Backups are grouped in **Settings → Storage Management** when restoring. They include:
+
+- Site settings, languages, themes, storage settings
+- Roles, permissions, access groups
+- Users, authors, preferences, badges
+- Taxonomy, geography, tags
+- Communities, publications, forums (with attachments, comments, approvals)
+- Content requests, events, facts, courses, tools
+- OAuth API clients (not tokens)
+
+**Excluded (KPI / OWID — re-sync from API instead):** `kpi`, `kpi_narrations`, `kpi_sync_runs`, `subject_areas`, `data`
+
+### Selective restore
+
+When restoring, choose which tables to import. Tables not present in the backup folder are skipped. Use **In backup only** to check only tables that exist in the selected backup snapshot.
 
 ---
 

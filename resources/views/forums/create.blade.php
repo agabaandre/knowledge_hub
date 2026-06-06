@@ -98,6 +98,8 @@
                           <textarea placeholder="Descripion" class="form-control newform" id="summernote" name="description" required></textarea>
                       </div>
                   </div>
+
+                  @include('partials.publications.public_availability_toggle')
       
                        </div>
 

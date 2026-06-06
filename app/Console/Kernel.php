@@ -62,6 +62,16 @@ class Kernel extends ConsoleKernel
                     return false;
                 }
             });
+        // Sync public content from country hubs (continental portal only)
+        $schedule->command('federation:sync')
+            ->dailyAt('02:45')
+            ->when(function () {
+                try {
+                    return function_exists('federation_consumer_enabled') && federation_consumer_enabled();
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
     }
 
     /**

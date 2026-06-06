@@ -17,7 +17,13 @@ php artisan khub:install \
   --site-name='Knowledge Hub'
 ```
 
-The command runs migrations (unless skipped), configures storage, site settings, mail, creates the admin user, and locks the installer.
+The command runs migrations (unless skipped), configures storage, site settings, mail, creates the admin user, links `public/storage` to the hub files root, and locks the installer.
+
+After any manual storage path change:
+
+```bash
+php artisan hub:link-storage
+```
 
 ---
 
@@ -65,3 +71,17 @@ php artisan khub:mark-installed
 ```
 
 See [EXISTING_DEPLOYMENTS.md](EXISTING_DEPLOYMENTS.md).
+
+---
+
+## Storage link commands
+
+| Command | Description |
+|---------|-------------|
+| `php artisan hub:link-storage` | Link `public/storage` to the hub files root (macOS, Linux, Windows) |
+| `./link-hub-storage.sh` | Shell wrapper (macOS/Linux) |
+| `link-hub-storage.bat` | Batch wrapper (Windows CMD) |
+| `.\link-hub-storage.ps1` | PowerShell wrapper (Windows) |
+| `./fix-storage-permissions.sh` | Fix Laravel + host data permissions, then run `hub:link-storage` |
+
+Full details: [../deployment/STORAGE.md](../deployment/STORAGE.md).
