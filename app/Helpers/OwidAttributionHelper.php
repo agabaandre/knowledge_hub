@@ -267,6 +267,116 @@ if (! function_exists('kpi_parse_unit_label')) {
     }
 }
 
+if (! function_exists('kpi_humanize_unit')) {
+    /**
+     * Plain-language denomination for display (currency, scale, rates, etc.).
+     */
+    function kpi_humanize_unit(string $full, string $type, ?string $kpiName = null): string
+    {
+        $full = trim($full);
+        if ($full === '') {
+            return '';
+        }
+
+        $lower = strtolower($full);
+        $kpiLower = strtolower(trim((string) $kpiName));
+
+        if (preg_match('/constant\s+(\d{4})\s+us\$/i', $full, $matches)) {
+            return 'US dollars ('.$matches[1].' constant prices)';
+        }
+
+        if (preg_match('/constant\s+(\d{4})\s+international-?\$/i', $full, $matches)) {
+            return 'International dollars ('.$matches[1].' constant prices, PPP-adjusted)';
+        }
+
+        if (preg_match('/constant\s+(\d{4})\s+/i', $full, $matches) && str_contains($full, '$')) {
+            return 'Dollars ('.$matches[1].' constant prices)';
+        }
+
+        if (preg_match('/current\s+us\$/i', $full)) {
+            return 'US dollars (current prices)';
+        }
+
+        if (preg_match('/\bus\$/i', $full) || preg_match('/\busd\b/i', $lower)) {
+            return 'US dollars';
+        }
+
+        if (preg_match('/international-?\$/i', $full)) {
+            return 'International dollars (PPP-adjusted)';
+        }
+
+        if ($type === 'percent') {
+            $desc = trim(preg_replace('/^%\s*(of\s+)?/i', '', $full));
+            if ($desc !== '' && ! str_contains(strtolower($desc), 'percent')) {
+                return 'of '.$desc;
+            }
+
+            return 'percent';
+        }
+
+        if ($type === 'million') {
+            if (str_contains($kpiLower, 'population') || str_contains($lower, 'people') || str_contains($lower, 'population')) {
+                return 'million people';
+            }
+
+            return 'millions';
+        }
+
+        if ($type === 'billion') {
+            if (str_contains($kpiLower, 'population') || str_contains($lower, 'people') || str_contains($lower, 'population')) {
+                return 'billion people';
+            }
+
+            return 'billions';
+        }
+
+        if ($type === 'thousand') {
+            if (str_contains($kpiLower, 'population') || str_contains($lower, 'people') || str_contains($lower, 'population')) {
+                return 'thousand people';
+            }
+
+            return 'thousands';
+        }
+
+        if ($type === 'count') {
+            return 'people';
+        }
+
+        if ($type === 'rate') {
+            return preg_replace('/\bpopulation\b/i', 'people', $full);
+        }
+
+        if (strlen($full) <= 72) {
+            return ucfirst($full);
+        }
+
+        return '';
+    }
+}
+
+if (! function_exists('kpi_build_value_with_unit')) {
+    function kpi_build_value_with_unit(string $formatted, string $unit, string $unitPlain, string $type): string
+    {
+        if ($type === 'percent') {
+            $value = rtrim($formatted).'%';
+
+            return $unitPlain !== '' && $unitPlain !== 'percent'
+                ? trim($value.' '.$unitPlain)
+                : $value;
+        }
+
+        if ($unitPlain !== '') {
+            return trim($formatted.' '.$unitPlain);
+        }
+
+        if ($unit !== '') {
+            return trim($formatted.' '.$unit);
+        }
+
+        return $formatted;
+    }
+}
+
 if (! function_exists('kpi_indicator_display')) {
     /**
      * Format a KPI value with unit metadata from OWID.
@@ -274,6 +384,7 @@ if (! function_exists('kpi_indicator_display')) {
      * @return array{
      *     value: string,
      *     unit: string,
+     *     unit_plain: string,
      *     unit_full: string,
      *     value_with_unit: string,
      *     chart_unit: string,
@@ -296,42 +407,42 @@ if (! function_exists('kpi_indicator_display')) {
             case 'percent':
                 $decimals = $abs >= 10 ? 1 : 2;
                 $formatted = number_format($value, $decimals);
-                $unit = '%';
+                $unit = '';
                 break;
 
             case 'currency':
                 $decimals = $abs >= 10_000 ? 0 : 2;
                 $formatted = number_format($value, $decimals);
-                $unit = (string) ($parsed['currency_symbol'] ?? $parsed['short']);
+                $unit = '';
                 break;
 
             case 'million':
                 $decimals = $abs >= 100 ? 1 : ($abs >= 10 ? 2 : 3);
                 $formatted = number_format($value, $decimals);
-                $unit = 'million';
+                $unit = '';
                 break;
 
             case 'billion':
                 $decimals = $abs >= 100 ? 1 : 2;
                 $formatted = number_format($value, $decimals);
-                $unit = 'billion';
+                $unit = '';
                 break;
 
             case 'thousand':
                 $decimals = $abs >= 100 ? 1 : 2;
                 $formatted = number_format($value, $decimals);
-                $unit = 'thousand';
+                $unit = '';
                 break;
 
             case 'count':
                 $formatted = number_format($value, 0);
-                $unit = $parsed['short'] !== '' ? $parsed['short'] : 'people';
+                $unit = '';
                 break;
 
             case 'rate':
                 $decimals = $abs >= 100 ? 1 : 2;
                 $formatted = number_format($value, $decimals);
-                $unit = $parsed['short'];
+                $unit = '';
                 break;
 
             default:
@@ -342,14 +453,22 @@ if (! function_exists('kpi_indicator_display')) {
         }
 
         $unitFull = $parsed['full'] !== '' ? $parsed['full'] : $unit;
-        $valueWithUnit = trim($formatted.($unit !== '' ? ' '.$unit : ''));
+        $unitPlain = kpi_humanize_unit($unitFull, $parsed['type'], $kpiName);
+
+        if ($unitPlain === '' && $unit !== '') {
+            $unitPlain = $unit;
+        }
+
+        $valueWithUnit = kpi_build_value_with_unit($formatted, $unit, $unitPlain, $parsed['type']);
+        $chartUnit = $unitPlain !== '' ? $unitPlain : ($unitFull !== '' ? $unitFull : 'Value');
 
         return [
             'value' => $formatted,
             'unit' => $unit,
+            'unit_plain' => $unitPlain,
             'unit_full' => $unitFull,
             'value_with_unit' => $valueWithUnit,
-            'chart_unit' => $unitFull !== '' ? $unitFull : ($unit !== '' ? $unit : 'Value'),
+            'chart_unit' => $chartUnit,
             'type' => $parsed['type'],
         ];
     }

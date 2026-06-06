@@ -80,16 +80,18 @@
         line-height: 1.6;
         margin: 0;
     }
-    .country-kpi-tile__unit {
-        font-size: 0.85rem;
-        color: #64748b;
-        font-weight: 500;
-        margin-left: 0.25rem;
+    .country-kpi-tile__denomination {
+        display: block;
+        font-size: 0.72rem;
+        line-height: 1.35;
+        margin-top: 0.1rem;
+        color: #64748b !important;
     }
     .country-kpi-tile__period {
         display: block;
-        font-size: 0.75rem;
+        font-size: 0.72rem;
         line-height: 1.3;
+        margin-top: 0.15rem;
     }
     .country-kpi-tile--drilldown {
         cursor: pointer;
@@ -148,10 +150,12 @@
         color: #9F2241;
         line-height: 1.1;
     }
-    .country-kpi-modal__unit {
+    .country-kpi-modal__denomination {
         font-size: 0.95rem;
-        color: #64748b;
-        margin-left: 0.35rem;
+        color: #475569;
+        margin-top: 0.35rem;
+        line-height: 1.45;
+        max-width: 36rem;
     }
     .country-kpi-modal__chart-wrap {
         margin-bottom: 1rem;
@@ -407,16 +411,25 @@
 
         document.getElementById('countryKpiModalSubject').textContent = subjectName || 'Country indicator';
         document.getElementById('countryKpiModalLabel').textContent = data.name || '';
-        document.getElementById('countryKpiModalValue').textContent = data.display_value || String(data.latest_value);
-        document.getElementById('countryKpiModalUnit').textContent = data.unit ? data.unit : '';
-        var periodParts = [];
-        if (data.latest_period) {
-            periodParts.push('Latest period: ' + data.latest_period);
+        var valueLine = data.display_value || String(data.latest_value);
+        if (data.value_type === 'percent' && valueLine.indexOf('%') === -1) {
+            valueLine = valueLine + '%';
         }
-        if (data.unit_full && data.unit_full !== data.unit) {
-            periodParts.push('Unit: ' + data.unit_full);
+        document.getElementById('countryKpiModalValue').textContent = valueLine;
+
+        var denominationEl = document.getElementById('countryKpiModalDenomination');
+        var denomination = data.unit_plain || '';
+        if (denomination) {
+            denominationEl.style.display = 'block';
+            denominationEl.textContent = denomination;
+        } else {
+            denominationEl.style.display = 'none';
+            denominationEl.textContent = '';
         }
-        document.getElementById('countryKpiModalPeriod').textContent = periodParts.join(' · ');
+
+        document.getElementById('countryKpiModalPeriod').textContent = data.latest_period
+            ? 'Latest period: ' + data.latest_period
+            : '';
 
         var chartWrap = document.getElementById('countryKpiModalChartWrap');
         if (data.has_chart && typeof Highcharts !== 'undefined') {

@@ -5,6 +5,8 @@
     $display = $kpi->display ?? kpi_indicator_display($value, $kpi->unit_label ?? null, $kpiName);
     $periodLabel = substr((string) ($kpi->period ?? ''), 0, 4);
     $hasDrilldown = ! empty($kpi->has_drilldown);
+    $valueLine = $display['type'] === 'percent' ? rtrim($display['value']).'%' : $display['value'];
+    $denomination = $display['unit_plain'] ?? '';
 @endphp
 <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mt-2">
     <div class="dro_140 country-kpi-tile {{ $hasDrilldown ? 'country-kpi-tile--drilldown kpi-drilldown-trigger' : '' }}"
@@ -12,7 +14,7 @@
              role="button"
              tabindex="0"
              data-kpi-id="{{ $kpiId }}"
-             aria-label="View details for {{ $kpiName }}"
+             aria-label="{{ $display['value_with_unit'] ?? $kpiName }}"
              title="View details"
          @endif>
         <div class="dro_141 de">
@@ -20,9 +22,10 @@
         </div>
         <div class="dro_142 country-kpi-tile__body">
             <h6 class="country-kpi-tile__title">{{ $kpiName }}</h6>
-            <p class="color-red text-bold country-kpi-tile__value mb-0">
-                {{ $display['value'] }}@if(!empty($display['unit']))<span class="country-kpi-tile__unit" @if(!empty($display['unit_full']) && $display['unit_full'] !== $display['unit']) title="{{ $display['unit_full'] }}" @endif>{{ $display['unit'] }}</span>@endif
-            </p>
+            <p class="color-red text-bold country-kpi-tile__value mb-0">{{ $valueLine }}</p>
+            @if($denomination !== '')
+                <small class="country-kpi-tile__denomination text-muted d-block">{{ $denomination }}</small>
+            @endif
             @if($periodLabel !== '')
                 <small class="text-muted country-kpi-tile__period">Latest: {{ $periodLabel }}</small>
             @endif

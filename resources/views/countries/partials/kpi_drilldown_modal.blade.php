@@ -11,8 +11,8 @@
             <div class="modal-body country-kpi-modal__body">
                 <div class="country-kpi-modal__hero">
                     <div>
-                        <span class="country-kpi-modal__value" id="countryKpiModalValue"></span>
-                        <span class="country-kpi-modal__unit" id="countryKpiModalUnit"></span>
+                        <div class="country-kpi-modal__value" id="countryKpiModalValue"></div>
+                        <div class="country-kpi-modal__denomination text-muted" id="countryKpiModalDenomination"></div>
                     </div>
                     <div class="country-kpi-modal__period text-muted" id="countryKpiModalPeriod"></div>
                 </div>
