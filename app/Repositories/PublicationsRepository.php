@@ -2128,4 +2128,232 @@ public function bulkFeatured($ids)
         ];
     }
 
+    public function buildAdminPendingQuery(Request $request)
+    {
+        $pubs = Publication::query()
+            ->with(['author', 'country'])
+            ->where('is_version', 0)
+            ->where('is_approved', 0)
+            ->where('is_rejected', 0)
+            ->orderBy('id', 'desc');
+
+        if ($request->filled('term')) {
+            $pubs->searchTerm($request->term);
+        }
+
+        $this->applyFilters($pubs, $request);
+        $this->access_filter($pubs);
+
+        $search = trim((string) $request->input('search.value', ''));
+        if ($search !== '') {
+            $pubs->where(function ($q) use ($search) {
+                $q->where('title', 'like', '%'.$search.'%')
+                    ->orWhere('description', 'like', '%'.$search.'%')
+                    ->orWhereHas('author', function ($aq) use ($search) {
+                        $aq->where('name', 'like', '%'.$search.'%');
+                    });
+            });
+        }
+
+        return $pubs;
+    }
+
+    public function adminPendingDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminPendingQuery($request);
+        $recordsTotal = Publication::query()
+            ->where('is_version', 0)
+            ->where('is_approved', 0)
+            ->where('is_rejected', 0)
+            ->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'id', 2 => 'title', 3 => 'description', 7 => 'is_active', 8 => 'date_created'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        if ($orderCol === 'date_created') {
+            $base->orderByRaw('COALESCE(date_created, created_at) '.$orderDir);
+        } else {
+            $base->orderBy($orderCol, $orderDir);
+        }
+
+        $rows = $base->skip($start)->take($length)->get();
+        $canDelete = auth()->user() && auth()->user()->can('delete_publications');
+        $currentUserId = current_user() ? current_user()->id : null;
+        $isAdmin = is_admin();
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $publication) {
+            $dateCreated = '-';
+            if ($publication->date_created) {
+                $dateCreated = Carbon::parse($publication->date_created)->format('M d, Y');
+            } elseif ($publication->created_at) {
+                $dateCreated = Carbon::parse($publication->created_at)->format('M d, Y');
+            }
+
+            $actions = '<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary mr-1" title="View"><i class="fa fa-eye"></i></a>';
+            if ($publication->user_id == $currentUserId || $isAdmin) {
+                $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Edit"><i class="fa fa-edit"></i></a>';
+            }
+            if ($canDelete) {
+                $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(\''.$publication->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>';
+            }
+
+            $data[] = [
+                'checkbox' => '<input type="checkbox" name="publication_ids[]" value="'.$publication->id.'" class="pending-pub-cb">',
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => '<a href="'.e($publication->publication).'" target="_blank" rel="noopener">'.truncate($publication->title, 30).'</a>',
+                'description' => truncate(html_to_text($publication->description), 50),
+                'author' => e($publication->author->name ?? ''),
+                'affiliation' => e($publication->author_affiliation ?: '-'),
+                'member_state' => e($publication->country->name ?? ''),
+                'status' => e(get_publication_state($publication->is_approved, $publication->is_rejected)),
+                'date_created' => $dateCreated,
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function buildAdminSummariesQuery(Request $request)
+    {
+        $qry = PublicationSummary::query()->with('author')->orderBy('id', 'desc');
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            $qry->where(function ($q) use ($term) {
+                $q->where('title', 'like', '%'.$term.'%')
+                    ->orWhere('description', 'like', '%'.$term.'%');
+            });
+        }
+
+        if ($request->filled('author')) {
+            $qry->where('author_id', $request->author);
+        }
+
+        return $qry;
+    }
+
+    public function adminSummariesDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 15)), 100);
+
+        $base = $this->buildAdminSummariesQuery($request);
+        $recordsTotal = PublicationSummary::query()->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 0);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [0 => 'id', 1 => 'title', 2 => 'description', 4 => 'is_approved'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $row) {
+            if ((int) ($row->is_approved ?? 0) === 0 && (int) ($row->is_rejected ?? 0) === 0) {
+                $status = 'Pending Approval';
+            } elseif ((int) ($row->is_rejected ?? 0) === 1) {
+                $status = 'Rejected';
+            } else {
+                $status = 'Approved';
+            }
+
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => truncate($row->title, 30),
+                'content' => truncate(html_to_text($row->description), 50),
+                'author' => e($row->author->name ?? ''),
+                'status' => e($status),
+                'actions' => '<a href="'.url('admin/publications/summary').'?id='.$row->id.'" class="btn btn-sm btn-outline-primary mr-1"><i class="fa fa-eye mr-1"></i> Details</a>'
+                    .'<a href="'.url('admin/publications/details').'?id='.$row->resource_id.'" class="btn btn-sm btn-outline-dark"><i class="fa fa-external-link mr-1"></i> Original</a>',
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function buildAdminModerateCommentsQuery(Request $request)
+    {
+        $qry = PublicationComment::query()
+            ->with(['user', 'publication'])
+            ->where('status', 'pending')
+            ->orderBy('created_at', 'desc');
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            $qry->where(function ($q) use ($term) {
+                $q->where('comment', 'like', '%'.$term.'%')
+                    ->orWhereHas('publication', function ($pq) use ($term) {
+                        $pq->where('title', 'like', '%'.$term.'%');
+                    });
+            });
+        }
+
+        return $qry;
+    }
+
+    public function adminModerateCommentsDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminModerateCommentsQuery($request);
+        $recordsTotal = PublicationComment::query()->where('status', 'pending')->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 3);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [0 => 'publication_id', 1 => 'comment', 3 => 'created_at'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'created_at';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+
+        $data = [];
+        foreach ($rows as $comment) {
+            $pubTitle = $comment->publication ? truncate($comment->publication->title, 40) : '—';
+            $createdAt = $comment->created_at ? Carbon::parse($comment->created_at)->format('M d, Y H:i') : '—';
+            $actions = '<a href="'.url('admin/publications/approve_comment').'?id='.$comment->id.'" class="btn btn-sm btn-outline-success approve_comment mr-1"><i class="fa fa-check mr-1"></i> Approve</a>'
+                .'<a href="'.url('admin/publications/reject_comment').'?id='.$comment->id.'" class="btn btn-sm btn-outline-danger reject_comment"><i class="fa fa-times mr-1"></i> Reject</a>';
+
+            $data[] = [
+                'publication' => e($pubTitle),
+                'comment' => e(truncate($comment->comment, 120)),
+                'created_by' => e($comment->user->name ?? '—'),
+                'created_at' => e($createdAt),
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
 }

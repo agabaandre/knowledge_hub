@@ -14,6 +14,10 @@ class PublicationComment extends Model
         return $this->belongsTo(User::class,"user_id","id");
     }
 
+    public function publication(){
+        return $this->belongsTo(Publication::class, 'publication_id', 'id');
+    }
+
     public function getCommentAttribute($value)
     {
            return cleanUTF8($value);

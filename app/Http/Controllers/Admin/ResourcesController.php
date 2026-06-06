@@ -39,11 +39,12 @@ class ResourcesController extends Controller
 
     
     public function pending(Request $request){
-        $request['is_admin']  = 1;
-        $request['rows'] = $request->rows ?? 20; // Set pagination to 20 per page
-        $data['publications'] = $this->publicationsRepo->get($request,false, false,true);
-        $data['search']       = (Object) $request->all();
-        return view('admin.publications.pending',$data);
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->adminPendingDatatable($request));
+        }
+
+        $data['search'] = (object) $request->all();
+        return view('admin.publications.pending', $data);
     }
 
     public function create(Request $request){
@@ -68,9 +69,12 @@ class ResourcesController extends Controller
 
 
     public function summaries(Request $request){
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->adminSummariesDatatable($request));
+        }
 
-        $data['summaries']        =  $this->publicationsRepo->get_summaries($request);
-        return view('admin.publications.summaries',$data);
+        $data['search'] = (object) $request->all();
+        return view('admin.publications.summaries', $data);
     }
 
     public function summary(Request $request){
@@ -182,10 +186,12 @@ class ResourcesController extends Controller
         return back()->with($data);
     }
     public function moderate(Request $request){
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->adminModerateCommentsDatatable($request));
+        }
 
-        $data['publications'] = $this->publicationsRepo->with_pending_comments($request);
-        $data['search']       = (Object) $request->all();
-        return view('admin.publications.moderate',$data);
+        $data['search'] = (object) $request->all();
+        return view('admin.publications.moderate', $data);
     }
 
     public function destroy(Request $request){
