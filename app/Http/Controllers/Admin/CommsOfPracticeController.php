@@ -27,6 +27,10 @@ class CommsOfPracticeController extends Controller
 
     public function index(Request $request){
 
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->commsOfPracticeRepository->adminCommunitiesDatatable($request));
+        }
+
         $col = array();
         $col["title"]    = "Id"; 
         $col["name"]     = "id"; 
@@ -63,18 +67,9 @@ class CommsOfPracticeController extends Controller
 
         // Get communities with pending member counts (admin can see all, including non-public)
         $request->merge(['admin' => true]);
-        $data['communities'] = $this->commsOfPracticeRepository->get($request);
         
         // Pass regions data for chained dropdowns
         $data['regions'] = $this->areasRepo->regions()->load('countries');
-        
-        // Load pending member counts for each community
-        $data['communities']->getCollection()->transform(function ($community) {
-            $community->pending_members_count = \App\Models\CommunityOfPracticeMembers::where('community_of_practice_id', $community->id)
-                ->where('is_approved', 0)
-                ->count();
-            return $community;
-        });
         
         $data['search']    = (Object) $request->all();
         $sql = "SELECT c.id,community_name,description,is_active,u.name as created_by FROM community_of_practices c left join users u on u.id=c.created_by";
@@ -196,144 +191,18 @@ class CommsOfPracticeController extends Controller
 
     public function participants(Request $request)
     {
-        $usesAdministrativeUnits = function_exists('admin_units_enabled')
-            ? (bool) admin_units_enabled()
-            : (bool) env('ADMIN_UNITS_ENABLED', false);
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->commsOfPracticeRepository->adminParticipantsDatatable($request));
+        }
 
-        $geoTable = $usesAdministrativeUnits ? 'administrative_units' : 'country';
-        $geoForeignKey = $usesAdministrativeUnits ? 'users.administrative_unit_id' : 'users.country_id';
-        $geoLabel = $usesAdministrativeUnits ? 'Administrative Unit' : 'Country';
+        $geo = $this->commsOfPracticeRepository->participantsGeoContext();
+        $geoTable = $geo['geoTable'];
+        $geoLabel = $geo['geoLabel'];
         $geoFilterId = (int) ($request->input('geography_id') ?: $request->input('country_id'));
-
-        $participants = User::query()
-            ->select('users.*', DB::raw($geoTable.'.name as geo_name'))
-            ->join('community_of_practice_members as copm', function ($join) {
-                $join->on('copm.user_id', '=', 'users.id')
-                    ->where('copm.is_approved', 1)
-                    ->where('copm.is_active', 1);
-            })
-            ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey)
-            ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
-                $term = trim((string) $request->q);
-                $q->where(function ($qq) use ($term, $geoTable) {
-                    $qq->where('users.name', 'like', '%'.$term.'%')
-                        ->orWhere('users.email', 'like', '%'.$term.'%')
-                        ->orWhere('users.job_title', 'like', '%'.$term.'%')
-                        ->orWhere('users.organization_name', 'like', '%'.$term.'%')
-                        ->orWhere($geoTable.'.name', 'like', '%'.$term.'%');
-                });
-            })
-            ->when($geoFilterId > 0, function ($q) use ($geoForeignKey, $geoFilterId) {
-                $q->where($geoForeignKey, $geoFilterId);
-            })
-            ->when($request->filled('title'), function ($q) use ($request) {
-                $q->where('users.job_title', 'like', '%'.trim((string) $request->title).'%');
-            })
-            ->when($request->filled('organisation'), function ($q) use ($request) {
-                $q->where('users.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
-            })
-            ->when($request->filled('community_id'), function ($q) use ($request) {
-                $q->where('copm.community_of_practice_id', (int) $request->community_id);
-            })
-            ->when($request->filled('badge_type_id'), function ($q) use ($request) {
-                $badgeTypeId = (int) $request->badge_type_id;
-                $q->whereExists(function ($sub) use ($badgeTypeId) {
-                    $sub->select(DB::raw(1))
-                        ->from('user_badges as ub')
-                        ->whereColumn('ub.user_id', 'users.id')
-                        ->where('ub.badge_type_id', $badgeTypeId);
-                });
-            })
-            ->groupBy('users.id', $geoTable.'.name')
-            ->orderBy('users.name')
-            ->paginate(40)
-            ->appends($request->query());
-
-        $userIds = $participants->getCollection()->pluck('id')->all();
-        $authorByUser = $participants->getCollection()
-            ->pluck('author_id', 'id')
-            ->filter()
-            ->map(fn ($id) => (int) $id)
-            ->toArray();
-
-        $publicationsByUser = DB::table('publication')
-            ->select('user_id', DB::raw('COUNT(*) as total'))
-            ->whereIn('user_id', $userIds)
-            ->groupBy('user_id')
-            ->pluck('total', 'user_id');
-
-        $publicationsByAuthor = empty($authorByUser)
-            ? collect()
-            : DB::table('publication')
-                ->select('author_id', DB::raw('COUNT(*) as total'))
-                ->whereIn('author_id', array_values($authorByUser))
-                ->groupBy('author_id')
-                ->pluck('total', 'author_id');
-
-        $forumPostsByUser = DB::table('forums')
-            ->select('created_by', DB::raw('COUNT(*) as total'))
-            ->whereIn('created_by', $userIds)
-            ->groupBy('created_by')
-            ->pluck('total', 'created_by');
-
-        $forumCommentsByUser = DB::table('forum_comments')
-            ->select('created_by', DB::raw('COUNT(*) as total'))
-            ->whereIn('created_by', $userIds)
-            ->groupBy('created_by')
-            ->pluck('total', 'created_by');
-
-        $badgesByUser = UserBadge::query()
-            ->with('badgeType:id,name')
-            ->whereIn('user_id', $userIds)
-            ->orderByDesc('awarded_at')
-            ->get()
-            ->groupBy('user_id');
-
-        $membershipsByUser = CommunityOfPracticeMembers::query()
-            ->with('community:id,community_name')
-            ->whereIn('user_id', $userIds)
-            ->where('is_approved', 1)
-            ->where('is_active', 1)
-            ->get()
-            ->groupBy('user_id');
-
-        $participants->getCollection()->transform(function ($u) use (
-            $publicationsByUser,
-            $publicationsByAuthor,
-            $authorByUser,
-            $forumPostsByUser,
-            $forumCommentsByUser,
-            $badgesByUser,
-            $membershipsByUser
-        ) {
-            $uid = (int) $u->id;
-            $authorId = $authorByUser[$uid] ?? null;
-            $pubByUser = (int) ($publicationsByUser[$uid] ?? 0);
-            $pubByAuthor = $authorId ? (int) ($publicationsByAuthor[$authorId] ?? 0) : 0;
-
-            $u->publication_contributions = $pubByUser + $pubByAuthor;
-            $u->forum_contributions = (int) ($forumPostsByUser[$uid] ?? 0) + (int) ($forumCommentsByUser[$uid] ?? 0);
-
-            $badgeNames = collect($badgesByUser[$uid] ?? [])
-                ->map(fn ($b) => $b->badgeType->name ?? null)
-                ->filter()
-                ->unique()
-                ->values();
-            $u->badge_labels = $badgeNames->implode(', ');
-
-            $communityNames = collect($membershipsByUser[$uid] ?? [])
-                ->map(fn ($m) => $m->community->community_name ?? null)
-                ->filter()
-                ->unique()
-                ->values();
-            $u->community_labels = $communityNames->implode(', ');
-
-            return $u;
-        });
 
         $baseMembershipQuery = CommunityOfPracticeMembers::query()
             ->join('users', 'users.id', '=', 'community_of_practice_members.user_id')
-            ->leftJoin($geoTable, $geoTable.'.id', '=', $usesAdministrativeUnits ? 'users.administrative_unit_id' : 'users.country_id')
+            ->leftJoin($geoTable, $geoTable.'.id', '=', $geo['usesAdministrativeUnits'] ? 'users.administrative_unit_id' : 'users.country_id')
             ->where('community_of_practice_members.is_approved', 1)
             ->where('community_of_practice_members.is_active', 1)
             ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
@@ -352,8 +221,8 @@ class CommsOfPracticeController extends Controller
             ->when($request->filled('organisation'), function ($q) use ($request) {
                 $q->where('users.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
             })
-            ->when($geoFilterId > 0, function ($q) use ($usesAdministrativeUnits, $geoFilterId) {
-                $q->where($usesAdministrativeUnits ? 'users.administrative_unit_id' : 'users.country_id', $geoFilterId);
+            ->when($geoFilterId > 0, function ($q) use ($geo, $geoFilterId) {
+                $q->where($geo['usesAdministrativeUnits'] ? 'users.administrative_unit_id' : 'users.country_id', $geoFilterId);
             })
             ->when($request->filled('community_id'), function ($q) use ($request) {
                 $q->where('community_of_practice_members.community_of_practice_id', (int) $request->community_id);
@@ -386,7 +255,6 @@ class CommsOfPracticeController extends Controller
         $search = (object) $request->all();
 
         return view('admin.commsofpractice.participants', compact(
-            'participants',
             'geographies',
             'communities',
             'badgeTypes',
@@ -396,7 +264,6 @@ class CommsOfPracticeController extends Controller
             'totalUniqueMemberships',
             'totalMembershipsByGeography',
             'membershipsByGeography',
-            'usesAdministrativeUnits'
         ));
     }
 

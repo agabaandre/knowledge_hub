@@ -2386,4 +2386,192 @@ public function bulkFeatured($ids)
         ];
     }
 
+    public function buildAdminDashboardRecentQuery(Request $request)
+    {
+        $pubs = Publication::query()
+            ->with(['author'])
+            ->where('is_version', 0)
+            ->orderBy('visits', 'desc')
+            ->orderBy('id', 'desc');
+
+        $this->access_filter($pubs);
+
+        if ($request->filled('search.title')) {
+            $pubs->where('title', 'like', '%'.trim((string) $request->input('search.title')).'%');
+        }
+        if ($request->filled('search.description')) {
+            $pubs->where('description', 'like', '%'.trim((string) $request->input('search.description')).'%');
+        }
+        if ($request->filled('search.author')) {
+            $term = trim((string) $request->input('search.author'));
+            $pubs->whereHas('author', function ($q) use ($term) {
+                $q->where('name', 'like', '%'.$term.'%');
+            });
+        }
+
+        return $pubs;
+    }
+
+    public function adminDashboardRecentDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 10)), 100);
+
+        $base = $this->buildAdminDashboardRecentQuery($request);
+        $recordsTotal = Publication::query()->where('is_version', 0)->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'created_at', 2 => 'title', 5 => 'is_approved'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+        $data = [];
+        $index = $start + 1;
+
+        foreach ($rows as $publication) {
+            $created = $publication->created_at
+                ? Carbon::parse($publication->created_at)->format('M d, Y')
+                : '-';
+            $title = '<div class="pub-cell-wrap"><a href="'.e($publication->publication ?? url('records/resource?id='.$publication->id)).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a></div>';
+            $description = $this->adminPublicationDescriptionCell($publication->title, $publication->description);
+            $author = '<div class="pub-cell-wrap">'.e($publication->author->name ?? '-').'</div>';
+
+            if ($publication->is_approved) {
+                $statusClass = 'success';
+                $statusLabel = 'Approved';
+            } elseif ($publication->is_rejected) {
+                $statusClass = 'danger';
+                $statusLabel = 'Rejected';
+            } else {
+                $statusClass = 'warning';
+                $statusLabel = 'Pending';
+            }
+            $status = '<span class="badge badge-'.$statusClass.'">'.e($statusLabel).'</span>';
+
+            $actions = '<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary" title="Preview"><i class="fa fa-eye mr-1"></i>Preview</a>';
+
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'date_created' => e($created),
+                'title' => $title,
+                'description' => $description,
+                'author' => $author,
+                'status' => $status,
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function buildAccountMyPublicationsQuery(Request $request, int $userId)
+    {
+        $query = Publication::query()
+            ->with(['author'])
+            ->where('user_id', $userId);
+
+        $term = trim((string) ($request->input('term') ?: $request->input('search.value')));
+        if ($term !== '') {
+            $query->where(function ($q) use ($term) {
+                $q->where('title', 'like', '%'.$term.'%')
+                    ->orWhere('description', 'like', '%'.$term.'%');
+            });
+        }
+
+        if ($request->filled('search.title')) {
+            $query->where('title', 'like', '%'.trim((string) $request->input('search.title')).'%');
+        }
+        if ($request->filled('search.description')) {
+            $query->where('description', 'like', '%'.trim((string) $request->input('search.description')).'%');
+        }
+
+        $status = strtolower(trim((string) $request->input('status', '')));
+        if ($status === 'approved') {
+            $query->where('is_approved', 1)->where('is_rejected', 0);
+        } elseif ($status === 'pending') {
+            $query->where('is_approved', 0)->where('is_rejected', 0);
+        } elseif ($status === 'rejected') {
+            $query->where('is_rejected', 1);
+        }
+
+        return $query;
+    }
+
+    public function accountMyPublicationsDatatable(Request $request): array
+    {
+        $userId = (int) auth()->id();
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 10)), 100);
+
+        $base = $this->buildAccountMyPublicationsQuery($request, $userId);
+        $recordsTotal = Publication::query()->where('user_id', $userId)->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 5);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'title', 2 => 'description', 3 => 'is_approved', 4 => 'visits', 5 => 'created_at'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+        $data = [];
+        $index = $start + 1;
+
+        foreach ($rows as $row) {
+            $status = get_publication_state($row->is_approved, $row->is_rejected);
+            if ((int) ($row->is_rejected ?? 0) === 1) {
+                $statusClass = 'danger';
+            } elseif ((int) ($row->is_approved ?? 0) === 1) {
+                $statusClass = 'success';
+            } else {
+                $statusClass = 'warning';
+            }
+            $statusBadge = '<span class="badge badge-'.$statusClass.'">'.e($status).'</span>';
+
+            $title = '<div class="pub-cell-wrap"><a href="'.e($row->publication).'" target="_blank" rel="noopener" class="pub-title-link">'.e($row->title).'</a></div>';
+            $description = $this->adminPublicationDescriptionCell($row->title, $row->description);
+            if ((int) ($row->is_rejected ?? 0) === 1 && !empty($row->rejected_reason)) {
+                $description .= '<div class="mt-2 p-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:0;"><small class="text-danger"><strong>Rejection reason:</strong> '.e($row->rejected_reason).'</small></div>';
+            }
+
+            $totalViews = \App\Models\PublicationView::getTotalViews($row->id);
+            $isApproved = (int) ($row->is_approved ?? 0) === 1;
+
+            $actions = '<div class="btn-group btn-group-sm" role="group" aria-label="Actions">'
+                .'<a href="'.url('records/resource').'?id='.$row->id.'" class="btn btn-outline-secondary" target="_blank" rel="noopener"><i class="fa fa-eye"></i> Preview</a>';
+            if (!$isApproved) {
+                $actions .= '<a href="'.route('account.publications.edit').'?ref='.$row->id.'" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>'
+                    .'<a href="javascript:void(0);" onclick="openDeleteModal('.$row->id.')" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>';
+            }
+            $actions .= '</div>';
+
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => $title,
+                'description' => $description,
+                'status' => $statusBadge,
+                'views' => '<span class="badge badge-info">'.number_format($totalViews).'</span>',
+                'created_at' => e($row->created_at ? $row->created_at->format('M d, Y') : 'N/A'),
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
 }

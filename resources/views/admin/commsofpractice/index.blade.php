@@ -2,127 +2,19 @@
 
 @section('styles')
  @include('common.table')
+ @include('admin.publications.partials.filter_styles')
  @include('partials.general.summernote')
- <link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
  <style>
-    .af-card{background:#fff;border:1px solid #e2e8f0;border-radius:12px}
+    .af-card{background:#fff;border:1px solid #e2e8f0}
     .af-card .card-header{padding:12px 16px;border-bottom:1px solid #e2e8f0;background:#f8fafc}
     .af-card .card-body{padding:16px}
-    
-    /* Ensure red badges show in table and on buttons */
     #communities-table .badge-danger,
     .badge.badge-danger.badge-pill { background-color: #dc3545 !important; color: #fff !important; }
-
-    /* Table organization improvements */
-    #communities-table {
-        width: 100% !important;
-        table-layout: auto;
-    }
-    
-    #communities-table thead th {
-        background: #f8fafc;
-        border-bottom: 2px solid #e2e8f0;
-        color: #0f172a;
-        font-weight: 600;
-        padding: 12px 15px;
-        text-align: left;
-        vertical-align: middle;
-        white-space: nowrap;
-    }
-    
-    #communities-table tbody td {
-        padding: 12px 15px;
-        vertical-align: top;
-        border-top: 1px solid #f1f5f9;
-    }
-    
-    /* Column width management */
-    #communities-table th:nth-child(1),
-    #communities-table td:nth-child(1) {
-        width: 60px;
-        text-align: center;
-        white-space: nowrap;
-    }
-    
-    #communities-table th:nth-child(2),
-    #communities-table td:nth-child(2) {
-        min-width: 216px; /* Increased by 20% from 180px */
-        max-width: 300px; /* Increased by 20% from 250px */
-        font-weight: 600;
-        word-wrap: break-word;
-        word-break: break-word;
-        white-space: normal;
-        line-height: 1.5;
-    }
-    
-    #communities-table th:nth-child(3),
-    #communities-table td:nth-child(3) {
-        min-width: 200px; /* Reduced from 300px */
-        max-width: 300px; /* Reduced */
-        word-wrap: break-word;
-        word-break: break-word;
-        white-space: normal;
-        line-height: 1.5;
-    }
-    
-    #communities-table th:nth-child(4),
-    #communities-table td:nth-child(4) {
-        width: 192px; /* Increased by 20% from 160px */
-        text-align: center;
-        white-space: normal;
-    }
-    
-    /* Description column - truncate after 20 words */
-    #communities-table td:nth-child(3) {
-        text-align: left;
-    }
-    
-    /* Action buttons */
-    #communities-table .btn-group {
-        display: flex;
-        justify-content: center;
-        gap: 6px;
-        flex-wrap: wrap;
-    }
-    
-    #communities-table .btn-group .btn {
-        padding: 6px 12px;
-        font-size: 0.875rem;
-        white-space: nowrap;
-    }
-    
-    /* Striped rows */
-    #communities-table tbody tr:nth-of-type(even) {
-        background-color: #f9fafb;
-    }
-    
-    #communities-table tbody tr:hover {
-        background-color: #f3f4f6;
-    }
-    
-    /* Mobile responsive adjustments */
-    @media (max-width: 768px) {
-        #communities-table th:nth-child(3),
-        #communities-table td:nth-child(3) {
-            min-width: 200px;
-        }
-        .dataTables_wrapper .dataTables_filter {
-            margin-bottom: 1rem;
-        }
-        .dataTables_wrapper .dataTables_length {
-            margin-bottom: 1rem;
-        }
-    }
-    @media (max-width: 576px) {
-        #communities-table th:nth-child(3),
-        #communities-table td:nth-child(3) {
-            min-width: 150px;
-        }
-        #communities-table .btn-group .btn {
-            padding: 4px 8px;
-            font-size: 0.75rem;
-        }
-    }
+    #communities-table_wrapper table.dataTable { table-layout: fixed !important; }
+    #communities-table .cop-col-index { width: 3rem; min-width: 3rem; }
+    #communities-table .cop-col-community { width: 22%; }
+    #communities-table .cop-col-description { width: 48%; }
+    #communities-table .cop-col-actions { width: 11rem; white-space: nowrap; vertical-align: middle; }
  </style>
 @endsection
 
@@ -204,50 +96,46 @@
                 </div>
             </div>
 
-            <form method="GET" action="{{ request()->url() }}" class="mb-3 d-flex flex-wrap align-items-center gap-2">
-                <label class="mb-0 font-weight-medium">Search:</label>
-                <input type="text" name="term" value="{{ request('term') }}" class="form-control" style="max-width: 280px;" placeholder="By community name or creator email..." aria-label="Search communities">
-                <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-search mr-1"></i>Search</button>
-                @if(request()->filled('term'))
-                    <a href="{{ request()->url() }}" class="btn btn-outline-secondary btn-sm">Clear</a>
-                @endif
-            </form>
-            <div class="table-responsive">
-                <table id="communities-table" class="table table-striped table-hover table-bordered">
-                    <thead class="thead-light">
+            <div class="pub-filters-card mb-3">
+                <div class="pub-filters-card__header">
+                    <div class="pub-filters-card__heading">
+                        <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                        <div>
+                            <h3 class="pub-filters-card__title">Filter Communities</h3>
+                            <p class="pub-filters-card__subtitle">Search by community name, description, or creator email</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pub-filters-card__body">
+                    <form id="communitiesFiltersForm" method="GET" action="{{ request()->url() }}">
+                        <div class="pub-filters-grid pub-filters-grid--single">
+                            <div class="pub-filter-field">
+                                <label class="pub-filter-label" for="communityTerm">Keyword</label>
+                                <input type="text" name="term" id="communityTerm" class="form-control pub-filter-input" value="{{ request('term') }}" placeholder="Community name, description, or creator email">
+                            </div>
+                        </div>
+                        <div class="pub-filters-actions">
+                            <a href="{{ request()->url() }}" class="pub-filters-btn pub-filters-btn--clear" id="clearCommunitiesFilters">
+                                <i class="fa fa-rotate-left"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="publication-table-wrap">
+                <table id="communities-table" data-kh-datatable="custom" class="table table-striped table-hover table-bordered w-100 kh-table-wrap-cells">
+                    <thead>
                         <tr>
-                            <th>#</th>
-                            <th>Community</th>
-                            <th>Description</th>
-                            <th>Actions</th>
+                            <th class="cop-col-index">#</th>
+                            <th class="cop-col-community">Community</th>
+                            <th class="cop-col-description">Description</th>
+                            <th class="cop-col-actions">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        @foreach($communities as $idx => $c)
-                        <tr>
-                            <td class="text-center">{{ $communities->firstItem() + $idx }}</td>
-                            <td><strong>{{ $c->community_name }}</strong></td>
-                            <td>{!! \Illuminate\Support\Str::words(strip_tags($c->description), 20, '...') !!}</td>
-                            <td>
-                                <div class="btn-group-vertical btn-group-sm" role="group" style="gap: 4px;">
-                                    <a href="{{ route('admin.commsofpractice.details', $c->id) }}" class="btn btn-outline-info btn-sm" style="position: relative;">
-                                        <i class="fa fa-users mr-1"></i>Group Members
-                                        @if(isset($c->pending_members_count) && $c->pending_members_count > 0)
-                                            <span class="badge badge-danger badge-pill" style="position: absolute; top: -4px; right: -6px; min-width: 18px; height: 18px; font-size: 0.7rem; padding: 2px 5px; background:#dc3545!important;color:#fff!important;">{{ $c->pending_members_count }}</span>
-                                        @endif
-                                    </a>
-                                    <button class="btn btn-outline-dark btn-sm" onclick="openEditCommunity({{ $c->id }})"><i class="fa fa-edit mr-1"></i>Edit</button>
-                                    @can('delete_publication_metadata')
-                                    <button class="btn btn-outline-danger btn-sm" onclick="openDeleteModal({{ $c->id }})"><i class="fa fa-trash mr-1"></i>Delete</button>
-                                    @endcan
-                                </div>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
-            <div class="py-2">{{ $communities->links() }}</div>
         </div>
     </div>
 
@@ -259,48 +147,60 @@
 @section('scripts')
 @include('partials.general.summernote')
 @include('common.select2')
-<script src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"></script>
+@include('admin.publications.partials.datatable_assets')
 <script>
+let communitiesTable = null;
+let communitiesFilterTimer = null;
+
+function collectCommunitiesFilterParams() {
+    const params = {};
+    const term = $('#communityTerm').val();
+    if (term) params.term = term;
+    return params;
+}
+
+function reloadCommunitiesTable() {
+    if (communitiesTable) communitiesTable.ajax.reload();
+}
+
 $(function(){
-    // Initialize DataTable with custom search
-    var table = $('#communities-table').DataTable({
+    communitiesTable = $('#communities-table').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        autoWidth: false,
+        scrollX: false,
         pageLength: 15,
-        lengthMenu: [[10, 15, 25, 50, 100, -1], [10, 15, 25, 50, 100, "All"]],
-        order: [[0, 'asc']], // Sort by # column (number) in ascending order
-        columnDefs: [
-            { orderable: false, targets: [3] }, // Disable sorting on Actions column
-            { width: "60px", targets: [0], className: "text-center" }, // # column
-            { width: "240px", targets: [1] }, // Community column (increased by 20%)
-            { width: "300px", targets: [2] }, // Description column (reduced)
-            { width: "192px", targets: [3], className: "text-center" }, // Actions column (increased by 20%)
-        ],
-        responsive: true, // Enable responsive mode
-        scrollX: false, // Disable horizontal scroll for better organization
-        autoWidth: true, // Allow table to adjust width
-        language: {
-            search: "",
-            searchPlaceholder: "Search communities by name or description...",
-            lengthMenu: "Show _MENU_ communities per page",
-            info: "Showing _START_ to _END_ of _TOTAL_ communities",
-            infoEmpty: "No communities available",
-            infoFiltered: "(filtered from _MAX_ total communities)",
-            zeroRecords: "No matching communities found"
+        lengthMenu: [[10, 15, 25, 50, 100], [10, 15, 25, 50, 100]],
+        order: [[1, 'asc']],
+        ajax: {
+            url: '{{ request()->url() }}',
+            data: function (d) {
+                d.datatable = 1;
+                return Object.assign(d, collectCommunitiesFilterParams());
+            }
         },
-        dom: '<"row mb-3"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip',
-        paging: false, // Disable DataTables pagination since we're using Laravel pagination
-        info: false // Disable DataTables info since we're using Laravel pagination
+        columns: [
+            { data: 'index', orderable: false, searchable: false, className: 'cop-col-index text-center' },
+            { data: 'community_name', orderable: true, className: 'cop-col-community' },
+            { data: 'description', orderable: true, className: 'cop-col-description' },
+            { data: 'actions', orderable: false, searchable: false, className: 'cop-col-actions text-center' }
+        ],
+        columnDefs: [
+            { targets: [0, 3], orderable: false }
+        ],
+        language: {
+            processing: '<i class="fa fa-spinner fa-spin"></i> Loading communities...',
+            emptyTable: 'No communities match your filters.',
+            zeroRecords: 'No matching communities found.'
+        }
     });
-    
-    // Customize search input styling
-    $('.dataTables_filter input').addClass('form-control').css({
-        'width': '300px',
-        'display': 'inline-block',
-        'margin-left': '10px'
+
+    $('#communityTerm').on('input', function () {
+        clearTimeout(communitiesFilterTimer);
+        communitiesFilterTimer = setTimeout(reloadCommunitiesTable, 350);
     });
-    
-    // Add search icon to DataTables filter
-    $('.dataTables_filter').prepend('<i class="fa fa-search" style="margin-right: 5px; color: #6c757d;"></i>');
-    
+
     function initSN(){
         var $el = $('#description');
         if ($el.length && !$el.hasClass('summernote-sm')) { $el.addClass('summernote-sm'); }

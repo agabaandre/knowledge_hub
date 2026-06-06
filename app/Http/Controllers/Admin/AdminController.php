@@ -36,16 +36,11 @@ class AdminController extends Controller
 
     public function index(Request $request){
 
-        $request['rows']      = 10;
-        $request['order_by_visits'] = true;
-        $request['is_admin']  = 1;
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->adminDashboardRecentDatatable($request));
+        }
 
         $data['search'] = (Object) $request->all();
-
-		$data['publications'] = $this->publicationsRepo->get($request);
-        $data['authors'] = $this->authorsRepo->get($request);
-        $data['experts'] = $this->expertsRepo->get($request);
-        $data['forums']  = $this->forumsRepo->get($request);
 
         $data['publications_count'] = Publication::count();
         $data['authors_count'] = Author::count();

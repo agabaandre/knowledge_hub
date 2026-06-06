@@ -2,8 +2,7 @@
 
 @section('styles')
 @include('common.table')
-<link href="{{ asset('assets/plugins/datatable/css/jquery.dataTables.min.css') }}" rel="stylesheet">
-
+@include('admin.publications.partials.filter_styles')
 <style>
     /* Stat card styles with colored backgrounds */
     .stat-card {
@@ -148,6 +147,33 @@
         #previewModalBody iframe {
             height: calc(100vh * 0.70);
         }
+    }
+
+    #my-publications_wrapper table.dataTable { table-layout: fixed !important; }
+    #my-publications .my-pub-col-index { width: 3rem; min-width: 3rem; }
+    #my-publications .my-pub-col-title { width: 18%; }
+    #my-publications .my-pub-col-description { width: 26%; }
+    #my-publications .my-pub-col-status { width: 8%; }
+    #my-publications .my-pub-col-views { width: 6rem; text-align: center; }
+    #my-publications .my-pub-col-created { width: 9%; }
+    #my-publications .my-pub-col-actions { width: 11rem; white-space: nowrap; vertical-align: middle; }
+    #my-publications .pub-title-link {
+        word-break: break-word;
+        overflow-wrap: anywhere;
+    }
+    .pub-desc-preview {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: var(--theme-color-primary, #119A48) !important;
+        text-decoration: none !important;
+        white-space: nowrap;
+    }
+    .pub-desc-preview:hover { text-decoration: underline !important; }
+    #pubDescriptionPreviewBody {
+        white-space: pre-wrap;
+        word-break: break-word;
+        line-height: 1.6;
+        color: #334155;
     }
 </style>
 @endsection
@@ -298,61 +324,185 @@
 		</div>
 	
 		<div class="card-body text-left">
-            <table id="my-publications" class="table table-striped table-bordered align-middle">
-				<thead>
-					<tr>
-						<th>#</th>
-						<th>Title</th>
-						<th>Description</th>
-                        <th>Status</th>
-                        <th>Total Views</th>
-                        <th>Created At</th>
-                        <th width="240">Actions</th>
-					</tr>
-				</thead>
-                <tbody></tbody>
-            </table>
+            <div class="pub-filters-card mb-3">
+                <div class="pub-filters-card__header">
+                    <div class="pub-filters-card__heading">
+                        <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                        <div>
+                            <h3 class="pub-filters-card__title">Filter Publications</h3>
+                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="pub-filters-card__body">
+                    <form id="myPublicationsFiltersForm" method="GET" action="{{ route('account.publications') }}" class="mb-0">
+                        <div class="pub-filters-grid">
+                            <div class="pub-filter-field">
+                                <label class="pub-filter-label" for="filterMyPubTitle">Title</label>
+                                <input type="text" name="search[title]" id="filterMyPubTitle" class="form-control pub-filter-input" value="{{ request('search.title') }}" placeholder="Filter by title">
+                            </div>
+                            <div class="pub-filter-field">
+                                <label class="pub-filter-label" for="filterMyPubDescription">Description</label>
+                                <input type="text" name="search[description]" id="filterMyPubDescription" class="form-control pub-filter-input" value="{{ request('search.description') }}" placeholder="Filter by description">
+                            </div>
+                            <div class="pub-filter-field">
+                                <label class="pub-filter-label" for="filterMyPubStatus">Status</label>
+                                <select name="status" id="filterMyPubStatus" class="form-control pub-filter-input">
+                                    <option value="">All statuses</option>
+                                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="pub-filters-actions">
+                            <a href="{{ route('account.publications') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearMyPublicationsFilters">
+                                <i class="fa fa-rotate-left"></i> Clear
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
 
+            <div class="publication-table-wrap">
+                <table id="my-publications" data-kh-datatable="custom" class="table table-striped table-bordered align-middle w-100 kh-table-wrap-cells">
+                    <thead>
+                        <tr>
+                            <th class="my-pub-col-index">#</th>
+                            <th class="my-pub-col-title">Title</th>
+                            <th class="my-pub-col-description">Description</th>
+                            <th class="my-pub-col-status">Status</th>
+                            <th class="my-pub-col-views">Total Views</th>
+                            <th class="my-pub-col-created">Created At</th>
+                            <th class="my-pub-col-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
 
             @include('account.partials.delete_pub')
-
         </div>
     </div>
 
+</div>
+
+<div class="modal fade" id="pubDescriptionPreviewModal" tabindex="-1" role="dialog" aria-labelledby="pubDescriptionPreviewTitle" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="pubDescriptionPreviewBody"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
 </div>
 <!-- /row -->
 @endsection
 
 @section('scripts')
 <script>
-// Ensure DataTables library is loaded for non-admin layout
 if (typeof $.fn.DataTable === 'undefined') {
   document.write('\x3Cscript src="{{ asset('assets/plugins/datatable/js/jquery.dataTables.min.js') }}"\x3E\x3C/script\x3E');
 }
+</script>
+@include('common.datatable_defaults')
+<script>
+let myPublicationsTable = null;
+let myPublicationsFilterTimer = null;
+
+function collectMyPublicationsFilterParams() {
+    const params = {};
+    $('#myPublicationsFiltersForm').find('input, select').each(function () {
+        const $el = $(this);
+        const name = $el.attr('name');
+        if (!name) return;
+        const value = $el.val();
+        if (value !== null && value !== '') {
+            params[name] = value;
+        }
+    });
+    return params;
+}
+
+function reloadMyPublicationsTable() {
+    if (myPublicationsTable) myPublicationsTable.ajax.reload();
+}
+
+function scheduleMyPublicationsFilterReload() {
+    clearTimeout(myPublicationsFilterTimer);
+    myPublicationsFilterTimer = setTimeout(reloadMyPublicationsTable, 350);
+}
+
 $(function(){
-  $('#my-publications').DataTable({
+  myPublicationsTable = $('#my-publications').DataTable({
     processing: true,
     serverSide: true,
     searching: false,
-    lengthChange: true,
-    dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"p>>rtip',
+    autoWidth: false,
+    scrollX: false,
+    pageLength: 10,
+    lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+    order: [[5, 'desc']],
     ajax: {
       url: '{{ route('account.publications') }}',
-      data: function(d){ d.datatable = 1; }
+      data: function (d) {
+        d.datatable = 1;
+        return Object.assign(d, collectMyPublicationsFilterParams());
+      }
     },
-    order: [[0,'desc']],
     columns: [
-      { data: 0, orderable: true, searchable: false, width: '5%' },
-      { data: 1, orderable: true },
-      { data: 2, orderable: false },
-      { data: 3, orderable: true, searchable: false },
-      { data: 4, orderable: true, searchable: false },
-      { data: 5, orderable: true, searchable: false },
-      { data: 6, orderable: false, searchable: false, width: '240px' }
+      { data: 'index', orderable: false, searchable: false, className: 'my-pub-col-index text-center' },
+      { data: 'title', orderable: true, className: 'my-pub-col-title' },
+      { data: 'description', orderable: true, className: 'my-pub-col-description' },
+      { data: 'status', orderable: true, searchable: false, className: 'my-pub-col-status' },
+      { data: 'views', orderable: true, searchable: false, className: 'my-pub-col-views text-center' },
+      { data: 'created_at', orderable: true, searchable: false, className: 'my-pub-col-created' },
+      { data: 'actions', orderable: false, searchable: false, className: 'my-pub-col-actions text-center' }
     ],
-    drawCallback: function(){
-      // enable bootstrap tooltips/popovers if needed later
+    columnDefs: [
+      { targets: [0, 6], orderable: false }
+    ],
+    language: {
+      processing: '<i class="fa fa-spinner fa-spin"></i> Loading publications...',
+      emptyTable: 'No publications match your filters.',
+      zeroRecords: 'No matching publications found.'
     }
+  });
+
+  $('#filterMyPubTitle, #filterMyPubDescription').on('input', scheduleMyPublicationsFilterReload);
+  $('#filterMyPubStatus').on('change', reloadMyPublicationsTable);
+
+  $('#myPublicationsFiltersForm').on('submit', function (e) {
+    e.preventDefault();
+    reloadMyPublicationsTable();
+  });
+
+  $('#clearMyPublicationsFilters').on('click', function (e) {
+    e.preventDefault();
+    window.location.href = '{{ route('account.publications') }}';
+  });
+
+  $(document).on('click', '.pub-desc-preview', function (e) {
+    e.preventDefault();
+    var title = $(this).attr('data-title') || 'Description';
+    var description = $(this).attr('data-description') || '';
+    try {
+      description = JSON.parse(description);
+    } catch (err) {
+      // keep raw string fallback
+    }
+    $('#pubDescriptionPreviewTitle').text(title);
+    $('#pubDescriptionPreviewBody').text(description);
+    $('#pubDescriptionPreviewModal').modal('show');
   });
 });
 // A4-like page preview modal - ensure it exists

@@ -1311,4 +1311,288 @@ class CommsOfPracticeRepository{
             ->limit($limit)
             ->get();
     }
+
+    public function buildAdminCommunitiesQuery(Request $request)
+    {
+        $query = CommunityOfPractice::query();
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->input('term'));
+            $query->where(function ($q) use ($term) {
+                $q->where('community_name', 'like', '%'.$term.'%')
+                    ->orWhere('description', 'like', '%'.$term.'%')
+                    ->orWhereHas('creator', function ($q2) use ($term) {
+                        $q2->where('name', 'like', '%'.$term.'%')
+                            ->orWhere('email', 'like', '%'.$term.'%');
+                    });
+            });
+        }
+
+        return $query->orderBy('community_name');
+    }
+
+    public function adminCommunitiesDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 15)), 100);
+
+        $base = $this->buildAdminCommunitiesQuery($request);
+        $recordsTotal = CommunityOfPractice::query()->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $orderMap = [0 => 'id', 1 => 'community_name', 2 => 'description'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'community_name';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+        $pendingCounts = CommunityOfPracticeMembers::query()
+            ->select('community_of_practice_id', DB::raw('COUNT(*) as total'))
+            ->where('is_approved', 0)
+            ->whereIn('community_of_practice_id', $rows->pluck('id'))
+            ->groupBy('community_of_practice_id')
+            ->pluck('total', 'community_of_practice_id');
+
+        $canDelete = auth()->user() && auth()->user()->can('delete_publication_metadata');
+        $data = [];
+        $index = $start + 1;
+
+        foreach ($rows as $community) {
+            $pending = (int) ($pendingCounts[$community->id] ?? 0);
+            $description = e(\Illuminate\Support\Str::words(strip_tags((string) $community->description), 20, '...'));
+
+            $actions = '<div class="btn-group-vertical btn-group-sm d-inline-flex" style="gap:4px;">'
+                .'<a href="'.route('admin.commsofpractice.details', $community->id).'" class="btn btn-outline-info btn-sm" style="position:relative;">'
+                .'<i class="fa fa-users mr-1"></i>Group Members';
+            if ($pending > 0) {
+                $actions .= '<span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:18px;background:#dc3545!important;color:#fff!important;">'.$pending.'</span>';
+            }
+            $actions .= '</a>'
+                .'<button type="button" class="btn btn-outline-dark btn-sm" onclick="openEditCommunity('.$community->id.')"><i class="fa fa-edit mr-1"></i>Edit</button>';
+            if ($canDelete) {
+                $actions .= '<button type="button" class="btn btn-outline-danger btn-sm" onclick="openDeleteModal('.$community->id.')"><i class="fa fa-trash mr-1"></i>Delete</button>';
+            }
+            $actions .= '</div>';
+
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'community_name' => '<div class="pub-cell-wrap"><strong>'.e($community->community_name).'</strong></div>',
+                'description' => '<div class="pub-cell-wrap">'.$description.'</div>',
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    /**
+     * @return array{usesAdministrativeUnits: bool, geoTable: string, geoForeignKey: string, geoLabel: string, geoFilterId: int}
+     */
+    public function participantsGeoContext(): array
+    {
+        $usesAdministrativeUnits = function_exists('admin_units_enabled')
+            ? (bool) admin_units_enabled()
+            : (bool) env('ADMIN_UNITS_ENABLED', false);
+
+        return [
+            'usesAdministrativeUnits' => $usesAdministrativeUnits,
+            'geoTable' => $usesAdministrativeUnits ? 'administrative_units' : 'country',
+            'geoForeignKey' => $usesAdministrativeUnits ? 'users.administrative_unit_id' : 'users.country_id',
+            'geoLabel' => $usesAdministrativeUnits ? 'Administrative Unit' : 'Country',
+            'geoFilterId' => 0,
+        ];
+    }
+
+    public function buildAdminParticipantsQuery(Request $request, array $geo): \Illuminate\Database\Eloquent\Builder
+    {
+        $geoTable = $geo['geoTable'];
+        $geoForeignKey = $geo['geoForeignKey'];
+        $geoFilterId = (int) ($request->input('geography_id') ?: $request->input('country_id'));
+
+        return User::query()
+            ->select('users.*', DB::raw($geoTable.'.name as geo_name'))
+            ->join('community_of_practice_members as copm', function ($join) {
+                $join->on('copm.user_id', '=', 'users.id')
+                    ->where('copm.is_approved', 1)
+                    ->where('copm.is_active', 1);
+            })
+            ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey)
+            ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
+                $term = trim((string) $request->q);
+                $q->where(function ($qq) use ($term, $geoTable) {
+                    $qq->where('users.name', 'like', '%'.$term.'%')
+                        ->orWhere('users.email', 'like', '%'.$term.'%')
+                        ->orWhere('users.job_title', 'like', '%'.$term.'%')
+                        ->orWhere('users.organization_name', 'like', '%'.$term.'%')
+                        ->orWhere($geoTable.'.name', 'like', '%'.$term.'%');
+                });
+            })
+            ->when($geoFilterId > 0, function ($q) use ($geoForeignKey, $geoFilterId) {
+                $q->where($geoForeignKey, $geoFilterId);
+            })
+            ->when($request->filled('title'), function ($q) use ($request) {
+                $q->where('users.job_title', 'like', '%'.trim((string) $request->title).'%');
+            })
+            ->when($request->filled('organisation'), function ($q) use ($request) {
+                $q->where('users.organization_name', 'like', '%'.trim((string) $request->organisation).'%');
+            })
+            ->when($request->filled('community_id'), function ($q) use ($request) {
+                $q->where('copm.community_of_practice_id', (int) $request->community_id);
+            })
+            ->when($request->filled('badge_type_id'), function ($q) use ($request) {
+                $badgeTypeId = (int) $request->badge_type_id;
+                $q->whereExists(function ($sub) use ($badgeTypeId) {
+                    $sub->select(DB::raw(1))
+                        ->from('user_badges as ub')
+                        ->whereColumn('ub.user_id', 'users.id')
+                        ->where('ub.badge_type_id', $badgeTypeId);
+                });
+            })
+            ->groupBy('users.id', $geoTable.'.name');
+    }
+
+    /**
+     * @param  \Illuminate\Support\Collection<int, User>  $participants
+     */
+    public function enrichParticipantsCollection($participants): void
+    {
+        $userIds = $participants->pluck('id')->all();
+        if ($userIds === []) {
+            return;
+        }
+
+        $authorByUser = $participants->pluck('author_id', 'id')->filter()->map(fn ($id) => (int) $id)->toArray();
+
+        $publicationsByUser = DB::table('publication')
+            ->select('user_id', DB::raw('COUNT(*) as total'))
+            ->whereIn('user_id', $userIds)
+            ->groupBy('user_id')
+            ->pluck('total', 'user_id');
+
+        $publicationsByAuthor = empty($authorByUser)
+            ? collect()
+            : DB::table('publication')
+                ->select('author_id', DB::raw('COUNT(*) as total'))
+                ->whereIn('author_id', array_values($authorByUser))
+                ->groupBy('author_id')
+                ->pluck('total', 'author_id');
+
+        $forumPostsByUser = DB::table('forums')
+            ->select('created_by', DB::raw('COUNT(*) as total'))
+            ->whereIn('created_by', $userIds)
+            ->groupBy('created_by')
+            ->pluck('total', 'created_by');
+
+        $forumCommentsByUser = DB::table('forum_comments')
+            ->select('created_by', DB::raw('COUNT(*) as total'))
+            ->whereIn('created_by', $userIds)
+            ->groupBy('created_by')
+            ->pluck('total', 'created_by');
+
+        $badgesByUser = \App\Models\UserBadge::query()
+            ->with('badgeType:id,name')
+            ->whereIn('user_id', $userIds)
+            ->orderByDesc('awarded_at')
+            ->get()
+            ->groupBy('user_id');
+
+        $membershipsByUser = CommunityOfPracticeMembers::query()
+            ->with('community:id,community_name')
+            ->whereIn('user_id', $userIds)
+            ->where('is_approved', 1)
+            ->where('is_active', 1)
+            ->get()
+            ->groupBy('user_id');
+
+        $participants->transform(function ($u) use (
+            $publicationsByUser,
+            $publicationsByAuthor,
+            $authorByUser,
+            $forumPostsByUser,
+            $forumCommentsByUser,
+            $badgesByUser,
+            $membershipsByUser
+        ) {
+            $uid = (int) $u->id;
+            $authorId = $authorByUser[$uid] ?? null;
+            $pubByUser = (int) ($publicationsByUser[$uid] ?? 0);
+            $pubByAuthor = $authorId ? (int) ($publicationsByAuthor[$authorId] ?? 0) : 0;
+
+            $u->publication_contributions = $pubByUser + $pubByAuthor;
+            $u->forum_contributions = (int) ($forumPostsByUser[$uid] ?? 0) + (int) ($forumCommentsByUser[$uid] ?? 0);
+
+            $u->badge_labels = collect($badgesByUser[$uid] ?? [])
+                ->map(fn ($b) => $b->badgeType->name ?? null)
+                ->filter()
+                ->unique()
+                ->implode(', ');
+
+            $u->community_labels = collect($membershipsByUser[$uid] ?? [])
+                ->map(fn ($m) => $m->community->community_name ?? null)
+                ->filter()
+                ->unique()
+                ->implode(', ');
+
+            return $u;
+        });
+    }
+
+    public function adminParticipantsDatatable(Request $request): array
+    {
+        $geo = $this->participantsGeoContext();
+        $geo['geoFilterId'] = (int) ($request->input('geography_id') ?: $request->input('country_id'));
+
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminParticipantsQuery($request, $geo);
+        $recordsTotal = (clone $base)->count();
+        $recordsFiltered = $recordsTotal;
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
+        $orderMap = [1 => 'users.name', 2 => 'users.email', 3 => 'users.job_title', 4 => 'users.organization_name', 5 => 'geo_name'];
+        if (isset($orderMap[$orderColIndex])) {
+            $base->orderBy($orderMap[$orderColIndex], $orderDir);
+        } else {
+            $base->orderBy('users.name', 'asc');
+        }
+
+        $rows = $base->skip($start)->take($length)->get();
+        $this->enrichParticipantsCollection($rows);
+
+        $cell = static fn (?string $value) => '<div class="pub-cell-wrap">'.e($value ?: '—').'</div>';
+        $data = [];
+        $index = $start + 1;
+
+        foreach ($rows as $participant) {
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'name' => $cell($participant->name),
+                'email' => $cell($participant->email),
+                'title' => $cell($participant->job_title),
+                'organisation' => $cell($participant->organization_name),
+                'geography' => $cell($participant->geo_name),
+                'publications' => (int) ($participant->publication_contributions ?? 0),
+                'forums' => (int) ($participant->forum_contributions ?? 0),
+                'badges' => $cell($participant->badge_labels),
+                'communities' => $cell($participant->community_labels),
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
 }

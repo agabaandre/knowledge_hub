@@ -61,85 +61,8 @@ class AccountController extends Controller
 
 
     public function publications(Request $request){
-        // Server-side DataTables JSON
-        if ($request->ajax() && $request->input('datatable')) {
-            $userId = auth()->id();
-            $draw   = intval($request->input('draw'));
-            $start  = intval($request->input('start', 0));
-            $length = intval($request->input('length', 10));
-
-            $base = \App\Models\Publication::query()
-                ->with(['author'])
-                ->where('user_id', $userId);
-
-            $recordsTotal = (clone $base)->count();
-
-            // Global search
-            $search = $request->input('search.value');
-            if ($search) {
-                $base->where(function ($q) use ($search) {
-                    $q->where('title', 'like', '%'.$search.'%')
-                      ->orWhere('description', 'like', '%'.$search.'%');
-                });
-            }
-
-            $recordsFiltered = (clone $base)->count();
-
-            // Ordering (default: id desc)
-            $orderColIndex = intval($request->input('order.0.column', 0));
-            $orderDir      = $request->input('order.0.dir', 'desc');
-            $columns       = ['id','title','description','is_approved','visits','created_at'];
-            $orderCol      = $columns[$orderColIndex] ?? 'id';
-
-            $rows = $base->orderBy($orderCol, $orderDir)
-                ->skip($start)
-                ->take($length)
-                ->get();
-
-            $data = [];
-            $index = $start + 1;
-            foreach ($rows as $row) {
-                $status = get_publication_state($row->is_approved, $row->is_rejected);
-                $statusBadge = '<span class="badge '.($row->is_approved ? 'badge-success' : 'badge-secondary').'">'.$status.'</span>';
-                $title = '<a href="'.e($row->publication).'" target="_blank">'.truncate($row->title, 50).'</a>';
-                $desc  = truncate(html_to_text($row->description), 80);
-                if (($row->is_rejected ?? 0) == 1 && !empty($row->rejected_reason)) {
-                    $desc .= '<div class="mt-2 p-2" style="background:#fef2f2;border:1px solid #fecaca;border-radius:8px;"><small class="text-danger"><strong>Rejection reason:</strong> '.e($row->rejected_reason).'</small></div>';
-                }
-                
-                // Get total views from monthly views table
-                $totalViews = \App\Models\PublicationView::getTotalViews($row->id);
-                
-                // Build actions - only show edit/delete if not approved
-                $isApproved = ($row->is_approved ?? 0) == 1;
-                $actions = '<div class="btn-group btn-group-sm" role="group" aria-label="Actions">'
-                    .'<a href="'.url('records/resource').'?id='.$row->id.'" class="btn btn-outline-secondary" target="_blank"><i class="fa fa-eye"></i> Preview</a>';
-                
-                // Only show edit and delete buttons if publication is not approved
-                if (!$isApproved) {
-                    $actions .= '<a href="'.route('account.publications.edit').'?ref='.$row->id.'" class="btn btn-outline-primary"><i class="fa fa-edit"></i> Edit</a>'
-                        .'<a href="javascript:void(0);" onclick="openDeleteModal('.$row->id.')" class="btn btn-outline-danger"><i class="fa fa-trash"></i> Delete</a>';
-                }
-                
-                $actions .= '</div>';
-
-                $data[] = [
-                    $index++,
-                    $title,
-                    $desc,
-                    $statusBadge,
-                    '<span class="badge badge-info">'.number_format($totalViews).'</span>',
-                    $row->created_at ? $row->created_at->format('Y-m-d H:i') : 'N/A',
-                    $actions,
-                ];
-            }
-
-            return response()->json([
-                'draw' => $draw,
-                'recordsTotal' => $recordsTotal,
-                'recordsFiltered' => $recordsFiltered,
-                'data' => $data,
-            ]);
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->publicationsRepo->accountMyPublicationsDatatable($request));
         }
 
         // Get statistics for the user's publications
@@ -174,7 +97,6 @@ class AccountController extends Controller
             ->toArray();
         
         $data['stats'] = $stats;
-        $data['publications'] = $this->publicationsRepo->my_publications($request);
         return view('account.mypublications', $data);
     }
 
