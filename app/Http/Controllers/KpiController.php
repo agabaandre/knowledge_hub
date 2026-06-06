@@ -282,9 +282,28 @@ class KpiController extends Controller
         ]);
     }
 
-    public function dedupeIndicatorsAuto(Request $request)
+    public function dedupeIndicatorsAuto(Request $request, KpiDeduplicationService $dedupe)
     {
-        return $this->queueTask($request, 'dedupe_indicators', [], 'Merging duplicate indicators…');
+        $result = $dedupe->autoDedupeIndicators();
+        $message = sprintf(
+            'Merged duplicate indicators in %d group(s); removed %d duplicate record(s).',
+            $result['merged'],
+            $result['removed']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'sync' => true,
+                'message' => $message,
+                'result' => $result,
+            ]);
+        }
+
+        return back()->with('alert-success', $message);
     }
 
     public function mergeIndicators(Request $request, KpiDeduplicationService $dedupe)

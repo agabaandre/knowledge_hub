@@ -128,6 +128,21 @@
                         if (submitBtn) submitBtn.disabled = false;
                         return;
                     }
+                    if (result.data.sync) {
+                        updateProgress({
+                            progress: 100,
+                            step: 'Complete',
+                            message: result.data.message || 'Done.',
+                            finished: true,
+                            status: 'completed',
+                            alert_type: 'success'
+                        });
+                        if (submitBtn) submitBtn.disabled = false;
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 1200);
+                        return;
+                    }
                     pollRun(result.data.run_id);
                     if (submitBtn) submitBtn.disabled = false;
                 })

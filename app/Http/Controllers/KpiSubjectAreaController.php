@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Jobs\ProcessKpiOwidActionJob;
 use App\Repositories\SubjectAreasRepository;
 use App\Services\Kpi\KpiDeduplicationService;
 use Illuminate\Http\Request;
@@ -55,23 +54,28 @@ class KpiSubjectAreaController extends Controller
         return back()->with('alert-success', 'Subject area deleted.');
     }
 
-    public function dedupeAuto(Request $request)
+    public function dedupeAuto(Request $request, KpiDeduplicationService $dedupe)
     {
-        $runs = app(\App\Services\Kpi\KpiSyncRunService::class);
-        $run = $runs->create('dedupe_subject_areas', [], auth()->id());
-        ProcessKpiOwidActionJob::dispatch($run->id);
+        $result = $dedupe->autoDedupeSubjectAreas();
+        $message = sprintf(
+            'Merged duplicate subject areas in %d group(s); removed %d duplicate record(s).',
+            $result['merged'],
+            $result['removed']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([
                 'success' => true,
-                'run_id' => $run->id,
-                'message' => 'Merging duplicate subject areas…',
+                'sync' => true,
+                'message' => $message,
+                'result' => $result,
             ]);
         }
 
-        return back()
-            ->with('kpi_sync_run_id', $run->id)
-            ->with('alert-info', 'Merging duplicate subject areas… Track progress below.');
+        return back()->with('alert-success', $message);
     }
 
     public function merge(Request $request, KpiDeduplicationService $dedupe)
