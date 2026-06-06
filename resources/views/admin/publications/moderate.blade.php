@@ -2,6 +2,7 @@
 
 @section('styles')
     @include('common.table')
+    @include('admin.publications.partials.filter_styles')
 @endsection
 
 @section('content')
@@ -18,25 +19,34 @@
 <div class="container-fluid">
     <div class="row">
         <div class="col-md-12">
-            <div class="card mb-3">
-                <div class="card-header">
-                    <h3 class="card-title mb-0">Filter comments</h3>
-                    <small class="text-muted">Search by publication title or comment text</small>
-                </div>
-                <div class="card-body">
-                    <form id="moderateFiltersForm" class="row align-items-end">
-                        <div class="col-md-6">
-                            <label class="form-label-sm">Keyword</label>
-                            <input type="text" name="term" id="filterTitle" class="form-control" value="{{ @$search->term ?? '' }}" placeholder="Publication title or comment text">
+            <div class="pub-filters-card mb-3">
+                <div class="pub-filters-card__header">
+                    <div class="pub-filters-card__heading">
+                        <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                        <div>
+                            <h3 class="pub-filters-card__title">Filter Comments</h3>
+                            <p class="pub-filters-card__subtitle">Search by publication title or comment text</p>
                         </div>
-                        <div class="col-md-6 text-md-end mt-2 mt-md-0">
-                            <a href="{{ url('admin/publications/moderate') }}" class="btn btn-secondary btn-sm">Clear</a>
+                    </div>
+                </div>
+                <div class="pub-filters-card__body">
+                    <form id="moderateFiltersForm">
+                        <div class="pub-filters-grid pub-filters-grid--single">
+                            <div class="pub-filter-field">
+                                <label class="pub-filter-label" for="filterTitle">Keyword</label>
+                                <input type="text" name="term" id="filterTitle" class="form-control pub-filter-input" value="{{ @$search->term ?? '' }}" placeholder="Publication title or comment text">
+                            </div>
+                        </div>
+                        <div class="pub-filters-actions">
+                            <a href="{{ url('admin/publications/moderate') }}" class="pub-filters-btn pub-filters-btn--clear">
+                                <i class="fa fa-rotate-left"></i> Clear
+                            </a>
                         </div>
                     </form>
                 </div>
             </div>
 
-            <div class="card">
+            <div class="card pub-list-card">
                 <div class="card-body">
                     <div class="table-responsive">
                         <table id="moderateCommentsTable" class="table table-striped table-hover table-bordered w-100">

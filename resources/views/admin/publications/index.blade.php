@@ -2,17 +2,8 @@
 
 @section('styles')
     @include('common.table')
+    @include('admin.publications.partials.filter_styles')
     <style>
-        .filter-chip { display:inline-flex; align-items:center; gap:6px; padding:6px 10px; border:1px solid #e2e8f0; border-radius:999px; background:#fff; }
-        .btn-soft { border:1px solid #cbd5e1; background:#ffffff; }
-        .btn-soft:hover { background:#f8fafc; }
-        .form-label-sm { font-size:.875rem; font-weight:600; color:#334155; }
-        .form-group { margin-bottom: 1.5rem; }
-        #advancedFilters .form-group { margin-bottom: 1rem; }
-        #advancedFilters .row { margin-left: -15px; margin-right: -15px; }
-        .card { border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem; }
-        .card-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
-        .card-body { padding: 1.5rem; }
         .pub-row-featured { background-color: #ecfdf3 !important; }
         .pub-row-inactive { background-color: #fef2f2 !important; }
         .pub-state-key { display:inline-flex; align-items:center; gap:8px; padding:4px 10px; border:1px solid #e2e8f0; border-radius:16px; font-size:12px; color:#334155; background:#fff; }
@@ -94,49 +85,34 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div>
-                        <h3 class="card-title mb-0">Filter Resources</h3>
-                        <small class="text-muted">Filters apply automatically as you type or change selections</small>
+            <div class="pub-filters-card">
+                <div class="pub-filters-card__header">
+                    <div class="pub-filters-card__heading">
+                        <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                        <div>
+                            <h3 class="pub-filters-card__title">Filter Resources</h3>
+                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                        </div>
                     </div>
-                    <div>
-                        <button class="btn btn-soft btn-sm" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
-                            <i class="fa fa-sliders mr-1"></i> Advanced Filters
-                        </button>
-                    </div>
+                    <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
+                        <i class="fa fa-sliders mr-1"></i> Advanced Filters
+                    </button>
                 </div>
-                <div class="card-body">
+                <div class="pub-filters-card__body">
                     <form id="publicationFiltersForm" method="GET" action="{{ url('admin/publications') }}" class="mb-0">
-                        <div class="row">
-                            <div class="col-md-4 col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm" for="filterTitle">Keyword</label>
-                                    <input type="text" name="term" id="filterTitle" class="form-control pub-filter-input" placeholder="Search by title or keyword" value="{{ @$search->term ?? '' }}">
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm" for="author">Source / Author</label>
-                                    @include('partials.authors.dropdown', [ 'field' => 'author', 'selected' => @$search->author, 'class' => 'pub-filter-input select2 form-control' ])
-                                </div>
-                            </div>
-                            <div class="col-md-4 col-lg-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm" for="file_type">File Type</label>
-                                    @include('partials.publications.filetype_dropdown', [ 'field' => 'file_type', 'selected' => @$search->file_type, 'class' => 'pub-filter-input select2 form-control' ])
-                                </div>
-                            </div>
+                        @include('admin.publications.partials.primary_resource_filters')
+
+                        <div id="advancedFilters" class="collapse pub-filters-advanced">
+                            @include('admin.publications.partials.advanced_filters')
                         </div>
 
-                        <div id="advancedFilters" class="collapse mt-3">
-                            <hr class="my-3" style="border-color: #e2e8f0;">
-                            @include('partials.search.search_fields')
-                        </div>
-
-                        <div class="d-flex justify-content-end mt-2 flex-wrap" style="gap:8px;">
-                            <a href="{{ url('admin/publications') }}" class="btn btn-secondary btn-sm" id="clearFiltersBtn"><i class="fa fa-rotate-left mr-1"></i> Clear</a>
-                            <button type="button" id="exportButton" class="btn btn-success btn-sm"><i class="fa fa-download mr-1"></i> Export</button>
+                        <div class="pub-filters-actions">
+                            <a href="{{ url('admin/publications') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearFiltersBtn">
+                                <i class="fa fa-rotate-left"></i> Clear
+                            </a>
+                            <button type="button" id="exportButton" class="pub-filters-btn pub-filters-btn--export">
+                                <i class="fa fa-download"></i> Export
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -146,7 +122,7 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card pub-list-card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
                         <h3 class="card-title mb-0">Publications</h3>

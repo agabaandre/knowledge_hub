@@ -2,16 +2,7 @@
 
 @section('styles')
     @include('common.table')
-    <style>
-        .btn-soft { border:1px solid #cbd5e1; background:#ffffff; }
-        .btn-soft:hover { background:#f8fafc; }
-        .form-label-sm { font-size:.875rem; font-weight:600; color:#334155; }
-        .form-group { margin-bottom: 1.5rem; }
-        #advancedFilters .form-group { margin-bottom: 1rem; }
-        .card { border: 1px solid #e2e8f0; border-radius: 0; margin-bottom: 1.5rem; }
-        .card-header { background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 1rem 1.5rem; }
-        .card-body { padding: 1.5rem; }
-    </style>
+    @include('admin.publications.partials.filter_styles')
 @endsection
 
 @section('content')
@@ -27,44 +18,31 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
-                <div class="card-header d-flex align-items-center justify-content-between">
-                    <div>
-                        <h3 class="card-title mb-0">Filter Pending Resources</h3>
-                        <small class="text-muted">Filters apply automatically as you type or change selections</small>
+            <div class="pub-filters-card">
+                <div class="pub-filters-card__header">
+                    <div class="pub-filters-card__heading">
+                        <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                        <div>
+                            <h3 class="pub-filters-card__title">Filter Pending Resources</h3>
+                            <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
+                        </div>
                     </div>
-                    <button class="btn btn-soft btn-sm" type="button" data-toggle="collapse" data-target="#advancedFilters">
+                    <button class="pub-filters-advanced-toggle" type="button" data-toggle="collapse" data-target="#advancedFilters" aria-expanded="false" aria-controls="advancedFilters">
                         <i class="fa fa-sliders mr-1"></i> Advanced Filters
                     </button>
                 </div>
-                <div class="card-body">
+                <div class="pub-filters-card__body">
                     <form id="publicationFiltersForm" method="GET" action="{{ url('admin/publications/pending') }}">
-                        <div class="row">
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm">Keyword</label>
-                                    <input type="text" name="term" id="filterTitle" class="form-control pub-filter-input" value="{{ @$search->term ?? '' }}" placeholder="Search by title or keyword">
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm">Source / Author</label>
-                                    @include('partials.authors.dropdown', ['field' => 'author', 'selected' => @$search->author, 'class' => 'pub-filter-input select2 form-control'])
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <div class="form-group">
-                                    <label class="form-label-sm">File Type</label>
-                                    @include('partials.publications.filetype_dropdown', ['field' => 'file_type', 'selected' => @$search->file_type, 'class' => 'pub-filter-input select2 form-control'])
-                                </div>
-                            </div>
+                        @include('admin.publications.partials.primary_resource_filters')
+
+                        <div id="advancedFilters" class="collapse pub-filters-advanced">
+                            @include('admin.publications.partials.advanced_filters')
                         </div>
-                        <div id="advancedFilters" class="collapse mt-3">
-                            <hr>
-                            @include('partials.search.search_fields')
-                        </div>
-                        <div class="d-flex justify-content-end mt-2">
-                            <a href="{{ url('admin/publications/pending') }}" class="btn btn-secondary btn-sm"><i class="fa fa-rotate-left mr-1"></i> Clear</a>
+
+                        <div class="pub-filters-actions">
+                            <a href="{{ url('admin/publications/pending') }}" class="pub-filters-btn pub-filters-btn--clear">
+                                <i class="fa fa-rotate-left"></i> Clear
+                            </a>
                         </div>
                     </form>
                 </div>
@@ -74,7 +52,7 @@
 
     <div class="row">
         <div class="col-md-12">
-            <div class="card">
+            <div class="card pub-list-card">
                 <div class="card-header"><h3 class="card-title mb-0">Pending Publications</h3></div>
                 <div class="card-body">
                     @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
