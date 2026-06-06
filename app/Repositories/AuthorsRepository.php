@@ -40,7 +40,7 @@ class AuthorsRepository extends SharedRepo{
 
         // Do not eager-load `publications` (can load thousands of rows per author and cause timeouts / HTTP 500).
         $authors = Author::query()
-            ->with(['user.country', 'user.badges.badgeType', 'user.communities'])
+            ->with(['user.country', 'user.lifetimeBadge.badgeType', 'user.communities'])
             ->leftJoinSub($publicationCountSubquery, 'publication_totals', function ($join) {
                 $join->on('publication_totals.author_id', '=', 'author.id');
             })
@@ -92,7 +92,7 @@ class AuthorsRepository extends SharedRepo{
     public function find($id){
         $author = Author::with([
             'user.country',
-            'user.badges' => fn ($q) => $q->with(['badgeType', 'community'])->orderByDesc('awarded_at'),
+            'user.lifetimeBadge.badgeType',
         ])->find($id);
         if ($author) {
             $this->ensureSlug($author);
@@ -105,7 +105,7 @@ class AuthorsRepository extends SharedRepo{
     {
         return Author::with([
             'user.country',
-            'user.badges' => fn ($q) => $q->with(['badgeType', 'community'])->orderByDesc('awarded_at'),
+            'user.lifetimeBadge.badgeType',
         ])
             ->where('slug', $slug)
             ->first();

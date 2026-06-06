@@ -52,6 +52,10 @@
             'author' => $author,
             'contributionStats' => $contributionStats,
             'contributorOrganization' => $contributorOrganization ?? null,
+            'lifetimeBadge' => $lifetimeBadge ?? null,
+            'badgeDrilldownYear' => $badgeDrilldownYear ?? null,
+            'badgeDrilldownMonth' => $badgeDrilldownMonth ?? null,
+            'communityBadgeStarCount' => $communityBadgeStarCount ?? 0,
         ])
 
         <div class="row g-4">

@@ -133,6 +133,16 @@ class User extends Authenticatable
         return $this->hasMany(UserBadge::class, 'user_id')->with('badgeType');
     }
 
+    public function lifetimeBadge()
+    {
+        return $this->hasOne(UserLifetimeBadge::class, 'user_id')->with('badgeType');
+    }
+
+    public function communityMonthlyContributions()
+    {
+        return $this->hasMany(UserCommunityMonthlyContribution::class, 'user_id')->with('community');
+    }
+
      /**
      * Specifies the user's FCM token
      *

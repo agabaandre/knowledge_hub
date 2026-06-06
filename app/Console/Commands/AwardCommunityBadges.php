@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Jobs\AwardCommunityBadgesJob;
-use App\Services\CommunityBadgeAwardService;
+use App\Services\ContributorBadgeAwardService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
 
@@ -14,9 +14,9 @@ class AwardCommunityBadges extends Command
                             {--year= : Year to process}
                             {--queue : Dispatch to the queue instead of running synchronously}';
 
-    protected $description = 'Award community participant badges for monthly contributions (publications, forums, comments)';
+    protected $description = 'Recalculate lifetime contributor badges and sync monthly community contribution snapshots';
 
-    public function handle(CommunityBadgeAwardService $service): int
+    public function handle(ContributorBadgeAwardService $service): int
     {
         $period = $service->defaultPeriod();
         $year = (int) ($this->option('year') ?: $period['year']);
@@ -48,9 +48,11 @@ class AwardCommunityBadges extends Command
         }
 
         $this->info('Badge awarding completed.');
-        $this->line('  Badges awarded: '.$result['badges_awarded']);
+        $this->line('  Users processed: '.($result['users_processed'] ?? 0));
+        $this->line('  New lifetime badges: '.$result['badges_awarded']);
+        $this->line('  Badge upgrades: '.($result['badges_upgraded'] ?? 0));
+        $this->line('  Community monthly rows synced: '.($result['community_rows_synced'] ?? 0));
         $this->line('  Notification emails queued: '.$result['emails_queued']);
-        $this->line('  Communities processed: '.$result['communities_processed']);
 
         return 0;
     }

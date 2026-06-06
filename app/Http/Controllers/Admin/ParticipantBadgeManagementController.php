@@ -6,10 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Jobs\AwardCommunityBadgesJob;
 use App\Models\Author;
 use App\Models\BadgeType;
-use App\Models\CommunityOfPractice;
 use App\Models\User;
-use App\Models\UserBadge;
-use App\Services\CommunityBadgeAwardService;
+use App\Models\UserLifetimeBadge;
+use App\Services\ContributorBadgeAwardService;
 use App\Support\QueueHealth;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -24,29 +23,16 @@ class ParticipantBadgeManagementController extends Controller
             ->orderBy('contribution_threshold')
             ->get();
 
-        $communities = CommunityOfPractice::query()
-            ->where('is_active', true)
-            ->orderBy('community_name')
-            ->get(['id', 'community_name']);
-
-        $badgeAwards = UserBadge::query()
-            ->with(['user.author', 'badgeType', 'community'])
-            ->join('users', 'user_badges.user_id', '=', 'users.id')
-            ->select('user_badges.*')
-            ->selectRaw('(
-                SELECT COUNT(DISTINCT p.id) FROM publication p
-                WHERE p.user_id = users.id
-                OR (users.author_id IS NOT NULL AND p.author_id = users.author_id)
-            ) as publications_total')
-            ->orderByDesc('user_badges.awarded_at')
+        $lifetimeBadges = UserLifetimeBadge::query()
+            ->with(['user.author', 'badgeType'])
+            ->whereNotNull('badge_type_id')
+            ->orderByDesc('lifetime_contributions')
             ->paginate(40)
             ->withQueryString();
 
         $authors = Author::query()
             ->withCount('publications')
-            ->with(['user' => function ($q) {
-                $q->with(['badges.badgeType', 'badges.community']);
-            }])
+            ->with(['user.lifetimeBadge.badgeType'])
             ->whereHas('publications')
             ->orderBy('name')
             ->paginate(25, ['*'], 'authors_page')
@@ -57,15 +43,14 @@ class ParticipantBadgeManagementController extends Controller
             ->limit(3000)
             ->get(['id', 'name', 'email']);
 
-        $defaultPeriod = app(CommunityBadgeAwardService::class)->defaultPeriod();
+        $defaultPeriod = app(ContributorBadgeAwardService::class)->defaultPeriod();
         $queueHealth = QueueHealth::snapshot();
         $lastAwardRun = Cache::get('badges_last_award_run');
         $awardJobRunning = Cache::get('badges_award_job_running');
 
         return view('admin.participant-badges.index', compact(
             'badgeTypes',
-            'communities',
-            'badgeAwards',
+            'lifetimeBadges',
             'authors',
             'usersForAward',
             'defaultPeriod',
@@ -75,7 +60,7 @@ class ParticipantBadgeManagementController extends Controller
         ));
     }
 
-    public function runAwardJob(Request $request, CommunityBadgeAwardService $service)
+    public function runAwardJob(Request $request, ContributorBadgeAwardService $service)
     {
         $validated = $request->validate([
             'year' => 'required|integer|min:2000|max:2100',
@@ -106,10 +91,11 @@ class ParticipantBadgeManagementController extends Controller
             return redirect()
                 ->route('admin.participant-badges.index')
                 ->with('success', sprintf(
-                    'Badge run completed for %s: %d badge(s) awarded, %d notification email(s) queued.',
+                    'Badge run completed for %s: %d user(s) processed, %d upgrade(s), %d community row(s) synced.',
                     $result['period_label'] ?? Carbon::create($year, $month, 1)->format('F Y'),
-                    (int) $result['badges_awarded'],
-                    (int) $result['emails_queued']
+                    (int) ($result['users_processed'] ?? 0),
+                    (int) ($result['badges_upgraded'] ?? 0),
+                    (int) ($result['community_rows_synced'] ?? 0)
                 ));
         }
 
@@ -123,54 +109,44 @@ class ParticipantBadgeManagementController extends Controller
             ));
     }
 
-    public function award(Request $request)
+    public function award(Request $request, ContributorBadgeAwardService $service)
     {
         $validated = $request->validate([
             'user_id' => 'required|integer|exists:users,id',
-            'community_of_practice_id' => 'required|integer|exists:community_of_practices,id',
             'badge_type_id' => 'required|integer|exists:badge_types,id',
-            'year' => 'required|integer|min:2000|max:2100',
-            'month' => 'required|integer|min:1|max:12',
-            'contributions_count' => 'nullable|integer|min:0',
+            'lifetime_contributions' => 'nullable|integer|min:0',
         ]);
 
+        $user = User::query()->findOrFail($validated['user_id']);
         $badgeType = BadgeType::findOrFail($validated['badge_type_id']);
-        $contributions = $validated['contributions_count'] ?? $badgeType->contribution_threshold;
+        $lifetime = $validated['lifetime_contributions'] ?? max(
+            (int) $badgeType->contribution_threshold,
+            $service->countLifetimeContributions((int) $user->id)
+        );
 
-        if (UserBadge::hasBadge(
-            $validated['user_id'],
-            $validated['community_of_practice_id'],
-            $validated['badge_type_id'],
-            $validated['year'],
-            $validated['month']
-        )) {
-            return redirect()
-                ->route('admin.participant-badges.index')
-                ->with('error', 'This user already has that badge for the selected community and month.');
-        }
-
-        UserBadge::create([
-            'user_id' => $validated['user_id'],
-            'community_of_practice_id' => $validated['community_of_practice_id'],
-            'badge_type_id' => $validated['badge_type_id'],
-            'year' => $validated['year'],
-            'month' => $validated['month'],
-            'contributions_count' => $contributions,
-            'awarded_at' => now(),
-            'email_sent' => false,
-        ]);
+        UserLifetimeBadge::query()->updateOrCreate(
+            ['user_id' => $user->id],
+            [
+                'badge_type_id' => $badgeType->id,
+                'lifetime_contributions' => $lifetime,
+                'last_upgraded_at' => now(),
+            ]
+        );
 
         return redirect()
             ->route('admin.participant-badges.index')
-            ->with('success', 'Badge awarded successfully.');
+            ->with('success', 'Lifetime contributor badge set successfully.');
     }
 
-    public function revoke(UserBadge $userBadge)
+    public function revoke(UserLifetimeBadge $userLifetimeBadge)
     {
-        $userBadge->delete();
+        $userLifetimeBadge->update([
+            'badge_type_id' => null,
+            'last_upgraded_at' => null,
+        ]);
 
         return redirect()
             ->route('admin.participant-badges.index')
-            ->with('success', 'Badge removed.');
+            ->with('success', 'Lifetime badge tier removed for this user.');
     }
 }

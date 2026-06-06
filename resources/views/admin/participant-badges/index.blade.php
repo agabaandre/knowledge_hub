@@ -35,7 +35,7 @@
         <div class="card-header d-flex flex-wrap justify-content-between align-items-center">
             <div>
                 <h3 class="card-title mb-0">Automated badge awarding</h3>
-                <p class="text-muted small mb-0 mt-1">Runs monthly for the previous calendar month. Scheduled: 1st of each month at 01:00 (server time).</p>
+                <p class="text-muted small mb-0 mt-1">Recalculates <strong>lifetime</strong> hub badges from all contributions and syncs <strong>community monthly</strong> activity for the selected period. Scheduled: 1st of each month at 01:00.</p>
             </div>
             @if($awardJobRunning)
                 <span class="badge badge-warning text-dark mt-2 mt-md-0">Job running…</span>
@@ -81,7 +81,9 @@
                                     {{ $lastAwardRun['status'] ?? '—' }}
                                 @endif
                             </li>
-                            <li><strong>Badges awarded:</strong> {{ number_format((int) ($lastAwardRun['badges_awarded'] ?? 0)) }}</li>
+                            <li><strong>Users processed:</strong> {{ number_format((int) ($lastAwardRun['users_processed'] ?? 0)) }}</li>
+                            <li><strong>Badge upgrades:</strong> {{ number_format((int) ($lastAwardRun['badges_upgraded'] ?? 0)) }}</li>
+                            <li><strong>Community rows synced:</strong> {{ number_format((int) ($lastAwardRun['community_rows_synced'] ?? 0)) }}</li>
                             <li><strong>Emails queued:</strong> {{ number_format((int) ($lastAwardRun['emails_queued'] ?? 0)) }}</li>
                             <li><strong>Finished:</strong> {{ isset($lastAwardRun['finished_at']) ? \Carbon\Carbon::parse($lastAwardRun['finished_at'])->format('Y-m-d H:i') : '—' }}</li>
                             <li><strong>Triggered by:</strong> {{ $lastAwardRun['triggered_by'] ?? '—' }}</li>
@@ -126,9 +128,7 @@
                 </div>
             </form>
             <p class="text-muted small mb-0">
-                CLI: <code>php artisan badges:award-community</code> (sync) or
-                <code>php artisan badges:award-community --queue</code> (background).
-                Defaults to the <strong>previous month</strong> when year/month are omitted.
+                CLI: <code>php artisan badges:award-community</code> · <code>php artisan badges:recalculate-lifetime</code> (full lifetime recalc).
             </p>
         </div>
     </div>
@@ -137,7 +137,7 @@
     <div class="card mb-4">
         <div class="card-header">
             <h3 class="card-title mb-0">Badge key</h3>
-            <p class="text-muted small mb-0 mt-1">Community contributor badges are earned from monthly activity in a community of practice (or can be awarded manually below).</p>
+            <p class="text-muted small mb-0 mt-1">Lifetime contributor badges grow with total hub contributions (resources, forums, comments). Community activity is shown as stars / drill-down on the public profile.</p>
         </div>
         <div class="card-body">
             <div class="row">
@@ -156,7 +156,7 @@
                                     <span class="badge badge-secondary">Inactive</span>
                                 @endif
                                 <div class="small text-muted mt-1">{{ $bt->description }}</div>
-                                <div class="small"><strong>Threshold:</strong> {{ $bt->contribution_threshold }}+ contributions / month</div>
+                                <div class="small"><strong>Threshold:</strong> {{ $bt->contribution_threshold }}+ lifetime contributions</div>
                             </div>
                         </div>
                     </div>
@@ -170,12 +170,12 @@
     {{-- Manual award --}}
     <div class="card mb-4">
         <div class="card-header">
-            <h3 class="card-title mb-0">Manually award a badge</h3>
+            <h3 class="card-title mb-0">Manually set lifetime badge</h3>
         </div>
         <div class="card-body">
             <form method="POST" action="{{ route('admin.participant-badges.award') }}" class="row">
                 @csrf
-                <div class="col-md-4 mb-3">
+                <div class="col-md-5 mb-3">
                     <label class="form-label">Participant (user) <span class="text-danger">*</span></label>
                     <select name="user_id" class="form-control select2" required data-placeholder="Select user">
                         <option value=""></option>
@@ -185,52 +185,30 @@
                     </select>
                 </div>
                 <div class="col-md-4 mb-3">
-                    <label class="form-label">Community of practice <span class="text-danger">*</span></label>
-                    <select name="community_of_practice_id" class="form-control" required>
-                        <option value="">— Select —</option>
-                        @foreach($communities as $c)
-                            <option value="{{ $c->id }}">{{ $c->community_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Badge type <span class="text-danger">*</span></label>
+                    <label class="form-label">Badge tier <span class="text-danger">*</span></label>
                     <select name="badge_type_id" class="form-control" required>
                         <option value="">— Select —</option>
                         @foreach($badgeTypes->where('is_active', true) as $bt)
-                            <option value="{{ $bt->id }}">{{ $bt->name }} ({{ $bt->contribution_threshold }}+)</option>
+                            <option value="{{ $bt->id }}">{{ $bt->name }} ({{ $bt->contribution_threshold }}+ lifetime)</option>
                         @endforeach
                     </select>
                 </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label">Year <span class="text-danger">*</span></label>
-                    <input type="number" name="year" class="form-control" value="{{ now()->year }}" min="2000" max="2100" required>
+                <div class="col-md-3 mb-3">
+                    <label class="form-label">Lifetime contributions</label>
+                    <input type="number" name="lifetime_contributions" class="form-control" min="0" placeholder="Auto from hub">
                 </div>
-                <div class="col-md-2 mb-3">
-                    <label class="form-label">Month <span class="text-danger">*</span></label>
-                    <select name="month" class="form-control" required>
-                        @for($m = 1; $m <= 12; $m++)
-                            <option value="{{ $m }}" {{ (int) now()->month === $m ? 'selected' : '' }}>{{ date('F', mktime(0, 0, 0, $m, 1)) }}</option>
-                        @endfor
-                    </select>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label class="form-label">Contributions count</label>
-                    <input type="number" name="contributions_count" class="form-control" min="0" placeholder="Defaults to badge threshold">
-                    <small class="text-muted">Optional; stored on the award record.</small>
-                </div>
-                <div class="col-md-4 mb-3 d-flex align-items-end">
-                    <button type="submit" class="btn btn-primary">Award badge</button>
+                <div class="col-md-12 mb-3 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary">Set lifetime badge</button>
                 </div>
             </form>
         </div>
     </div>
 
-    {{-- Awards list --}}
+    {{-- Lifetime badges list --}}
     <div class="card mb-4">
         <div class="card-header">
-            <h3 class="card-title mb-0">Participants with community badges</h3>
-            <p class="text-muted small mb-0 mt-1">Each row is one award. <strong>Publications</strong> counts resources where the user is uploader (<code>user_id</code>) or linked author (<code>author_id</code>).</p>
+            <h3 class="card-title mb-0">Lifetime contributor badges</h3>
+            <p class="text-muted small mb-0 mt-1">One badge per user; strength grows with total hub contributions and only upgrades over time.</p>
         </div>
         <div class="card-body table-responsive">
             <table class="table table-striped table-bordered table-hover table-sm">
@@ -238,30 +216,19 @@
                     <tr>
                         <th>Participant</th>
                         <th>Email</th>
-                        <th>Author / source</th>
-                        <th class="text-right">Publications</th>
-                        <th>Community</th>
-                        <th>Badge</th>
-                        <th>Period</th>
-                        <th class="text-right">Contrib.</th>
-                        <th>Awarded</th>
+                        <th>Author</th>
+                        <th>Badge tier</th>
+                        <th class="text-right">Lifetime contrib.</th>
+                        <th>Last upgraded</th>
                         <th width="90"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($badgeAwards as $row)
+                    @forelse($lifetimeBadges as $row)
                         <tr>
                             <td>{{ $row->user->name ?? '—' }}</td>
                             <td>{{ $row->user->email ?? '—' }}</td>
-                            <td>
-                                @if($row->user && $row->user->author)
-                                    {{ $row->user->author->name }}
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-right">{{ (int) ($row->publications_total ?? 0) }}</td>
-                            <td>{{ $row->community->community_name ?? '—' }}</td>
+                            <td>{{ $row->user->author->name ?? '—' }}</td>
                             <td>
                                 @if($row->badgeType)
                                     <span class="badge badge-pill px-2 py-1" style="background:{{ $row->badgeType->badge_color }};color:#111;">{{ $row->badgeType->name }}</span>
@@ -269,11 +236,10 @@
                                     —
                                 @endif
                             </td>
-                            <td>{{ $row->year }}-{{ str_pad($row->month, 2, '0', STR_PAD_LEFT) }}</td>
-                            <td class="text-right">{{ $row->contributions_count }}</td>
-                            <td>{{ $row->awarded_at ? $row->awarded_at->format('Y-m-d H:i') : '—' }}</td>
+                            <td class="text-right">{{ number_format((int) $row->lifetime_contributions) }}</td>
+                            <td>{{ $row->last_upgraded_at ? $row->last_upgraded_at->format('Y-m-d H:i') : '—' }}</td>
                             <td>
-                                <form method="POST" action="{{ route('admin.participant-badges.revoke', $row) }}" onsubmit="return confirm('Remove this badge award?');">
+                                <form method="POST" action="{{ route('admin.participant-badges.revoke', $row) }}" onsubmit="return confirm('Remove lifetime badge tier for this user?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-outline-danger">Revoke</button>
@@ -282,12 +248,12 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="10" class="text-center text-muted">No badge awards yet. Use the form above or run <code>php artisan badges:award-community</code>.</td>
+                            <td colspan="7" class="text-center text-muted">No lifetime badges yet. Run <code>php artisan badges:recalculate-lifetime</code> or the monthly job.</td>
                         </tr>
                     @endforelse
                 </tbody>
             </table>
-            <div class="py-2">{{ $badgeAwards->links() }}</div>
+            <div class="py-2">{{ $lifetimeBadges->links() }}</div>
         </div>
     </div>
 
@@ -320,13 +286,11 @@
                                 @endif
                             </td>
                             <td>
-                                @if($author->user && $author->user->badges->isNotEmpty())
-                                    @foreach($author->user->badges->unique('badge_type_id') as $ub)
-                                        @if($ub->badgeType)
-                                            <span class="badge badge-pill mr-1 mb-1" style="background:{{ $ub->badgeType->badge_color }};color:#111;">{{ $ub->badgeType->name }}</span>
-                                        @endif
-                                    @endforeach
-                                    <div class="small text-muted mt-1">{{ $author->user->badges->count() }} award(s) total</div>
+                                @if($author->user && $author->user->lifetimeBadge && $author->user->lifetimeBadge->badgeType)
+                                    <span class="badge badge-pill mr-1 mb-1" style="background:{{ $author->user->lifetimeBadge->badgeType->badge_color }};color:#111;">
+                                        {{ $author->user->lifetimeBadge->badgeType->name }}
+                                    </span>
+                                    <div class="small text-muted mt-1">{{ number_format((int) $author->user->lifetimeBadge->lifetime_contributions) }} lifetime</div>
                                 @else
                                     <span class="text-muted">—</span>
                                 @endif

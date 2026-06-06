@@ -8,6 +8,7 @@ use App\Models\Tag;
 use App\Support\ContributorsSeo;
 use App\Support\PublicationSeo;
 use App\Support\RecordsSearchSeo;
+use App\Services\ContributorBadgeAwardService;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
@@ -455,6 +456,27 @@ class PublicationsController extends Controller
             $data['pageDescription']
         );
 
+        $badgeService = app(ContributorBadgeAwardService::class);
+        $badgePeriod = $badgeService->defaultPeriod();
+        $data['badgeDrilldownYear'] = (int) $badgePeriod['year'];
+        $data['badgeDrilldownMonth'] = (int) $badgePeriod['month'];
+        $data['lifetimeBadge'] = null;
+        $data['communityBadgeStarCount'] = 0;
+
+        if (! empty($data['author']->user)) {
+            $data['author']->user->loadMissing('lifetimeBadge.badgeType');
+            $data['lifetimeBadge'] = $data['author']->user->lifetimeBadge;
+            if ($data['lifetimeBadge'] && $data['lifetimeBadge']->badge_type_id) {
+                $data['communityBadgeStarCount'] = $badgeService
+                    ->communityContributionsForMonth(
+                        (int) $data['author']->user->id,
+                        $data['badgeDrilldownYear'],
+                        $data['badgeDrilldownMonth']
+                    )
+                    ->count();
+            }
+        }
+
         $data['authorCommunities'] = collect();
         if (! empty($data['author']->user)) {
             $memberUserId = (int) $data['author']->user->id;
@@ -473,6 +495,44 @@ class PublicationsController extends Controller
         }
 
         return view('publications.author_pubs',$data);
+    }
+
+    public function authorBadgeCommunities(Request $request, ?string $slug = null)
+    {
+        if ($slug) {
+            $author = $this->authorsRepo->findBySlug($slug);
+        } elseif ($request->filled('author')) {
+            $author = $this->authorsRepo->find($request->author);
+        } else {
+            abort(404);
+        }
+
+        if (! $author || ! $author->user) {
+            abort(404);
+        }
+
+        $service = app(ContributorBadgeAwardService::class);
+        $period = $service->defaultPeriod();
+        $year = (int) $request->input('year', $period['year']);
+        $month = (int) $request->input('month', $period['month']);
+
+        $rows = $service->communityContributionsForMonth((int) $author->user->id, $year, $month);
+
+        return response()->json([
+            'year' => $year,
+            'month' => $month,
+            'period_label' => \Carbon\Carbon::create($year, $month, 1)->format('F Y'),
+            'community_count' => $rows->count(),
+            'total_community_contributions' => (int) $rows->sum('contributions_count'),
+            'communities' => $rows->map(function ($row) {
+                return [
+                    'community_id' => $row->community_of_practice_id,
+                    'community_name' => $row->community->community_name ?? 'Community',
+                    'community_url' => $row->community ? community_detail_url($row->community) : null,
+                    'contributions_count' => (int) $row->contributions_count,
+                ];
+            })->values(),
+        ]);
     }
 
     public function subtheme_pubs(Request $request){

@@ -687,7 +687,7 @@
             <!-- Badge Requirements Info -->
             <div class="sidebar-card">
                 <h5><i class="fa fa-trophy theme-text mr-2"></i>Contribution Badges</h5>
-                <p class="small text-muted mb-3">Earn badges based on your monthly contributions (publications, forum posts, and comments):</p>
+                <p class="small text-muted mb-3">Lifetime contributor badges grow with all your hub contributions. Community activity adds stars on your public profile badge each month:</p>
                         @if(isset($badgeTypes) && $badgeTypes->count() > 0)
                         @foreach($badgeTypes as $badgeType)
                         <div class="mb-3 p-2 badge-type-block" style="border-left: 3px solid {{ $badgeType->badge_color }}; background: {{ $badgeType->badge_color }}10; border-radius: 4px;">
@@ -703,7 +703,7 @@
                                 <strong style="color: {{ $badgeType->badge_color }};">{{ $badgeType->name }}</strong>
                             </div>
                             <div class="small text-muted">
-                                {{ $badgeType->contribution_threshold }}+ contributions/month
+                                {{ $badgeType->contribution_threshold }}+ lifetime contributions
                             </div>
                             @if($badgeType->slug === 'diamond')
                                 <div class="small mt-1" style="font-weight: 600; color: {{ $badgeType->badge_color }};">
@@ -713,7 +713,7 @@
                         </div>
                     @endforeach
                     <div class="mt-3 p-2 badge-note-block" style="background: #f8f9fa; border-radius: 4px; font-size: 0.85rem;">
-                        <strong>Note:</strong> Badges are awarded monthly based on your contributions. The system automatically calculates and awards badges at the end of each month.
+                        <strong>Note:</strong> Your public badge reflects lifetime hub impact. Monthly community contributions appear as stars you can drill into from your contributor profile.
                     </div>
                 @endif
             </div>

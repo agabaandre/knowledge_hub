@@ -39,8 +39,8 @@
                 </div>
                 @if($badgeCount > 0)
                 <div class="account-contributor-stat">
-                    <div class="account-contributor-stat__value">{{ number_format($badgeCount) }}</div>
-                    <div class="account-contributor-stat__label">Participant badges</div>
+                    <div class="account-contributor-stat__value">{{ optional($contributorPublicProfile['lifetime_badge'] ?? null)->badgeType->name ?? '1' }}</div>
+                    <div class="account-contributor-stat__label">Lifetime badge tier</div>
                 </div>
                 @endif
             </div>

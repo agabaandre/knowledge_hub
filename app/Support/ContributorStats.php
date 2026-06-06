@@ -57,9 +57,12 @@ class ContributorStats
 
         $forumContributions = $forumPosts + $forumComments;
 
+        $user->loadMissing('lifetimeBadge.badgeType');
+
         return [
             'author' => $author,
             'public_profile_url' => $author ? author_publications_url($author) : null,
+            'lifetime_badge' => $user->lifetimeBadge,
             'contribution_stats' => [
                 'resource_contributions' => $resourceContributions,
                 'forum_posts' => $forumPosts,
@@ -67,7 +70,8 @@ class ContributorStats
                 'forum_contributions' => $forumContributions,
                 'total_contributions' => $resourceContributions + $forumContributions,
             ],
-            'badge_count' => (int) $user->badges()->count(),
+            'badge_count' => (int) optional($user->lifetimeBadge)->badge_type_id ? 1 : 0,
+            'lifetime_badge' => $user->lifetimeBadge,
         ];
     }
 }

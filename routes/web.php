@@ -189,6 +189,9 @@ Route::get('/events/{id}', [PublicEventsController::class, 'show'])->name('event
 
 Route::group(["prefix" => "authors"], function () {
     Route::get("/", [AuthorsController::class, 'index']);
+    Route::get("publications/{slug}/badge-communities", [PublicationsController::class, 'authorBadgeCommunities'])
+        ->where('slug', '[\w\-]+')
+        ->name('authors.badge-communities');
     Route::get("publications/{slug}", [PublicationsController::class, 'author_pubs'])
         ->where('slug', '[\w\-]+')
         ->name('authors.publications');
@@ -344,7 +347,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         ->name('admin.participant-badges.run-award-job');
     Route::post('/participant-badges/award', [ParticipantBadgeManagementController::class, 'award'])
         ->name('admin.participant-badges.award');
-    Route::delete('/participant-badges/{userBadge}', [ParticipantBadgeManagementController::class, 'revoke'])
+    Route::delete('/participant-badges/lifetime/{userLifetimeBadge}', [ParticipantBadgeManagementController::class, 'revoke'])
         ->name('admin.participant-badges.revoke');
 
     //geo areas

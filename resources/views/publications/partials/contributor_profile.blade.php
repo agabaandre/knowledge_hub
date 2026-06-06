@@ -21,11 +21,7 @@
     $countryName = $user->country->name ?? null;
     $stats = $contributionStats ?? [];
     $profileKicker = ($isOrganisation && ! $user) ? 'Contributing Organisation' : 'Contributor';
-    $participantBadges = $user
-        ? $user->badges->sortByDesc(function ($badge) {
-            return $badge->awarded_at ?? $badge->created_at;
-        })->values()
-        : collect();
+    $lifetimeBadge = $lifetimeBadge ?? ($user->lifetimeBadge ?? null);
 @endphp
 
 <style>
@@ -271,10 +267,7 @@
             text-align: center;
         }
         .contributor-meta-line,
-        .contributor-participant-badges__grid {
-            justify-content: center;
-        }
-        .contributor-participant-badges {
+        .contributor-lifetime-badge-wrap {
             text-align: center;
         }
         .contributor-name {
@@ -325,43 +318,13 @@
                     <span><i class="fa fa-envelope"></i>{{ $author->email }}</span>
                 @endif
             </div>
-            @if($participantBadges->isNotEmpty())
-                <div class="contributor-participant-badges">
-                    <div class="contributor-participant-badges__title">Participant badges</div>
-                    <div class="contributor-participant-badges__grid">
-                        @foreach($participantBadges->take(8) as $userBadge)
-                            @php
-                                $badgeType = $userBadge->badgeType;
-                                $badgeColor = $badgeType->badge_color ?? '#64748b';
-                                $badgeSlug = $badgeType->slug ?? null;
-                                $communityName = $userBadge->community->community_name ?? null;
-                                $period = $userBadge->year && $userBadge->month
-                                    ? \Carbon\Carbon::create((int) $userBadge->year, (int) $userBadge->month, 1)->format('M Y')
-                                    : null;
-                            @endphp
-                            <div class="participant-badge-card" title="{{ $badgeType->name ?? 'Badge' }}{{ $communityName ? ' · '.$communityName : '' }}{{ $period ? ' · '.$period : '' }}">
-                                <span class="participant-badge-card__icon" style="background: {{ $badgeColor }}22;">
-                                    @if(!empty($badgeType->image_path))
-                                        <img src="{{ asset($badgeType->image_path) }}" alt="">
-                                    @else
-                                        {{ participant_badge_emoji($badgeSlug) }}
-                                    @endif
-                                </span>
-                                <span class="participant-badge-card__body">
-                                    <span class="participant-badge-card__name">{{ $badgeType->name ?? 'Badge' }}</span>
-                                    @if($communityName || $period)
-                                        <span class="participant-badge-card__meta">
-                                            @if($communityName){{ Str::limit($communityName, 42) }}@endif
-                                            @if($communityName && $period) · @endif
-                                            @if($period){{ $period }}@endif
-                                        </span>
-                                    @endif
-                                </span>
-                            </div>
-                        @endforeach
-                    </div>
-                </div>
-            @endif
+            @include('publications.partials.contributor_lifetime_badge', [
+                'author' => $author,
+                'lifetimeBadge' => $lifetimeBadge,
+                'badgeDrilldownYear' => $badgeDrilldownYear ?? null,
+                'badgeDrilldownMonth' => $badgeDrilldownMonth ?? null,
+                'communityBadgeStarCount' => $communityBadgeStarCount ?? 0,
+            ])
         </div>
     </div>
 </div>

@@ -2,7 +2,7 @@
 
 namespace App\Jobs;
 
-use App\Services\CommunityBadgeAwardService;
+use App\Services\ContributorBadgeAwardService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -33,7 +33,7 @@ class AwardCommunityBadgesJob implements ShouldQueue
         $this->onQueue('default');
     }
 
-    public function handle(CommunityBadgeAwardService $service): void
+    public function handle(ContributorBadgeAwardService $service): void
     {
         $period = $service->defaultPeriod();
         $year = $this->year ?? $period['year'];

@@ -277,26 +277,15 @@
                                 {{ $author->user->country->name }}
                             </div>
                             @endif
-                            @if($author->user && $author->user->badges && $author->user->badges->count() > 0)
+                            @if($author->user && $author->user->lifetimeBadge && $author->user->lifetimeBadge->badgeType)
+                            @php $lb = $author->user->lifetimeBadge; $bt = $lb->badgeType; @endphp
                             <div class="author-badges">
-                                @foreach($author->user->badges->take(3) as $userBadge)
-                                    <span class="author-badge" 
-                                          style="background-color: {{ $userBadge->badgeType->badge_color ?? '#C0C0C0' }};"
-                                          title="{{ $userBadge->badgeType->name }} - {{ Carbon\Carbon::create($userBadge->year, $userBadge->month, 1)->format('M Y') }}">
-                                        @if($userBadge->badgeType->slug === 'silver')🥈
-                                        @elseif($userBadge->badgeType->slug === 'gold')🥇
-                                        @elseif($userBadge->badgeType->slug === 'platinum')💎
-                                        @elseif($userBadge->badgeType->slug === 'diamond')💠
-                                        @else🏅
-                                        @endif
-                                        {{ $userBadge->badgeType->name }}
-                                    </span>
-                                @endforeach
-                                @if($author->user->badges->count() > 3)
-                                    <span class="author-badge" style="background-color: #64748b;">
-                                        +{{ $author->user->badges->count() - 3 }}
-                                    </span>
-                                @endif
+                                <span class="author-badge"
+                                      style="background-color: {{ $bt->badge_color ?? '#C0C0C0' }};"
+                                      title="{{ $bt->name }} — {{ number_format((int) $lb->lifetime_contributions) }} lifetime contributions">
+                                    {{ participant_badge_emoji($bt->slug ?? null) }}
+                                    {{ $bt->name }}
+                                </span>
                             </div>
                             @endif
 				</div>
