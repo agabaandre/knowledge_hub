@@ -41,7 +41,7 @@ The **`queue`** service processes Scout index jobs when `SCOUT_QUEUE=true`.
 
 ## Database schema
 
-- **258 migrations** plus `database/schema/mysql-schema.dump` for fast fresh installs (Laravel loads the dump before pending migrations).
+- **261 migrations** plus `database/schema/mysql-schema.dump` for fast fresh installs (Laravel loads the dump before pending migrations). The dump includes `publication_approval_logs` for publication moderation history.
 - Baseline **roles, permissions, and settings** are imported from `database/install/baseline_seed.sql` when empty after migrate.
 
 ## Existing installations

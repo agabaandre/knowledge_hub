@@ -30,7 +30,15 @@
         #publicationTable .pub-col-status { width: 7%; }
         #publicationTable .pub-col-date { width: 8%; }
         #publicationTable .pub-col-moderator { width: 10%; }
-        #publicationTable .pub-col-actions { width: 8.5rem; min-width: 8.5rem; }
+        #publicationTable .pub-col-actions { width: 11.5rem; min-width: 11.5rem; }
+        .pub-actions-group {
+            display: inline-flex;
+            flex-wrap: wrap;
+            gap: 4px;
+            justify-content: center;
+            max-width: 100%;
+        }
+        .pub-actions-group .btn { padding: 0.25rem 0.45rem; }
         #publicationTable .pub-title-link {
             word-break: break-word;
             overflow-wrap: anywhere;
@@ -390,6 +398,51 @@ $(function () {
         $('#pubDescriptionPreviewTitle').text(title);
         $('#pubDescriptionPreviewBody').text(description);
         $('#pubDescriptionPreviewModal').modal('show');
+    });
+
+    function postPublicationToggle(url, id, confirmText, $btn) {
+        if (!confirm(confirmText)) {
+            return;
+        }
+        $btn.prop('disabled', true);
+        $.ajax({
+            url: url,
+            method: 'POST',
+            data: {
+                _token: $('meta[name="csrf-token"]').attr('content'),
+                id: id
+            },
+            success: function (response) {
+                reloadPublicationTable();
+            },
+            error: function (xhr) {
+                const message = xhr.responseJSON && xhr.responseJSON.message
+                    ? xhr.responseJSON.message
+                    : 'Action failed. Please try again.';
+                alert(message);
+                $btn.prop('disabled', false);
+            }
+        });
+    }
+
+    $(document).on('click', '.pub-toggle-featured', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const isFeatured = String($btn.data('featured')) === '1';
+        const text = isFeatured
+            ? 'Remove this publication from featured?'
+            : 'Mark this publication as featured?';
+        postPublicationToggle('{{ url('admin/publications/toggle-featured') }}', $btn.data('id'), text, $btn);
+    });
+
+    $(document).on('click', '.pub-toggle-active', function (e) {
+        e.preventDefault();
+        const $btn = $(this);
+        const isActive = String($btn.data('active')) === '1';
+        const text = isActive
+            ? 'Unpublish this publication?'
+            : 'Publish this publication?';
+        postPublicationToggle('{{ url('admin/publications/toggle-active') }}', $btn.data('id'), text, $btn);
     });
 
     $('#bulkActionButton').on('click', function (e) {

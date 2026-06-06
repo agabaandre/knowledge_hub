@@ -444,6 +444,13 @@
 
                 </div>
             </div>
+
+            <div class="row mb-4">
+                <div class="col-12">
+                    @include('admin.publications.partials.approval_trail', ['approvalTrail' => $approvalTrail ?? collect()])
+                </div>
+            </div>
+        </div>
     </section>
 
 @endsection

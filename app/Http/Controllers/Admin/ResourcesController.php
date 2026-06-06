@@ -62,8 +62,12 @@ class ResourcesController extends Controller
 
     public function details(Request $request){
 
-        $publication          =  $this->publicationsRepo->find($request->id);
+        $publication          =  $this->publicationsRepo->find($request->id, false);
+        if (!$publication) {
+            abort(404);
+        }
         $data['publication']  = $publication;
+        $data['approvalTrail'] = $this->publicationsRepo->approvalTrailForPublication($publication);
         return view('admin.publications.details',$data);
     }
 
@@ -246,6 +250,48 @@ class ResourcesController extends Controller
             default:
                 return back()->with('error', 'Invalid action.');
         }
+    }
+
+    public function toggleFeatured(Request $request)
+    {
+        $id = (int) $request->input('id');
+        if ($id <= 0) {
+            return response()->json(['status' => 'failure', 'message' => 'Invalid publication.'], 422);
+        }
+
+        $publication = $this->publicationsRepo->togglePublicationFeatured($id);
+        if (!$publication) {
+            return response()->json(['status' => 'failure', 'message' => 'Publication not found.'], 404);
+        }
+
+        $isFeatured = (int) ($publication->is_featured ?? 0) === 1;
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $isFeatured ? 'Publication marked as featured.' : 'Publication removed from featured.',
+            'is_featured' => $isFeatured ? 1 : 0,
+        ]);
+    }
+
+    public function toggleActive(Request $request)
+    {
+        $id = (int) $request->input('id');
+        if ($id <= 0) {
+            return response()->json(['status' => 'failure', 'message' => 'Invalid publication.'], 422);
+        }
+
+        $publication = $this->publicationsRepo->togglePublicationActive($id);
+        if (!$publication) {
+            return response()->json(['status' => 'failure', 'message' => 'Publication not found.'], 404);
+        }
+
+        $isActive = strtolower((string) ($publication->is_active ?? '')) === 'active';
+
+        return response()->json([
+            'status' => 'success',
+            'message' => $isActive ? 'Publication published.' : 'Publication unpublished.',
+            'is_active' => $isActive ? 1 : 0,
+        ]);
     }
 
 }

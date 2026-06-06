@@ -175,6 +175,15 @@
         line-height: 1.6;
         color: #334155;
     }
+    .pub-filters-card--collapsible:not(.is-expanded) .pub-filters-card__header {
+        border-bottom: none;
+    }
+    .pub-filters-panel-toggle .fa-chevron-down {
+        transition: transform 0.2s ease;
+    }
+    .pub-filters-panel-toggle[aria-expanded="true"] .fa-chevron-down {
+        transform: rotate(180deg);
+    }
 </style>
 @endsection
 
@@ -324,7 +333,12 @@
 		</div>
 	
 		<div class="card-body text-left">
-            <div class="pub-filters-card mb-3">
+            @php
+                $hasActiveMyPubFilters = request()->filled('search.title')
+                    || request()->filled('search.description')
+                    || request()->filled('status');
+            @endphp
+            <div class="pub-filters-card pub-filters-card--collapsible {{ $hasActiveMyPubFilters ? 'is-expanded' : '' }} mb-3">
                 <div class="pub-filters-card__header">
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
@@ -333,34 +347,48 @@
                             <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
                         </div>
                     </div>
+                    <button
+                        class="pub-filters-advanced-toggle pub-filters-panel-toggle"
+                        type="button"
+                        data-toggle="collapse"
+                        data-target="#myPublicationsFiltersPanel"
+                        aria-expanded="{{ $hasActiveMyPubFilters ? 'true' : 'false' }}"
+                        aria-controls="myPublicationsFiltersPanel"
+                        id="myPublicationsFiltersToggle"
+                    >
+                        <i class="fa fa-chevron-down mr-1"></i>
+                        <span class="pub-filters-panel-toggle__label">{{ $hasActiveMyPubFilters ? 'Hide Filters' : 'Show Filters' }}</span>
+                    </button>
                 </div>
-                <div class="pub-filters-card__body">
-                    <form id="myPublicationsFiltersForm" method="GET" action="{{ route('account.publications') }}" class="mb-0">
-                        <div class="pub-filters-grid">
-                            <div class="pub-filter-field">
-                                <label class="pub-filter-label" for="filterMyPubTitle">Title</label>
-                                <input type="text" name="search[title]" id="filterMyPubTitle" class="form-control pub-filter-input" value="{{ request('search.title') }}" placeholder="Filter by title">
+                <div id="myPublicationsFiltersPanel" class="collapse {{ $hasActiveMyPubFilters ? 'show' : '' }}">
+                    <div class="pub-filters-card__body">
+                        <form id="myPublicationsFiltersForm" method="GET" action="{{ route('account.publications') }}" class="mb-0">
+                            <div class="pub-filters-grid">
+                                <div class="pub-filter-field">
+                                    <label class="pub-filter-label" for="filterMyPubTitle">Title</label>
+                                    <input type="text" name="search[title]" id="filterMyPubTitle" class="form-control pub-filter-input" value="{{ request('search.title') }}" placeholder="Filter by title">
+                                </div>
+                                <div class="pub-filter-field">
+                                    <label class="pub-filter-label" for="filterMyPubDescription">Description</label>
+                                    <input type="text" name="search[description]" id="filterMyPubDescription" class="form-control pub-filter-input" value="{{ request('search.description') }}" placeholder="Filter by description">
+                                </div>
+                                <div class="pub-filter-field">
+                                    <label class="pub-filter-label" for="filterMyPubStatus">Status</label>
+                                    <select name="status" id="filterMyPubStatus" class="form-control pub-filter-input">
+                                        <option value="">All statuses</option>
+                                        <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
+                                        <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="pub-filter-field">
-                                <label class="pub-filter-label" for="filterMyPubDescription">Description</label>
-                                <input type="text" name="search[description]" id="filterMyPubDescription" class="form-control pub-filter-input" value="{{ request('search.description') }}" placeholder="Filter by description">
+                            <div class="pub-filters-actions">
+                                <a href="{{ route('account.publications') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearMyPublicationsFilters">
+                                    <i class="fa fa-rotate-left"></i> Clear
+                                </a>
                             </div>
-                            <div class="pub-filter-field">
-                                <label class="pub-filter-label" for="filterMyPubStatus">Status</label>
-                                <select name="status" id="filterMyPubStatus" class="form-control pub-filter-input">
-                                    <option value="">All statuses</option>
-                                    <option value="approved" {{ request('status') === 'approved' ? 'selected' : '' }}>Approved</option>
-                                    <option value="pending" {{ request('status') === 'pending' ? 'selected' : '' }}>Pending</option>
-                                    <option value="rejected" {{ request('status') === 'rejected' ? 'selected' : '' }}>Rejected</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="pub-filters-actions">
-                            <a href="{{ route('account.publications') }}" class="pub-filters-btn pub-filters-btn--clear" id="clearMyPublicationsFilters">
-                                <i class="fa fa-rotate-left"></i> Clear
-                            </a>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
             </div>
 
@@ -490,6 +518,18 @@ $(function(){
     e.preventDefault();
     window.location.href = '{{ route('account.publications') }}';
   });
+
+  $('#myPublicationsFiltersPanel')
+    .on('show.bs.collapse', function () {
+      $('#myPublicationsFiltersToggle').attr('aria-expanded', 'true');
+      $('#myPublicationsFiltersToggle .pub-filters-panel-toggle__label').text('Hide Filters');
+      $('.pub-filters-card--collapsible').addClass('is-expanded');
+    })
+    .on('hide.bs.collapse', function () {
+      $('#myPublicationsFiltersToggle').attr('aria-expanded', 'false');
+      $('#myPublicationsFiltersToggle .pub-filters-panel-toggle__label').text('Show Filters');
+      $('.pub-filters-card--collapsible').removeClass('is-expanded');
+    });
 
   $(document).on('click', '.pub-desc-preview', function (e) {
     e.preventDefault();

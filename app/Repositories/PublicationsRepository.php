@@ -7,7 +7,7 @@ use App\Models\Country;
 use App\Models\Favourite;
 use App\Models\GeoCoverage;
 use App\Models\Publication;
-use App\Models\PublicationAccessGroup;
+use App\Models\PublicationApprovalLog;
 use App\Models\PublicationAttachment;
 use App\Models\PublicationComment;
 use App\Models\PublicationCommunityOfPractice;
@@ -411,6 +411,8 @@ public function get(Request $request, $return_array = false, $featured = false,$
     public function save(Request $request){
 
         Log::info("Request:: ". json_encode($request->all()));
+
+        $wasNewPublication = empty($request->id);
 
         // When creating a version from an existing resource, always create a new record
         if ($request->original_id) {
@@ -925,6 +927,24 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     'processed_status' => PublicationStaging::STATUS_APPROVED,
                     'publication_id' => $pub->id,
                 ]);
+            }
+        }
+
+        if ($saved && !$request->original_id && $wasNewPublication) {
+            if ((int) ($pub->is_approved ?? 0) === 1) {
+                $this->logPublicationApprovalEvent(
+                    (int) $pub->id,
+                    'auto_approved',
+                    null,
+                    ['source' => is_admin() ? 'admin_submission' : 'privileged_role']
+                );
+            } elseif ((int) ($pub->is_approved ?? 0) === 0 && (int) ($pub->is_rejected ?? 0) === 0) {
+                $this->logPublicationApprovalEvent(
+                    (int) $pub->id,
+                    'submitted',
+                    null,
+                    ['submitter_user_id' => $pub->user_id]
+                );
             }
         }
 
@@ -1523,6 +1543,12 @@ public function change_approval_status(Request $request){
             $publication->load('user');
         }
     }
+
+    $previousState = [
+        'is_approved' => (int) ($publication->is_approved ?? 0),
+        'is_rejected' => (int) ($publication->is_rejected ?? 0),
+        'is_active' => $publication->is_active ?? null,
+    ];
     
     if($request->approved){
 
@@ -1572,6 +1598,24 @@ public function change_approval_status(Request $request){
     }
 
     $publication->update();
+
+    if (!$request->is_summary && $publication instanceof Publication) {
+        if ($request->approved) {
+            $this->logPublicationApprovalEvent(
+                (int) $publication->id,
+                'approved',
+                null,
+                ['previous' => $previousState]
+            );
+        } elseif ($request->rejected) {
+            $this->logPublicationApprovalEvent(
+                (int) $publication->id,
+                'rejected',
+                trim((string) $request->input('rejected_reason', '')) ?: null,
+                ['previous' => $previousState]
+            );
+        }
+    }
     
     // Send email notification using proper template
     $userEmail = null;
@@ -1982,6 +2026,33 @@ public function bulkFeatured($ids)
     Publication::whereIn('id', $ids)->update(['is_featured' => 1]);
 }
 
+public function togglePublicationFeatured(int $id): ?Publication
+{
+    $publication = Publication::find($id);
+    if (!$publication) {
+        return null;
+    }
+
+    $publication->is_featured = (int) ($publication->is_featured ?? 0) === 1 ? 0 : 1;
+    $publication->save();
+
+    return $publication;
+}
+
+public function togglePublicationActive(int $id): ?Publication
+{
+    $publication = Publication::find($id);
+    if (!$publication) {
+        return null;
+    }
+
+    $isActive = strtolower((string) ($publication->is_active ?? '')) === 'active';
+    $publication->is_active = $isActive ? 'In-Active' : 'Active';
+    $publication->save();
+
+    return $publication;
+}
+
     /**
      * Base query for admin "Manage Publications" (approved, non-version rows).
      */
@@ -2016,16 +2087,109 @@ public function bulkFeatured($ids)
         return $pubs;
     }
 
+    public function logPublicationApprovalEvent(
+        int $publicationId,
+        string $action,
+        ?string $reason = null,
+        ?array $metadata = null,
+        ?int $performedBy = null
+    ): PublicationApprovalLog {
+        $actor = $performedBy ?? (current_user() ? (int) current_user()->id : null);
+        $actorName = null;
+        if ($actor) {
+            $actorName = User::query()->whereKey($actor)->value('name');
+        }
+
+        return PublicationApprovalLog::create([
+            'publication_id' => $publicationId,
+            'action' => $action,
+            'performed_by' => $actor,
+            'performed_by_name' => $actorName,
+            'reason' => $reason,
+            'metadata' => $metadata,
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, PublicationApprovalLog|object>
+     */
+    public function approvalTrailForPublication(Publication $publication)
+    {
+        $logs = PublicationApprovalLog::query()
+            ->where('publication_id', $publication->id)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
+
+        if ($logs->isNotEmpty()) {
+            return $logs;
+        }
+
+        return $this->synthesizeLegacyApprovalTrail($publication);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    protected function synthesizeLegacyApprovalTrail(Publication $publication): Collection
+    {
+        $publication->loadMissing(['user', 'approver', 'rejector']);
+        $entries = collect();
+
+        if ($publication->user) {
+            $entries->push((object) [
+                'action' => 'submitted',
+                'action_label' => 'Submitted for review',
+                'performed_by_name' => $publication->user->name,
+                'reason' => null,
+                'created_at' => $publication->created_at,
+                'is_legacy' => true,
+            ]);
+        }
+
+        if ((int) ($publication->is_rejected ?? 0) === 1) {
+            $entries->push((object) [
+                'action' => 'rejected',
+                'action_label' => 'Rejected',
+                'performed_by_name' => $publication->rejector->name
+                    ?? ($publication->rejected_by ? 'User #'.$publication->rejected_by : 'Moderator not recorded'),
+                'reason' => $publication->rejected_reason,
+                'created_at' => $publication->rejected_at ?? $publication->updated_at,
+                'is_legacy' => true,
+            ]);
+        } elseif ((int) ($publication->is_approved ?? 0) === 1) {
+            $entries->push((object) [
+                'action' => !empty($publication->approved_by) ? 'approved' : 'legacy_approved',
+                'action_label' => !empty($publication->approved_by) ? 'Approved' : 'Approved (moderator not recorded)',
+                'performed_by_name' => $publication->approver->name
+                    ?? 'Moderator not recorded — may predate approval tracking',
+                'reason' => null,
+                'created_at' => $publication->updated_at ?? $publication->created_at,
+                'is_legacy' => true,
+            ]);
+        }
+
+        return $entries->sortByDesc(function ($entry) {
+            return $entry->created_at;
+        })->values();
+    }
+
     public function moderatorDisplayName(Publication $publication): string
     {
-        if (!empty($publication->approved_by) && $publication->approver) {
-            return (string) ($publication->approver->name ?? '—');
+        if ((int) ($publication->is_rejected ?? 0) === 1) {
+            if (!empty($publication->rejected_by) && $publication->rejector) {
+                return 'Rejected by '.($publication->rejector->name ?? 'Unknown');
+            }
+
+            return 'Rejected (moderator not recorded)';
         }
-        if (!empty($publication->rejected_by) && $publication->rejector) {
-            return (string) ($publication->rejector->name ?? 'Rejected');
-        }
-        if ((int) ($publication->is_approved ?? 0) === 1 && $publication->user) {
-            return (string) ($publication->user->name ?? '—');
+
+        if ((int) ($publication->is_approved ?? 0) === 1) {
+            if (!empty($publication->approved_by) && $publication->approver) {
+                return 'Approved by '.($publication->approver->name ?? 'Unknown');
+            }
+
+            return 'Approved (moderator not recorded)';
         }
 
         return '—';
@@ -2093,16 +2257,30 @@ public function bulkFeatured($ids)
             $affiliation = '<div class="pub-cell-wrap">'.e($publication->author_affiliation ?: '-').'</div>';
             $memberState = e($publication->country->name ?? '');
             $status = e(get_publication_state($publication->is_approved, $publication->is_rejected));
-            $moderator = '<div class="pub-cell-wrap"><span class="text-muted">'.e($this->moderatorDisplayName($publication)).'</span></div>';
+            $moderator = '<div class="pub-cell-wrap"><span class="text-muted">'.e($this->moderatorDisplayName($publication)).'</span>'
+                .' <a href="'.url('admin/publications/details').'?id='.$publication->id.'#approval-trail" class="small" title="View approval trail">Trail</a></div>';
 
-            $actions = '<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success mr-1" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
-                .'<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary mr-1" title="View"><i class="fa fa-eye"></i></a>';
+            $actions = '<div class="pub-actions-group">'
+                .'<a href="'.url('records/resource').'?id='.$publication->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-success" title="Public view"><i class="fa fa-external-link-alt"></i></a>'
+                .'<a href="'.url('admin/publications/details').'?id='.$publication->id.'" class="btn btn-sm btn-outline-primary" title="View"><i class="fa fa-eye"></i></a>';
             if ($publication->user_id == $currentUserId || $isAdmin) {
-                $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Edit"><i class="fa fa-edit"></i></a>';
+                $actions .= '<a href="'.url('admin/publications/edit').'?id='.$publication->id.'" class="btn btn-sm btn-outline-dark" title="Edit"><i class="fa fa-edit"></i></a>';
             }
+
+            $featuredBtnClass = $isFeatured ? 'btn-warning' : 'btn-outline-warning';
+            $featuredTitle = $isFeatured ? 'Remove from featured' : 'Mark as featured';
+            $featuredIcon = $isFeatured ? 'fa-star' : 'fa-star-o';
+            $actions .= '<button type="button" class="btn btn-sm '.$featuredBtnClass.' pub-toggle-featured" data-id="'.$publication->id.'" data-featured="'.($isFeatured ? '1' : '0').'" title="'.$featuredTitle.'"><i class="fa '.$featuredIcon.'"></i></button>';
+
+            $activeTitle = $isInactive ? 'Publish' : 'Unpublish';
+            $activeBtnClass = $isInactive ? 'btn-outline-success' : 'btn-outline-secondary';
+            $activeIcon = $isInactive ? 'fa-upload' : 'fa-ban';
+            $actions .= '<button type="button" class="btn btn-sm '.$activeBtnClass.' pub-toggle-active" data-id="'.$publication->id.'" data-active="'.($isInactive ? '0' : '1').'" title="'.$activeTitle.'"><i class="fa '.$activeIcon.'"></i></button>';
+
             if ($canDelete) {
                 $actions .= '<button type="button" class="btn btn-sm btn-outline-danger" onclick="openDeleteModal(\''.$publication->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>';
             }
+            $actions .= '</div>';
 
             $data[] = [
                 'DT_RowClass' => trim($rowClass),

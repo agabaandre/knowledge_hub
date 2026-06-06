@@ -177,6 +177,10 @@ class Publication extends Model
         return $this->belongsTo(User::class, 'rejected_by', 'id');
     }
 
+    public function approvalLogs(){
+        return $this->hasMany(PublicationApprovalLog::class)->orderByDesc('created_at');
+    }
+
     public function favourited(){
         return $this->hasMany(Favourite::class);
     }

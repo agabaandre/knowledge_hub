@@ -1350,6 +1350,24 @@ CREATE TABLE `publication_access_groups` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `publication_approval_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `publication_approval_logs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `publication_id` bigint unsigned NOT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `performed_by` bigint unsigned DEFAULT NULL,
+  `performed_by_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci,
+  `metadata` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `publication_approval_logs_publication_id_index` (`publication_id`),
+  KEY `publication_approval_logs_performed_by_index` (`performed_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `publication_attachments`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -1706,6 +1724,8 @@ CREATE TABLE `setting` (
   `id` bigint unsigned NOT NULL AUTO_INCREMENT,
   `config_name` varchar(100) DEFAULT NULL,
   `status` enum('active','inactive') NOT NULL DEFAULT 'active',
+  `installer_locked` tinyint(1) NOT NULL DEFAULT '0',
+  `installer_completed_at` timestamp NULL DEFAULT NULL,
   `title` varchar(255) DEFAULT NULL,
   `site_name` varchar(100) NOT NULL,
   `seo_keywords` text NOT NULL,
@@ -2462,3 +2482,5 @@ INSERT INTO `migrations` VALUES (271,'2026_04_22_120000_add_allow_password_accou
 INSERT INTO `migrations` VALUES (272,'2026_04_22_133000_create_setting_key_groups_table',151);
 INSERT INTO `migrations` VALUES (273,'2026_05_19_120000_add_disposable_email_settings_to_setting_table',152);
 INSERT INTO `migrations` VALUES (274,'2026_06_03_120000_add_profile_reminder_settings_to_setting_table',153);
+INSERT INTO `migrations` VALUES (275,'2026_05_19_120000_create_publication_approval_logs_table',154);
+INSERT INTO `migrations` VALUES (276,'2026_06_02_120000_add_installer_lock_to_setting_table',155);

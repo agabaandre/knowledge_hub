@@ -324,6 +324,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/import", [ResourcesController::class, 'import']);
         Route::get("/import-template", [ResourcesController::class, 'import_template']);
         Route::post("/bulk-action", [ResourcesController::class, 'bulkAction'])->name('admin.publications.bulk-action');
+        Route::post("/toggle-featured", [ResourcesController::class, 'toggleFeatured'])->name('admin.publications.toggle-featured');
+        Route::post("/toggle-active", [ResourcesController::class, 'toggleActive'])->name('admin.publications.toggle-active');
 
     });
 
