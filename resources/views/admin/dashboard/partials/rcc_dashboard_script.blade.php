@@ -379,8 +379,23 @@
         }).join('');
     }
 
+    function syncYearSelectFromPayload(payload) {
+        var meta = payload && payload.meta ? payload.meta : {};
+        if (!meta.period_year) return;
+        var yearSelect = document.getElementById('rccYear');
+        if (!yearSelect) return;
+        var year = String(meta.period_year);
+        if (yearSelect.value !== year) {
+            yearSelect.value = year;
+            if (window.jQuery) {
+                jQuery(yearSelect).trigger('change.select2');
+            }
+        }
+    }
+
     function applyPayload(payload) {
         lastPayload = payload;
+        syncYearSelectFromPayload(payload);
         syncFilterUrl();
         renderScopeBanner(payload);
         renderSummaryChips(payload.indicator_summaries);

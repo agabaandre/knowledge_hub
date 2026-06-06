@@ -156,13 +156,34 @@ class GraphsRepository extends SharedRepo{
 		return $kpi_ids;
 	}
 
-	public function get_periods_years()
+	public function get_periods_years(bool $publishedOnly = false, bool $descending = false): array
 	{
-		$data = DB::table('kpi_data_view')
-			->select('period_year')
-			->distinct()
-			->pluck('period_year');
-		return $data->toArray();
+		$query = DB::table('kpi_data_view as kdv')
+			->select('kdv.period_year')
+			->distinct();
+
+		if ($publishedOnly) {
+			$query->join('kpi', 'kpi.id', '=', 'kdv.kpi_id')
+				->where('kpi.status', 'published');
+		}
+
+		$years = $query->pluck('period_year')
+			->map(fn ($year) => (int) $year)
+			->filter(fn ($year) => $year > 0)
+			->unique()
+			->values()
+			->all();
+
+		$descending ? rsort($years) : sort($years);
+
+		return $years;
+	}
+
+	public function get_latest_period_year(bool $publishedOnly = true): int
+	{
+		$years = $this->get_periods_years($publishedOnly, true);
+
+		return $years[0] ?? (int) date('Y');
 	}
 
 	public function get_kpis($filter = [], $only_ids=false, $publishedOnly = false)
@@ -797,7 +818,9 @@ class GraphsRepository extends SharedRepo{
         $countryId = ! empty($filter['country_id']) ? (int) $filter['country_id'] : null;
         $subjectAreaId = ! empty($filter['subject_area']) ? (int) $filter['subject_area'] : null;
         $kpiId = ! empty($filter['kpi_id']) ? (int) $filter['kpi_id'] : null;
-        $periodYear = ! empty($filter['period_year']) ? (int) $filter['period_year'] : (int) date('Y');
+        $periodYear = ! empty($filter['period_year'])
+            ? (int) $filter['period_year']
+            : $this->get_latest_period_year(true);
 
         $kpiFilter = array_filter([
             'region_id' => $regionId,

@@ -58,10 +58,12 @@ class GraphController extends Controller
 		$filter = $request->all();
 		$meta = $this->rccPageMetadata($filter);
 		$regions = $meta['regions'];
+		$defaultPeriodYear = $meta['default_period_year'];
 
 		return view('admin.dashboard.rcc', [
 			'title' => 'RCC Dashboard',
 			'filter' => $filter,
+			'default_period_year' => $defaultPeriodYear,
 			'regions' => $regions,
 			'subjectareas' => $meta['subjectareas'],
 			'indicators' => $meta['indicators'],
@@ -102,11 +104,12 @@ class GraphController extends Controller
 			->orderBy('name')
 			->get(['id', 'name']));
 
-		$years = $store->remember('rcc_meta_years', $ttl, function () {
-			$years = array_values(array_filter($this->dashRepo->get_periods_years()));
+		$years = $store->remember('rcc_meta_years_published_desc', $ttl, function () {
+			$years = $this->dashRepo->get_periods_years(true, true);
 
 			return $years !== [] ? $years : [(int) date('Y')];
 		});
+		$defaultPeriodYear = $years[0] ?? (int) date('Y');
 
 		$indicators = $store->remember('rcc_meta_indicators', $ttl, fn () => $this->dashRepo->get_published_map_indicators());
 
@@ -115,7 +118,9 @@ class GraphController extends Controller
 		]));
 		$countries = $store->remember($countriesKey, MetricsCache::ttl('rcc'), fn () => $this->dashRepo->get_countries($filter, true));
 
-		return compact('regions', 'subjectareas', 'years', 'indicators', 'countries');
+		return array_merge(compact('regions', 'subjectareas', 'years', 'indicators', 'countries'), [
+			'default_period_year' => $defaultPeriodYear,
+		]);
 	}
 
 	private function normalizedRccFilter(array $filter): array
@@ -127,8 +132,14 @@ class GraphController extends Controller
 			}
 		}
 
-		if (empty($normalized['period_year'])) {
-			$normalized['period_year'] = (int) date('Y');
+		$availableYears = $this->dashRepo->get_periods_years(true, true);
+		$latestYear = $availableYears[0] ?? $this->dashRepo->get_latest_period_year(true);
+
+		if (
+			empty($normalized['period_year'])
+			|| ($availableYears !== [] && ! in_array($normalized['period_year'], $availableYears, true))
+		) {
+			$normalized['period_year'] = $latestYear;
 		}
 
 		return $normalized;

@@ -196,8 +196,15 @@
                 <div>
                     <label for="rccYear">Year</label>
                     <select name="period_year" id="rccYear" class="form-control select2">
+                        @php
+                            $defaultYear = (int) ($default_period_year ?? ($years[0] ?? date('Y')));
+                            $selectedYear = ! empty($filter['period_year']) ? (int) $filter['period_year'] : $defaultYear;
+                            if (! in_array($selectedYear, array_map('intval', $years ?? []), true) && ! empty($years)) {
+                                $selectedYear = (int) $years[0];
+                            }
+                        @endphp
                         @foreach($years as $year)
-                            <option value="{{ $year }}" @if((int) ($filter['period_year'] ?? date('Y')) === (int) $year) selected @endif>{{ $year }}</option>
+                            <option value="{{ $year }}" @if($selectedYear === (int) $year) selected @endif>{{ $year }}</option>
                         @endforeach
                     </select>
                 </div>
