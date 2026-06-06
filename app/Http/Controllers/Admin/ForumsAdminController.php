@@ -22,12 +22,16 @@ class ForumsAdminController extends Controller
 
     public function index(Request $request)
     {
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->forumsRepo->adminForumsDatatable($request, 'pending'));
+        }
+
         $data = [
-            'forums' => $this->forumsRepo->get($request, 3, 'pending'),
             'search' => (object) $request->all(),
             'title' => 'Pending approval',
             'forum_admin_queue' => 'pending',
             'forum_list_subtitle' => 'Discussion threads awaiting moderator approval',
+            'forum_stats' => $this->forumsRepo->adminForumIndexStats(),
         ];
 
         return view('admin.forums.index', $this->withForumAdminCounts($data));
@@ -35,12 +39,16 @@ class ForumsAdminController extends Controller
 
     public function approved(Request $request)
     {
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->forumsRepo->adminForumsDatatable($request, 'approved'));
+        }
+
         $data = [
-            'forums' => $this->forumsRepo->get($request, 3, 'approved'),
             'search' => (object) $request->all(),
             'title' => 'Approved forums',
             'forum_admin_queue' => 'approved',
             'forum_list_subtitle' => 'Published discussion threads',
+            'forum_stats' => $this->forumsRepo->adminForumIndexStats(),
         ];
 
         return view('admin.forums.index', $this->withForumAdminCounts($data));
@@ -48,12 +56,16 @@ class ForumsAdminController extends Controller
 
     public function rejected(Request $request)
     {
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->forumsRepo->adminForumsDatatable($request, 'rejected'));
+        }
+
         $data = [
-            'forums' => $this->forumsRepo->get($request, 3, 'rejected'),
             'search' => (object) $request->all(),
             'title' => 'Rejected forums',
             'forum_admin_queue' => 'rejected',
             'forum_list_subtitle' => 'Threads that were not approved',
+            'forum_stats' => $this->forumsRepo->adminForumIndexStats(),
         ];
 
         return view('admin.forums.index', $this->withForumAdminCounts($data));
@@ -91,6 +103,7 @@ class ForumsAdminController extends Controller
     public function details(Request $request){
         $forum          =  $this->forumsRepo->find($request->id);
         $data['forum']  = $forum;
+        $data['approvalTrail'] = $this->forumsRepo->approvalTrailForForum($forum);
         
         // Get recent forums for sidebar (excluding current forum)
         $request['rows'] = 6;

@@ -2,121 +2,230 @@
 
 @section('styles')
 <link href="{{ asset('assets/plugins/summernote/dist/summernote.min.css') }}" rel="stylesheet">
- @include('common.table')
- <style>
-    .filter-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; }
-    .filter-card .card-header { background:#f8fafc; border-bottom:1px solid #e2e8f0; }
-    .btn-soft { border:1px solid #cbd5e1; background:#ffffff; }
-    .btn-soft:hover { background:#f8fafc; }
-    .form-label-sm { font-size:.875rem; font-weight:600; color:#334155; }
- </style>
+@include('common.table')
+@include('admin.publications.partials.filter_styles')
+<style>
+    .forum-stat-card {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 0;
+        border-top: 3px solid var(--theme-color-primary, #119A48);
+    }
+    .forum-stat-card--pending { border-top-color: #d97706; }
+    .forum-stat-card--rejected { border-top-color: #dc3545; }
+    .forum-stat-card__label {
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin-bottom: 0.35rem;
+    }
+    .forum-stat-card__value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+    }
+    #forumsTable_wrapper table.dataTable { table-layout: fixed !important; }
+    #forumsTable .forum-col-index { width: 3rem; min-width: 3rem; }
+    #forumsTable .forum-col-title { width: 18%; }
+    #forumsTable .forum-col-description { width: 22%; }
+    #forumsTable .forum-col-author { width: 10%; }
+    #forumsTable .forum-col-created { width: 9%; }
+    #forumsTable .forum-col-moderator { width: 14%; }
+    #forumsTable .forum-col-actions { width: 11rem; min-width: 11rem; }
+    .pub-actions-group { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+    .pub-actions-group .btn { padding: 0.25rem 0.45rem; }
+</style>
 @endsection
 
 @section('content')
+@php
+    $queue = $forum_admin_queue ?? 'pending';
+    $ajaxUrl = match ($queue) {
+        'approved' => url('admin/forums/approved'),
+        'rejected' => url('admin/forums/rejected'),
+        default => url('admin/forums'),
+    };
+    $forumStats = $forum_stats ?? ['approved' => 0, 'pending' => 0, 'rejected' => 0];
+@endphp
+
+<div class="row mb-3">
+    <div class="col-md-4 col-sm-6 mb-2">
+        <a href="{{ url('admin/forums/approved') }}" class="card forum-stat-card h-100 shadow-sm text-decoration-none">
+            <div class="card-body py-3">
+                <div class="forum-stat-card__label">Approved Forums</div>
+                <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['approved'] ?? 0)) }}</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-2">
+        <a href="{{ url('admin/forums') }}" class="card forum-stat-card forum-stat-card--pending h-100 shadow-sm text-decoration-none">
+            <div class="card-body py-3">
+                <div class="forum-stat-card__label">Pending Review</div>
+                <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['pending'] ?? 0)) }}</div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4 col-sm-6 mb-2">
+        <a href="{{ url('admin/forums/rejected') }}" class="card forum-stat-card forum-stat-card--rejected h-100 shadow-sm text-decoration-none">
+            <div class="card-body py-3">
+                <div class="forum-stat-card__label">Rejected</div>
+                <div class="forum-stat-card__value">{{ number_format((int) ($forumStats['rejected'] ?? 0)) }}</div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <div class="row">
-	<div class="card col-lg-12">
-		<div class="filter-card">
-			<div class="card-header d-flex align-items-center justify-content-between flex-wrap" style="gap:12px;">
-				<div class="flex-grow-1">
-					<strong>{{ $title ?? 'Forums' }}</strong>
-					<small class="text-muted d-block">{{ $forum_list_subtitle ?? 'Search and manage discussion threads' }}</small>
-				</div>
-				<div class="btn-group btn-group-sm" role="group" aria-label="Forum queues">
-					<a href="{{ url('admin/forums') }}" class="btn {{ ($forum_admin_queue ?? '') === 'pending' ? 'btn-dark' : 'btn-outline-secondary' }}">Pending</a>
-					<a href="{{ url('admin/forums/approved') }}" class="btn {{ ($forum_admin_queue ?? '') === 'approved' ? 'btn-dark' : 'btn-outline-secondary' }}">Approved</a>
-					<a href="{{ url('admin/forums/rejected') }}" class="btn {{ ($forum_admin_queue ?? '') === 'rejected' ? 'btn-dark' : 'btn-outline-secondary' }}">Rejected</a>
-				</div>
-				@if(isset($pending_forums_count) && $pending_forums_count > 0)
-					<div class="dropdown nav-item">
-						<a class="nav-link position-relative" href="{{ url('admin/forums/moderate') }}" title="Pending Forums">
-							<svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
-								<path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
-								<path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
-							</svg>
-							<span class="badge badge-danger badge-pill" style="position:absolute;top:-4px;right:-6px;min-width:20px;">{{ $pending_forums_count }}</span>
-						</a>
-					</div>
-				@endif
-			</div>
-			<div class="card-body">
-				<form class="container-fluid">
-					<div class="row">
-						<div class="col-md-8">
-							<div class="form-group">
-								<label class="form-label-sm" for="title">Keyword</label>
-								<input type="text" name="term" id="filterTitle" class="form-control" placeholder="Filter by title or description" value="{{ @$search->term ?? ''}}">
-							</div>
-						</div>
-						<div class="col-md-4 d-flex align-items-end justify-content-end" style="gap:8px;">
-							<button type="submit" id="filterButton" class="btn btn-dark btn-sm"><i class="fa fa-filter mr-1"></i> Apply</button>
-							<button type="button" id="reset" class="btn btn-soft btn-sm"><i class="fa fa-rotate-left mr-1"></i> Reset</button>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
+    <div class="col-lg-12">
+        <div class="pub-filters-card mb-3">
+            <div class="pub-filters-card__header">
+                <div class="pub-filters-card__heading">
+                    <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
+                    <div>
+                        <h3 class="pub-filters-card__title">{{ $title ?? 'Forums' }}</h3>
+                        <p class="pub-filters-card__subtitle">{{ $forum_list_subtitle ?? 'Search and manage discussion threads' }}</p>
+                    </div>
+                </div>
+                <div class="d-flex align-items-center flex-wrap" style="gap:8px;">
+                    <div class="btn-group btn-group-sm" role="group" aria-label="Forum queues">
+                        <a href="{{ url('admin/forums') }}" class="btn {{ $queue === 'pending' ? 'btn-dark' : 'btn-outline-secondary' }}">Pending</a>
+                        <a href="{{ url('admin/forums/approved') }}" class="btn {{ $queue === 'approved' ? 'btn-dark' : 'btn-outline-secondary' }}">Approved</a>
+                        <a href="{{ url('admin/forums/rejected') }}" class="btn {{ $queue === 'rejected' ? 'btn-dark' : 'btn-outline-secondary' }}">Rejected</a>
+                    </div>
+                    @if(isset($pending_forums_count) && $pending_forums_count > 0)
+                        <a class="nav-link position-relative d-inline-flex p-0" href="{{ url('admin/forums/moderate') }}" title="Pending Forums">
+                            <svg class="svg-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:22px;height:22px;">
+                                <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                                <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                            </svg>
+                            <span class="badge badge-danger badge-pill" style="position:absolute;top:-6px;right:-8px;min-width:18px;">{{ $pending_forums_count }}</span>
+                        </a>
+                    @endif
+                </div>
+            </div>
+            <div class="pub-filters-card__body">
+                <form id="forumsFiltersForm" method="GET" action="{{ $ajaxUrl }}" class="mb-0">
+                    <div class="pub-filters-grid pub-filters-grid--single">
+                        <div class="pub-filter-field">
+                            <label class="pub-filter-label" for="filterForumTerm">Keyword</label>
+                            <input type="text" name="term" id="filterForumTerm" class="form-control pub-filter-input" placeholder="Filter by title, description, or author" value="{{ @$search->term ?? '' }}">
+                        </div>
+                    </div>
+                    <div class="pub-filters-actions">
+                        <a href="{{ $ajaxUrl }}" class="pub-filters-btn pub-filters-btn--clear" id="clearForumFilters">
+                            <i class="fa fa-rotate-left"></i> Clear
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
 
-		<div class="card-body text-left">
-			<div class="table-responsive">
-			<table id="publicationTable" class="table table-striped table-hover table-bordered">
-				<thead class="thead-light">
-					<tr>
-						<th style="width:60px;">#</th>
-						<th>Forum Title</th>
-						<th>Description</th>
-						<th>Author</th>
-						<th width="12%">Created</th>
-						<th width="18%">Approved/Rejected By</th>
-						<th width="24%">Actions</th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach($forums as $idx => $row)
-						<tr>
-							<td><span class="text-muted">{{ $forums->firstItem() + $idx }}</span></td>
-							<td>
-								{{ $row->forum_title }}
-								@include('admin.forums.partials.resubmission-badge', ['forum' => $row, 'class' => 'ml-1 align-middle'])
-							</td>
-							<td>{!! truncate(strip_tags($row->forum_description), 100) !!}</td>
-							<td>{!! truncate(strip_tags($row->user->name), 100) !!}</td>
-							<td>{!! time_ago($row->created_at) !!}</td>
-							<td>
-								@php
-									$name = '-';
-									if (!empty($row->approved_by)) { $u=\App\Models\User::find($row->approved_by); $name=$u->name ?? '-'; }
-									elseif (!empty($row->rejected_by)) { $u=\App\Models\User::find($row->rejected_by); $name=($u->name??'Rejected'); }
-								@endphp
-								<span class="text-muted">{{ $name }}</span>
-							</td>
-							<td>
-							    @php
-							        $rowPendingEdit = (int) ($row->is_rejected ?? 0) === 0 && (int) ($row->is_approved ?? 0) === 0 && (int) ($row->status ?? 0) === 0;
-							    @endphp
-							    @if($rowPendingEdit)
-							        <a class="btn btn-sm btn-outline-primary mr-1" href="#details{{ $row->id }}" data-toggle="modal"><i class="fa fa-edit mr-1"></i> Review / Edit</a>
-							    @endif
-							    <a class="btn btn-sm btn-outline-dark mr-1" href="{{ url('admin/forums/details')}}?id={{$row->id}}"><i class="fa fa-info-circle mr-1"></i> Details</a>
-								<a class="btn btn-sm btn-outline-danger" href="javascript:void(0);" onclick="openDeleteModal('{{ $row->id }}')"><i class="fa fa-trash mr-1"></i> Delete</a>
-								<a class="btn btn-sm btn-outline-secondary ml-1" target="_blank" href="{{ url('forums/thread')}}?id={{$row->id}}"><i class="fa fa-external-link mr-1"></i> View Website</a>
-							</td>
-						</tr>
-						@include('admin.forums.partials.details-modal',['forum'=>$row])
-					@endforeach
-				</tbody>
-			</table>
-			</div>
-			<div class="py-2"> {{$forums->links() }}</div>
+        <div class="card pub-list-card">
+            <div class="card-header">
+                <h3 class="card-title mb-0">{{ $title ?? 'Forums' }}</h3>
+            </div>
+            <div class="card-body text-left">
+                @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
+                @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
-		</div>
+                <div class="publication-table-wrap">
+                    <table id="forumsTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
+                        <thead>
+                            <tr>
+                                <th class="forum-col-index">#</th>
+                                <th class="forum-col-title">Forum Title</th>
+                                <th class="forum-col-description">Description</th>
+                                <th class="forum-col-author">Author</th>
+                                <th class="forum-col-created">Created</th>
+                                <th class="forum-col-moderator">Approved/Rejected By</th>
+                                <th class="forum-col-actions">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
-	</div>
-
-	<!-- Include delete-modal.php -->
-	@include('admin.forums.partials.delete-modal')
-
-    @endsection
+@include('admin.forums.partials.delete-modal')
+@endsection
 
 @section('scripts')
-    @include('admin.forums.partials.moderation-forum-editor-scripts')
+@include('admin.publications.partials.datatable_assets')
+<script>
+let forumsTable = null;
+let forumsFilterTimer = null;
+
+function collectForumFilterParams() {
+    const params = {};
+    const term = $('#filterForumTerm').val();
+    if (term !== null && term !== '') {
+        params.term = term;
+    }
+    return params;
+}
+
+function reloadForumsTable() {
+    if (forumsTable) forumsTable.ajax.reload();
+}
+
+function scheduleForumFilterReload() {
+    clearTimeout(forumsFilterTimer);
+    forumsFilterTimer = setTimeout(reloadForumsTable, 350);
+}
+
+$(function () {
+    forumsTable = $('#forumsTable').DataTable({
+        processing: true,
+        serverSide: true,
+        searching: false,
+        autoWidth: false,
+        scrollX: false,
+        pageLength: 20,
+        lengthMenu: [[10, 20, 50, 100], [10, 20, 50, 100]],
+        order: [[1, 'desc']],
+        ajax: {
+            url: '{{ $ajaxUrl }}',
+            data: function (d) {
+                d.datatable = 1;
+                return Object.assign(d, collectForumFilterParams());
+            }
+        },
+        columns: [
+            { data: 'index', orderable: false, searchable: false, className: 'forum-col-index text-center' },
+            { data: 'title', orderable: true, className: 'forum-col-title' },
+            { data: 'description', orderable: true, className: 'forum-col-description' },
+            { data: 'author', orderable: false, className: 'forum-col-author' },
+            { data: 'created_at', orderable: true, className: 'forum-col-created' },
+            { data: 'moderator', orderable: false, className: 'forum-col-moderator' },
+            { data: 'actions', orderable: false, searchable: false, className: 'forum-col-actions text-nowrap' }
+        ],
+        columnDefs: [
+            { targets: [0, 6], orderable: false }
+        ],
+        language: {
+            processing: '<i class="fa fa-spinner fa-spin"></i> Loading forums...',
+            emptyTable: 'No forums match your filters.',
+            zeroRecords: 'No matching forums found.'
+        }
+    });
+
+    $('#filterForumTerm').on('input', scheduleForumFilterReload);
+
+    $('#forumsFiltersForm').on('submit', function (e) {
+        e.preventDefault();
+        reloadForumsTable();
+    });
+
+    $('#clearForumFilters').on('click', function (e) {
+        e.preventDefault();
+        window.location.href = '{{ $ajaxUrl }}';
+    });
+});
+</script>
 @endsection

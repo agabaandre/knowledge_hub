@@ -636,6 +636,24 @@ CREATE TABLE `file_type` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3;
 /*!40101 SET character_set_client = @saved_cs_client */;
+DROP TABLE IF EXISTS `forum_approval_logs`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `forum_approval_logs` (
+  `id` bigint unsigned NOT NULL AUTO_INCREMENT,
+  `forum_id` bigint unsigned NOT NULL,
+  `action` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `performed_by` bigint unsigned DEFAULT NULL,
+  `performed_by_name` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `reason` text COLLATE utf8mb4_unicode_ci,
+  `metadata` json DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `forum_approval_logs_forum_id_index` (`forum_id`),
+  KEY `forum_approval_logs_performed_by_index` (`performed_by`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+/*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `forum_comment_likes`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
@@ -2484,3 +2502,6 @@ INSERT INTO `migrations` VALUES (273,'2026_05_19_120000_add_disposable_email_set
 INSERT INTO `migrations` VALUES (274,'2026_06_03_120000_add_profile_reminder_settings_to_setting_table',153);
 INSERT INTO `migrations` VALUES (275,'2026_05_19_120000_create_publication_approval_logs_table',154);
 INSERT INTO `migrations` VALUES (276,'2026_06_02_120000_add_installer_lock_to_setting_table',155);
+INSERT INTO `migrations` VALUES (277,'2026_05_20_100000_backfill_publication_approval_logs',156);
+INSERT INTO `migrations` VALUES (278,'2026_05_20_100001_create_forum_approval_logs_table',157);
+INSERT INTO `migrations` VALUES (279,'2026_05_20_100002_backfill_forum_approval_logs',158);

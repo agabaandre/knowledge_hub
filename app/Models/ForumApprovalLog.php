@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class PublicationApprovalLog extends Model
+class ForumApprovalLog extends Model
 {
     protected $guarded = [];
 
@@ -13,9 +13,9 @@ class PublicationApprovalLog extends Model
         'metadata' => 'array',
     ];
 
-    public function publication(): BelongsTo
+    public function forum(): BelongsTo
     {
-        return $this->belongsTo(Publication::class);
+        return $this->belongsTo(Forum::class);
     }
 
     public function performer(): BelongsTo
@@ -29,6 +29,7 @@ class PublicationApprovalLog extends Model
             'submitted' => 'Submitted for review',
             'approved' => 'Approved',
             'rejected' => 'Rejected',
+            'resubmitted' => 'Resubmitted after rejection',
             'auto_approved' => 'Auto-approved',
             'legacy_approved' => 'Approved (moderator not recorded)',
             default => ucfirst(str_replace('_', ' ', (string) $this->action)),

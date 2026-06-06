@@ -373,6 +373,8 @@
 
                 @include('admin.publications.partials.approval-modal',[ 'action'=>url('admin/forums/approve'), 'record'=>$forum])
                 @include('admin.publications.partials.reject-modal',[ 'action'=>url('admin/forums/reject'), 'record'=>$forum])
+
+                @include('admin.forums.partials.approval_trail', ['approvalTrail' => $approvalTrail ?? collect()])
             </div>
         </div>
     </div>

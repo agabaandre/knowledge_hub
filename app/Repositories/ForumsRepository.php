@@ -12,8 +12,12 @@ use App\Models\ForumComment;
 use App\Models\ForumCommunityOfPractice;
 use App\Models\ForumSubscription;
 use App\Models\ForumTag;
+use App\Models\ForumApprovalLog;
 use App\Models\Tag;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema as DBSchema;
@@ -396,6 +400,8 @@ class ForumsRepository extends SharedRepo{
 
         // Send notification to approvers if forum is pending approval (status = 0)
         if ($forum->id && $forum->status == 0 && $forum->is_approved == 0) {
+            $this->logForumApprovalEvent($forum->id, 'submitted', null, null, (int) $forum->created_by);
+
             // Load user relationship for author name
             $forum->load('user');
             
@@ -810,6 +816,8 @@ class ForumsRepository extends SharedRepo{
         }
         $forum->update();
 
+        $this->logForumApprovalEvent($forum->id, 'approved');
+
         $this->dispatchForumAuthorEmailIfPossible(
             optional($forum->user)->email,
             'Forum post approved: '.($forum->forum_title ?? 'Your discussion'),
@@ -895,6 +903,10 @@ class ForumsRepository extends SharedRepo{
 
         $forum->save();
 
+        if ($wasRejected) {
+            $this->logForumApprovalEvent($forum->id, 'resubmitted', null, ['after_rejection' => true], (int) $forum->created_by);
+        }
+
         ForumCommunityOfPractice::where('forum_id', $forum->id)->delete();
 
         $copIds = CommunityTargeting::filterValidCommunityIds($request->input('communities', []));
@@ -972,6 +984,8 @@ class ForumsRepository extends SharedRepo{
             $forum->is_resubmission_pending = 0;
         }
         $forum->update();
+
+        $this->logForumApprovalEvent($forum->id, 'rejected', $reason !== '' ? $reason : null);
 
         $body = 'We are sorry to inform you that your forum post was not approved.';
         if ($reason !== '') {
@@ -1263,6 +1277,234 @@ class ForumsRepository extends SharedRepo{
         }
 
         return $forums->orderBy('created_at', 'desc')->paginate($rows)->withQueryString();
+    }
+
+    public function logForumApprovalEvent(
+        int $forumId,
+        string $action,
+        ?string $reason = null,
+        ?array $metadata = null,
+        ?int $performedBy = null
+    ): ForumApprovalLog {
+        $actor = $performedBy ?? (current_user() ? (int) current_user()->id : null);
+        $actorName = null;
+        if ($actor) {
+            $actorName = User::query()->whereKey($actor)->value('name');
+        }
+
+        return ForumApprovalLog::create([
+            'forum_id' => $forumId,
+            'action' => $action,
+            'performed_by' => $actor,
+            'performed_by_name' => $actorName,
+            'reason' => $reason,
+            'metadata' => $metadata,
+        ]);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, ForumApprovalLog|object>
+     */
+    public function approvalTrailForForum(Forum $forum)
+    {
+        $logs = ForumApprovalLog::query()
+            ->where('forum_id', $forum->id)
+            ->orderByDesc('created_at')
+            ->orderByDesc('id')
+            ->get();
+
+        if ($logs->isNotEmpty()) {
+            return $logs;
+        }
+
+        return $this->synthesizeLegacyForumApprovalTrail($forum);
+    }
+
+    /**
+     * @return \Illuminate\Support\Collection<int, object>
+     */
+    protected function synthesizeLegacyForumApprovalTrail(Forum $forum): Collection
+    {
+        $forum->loadMissing(['user', 'approver', 'rejector']);
+        $entries = collect();
+
+        if ($forum->user) {
+            $entries->push((object) [
+                'action' => 'submitted',
+                'action_label' => 'Submitted for review',
+                'performed_by_name' => $forum->user->name,
+                'reason' => null,
+                'created_at' => $forum->created_at,
+                'is_legacy' => true,
+            ]);
+        }
+
+        if ((int) ($forum->is_rejected ?? 0) === 1) {
+            $entries->push((object) [
+                'action' => 'rejected',
+                'action_label' => 'Rejected',
+                'performed_by_name' => $forum->rejector->name
+                    ?? ($forum->rejected_by ? 'User #'.$forum->rejected_by : 'Moderator not recorded'),
+                'reason' => $forum->rejected_reason,
+                'created_at' => $forum->updated_at ?? $forum->created_at,
+                'is_legacy' => true,
+            ]);
+        } elseif ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
+            $entries->push((object) [
+                'action' => !empty($forum->approved_by) ? 'approved' : 'legacy_approved',
+                'action_label' => !empty($forum->approved_by) ? 'Approved' : 'Approved (moderator not recorded)',
+                'performed_by_name' => $forum->approver->name
+                    ?? 'Moderator not recorded — may predate approval tracking',
+                'reason' => null,
+                'created_at' => $forum->updated_at ?? $forum->created_at,
+                'is_legacy' => true,
+            ]);
+        }
+
+        return $entries->sortByDesc(function ($entry) {
+            return $entry->created_at;
+        })->values();
+    }
+
+    public function moderatorDisplayName(Forum $forum): string
+    {
+        if ((int) ($forum->is_rejected ?? 0) === 1) {
+            if (!empty($forum->rejected_by) && $forum->rejector) {
+                return 'Rejected by '.($forum->rejector->name ?? 'Unknown');
+            }
+
+            return 'Rejected (moderator not recorded)';
+        }
+
+        if ((int) ($forum->is_approved ?? 0) === 1 && (int) ($forum->status ?? 0) === 1) {
+            if (!empty($forum->approved_by) && $forum->approver) {
+                return 'Approved by '.($forum->approver->name ?? 'Unknown');
+            }
+
+            return 'Approved (moderator not recorded)';
+        }
+
+        return '—';
+    }
+
+    /**
+     * @return array{approved:int,pending:int,rejected:int}
+     */
+    public function adminForumIndexStats(): array
+    {
+        $base = Forum::query();
+
+        return [
+            'approved' => (clone $base)->where('status', 1)->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                })->count(),
+            'pending' => (clone $base)->pendingApproval()->count(),
+            'rejected' => (clone $base)->where('is_rejected', 1)->count(),
+        ];
+    }
+
+    public function buildAdminForumsQuery(Request $request, string $queue)
+    {
+        $forums = Forum::query()
+            ->with(['user', 'approver', 'rejector']);
+
+        if ($queue === 'pending') {
+            $forums->pendingApproval();
+        } elseif ($queue === 'approved') {
+            $forums->where('status', 1)
+                ->where('is_approved', 1)
+                ->where(function ($q) {
+                    $q->where('is_rejected', 0)->orWhereNull('is_rejected');
+                });
+        } elseif ($queue === 'rejected') {
+            $forums->where('is_rejected', 1);
+        }
+
+        if ($request->filled('term')) {
+            $this->applyForumTermSearch($forums, trim((string) $request->term));
+        }
+
+        $search = trim((string) $request->input('search.value', ''));
+        if ($search !== '') {
+            $this->applyForumTermSearch($forums, $search);
+        }
+
+        return $forums;
+    }
+
+    protected function adminForumsRecordsTotal(string $queue): int
+    {
+        $request = new Request();
+
+        return $this->buildAdminForumsQuery($request, $queue)->count();
+    }
+
+    public function adminForumsDatatable(Request $request, string $queue): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminForumsQuery($request, $queue);
+        $recordsTotal = $this->adminForumsRecordsTotal($queue);
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 1);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [1 => 'id', 2 => 'forum_title', 3 => 'forum_description', 4 => 'created_by', 5 => 'created_at'];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+
+        $data = [];
+        $index = $start + 1;
+        foreach ($rows as $forum) {
+            $created = $forum->created_at
+                ? Carbon::parse($forum->created_at)->format('M d, Y')
+                : '-';
+
+            $title = e($forum->forum_title ?? '');
+            if ((int) ($forum->is_resubmission_pending ?? 0) === 1) {
+                $title .= ' <span class="badge badge-warning text-dark ml-1" title="Author resubmitted after a previous rejection">Resubmission</span>';
+            }
+
+            $description = e(truncate(strip_tags((string) ($forum->forum_description ?? '')), 100));
+            $author = e($forum->user->name ?? '');
+            $moderator = '<div class="pub-cell-wrap"><span class="text-muted">'.e($this->moderatorDisplayName($forum)).'</span>'
+                .' <a href="'.url('admin/forums/details').'?id='.$forum->id.'#approval-trail" class="small" title="View approval trail">Trail</a></div>';
+
+            $rowPending = (int) ($forum->is_rejected ?? 0) === 0
+                && (int) ($forum->is_approved ?? 0) === 0
+                && (int) ($forum->status ?? 0) === 0;
+
+            $actions = '<div class="pub-actions-group">';
+            if ($rowPending) {
+                $actions .= '<a href="'.url('admin/forums/details').'?id='.$forum->id.'" class="btn btn-sm btn-outline-primary mr-1" title="Review"><i class="fa fa-edit"></i></a>';
+            }
+            $actions .= '<a href="'.url('admin/forums/details').'?id='.$forum->id.'" class="btn btn-sm btn-outline-dark mr-1" title="Details"><i class="fa fa-info-circle"></i></a>'
+                .'<button type="button" class="btn btn-sm btn-outline-danger mr-1" onclick="openDeleteModal(\''.$forum->id.'\')" title="Delete"><i class="fa fa-trash"></i></button>'
+                .'<a href="'.url('forums/thread').'?id='.$forum->id.'" target="_blank" rel="noopener" class="btn btn-sm btn-outline-secondary" title="View on site"><i class="fa fa-external-link-alt"></i></a>'
+                .'</div>';
+
+            $data[] = [
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => $title,
+                'description' => $description,
+                'author' => $author,
+                'created_at' => $created,
+                'moderator' => $moderator,
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
     }
 
 }
