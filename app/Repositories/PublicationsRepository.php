@@ -2088,7 +2088,7 @@ public function bulkFeatured($ids)
             }
 
             $title = '<div class="pub-cell-wrap"><a href="'.e($publication->publication).'" target="_blank" rel="noopener" class="pub-title-link">'.e($publication->title).'</a></div>';
-            $description = '<div class="pub-cell-wrap">'.e(html_to_text($publication->description)).'</div>';
+            $description = $this->adminPublicationDescriptionCell($publication->title, $publication->description);
             $author = '<div class="pub-cell-wrap">'.e($publication->author->name ?? '').'</div>';
             $affiliation = '<div class="pub-cell-wrap">'.e($publication->author_affiliation ?: '-').'</div>';
             $memberState = e($publication->country->name ?? '');
@@ -2126,6 +2126,36 @@ public function bulkFeatured($ids)
             'recordsFiltered' => $recordsFiltered,
             'data' => $data,
         ];
+    }
+
+    /**
+     * Truncated description for admin tables with optional full-text preview modal.
+     */
+    private function adminPublicationDescriptionCell(?string $publicationTitle, ?string $rawDescription, int $wordLimit = 31): string
+    {
+        $full = trim(html_to_text((string) $rawDescription));
+        if ($full === '') {
+            return '<div class="pub-cell-wrap">—</div>';
+        }
+
+        $words = preg_split('/\s+/u', $full, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $isTruncated = count($words) > $wordLimit;
+        $preview = $isTruncated
+            ? implode(' ', array_slice($words, 0, $wordLimit))
+            : $full;
+
+        $html = '<div class="pub-cell-wrap"><span class="pub-desc-excerpt">'.e($preview).'</span>';
+
+        if ($isTruncated) {
+            $titleAttr = e($publicationTitle ?: 'Publication description');
+            $descAttr = e(json_encode($full, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT));
+            $html .= ' <button type="button" class="btn btn-link btn-sm p-0 align-baseline pub-desc-preview"'
+                .' data-title="'.$titleAttr.'"'
+                .' data-description="'.$descAttr.'"'
+                .'>Preview</button>';
+        }
+
+        return $html.'</div>';
     }
 
     public function buildAdminPendingQuery(Request $request)

@@ -49,6 +49,22 @@
             line-height: 1.25;
             font-size: 0.72rem;
         }
+        .pub-desc-preview {
+            font-size: 0.8125rem;
+            font-weight: 600;
+            color: var(--theme-color-primary, #119A48) !important;
+            text-decoration: none !important;
+            white-space: nowrap;
+        }
+        .pub-desc-preview:hover {
+            text-decoration: underline !important;
+        }
+        #pubDescriptionPreviewBody {
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 1.6;
+            color: #334155;
+        }
     </style>
 @endsection
 
@@ -206,6 +222,25 @@
 
     @include('admin.publications.partials.edit-modal')
     @include('admin.publications.partials.delete-modal')
+
+    <div class="modal fade" id="pubDescriptionPreviewModal" tabindex="-1" role="dialog" aria-labelledby="pubDescriptionPreviewTitle" aria-hidden="true">
+        <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="pubDescriptionPreviewTitle">Description</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="pubDescriptionPreviewBody"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="bulkActionConfirmModal" tabindex="-1" role="dialog" aria-labelledby="bulkActionConfirmModalLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
@@ -366,6 +401,20 @@ $(function () {
 
     $(document).on('change', '.publication-checkbox', updateBulkActionButton);
     $('#bulkActionSelect').on('change', updateBulkActionButton);
+
+    $(document).on('click', '.pub-desc-preview', function (e) {
+        e.preventDefault();
+        var title = $(this).attr('data-title') || 'Description';
+        var description = $(this).attr('data-description') || '';
+        try {
+            description = JSON.parse(description);
+        } catch (err) {
+            // keep raw string fallback
+        }
+        $('#pubDescriptionPreviewTitle').text(title);
+        $('#pubDescriptionPreviewBody').text(description);
+        $('#pubDescriptionPreviewModal').modal('show');
+    });
 
     $('#bulkActionButton').on('click', function (e) {
         e.preventDefault();
