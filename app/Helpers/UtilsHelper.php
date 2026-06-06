@@ -484,13 +484,16 @@ if(!function_exists('storage_link')){
         if (strpos($file_path, 'http://') === 0 || strpos($file_path, 'https://') === 0) {
             return $file_path;
         }
-        // Get storage URL
-        $storageUrl = Storage::disk('local')->url($file_path);
-        // If storage URL already contains domain, return as-is, otherwise prepend site URL
-        if (strpos($storageUrl, 'http://') === 0 || strpos($storageUrl, 'https://') === 0) {
-            return $storageUrl;
+        try {
+            return hub_storage()->url($file_path);
+        } catch (\Throwable $e) {
+            $storageUrl = Storage::disk('public')->url($file_path);
+            if (strpos($storageUrl, 'http://') === 0 || strpos($storageUrl, 'https://') === 0) {
+                return $storageUrl;
+            }
+
+            return url('/').$storageUrl;
         }
-        return url('/').$storageUrl;
      }
    
    }
@@ -968,7 +971,7 @@ if (!function_exists('extract_video_frame_cover')) {
             return null;
         }
 
-        $outputDir = storage_path('app/public/uploads/publications/');
+        $outputDir = hub_storage_path('uploads/publications').'/';
         if (!is_dir($outputDir)) {
             @mkdir($outputDir, 0755, true);
         }
@@ -1229,7 +1232,7 @@ if (!function_exists('resolve_publication_upload_disk_path')) {
         if ($rawRelativeFilename === '') {
             return null;
         }
-        $baseDir = storage_path('app/public/uploads/publications/');
+        $baseDir = hub_storage_path('uploads/publications').'/';
         $candidates = [$rawRelativeFilename];
         if (preg_match('/\.pd$/i', $rawRelativeFilename)) {
             $candidates[] = preg_replace('/\.pd$/i', '.pdf', $rawRelativeFilename);
@@ -2146,6 +2149,20 @@ if (!function_exists('detect_and_embed_video_links')) {
         $text = $result;
         
         return $text;
+    }
+}
+
+if (! function_exists('hub_storage')) {
+    function hub_storage(): \App\Services\HubStorageService
+    {
+        return app(\App\Services\HubStorageService::class);
+    }
+}
+
+if (! function_exists('hub_storage_path')) {
+    function hub_storage_path(string $relative = ''): string
+    {
+        return hub_storage()->absolutePath($relative);
     }
 }
 

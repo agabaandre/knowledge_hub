@@ -3,7 +3,7 @@
 @section('title', 'Admin account')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 5 of 5</div>
+    <div class="step-badge text-muted mb-2">Step 6 of 6</div>
     <h2 class="h5 mb-3">Administrator account</h2>
     <p class="text-muted small">This user receives the <strong>Admin</strong> role with full access. Completing this step locks the installer permanently.</p>
 

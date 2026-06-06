@@ -1,0 +1,495 @@
+<?php
+
+namespace App\Services;
+
+use App\Filesystem\SharePointGraphAdapter;
+use App\Filesystem\SftpAdapter;
+use App\Models\HubStorageSetting;
+use Illuminate\Contracts\Filesystem\Filesystem;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
+class HubStorageService
+{
+    public function settings(): HubStorageSetting
+    {
+        if (! \Illuminate\Support\Facades\Schema::hasTable('hub_storage_settings')) {
+            return new HubStorageSetting([
+                'files_driver' => 'internal',
+                'local_files_root' => $this->defaultInternalRoot(),
+                'sql_backup_root' => $this->defaultSqlBackupRoot(),
+                'auto_sql_backup' => true,
+            ]);
+        }
+
+        return HubStorageSetting::current();
+    }
+
+    public function recommendedPaths(): array
+    {
+        if (PHP_OS_FAMILY === 'Windows') {
+            return [
+                'files' => 'C:\\khubdata\\files',
+                'sql_backups' => 'C:\\khubdata\\backups\\sql',
+            ];
+        }
+
+        return [
+            'files' => '/var/khubdata/files',
+            'sql_backups' => '/var/khubdata/backups/sql',
+        ];
+    }
+
+    public function legacyInternalRoot(): string
+    {
+        return storage_path('app/public');
+    }
+
+    public function defaultInternalRoot(): string
+    {
+        $env = trim((string) env('HUB_FILES_ROOT', ''));
+        if ($env !== '') {
+            return rtrim($env, '/\\');
+        }
+
+        return $this->recommendedPaths()['files'];
+    }
+
+    public function defaultSqlBackupRoot(): string
+    {
+        $env = trim((string) env('HUB_SQL_BACKUP_ROOT', ''));
+        if ($env !== '') {
+            return rtrim($env, '/\\');
+        }
+
+        return $this->recommendedPaths()['sql_backups'];
+    }
+
+    public function filesRoot(): string
+    {
+        $settings = $this->settings();
+        if ($settings->files_driver === 'internal') {
+            $root = trim((string) ($settings->local_files_root ?: ''));
+            if ($root !== '') {
+                return rtrim($root, '/\\');
+            }
+
+            return $this->resolveInternalRootForInstall();
+        }
+
+        return $this->legacyInternalRoot();
+    }
+
+    public function sqlBackupRoot(): string
+    {
+        $settings = $this->settings();
+        $root = trim((string) ($settings->sql_backup_root ?: ''));
+
+        if ($root === '') {
+            $root = $this->defaultSqlBackupRoot();
+        }
+
+        return rtrim($root, '/\\');
+    }
+
+    public function usesLegacyInternalRoot(): bool
+    {
+        return $this->settings()->files_driver === 'internal'
+            && realpath($this->filesRoot()) === realpath($this->legacyInternalRoot());
+    }
+
+    /**
+     * Prefer host paths outside the application/container tree. Fall back to legacy
+     * storage/app/public only when uploads already live there and the host path is unused.
+     */
+    public function resolveInternalRootForInstall(): string
+    {
+        $recommended = $this->defaultInternalRoot();
+        $legacy = $this->legacyInternalRoot();
+
+        if ($this->pathHasHubUploads($legacy) && ! $this->pathHasHubUploads($recommended)) {
+            return $legacy;
+        }
+
+        return $recommended;
+    }
+
+    public function pathHasHubUploads(string $root): bool
+    {
+        foreach (config('hub_storage.content_prefixes', []) as $prefix) {
+            $absolute = rtrim($root, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
+            if (! is_dir($absolute)) {
+                continue;
+            }
+            foreach (scandir($absolute) ?: [] as $entry) {
+                if ($entry !== '.' && $entry !== '..') {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public function usesExternalFiles(): bool
+    {
+        return $this->settings()->files_driver !== 'internal';
+    }
+
+    public function registerDiskConfig(): void
+    {
+        $settings = $this->settings();
+        $driver = $settings->files_driver ?: 'internal';
+
+        if ($driver === 'internal') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 'local',
+                'root' => $this->filesRoot(),
+                'url' => env('APP_URL').'/hub-media',
+                'visibility' => 'public',
+            ]);
+
+            return;
+        }
+
+        $cloud = $settings->cloud_config ?? [];
+
+        if ($driver === 's3') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 's3',
+                'key' => $cloud['key'] ?? env('AWS_ACCESS_KEY_ID'),
+                'secret' => $cloud['secret'] ?? env('AWS_SECRET_ACCESS_KEY'),
+                'region' => $cloud['region'] ?? env('AWS_DEFAULT_REGION'),
+                'bucket' => $cloud['bucket'] ?? env('AWS_BUCKET'),
+                'url' => $cloud['url'] ?? env('AWS_URL'),
+                'endpoint' => $cloud['endpoint'] ?? env('AWS_ENDPOINT'),
+                'use_path_style_endpoint' => (bool) ($cloud['use_path_style_endpoint'] ?? false),
+                'root' => $cloud['root_prefix'] ?? 'khub',
+                'visibility' => 'public',
+            ]);
+
+            return;
+        }
+
+        if ($driver === 'gcs') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 'gcs',
+                'project_id' => $cloud['project_id'] ?? env('GOOGLE_CLOUD_PROJECT_ID'),
+                'key_file_path' => $cloud['key_file_path'] ?? env('GOOGLE_CLOUD_KEY_FILE'),
+                'bucket' => $cloud['bucket'] ?? env('GOOGLE_CLOUD_STORAGE_BUCKET'),
+                'path_prefix' => $cloud['root_prefix'] ?? 'khub',
+                'storage_api_uri' => $cloud['storage_api_uri'] ?? env('GOOGLE_CLOUD_STORAGE_API_URI'),
+            ]);
+
+            return;
+        }
+
+        if ($driver === 'azure') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 'azure-blob',
+                'connection_string' => $cloud['connection_string'] ?? env('AZURE_STORAGE_CONNECTION_STRING'),
+                'name' => $cloud['account_name'] ?? env('AZURE_STORAGE_NAME'),
+                'key' => $cloud['account_key'] ?? env('AZURE_STORAGE_KEY'),
+                'container' => $cloud['container'] ?? env('AZURE_STORAGE_CONTAINER'),
+                'url' => $cloud['url'] ?? env('AZURE_STORAGE_URL'),
+                'prefix' => $cloud['root_prefix'] ?? 'khub',
+            ]);
+
+            return;
+        }
+
+        if ($driver === 'sftp') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 'sftp-phpseclib',
+                'host' => $cloud['host'] ?? '',
+                'username' => $cloud['username'] ?? '',
+                'password' => $cloud['password'] ?? null,
+                'private_key' => $cloud['private_key'] ?? null,
+                'passphrase' => $cloud['passphrase'] ?? null,
+                'port' => (int) ($cloud['port'] ?? 22),
+                'root' => $cloud['root_prefix'] ?? '/khub',
+                'timeout' => 30,
+            ]);
+
+            return;
+        }
+
+        if ($driver === 'sharepoint') {
+            Config::set('filesystems.disks.hub', [
+                'driver' => 'sharepoint-graph',
+                'tenant_id' => $cloud['tenant_id'] ?? '',
+                'client_id' => $cloud['client_id'] ?? '',
+                'client_secret' => $cloud['client_secret'] ?? '',
+                'site_id' => $cloud['site_id'] ?? null,
+                'drive_id' => $cloud['drive_id'] ?? null,
+                'site_hostname' => $cloud['site_hostname'] ?? null,
+                'site_path' => $cloud['site_path'] ?? null,
+                'prefix' => $cloud['root_prefix'] ?? 'khub',
+            ]);
+        }
+    }
+
+    public function disk(): Filesystem
+    {
+        $this->registerDiskConfig();
+
+        return Storage::disk('hub');
+    }
+
+    public function absolutePath(string $relative = ''): string
+    {
+        $relative = ltrim(str_replace(['\\', '..'], ['/', ''], $relative), '/');
+        $root = $this->filesRoot();
+
+        return $relative === '' ? $root : $root.'/'.$relative;
+    }
+
+    public function ensureDirectories(): void
+    {
+        foreach (config('hub_storage.content_prefixes', []) as $prefix) {
+            if ($this->usesExternalFiles()) {
+                if (! $this->disk()->exists($prefix)) {
+                    $this->disk()->makeDirectory($prefix);
+                }
+            } else {
+                File::ensureDirectoryExists($this->absolutePath($prefix), 0775, true);
+            }
+        }
+
+        File::ensureDirectoryExists($this->sqlBackupRoot(), 0775, true);
+        $this->ensurePublicStorageSymlink();
+    }
+
+    /**
+     * Link public/storage to the active internal files root so /storage/... URLs keep working.
+     */
+    public function ensurePublicStorageSymlink(): void
+    {
+        if ($this->settings()->files_driver !== 'internal') {
+            return;
+        }
+
+        $target = $this->filesRoot();
+        $link = public_path('storage');
+
+        if (realpath($target) === realpath($this->legacyInternalRoot())) {
+            if (! File::exists($link)) {
+                Artisan::call('storage:link');
+            }
+
+            return;
+        }
+
+        if (File::exists($link) && ! is_link($link)) {
+            return;
+        }
+
+        $linkedTarget = is_link($link) ? realpath($link) : null;
+        if ($linkedTarget && realpath($target) === $linkedTarget) {
+            return;
+        }
+
+        if (is_link($link) || File::exists($link)) {
+            @unlink($link);
+        }
+
+        File::ensureDirectoryExists($target, 0775, true);
+        File::link($target, $link);
+    }
+
+    public function url(string $relative): string
+    {
+        $relative = ltrim($relative, '/');
+        if ($this->usesExternalFiles()) {
+            try {
+                $url = $this->disk()->url($relative);
+                if (Str::startsWith($url, ['http://', 'https://'])) {
+                    return $url;
+                }
+            } catch (\Throwable $e) {
+                // Fall through to hub-media route for local external roots.
+            }
+        }
+
+        if ($this->settings()->files_driver === 'internal' && $this->usesLegacyInternalRoot()) {
+            return url('/storage/'.$relative);
+        }
+
+        return url('/hub-media/'.$relative);
+    }
+
+    /**
+     * @return array{items: array<int, array<string, mixed>>, path: string}
+     */
+    public function browse(string $area, string $subPath = ''): array
+    {
+        $area = array_key_exists($area, config('hub_storage.content_prefixes', []))
+            ? $area
+            : 'publications';
+        $base = config('hub_storage.content_prefixes')[$area];
+        $subPath = trim(str_replace(['\\', '..'], ['/', ''], $subPath), '/');
+        $relative = $subPath === '' ? $base : $base.'/'.$subPath;
+
+        $items = [];
+        if ($this->usesExternalFiles()) {
+            foreach ($this->disk()->directories($relative) as $dir) {
+                $items[] = [
+                    'name' => basename($dir),
+                    'type' => 'dir',
+                    'path' => str_replace($base.'/', '', $dir),
+                ];
+            }
+            foreach ($this->disk()->files($relative) as $file) {
+                $items[] = [
+                    'name' => basename($file),
+                    'type' => 'file',
+                    'path' => str_replace($base.'/', '', $file),
+                    'size' => $this->disk()->size($file),
+                ];
+            }
+        } else {
+            $absolute = $this->absolutePath($relative);
+            if (! is_dir($absolute)) {
+                return ['items' => [], 'path' => $relative];
+            }
+            foreach (scandir($absolute) ?: [] as $entry) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                $full = $absolute.DIRECTORY_SEPARATOR.$entry;
+                $items[] = [
+                    'name' => $entry,
+                    'type' => is_dir($full) ? 'dir' : 'file',
+                    'path' => trim(($subPath === '' ? '' : $subPath.'/').$entry, '/'),
+                    'size' => is_file($full) ? filesize($full) : null,
+                ];
+            }
+        }
+
+        usort($items, function ($a, $b) {
+            if ($a['type'] !== $b['type']) {
+                return $a['type'] === 'dir' ? -1 : 1;
+            }
+
+            return strcasecmp($a['name'], $b['name']);
+        });
+
+        return ['items' => $items, 'path' => $relative];
+    }
+
+    /**
+     * @return array{status: string, message: string}
+     */
+    public function testConnection(): array
+    {
+        $settings = $this->settings();
+        try {
+            $this->registerDiskConfig();
+            if ($settings->files_driver === 'sharepoint') {
+                $cloud = $settings->cloud_config ?? [];
+                $adapter = new SharePointGraphAdapter([
+                    'tenant_id' => $cloud['tenant_id'] ?? '',
+                    'client_id' => $cloud['client_id'] ?? '',
+                    'client_secret' => $cloud['client_secret'] ?? '',
+                    'site_id' => $cloud['site_id'] ?? null,
+                    'drive_id' => $cloud['drive_id'] ?? null,
+                    'site_hostname' => $cloud['site_hostname'] ?? null,
+                    'site_path' => $cloud['site_path'] ?? null,
+                    'prefix' => $cloud['root_prefix'] ?? 'khub',
+                ]);
+                $adapter->probe();
+            }
+            if ($settings->files_driver === 'sftp') {
+                $cloud = $settings->cloud_config ?? [];
+                $adapter = new SftpAdapter([
+                    'host' => $cloud['host'] ?? '',
+                    'username' => $cloud['username'] ?? '',
+                    'password' => $cloud['password'] ?? null,
+                    'private_key' => $cloud['private_key'] ?? null,
+                    'passphrase' => $cloud['passphrase'] ?? null,
+                    'port' => (int) ($cloud['port'] ?? 22),
+                    'root' => $cloud['root_prefix'] ?? '/khub',
+                ]);
+                $adapter->probe();
+            }
+            $disk = $this->disk();
+            $probe = 'hub_probe_'.Str::random(8).'.txt';
+            $disk->put($probe, 'ok');
+            $disk->delete($probe);
+
+            return ['status' => 'ok', 'message' => 'Connection successful. Read/write probe passed.'];
+        } catch (\Throwable $e) {
+            return ['status' => 'error', 'message' => $e->getMessage()];
+        }
+    }
+
+    public function migrateInternalToExternal(?callable $progress = null): array
+    {
+        $settings = $this->settings();
+        if ($settings->files_driver === 'internal') {
+            return ['status' => 'skipped', 'message' => 'Files driver is still internal.'];
+        }
+
+        $sourceRoot = $this->legacyInternalRoot();
+        if ($this->pathHasHubUploads($this->filesRoot()) && ! $this->pathHasHubUploads($sourceRoot)) {
+            $sourceRoot = $this->filesRoot();
+        }
+        $prefixes = array_values(config('hub_storage.content_prefixes', []));
+        $files = [];
+        foreach ($prefixes as $prefix) {
+            $dir = $sourceRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
+            if (! is_dir($dir)) {
+                continue;
+            }
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($iterator as $fileInfo) {
+                if ($fileInfo->isFile()) {
+                    $full = $fileInfo->getPathname();
+                    $relative = $prefix.'/'.substr($full, strlen($dir) + 1);
+                    $files[] = str_replace('\\', '/', $relative);
+                }
+            }
+        }
+
+        $settings->update([
+            'migration_status' => 'running',
+            'migration_files_total' => count($files),
+            'migration_files_done' => 0,
+            'migration_message' => null,
+        ]);
+
+        $done = 0;
+        $disk = $this->disk();
+        foreach ($files as $relative) {
+            $source = $sourceRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (! is_file($source)) {
+                continue;
+            }
+            $stream = fopen($source, 'r');
+            if ($stream) {
+                $disk->put($relative, $stream);
+                fclose($stream);
+            }
+            $done++;
+            if ($progress) {
+                $progress($done, count($files), $relative);
+            }
+            if ($done % 25 === 0) {
+                $settings->update(['migration_files_done' => $done]);
+            }
+        }
+
+        $settings->update([
+            'migration_status' => 'completed',
+            'migration_files_done' => $done,
+            'migration_message' => "Migrated {$done} file(s) to {$settings->files_driver} storage.",
+        ]);
+
+        return ['status' => 'completed', 'files' => $done];
+    }
+}

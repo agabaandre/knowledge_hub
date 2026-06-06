@@ -53,6 +53,13 @@ return [
             'use_path_style_endpoint' => env('AWS_USE_PATH_STYLE_ENDPOINT', false),
         ],
 
+        'hub' => [
+            'driver' => 'local',
+            'root' => env('HUB_FILES_ROOT', storage_path('app/public')),
+            'url' => env('APP_URL').'/hub-media',
+            'visibility' => 'public',
+        ],
+
     ],
 
     /*

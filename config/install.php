@@ -27,6 +27,22 @@ return [
         public_path('uploads'),
     ],
 
+    'storage_defaults' => [
+        'docker' => [
+            'files_root' => '/var/khubdata/files',
+            'sql_backup_root' => '/var/khubdata/backups/sql',
+        ],
+        'local' => [
+            'files_root' => '/var/khubdata/files',
+            'sql_backup_root' => '/var/khubdata/backups/sql',
+        ],
+    ],
+
+    'storage_env_keys' => [
+        'HUB_FILES_ROOT',
+        'HUB_SQL_BACKUP_ROOT',
+    ],
+
     'mail_env_keys' => [
         'MAIL_MAILER',
         'MAIL_HOST',

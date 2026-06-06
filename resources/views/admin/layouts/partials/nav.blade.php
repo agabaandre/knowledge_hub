@@ -282,6 +282,7 @@
             <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Settings <i
                         class="fe fe-chevron-down horizontal-icon"></i></a>
                 <ul class="sub-menu">
+                    <li class=""><a href="{{ route('admin.storage.index') }}" class="">{{ __('admin_nav.storage_management') }}</a></li>
                     <li class=""><a href="{{ url('admin/configure') }}" class="">{{ __('admin_nav.system_configurations') }}</a></li>
                     <li class=""><a href="{{ route('admin.site-languages.index') }}" class="">{{ __('admin_nav.site_languages') }}</a></li>
                     <li class=""><a href="{{ route('admin.language-management.index') }}" class="">{{ __('admin_nav.language_management') }}</a></li>

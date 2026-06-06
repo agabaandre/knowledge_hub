@@ -3,7 +3,7 @@
 @section('title', 'Mail')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 4 of 5</div>
+    <div class="step-badge text-muted mb-2">Step 5 of 6</div>
     <h2 class="h5 mb-3">Mail configuration</h2>
     <p class="text-muted small">These values are written to your <code>.env</code> file. Choose <strong>Log only</strong> for local/Docker testing, or <strong>SMTP</strong> for production mail.</p>
 

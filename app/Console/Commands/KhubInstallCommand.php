@@ -14,6 +14,9 @@ class KhubInstallCommand extends Command
         {--last-name=User : Admin last name}
         {--mail-driver=log : Mail driver (log or smtp)}
         {--site-name= : Site name for setting row}
+        {--files-root= : Host files root (default /var/khubdata/files)}
+        {--sql-backup-root= : SQL backup root (default /var/khubdata/backups/sql)}
+        {--storage-driver=internal : Files driver (internal, s3, gcs, azure, sharepoint, sftp)}
         {--skip-migrate : Skip migrations}';
 
     protected $description = 'Install Knowledge Hub: migrate database, seed baseline, create admin user';
@@ -64,6 +67,14 @@ class KhubInstallCommand extends Command
             'mail_username' => env('MAIL_USERNAME', ''),
             'mail_password' => env('MAIL_PASSWORD', ''),
             'mail_encryption' => env('MAIL_ENCRYPTION', 'tls') ?: 'none',
+        ]);
+
+        $storageDefaults = $installer->storageDefaults();
+        $installer->configureStorage([
+            'files_driver' => (string) $this->option('storage-driver'),
+            'local_files_root' => (string) ($this->option('files-root') ?: $storageDefaults['files_root']),
+            'sql_backup_root' => (string) ($this->option('sql-backup-root') ?: $storageDefaults['sql_backup_root']),
+            'auto_sql_backup' => true,
         ]);
 
         $siteName = (string) ($this->option('site-name') ?: env('APP_NAME', 'Knowledge Hub'));

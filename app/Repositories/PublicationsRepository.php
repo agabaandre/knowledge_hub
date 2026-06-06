@@ -568,7 +568,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     $extension   = $file->guessExtension() ?: pathinfo($file->getClientOriginalName(), PATHINFO_EXTENSION);
                     $cover_filepath = $file_name.'.'.$extension;
                     
-                    $storagePath = storage_path().'/app/public/uploads/publications/';
+                    $storagePath = hub_storage_path('uploads/publications').'/';
                     
                     // Ensure directory exists
                     if (!is_dir($storagePath)) {
@@ -764,7 +764,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             }
         endif;
 
-        $attachment_path = ($attachment_path)?storage_path('/app/public/uploads/publications/'.$attachment_path):null;
+        $attachment_path = $attachment_path ? hub_storage_path('uploads/publications').'/'.$attachment_path : null;
         $file_type = get_file_type($attachment_path,$request->link);
 
         // Detect video from file type name, mime types, link platform, or direct file extensions.
@@ -812,9 +812,9 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     });
                 if ($firstPdfRow) {
                     $pdfBasename = basename((string) $firstPdfRow->getRawOriginal('file'));
-                    $pdfPath = storage_path('app/public/uploads/publications/'.$pdfBasename);
+                    $pdfPath = hub_storage_path('uploads/publications').'/'.$pdfBasename;
                     if (is_file($pdfPath)) {
-                        $outDir = storage_path('app/public/uploads/publications');
+                        $outDir = hub_storage_path('uploads/publications');
                         $coverBasename = $this->extractPublicationCoverJpegFromPdf($pdfPath, $outDir);
                         if ($coverBasename !== null) {
                             $pub->cover = $coverBasename;
@@ -1438,7 +1438,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
                     continue;
                 }
 
-                $storagePath = storage_path().'/app/public/uploads/publications/';
+                $storagePath = hub_storage_path('uploads/publications').'/';
                 if (!is_dir($storagePath)) {
                     mkdir($storagePath, 0755, true);
                 }
@@ -1533,7 +1533,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
             $file_name   = md5_file($file->getRealPath());
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
-            $file->move(storage_path().'/app/public/uploads/publications/summaries/',$file_path);
+            $file->move(hub_storage_path('uploads/publications/summaries').'/',$file_path);
             $summary->file_path  = $file_path;
 
         endif;

@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use App\Models\StaticLink;
+use App\Services\HubStorageService;
 use App\Support\EmailConfig;
 
 class AppServiceProvider extends ServiceProvider
@@ -65,6 +66,14 @@ class AppServiceProvider extends ServiceProvider
             EmailConfig::applyRuntimeConfig();
         } catch (\Throwable $e) {
             // Database may be unavailable during install or early bootstrap.
+        }
+
+        try {
+            if (Schema::hasTable('hub_storage_settings')) {
+                app(HubStorageService::class)->registerDiskConfig();
+            }
+        } catch (\Throwable $e) {
+            // Ignore during install / missing DB.
         }
     }
 }

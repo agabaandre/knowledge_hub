@@ -38,6 +38,8 @@ use App\Http\Controllers\Admin\QuizController;
 use App\Http\Controllers\Admin\QuotesController;
 use App\Http\Controllers\Admin\SubHealthThemesController;
 use App\Http\Controllers\Admin\ParticipantBadgeManagementController;
+use App\Http\Controllers\Admin\StorageManagementController;
+use App\Http\Controllers\HubMediaController;
 use App\Http\Controllers\Admin\PublicationSubCategoryController;
 use App\Http\Controllers\Admin\TagsController;
 use App\Http\Controllers\Admin\LicensesController;
@@ -105,6 +107,7 @@ Auth::routes(['verify' => true, 'reset' => false]);
 | and would shadow this route (404 in production).
 */
 Route::get('docs/openapi-dynamic.json', [DocsController::class, 'openApiJson'])->name('docs.openapi.dynamic');
+Route::get('hub-media/{path}', [HubMediaController::class, 'show'])->where('path', '.*')->name('hub.media');
 
 /*
 | Password reset: Laravel expects the token in the path (/password/reset/{token}).
@@ -280,7 +283,16 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get("/rccdashboards", [GraphController::class, 'rcc_admin'])->name('admin.rccdashboards');
     Route::get("/rccdashboards/data", [GraphController::class, 'rcc_data'])->name('admin.rccdashboards.data');
     Route::get('/dashboards', [DashboardsController::class, 'details'])->name('admin.dashboard.details');
-    Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
+    Route::get('/storage-management', [StorageManagementController::class, 'index'])->name('admin.storage.index');
+    Route::post('/storage-management', [StorageManagementController::class, 'update'])->name('admin.storage.update');
+    Route::post('/storage-management/test-connection', [StorageManagementController::class, 'testConnection'])->name('admin.storage.test');
+    Route::get('/storage-management/browse', [StorageManagementController::class, 'browse'])->name('admin.storage.browse');
+    Route::get('/storage-management/browse-backups', [StorageManagementController::class, 'browseBackups'])->name('admin.storage.browse-backups');
+    Route::post('/storage-management/backup', [StorageManagementController::class, 'runBackup'])->name('admin.storage.backup');
+    Route::post('/storage-management/restore', [StorageManagementController::class, 'restoreBackup'])->name('admin.storage.restore');
+    Route::post('/storage-management/migrate', [StorageManagementController::class, 'migrate'])->name('admin.storage.migrate');
+    Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
+
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
     Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');

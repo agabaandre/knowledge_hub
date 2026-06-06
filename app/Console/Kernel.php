@@ -52,6 +52,16 @@ class Kernel extends ConsoleKernel
         if (settings()->enable_ai_chat_prune ?? true) {
             $schedule->command('pdf-chat:prune --days=7')->dailyAt('03:30');
         }
+        $schedule->command('hub:backup-database')
+            ->dailyAt(config('hub_storage.backup_schedule_time', '01:30'))
+            ->when(function () {
+                try {
+                    return \Illuminate\Support\Facades\Schema::hasTable('hub_storage_settings')
+                        && app(\App\Services\HubStorageService::class)->settings()->auto_sql_backup;
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
     }
 
     /**

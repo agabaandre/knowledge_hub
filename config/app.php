@@ -179,6 +179,7 @@ return [
         App\Providers\RouteServiceProvider::class,
         //App\Providers\TelescopeServiceProvider::class,
         App\Providers\HelperServiceProvider::class,
+        App\Providers\HubStorageServiceProvider::class,
         App\Providers\ViewComposerServiceProvider::class,
 
         Mckenziearts\Notify\LaravelNotifyServiceProvider::class,

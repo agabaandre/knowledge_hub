@@ -72,13 +72,67 @@ class InstallController extends Controller
             ? 'Database connection saved. Existing schema and data were left unchanged.'
             : 'Database migrated successfully.';
 
-        return redirect()->route('install.site')->with('status', $status);
+        return redirect()->route('install.storage')->with('status', $status);
+    }
+
+    public function showStorage(Request $request): RedirectResponse|View
+    {
+        if (! $request->session()->get('installer.database_ready')) {
+            return redirect()->route('install.database');
+        }
+
+        $defaults = $this->installer->storageDefaults();
+        $runtime = $this->installer->runtimeEnvironment();
+
+        return view('install.storage', [
+            'defaults' => $defaults,
+            'runtime' => $runtime,
+            'drivers' => config('hub_storage.drivers', []),
+            'driverSetup' => config('hub_storage.driver_setup', []),
+            'driverPackages' => config('hub_storage.driver_packages', []),
+        ]);
+    }
+
+    public function storeStorage(Request $request): RedirectResponse
+    {
+        if (! $request->session()->get('installer.database_ready')) {
+            return redirect()->route('install.database');
+        }
+
+        $driver = $request->input('files_driver', 'internal');
+        $rules = [
+            'files_driver' => 'required|in:internal,s3,gcs,azure,sharepoint,sftp',
+            'local_files_root' => 'nullable|string|max:512',
+            'sql_backup_root' => 'nullable|string|max:512',
+            'auto_sql_backup' => 'nullable|boolean',
+        ];
+
+        $rules['sql_backup_root'] = 'required|string|max:512';
+        if ($driver === 'internal') {
+            $rules['local_files_root'] = 'required|string|max:512';
+        }
+
+        $data = $request->validate($rules);
+
+        try {
+            $this->installer->configureStorage($data);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Could not configure storage: '.$e->getMessage());
+        }
+
+        $request->session()->put('installer.storage_ready', true);
+
+        return redirect()->route('install.site')->with('status', 'Storage paths configured.');
     }
 
     public function showSite(Request $request): RedirectResponse|View
     {
         if (! $request->session()->get('installer.database_ready')) {
             return redirect()->route('install.database');
+        }
+
+        if (! $request->session()->get('installer.storage_ready')) {
+            return redirect()->route('install.storage');
         }
 
         $active = null;
@@ -218,7 +272,7 @@ class InstallController extends Controller
             return back()->withInput()->with('error', 'Could not create admin account: '.$e->getMessage());
         }
 
-        $request->session()->forget(['installer.database_ready', 'installer.site_ready', 'installer.mail_ready']);
+        $request->session()->forget(['installer.database_ready', 'installer.storage_ready', 'installer.site_ready', 'installer.mail_ready']);
         $request->session()->put('install_show_complete', true);
 
         return redirect()->route('install.complete');

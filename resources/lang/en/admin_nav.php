@@ -57,6 +57,7 @@ return [
     'static_links' => 'Static Links',
     'privacy_policy' => 'Privacy Policy',
     'settings' => 'Settings',
+    'storage_management' => 'Storage Management',
     'system_configurations' => 'System Configurations',
     'language_management' => 'Language management',
     'site_languages' => 'Site languages',

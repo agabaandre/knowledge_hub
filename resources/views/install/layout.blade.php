@@ -15,7 +15,7 @@
 <div class="container install-card">
     <div class="text-center mb-4">
         <h1 class="h3 text-success fw-bold">Knowledge Hub Installer</h1>
-        <p class="text-muted mb-0">Set up the database and create your administrator account.</p>
+        <p class="text-muted mb-0">Configure the database, persistent storage, and administrator account.</p>
     </div>
 
     @if (session('status'))
@@ -31,5 +31,6 @@
         </div>
     </div>
 </div>
+@yield('scripts')
 </body>
 </html>

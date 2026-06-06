@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\HubStorageSetting;
 use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Support\Facades\Artisan;
@@ -121,6 +122,21 @@ class InstallerService
     }
 
     /**
+     * @return array{files_root: string, sql_backup_root: string}
+     */
+    public function storageDefaults(): array
+    {
+        $env = $this->runtimeEnvironment();
+        $configured = config("install.storage_defaults.{$env}", config('install.storage_defaults.local'));
+        $storage = app(HubStorageService::class);
+
+        return [
+            'files_root' => env('HUB_FILES_ROOT', $configured['files_root'] ?? $storage->defaultInternalRoot()),
+            'sql_backup_root' => env('HUB_SQL_BACKUP_ROOT', $configured['sql_backup_root'] ?? $storage->defaultSqlBackupRoot()),
+        ];
+    }
+
+    /**
      * Installer step 1 — server / filesystem checks (Docker and bare metal).
      *
      * @return array{ok: bool, runtime: string, checks: array<int, array{label: string, ok: bool, message: string, required: bool}>}
@@ -203,6 +219,27 @@ class InstallerService
             ];
         }
 
+        $storageDefaults = $this->storageDefaults();
+        foreach ([
+            'files' => $storageDefaults['files_root'],
+            'sql_backups' => $storageDefaults['sql_backup_root'],
+        ] as $label => $path) {
+            if (! File::isDirectory($path)) {
+                @File::ensureDirectoryExists($path, 0775, true);
+            }
+            $writable = is_dir($path) && is_writable($path);
+            $checks[] = [
+                'label' => "Host data path ({$label}): {$path}",
+                'ok' => $writable,
+                'message' => $writable
+                    ? 'Writable'
+                    : ($runtime === 'docker'
+                        ? 'Create and mount a host volume at /var/khubdata (see docker-compose)'
+                        : 'Run: sudo mkdir -p '.$path.' && sudo chown www-data '.$path),
+                'required' => $runtime !== 'docker',
+            ];
+        }
+
         $ok = collect($checks)->every(fn (array $c) => ! $c['required'] || $c['ok']);
 
         return ['ok' => $ok, 'runtime' => $runtime, 'checks' => $checks];
@@ -237,6 +274,32 @@ class InstallerService
             'ok' => $storageOk,
             'message' => $storageOk ? 'OK' : 'Fix permissions on storage/',
         ];
+
+        try {
+            $hubStorage = app(HubStorageService::class);
+            $filesRoot = $hubStorage->filesRoot();
+            $filesWritable = is_dir($filesRoot) && is_writable($filesRoot);
+            $checks[] = [
+                'label' => 'Hub files root',
+                'ok' => $filesWritable,
+                'message' => $filesWritable ? $filesRoot : 'Not writable: '.$filesRoot,
+            ];
+            $link = public_path('storage');
+            $linkOk = is_link($link) && realpath($link) === realpath($filesRoot);
+            $checks[] = [
+                'label' => 'public/storage symlink',
+                'ok' => $linkOk || $hubStorage->usesLegacyInternalRoot(),
+                'message' => $linkOk
+                    ? 'Linked to '.$filesRoot
+                    : ($hubStorage->usesLegacyInternalRoot() ? 'Using legacy storage/app/public' : 'Run installer storage step or php artisan storage:link'),
+            ];
+        } catch (\Throwable $e) {
+            $checks[] = [
+                'label' => 'Hub files root',
+                'ok' => false,
+                'message' => $e->getMessage(),
+            ];
+        }
 
         $vendorOk = File::isDirectory(base_path('vendor'));
         $checks[] = [
@@ -373,6 +436,75 @@ class InstallerService
     }
 
     /**
+     * @param  array<string, mixed>  $storage
+     */
+    public function configureStorage(array $storage): void
+    {
+        $defaults = $this->storageDefaults();
+        $filesRoot = trim((string) ($storage['local_files_root'] ?? $defaults['files_root']));
+        $sqlRoot = trim((string) ($storage['sql_backup_root'] ?? $defaults['sql_backup_root']));
+        $driver = (string) ($storage['files_driver'] ?? 'internal');
+
+        $this->writeEnvValues([
+            'HUB_FILES_ROOT' => $filesRoot,
+            'HUB_SQL_BACKUP_ROOT' => $sqlRoot,
+        ]);
+
+        File::ensureDirectoryExists($filesRoot, 0775, true);
+        File::ensureDirectoryExists($sqlRoot, 0775, true);
+
+        if (! Schema::hasTable('hub_storage_settings')) {
+            return;
+        }
+
+        $cloud = array_filter([
+            'key' => $storage['cloud_key'] ?? null,
+            'secret' => $storage['cloud_secret'] ?? null,
+            'region' => $storage['cloud_region'] ?? null,
+            'bucket' => $storage['cloud_bucket'] ?? null,
+            'endpoint' => $storage['cloud_endpoint'] ?? null,
+            'root_prefix' => $storage['cloud_root_prefix'] ?? 'khub',
+            'connection_string' => $storage['cloud_connection_string'] ?? null,
+            'account_name' => $storage['cloud_account_name'] ?? null,
+            'account_key' => $storage['cloud_account_key'] ?? null,
+            'container' => $storage['cloud_container'] ?? null,
+            'project_id' => $storage['gcs_project_id'] ?? null,
+            'key_file_path' => $storage['gcs_key_file_path'] ?? null,
+            'storage_api_uri' => $storage['gcs_storage_api_uri'] ?? null,
+            'tenant_id' => $storage['sharepoint_tenant_id'] ?? null,
+            'client_id' => $storage['sharepoint_client_id'] ?? null,
+            'client_secret' => $storage['sharepoint_client_secret'] ?? null,
+            'site_hostname' => $storage['sharepoint_site_hostname'] ?? null,
+            'site_path' => $storage['sharepoint_site_path'] ?? null,
+            'site_id' => $storage['sharepoint_site_id'] ?? null,
+            'drive_id' => $storage['sharepoint_drive_id'] ?? null,
+            'host' => $storage['cloud_host'] ?? null,
+            'username' => $storage['cloud_username'] ?? null,
+            'password' => $storage['cloud_password'] ?? null,
+            'port' => $storage['cloud_port'] ?? null,
+        ], fn ($value) => $value !== null && $value !== '');
+
+        $record = HubStorageSetting::query()->first();
+        $payload = [
+            'files_driver' => $driver,
+            'local_files_root' => $driver === 'internal' ? $filesRoot : null,
+            'sql_backup_root' => $sqlRoot,
+            'cloud_config' => $cloud ?: null,
+            'auto_sql_backup' => filter_var($storage['auto_sql_backup'] ?? true, FILTER_VALIDATE_BOOLEAN),
+            'sql_backup_retention_days' => (int) ($storage['sql_backup_retention_days'] ?? 30),
+        ];
+
+        if ($record) {
+            $record->forceFill($payload)->save();
+        } else {
+            HubStorageSetting::query()->create($payload);
+        }
+
+        app(HubStorageService::class)->ensureDirectories();
+        Artisan::call('config:clear');
+    }
+
+    /**
      * @param  array<string, string>  $site
      */
     public function saveSiteSettings(array $site): Setting
@@ -494,6 +626,14 @@ class InstallerService
         File::put(config('install.lock_file'), now()->toIso8601String());
 
         $this->lockInstallerInSettings();
+
+        try {
+            if (Schema::hasTable('hub_storage_settings')) {
+                app(HubStorageService::class)->ensureDirectories();
+            }
+        } catch (\Throwable) {
+            // Storage paths may be configured on a later admin visit.
+        }
 
         Artisan::call('config:clear');
         if (! config('app.debug')) {

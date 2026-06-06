@@ -343,7 +343,7 @@ class ForumsRepository extends SharedRepo{
             $extension   = $file->guessExtension();
             $file_path   = $file_name.'.'.$extension;
            
-            $file->move(storage_path().'/app/public/uploads/forums/',$file_path);
+            $file->move(hub_storage_path('uploads/forums').'/',$file_path);
             $forum->forum_image     = $file_path;
 
         endif;
@@ -643,7 +643,7 @@ class ForumsRepository extends SharedRepo{
                 $file_name = md5_file($file->getRealPath());
                 $file_path = 'forum/'.$file_name.'.'.$extension;
                
-                $storagePath = storage_path('/app/public/uploads/forum/');
+                $storagePath = hub_storage_path('uploads/forum').'/';
                 if (!is_dir($storagePath)) {
                     mkdir($storagePath, 0755, true);
                     \Log::info('Created forum upload directory', ['path' => $storagePath]);
@@ -912,7 +912,7 @@ class ForumsRepository extends SharedRepo{
             $file_name = md5_file($file->getRealPath());
             $extension = $file->guessExtension();
             $file_path = $file_name . '.' . $extension;
-            $file->move(storage_path() . '/app/public/uploads/forums/', $file_path);
+            $file->move(hub_storage_path('uploads/forums').'/', $file_path);
             $forum->forum_image = $file_path;
         }
 

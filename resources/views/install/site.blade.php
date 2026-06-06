@@ -3,7 +3,7 @@
 @section('title', 'Site settings')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 3 of 5</div>
+    <div class="step-badge text-muted mb-2">Step 4 of 6</div>
     <h2 class="h5 mb-3">Site settings</h2>
     <p class="text-muted small">These values are saved to the active <strong>setting</strong> record so the hub can render the homepage, SEO metadata, and contact details.</p>
 
@@ -50,7 +50,7 @@
             </select>
         </div>
         <div class="col-12 d-flex gap-2">
-            <a href="{{ route('install.database') }}" class="btn btn-outline-secondary">Back</a>
+            <a href="{{ route('install.storage') }}" class="btn btn-outline-secondary">Back</a>
             <button type="submit" class="btn btn-success">Save site settings &amp; continue</button>
         </div>
     </form>

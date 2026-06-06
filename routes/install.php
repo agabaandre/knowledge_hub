@@ -7,6 +7,8 @@ Route::middleware(['web', 'install.guest'])->prefix('install')->name('install.')
     Route::get('/', [InstallController::class, 'index'])->name('index');
     Route::get('/database', [InstallController::class, 'showDatabase'])->name('database');
     Route::post('/database', [InstallController::class, 'storeDatabase'])->name('database.store');
+    Route::get('/storage', [InstallController::class, 'showStorage'])->name('storage');
+    Route::post('/storage', [InstallController::class, 'storeStorage'])->name('storage.store');
     Route::get('/site', [InstallController::class, 'showSite'])->name('site');
     Route::post('/site', [InstallController::class, 'storeSite'])->name('site.store');
     Route::get('/mail', [InstallController::class, 'showMail'])->name('mail');
