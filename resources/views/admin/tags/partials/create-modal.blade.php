@@ -17,7 +17,8 @@
           <div class="col-md-12">
             <div class="mb-1">
               <label class="form-label" for="name">Tag</label>
-              <input type="text" placeholder="Enter Tag" class="form-control newform" id="name" name="name" required>
+              <input type="text" placeholder="Enter Tag" class="form-control newform" id="name" name="name" maxlength="255" required>
+              <small class="text-muted">Up to 255 characters.</small>
             </div>
           </div>
 

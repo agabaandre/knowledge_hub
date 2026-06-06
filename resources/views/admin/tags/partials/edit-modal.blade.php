@@ -14,7 +14,8 @@
                 <div class="modal-body">
                     <div class="form-group">
                         <label for="tag_text">Tag</label>
-                        <input type="text" class="form-control" id="tag_text" name="tag_text" value="">
+                        <input type="text" class="form-control" id="tag_text" name="tag_text" maxlength="255" value="">
+                        <small class="text-muted">Up to 255 characters.</small>
                     </div>
 
                     <div class="col-md-12">

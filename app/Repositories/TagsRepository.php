@@ -6,6 +6,7 @@ use App\Models\ForumTag;
 use App\Models\PublicationTag;
 use App\Models\Tag;
 use App\View\Composers\TagsViewComposer;
+use App\Support\HealthTopicSourceCatalog;
 use App\Support\SeoSlugger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -45,6 +46,8 @@ class TagsRepository{
         }
         if ($request->has('is_health_emergency')) {
             $tag->is_health_emergency = $request->is_health_emergency ? 1 : 0;
+        } else {
+            $tag->is_health_emergency = 0;
         }
         if ($request->has('overview')) {
             $tag->overview = $request->overview;
@@ -216,5 +219,148 @@ class TagsRepository{
         });
     }
 
+    /**
+     * @return array<string, true>
+     */
+    public function existingTagKeyMap(): array
+    {
+        $map = [];
+        foreach (Tag::query()->pluck('tag_text') as $name) {
+            $key = HealthTopicSourceCatalog::normalizeTagKey((string) $name);
+            if ($key !== '') {
+                $map[$key] = true;
+            }
+        }
 
+        return $map;
+    }
+
+    /**
+     * @param  list<array{tag_text: string, overview: string, is_health_topic?: int, is_health_emergency?: int}>  $topics
+     * @return array{imported: int, skipped_duplicates: int, tags: list<Tag>}
+     */
+    public function importHealthTopics(array $topics): array
+    {
+        $existing = $this->existingTagKeyMap();
+        $imported = 0;
+        $skipped = 0;
+        $saved = [];
+
+        foreach ($topics as $row) {
+            $tagText = HealthTopicSourceCatalog::normalizeTopicName((string) ($row['tag_text'] ?? ''));
+            if ($tagText === '' || mb_strlen($tagText) > 255) {
+                continue;
+            }
+            $key = HealthTopicSourceCatalog::normalizeTagKey($tagText);
+            if (isset($existing[$key])) {
+                $skipped++;
+                continue;
+            }
+
+            $tag = new Tag();
+            $tag->tag_text = $tagText;
+            $tag->overview = (string) ($row['overview'] ?? '');
+            $tag->is_health_topic = (int) ($row['is_health_topic'] ?? 1);
+            $tag->is_health_emergency = (int) ($row['is_health_emergency'] ?? 0);
+            if (Schema::hasColumn('tags', 'slug')) {
+                $tag->slug = SeoSlugger::forTag($tagText, null);
+            }
+            $tag->save();
+
+            $existing[$key] = true;
+            $imported++;
+            $saved[] = $tag;
+        }
+
+        if ($imported > 0) {
+            TagsViewComposer::forgetTagListCache();
+        }
+
+        return [
+            'imported' => $imported,
+            'skipped_duplicates' => $skipped,
+            'tags' => $saved,
+        ];
+    }
+
+    /**
+     * Merge exact duplicate tag names (case-insensitive) into the oldest tag per group.
+     *
+     * @return array{status: string, message: string, merged_groups: int, merged_tags: int, details: list<array<string, mixed>>}
+     */
+    public function deduplicateTags(): array
+    {
+        $groups = [];
+        foreach (Tag::query()->orderBy('id')->get() as $tag) {
+            $key = HealthTopicSourceCatalog::normalizeTagKey((string) $tag->tag_text);
+            if ($key === '') {
+                continue;
+            }
+            $groups[$key][] = $tag;
+        }
+
+        $mergedGroups = 0;
+        $mergedTags = 0;
+        $details = [];
+
+        foreach ($groups as $key => $tags) {
+            if (count($tags) < 2) {
+                continue;
+            }
+
+            $canonical = $tags[0];
+            foreach (array_slice($tags, 1) as $duplicate) {
+                $result = $this->deleteTagWithMapping((int) $duplicate->id, (int) $canonical->id);
+                if (($result['status'] ?? '') === 'success') {
+                    $mergedTags++;
+                    $details[] = [
+                        'canonical_id' => (int) $canonical->id,
+                        'canonical_text' => (string) $canonical->tag_text,
+                        'merged_id' => (int) $duplicate->id,
+                        'merged_text' => (string) $duplicate->tag_text,
+                    ];
+                }
+            }
+            $mergedGroups++;
+        }
+
+        $message = $mergedTags > 0
+            ? "Merged {$mergedTags} duplicate tag(s) across {$mergedGroups} group(s)."
+            : 'No duplicate tags found (case-insensitive exact matches).';
+
+        return [
+            'status' => 'success',
+            'message' => $message,
+            'merged_groups' => $mergedGroups,
+            'merged_tags' => $mergedTags,
+            'details' => $details,
+        ];
+    }
+
+    /**
+     * @param  list<array{tag_text: string, overview: string}>  $topics
+     * @return list<array{tag_text: string, overview: string, is_duplicate: bool}>
+     */
+    public function markDuplicateTopics(array $topics): array
+    {
+        $existing = $this->existingTagKeyMap();
+        $out = [];
+        $batchKeys = [];
+
+        foreach ($topics as $topic) {
+            $tagText = HealthTopicSourceCatalog::normalizeTopicName((string) ($topic['tag_text'] ?? ''));
+            $key = HealthTopicSourceCatalog::normalizeTagKey($tagText);
+            $isDuplicate = $tagText === '' || isset($existing[$key]) || isset($batchKeys[$key]);
+            if ($key !== '' && ! $isDuplicate) {
+                $batchKeys[$key] = true;
+            }
+            $out[] = [
+                'tag_text' => $tagText,
+                'overview' => (string) ($topic['overview'] ?? ''),
+                'is_duplicate' => $isDuplicate,
+            ];
+        }
+
+        return $out;
+    }
 }

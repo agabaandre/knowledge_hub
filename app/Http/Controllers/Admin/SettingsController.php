@@ -6,6 +6,7 @@ use App\Models\CustomFont;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
+use App\Support\EmailConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -42,6 +43,9 @@ class SettingsController extends Controller
                 ->get()
                 ->groupBy('group_name')
             : collect();
+        $data['emailFields'] = Schema::hasColumn('setting', 'email_driver')
+            ? EmailConfig::fieldsForAdmin()
+            : [];
         return view('admin.settings.index', $data);
     }
   

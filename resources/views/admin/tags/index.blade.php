@@ -12,7 +12,8 @@
                 <hr>
             </div>
 
-            
+            @include('admin.tags.partials.ai-tools')
+
             <!-- Card Header With Form Filters -->
             <div class="card-header">
                 <form class="container-fluid">

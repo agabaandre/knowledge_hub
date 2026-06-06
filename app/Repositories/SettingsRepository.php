@@ -3,6 +3,7 @@ namespace App\Repositories;
 
 use App\Models\Setting;
 use App\Support\DisposableEmailChecker;
+use App\Support\EmailConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
@@ -354,6 +355,32 @@ class SettingsRepository
             $settings->profile_reminder_day_of_month = max(1, min(28, $day));
         }
 
+        if (Schema::hasColumn('setting', 'email_driver')) {
+            $driver = $request->input('email_driver', 'exchange');
+            $settings->email_driver = in_array($driver, ['smtp', 'exchange'], true) ? $driver : 'exchange';
+            $settings->mail_host = $request->input('mail_host');
+            $settings->mail_port = $request->input('mail_port');
+            $settings->mail_username = $request->input('mail_username');
+            if ($request->filled('mail_password')) {
+                $settings->mail_password = $request->input('mail_password');
+            }
+            $encryption = $request->input('mail_encryption', 'tls');
+            $settings->mail_encryption = in_array($encryption, ['tls', 'ssl', 'none', ''], true) ? $encryption : 'tls';
+            $settings->mail_from_address = $request->input('mail_from_address');
+            $settings->mail_from_name = $request->input('mail_from_name');
+            $settings->exchange_tenant_id = $request->input('exchange_tenant_id');
+            $settings->exchange_client_id = $request->input('exchange_client_id');
+            if ($request->filled('exchange_client_secret')) {
+                $settings->exchange_client_secret = $request->input('exchange_client_secret');
+            }
+            $settings->exchange_redirect_uri = $request->input('exchange_redirect_uri');
+            $settings->exchange_scope = $request->input('exchange_scope');
+            $authMethod = $request->input('exchange_auth_method', 'client_credentials');
+            $settings->exchange_auth_method = in_array($authMethod, ['client_credentials', 'authorization_code'], true)
+                ? $authMethod
+                : 'client_credentials';
+        }
+
         // Handle status change - if setting a new config as active, deactivate others
         if ($request->has('status') && $request->status === 'active') {
             // Deactivate all other settings
@@ -424,6 +451,8 @@ class SettingsRepository
         $settings->save();
 
         DisposableEmailChecker::forgetCache();
+        EmailConfig::clearCache();
+        EmailConfig::applyRuntimeConfig();
         clear_cache();
 
         return $settings;

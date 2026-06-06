@@ -699,10 +699,13 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
             }
         }
         
+        $resolvedFromEmail = $fromEmail ?: \App\Support\EmailConfig::resolve('MAIL_FROM_ADDRESS', 'mail_from_address');
+        $resolvedFromName = $fromName ?: \App\Support\EmailConfig::resolve('MAIL_FROM_NAME', 'mail_from_name', 'Africa CDC Knowledge Hub');
+
         \Log::info('Sending email via Exchange OAuth', [
             'to' => is_array($to) ? implode(', ', $to) : $to,
             'subject' => $subject,
-            'from' => $fromEmail ?: env('MAIL_FROM_ADDRESS')
+            'from' => $resolvedFromEmail
         ]);
         
         $result = $oauth->sendEmail(
@@ -710,8 +713,8 @@ function sendEmailWithExchange($to, $subject, $body, $fromEmail = null, $fromNam
             $subject,
             $body,
             true, // HTML email
-            $fromEmail ?: env('MAIL_FROM_ADDRESS'),
-            $fromName ?: env('MAIL_FROM_NAME', 'Africa CDC Knowledge Hub'),
+            $resolvedFromEmail,
+            $resolvedFromName,
             $cc,
             $bcc,
             $attachments

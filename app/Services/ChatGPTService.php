@@ -772,6 +772,133 @@ class ChatGPTService implements AIModel{
     }
 
     /**
+     * Generate unique health topics (diseases, conditions) with HTML overviews.
+     *
+     * @param  list<string>  $existingTagNames
+     * @param  list<string>  $referenceTopics
+     * @return array{ok: true, topics: list<array{tag_text: string, overview: string}>}|array{ok: false, error: string}
+     */
+    public function generateHealthTopics(array $existingTagNames, array $referenceTopics, int $count = 15): array
+    {
+        $count = max(5, min(40, $count));
+        $apiKey = config('ai.open_api_key');
+        if (empty($apiKey)) {
+            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        }
+
+        $existingSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $existingTagNames)))), 0, 120);
+        $referenceSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $referenceTopics)))), 0, 180);
+
+        $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer '.$apiKey,
+        ];
+
+        $system = 'You are a clinical terminology editor for the Africa CDC Knowledge Hub. '
+            .'Propose health topics, diseases, and medical conditions suitable as taxonomy tags for a public health knowledge portal focused on Africa. '
+            .'Use reputable reference lists (WHO, MedlinePlus, university health services) as inspiration but do not copy text verbatim. '
+            .'Each topic must be distinct, professionally named, and not duplicate any existing tag (case-insensitive). '
+            .'Write concise HTML overviews (2–4 short paragraphs with <p> tags only) describing symptoms, public health relevance, and prevention or management at a lay-professional level. '
+            .'Do not invent statistics. Default context: general health topic, not an active outbreak emergency unless the condition is commonly classified as one.';
+
+        $user = 'Generate exactly '.$count.' NEW health topic tags. '
+            .'Return JSON: {"topics":[{"tag_text":"...","overview":"<p>...</p>"}]} only. '
+            .'tag_text max 255 characters. overview max 3500 characters HTML. '
+            .'Avoid duplicates against existing tags: '.json_encode($existingSample).'. '
+            .'Reference inspiration (do not repeat blindly): '.json_encode($referenceSample).'. '
+            .'Prefer diverse conditions across infectious disease, NCDs, maternal-child health, mental health, and environmental health.';
+
+        $payload = [
+            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
+            'messages' => [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => $user],
+            ],
+            'max_tokens' => 8192,
+            'temperature' => 0.35,
+        ];
+
+        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $content = $this->extractOpenAiMessageContent($response);
+        if ($content === null || trim($content) === '') {
+            return ['ok' => false, 'error' => 'Empty response from OpenAI.'];
+        }
+
+        $topics = $this->parseHealthTopicsJson($content);
+        if ($topics === []) {
+            return ['ok' => false, 'error' => 'Could not parse health topics from AI response.'];
+        }
+
+        $normalized = [];
+        $seen = [];
+        foreach ($topics as $row) {
+            $tagText = Str::limit(trim((string) ($row['tag_text'] ?? '')), 255, '');
+            $overview = trim((string) ($row['overview'] ?? ''));
+            if ($tagText === '' || $overview === '') {
+                continue;
+            }
+            $key = mb_strtolower($tagText);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $normalized[] = [
+                'tag_text' => $tagText,
+                'overview' => Str::limit($overview, 12000, ''),
+            ];
+        }
+
+        if ($normalized === []) {
+            return ['ok' => false, 'error' => 'No usable topics after normalization.'];
+        }
+
+        return ['ok' => true, 'topics' => array_slice($normalized, 0, $count)];
+    }
+
+    /**
+     * @return list<array{tag_text?: string, overview?: string}>
+     */
+    private function parseHealthTopicsJson(string $raw): array
+    {
+        $text = function_exists('clean_unicode') ? clean_unicode($raw) : $raw;
+        $text = preg_replace('/```json\s*/i', '', (string) $text);
+        $text = preg_replace('/```\s*/', '', $text);
+        $text = trim($text);
+
+        $decoded = json_decode($text, true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+        if (! is_array($decoded) || json_last_error() !== JSON_ERROR_NONE) {
+            $start = strpos($text, '{');
+            $end = strrpos($text, '}');
+            if ($start !== false && $end !== false && $end > $start) {
+                $decoded = json_decode(substr($text, $start, $end - $start + 1), true, 512, JSON_INVALID_UTF8_SUBSTITUTE);
+            }
+        }
+
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $list = $decoded['topics'] ?? null;
+        if (! is_array($list)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($list as $item) {
+            if (! is_array($item)) {
+                continue;
+            }
+            $out[] = [
+                'tag_text' => $item['tag_text'] ?? '',
+                'overview' => $item['overview'] ?? '',
+            ];
+        }
+
+        return $out;
+    }
+
+    /**
      * @return list<array{title?: string, summary?: string, description?: string}>
      */
     private function parseAfricaHealthFactsJson(string $raw): array

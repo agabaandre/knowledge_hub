@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\View;
 use App\Models\StaticLink;
+use App\Support\EmailConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -59,5 +60,11 @@ class AppServiceProvider extends ServiceProvider
         define('PHPGRID_LIBPATH', 'libs/phpgrid/');
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
+
+        try {
+            EmailConfig::applyRuntimeConfig();
+        } catch (\Throwable $e) {
+            // Database may be unavailable during install or early bootstrap.
+        }
     }
 }

@@ -5,12 +5,12 @@ return [
     |--------------------------------------------------------------------------
     | Email sending driver
     |--------------------------------------------------------------------------
-    | Single source of truth: set EMAIL_DRIVER or MAIL_MAILER in .env to
-    | 'exchange' or 'smtp'. EMAIL_DRIVER takes precedence over MAIL_MAILER.
-    | - exchange: uses Microsoft Graph (requires EXCHANGE_TENANT_ID, etc.)
-    | - smtp: uses PHPMailer/SMTP (requires MAIL_HOST, MAIL_USERNAME, etc.)
-    | Applies to password reset, queued mail, and all send_email() usage.
-    | After changing .env run: php artisan config:clear
+    | Priority: .env values first; when empty, admin Email settings (database).
+    | Set EMAIL_DRIVER or MAIL_MAILER in .env to 'exchange' or 'smtp'.
+    | EMAIL_DRIVER takes precedence over MAIL_MAILER. Default: exchange.
+    | - exchange: Microsoft Graph (EXCHANGE_TENANT_ID, etc.)
+    | - smtp: PHPMailer/SMTP (MAIL_HOST, MAIL_USERNAME, etc.)
+    | Runtime resolution: App\Support\EmailConfig::applyRuntimeConfig()
     */
     'driver'      => env('EMAIL_DRIVER', env('MAIL_MAILER', 'exchange')),
 

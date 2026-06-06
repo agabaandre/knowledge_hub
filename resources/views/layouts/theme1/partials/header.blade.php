@@ -135,15 +135,7 @@
                             <li><a class="dropdown-item" href="{{ url('publications/request-content') }}">Content Request</a></li>
                         </ul>
                     </li>
-                    @auth
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Create</a>
-                            <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="{{ route('forums.create') }}">Forum Discussion</a></li>
-                                <li><a class="dropdown-item" href="{{ route('account.publish') }}">Publish Resource</a></li>
-                            </ul>
-                        </li>
-                    @endauth
+                    @include('layouts.theme1.partials.create_menu')
                 </ul>
             </div>
         </nav>

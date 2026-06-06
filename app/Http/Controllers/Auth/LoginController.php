@@ -44,6 +44,50 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    public function showLoginForm(Request $request)
+    {
+        $redirect = $this->safeRedirectUrl($request->query('redirect'));
+        if ($redirect !== null) {
+            session(['url.intended' => $redirect]);
+        }
+
+        if (! session()->has('alert')) {
+            $reason = (string) $request->query('reason', '');
+            if ($reason === 'forum') {
+                session()->flash('alert_class', 'info');
+                session()->flash('alert', 'Please log in to create a forum discussion.');
+            } elseif ($reason === 'publication') {
+                session()->flash('alert_class', 'info');
+                session()->flash('alert', 'Please log in to publish a resource.');
+            }
+        }
+
+        return view('auth.login');
+    }
+
+    protected function safeRedirectUrl(?string $url): ?string
+    {
+        if ($url === null || $url === '') {
+            return null;
+        }
+
+        $url = trim($url);
+        if ($url === '') {
+            return null;
+        }
+
+        if (str_starts_with($url, '/')) {
+            return $url;
+        }
+
+        $appUrl = rtrim((string) config('app.url'), '/');
+        if ($appUrl !== '' && str_starts_with($url, $appUrl.'/')) {
+            return $url;
+        }
+
+        return null;
+    }
+
     protected function validateLogin(Request $request)
     {
         $rules = [

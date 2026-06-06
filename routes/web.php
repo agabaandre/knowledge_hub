@@ -400,6 +400,9 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/save", [TagsController::class, 'store']);
         Route::put('/update', [TagsController::class, 'update'])->name('update');
         Route::get("/delete", [TagsController::class, 'destroy']);
+        Route::post('/ai-generate', [TagsController::class, 'aiGenerate'])->name('ai-generate');
+        Route::post('/ai-import', [TagsController::class, 'aiImport'])->name('ai-import');
+        Route::post('/deduplicate', [TagsController::class, 'deduplicate'])->name('deduplicate');
     });
 
     //licenses
