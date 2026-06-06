@@ -9,7 +9,7 @@
                     id="{{$country->id}}"
                     data-country-id="{{$country->id}}"
                     data-country-name="{{ strtolower($country->name) }}"
-                    onclick="window.location.href='{{ url('countries/details')}}?state={{$country->id}}'" 
+                    onclick="window.location.href='{{ country_detail_url($country) }}'" 
                     data-info='<div class="map-popover-content">
                         <div class="d-flex align-items-center mb-2">
                           <img width="60px" src="{{ asset('assets/img/flags/' . ($country->flag ?? '')) }}" class="rounded me-2" alt="{{$country->name}}">

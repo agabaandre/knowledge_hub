@@ -324,6 +324,7 @@ CREATE TABLE `country` (
   `id` int NOT NULL AUTO_INCREMENT,
   `national` varchar(100) NOT NULL DEFAULT '',
   `name` varchar(100) NOT NULL,
+  `slug` varchar(191) DEFAULT NULL,
   `iso_code` varchar(2) DEFAULT NULL,
   `iso3_code` varchar(3) DEFAULT NULL,
   `numcode` smallint DEFAULT NULL,
@@ -337,7 +338,8 @@ CREATE TABLE `country` (
   `flag` varchar(255) DEFAULT NULL,
   `base_url` varchar(191) DEFAULT NULL,
   `is_app_supported` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `country_slug_unique` (`slug`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 DROP TABLE IF EXISTS `course_categories`;
@@ -2518,3 +2520,5 @@ INSERT INTO `migrations` VALUES (280,'2026_05_20_110000_add_slugs_to_publication
 INSERT INTO `migrations` VALUES (281,'2026_05_20_110001_backfill_publication_and_forum_slugs',160);
 INSERT INTO `migrations` VALUES (282,'2026_05_20_120000_add_slugs_to_tags_and_communities',161);
 INSERT INTO `migrations` VALUES (283,'2026_05_20_120001_backfill_tag_and_community_slugs',162);
+INSERT INTO `migrations` VALUES (284,'2026_05_20_130000_add_slug_to_country',163);
+INSERT INTO `migrations` VALUES (285,'2026_05_20_130001_backfill_country_slugs',164);

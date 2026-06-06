@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\CommunityOfPractice;
+use App\Models\Country;
 use App\Models\Forum;
 use App\Models\Publication;
 use App\Models\Tag;
@@ -250,6 +251,66 @@ if (! function_exists('community_detail_url')) {
             $path = 'communities/detail/'.$id;
             if ($query) {
                 $path .= '?'.http_build_query($query);
+            }
+        }
+
+        return $absolute ? url($path) : $path;
+    }
+}
+
+if (! function_exists('resolve_country_for_url')) {
+    /**
+     * @param  Country|object|int|string|null  $country
+     * @return array{id: ?int, slug: ?string}
+     */
+    function resolve_country_for_url($country): array
+    {
+        $id = null;
+        $slug = null;
+
+        if ($country instanceof Country) {
+            $id = (int) $country->id;
+            $slug = $country->slug ?? null;
+        } elseif (is_object($country) && isset($country->id)) {
+            $id = (int) $country->id;
+            $slug = $country->slug ?? null;
+        } elseif (is_numeric($country)) {
+            $id = (int) $country;
+            $slug = Country::query()->whereKey($id)->value('slug');
+        }
+
+        return ['id' => $id, 'slug' => $slug];
+    }
+}
+
+if (! function_exists('country_detail_url')) {
+    /**
+     * Member state detail page (countries/details).
+     *
+     * @param  Country|object|int|string|null  $country
+     */
+    function country_detail_url($country, bool $absolute = true, array $query = []): string
+    {
+        ['id' => $id, 'slug' => $slug] = resolve_country_for_url($country);
+
+        if (! $id) {
+            $path = 'countries';
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+
+            return $absolute ? url($path) : $path;
+        }
+
+        if (seo_friendly_urls_enabled() && ! empty($slug)) {
+            $path = 'countries/details/'.$slug;
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+        } else {
+            $path = 'countries/details?state='.$id;
+            if ($query) {
+                $path .= '&'.http_build_query($query);
             }
         }
 

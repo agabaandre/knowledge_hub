@@ -27,6 +27,11 @@ class SeoSlugger
         return self::uniqueSlug('community_of_practices', self::baseSlug($name, 'community'), $excludeId);
     }
 
+    public static function forCountry(string $name, ?int $excludeId = null): string
+    {
+        return self::uniqueSlug('country', self::baseSlug($name, 'country'), $excludeId);
+    }
+
     public static function baseSlug(string $title, string $fallback): string
     {
         $slug = Str::slug(Str::limit(trim($title), 120, ''));

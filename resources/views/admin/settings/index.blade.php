@@ -482,7 +482,7 @@
                         <input type="hidden" name="use_seo_friendly_urls" value="0">
                         <label class="mb-0">
                             <input type="checkbox" name="use_seo_friendly_urls" value="1" {{ ($settings->use_seo_friendly_urls ?? true) ? 'checked' : '' }}>
-                            Use title-based URLs for publications, forums, communities, tags, and health topics (instead of <code>?id=</code> links)
+                            Use title-based URLs for publications, forums, communities, tags, health topics, and member states (instead of <code>?id=</code> links)
                         </label>
                         <small class="info-text d-block">When enabled, links use readable slugs and legacy ID URLs redirect to the slug URL.</small>
                 </div>

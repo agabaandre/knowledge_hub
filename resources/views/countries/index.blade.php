@@ -560,7 +560,7 @@
                                                                                         @php
                                                     $country = (object) $country;
                                                                                         @endphp
-                                                <a href="{{ url('countries/details')}}?state={{$country->id}}" 
+                                                <a href="{{ country_detail_url($country) }}" 
                                                    class="country-card" 
                                                    data-country-id="{{$country->id}}"
                                                    data-country-name="{{ strtolower($country->name) }}">
@@ -592,6 +592,10 @@
 @section('scripts')
 <script src="{{ asset('assets/js/map.js')}}"></script>
 <script>
+    const countryDetailUrls = @json(
+        collect($countries ?? [])->mapWithKeys(fn ($country) => [(string) $country->id => country_detail_url($country)])->all()
+    );
+
     $(document).ready(function() {
         // Toggle region cards
         $('.region-card-header').on('click', function() {
@@ -719,7 +723,8 @@
             
             // Navigate after a short delay for visual feedback
             setTimeout(() => {
-                window.location.href = '{{ url("countries/details") }}?state=' + countryId;
+                const targetUrl = countryDetailUrls[String(countryId)] || ('{{ url('countries/details') }}?state=' + countryId);
+                window.location.href = targetUrl;
             }, 300);
         });
     });

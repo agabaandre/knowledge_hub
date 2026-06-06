@@ -48,6 +48,10 @@ class AreasRepository{
         return Country::where('id',$id)->first();
     }
 
+    public function member_state_by_slug(string $slug){
+        return Country::where('slug', $slug)->first();
+    }
+
     public function regions()
     {
         return Region::all();
