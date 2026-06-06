@@ -104,6 +104,15 @@ APP_URL=https://your-hub.example
 
 For Docker-specific notes (Meilisearch import, queue workers, production tuning), see **[docs/DOCKER.md](docs/DOCKER.md)**.
 
+### Documentation index
+
+| Document | Audience | Topic |
+|----------|----------|--------|
+| [docs/DOCKER.md](docs/DOCKER.md) | Dev / ops | Container deploy, queue, Meilisearch |
+| [docs/KPI_INDICATORS_OWID.md](docs/KPI_INDICATORS_OWID.md) | Users, admin, dev | Country indicators, OWID import, KPI settings, queue tasks |
+| [docs/CONTENT_REQUEST_REFERRALS.md](docs/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |
+| [docs/FORUM_ATTACHMENTS_PDF.md](docs/FORUM_ATTACHMENTS_PDF.md) | Dev / ops | Forum Office → PDF conversion |
+
 ---
 
 ## 1. Prerequisites

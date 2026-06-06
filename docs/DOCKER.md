@@ -37,7 +37,7 @@ After install, import searchable models into Meilisearch:
 docker compose exec app php artisan scout:import "App\\Models\\Publication"
 ```
 
-The **`queue`** service processes Scout index jobs when `SCOUT_QUEUE=true`.
+The **`queue`** service processes Scout index jobs when `SCOUT_QUEUE=true`, and **KPI / OWID background tasks** (indicator fetch, sync, AI narration queues). See [docs/KPI_INDICATORS_OWID.md](KPI_INDICATORS_OWID.md).
 
 ## Database schema
 
@@ -75,7 +75,8 @@ Add `--skip-migrate` when the database already has tables and data. The command 
 - Set `APP_DEBUG=false` and `APP_ENV=production` in `.env`.
 - In `docker/php/opcache.ini`, set `opcache.validate_timestamps=0` and reload PHP-FPM after each deploy.
 - Scale `docker/php/www.conf` `pm.max_children` using the tier tables in the optimisation repo.
-- Run queue workers separately: `php artisan queue:work redis --sleep=3` (required when `SCOUT_QUEUE=true` for Meilisearch indexing).
+- Run queue workers separately: `php artisan queue:work redis --sleep=3` (required when `SCOUT_QUEUE=true` for Meilisearch indexing, and for **KPI OWID import progress** in admin).
+- KPI automatic weekly OWID refresh is controlled in **Admin → KPIs → Indicator data management** (`kpi_owid_auto_fetch_enabled` on the `setting` row). Details: [KPI_INDICATORS_OWID.md](KPI_INDICATORS_OWID.md).
 - Meilisearch master key defaults to `masterKey` in Docker; set `MEILISEARCH_KEY` in `.env` / compose for production.
 
 ## PHP performance files

@@ -28,8 +28,11 @@ return new class extends Migration
                 if (! Schema::hasColumn('subject_areas', 'owid_topic')) {
                     $table->string('owid_topic', 191)->nullable()->after('slug');
                 }
+                if (! Schema::hasColumn('subject_areas', 'owid_search_query')) {
+                    $table->string('owid_search_query', 255)->nullable()->after('owid_topic');
+                }
                 if (! Schema::hasColumn('subject_areas', 'description')) {
-                    $table->text('description')->nullable()->after('owid_topic');
+                    $table->text('description')->nullable()->after('owid_search_query');
                 }
                 if (! Schema::hasColumn('subject_areas', 'sort_order')) {
                     $table->unsignedInteger('sort_order')->default(100)->after('description');
@@ -112,18 +115,23 @@ return new class extends Migration
 
         $id = 1;
         foreach (config('owid.default_subject_areas', []) as $row) {
-            DB::table('subject_areas')->insert([
+            $record = [
                 'id' => $id,
                 'name' => $row['name'],
                 'slug' => \Illuminate\Support\Str::slug($row['name']),
                 'owid_topic' => $row['owid_topic'] ?? null,
-                'owid_search_query' => $row['owid_search_query'] ?? null,
                 'description' => 'Indicators sourced from Our World in Data — '.$row['name'],
                 'sort_order' => $row['sort_order'] ?? ($id * 10),
                 'is_active' => true,
                 'created' => now(),
                 'updated' => now(),
-            ]);
+            ];
+
+            if (Schema::hasColumn('subject_areas', 'owid_search_query')) {
+                $record['owid_search_query'] = $row['owid_search_query'] ?? null;
+            }
+
+            DB::table('subject_areas')->insert($record);
             $id++;
         }
     }
@@ -183,7 +191,7 @@ SQL);
 
         if (Schema::hasTable('subject_areas')) {
             Schema::table('subject_areas', function (Blueprint $table) {
-                foreach (['is_active', 'sort_order', 'description', 'owid_topic', 'slug'] as $col) {
+                foreach (['is_active', 'sort_order', 'description', 'owid_search_query', 'owid_topic', 'slug'] as $col) {
                     if (Schema::hasColumn('subject_areas', $col)) {
                         $table->dropColumn($col);
                     }
