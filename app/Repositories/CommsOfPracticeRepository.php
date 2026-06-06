@@ -1436,21 +1436,36 @@ class CommsOfPracticeRepository{
         $geoForeignKey = $geo['geoForeignKey'];
         $geoFilterId = (int) ($request->input('geography_id') ?: $request->input('country_id'));
 
-        return User::query()
-            ->select('users.*', DB::raw($geoTable.'.name as geo_name'))
-            ->join('community_of_practice_members as copm', function ($join) {
-                $join->on('copm.user_id', '=', 'users.id')
-                    ->where('copm.is_approved', 1)
-                    ->where('copm.is_active', 1);
-            })
+        return CommunityOfPracticeMembers::query()
+            ->from('community_of_practice_members as copm')
+            ->select([
+                'copm.id as membership_id',
+                'copm.user_id',
+                'copm.community_of_practice_id',
+                'copm.is_approved',
+                'copm.is_active',
+                'users.name',
+                'users.email',
+                'users.phone_number',
+                'users.job_title',
+                'users.organization_name',
+                'cop.community_name',
+                DB::raw($geoTable.'.name as geo_name'),
+            ])
+            ->join('users', 'users.id', '=', 'copm.user_id')
+            ->join('community_of_practices as cop', 'cop.id', '=', 'copm.community_of_practice_id')
             ->leftJoin($geoTable, $geoTable.'.id', '=', $geoForeignKey)
+            ->where('copm.is_active', 1)
+            ->whereIn('copm.is_approved', [0, 1])
             ->when($request->filled('q'), function ($q) use ($request, $geoTable) {
                 $term = trim((string) $request->q);
                 $q->where(function ($qq) use ($term, $geoTable) {
                     $qq->where('users.name', 'like', '%'.$term.'%')
                         ->orWhere('users.email', 'like', '%'.$term.'%')
+                        ->orWhere('users.phone_number', 'like', '%'.$term.'%')
                         ->orWhere('users.job_title', 'like', '%'.$term.'%')
                         ->orWhere('users.organization_name', 'like', '%'.$term.'%')
+                        ->orWhere('cop.community_name', 'like', '%'.$term.'%')
                         ->orWhere($geoTable.'.name', 'like', '%'.$term.'%');
                 });
             })
@@ -1474,21 +1489,31 @@ class CommsOfPracticeRepository{
                         ->whereColumn('ub.user_id', 'users.id')
                         ->where('ub.badge_type_id', $badgeTypeId);
                 });
-            })
-            ->groupBy('users.id', $geoTable.'.name');
+            });
+    }
+
+    private function formatParticipantContact(?string $email, ?string $phone): string
+    {
+        $email = trim((string) $email);
+        $phone = trim((string) $phone);
+        if ($email !== '' && $phone !== '') {
+            return $email."\n".$phone;
+        }
+
+        return $email !== '' ? $email : $phone;
     }
 
     /**
-     * @param  \Illuminate\Support\Collection<int, User>  $participants
+     * @param  \Illuminate\Support\Collection<int, object>  $participants
      */
     public function enrichParticipantsCollection($participants): void
     {
-        $userIds = $participants->pluck('id')->all();
+        $userIds = $participants->pluck('user_id')->unique()->filter()->map(fn ($id) => (int) $id)->all();
         if ($userIds === []) {
             return;
         }
 
-        $authorByUser = $participants->pluck('author_id', 'id')->filter()->map(fn ($id) => (int) $id)->toArray();
+        $authorByUser = User::query()->whereIn('id', $userIds)->pluck('author_id', 'id')->filter()->map(fn ($id) => (int) $id)->toArray();
 
         $publicationsByUser = DB::table('publication')
             ->select('user_id', DB::raw('COUNT(*) as total'))
@@ -1523,44 +1548,29 @@ class CommsOfPracticeRepository{
             ->get()
             ->groupBy('user_id');
 
-        $membershipsByUser = CommunityOfPracticeMembers::query()
-            ->with('community:id,community_name')
-            ->whereIn('user_id', $userIds)
-            ->where('is_approved', 1)
-            ->where('is_active', 1)
-            ->get()
-            ->groupBy('user_id');
-
-        $participants->transform(function ($u) use (
+        $participants->transform(function ($row) use (
             $publicationsByUser,
             $publicationsByAuthor,
             $authorByUser,
             $forumPostsByUser,
             $forumCommentsByUser,
-            $badgesByUser,
-            $membershipsByUser
+            $badgesByUser
         ) {
-            $uid = (int) $u->id;
+            $uid = (int) $row->user_id;
             $authorId = $authorByUser[$uid] ?? null;
             $pubByUser = (int) ($publicationsByUser[$uid] ?? 0);
             $pubByAuthor = $authorId ? (int) ($publicationsByAuthor[$authorId] ?? 0) : 0;
 
-            $u->publication_contributions = $pubByUser + $pubByAuthor;
-            $u->forum_contributions = (int) ($forumPostsByUser[$uid] ?? 0) + (int) ($forumCommentsByUser[$uid] ?? 0);
+            $row->publication_contributions = $pubByUser + $pubByAuthor;
+            $row->forum_contributions = (int) ($forumPostsByUser[$uid] ?? 0) + (int) ($forumCommentsByUser[$uid] ?? 0);
 
-            $u->badge_labels = collect($badgesByUser[$uid] ?? [])
+            $row->badge_labels = collect($badgesByUser[$uid] ?? [])
                 ->map(fn ($b) => $b->badgeType->name ?? null)
                 ->filter()
                 ->unique()
                 ->implode(', ');
 
-            $u->community_labels = collect($membershipsByUser[$uid] ?? [])
-                ->map(fn ($m) => $m->community->community_name ?? null)
-                ->filter()
-                ->unique()
-                ->implode(', ');
-
-            return $u;
+            return $row;
         });
     }
 
@@ -1579,32 +1589,55 @@ class CommsOfPracticeRepository{
 
         $orderColIndex = (int) $request->input('order.0.column', 1);
         $orderDir = strtolower((string) $request->input('order.0.dir', 'asc')) === 'desc' ? 'desc' : 'asc';
-        $orderMap = [1 => 'users.name', 2 => 'users.email', 3 => 'users.job_title', 4 => 'users.organization_name', 5 => 'geo_name'];
+        $orderMap = [
+            1 => 'users.name',
+            2 => 'users.email',
+            3 => 'users.job_title',
+            4 => 'users.organization_name',
+            5 => 'geo_name',
+            9 => 'cop.community_name',
+            10 => 'copm.is_approved',
+        ];
         if (isset($orderMap[$orderColIndex])) {
             $base->orderBy($orderMap[$orderColIndex], $orderDir);
         } else {
-            $base->orderBy('users.name', 'asc');
+            $base->orderBy('users.name', 'asc')->orderBy('cop.community_name', 'asc');
         }
 
         $rows = $base->skip($start)->take($length)->get();
         $this->enrichParticipantsCollection($rows);
 
         $cell = static fn (?string $value) => '<div class="pub-cell-wrap">'.e($value ?: '—').'</div>';
+        $contactCell = function (?string $email, ?string $phone) use ($cell) {
+            $formatted = $this->formatParticipantContact($email, $phone);
+            if ($formatted === '') {
+                return $cell(null);
+            }
+            $lines = array_map('trim', explode("\n", $formatted));
+
+            return '<div class="pub-cell-wrap">'.implode('<br>', array_map(static fn ($line) => e($line), $lines)).'</div>';
+        };
         $data = [];
         $index = $start + 1;
 
         foreach ($rows as $participant) {
+            $isApproved = (int) ($participant->is_approved ?? 0) === 1;
+            $statusHtml = $isApproved
+                ? '<span class="badge bg-success">Approved</span>'
+                : '<span class="badge bg-warning text-dark">Pending approval</span>';
+
             $data[] = [
                 'index' => '<span class="text-muted">'.$index++.'</span>',
                 'name' => $cell($participant->name),
-                'email' => $cell($participant->email),
+                'contact' => $contactCell($participant->email ?? null, $participant->phone_number ?? null),
                 'title' => $cell($participant->job_title),
                 'organisation' => $cell($participant->organization_name),
                 'geography' => $cell($participant->geo_name),
                 'publications' => (int) ($participant->publication_contributions ?? 0),
                 'forums' => (int) ($participant->forum_contributions ?? 0),
-                'badges' => $cell($participant->badge_labels),
-                'communities' => $cell($participant->community_labels),
+                'badges' => $cell($participant->badge_labels ?? null),
+                'community' => $cell($participant->community_name ?? null),
+                'status' => '<div class="pub-cell-wrap">'.$statusHtml.'</div>',
             ];
         }
 

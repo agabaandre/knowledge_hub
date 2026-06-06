@@ -18,6 +18,6 @@ class CommunityOfPracticeMembers extends Model
 
     public function community()
     {
-        return $this->belongsTo(CommunityOfPractice::class);
+        return $this->belongsTo(CommunityOfPractice::class, 'community_of_practice_id');
     }
 }

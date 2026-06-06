@@ -12,14 +12,25 @@
         #participants-table_wrapper table.dataTable { table-layout: fixed !important; }
         #participants-table .part-col-index { width: 3rem; min-width: 3rem; }
         #participants-table .part-col-name { width: 12%; }
-        #participants-table .part-col-email { width: 14%; }
+        #participants-table .part-col-contact { width: 14%; }
+        #participants-table .part-col-status { width: 8rem; text-align: center; }
         #participants-table .part-col-title { width: 10%; }
         #participants-table .part-col-org { width: 12%; }
         #participants-table .part-col-geo { width: 9%; }
         #participants-table .part-col-pub,
         #participants-table .part-col-forum { width: 5rem; text-align: center; }
         #participants-table .part-col-badges,
-        #participants-table .part-col-communities { width: 14%; }
+        #participants-table .part-col-community { width: 14%; }
+        /* DataTables 2.x pseudo-arrows + theme background icons = double sort glyphs */
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting:before,
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting:after,
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting_asc:before,
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting_asc:after,
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting_desc:before,
+        #participants-table_wrapper table.dataTable thead > tr > th.sorting_desc:after {
+            display: none !important;
+            content: none !important;
+        }
     </style>
 @endsection
 
@@ -37,8 +48,9 @@
         <div class="col-md-4">
             <div class="card border-left-success shadow-sm h-100 stat-card-mini">
                 <div class="card-body">
-                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Total Unique Memberships</div>
+                    <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Approved Memberships</div>
                     <div class="h4 mb-0 font-weight-bold text-gray-800">{{ number_format((int) $totalUniqueMemberships) }}</div>
+                    <div class="small text-muted mt-1">{{ number_format((int) ($totalPendingMemberships ?? 0)) }} pending approval</div>
                 </div>
             </div>
         </div>
@@ -146,14 +158,15 @@
                         <tr>
                             <th class="part-col-index">#</th>
                             <th class="part-col-name">Participant Name</th>
-                            <th class="part-col-email">Email Address</th>
+                            <th class="part-col-contact">Email / Phone</th>
                             <th class="part-col-title">Title</th>
                             <th class="part-col-org">Organisation</th>
                             <th class="part-col-geo">{{ $geoLabel }}</th>
                             <th class="part-col-pub">Publication Contributions</th>
                             <th class="part-col-forum">Forum Contributions</th>
                             <th class="part-col-badges">Badge(s)</th>
-                            <th class="part-col-communities">Communities Subscribed</th>
+                            <th class="part-col-community">Community</th>
+                            <th class="part-col-status">Membership Status</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -213,17 +226,18 @@ $(function () {
         columns: [
             { data: 'index', orderable: false, searchable: false, className: 'part-col-index text-center' },
             { data: 'name', orderable: true, className: 'part-col-name' },
-            { data: 'email', orderable: true, className: 'part-col-email' },
+            { data: 'contact', orderable: true, className: 'part-col-contact' },
             { data: 'title', orderable: true, className: 'part-col-title' },
             { data: 'organisation', orderable: true, className: 'part-col-org' },
             { data: 'geography', orderable: true, className: 'part-col-geo' },
             { data: 'publications', orderable: false, searchable: false, className: 'part-col-pub text-center' },
             { data: 'forums', orderable: false, searchable: false, className: 'part-col-forum text-center' },
             { data: 'badges', orderable: false, searchable: false, className: 'part-col-badges' },
-            { data: 'communities', orderable: false, searchable: false, className: 'part-col-communities' }
+            { data: 'community', orderable: true, className: 'part-col-community' },
+            { data: 'status', orderable: true, className: 'part-col-status text-center' }
         ],
         columnDefs: [
-            { targets: [0, 6, 7, 8, 9], orderable: false }
+            { targets: [0, 6, 7, 8], orderable: false }
         ],
         language: {
             processing: '<i class="fa fa-spinner fa-spin"></i> Loading participants...',

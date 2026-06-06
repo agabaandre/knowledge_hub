@@ -238,7 +238,11 @@ class CommsOfPracticeController extends Controller
             });
 
         $totalCommunities = CommunityOfPractice::query()->count();
-        $totalUniqueMemberships = (clone $baseMembershipQuery)->distinct('users.id')->count('users.id');
+        $totalUniqueMemberships = (clone $baseMembershipQuery)->count('community_of_practice_members.id');
+        $totalPendingMemberships = CommunityOfPracticeMembers::query()
+            ->where('is_active', 1)
+            ->where('is_approved', 0)
+            ->count();
         $membershipsByGeography = (clone $baseMembershipQuery)
             ->select(
                 DB::raw($geoTable.'.name as geography_name'),
@@ -262,6 +266,7 @@ class CommsOfPracticeController extends Controller
             'geoLabel',
             'totalCommunities',
             'totalUniqueMemberships',
+            'totalPendingMemberships',
             'totalMembershipsByGeography',
             'membershipsByGeography',
         ));

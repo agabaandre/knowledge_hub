@@ -114,6 +114,21 @@
         vertical-align: middle;
     }
 
+    /* Hide DataTables default pseudo-element arrows (theme uses background-image icons) */
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting:before,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting:after,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_asc:before,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_asc:after,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_desc:before,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_desc:after,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_asc_disabled:before,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_asc_disabled:after,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_desc_disabled:before,
+    .dataTables_wrapper table.dataTable thead > tr > th.sorting_desc_disabled:after {
+        display: none !important;
+        content: none !important;
+    }
+
     /* Sortable headers */
     .dataTables_wrapper table.dataTable thead .sorting,
     .dataTables_wrapper table.dataTable thead .sorting_asc,
