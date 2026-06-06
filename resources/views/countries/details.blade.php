@@ -2,8 +2,216 @@
 @extends('layouts.plain')
 
 @section('styles')
-
-
+<link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
+<style>
+    .country-kpi-section {
+        margin-top: 0;
+    }
+    .country-kpi-section .crp_box.fl_color {
+        margin-top: 0;
+    }
+    .country-kpi-subject {
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(26, 86, 50, 0.08);
+        padding: 1.25rem 1.25rem 0.5rem;
+        margin-bottom: 1.5rem;
+        border: 1px solid rgba(26, 86, 50, 0.08);
+    }
+    .country-kpi-subject__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 1rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid rgba(180, 162, 105, 0.35);
+    }
+    .country-kpi-subject__title {
+        margin: 0;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #1A5632;
+    }
+    .country-kpi-subject__count {
+        font-size: 0.8rem;
+        font-weight: 600;
+        color: #58595B;
+        background: #f4f7f5;
+        border-radius: 999px;
+        padding: 0.25rem 0.75rem;
+        white-space: nowrap;
+    }
+    .country-kpi-tile {
+        background: #ffffff;
+        border-radius: 10px;
+        padding: 1.25rem 1rem;
+        box-shadow: 0 0 20px 0 rgb(62 28 131 / 10%);
+        border: 1px solid transparent;
+        transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .country-kpi-tile .dro_141.country-kpi-tile__icon {
+        margin-right: 0;
+        margin-bottom: 0.75rem;
+        align-self: flex-start;
+    }
+    .country-kpi-tile .country-kpi-tile__body {
+        padding-right: 0;
+        width: 100%;
+    }
+    .country-kpi-tile__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 0.5rem;
+        margin-bottom: 0.35rem;
+    }
+    .country-kpi-tile__title {
+        font-size: 0.95rem !important;
+        line-height: 1.35 !important;
+        margin: 0 !important;
+        color: #172228;
+        font-weight: 600 !important;
+    }
+    .country-kpi-tile__drill-badge {
+        flex-shrink: 0;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        background: rgba(26, 86, 50, 0.1);
+        color: #1A5632;
+        font-size: 0.7rem;
+    }
+    .country-kpi-tile__value {
+        font-size: 1.5rem !important;
+        line-height: 1.2;
+    }
+    .country-kpi-tile__unit {
+        font-size: 0.8rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-left: 0.25rem;
+    }
+    .country-kpi-tile__period {
+        display: block;
+        margin-top: 0.15rem;
+        font-size: 0.78rem;
+    }
+    .country-kpi-sparkline {
+        margin-top: 0.65rem;
+        height: 52px;
+        width: 100%;
+        border-radius: 6px;
+        overflow: hidden;
+        background: linear-gradient(180deg, rgba(26, 86, 50, 0.04) 0%, rgba(255,255,255,0) 100%);
+    }
+    .country-kpi-tile__cta {
+        display: inline-flex;
+        align-items: center;
+        margin-top: 0.65rem;
+        font-size: 0.78rem;
+        font-weight: 600;
+        color: #1A5632;
+        letter-spacing: 0.01em;
+    }
+    .country-kpi-tile--drilldown {
+        cursor: pointer;
+    }
+    .country-kpi-tile--drilldown:hover,
+    .country-kpi-tile--drilldown:focus {
+        outline: none;
+        transform: translateY(-2px);
+        box-shadow: 0 12px 28px rgba(26, 86, 50, 0.14);
+        border-color: rgba(26, 86, 50, 0.2);
+    }
+    .country-kpi-tile--drilldown:focus-visible {
+        box-shadow: 0 0 0 3px rgba(26, 86, 50, 0.25);
+    }
+    .country-kpi-modal__content {
+        border: none;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 20px 50px rgba(15, 23, 42, 0.2);
+    }
+    .country-kpi-modal__header {
+        background: linear-gradient(135deg, #1A5632 0%, #2d7a47 100%);
+        color: #fff;
+        border: none;
+        padding: 1.25rem 1.5rem;
+    }
+    .country-kpi-modal__header .close {
+        color: #fff;
+        opacity: 0.85;
+        text-shadow: none;
+    }
+    .country-kpi-modal__eyebrow {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        opacity: 0.85;
+        margin: 0;
+    }
+    .country-kpi-modal__header .modal-title {
+        color: #fff;
+        font-size: 1.25rem;
+    }
+    .country-kpi-modal__hero {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e2e8f0;
+    }
+    .country-kpi-modal__value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #9F2241;
+        line-height: 1.1;
+    }
+    .country-kpi-modal__unit {
+        font-size: 0.95rem;
+        color: #64748b;
+        margin-left: 0.35rem;
+    }
+    .country-kpi-modal__chart-wrap {
+        margin-bottom: 1rem;
+        padding: 0.5rem;
+        background: #f8fafc;
+        border-radius: 8px;
+        border: 1px solid #e2e8f0;
+    }
+    .country-kpi-modal__narration {
+        font-size: 0.95rem;
+        line-height: 1.65;
+        color: #334155;
+        margin-bottom: 1rem;
+        padding: 1rem;
+        background: #fffbeb;
+        border-left: 4px solid #B4A269;
+        border-radius: 0 8px 8px 0;
+    }
+    .country-kpi-modal__attribution {
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .country-kpi-modal__footer {
+        background: #f8fafc;
+        border-top: 1px solid #e2e8f0;
+    }
+    @media (max-width: 767px) {
+        .country-kpi-tile__value {
+            font-size: 1.35rem !important;
+        }
+    }
+</style>
 @endsection
 @section('content')      	
 <!-- ======================= Countries ======================== -->
@@ -81,71 +289,55 @@
     @endif
 
     @if(!empty($kpi_groups))
-    <div class="row justify-content-center mb-2">
+    <div class="row justify-content-center mb-2 country-kpi-section">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-            <div class="sec_title position-relative text-center mb-4">
+            <div class="sec_title position-relative text-center mb-4 mt-4">
                 <h2 class="ft-bold">Country indicators</h2>
-                <p class="text-muted mb-0">Latest published indicators for {{ $country->name }}, matched using ISO country codes.</p>
+                <p class="text-muted mb-0">Latest published indicators for {{ $country->name }}, matched using ISO country codes. Tap a card with <i class="fa fa-chevron-right" aria-hidden="true"></i> for trends, context, and source details.</p>
                 @include('common.owid_attribution')
             </div>
         </div>
 
         @foreach($kpi_groups as $group)
-        <div class="col-lg-12 mb-4">
-            <h4 class="ft-bold mb-3">{{ $group['subject_area_name'] }}</h4>
-            <div class="row">
-                @foreach($group['items'] as $kpi)
-                <div class="col-xl-4 col-lg-4 col-md-6 col-sm-12 mb-3">
-                    <div class="crp_box fl_color ovr_top h-100 p-3">
-                        <h6 class="mb-1">{{ $kpi->kpi_name }}</h6>
-                        <p class="color-red text-bold mb-1" style="font-size: 1.35rem;">
-                            {{ number_format((float) $kpi->kpi_value, 2) }}
-                            @if(!empty($kpi->unit_label))
-                                <span class="text-muted" style="font-size: 0.85rem;">{{ $kpi->unit_label }}</span>
-                            @endif
-                        </p>
-                        <small class="text-muted d-block mb-2">Latest period: {{ substr($kpi->period ?? '', 0, 4) }}</small>
-                        @if(!empty($kpi->narration))
-                            <p class="mb-2" style="font-size: 0.95rem;">{{ $kpi->narration }}</p>
-                        @endif
-                        @include('common.owid_attribution', ['chart' => $kpi, 'compact' => true])
-                    </div>
+        <div class="col-lg-12 mb-3">
+            <div class="country-kpi-subject">
+                <div class="country-kpi-subject__head">
+                    <h4 class="country-kpi-subject__title">{{ $group['subject_area_name'] }}</h4>
+                    <span class="country-kpi-subject__count">{{ count($group['items']) }} indicator{{ count($group['items']) === 1 ? '' : 's' }}</span>
                 </div>
-                @endforeach
+                <div class="row">
+                    @foreach($group['items'] as $kpi)
+                        @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
+                    @endforeach
+                </div>
             </div>
         </div>
         @endforeach
     </div>
+
     @elseif(count($kpis)>0)
-    {{-- Legacy flat layout fallback --}}
-    <div class="row justify-content-center mb-2">
+    {{-- Legacy flat layout with same tile treatment --}}
+    <div class="row justify-content-center mb-2 country-kpi-section">
         <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 mb-2">
-            <div class="sec_title position-relative text-center mb-5">
+            <div class="sec_title position-relative text-center mb-4 mt-4">
                 <h2 class="ft-bold">Country Statistics</h2>
                 @include('common.owid_attribution')
             </div>
         </div>
         <div class="col-lg-12 col-md-12 col-sm-12">
-            <div class="crp_box fl_color ovr_top">
-                <div class="row align-items-center">
-                @foreach($kpis as $kpi)
-                <div class="col-xl-3 col-lg-3 col-md-3 col-sm-12 mt-2">
-                        <div class="dro_140">
-                            <div class="dro_141 de">
-                                <img src="{{ asset('assets/img/common/stats.png')}}" style="max-width:35px;"/>
-                            </div>
-                            <div class="dro_142">
-                                <h6 style="font-size: 11pt!important;">{{$kpi->kpi_name}}</h6>
-                                <p class="color-red text-bold">{{ number_format($kpi->kpi_value,2)}}</p>
-                                @include('common.owid_attribution', ['chart' => $kpi, 'compact' => true])
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
+            <div class="country-kpi-subject">
+                <div class="row">
+                    @foreach($kpis as $kpi)
+                        @include('countries.partials.kpi_indicator_card', ['kpi' => $kpi])
+                    @endforeach
                 </div>
             </div>
         </div>
     </div>
+    @endif
+
+    @if((!empty($kpi_groups) || count($kpis) > 0) && !empty($kpi_chart_payload))
+        @include('countries.partials.kpi_drilldown_modal')
     @endif
 
     @if(count($publications)>0)
@@ -169,4 +361,215 @@
 <!-- ======================= Countries ======================== -->
 @endsection
 @section('scripts')
+@if((!empty($kpi_groups) || count($kpis ?? []) > 0) && !empty($kpi_chart_payload))
+<script src="{{ asset('assets/plugins/highcharts/highcharts.js') }}"></script>
+<script>
+(function () {
+    var kpiPayload = @json($kpi_chart_payload ?? []);
+    var auGreen = '{{ settings()->au_corporate_green ?? '#1A5632' }}';
+    var auRed = '{{ settings()->au_red ?? '#9F2241' }}';
+    var auGold = '{{ settings()->au_gold ?? '#B4A269' }}';
+    var owidSite = @json(owid_site_url());
+    var owidLicense = @json(owid_license_url());
+    var modalChart = null;
+
+    function formatValue(value) {
+        var n = Number(value);
+        if (!isFinite(n)) return '—';
+        var abs = Math.abs(n);
+        var decimals = abs >= 100 ? 0 : (abs >= 10 ? 1 : 2);
+        return n.toLocaleString(undefined, { minimumFractionDigits: decimals, maximumFractionDigits: decimals });
+    }
+
+    function sparklineOptions(kpiId) {
+        var data = kpiPayload[kpiId];
+        if (!data || !data.has_chart) return null;
+        return {
+            chart: {
+                backgroundColor: 'transparent',
+                margin: [4, 4, 4, 4],
+                height: 52,
+                spacing: [0, 0, 0, 0]
+            },
+            title: { text: null },
+            credits: { enabled: false },
+            legend: { enabled: false },
+            xAxis: {
+                categories: data.labels,
+                visible: false
+            },
+            yAxis: {
+                visible: false,
+                title: { text: null }
+            },
+            tooltip: {
+                outside: true,
+                shared: true,
+                headerFormat: '<span style="font-size:11px">{point.key}</span><br/>',
+                pointFormat: '<span style="color:{series.color}">\u25CF</span> {series.name}: <b>{point.y}</b><br/>'
+            },
+            series: [{
+                name: data.name,
+                data: data.values,
+                color: auGreen,
+                lineWidth: 2,
+                marker: { enabled: false, states: { hover: { enabled: true, radius: 3 } } }
+            }],
+            plotOptions: {
+                series: {
+                    animation: false,
+                    states: { hover: { lineWidthPlus: 0 } }
+                }
+            }
+        };
+    }
+
+    function renderSparklines() {
+        if (typeof Highcharts === 'undefined') return;
+        document.querySelectorAll('.kpi-sparkline').forEach(function (el) {
+            var kpiId = el.getAttribute('data-kpi-id');
+            var opts = sparklineOptions(kpiId);
+            if (opts) {
+                Highcharts.chart(el, opts);
+            }
+        });
+    }
+
+    function buildAttributionHtml(owidUrl) {
+        var explore = owidUrl || (owidSite + '/');
+        return 'Data from <a href="' + owidSite + '/" target="_blank" rel="noopener noreferrer">Our World in Data</a> ' +
+            '(<a href="' + owidLicense + '" target="_blank" rel="noopener noreferrer">CC BY 4.0</a>). ' +
+            '<a href="' + explore + '" target="_blank" rel="noopener noreferrer">View chart details</a>.';
+    }
+
+    function openKpiModal(kpiId, subjectName) {
+        var data = kpiPayload[kpiId];
+        if (!data) return;
+
+        document.getElementById('countryKpiModalSubject').textContent = subjectName || 'Country indicator';
+        document.getElementById('countryKpiModalLabel').textContent = data.name || '';
+        document.getElementById('countryKpiModalValue').textContent = formatValue(data.latest_value);
+        document.getElementById('countryKpiModalUnit').textContent = data.unit ? data.unit : '';
+        document.getElementById('countryKpiModalPeriod').textContent = data.latest_period
+            ? 'Latest period: ' + data.latest_period
+            : '';
+
+        var chartWrap = document.getElementById('countryKpiModalChartWrap');
+        if (data.has_chart && typeof Highcharts !== 'undefined') {
+            chartWrap.style.display = 'block';
+            if (modalChart) {
+                modalChart.destroy();
+                modalChart = null;
+            }
+            modalChart = Highcharts.chart('countryKpiModalChart', {
+                chart: { type: 'areaspline', height: 280 },
+                title: { text: null },
+                colors: [auGreen],
+                credits: {
+                    enabled: true,
+                    text: 'Data: Our World in Data (CC BY 4.0)',
+                    href: data.owid_chart_url || (owidSite + '/'),
+                    style: { fontSize: '11px', color: '#64748b' }
+                },
+                xAxis: {
+                    categories: data.labels,
+                    crosshair: true,
+                    labels: { style: { color: '#64748b' } }
+                },
+                yAxis: {
+                    title: { text: data.unit || 'Value' },
+                    gridLineColor: '#e2e8f0'
+                },
+                tooltip: {
+                    shared: true,
+                    valueDecimals: 2
+                },
+                plotOptions: {
+                    areaspline: {
+                        fillColor: {
+                            linearGradient: { x1: 0, y1: 0, x2: 0, y2: 1 },
+                            stops: [
+                                [0, Highcharts.color(auGreen).setOpacity(0.25).get('rgba')],
+                                [1, Highcharts.color(auGreen).setOpacity(0.02).get('rgba')]
+                            ]
+                        },
+                        marker: { radius: 3, fillColor: auRed }
+                    }
+                },
+                series: [{
+                    name: data.name,
+                    data: data.values
+                }]
+            });
+        } else {
+            chartWrap.style.display = 'none';
+            if (modalChart) {
+                modalChart.destroy();
+                modalChart = null;
+            }
+        }
+
+        var narrationEl = document.getElementById('countryKpiModalNarration');
+        if (data.narration) {
+            narrationEl.style.display = 'block';
+            narrationEl.textContent = data.narration;
+        } else {
+            narrationEl.style.display = 'none';
+            narrationEl.textContent = '';
+        }
+
+        document.getElementById('countryKpiModalAttribution').innerHTML = buildAttributionHtml(data.owid_chart_url);
+
+        var owidLink = document.getElementById('countryKpiModalOwidLink');
+        if (data.owid_chart_url) {
+            owidLink.href = data.owid_chart_url;
+            owidLink.style.display = 'inline-flex';
+        } else {
+            owidLink.style.display = 'none';
+        }
+
+        $('#countryKpiModal').modal('show');
+    }
+
+    function subjectForTrigger(trigger) {
+        var subject = trigger.closest('.country-kpi-subject');
+        if (!subject) return '';
+        var title = subject.querySelector('.country-kpi-subject__title');
+        return title ? title.textContent.trim() : '';
+    }
+
+    document.addEventListener('click', function (e) {
+        var trigger = e.target.closest('.kpi-drilldown-trigger');
+        if (!trigger) return;
+        var kpiId = trigger.getAttribute('data-kpi-id');
+        if (!kpiId) return;
+        openKpiModal(kpiId, subjectForTrigger(trigger));
+    });
+
+    document.addEventListener('keydown', function (e) {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        var trigger = e.target.closest('.kpi-drilldown-trigger');
+        if (!trigger) return;
+        e.preventDefault();
+        var kpiId = trigger.getAttribute('data-kpi-id');
+        if (kpiId) {
+            openKpiModal(kpiId, subjectForTrigger(trigger));
+        }
+    });
+
+    $('#countryKpiModal').on('hidden.bs.modal', function () {
+        if (modalChart) {
+            modalChart.destroy();
+            modalChart = null;
+        }
+    });
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', renderSparklines);
+    } else {
+        renderSparklines();
+    }
+})();
+</script>
+@endif
 @endsection

@@ -224,12 +224,21 @@ class OwidIndicatorSyncService
     /**
      * @return array{approved: int, already_published: int, missing: int, errors: array<int, string>, kpi_ids: array<int, int>}
      */
-    public function approveDefaultIndicators(?int $userId = null, ?callable $onProgress = null): array
+    public function approveDefaultIndicators(?int $userId = null, ?callable $onProgress = null, ?array $onlySlugs = null): array
     {
-        $slugs = array_values(array_unique(array_filter(
+        $configured = array_values(array_unique(array_filter(
             config('owid.default_published_chart_slugs', []),
             fn ($slug) => is_string($slug) && trim($slug) !== ''
         )));
+
+        $slugs = $configured;
+        if ($onlySlugs !== null) {
+            $allowed = array_flip($configured);
+            $slugs = array_values(array_filter(
+                array_unique(array_map('strval', $onlySlugs)),
+                fn ($slug) => isset($allowed[$slug])
+            ));
+        }
 
         $approved = 0;
         $alreadyPublished = 0;

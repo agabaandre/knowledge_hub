@@ -47,6 +47,7 @@ class ProcessKpiOwidActionJob implements ShouldQueue
                 'approve' => $this->runApprove($run, $sync, $runs),
                 'dedupe_indicators' => $this->runDedupeIndicators($run, $dedupe, $runs),
                 'dedupe_subject_areas' => $this->runDedupeSubjectAreas($run, $dedupe, $runs),
+                'bulk_approve' => $this->runBulkApprove($run, $sync, $runs),
                 default => throw new \RuntimeException('Unknown KPI task action: '.$run->action),
             };
         } catch (Throwable $e) {
@@ -154,11 +155,14 @@ class ProcessKpiOwidActionJob implements ShouldQueue
     {
         $userId = isset($run->payload['user_id']) ? (int) $run->payload['user_id'] : null;
         $withNarrations = (bool) ($run->payload['narrations'] ?? false);
+        $onlySlugs = isset($run->payload['slugs']) && is_array($run->payload['slugs'])
+            ? array_values(array_filter(array_map('strval', $run->payload['slugs'])))
+            : null;
 
         $result = $sync->approveDefaultIndicators($userId, function (int $current, int $totalSlugs, string $label) use ($run, $runs) {
             $progress = 5 + (int) round(($current / max(1, $totalSlugs)) * 90);
             $runs->updateProgress($run, $progress, $label);
-        });
+        }, $onlySlugs);
 
         if ($withNarrations) {
             foreach ($result['kpi_ids'] as $kpiId) {
@@ -166,9 +170,11 @@ class ProcessKpiOwidActionJob implements ShouldQueue
             }
         }
 
+        $selected = $onlySlugs ? count($onlySlugs) : count(config('owid.default_published_chart_slugs', []));
         $message = sprintf(
-            'Published %d recommended indicators (%d already live, %d not yet discovered).',
+            'Published %d of %d selected indicators (%d already live, %d not yet discovered).',
             $result['approved'],
+            $selected,
             $result['already_published'],
             $result['missing']
         );
@@ -237,6 +243,60 @@ class ProcessKpiOwidActionJob implements ShouldQueue
 
         $runs->complete($run, 'Indicator approved and country data synced from Our World in Data.', [
             'kpi_id' => $kpiId,
+        ]);
+    }
+
+    protected function runBulkApprove(KpiSyncRun $run, OwidIndicatorSyncService $sync, KpiSyncRunService $runs): void
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) ($run->payload['ids'] ?? [])))));
+        $userId = isset($run->payload['user_id']) ? (int) $run->payload['user_id'] : null;
+        $withNarrations = (bool) ($run->payload['narrations'] ?? true);
+        $total = max(1, count($ids));
+        $approved = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($ids as $index => $kpiId) {
+            $kpi = Kpi::query()->find($kpiId);
+            if (! $kpi) {
+                $skipped++;
+                continue;
+            }
+
+            $runs->updateProgress(
+                $run,
+                5 + (int) round((($index + 1) / $total) * 90),
+                'Publishing: '.$kpi->name
+            );
+
+            if ($kpi->status === 'published') {
+                $skipped++;
+                continue;
+            }
+
+            try {
+                $sync->approve($kpi, $userId);
+                $approved++;
+                if ($withNarrations) {
+                    GenerateKpiNarrationsJob::dispatch($kpiId);
+                }
+            } catch (\Throwable $e) {
+                $errors[] = $kpi->name.': '.$e->getMessage();
+            }
+        }
+
+        $message = sprintf('Published %d of %d selected indicator(s).', $approved, count($ids));
+        if ($skipped > 0) {
+            $message .= ' '.$skipped.' already published or missing.';
+        }
+        if (! empty($errors)) {
+            $message .= ' Notes: '.implode(' | ', array_slice($errors, 0, 3));
+        }
+
+        $runs->complete($run, $message, [
+            'approved' => $approved,
+            'skipped' => $skipped,
+            'errors' => $errors,
         ]);
     }
 

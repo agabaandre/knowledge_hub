@@ -98,11 +98,12 @@ On Docker, the `queue` service should be enabled. With `QUEUE_CONNECTION=sync` (
 |--------|----------------|
 | **Run fetch** | Searches OWID by subject area; new charts saved as **draft** |
 | **Refresh values** | Downloads latest CSV data for all **published** indicators |
-| **Publish recommended (22)** | Approves the curated default set from config and syncs values; optional AI summaries |
+| **Choose & publish (22)** | Opens a modal listing curated default indicators; uncheck any to skip, then publish selected and sync values; optional AI summaries |
 | **Run full refresh** | Fetch new indicators, then refresh all published values |
 | **Regenerate summaries** | Queues AI narration jobs for every published indicator |
-| **Publish** (per row) | Publishes one indicator and syncs its OWID data (queued) |
-| **Recall** (per row) | Hides indicator from public pages (`recalled` status) |
+| **Publish** (per row or bulk) | Publishes selected indicators on member state pages (queued for OWID sync) |
+| **Recall** (per row or bulk) | Hides indicators from public pages without deleting (`recalled` status) |
+| **Delete** (bulk) | Permanently removes selected indicators and their country values |
 | **Refresh** (sync icon) | Refreshes one OWID indicator’s country values (queued) |
 | **Country values** (table icon) | Opens `/admin/kpi/data?kpi_id=…` |
 | **Review duplicates** | Opens `/admin/kpi/duplicates` to inspect duplicate groups |

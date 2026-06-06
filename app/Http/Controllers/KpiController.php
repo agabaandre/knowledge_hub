@@ -25,14 +25,65 @@ class KpiController extends Controller
 
     public function index(Request $request)
     {
-        $request['rows'] = $request->rows ?? 20;
+        if ($request->ajax() && $request->boolean('datatable')) {
+            return response()->json($this->indicatorsRepo->adminIndicatorsDatatable($request));
+        }
+
         $data['search'] = (object) $request->all();
-        $data['indicators'] = $this->indicatorsRepo->get($request);
         $data['subject_areas'] = $this->indicatorsRepo->get_subject_areas();
         $data['kpi_stats'] = kpi_admin_stats();
-        $data['indicator_duplicate_groups'] = app(KpiDeduplicationService::class)->findIndicatorDuplicateGroups();
 
         return view('admin.kpi.index', $data);
+    }
+
+    public function bulkAction(Request $request)
+    {
+        $action = (string) $request->input('action');
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) $request->input('selected_ids', [])))));
+
+        if ($ids === []) {
+            return $this->bulkActionResponse($request, false, 'No indicators selected.');
+        }
+
+        switch ($action) {
+            case 'publish':
+                if (kpi_manual_data_only()) {
+                    $count = $this->indicatorsRepo->bulkPublishManual($ids, auth()->id());
+                    $message = sprintf('Published %d indicator(s) on member state pages.', $count);
+
+                    return $this->bulkActionResponse($request, true, $message);
+                }
+
+                return $this->queueTask($request, 'bulk_approve', [
+                    'ids' => $ids,
+                    'user_id' => auth()->id(),
+                    'narrations' => (bool) $request->boolean('narrations', true),
+                ], 'Publishing '.count($ids).' selected indicator(s)…');
+
+            case 'recall':
+                $count = $this->indicatorsRepo->bulkRecall($ids);
+                $message = sprintf('Recalled %d indicator(s) from member state pages.', $count);
+
+                return $this->bulkActionResponse($request, true, $message);
+
+            case 'delete':
+                $count = $this->indicatorsRepo->bulkDelete($ids);
+                $message = sprintf('Deleted %d indicator(s).', $count);
+
+                return $this->bulkActionResponse($request, true, $message);
+
+            default:
+                return $this->bulkActionResponse($request, false, 'Invalid bulk action.');
+        }
+    }
+
+    protected function bulkActionResponse(Request $request, bool $success, string $message)
+    {
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => $success, 'message' => $message], $success ? 200 : 422);
+        }
+
+        return back()->with($success ? 'alert-success' : 'alert-danger', $message);
     }
 
     public function save(Request $request)
@@ -231,8 +282,13 @@ class KpiController extends Controller
     {
         $kpi = Kpi::query()->findOrFail((int) $request->id);
         $sync->recall($kpi);
+        $message = 'Indicator recalled and hidden from public country pages.';
 
-        return back()->with('alert-success', 'Indicator recalled and hidden from public country pages.');
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json(['success' => true, 'message' => $message]);
+        }
+
+        return back()->with('alert-success', $message);
     }
 
     public function approveDefaults(Request $request)
@@ -241,10 +297,22 @@ class KpiController extends Controller
             return $this->rejectOwidImport($request);
         }
 
+        $slugs = array_values(array_filter(array_map('strval', (array) $request->input('slugs', []))));
+        if ($slugs === []) {
+            $message = 'Select at least one recommended indicator to publish.';
+
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json(['success' => false, 'message' => $message], 422);
+            }
+
+            return back()->with('alert-warning', $message);
+        }
+
         return $this->queueTask($request, 'approve_defaults', [
             'user_id' => auth()->id(),
             'narrations' => (bool) $request->boolean('narrations'),
-        ], 'Publishing recommended indicators…');
+            'slugs' => $slugs,
+        ], 'Publishing '.count($slugs).' selected indicator(s)…');
     }
 
     public function freshFetch(Request $request)

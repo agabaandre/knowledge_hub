@@ -68,6 +68,9 @@
                 clearInterval(pollTimer);
                 pollTimer = null;
             }
+            if (data.status === 'completed' && typeof reloadKpiIndicatorsTable === 'function') {
+                reloadKpiIndicatorsTable();
+            }
         }
     }
 
@@ -93,64 +96,75 @@
 
     window.startKpiTaskPoll = pollRun;
 
-    document.querySelectorAll('.js-kpi-queued-task').forEach(function (form) {
-        form.addEventListener('submit', function (event) {
-            event.preventDefault();
-            var confirmMessage = form.getAttribute('data-confirm');
-            if (confirmMessage && !window.confirm(confirmMessage)) {
-                return;
-            }
+    document.addEventListener('submit', function (event) {
+        var form = event.target;
+        if (!form || !form.matches || !form.matches('.js-kpi-queued-task')) {
+            return;
+        }
 
-            var submitBtn = form.querySelector('[type="submit"]');
-            if (submitBtn) {
-                submitBtn.disabled = true;
-            }
+        event.preventDefault();
+        var confirmMessage = form.getAttribute('data-confirm');
+        if (confirmMessage && !window.confirm(confirmMessage)) {
+            return;
+        }
 
-            fetch(form.action, {
-                method: 'POST',
-                body: new FormData(form),
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest'
-                }
-            })
-                .then(function (response) {
-                    return response.json().then(function (data) {
-                        return { ok: response.ok, data: data };
-                    });
-                })
-                .then(function (result) {
-                    if (!result.ok || !result.data.success) {
-                        setAlertType('danger');
-                        showProgressBox();
-                        document.getElementById('kpiTaskProgressTitle').textContent = 'Unable to start task';
-                        document.getElementById('kpiTaskProgressMessage').textContent = (result.data && result.data.message) ? result.data.message : 'Please try again.';
-                        if (submitBtn) submitBtn.disabled = false;
-                        return;
-                    }
-                    if (result.data.sync) {
-                        updateProgress({
-                            progress: 100,
-                            step: 'Complete',
-                            message: result.data.message || 'Done.',
-                            finished: true,
-                            status: 'completed',
-                            alert_type: 'success'
-                        });
-                        if (submitBtn) submitBtn.disabled = false;
-                        setTimeout(function () {
-                            window.location.reload();
-                        }, 1200);
-                        return;
-                    }
-                    pollRun(result.data.run_id);
-                    if (submitBtn) submitBtn.disabled = false;
-                })
-                .catch(function () {
-                    form.submit();
+        var submitBtn = form.querySelector('[type="submit"]');
+        if (submitBtn) {
+            submitBtn.disabled = true;
+        }
+
+        if (form.closest('.modal') && window.jQuery) {
+            window.jQuery(form.closest('.modal')).modal('hide');
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: new FormData(form),
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+            .then(function (response) {
+                return response.json().then(function (data) {
+                    return { ok: response.ok, data: data };
                 });
-        });
-    });
+            })
+            .then(function (result) {
+                if (!result.ok || !result.data.success) {
+                    setAlertType('danger');
+                    showProgressBox();
+                    document.getElementById('kpiTaskProgressTitle').textContent = 'Unable to start task';
+                    document.getElementById('kpiTaskProgressMessage').textContent = (result.data && result.data.message) ? result.data.message : 'Please try again.';
+                    if (submitBtn) submitBtn.disabled = false;
+                    return;
+                }
+                if (result.data.sync) {
+                    updateProgress({
+                        progress: 100,
+                        step: 'Complete',
+                        message: result.data.message || 'Done.',
+                        finished: true,
+                        status: 'completed',
+                        alert_type: 'success'
+                    });
+                    if (submitBtn) submitBtn.disabled = false;
+                    setTimeout(function () {
+                        if (typeof reloadKpiIndicatorsTable === 'function') {
+                            reloadKpiIndicatorsTable();
+                        } else {
+                            window.location.reload();
+                        }
+                    }, 1200);
+                    return;
+                }
+                pollRun(result.data.run_id);
+                if (submitBtn) submitBtn.disabled = false;
+            })
+            .catch(function () {
+                form.submit();
+            });
+    }, true);
 
     if (initialRunId) {
         pollRun(initialRunId);

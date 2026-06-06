@@ -473,6 +473,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/settings/save", [KpiController::class, 'saveSettings'])->middleware('permission:manage_kpis');
         Route::get("/owid/task/{id}", [KpiController::class, 'taskStatus'])->middleware('permission:manage_kpis');
         Route::post("/approve", [KpiController::class, 'approve'])->middleware('permission:manage_kpis');
+        Route::post("/bulk-action", [KpiController::class, 'bulkAction'])->middleware('permission:manage_kpis');
         Route::post("/recall", [KpiController::class, 'recall'])->middleware('permission:manage_kpis');
         Route::get("/get", [KpiController::class, 'get']);
         Route::get("/get_data", [KpiController::class, 'get_data']);

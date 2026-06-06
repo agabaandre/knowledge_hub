@@ -93,6 +93,46 @@ if (! function_exists('kpi_owid_auto_fetch_enabled')) {
     }
 }
 
+if (! function_exists('kpi_recommended_defaults_list')) {
+    /**
+     * Curated default indicators for the publish-recommended modal.
+     *
+     * @return array<int, array{slug: string, kpi_id: int|null, name: string, status: string, discovered: bool, url: string|null, subject_area: string|null}>
+     */
+    function kpi_recommended_defaults_list(): array
+    {
+        $slugs = array_values(array_unique(array_filter(
+            config('owid.default_published_chart_slugs', []),
+            fn ($slug) => is_string($slug) && trim($slug) !== ''
+        )));
+
+        if ($slugs === []) {
+            return [];
+        }
+
+        $kpis = \App\Models\Kpi::query()
+            ->with('subjectArea')
+            ->whereIn('owid_chart_slug', $slugs)
+            ->get()
+            ->keyBy('owid_chart_slug');
+
+        return collect($slugs)->map(function (string $slug) use ($kpis) {
+            $kpi = $kpis->get($slug);
+            $label = $kpi?->name ?? ucwords(str_replace('-', ' ', $slug));
+
+            return [
+                'slug' => $slug,
+                'kpi_id' => $kpi?->id,
+                'name' => $label,
+                'status' => $kpi?->status ?? 'missing',
+                'discovered' => $kpi !== null,
+                'url' => owid_chart_url($slug),
+                'subject_area' => $kpi?->subjectArea?->name,
+            ];
+        })->values()->all();
+    }
+}
+
 if (! function_exists('kpi_manual_data_only')) {
     function kpi_manual_data_only(): bool
     {

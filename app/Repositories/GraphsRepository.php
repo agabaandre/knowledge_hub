@@ -345,6 +345,41 @@ class GraphsRepository extends SharedRepo{
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
 	}
 
+    /**
+     * Historical KPI values per indicator for one member state (for sparklines / drill-down charts).
+     *
+     * @return array<int, array{labels: list<string>, values: list<float>}>
+     */
+    public function get_country_kpi_time_series(int $countryId, array $kpiIds, bool $publishedOnly = true): array
+    {
+        if ($countryId <= 0 || $kpiIds === []) {
+            return [];
+        }
+
+        $query = DB::table('kpi_data_view as kdv')
+            ->select(['kdv.kpi_id', 'kdv.period', 'kdv.kpi_value'])
+            ->where('kdv.country_id', $countryId)
+            ->whereIn('kdv.kpi_id', array_values(array_unique(array_map('intval', $kpiIds))))
+            ->orderBy('kdv.period');
+
+        if ($publishedOnly) {
+            $query->join('kpi', 'kpi.id', '=', 'kdv.kpi_id')
+                ->where('kpi.status', 'published');
+        }
+
+        $series = [];
+        foreach ($query->get() as $row) {
+            $kpiId = (int) $row->kpi_id;
+            if (! isset($series[$kpiId])) {
+                $series[$kpiId] = ['labels' => [], 'values' => []];
+            }
+            $series[$kpiId]['labels'][] = substr((string) $row->period, 0, 4);
+            $series[$kpiId]['values'][] = (float) $row->kpi_value;
+        }
+
+        return $series;
+    }
+
     public function group_country_kpis_by_subject(array $rows): array
     {
         $areaNames = SubjectArea::query()->pluck('name', 'id');

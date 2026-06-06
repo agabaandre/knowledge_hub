@@ -2,12 +2,14 @@
 
 namespace App\Repositories;
 
-use App\Models\Author;
 use App\Models\Kpi;
 use App\Models\KpiData;
 use App\Models\KpiDataRecord;
+use App\Models\KpiNarration;
 use App\Models\SubjectArea;
+use App\Services\Owid\OwidIndicatorSyncService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class IndicatorsRepository
 {
@@ -15,20 +17,30 @@ class IndicatorsRepository
     public function get(Request $request)
     {
         $rows_count = ($request->rows) ? $request->rows : 20;
+
+        return $this->buildAdminIndicatorsQuery($request)
+            ->orderBy('id', 'desc')
+            ->paginate($rows_count)
+            ->appends($request->all());
+    }
+
+    public function buildAdminIndicatorsQuery(Request $request)
+    {
         $kpis = Kpi::query()->with('subjectArea')->withCount(['dataRecords', 'narrations']);
 
-        if ($request->status) {
+        if ($request->filled('status')) {
             $kpis->where('status', $request->status);
         }
 
-        if ($request->source) {
+        if ($request->filled('source')) {
             $kpis->where('source', $request->source);
         }
-        
-        if ($request->term) {
-            $kpis->where(function($query) use ($request) {
-                $query->where('name', 'like', '%' . $request->term . '%')
-                      ->orWhere('description', 'like', '%' . $request->term . '%');
+
+        if ($request->filled('term')) {
+            $term = trim((string) $request->term);
+            $kpis->where(function ($query) use ($term) {
+                $query->where('name', 'like', '%'.$term.'%')
+                    ->orWhere('description', 'like', '%'.$term.'%');
             });
         }
 
@@ -41,9 +53,147 @@ class IndicatorsRepository
             $kpis->whereIn('id', $duplicateIds ?: [0]);
         }
 
-        $kpis->orderBy('id', 'desc');
-        
-        return $kpis->paginate($rows_count)->appends($request->all());
+        return $kpis;
+    }
+
+    public function adminIndicatorsDatatable(Request $request): array
+    {
+        $draw = (int) $request->input('draw', 1);
+        $start = max(0, (int) $request->input('start', 0));
+        $length = min(max(1, (int) $request->input('length', 20)), 100);
+
+        $base = $this->buildAdminIndicatorsQuery($request);
+        $recordsTotal = Kpi::query()->count();
+        $recordsFiltered = (clone $base)->count();
+
+        $orderColIndex = (int) $request->input('order.0.column', 2);
+        $orderDir = strtolower((string) $request->input('order.0.dir', 'desc')) === 'asc' ? 'asc' : 'desc';
+        $orderMap = [
+            1 => 'id',
+            2 => 'name',
+            3 => 'description',
+            4 => 'subject_area',
+            5 => 'frequency',
+            6 => 'status',
+        ];
+        $orderCol = $orderMap[$orderColIndex] ?? 'id';
+        $base->orderBy($orderCol, $orderDir);
+
+        $rows = $base->skip($start)->take($length)->get();
+        $manualOnly = function_exists('kpi_manual_data_only') && kpi_manual_data_only();
+
+        $data = [];
+        $index = $start + 1;
+
+        foreach ($rows as $row) {
+            $status = (string) ($row->status ?? 'draft');
+            $isPublished = $status === 'published';
+            $rowClass = $isPublished ? 'kpi-row-published' : ($status === 'recalled' ? 'kpi-row-recalled' : '');
+
+            $title = '<div class="kpi-cell-wrap"><strong>'.e($row->name ?? 'N/A').'</strong>';
+            if ($owidUrl = owid_chart_url($row)) {
+                $title .= '<br><a href="'.e($owidUrl).'" target="_blank" rel="noopener noreferrer" class="small">View on Our World in Data</a>';
+            }
+            $title .= '</div>';
+
+            $description = e(\Illuminate\Support\Str::limit(strip_tags((string) ($row->description ?? '')), 80));
+            $subjectArea = e($row->subjectArea?->name ?? 'N/A');
+            $frequency = '<span class="badge badge-info">'.e($row->frequency ?? 'N/A').'</span>';
+
+            $statusBadge = match ($status) {
+                'published' => 'success',
+                'recalled' => 'warning',
+                default => 'secondary',
+            };
+            $statusHtml = '<span class="badge badge-'.$statusBadge.'">'.e(ucfirst($status)).'</span>';
+            if (($row->source ?? '') === 'owid') {
+                $statusHtml .= ' <span class="badge badge-light border">OWID</span>';
+            }
+
+            $actions = '<div class="kpi-actions-group">';
+            if (! $isPublished) {
+                $actions .= '<button type="button" class="btn btn-sm btn-success kpi-publish-one" data-id="'.$row->id.'" title="Publish on member state pages"><i class="fa fa-check"></i></button>';
+            }
+            if ($isPublished) {
+                $actions .= '<button type="button" class="btn btn-sm btn-warning kpi-recall-one" data-id="'.$row->id.'" title="Recall from member state pages"><i class="fa fa-undo"></i></button>';
+            }
+            if (($row->source ?? '') === 'owid' && ! $manualOnly) {
+                $actions .= '<button type="button" class="btn btn-sm btn-outline-secondary kpi-sync-one" data-id="'.$row->id.'" title="Refresh OWID values"><i class="fa fa-sync"></i></button>';
+            }
+            $actions .= '<a href="'.url('admin/kpi/data?kpi_id='.$row->id).'" class="btn btn-sm btn-outline-info" title="Country values"><i class="fa fa-table"></i></a>';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-primary kpi-edit-one" data-id="'.$row->id.'" title="Edit"><i class="fa fa-edit"></i></button>';
+            $actions .= '<button type="button" class="btn btn-sm btn-outline-danger kpi-delete-one" data-id="'.$row->id.'" title="Delete"><i class="fa fa-trash"></i></button>';
+            $actions .= '</div>';
+
+            $data[] = [
+                'DT_RowClass' => trim($rowClass),
+                'checkbox' => '<input type="checkbox" name="selected_ids[]" value="'.$row->id.'" class="kpi-indicator-checkbox">',
+                'index' => '<span class="text-muted">'.$index++.'</span>',
+                'title' => $title,
+                'description' => '<div class="kpi-cell-wrap">'.$description.'</div>',
+                'subject_area' => '<div class="kpi-cell-wrap">'.$subjectArea.'</div>',
+                'frequency' => $frequency,
+                'status' => $statusHtml,
+                'values_count' => '<span class="text-muted">'.(int) ($row->data_records_count ?? 0).'</span>',
+                'actions' => $actions,
+            ];
+        }
+
+        return [
+            'draw' => $draw,
+            'recordsTotal' => $recordsTotal,
+            'recordsFiltered' => $recordsFiltered,
+            'data' => $data,
+        ];
+    }
+
+    public function bulkPublishManual(array $ids, ?int $userId = null): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return 0;
+        }
+
+        return Kpi::query()
+            ->whereIn('id', $ids)
+            ->where('status', '!=', 'published')
+            ->update([
+                'status' => 'published',
+                'approved_by' => $userId,
+                'approved_at' => now(),
+                'recalled_at' => null,
+            ]);
+    }
+
+    public function bulkRecall(array $ids, ?OwidIndicatorSyncService $sync = null): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return 0;
+        }
+
+        $sync = $sync ?? app(OwidIndicatorSyncService::class);
+        $count = 0;
+        foreach (Kpi::query()->whereIn('id', $ids)->where('status', 'published')->get() as $kpi) {
+            $sync->recall($kpi);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    public function bulkDelete(array $ids): int
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        if ($ids === []) {
+            return 0;
+        }
+
+        return DB::transaction(function () use ($ids) {
+            KpiDataRecord::query()->whereIn('kpi_id', $ids)->delete();
+            KpiNarration::query()->whereIn('kpi_id', $ids)->delete();
+            return Kpi::query()->whereIn('id', $ids)->delete();
+        });
     }
 
     public function save(Request $request)
@@ -188,7 +338,7 @@ class IndicatorsRepository
 
     public function delete($id)
     {
-        return Kpi::destroy($id);
+        return $this->bulkDelete([(int) $id]) > 0;
     }
 
 

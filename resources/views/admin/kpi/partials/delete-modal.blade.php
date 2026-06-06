@@ -29,11 +29,14 @@
 
         fetch(url)
             .then(res => res.text())
-            .then(res => {
-                console.log(res)
+            .then(() => {
                 $('#delete-modal').modal('hide');
-                window.location.reload();
-            })
+                if (typeof reloadKpiIndicatorsTable === 'function') {
+                    reloadKpiIndicatorsTable();
+                } else {
+                    window.location.reload();
+                }
+            });
     }
 
 

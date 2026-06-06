@@ -113,15 +113,10 @@
             <div class="col-lg-6 mb-3">
                 <div class="border rounded p-3 h-100">
                     <h6 class="mb-1"><i class="fa fa-check-circle text-info"></i> Publish recommended set</h6>
-                    <p class="text-muted small mb-2">Approve the curated default indicators and sync their country data.</p>
-                    <form method="POST" action="{{ url('admin/kpi/owid/approve-defaults') }}" class="js-kpi-queued-task" data-confirm="Publish the recommended indicator set?">
-                        @csrf
-                        <div class="form-check mb-2">
-                            <input type="checkbox" class="form-check-input" name="narrations" id="approve_defaults_narrations" value="1" checked>
-                            <label class="form-check-label small" for="approve_defaults_narrations">Also queue AI country summaries</label>
-                        </div>
-                        <button type="submit" class="btn btn-info btn-sm">Publish recommended ({{ $stats['default_set_size'] }})</button>
-                    </form>
+                    <p class="text-muted small mb-2">Review the curated default indicators, uncheck any you want to skip, then publish and sync country data.</p>
+                    <button type="button" class="btn btn-info btn-sm" data-toggle="modal" data-target="#approveDefaultsModal">
+                        Choose &amp; publish ({{ $stats['default_set_size'] }})
+                    </button>
                 </div>
             </div>
 
@@ -194,3 +189,7 @@
         @include('common.owid_attribution', ['compact' => true])
     </div>
 </div>
+
+@unless($manualOnly)
+    @include('admin.kpi.partials.approve_defaults_modal')
+@endunless
