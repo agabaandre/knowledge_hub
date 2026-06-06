@@ -454,6 +454,18 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
         Route::get("/", [KpiController::class, 'index'])->middleware('permission:manage_kpis');
         Route::get("/data", [KpiController::class, 'data'])->middleware('permission:manage_kpis');
+        Route::get("/subject-areas", [\App\Http\Controllers\KpiSubjectAreaController::class, 'index'])->middleware('permission:manage_kpis');
+        Route::post("/subject-areas/save", [\App\Http\Controllers\KpiSubjectAreaController::class, 'save'])->middleware('permission:manage_kpis');
+        Route::get("/subject-areas/get", [\App\Http\Controllers\KpiSubjectAreaController::class, 'get'])->middleware('permission:manage_kpis');
+        Route::get("/subject-areas/delete", [\App\Http\Controllers\KpiSubjectAreaController::class, 'destroy'])->middleware('permission:manage_kpis');
+        Route::post("/owid/discover", [KpiController::class, 'discoverOwid'])->middleware('permission:manage_kpis');
+        Route::post("/owid/sync", [KpiController::class, 'syncOwid'])->middleware('permission:manage_kpis');
+        Route::post("/owid/sync-one", [KpiController::class, 'syncOne'])->middleware('permission:manage_kpis');
+        Route::post("/owid/fresh-fetch", [KpiController::class, 'freshFetch'])->middleware('permission:manage_kpis');
+        Route::post("/owid/approve-defaults", [KpiController::class, 'approveDefaults'])->middleware('permission:manage_kpis');
+        Route::post("/owid/generate-narrations", [KpiController::class, 'generateNarrations'])->middleware('permission:manage_kpis');
+        Route::post("/approve", [KpiController::class, 'approve'])->middleware('permission:manage_kpis');
+        Route::post("/recall", [KpiController::class, 'recall'])->middleware('permission:manage_kpis');
         Route::get("/get", [KpiController::class, 'get']);
         Route::get("/get_data", [KpiController::class, 'get_data']);
         Route::post("/save", [KpiController::class, 'save'])->middleware('permission:manage_kpis');

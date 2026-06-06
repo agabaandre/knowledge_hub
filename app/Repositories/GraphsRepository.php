@@ -115,17 +115,22 @@ class GraphsRepository extends SharedRepo{
 		return $countries;
 	}
 
-	public function get_data_kpis($filter=[])
+	public function get_data_kpis($filter=[], $publishedOnly = false)
 	{
 		// Use a more efficient query to get KPI IDs that have data
-		$query = DB::table('kpi_data_view')
-			->select('kpi_id')
+		$query = DB::table('kpi_data_view as kdv')
+			->join('kpi', 'kpi.id', '=', 'kdv.kpi_id')
+			->select('kdv.kpi_id')
 			->distinct();
+
+		if ($publishedOnly) {
+			$query->where('kpi.status', 'published');
+		}
 
 		if(isset($filter['region_id'])){
 			$country_ids = $this->region_countries($filter['region_id']);
 			if(count($country_ids) > 0) {
-				$query->whereIn('country_id', $country_ids->toArray());
+				$query->whereIn('kdv.country_id', $country_ids->toArray());
 			}
 		}
 
@@ -135,11 +140,11 @@ class GraphsRepository extends SharedRepo{
 			$level = $user->access_level;
 			
 			if($level->level_name == "Country" && states_enabled()) {
-				$query->where('country_id', $user->country_id);
+				$query->where('kdv.country_id', $user->country_id);
 			} elseif($level->level_name == "RCC" && states_enabled()) {
 				// Get RCC countries directly
 				$rcc_countries = Country::where('region_id', $user->country->region_id)->pluck('id');
-				$query->whereIn('country_id', $rcc_countries);
+				$query->whereIn('kdv.country_id', $rcc_countries);
 			}
 		}
 
@@ -156,10 +161,14 @@ class GraphsRepository extends SharedRepo{
 		return $data->toArray();
 	}
 
-	public function get_kpis($filter = [], $only_ids=false)
+	public function get_kpis($filter = [], $only_ids=false, $publishedOnly = false)
 	{
 
-		$query = Kpi::whereIn('id',$this->get_data_kpis($filter));
+		$query = Kpi::whereIn('id',$this->get_data_kpis($filter, $publishedOnly));
+
+		if ($publishedOnly) {
+			$query->where('status', 'published');
+		}
 
 		if(!empty($filter)) {
 			foreach ($filter as $key => $value) {
@@ -268,15 +277,17 @@ class GraphsRepository extends SharedRepo{
 	}
 
 	//get country kpi performance
-	public function get_country_kpis($filter = [], $get_row = false)
+	public function get_country_kpis($filter = [], $get_row = false, $publishedOnly = true)
 	{
 
-		$kpi_ids = $this->get_kpis($filter,true);
+		$kpi_ids = $this->get_kpis($filter, true, $publishedOnly);
 
 		if(count($kpi_ids) == 0)
 			return [];
 
         $query = DB::table('kpi_data_view as kdv1')
+         ->join('kpi', 'kpi.id', '=', 'kdv1.kpi_id')
+         ->when($publishedOnly, fn ($q) => $q->where('kpi.status', 'published'))
          ->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
              return $query->whereIn('kdv1.kpi_id',$kpi_ids->toArray());
          });
@@ -316,7 +327,11 @@ class GraphsRepository extends SharedRepo{
 			'kdv1.period',
 			'kdv1.kpi_value',
 			'kdv1.kpi_id',
-			'kdv1.country_id'
+			'kdv1.country_id',
+			'kdv1.subject_area_id',
+			'kdv1.unit_label',
+			'kdv1.owid_url',
+			'kdv1.owid_chart_slug',
 		])
 		->whereRaw('kdv1.period = (
 			SELECT MAX(kdv2.period) 
@@ -329,6 +344,29 @@ class GraphsRepository extends SharedRepo{
        
 		return ($get_row) ? $results->toArray()[0] : $results->toArray();
 	}
+
+    public function group_country_kpis_by_subject(array $rows): array
+    {
+        $areaNames = SubjectArea::query()->pluck('name', 'id');
+        $groups = [];
+
+        foreach ($rows as $row) {
+            $item = is_array($row) ? (object) $row : $row;
+            $subjectId = (int) ($item->subject_area_id ?? 0);
+            if (! isset($groups[$subjectId])) {
+                $groups[$subjectId] = [
+                    'subject_area_id' => $subjectId,
+                    'subject_area_name' => $areaNames[$subjectId] ?? 'Other indicators',
+                    'items' => [],
+                ];
+            }
+            $groups[$subjectId]['items'][] = $item;
+        }
+
+        uasort($groups, fn ($a, $b) => strcmp($a['subject_area_name'], $b['subject_area_name']));
+
+        return array_values($groups);
+    }
 
 	// Optimized method to get country KPIs with previous year data in a single query
 	public function get_country_kpis_with_previous_year($filter = [], $current_year = null)
@@ -348,6 +386,7 @@ class GraphsRepository extends SharedRepo{
 		$current_filter['period_year'] = $current_year;
 		
 		$current_query = DB::table('kpi_data_view as kdv1')
+			->join('kpi', 'kpi.id', '=', 'kdv1.kpi_id')
 			->when(count($kpi_ids) > 0, function ($query) use($kpi_ids){
 				return $query->whereIn('kdv1.kpi_id',$kpi_ids->toArray());
 			});
@@ -377,7 +416,9 @@ class GraphsRepository extends SharedRepo{
 			'kdv1.period',
 			'kdv1.kpi_value',
 			'kdv1.kpi_id',
-			'kdv1.country_id'
+			'kdv1.country_id',
+			'kpi.owid_url',
+			'kpi.owid_chart_slug',
 		])
 		->whereRaw('kdv1.period = (
 			SELECT MAX(kdv2.period) 

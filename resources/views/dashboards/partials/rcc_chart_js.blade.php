@@ -56,9 +56,7 @@
             title: {
                 text: 'Indicator Analysis'
             },
-            subtitle: {
-                text: 'Source: Africa CDC'
-            },
+            @include('common.owid_chart_credits')
             yAxis: {
                 title: {
                     text: 'Indicator Value'
@@ -71,9 +69,6 @@
                 layout: 'vertical',
                 align: 'right',
                 verticalAlign: 'middle'
-            },
-            credits: {
-            enabled: false
             },
             exporting: {
                   buttons: {

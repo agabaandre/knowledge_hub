@@ -44,8 +44,8 @@ class Kernel extends ConsoleKernel
             $day = max(1, min(28, $day));
             $schedule->command('profiles:remind-incomplete')->monthlyOn($day, '09:00');
         }
-        // Cache forum and community counts every 5 minutes for menu badges
-        $schedule->command('cache:forum-community-counts')->everyFiveMinutes();
+        // Refresh published OWID indicator values weekly (ISO3-matched member states)
+        $schedule->command('kpi:sync-owid --sync --published-only')->weeklyOn(0, '04:30');
         // Clean up PDF chat sessions older than 7 days (when enabled in admin settings)
         if (settings()->enable_ai_chat_prune ?? true) {
             $schedule->command('pdf-chat:prune --days=7')->dailyAt('03:30');

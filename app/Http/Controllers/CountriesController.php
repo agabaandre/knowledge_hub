@@ -11,6 +11,7 @@ use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
 use App\Repositories\ThemesRepository;
 use Illuminate\Http\Request;
+use App\Models\KpiNarration;
 
 class CountriesController extends Controller
 {
@@ -77,7 +78,23 @@ class CountriesController extends Controller
         $request['area'] = $countryId;
         $request['state'] = $countryId;
 		$data['publications']   = $this->publicationsRepo->getLightweight($request);
-        $data['kpis'] = $this->dashRepo->get_country_kpis(['country_id' => $countryId]);
+        $data['kpis'] = $this->dashRepo->get_country_kpis(['country_id' => $countryId], false, true);
+        $data['kpi_groups'] = $this->dashRepo->group_country_kpis_by_subject($data['kpis']);
+
+        $narrationMap = KpiNarration::query()
+            ->where('country_id', $countryId)
+            ->whereIn('kpi_id', collect($data['kpis'])->pluck('kpi_id'))
+            ->get()
+            ->keyBy(fn ($n) => $n->kpi_id.'|'.$n->period);
+
+        foreach ($data['kpi_groups'] as &$group) {
+            foreach ($group['items'] as &$item) {
+                $key = ($item->kpi_id ?? '').'|'.($item->period ?? '');
+                $item->narration = $narrationMap[$key]->narration ?? null;
+            }
+        }
+        unset($group, $item);
+
         $data['engagement_stats'] = $countryId > 0
             ? $this->areasRepo->memberStateEngagementStats($countryId)
             : [

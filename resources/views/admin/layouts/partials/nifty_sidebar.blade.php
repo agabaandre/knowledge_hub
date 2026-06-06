@@ -26,8 +26,9 @@
                 <li class="nav-item has-sub">
                     <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-kpis"><i class="fa fa-chart-bar fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.kpis') }}</span></a>
                     <ul class="mininav-content nav collapse" id="nav-kpis">
-                        <li class="nav-item"><a href="{{ url('admin/kpi') }}" class="nav-link">{{ __('admin_nav.add_indicator') }}</a></li>
-                        <li class="nav-item"><a href="{{ url('admin/kpi/data') }}" class="nav-link">{{ __('admin_nav.indicator_data') }}</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi') }}" class="nav-link">Manage indicators</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi/subject-areas') }}" class="nav-link">Subject areas</a></li>
+                        <li class="nav-item"><a href="{{ url('admin/kpi/data') }}" class="nav-link">Country values</a></li>
                     </ul>
                 </li>
                 @endcan

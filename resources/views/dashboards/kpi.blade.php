@@ -48,6 +48,7 @@
             </div>
             <div class="card-body">
                 <div id="countries_summary" style="width: 100%; height: 350px;"></div>
+                @include('common.owid_attribution')
             </div>
         </div>
     </div>
@@ -66,6 +67,18 @@
     var seriesData = null;
     var reRender = false;
     var chart = null;
+    var owidChartUrls = @json(collect($kpis)->mapWithKeys(function ($kpi) {
+        return [(string) $kpi->id => owid_chart_url($kpi) ?: owid_site_url().'/'];
+    }));
+
+    function selectedOwidChartUrl() {
+        var kpiId = $('select[name="kpi_id"]').val();
+        if (kpiId && owidChartUrls[kpiId]) {
+            return owidChartUrls[kpiId];
+        }
+
+        return '{{ owid_site_url() }}/';
+    }
 
     function switchChartType(type) {
         //var ui_chart = $('#countries_summary').highcharts();
@@ -111,9 +124,7 @@
             title: {
                 text: 'KPI Analysis'
             },
-            subtitle: {
-                text: 'Source: Africa CDC'
-            },
+            @include('common.owid_chart_credits')
             yAxis: {
                 title: {
                     text: 'KPI Value'
@@ -141,6 +152,12 @@
                         }
                     }
                 }]
+            }
+        });
+
+        chart.update({
+            credits: {
+                href: selectedOwidChartUrl()
             }
         });
     }

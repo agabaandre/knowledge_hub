@@ -16,6 +16,14 @@ class IndicatorsRepository
     {
         $rows_count = ($request->rows) ? $request->rows : 20;
         $kpis = Kpi::with('subjectArea');
+
+        if ($request->status) {
+            $kpis->where('status', $request->status);
+        }
+
+        if ($request->source) {
+            $kpis->where('source', $request->source);
+        }
         
         if ($request->term) {
             $kpis->where(function($query) use ($request) {

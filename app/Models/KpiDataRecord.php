@@ -9,12 +9,21 @@ use App\Models\Country;
 class KpiDataRecord extends Model
 {
     use HasFactory;
-    protected $table ="data";
+
+    protected $table = 'data';
+
     public $timestamps = false;
+
+    protected $fillable = [
+        'kpi_id',
+        'country_id',
+        'value',
+        'period',
+        'data_source',
+    ];
 
     public function country()
     {
         return $this->belongsTo(Country::class);
     }
-    
 }

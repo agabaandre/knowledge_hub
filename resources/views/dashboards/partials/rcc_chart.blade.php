@@ -93,6 +93,7 @@ $valid_data++;
         <div id="countries_summary<?php echo  $widget_data['subject_area_id']; ?>" style="width: 100%; height: 350px; display:flex; justify-content:center; align-items:center;">
          <h1 class="text-muted">Loading  Graph...</h1>
         </div>
+        @include('common.owid_attribution')
     </div>
 </div>
 

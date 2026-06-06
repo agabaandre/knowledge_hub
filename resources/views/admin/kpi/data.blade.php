@@ -21,6 +21,8 @@
         </div>
     </div>
 
+    @include('admin.kpi.partials.data_management_panel', ['show_create' => false])
+
     <div class="row">
         <!-- Filters Card -->
         <div class="col-md-12">
@@ -92,9 +94,14 @@
                     @if(session('alert-success'))
                         <div class="alert alert-success">{{ session('alert-success') }}</div>
                     @endif
+                    @if(session('alert-warning'))
+                        <div class="alert alert-warning">{{ session('alert-warning') }}</div>
+                    @endif
                     @if(session('alert-danger'))
                         <div class="alert alert-danger">{{ session('alert-danger') }}</div>
                     @endif
+
+                    @include('common.owid_attribution')
 
                     <!-- Indicator Data Table -->
                     <div class="table-responsive">

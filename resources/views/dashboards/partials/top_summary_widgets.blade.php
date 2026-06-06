@@ -9,6 +9,7 @@
                 <span class="text-primary" style="font-size:13px;"><?php echo $row->kpi_name; ?></span>
                 <br>
                 <small class="mb-3 mt-3 text-muted">Current (<?php echo $year; ?>) Vs Previous year (<?php echo $year-1; ?>)</small>
+                @include('common.owid_attribution', ['chart' => $row, 'compact' => true])
             </div>
            
             <div class="card-footer theme-gold text-white" style="padding: 5px!important; margin:0px!important; background-color:#b4a269;">

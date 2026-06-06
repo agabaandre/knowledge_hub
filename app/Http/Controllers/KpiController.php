@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\GenerateKpiNarrationsJob;
 use App\Models\Country;
+use App\Models\Kpi;
+use App\Models\KpiNarration;
+use App\Services\Owid\OwidIndicatorSyncService;
 use Illuminate\Http\Request;
 use App\Repositories\IndicatorsRepository;
 
@@ -25,6 +29,7 @@ class KpiController extends Controller
         $subject_areas = $this->indicatorsRepo->get_subject_areas();
 
         $data['subject_areas'] = $subject_areas;
+        $data['kpi_stats'] = kpi_admin_stats();
 
         return view('admin.kpi.index', $data);
     }
@@ -61,6 +66,7 @@ class KpiController extends Controller
         $data['kpis']      = $this->indicatorsRepo->get_kpis();
         $data['countries'] = Country::where('national','National')->get();
         $data['kpi_data']  = $this->indicatorsRepo->get_kpi_data($request);
+        $data['kpi_stats'] = kpi_admin_stats();
 
         return view('admin.kpi.data', $data);
     }
@@ -163,5 +169,127 @@ class KpiController extends Controller
         $id = $request->id;
         $this->indicatorsRepo->delete($id);
         return true;
+    }
+
+    public function discoverOwid(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $result = $sync->discoverIndicators($request->filled('subject_area_id') ? (int) $request->subject_area_id : null);
+
+        $message = sprintf(
+            'Discovered %d OWID indicators across %d subject areas (%d skipped as duplicates).',
+            $result['discovered'],
+            $result['subject_areas'],
+            $result['skipped']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Warnings: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+    }
+
+    public function syncOwid(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $result = $sync->syncIndicatorData(
+            $request->filled('kpi_id') ? (int) $request->kpi_id : null,
+            (bool) $request->boolean('published_only')
+        );
+
+        $message = sprintf('Synced %d indicators (%d country values).', $result['indicators'], $result['rows']);
+        if (! empty($result['errors'])) {
+            $message .= ' Errors: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+    }
+
+    public function approve(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $kpi = Kpi::query()->findOrFail((int) $request->id);
+        $sync->approve($kpi, auth()->id());
+        GenerateKpiNarrationsJob::dispatch($kpi->id);
+
+        return back()->with('alert-success', 'Indicator approved and data synced from Our World in Data.');
+    }
+
+    public function recall(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $kpi = Kpi::query()->findOrFail((int) $request->id);
+        $sync->recall($kpi);
+
+        return back()->with('alert-success', 'Indicator recalled and hidden from public country pages.');
+    }
+
+    public function approveDefaults(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $result = $sync->approveDefaultIndicators(auth()->id());
+
+        if ($request->boolean('narrations')) {
+            foreach ($result['kpi_ids'] as $kpiId) {
+                GenerateKpiNarrationsJob::dispatch($kpiId);
+            }
+        }
+
+        $message = sprintf(
+            'Published %d recommended indicators (%d were already live, %d not yet discovered).',
+            $result['approved'],
+            $result['already_published'],
+            $result['missing']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' Notes: '.implode(' | ', array_slice($result['errors'], 0, 3));
+        }
+
+        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
+    }
+
+    public function freshFetch(OwidIndicatorSyncService $sync)
+    {
+        $discover = $sync->discoverIndicators();
+        $syncResult = $sync->syncIndicatorData(null, true);
+
+        $message = sprintf(
+            'Full refresh complete. Fetched %d new indicators; refreshed %d published indicators (%d country values updated).',
+            $discover['discovered'],
+            $syncResult['indicators'],
+            $syncResult['rows']
+        );
+
+        $errors = array_merge($discover['errors'] ?? [], $syncResult['errors']);
+        if (! empty($errors)) {
+            $message .= ' Notes: '.implode(' | ', array_slice($errors, 0, 3));
+        }
+
+        return back()->with(empty($errors) ? 'alert-success' : 'alert-warning', $message);
+    }
+
+    public function generateNarrations()
+    {
+        $kpiIds = Kpi::query()->where('status', 'published')->pluck('id');
+        foreach ($kpiIds as $kpiId) {
+            GenerateKpiNarrationsJob::dispatch((int) $kpiId);
+        }
+
+        return back()->with(
+            'alert-success',
+            sprintf('Queued AI summary generation for %d published indicators.', $kpiIds->count())
+        );
+    }
+
+    public function syncOne(Request $request, OwidIndicatorSyncService $sync)
+    {
+        $kpi = Kpi::query()->findOrFail((int) $request->id);
+        $result = $sync->syncIndicatorData($kpi->id);
+
+        $message = sprintf(
+            'Refreshed "%s" with %d country values.',
+            $kpi->name,
+            $result['rows']
+        );
+        if (! empty($result['errors'])) {
+            $message .= ' '.$result['errors'][0];
+        }
+
+        return back()->with(empty($result['errors']) ? 'alert-success' : 'alert-warning', $message);
     }
 }
