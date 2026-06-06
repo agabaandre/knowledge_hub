@@ -31,6 +31,7 @@
     if ($pageDescription === '') {
         $by = clean_unicode(optional($publication->author)->name ?? '');
         $fallbackBits = array_filter([
+            trim(clean_unicode($publication->author_affiliation ?? '')) ?: null,
             $categoryName ?: null,
             $subThemeDesc ?: null,
             $publication->year_published ? 'Year '.$publication->year_published : null,
@@ -164,37 +165,15 @@
         $scholarlyArticle['isPartOf'] = $isPartOf;
     }
 
-    $breadcrumbList = [
-        '@context' => 'https://schema.org',
-        '@type' => 'BreadcrumbList',
-        'itemListElement' => [
-            [
-                '@type' => 'ListItem',
-                'position' => 1,
-                'name' => 'Home',
-                'item' => url('/'),
-            ],
-            [
-                '@type' => 'ListItem',
-                'position' => 2,
-                'name' => 'Resources',
-                'item' => url('records'),
-            ],
-            [
-                '@type' => 'ListItem',
-                'position' => 3,
-                'name' => Str::limit($pubTitle, 70),
-                'item' => $canonicalUrl,
-            ],
-        ],
-    ];
-
+    $publicationJsonLd = \App\Support\PublicationSeo::structuredDataGraph(
+        $publication,
+        $related_publications ?? null
+    );
     $jsonLdFlags = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 @endphp
 
 @section('structured_data')
-<script type="application/ld+json">{!! json_encode($scholarlyArticle, $jsonLdFlags) !!}</script>
-<script type="application/ld+json">{!! json_encode($breadcrumbList, $jsonLdFlags) !!}</script>
+<script type="application/ld+json">{!! json_encode($publicationJsonLd, $jsonLdFlags) !!}</script>
 @endsection
 
 @section('styles')
@@ -534,6 +513,13 @@
 
 <section class="py-4">
     <div class="container">
+        <nav class="mb-3" aria-label="Breadcrumb">
+            <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
+                <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
+                <li class="breadcrumb-item"><a href="{{ url('records/search') }}">Browse resources</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ Str::limit($pubTitle, 80) }}</li>
+            </ol>
+        </nav>
         <div class="row">
             <!-- Left Column: Title/Info Card and Description -->
             <div class="col-lg-8">
@@ -677,8 +663,11 @@
                                 @endif
                             </div>
                             
-                            {{-- Associated Authors and Affiliation/Source --}}
-                            @if(!empty($publication->associated_authors) || $publication->author)
+                            {{-- Associated Authors, affiliation, and contributing source --}}
+                            @php
+                                $authorAffiliation = trim(clean_unicode($publication->author_affiliation ?? ''));
+                            @endphp
+                            @if(!empty($publication->associated_authors) || $authorAffiliation !== '' || $publication->author)
                             <div class="mb-3" style="font-size: 0.95rem;">
                                 @if(!empty($publication->associated_authors))
                                 <div class="mb-2">
@@ -686,17 +675,23 @@
                                     <span style="color: #0f172a;">{{ clean_unicode($publication->associated_authors) }}</span>
                                 </div>
                                 @endif
+                                @if($authorAffiliation !== '')
+                                <div class="mb-2">
+                                    <strong style="color: #5F5F5F;">Author Affiliation/Institution:</strong>
+                                    <span style="color: #0f172a;">{{ $authorAffiliation }}</span>
+                                </div>
+                                @endif
                                 @if($publication->author)
                                 <div class="mb-2">
                                     <strong style="color: #5F5F5F;">Affiliation/Source:</strong>
                                     <span style="color: #0f172a;">
-                                        @if(!empty($publication->author->orcid))
-                                            <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ clean_unicode($publication->author->name) }}'s ORCID profile" style="color: #0f172a; text-decoration: none;">
-                                                {{ clean_unicode($publication->author->name) }}
-                                                <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i>
-                                            </a>
-                                        @else
+                                        <a href="{{ author_publications_url($publication->author) }}" title="View contributor profile for {{ clean_unicode($publication->author->name) }}" style="color: #0f172a; text-decoration: none;">
                                             {{ clean_unicode($publication->author->name) }}
+                                        </a>
+                                        @if(!empty($publication->author->orcid))
+                                            <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile" class="ms-1" style="color: #64748b;">
+                                                <i class="fa fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                                            </a>
                                         @endif
                                     </span>
                                 </div>

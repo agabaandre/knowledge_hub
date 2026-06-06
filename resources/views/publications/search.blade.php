@@ -2,78 +2,14 @@
     $pageTitle = $pageTitle ?? ('Search Resources & Discussions - ' . (settings()->site_name ?? 'Africa CDC Knowledge Hub'));
     $pageDescription = $pageDescription ?? 'Search publications, resources and discussion forums. Find public health content and join discussions across Africa.';
     $canonicalUrl = $canonicalUrl ?? url('records/search');
+    $jsonLdFlags = $jsonLdFlags ?? (JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE);
 @endphp
 @extends('layouts.app')
 
 @section('structured_data')
-<script type="application/ld+json">
-{
-    "@context": "https://schema.org",
-    "@type": "SearchResultsPage",
-    "name": "{{ addslashes($pageTitle) }}",
-    "description": "{{ addslashes(strip_tags($pageDescription)) }}",
-    "url": "{{ $canonicalUrl }}",
-    "mainEntity": {
-        "@type": "ItemList",
-        "numberOfItems": {{ $results_count ?? 0 }},
-        "itemListElement": [
-            @if(isset($publications) && $publications->count() > 0)
-                @foreach($publications->take(10) as $index => $pub)
-                {
-                    "@type": "ListItem",
-                    "position": {{ $index + 1 }},
-                    "item": {
-                        "@type": "Article",
-                        "name": "{{ addslashes(Str::limit(strip_tags($pub->title ?? ''), 100)) }}",
-                        "url": "{{ publication_url($pub) }}",
-                        "description": "{{ addslashes(Str::limit(strip_tags($pub->description ?? ''), 200)) }}"
-                    }
-                }@if(!$loop->last || (isset($searchForums) && $searchForums->count() > 0) || (isset($searchCommunities) && $searchCommunities->count() > 0)),@endif
-                @endforeach
-            @endif
-            @if(isset($searchForums) && $searchForums->count() > 0)
-                @foreach($searchForums as $index => $forum)
-                {
-                    "@type": "ListItem",
-                    "position": {{ (isset($publications) && $publications->count() > 0 ? min(10, $publications->count()) : 0) + $index + 1 }},
-                    "item": {
-                        "@type": "DiscussionForumPosting",
-                        "name": "{{ addslashes(Str::limit(strip_tags($forum->forum_title ?? ''), 100)) }}",
-                        "url": "{{ forum_thread_url($forum) }}",
-                        "description": "{{ addslashes(Str::limit(strip_tags($forum->forum_description ?? ''), 200)) }}",
-                        "author": {
-                            "@type": "Person",
-                            "name": "{{ addslashes($forum->user->name ?? 'Anonymous') }}"
-                        }
-                    }
-                }@if(!$loop->last || (isset($searchCommunities) && $searchCommunities->count() > 0)),@endif
-                @endforeach
-            @endif
-            @if(isset($searchCommunities) && $searchCommunities->count() > 0)
-                @foreach($searchCommunities as $index => $community)
-                {
-                    "@type": "ListItem",
-                    "position": {{ (isset($publications) && $publications->count() > 0 ? min(10, $publications->count()) : 0) + (isset($searchForums) ? $searchForums->count() : 0) + $index + 1 }},
-                    "item": {
-                        "@type": "Organization",
-                        "name": "{{ addslashes(Str::limit($community->community_name ?? '', 100)) }}",
-                        "url": "{{ community_detail_url($community) }}",
-                        "description": "{{ addslashes(Str::limit(strip_tags($community->description ?? ''), 200)) }}"
-                    }
-                }@if(!$loop->last),@endif
-                @endforeach
-            @endif
-        ]
-    },
-    "breadcrumb": {
-        "@type": "BreadcrumbList",
-        "itemListElement": [
-            { "@type": "ListItem", "position": 1, "name": "Home", "item": "{{ url('/') }}" },
-            { "@type": "ListItem", "position": 2, "name": "Search", "item": "{{ $canonicalUrl }}" }
-        ]
-    }
-}
-</script>
+@if(!empty($searchJsonLd))
+<script type="application/ld+json">{!! json_encode($searchJsonLd, $jsonLdFlags) !!}</script>
+@endif
 @endsection
 
 @section('styles')
@@ -82,6 +18,13 @@
 @section('content')
     <div class="gray py-4">
         <div class="container">
+            <nav class="mb-3" aria-label="Breadcrumb">
+                <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
+                    <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Browse resources</li>
+                </ol>
+            </nav>
+
             <div class="row">
                 <div class="col-lg-8">
                     <div id="records-search-main" class="records-search-main position-relative">
@@ -200,6 +143,21 @@
                 });
             }
 
+            function updateStructuredData(data) {
+                if (!data.structured_data) {
+                    return;
+                }
+                var existing = document.getElementById('records-search-jsonld');
+                if (existing) {
+                    existing.remove();
+                }
+                var script = document.createElement('script');
+                script.type = 'application/ld+json';
+                script.id = 'records-search-jsonld';
+                script.textContent = JSON.stringify(data.structured_data);
+                document.head.appendChild(script);
+            }
+
             function getMultiParam(params, base) {
                 var bracketed = params.getAll(base + '[]');
                 if (bracketed.length) {
@@ -315,6 +273,7 @@
                         if (twU && data.canonical_url) {
                             twU.setAttribute('content', data.canonical_url);
                         }
+                        updateStructuredData(data);
                         if (push) {
                             history.pushState({ recordsSearchAjax: 1 }, '', u.pathname + (qs ? '?' + qs : ''));
                         }

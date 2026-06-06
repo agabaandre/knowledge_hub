@@ -58,6 +58,8 @@ class SeoDefaults
             $path === '' => self::homeBody($site),
             $path === 'courses' => "Browse online courses on public health, leadership, and technical skills on {$site}. Enrol and learn at your own pace.",
             str_starts_with($path, 'courses/details') => "Course information, syllabus, ratings, and enrolment options on {$site}.",
+            str_starts_with($path, 'records/search') => "Browse and search public health publications, reports, forums, and communities on {$site}. Filter by theme, country, author, or file type.",
+            str_starts_with($path, 'records/resource') => "Public health publication or resource on {$site}.",
             str_starts_with($path, 'records') => "Search publications, communities, and forums on {$site}. Filter by theme, country, author, type, or keywords.",
             str_starts_with($path, 'faqs') => "Frequently asked questions about using {$site}, accounts, submissions, and support.",
             str_starts_with($path, 'tools') => "Data tools and viewers available on {$site} for exploration and analysis.",

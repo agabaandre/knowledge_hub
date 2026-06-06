@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Tag;
 use App\Support\ContributorsSeo;
+use App\Support\PublicationSeo;
+use App\Support\RecordsSearchSeo;
 use App\Repositories\AuthorsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Repositories\QuotesRepository;
@@ -219,6 +221,7 @@ class PublicationsController extends Controller
             'page_title' => $data['pageTitle'],
             'meta_description' => strip_tags($data['pageDescription']),
             'canonical_url' => $data['canonicalUrl'],
+            'structured_data' => $data['searchJsonLd'] ?? null,
         ]);
     }
 
@@ -326,40 +329,22 @@ class PublicationsController extends Controller
 
         $data['tags'] = Tag::popularByEngagement(20);
 
-        $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
-        $term = $request->filled('term') ? trim((string) $request->term) : '';
-        $tagModel = null;
-        if ($request->filled('tag')) {
-            $tagModel = Tag::find((int) $request->tag);
-        }
+        $seo = RecordsSearchSeo::build(
+            $request,
+            $data['publications'],
+            $data['results_count'],
+            $data['searchForums'],
+            $data['searchCommunities']
+        );
 
-        if ($tagModel) {
-            $tagTitle = Str::limit($tagModel->tag_text, 50);
-            $data['pageTitle'] = $tagTitle.' — Resources — '.$siteName;
-            $data['pageDescription'] = 'Resources tagged "'.Str::limit($tagModel->tag_text, 80).'" on '.$siteName.'.';
-            $data['pageKeywords'] = $tagModel->tag_text.', tag, search, publications, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
-        } elseif ($term !== '') {
-            $data['pageTitle'] = 'Search: '.Str::limit($term, 50).' - '.$siteName;
-            $data['pageDescription'] = 'Search results for "'.Str::limit($term, 60).'" – publications, communities and discussion forums from '.$siteName.'.';
-            $data['pageKeywords'] = $term.', search, publications, communities, discussions, forums, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
-        } else {
-            $data['pageTitle'] = 'Search Resources & Discussions - '.$siteName;
-            $data['pageDescription'] = 'Search publications, communities, resources and discussion forums. Find public health content and join discussions across Africa.';
-            $data['pageKeywords'] = 'search, publications, communities, discussions, forums, '.(settings()->seo_keywords ?? 'Africa CDC, public health, knowledge hub');
-        }
-
-        $canonicalQuery = array_filter($request->only([
-            'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id', 'sub_thematic_area_id', 'subtheme',
-            'data_category_id', 'category', 'file_category_id', 'file_type_id', 'file_type', 'tag', 'page',
-        ]));
-        if ($tagModel && seo_friendly_urls_enabled() && ! empty($tagModel->slug)) {
-            $tagQuery = $canonicalQuery;
-            unset($tagQuery['tag']);
-            $data['canonicalUrl'] = tag_records_url($tagModel, true, $tagQuery);
-        } else {
-            $data['canonicalUrl'] = url('records/search?'.http_build_query($canonicalQuery, '', '&', PHP_QUERY_RFC3986));
-        }
+        $data['pageTitle'] = $seo['pageTitle'];
+        $data['pageDescription'] = $seo['pageDescription'];
+        $data['pageKeywords'] = $seo['pageKeywords'];
+        $data['canonicalUrl'] = $seo['canonicalUrl'];
+        $data['searchJsonLd'] = $seo['searchJsonLd'];
+        $data['searchHeading'] = $seo['searchHeading'];
         $data['ogType'] = 'website';
+        $data['jsonLdFlags'] = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
 
         return $data;
     }

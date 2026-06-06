@@ -1,11 +1,15 @@
 <div class="row mb-3">
     <div class="col-12">
+        <h1 class="mb-3" style="font-size:1.35rem;font-weight:700;color:#0f172a;line-height:1.35;">
+            {{ $searchHeading ?? 'Browse public health resources' }}
+        </h1>
+
         {{-- Search Results Info Card --}}
         @if(isset($results_count) || isset($search_time))
         <div class="sidebar-content mb-3" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
             <div class="d-flex align-items-center justify-content-between flex-wrap">
                 <div class="d-flex align-items-center mb-2 mb-md-0">
-                    <h5 class="mb-0 me-4" style="color:var(--theme-color-primary, #119A48);">Search Results</h5>
+                    <p class="mb-0 me-4 fw-semibold" style="color:var(--theme-color-primary, #119A48);">Results summary</p>
                     <span class="fw-bold" style="color:#1e293b;font-size:1rem;">
                         {{ $results_count ?? ($publications->total() ?? 0) }} {{ ($results_count ?? ($publications->total() ?? 0)) == 1 ? 'result' : 'results' }} found
                     </span>
