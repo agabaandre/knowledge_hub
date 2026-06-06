@@ -64,13 +64,36 @@
             line-height: 1.6;
             color: #334155;
         }
+        .pub-stat-card {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 0;
+            border-top: 3px solid var(--theme-color-primary, #119A48);
+        }
+        .pub-stat-card--pending { border-top-color: #d97706; }
+        .pub-stat-card--featured { border-top-color: #eab308; }
+        .pub-stat-card--inactive { border-top-color: #64748b; }
+        .pub-stat-card__label {
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-bottom: 0.35rem;
+        }
+        .pub-stat-card__value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #0f172a;
+            line-height: 1.2;
+        }
     </style>
 @endsection
 
 @section('content')
     <div class="page-header">
         <div class="d-flex align-items-center justify-content-between">
-            <h1 class="page-title">Manage Public Health Resources</h1>
+            <h1 class="page-title">Manage Publications</h1>
             @if(isset($pending_publications_count) && $pending_publications_count > 0)
                 <div class="dropdown nav-item">
                     <a class="nav-link position-relative" href="{{ url('admin/publications/pending') }}" title="Pending Publications">
@@ -86,8 +109,44 @@
         <div>
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="javascript:void(0)">Publish</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Manage Public Health Resource</li>
+                <li class="breadcrumb-item active" aria-current="page">Manage Publications</li>
             </ol>
+        </div>
+    </div>
+
+    @php $pubStats = $publication_stats ?? ['approved' => 0, 'pending' => 0, 'featured' => 0, 'inactive' => 0]; @endphp
+    <div class="row mb-3">
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card pub-stat-card h-100 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="pub-stat-card__label">Approved Publications</div>
+                    <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['approved'] ?? 0)) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <a href="{{ url('admin/publications/pending') }}" class="card pub-stat-card pub-stat-card--pending h-100 shadow-sm text-decoration-none">
+                <div class="card-body py-3">
+                    <div class="pub-stat-card__label">Pending Review</div>
+                    <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['pending'] ?? 0)) }}</div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card pub-stat-card pub-stat-card--featured h-100 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="pub-stat-card__label">Featured</div>
+                    <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['featured'] ?? 0)) }}</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-2">
+            <div class="card pub-stat-card pub-stat-card--inactive h-100 shadow-sm">
+                <div class="card-body py-3">
+                    <div class="pub-stat-card__label">Inactive / Unpublished</div>
+                    <div class="pub-stat-card__value">{{ number_format((int) ($pubStats['inactive'] ?? 0)) }}</div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -98,7 +157,7 @@
                     <div class="pub-filters-card__heading">
                         <span class="pub-filters-card__icon"><i class="fa fa-filter"></i></span>
                         <div>
-                            <h3 class="pub-filters-card__title">Filter Resources</h3>
+                            <h3 class="pub-filters-card__title">Filter Publications</h3>
                             <p class="pub-filters-card__subtitle">Filters apply automatically as you type or change selections</p>
                         </div>
                     </div>
@@ -133,7 +192,7 @@
             <div class="card pub-list-card">
                 <div class="card-header">
                     <div class="d-flex justify-content-between align-items-center">
-                        <h3 class="card-title mb-0">Publications</h3>
+                        <h3 class="card-title mb-0">Manage Publications</h3>
                         <div>
                             <a href="{{ url('admin/publications/create') }}" class="btn btn-primary btn-sm">
                                 <i class="fa fa-plus"></i> Add Publication

@@ -2075,6 +2075,25 @@ public function togglePublicationActive(int $id): ?Publication
 }
 
     /**
+     * Summary counts for the admin Manage Publications index page.
+     */
+    public function adminPublicationIndexStats(): array
+    {
+        $base = Publication::query()->where('is_version', 0);
+
+        return [
+            'approved' => (clone $base)->where('is_approved', 1)->where('is_rejected', 0)->count(),
+            'pending' => (clone $base)->where('is_approved', 0)->where('is_rejected', 0)->count(),
+            'featured' => (clone $base)->where('is_approved', 1)->where('is_rejected', 0)->where('is_featured', 1)->count(),
+            'inactive' => (clone $base)
+                ->where('is_approved', 1)
+                ->where('is_rejected', 0)
+                ->whereRaw("LOWER(COALESCE(is_active, '')) != 'active'")
+                ->count(),
+        ];
+    }
+
+    /**
      * Base query for admin "Manage Publications" (approved, non-version rows).
      */
     public function buildAdminApprovedQuery(Request $request)
@@ -2289,8 +2308,8 @@ public function togglePublicationActive(int $id): ?Publication
 
             $featuredBtnClass = $isFeatured ? 'btn-warning' : 'btn-outline-warning';
             $featuredTitle = $isFeatured ? 'Remove from featured' : 'Mark as featured';
-            $featuredIcon = $isFeatured ? 'fa-star' : 'fa-star-o';
-            $actions .= '<button type="button" class="btn btn-sm '.$featuredBtnClass.' pub-toggle-featured" data-id="'.$publication->id.'" data-featured="'.($isFeatured ? '1' : '0').'" title="'.$featuredTitle.'"><i class="fa '.$featuredIcon.'"></i></button>';
+            $featuredIconClass = $isFeatured ? 'fa-solid fa-star' : 'fa-regular fa-star';
+            $actions .= '<button type="button" class="btn btn-sm '.$featuredBtnClass.' pub-toggle-featured" data-id="'.$publication->id.'" data-featured="'.($isFeatured ? '1' : '0').'" title="'.$featuredTitle.'"><i class="'.$featuredIconClass.'"></i></button>';
 
             $activeTitle = $isInactive ? 'Publish' : 'Unpublish';
             $activeBtnClass = $isInactive ? 'btn-outline-success' : 'btn-outline-secondary';

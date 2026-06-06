@@ -8,7 +8,7 @@
     <style>
         .settings-container {
             background: #ffffff;
-            border-radius: 12px;
+            border-radius: 0;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             overflow: hidden;
         }
@@ -69,7 +69,7 @@
         }
         .settings-theme1 .settings-tabs .nav-link {
             border: none;
-            border-radius: 0.5rem;
+            border-radius: 0;
             padding: 0.65rem 1.25rem;
             font-weight: 500;
             color: #64748b;

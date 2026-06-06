@@ -28,11 +28,10 @@ class ResourcesController extends Controller
         }
 
         $data['search'] = (object) $request->all();
+        $data['publication_stats'] = $this->publicationsRepo->adminPublicationIndexStats();
         
         // Count pending publications for notification bell
-        $data['pending_publications_count'] = \App\Models\Publication::where('is_approved', 0)
-            ->where('is_rejected', 0)
-            ->count();
+        $data['pending_publications_count'] = $data['publication_stats']['pending'];
         
         return view('admin.publications.index', $data);
     }
