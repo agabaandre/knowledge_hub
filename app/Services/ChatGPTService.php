@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Support\HealthTopicSourceCatalog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -258,15 +259,17 @@ class ChatGPTService implements AIModel{
         $jsonData  = json_encode($body);
         $headers[] ='Content-Length: ' . strlen($jsonData);
 
-        // Set cURL options
+        // Set cURL options (match forum summarisation: bounded timeout, reliable POST)
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER,$headers);
-    
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 20);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 120);
+
         // Execute cURL request and get the response
         $response = curl_exec($ch);
-    
+
         // Check for cURL errors
         if ($response === false) {
             Log::error('OpenAI cURL error: '.curl_error($ch));
@@ -276,7 +279,9 @@ class ChatGPTService implements AIModel{
         // Close cURL session
         curl_close($ch);
 
-        Log::info('====RESPONSE::==== '.$response);
+        if ($response !== null && $response !== '') {
+            Log::info('OpenAI response received', ['bytes' => strlen($response)]);
+        }
 
         if ($response === null || $response === '') {
             return null;
@@ -786,74 +791,187 @@ class ChatGPTService implements AIModel{
             return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
         }
 
-        $existingSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $existingTagNames)))), 0, 120);
-        $referenceSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $referenceTopics)))), 0, 180);
+        $seen = [];
+        foreach ($existingTagNames as $name) {
+            $key = HealthTopicSourceCatalog::normalizeTagKey((string) $name);
+            if ($key !== '') {
+                $seen[$key] = true;
+            }
+        }
 
+        $referenceSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $referenceTopics)))), 0, 50);
+        $existingSample = array_slice(array_values(array_unique(array_filter(array_map('strval', $existingTagNames)))), 0, 80);
+
+        $normalized = [];
+        $batchSize = 5;
+        $errors = [];
+
+        while (count($normalized) < $count) {
+            $need = min($batchSize, $count - count($normalized));
+            $batch = $this->generateHealthTopicsBatch($need, $existingSample, $referenceSample, array_keys($seen));
+            if (! ($batch['ok'] ?? false)) {
+                $errors[] = $batch['error'] ?? 'Unknown batch error';
+                break;
+            }
+
+            $addedInBatch = 0;
+            foreach ($batch['topics'] as $row) {
+                $tagText = Str::limit(trim((string) ($row['tag_text'] ?? '')), 255, '');
+                $overview = trim((string) ($row['overview'] ?? ''));
+                if ($tagText === '' || $overview === '') {
+                    continue;
+                }
+                $key = HealthTopicSourceCatalog::normalizeTagKey($tagText);
+                if ($key === '' || isset($seen[$key])) {
+                    continue;
+                }
+                $seen[$key] = true;
+                $existingSample[] = $tagText;
+                $normalized[] = [
+                    'tag_text' => $tagText,
+                    'overview' => Str::limit($overview, 12000, ''),
+                ];
+                $addedInBatch++;
+            }
+
+            if ($addedInBatch === 0) {
+                break;
+            }
+        }
+
+        if ($normalized === []) {
+            $detail = $errors !== [] ? implode(' ', array_unique($errors)) : 'No topics returned.';
+
+            return ['ok' => false, 'error' => $detail];
+        }
+
+        return ['ok' => true, 'topics' => array_slice($normalized, 0, $count)];
+    }
+
+    /**
+     * @param  list<string>  $existingKeys lower-case tag keys already used
+     * @param  list<string>  $referenceTopics
+     * @param  list<string>  $blockedKeys lower-case keys to avoid (existing + generated)
+     * @return array{ok: true, topics: list<array{tag_text: string, overview: string}>}|array{ok: false, error: string}
+     */
+    private function generateHealthTopicsBatch(int $count, array $existingKeys, array $referenceTopics, array $blockedKeys): array
+    {
+        $count = max(1, min(8, $count));
+        $model = config('ai.openai_model', 'gpt-3.5-turbo');
+
+        $instruction = 'You are a clinical terminology editor for the Africa CDC Knowledge Hub. '
+            .'Create NEW health topic tags (diseases, conditions) for a public health portal focused on Africa. '
+            .'Use WHO, CDC, MedlinePlus, and university health topic lists only as naming inspiration. '
+            .'Each tag must be unique (case-insensitive) vs blocked names. '
+            .'Return ONLY valid JSON: {"topics":[{"tag_text":"Name","overview":"<p>2-3 short paragraphs</p>"}]}. '
+            .'tag_text max 255 chars. overview uses <p> tags only, max 1200 chars, no invented statistics.';
+
+        $user = 'Generate exactly '.$count.' topics. '
+            .'Blocked names (do not reuse): '.json_encode(array_slice($blockedKeys, 0, 120)).'. '
+            .'Existing tags sample: '.json_encode(array_slice($existingKeys, 0, 60)).'. '
+            .'Reference inspiration: '.json_encode(array_slice($referenceTopics, 0, 40)).'.';
+
+        $messages = [
+            ['role' => 'system', 'content' => $instruction],
+            ['role' => 'user', 'content' => $user],
+        ];
+
+        $result = $this->chatCompletionJson($messages, 3096, $model);
+        if (! ($result['ok'] ?? false)) {
+            return ['ok' => false, 'error' => $result['error'] ?? 'OpenAI request failed.'];
+        }
+
+        $topics = $this->parseHealthTopicsJson($result['content']);
+        if ($topics === []) {
+            return ['ok' => false, 'error' => 'Could not parse health topics JSON from OpenAI.'];
+        }
+
+        $out = [];
+        foreach ($topics as $row) {
+            $tagText = trim((string) ($row['tag_text'] ?? ''));
+            $overview = trim((string) ($row['overview'] ?? ''));
+            if ($tagText !== '' && $overview !== '') {
+                $out[] = ['tag_text' => $tagText, 'overview' => $overview];
+            }
+        }
+
+        if ($out === []) {
+            return ['ok' => false, 'error' => 'OpenAI returned topics without usable tag_text/overview fields.'];
+        }
+
+        return ['ok' => true, 'topics' => $out];
+    }
+
+    /**
+     * Forum summarisation uses {@see prompt()} with the same endpoint, model config, and moderate max_tokens.
+     *
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array{ok: true, content: string}|array{ok: false, error: string}
+     */
+    private function chatCompletionJson(array $messages, int $maxTokens, ?string $model = null): array
+    {
+        $apiKey = config('ai.open_api_key');
+        if (empty($apiKey)) {
+            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        }
+
+        $model = $model ?: config('ai.openai_model', 'gpt-3.5-turbo');
         $endpoint = 'https://api.openai.com/v1/chat/completions';
         $headers = [
             'Content-Type: application/json',
             'Authorization: Bearer '.$apiKey,
         ];
 
-        $system = 'You are a clinical terminology editor for the Africa CDC Knowledge Hub. '
-            .'Propose health topics, diseases, and medical conditions suitable as taxonomy tags for a public health knowledge portal focused on Africa. '
-            .'Use reputable reference lists (WHO, MedlinePlus, university health services) as inspiration but do not copy text verbatim. '
-            .'Each topic must be distinct, professionally named, and not duplicate any existing tag (case-insensitive). '
-            .'Write concise HTML overviews (2–4 short paragraphs with <p> tags only) describing symptoms, public health relevance, and prevention or management at a lay-professional level. '
-            .'Do not invent statistics. Default context: general health topic, not an active outbreak emergency unless the condition is commonly classified as one.';
-
-        $user = 'Generate exactly '.$count.' NEW health topic tags. '
-            .'Return JSON: {"topics":[{"tag_text":"...","overview":"<p>...</p>"}]} only. '
-            .'tag_text max 255 characters. overview max 3500 characters HTML. '
-            .'Avoid duplicates against existing tags: '.json_encode($existingSample).'. '
-            .'Reference inspiration (do not repeat blindly): '.json_encode($referenceSample).'. '
-            .'Prefer diverse conditions across infectious disease, NCDs, maternal-child health, mental health, and environmental health.';
-
         $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => [
-                ['role' => 'system', 'content' => $system],
-                ['role' => 'user', 'content' => $user],
-            ],
-            'max_tokens' => 8192,
-            'temperature' => 0.35,
+            'model' => $model,
+            'messages' => $messages,
+            'max_tokens' => max(512, min(4096, $maxTokens)),
+            'temperature' => 0.3,
+            'response_format' => ['type' => 'json_object'],
         ];
 
         $response = $this->sendRequest($endpoint, $headers, $payload);
-        $content = $this->extractOpenAiMessageContent($response);
-        if ($content === null || trim($content) === '') {
-            return ['ok' => false, 'error' => 'Empty response from OpenAI.'];
+        $parsed = $this->openAiResponseContentOrError($response);
+        if (! ($parsed['ok'] ?? false)) {
+            // Older/chat models may reject response_format — retry like forum summarisation (plain completion).
+            unset($payload['response_format']);
+            $response = $this->sendRequest($endpoint, $headers, $payload);
+            $parsed = $this->openAiResponseContentOrError($response);
         }
 
-        $topics = $this->parseHealthTopicsJson($content);
-        if ($topics === []) {
-            return ['ok' => false, 'error' => 'Could not parse health topics from AI response.'];
+        return $parsed;
+    }
+
+    /**
+     * @return array{ok: true, content: string}|array{ok: false, error: string}
+     */
+    private function openAiResponseContentOrError($response): array
+    {
+        if (! is_object($response)) {
+            return ['ok' => false, 'error' => 'No response from OpenAI. Check OPEN_API_KEY, OPENAI_MODEL, and server outbound HTTPS.'];
         }
 
-        $normalized = [];
-        $seen = [];
-        foreach ($topics as $row) {
-            $tagText = Str::limit(trim((string) ($row['tag_text'] ?? '')), 255, '');
-            $overview = trim((string) ($row['overview'] ?? ''));
-            if ($tagText === '' || $overview === '') {
-                continue;
-            }
-            $key = mb_strtolower($tagText);
-            if (isset($seen[$key])) {
-                continue;
-            }
-            $seen[$key] = true;
-            $normalized[] = [
-                'tag_text' => $tagText,
-                'overview' => Str::limit($overview, 12000, ''),
-            ];
+        if (isset($response->error)) {
+            $msg = is_object($response->error)
+                ? (string) ($response->error->message ?? 'API error')
+                : (string) $response->error;
+
+            return ['ok' => false, 'error' => 'OpenAI API error: '.$msg];
         }
 
-        if ($normalized === []) {
-            return ['ok' => false, 'error' => 'No usable topics after normalization.'];
+        $choice = $response->choices[0] ?? null;
+        if (! is_object($choice) || ! isset($choice->message->content)) {
+            return ['ok' => false, 'error' => 'Unexpected OpenAI response format.'];
         }
 
-        return ['ok' => true, 'topics' => array_slice($normalized, 0, $count)];
+        $content = trim((string) $choice->message->content);
+        if ($content === '') {
+            $reason = (string) ($choice->finish_reason ?? 'unknown');
+
+            return ['ok' => false, 'error' => 'Empty response from OpenAI (finish_reason: '.$reason.'). Try fewer topics or a different OPENAI_MODEL.'];
+        }
+
+        return ['ok' => true, 'content' => $content];
     }
 
     /**

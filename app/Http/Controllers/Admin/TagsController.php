@@ -105,11 +105,8 @@ class TagsController extends Controller
         }
 
         $referenceBySource = $fetcher->collectReferenceTopics($sourceKeys);
-        $referenceTopics = [];
-        foreach ($referenceBySource as $topics) {
-            $referenceTopics = array_merge($referenceTopics, $topics);
-        }
-        $referenceTopics = array_values(array_unique($referenceTopics));
+        $existingKeys = $this->tagsRepo->existingTagKeyMap();
+        $referenceTopics = $fetcher->collectUniqueReferenceTopics($sourceKeys, $existingKeys);
 
         $existingNames = $this->tagsRepo->allTagsForMapping()->pluck('tag_text')->all();
         $ai = $chatGpt->generateHealthTopics($existingNames, $referenceTopics, $count);

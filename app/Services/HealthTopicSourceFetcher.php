@@ -27,6 +27,21 @@ class HealthTopicSourceFetcher
     }
 
     /**
+     * @param  list<string>  $sourceKeys
+     * @param  array<string, true>  $existingTagKeys
+     * @return list<string>
+     */
+    public function collectUniqueReferenceTopics(array $sourceKeys, array $existingTagKeys = []): array
+    {
+        $merged = [];
+        foreach ($this->collectReferenceTopics($sourceKeys) as $topics) {
+            $merged = array_merge($merged, $topics);
+        }
+
+        return HealthTopicSourceCatalog::filterNewTopics($merged, $existingTagKeys);
+    }
+
+    /**
      * @return list<string>
      */
     public function topicsForSource(string $sourceKey): array

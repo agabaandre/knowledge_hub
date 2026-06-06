@@ -7,7 +7,8 @@
         <h5 class="mb-1"><i class="fa fa-magic text-success mr-2"></i>AI Health Topics</h5>
         <p class="text-muted small mb-0">
             Generate unique diseases and conditions with descriptions using reference lists from
-            WHO, MedlinePlus, UC Berkeley UHS, and Dartmouth. Runs only when you click the buttons below.
+            WHO, CDC, MedlinePlus, UC Berkeley UHS, and Dartmouth. Duplicates are filtered before and after AI generation.
+            Runs only when you click the buttons below.
             Default: Health Topic <strong>Yes</strong>, Health Emergency <strong>No</strong>.
         </p>
     </div>

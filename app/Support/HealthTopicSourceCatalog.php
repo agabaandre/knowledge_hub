@@ -12,6 +12,8 @@ class HealthTopicSourceCatalog
 
     public const SOURCE_DARTMOUTH = 'dartmouth';
 
+    public const SOURCE_CDC = 'cdc';
+
     /**
      * @return array<string, array{label: string, url: string}>
      */
@@ -21,6 +23,10 @@ class HealthTopicSourceCatalog
             self::SOURCE_WHO => [
                 'label' => 'WHO Health Topics',
                 'url' => 'https://www.who.int/health-topics',
+            ],
+            self::SOURCE_CDC => [
+                'label' => 'CDC Health Topics (A–Z)',
+                'url' => 'https://www.cdc.gov/health-topics.html',
             ],
             self::SOURCE_MEDLINEPLUS => [
                 'label' => 'MedlinePlus Health Topics',
@@ -76,9 +82,57 @@ class HealthTopicSourceCatalog
                 'Sleep', 'Stress Management', 'Suicide Prevention', 'Concussion', 'Influenza',
                 'Meningitis B', 'Vaping and E-cigarettes',
             ],
+            self::SOURCE_CDC => [
+                'Influenza', 'COVID-19', 'Diabetes', 'HIV', 'Hepatitis',
+                'Malaria', 'Measles', 'Mpox', 'Rabies', 'Tuberculosis',
+                'Zika Virus', 'Asthma', 'Cancer', 'Heart Disease', 'Stroke',
+                'Food Safety', 'Immunizations', 'Mental Health', 'Pregnancy', 'Workplace Safety',
+            ],
         ];
 
         return $lists[$sourceKey] ?? [];
+    }
+
+    /**
+     * @param  list<string>  $topics
+     * @return list<string>
+     */
+    public static function uniqueTopicList(array $topics): array
+    {
+        $seen = [];
+        $unique = [];
+        foreach ($topics as $topic) {
+            $name = self::normalizeTopicName((string) $topic);
+            $key = self::normalizeTagKey($name);
+            if ($name === '' || isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $unique[] = $name;
+        }
+
+        return $unique;
+    }
+
+    /**
+     * @param  list<string>  $topics
+     * @param  array<string, true>  $existingKeys
+     * @return list<string>
+     */
+    public static function filterNewTopics(array $topics, array $existingKeys): array
+    {
+        $out = [];
+        $seen = $existingKeys;
+        foreach (self::uniqueTopicList($topics) as $name) {
+            $key = self::normalizeTagKey($name);
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $out[] = $name;
+        }
+
+        return $out;
     }
 
     public static function normalizeTopicName(string $name): string
