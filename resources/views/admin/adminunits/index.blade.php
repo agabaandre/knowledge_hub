@@ -98,5 +98,19 @@
 	@section('scripts')
 
    	 @include('common.attachment_js')
+     <script>
+     document.addEventListener('change', function (e) {
+         if (!e.target.matches('.js-admin-unit-country')) return;
+         var opt = e.target.options[e.target.selectedIndex];
+         var iso2 = opt.getAttribute('data-iso2') || '';
+         var iso3 = opt.getAttribute('data-iso3') || '';
+         var form = e.target.closest('form');
+         if (!form) return;
+         var iso2Input = form.querySelector('.js-admin-unit-iso2');
+         var iso3Input = form.querySelector('.js-admin-unit-iso3');
+         if (iso2Input && iso2) iso2Input.value = iso2;
+         if (iso3Input && iso3) iso3Input.value = iso3;
+     });
+     </script>
 
 	@endsection

@@ -7,10 +7,11 @@
     $isPublishPage = request()->routeIs('account.publish') || request()->routeIs('account.publication') || request()->is('account/publish*');
     $isMyDiscussionsPage = request()->routeIs('account.my-discussions') || request()->routeIs('account.my-discussions.edit');
     $isPublicationsAccountPage = request()->routeIs('account.publications') || request()->routeIs('account.publications.edit');
+    $isFederatedBrowsePage = request()->is('federated*');
     $isAuthenticated = auth()->check();
     // If $forceShow is set to true, bypass the page check (used when explicitly included in content)
     $forceShow = $forceShow ?? false;
-    $excludedPages = $isContentRequestPage || $isFaqsPage || $isForumsPage || $isCommunitiesDetailPage || $isPublishPage;
+    $excludedPages = $isContentRequestPage || $isFaqsPage || $isForumsPage || $isCommunitiesDetailPage || $isPublishPage || $isFederatedBrowsePage;
     // Only show from layout if NOT on excluded pages AND not force-showing
     $shouldShow = !$isHomePage && $isAuthenticated && (!$excludedPages || $forceShow);
 @endphp

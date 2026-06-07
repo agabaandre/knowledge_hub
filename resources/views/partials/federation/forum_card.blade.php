@@ -19,7 +19,7 @@
             <span><i class="fa fa-comments me-1"></i>{{ $forum->total_comments ?? 0 }} Comments</span>
         </div>
         <a href="{{ $forum->federation_source_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm fed-btn-primary mt-2">
-            <i class="fa-regular fa-arrow-up-right-from-square me-1"></i>View on {{ $forum->federation_hub_name }}
+            <i class="fa fa-external-link me-1"></i>View on {{ $forum->federation_hub_name }}
         </a>
     </div>
 </div>

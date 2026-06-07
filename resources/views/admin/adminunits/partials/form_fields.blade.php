@@ -31,12 +31,44 @@
 
           <div class="col-md-12">
             <div class="mb-3">
+              <label class="form-label" for="country_id">Member state mapping <span class="text-muted">(optional)</span></label>
+              <select class="form-control newform js-admin-unit-country" id="country_id" name="country_id">
+                <option value="">— None —</option>
+                @foreach(($hubCountries ?? $countries ?? collect()) as $country)
+                <option value="{{ $country->id }}"
+                    data-iso2="{{ strtoupper($country->iso_code ?? '') }}"
+                    data-iso3="{{ strtoupper($country->iso3_code ?? '') }}"
+                    {{ (int) old('country_id', $row->country_id ?? 0) === (int) $country->id ? 'selected' : '' }}>
+                    {{ $country->name }}
+                </option>
+                @endforeach
+              </select>
+              <small class="text-muted">Link this unit to an AU member state for country-level KPI and map data joins.</small>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="iso_code">ISO alpha-2 <span class="text-muted">(optional)</span></label>
+              <input type="text" maxlength="2" placeholder="e.g. NG" class="form-control newform text-uppercase js-admin-unit-iso2" id="iso_code" name="iso_code" value="{{ strtoupper(old('iso_code', $row->iso_code ?? '')) }}">
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <div class="mb-3">
+              <label class="form-label" for="iso3_code">ISO alpha-3 <span class="text-muted">(optional)</span></label>
+              <input type="text" maxlength="3" placeholder="e.g. NGA" class="form-control newform text-uppercase js-admin-unit-iso3" id="iso3_code" name="iso3_code" value="{{ strtoupper(old('iso3_code', $row->iso3_code ?? '')) }}">
+            </div>
+          </div>
+
+          <div class="col-md-12">
+            <div class="mb-3">
               <label class="form-label" for="parent_id">Parent Admin Unit</label>
               <select class="form-control newform"  id="parent_id" name="parent_id" >
                 <option value="">None</option>
                 @foreach($adminunits as $unit)
-                <option {{ (($row && $row->parent_id ==$unit->id) ||  old('alt_code')==$unit->id)?'selected':''}}
-                     value="{{$unit->id}}">{{$unit->name}}</option>
+                <option {{ (($row && $row->parent_id == $unit->id) || (int) old('parent_id') === (int) $unit->id) ? 'selected' : '' }}
+                     value="{{ $unit->id }}">{{ $unit->name }}</option>
                 @endforeach
               </select>
             </div>

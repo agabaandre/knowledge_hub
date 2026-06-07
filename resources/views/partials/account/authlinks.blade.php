@@ -1,7 +1,10 @@
                        @guest
-                           <li class=" {{ $class ?? '' }} notranslate">
+                           <li class="{{ $class ?? '' }} notranslate">
                                <a href="{{ route('login') }}" class="ft-medium text-bold">
-                                   <i class="fa fa-user mr-2"></i>{{ __('ui_body.account') }}
+                                   <span class="kh-nav-item-stack">
+                                       <i class="fas fa-user kh-nav-icon" aria-hidden="true"></i>
+                                       <span class="kh-nav-label">{{ __('ui_body.account') }}</span>
+                                   </span>
                                </a>
                            </li>
 

@@ -2332,6 +2332,55 @@
                         </div>
                         @endif
 
+                        @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'africa_map_version'))
+                        @php
+                            $mapVersions = africa_map_all_versions();
+                            $activeMapVersion = africa_map_active_version_id();
+                        @endphp
+                        <div class="col-lg-6">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-map"></i>
+                                    Africa choropleth maps
+                                </div>
+                                <p class="text-muted small mb-3">
+                                    Choose which map topology is used on member states, admin metrics, and RCC dashboards.
+                                    Built-in versions ship with the app; add custom GeoJSON scripts under <code>public/assets/js/maps/</code>.
+                                </p>
+                                <div class="form-group">
+                                    <label for="africa_map_version">Active map version</label>
+                                    <select name="africa_map_version" id="africa_map_version" class="form-control">
+                                        @foreach($mapVersions as $versionId => $version)
+                                            <option value="{{ $versionId }}" {{ $activeMapVersion === $versionId ? 'selected' : '' }}>
+                                                {{ $version['label'] ?? $versionId }}
+                                                @if(!empty($version['custom'])) (custom) @endif
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                    <small class="info-text d-block mt-1">
+                                        Current: <strong>{{ resolved_africa_map_config()['label'] ?? $activeMapVersion }}</strong>
+                                        · join key <code>{{ resolved_africa_map_config()['join_by'] ?? 'iso-a3' }}</code>
+                                    </small>
+                                </div>
+                                @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'africa_map_custom_versions'))
+                                <div class="form-group mb-0">
+                                    <label for="africa_map_custom_versions">Custom map versions (JSON array)</label>
+                                    <textarea name="africa_map_custom_versions"
+                                              id="africa_map_custom_versions"
+                                              rows="8"
+                                              class="form-control font-monospace"
+                                              placeholder='[{"id":"my-africa-map","label":"My Africa map","type":"geojson_script","key":"custom/my-africa","script":"assets/js/maps/my-africa.js","version":"1.0","join_by":"iso-a3"}]'>{{ $settings->africa_map_custom_versions ?? '' }}</textarea>
+                                    <small class="info-text d-block mt-1">
+                                        Optional. Each entry needs a unique <code>id</code>, display <code>label</code>, and either
+                                        <code>type: geojson_script</code> with <code>key</code> + <code>script</code>, or
+                                        <code>type: topojson_url</code> with <code>topology_url</code> and <code>join_by</code> (usually <code>hc-key</code>).
+                                    </small>
+                                </div>
+                                @endif
+                            </div>
+                        </div>
+                        @endif
+
                         @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'auto_profile_completion_reminder'))
                         <div class="col-lg-6">
                             <div class="settings-group-card">

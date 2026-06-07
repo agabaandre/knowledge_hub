@@ -376,6 +376,25 @@ class SettingsRepository
             $settings->federation_api_token = $request->input('federation_api_token');
         }
 
+        if (Schema::hasColumn('setting', 'africa_map_version')) {
+            $versionId = trim((string) $request->input('africa_map_version', ''));
+            $allowed = array_keys(africa_map_all_versions());
+            $settings->africa_map_version = in_array($versionId, $allowed, true)
+                ? $versionId
+                : (string) config('maps.default_version_id', 'africa-prioritisation-1.1.3');
+        }
+        if (Schema::hasColumn('setting', 'africa_map_custom_versions')) {
+            $raw = trim((string) $request->input('africa_map_custom_versions', ''));
+            if ($raw === '') {
+                $settings->africa_map_custom_versions = null;
+            } else {
+                $decoded = json_decode($raw, true);
+                $settings->africa_map_custom_versions = is_array($decoded)
+                    ? json_encode(array_values($decoded))
+                    : $raw;
+            }
+        }
+
         if (Schema::hasColumn('setting', 'email_driver')) {
             $driver = $request->input('email_driver', 'exchange');
             $settings->email_driver = in_array($driver, ['smtp', 'exchange'], true) ? $driver : 'exchange';

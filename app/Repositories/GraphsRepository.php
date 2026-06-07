@@ -675,7 +675,7 @@ class GraphsRepository extends SharedRepo{
             $countryQuery->where('region_id', $regionId);
         }
 
-        $countriesById = $countryQuery->get(['id', 'name', 'iso_code', 'slug', 'region_id'])->keyBy('id');
+        $countriesById = $countryQuery->get(['id', 'name', 'iso_code', 'iso3_code', 'slug', 'region_id'])->keyBy('id');
         $rowsByCountry = collect($rows)->map(fn ($row) => (object) $row)->keyBy('country_id');
 
         $points = [];
@@ -691,7 +691,13 @@ class GraphsRepository extends SharedRepo{
             $numericValues[] = $value;
             $display = kpi_indicator_display($value, $row->unit_label ?? $unitLabel, $row->kpi_name ?? $kpiName);
 
+            $iso3 = strtoupper(trim((string) ($country->iso3_code ?? '')));
+            if ($iso3 === '') {
+                continue;
+            }
+
             $points[] = [
+                'iso-a3' => $iso3,
                 'hc-key' => strtolower((string) $country->iso_code),
                 'country_id' => (int) $countryId,
                 'name' => $country->name,

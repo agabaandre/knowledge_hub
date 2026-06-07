@@ -28,6 +28,19 @@ class AdminUnitsRepository{
         $record->alternate_code  = $request->alt_code;
         $record->icon            = $request->icon;
 
+        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'country_id')) {
+            $countryId = $request->input('country_id');
+            $record->country_id = ($countryId !== null && $countryId !== '') ? (int) $countryId : null;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'iso_code')) {
+            $iso2 = strtoupper(trim((string) $request->input('iso_code', '')));
+            $record->iso_code = $iso2 !== '' ? $iso2 : null;
+        }
+        if (\Illuminate\Support\Facades\Schema::hasColumn('administrative_units', 'iso3_code')) {
+            $iso3 = strtoupper(trim((string) $request->input('iso3_code', '')));
+            $record->iso3_code = $iso3 !== '' ? $iso3 : null;
+        }
+
         //save cover
         if($request->hasFile('logo')):
 
@@ -40,6 +53,10 @@ class AdminUnitsRepository{
         endif;
 
         $saved = ($request->id)?$record->update():$record->save();
+
+        if ($saved) {
+            cache()->forget('adminunits');
+        }
 
         return $saved;
     }

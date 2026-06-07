@@ -63,12 +63,18 @@ class MetricsRepository
         $labels = [];
         $values = [];
         $iso2 = [];
+        $iso3 = [];
         foreach ($records as $row) {
             $code = strtoupper(trim((string) $row->country));
             if ($code === '' || $code === 'UNKNOWN') {
                 continue;
             }
+            $alpha3 = $this->iso2ToIso3($code);
+            if ($alpha3 === null) {
+                continue;
+            }
             $iso2[] = strtolower($code);
+            $iso3[] = $alpha3;
             $labels[] = $this->iso2ToCountryName($code);
             $values[] = (int) $row->count;
         }
@@ -77,6 +83,7 @@ class MetricsRepository
             'labels' => $labels,
             'values' => $values,
             'iso2' => $iso2,
+            'iso3' => $iso3,
             'chartType' => 'map',
             'renderAsChart' => false,
             'period' => [
@@ -283,6 +290,31 @@ class MetricsRepository
             })
             ->values()
             ->all();
+    }
+
+    private function iso2ToIso3(string $iso2): ?string
+    {
+        $iso2 = strtoupper(trim($iso2));
+        if ($iso2 === '') {
+            return null;
+        }
+
+        $fromDb = \App\Models\Country::query()
+            ->where('iso_code', $iso2)
+            ->value('iso3_code');
+        if (is_string($fromDb) && $fromDb !== '') {
+            return strtoupper($fromDb);
+        }
+
+        try {
+            if (class_exists(\Symfony\Component\Intl\Countries::class)) {
+                return strtoupper(\Symfony\Component\Intl\Countries::getAlpha3Code($iso2));
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return null;
     }
 
     private function iso2ToCountryName(string $iso2): string

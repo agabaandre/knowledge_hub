@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', $pageTitle ?? 'Partner country knowledge hubs')
+@section('title', $pageTitle ?? 'Member States knowledge hubs')
 
 @section('styles')
 <style>
@@ -106,35 +106,30 @@
 @endsection
 
 @section('content')
-@include('partials.secondary_navigation', ['forceShow' => true])
-
 <div class="fed-page">
     <div class="container fed-shell">
         <div class="fed-hero d-flex flex-wrap justify-content-between align-items-start gap-3">
             <div>
-                <h1><i class="fa-regular fa-globe me-2"></i>{{ $pageTitle }}</h1>
+                <h1><i class="fa fa-globe-africa me-2"></i>{{ $pageTitle }}</h1>
                 <p>{{ $pageDescription }}</p>
             </div>
             <a href="{{ url('records') }}" class="btn btn-sm fed-btn-outline">
-                <i class="fa-regular fa-magnifying-glass me-1"></i>Back to records search
+                <i class="fa fa-search me-1"></i>Back to records search
             </a>
         </div>
 
         @if($hubs->isEmpty())
             <div class="fed-empty">
-                <i class="fa-regular fa-satellite-dish fa-2x mb-3 d-block" style="color:var(--theme-color-primary,#119A48);"></i>
-                No synced country hubs yet. Administrators can register hubs under
-                <strong>Settings → Federated Knowledge Hubs</strong> and run <strong>Sync public data</strong>
-                or wait for the nightly <code>federation:sync</code> job.
+                No member state content is available yet.
             </div>
         @else
             <div class="fed-panel">
                 <div class="fed-panel__body">
                     <form method="get" action="{{ route('federation.browse') }}" class="row g-3 align-items-end">
                         <div class="col-md-4">
-                            <label class="form-label">Country hub</label>
+                            <label class="form-label">Member state</label>
                             <select name="hub" class="form-control select2">
-                                <option value="">All partner hubs</option>
+                                <option value="">All member states</option>
                                 @foreach($hubs as $hub)
                                     <option value="{{ $hub->id }}" {{ (int) request('hub') === (int) $hub->id ? 'selected' : '' }}>
                                         {{ $hub->name }}
@@ -181,14 +176,14 @@
                         @forelse($publications as $row)
                             @include('partials.federation.publication_card', ['row' => $row])
                         @empty
-                            <div class="fed-empty mb-0">No approved partner publications match this filter.</div>
+                            <div class="fed-empty mb-0">No approved member state publications match this filter.</div>
                         @endforelse
                         <div class="py-3">{{ $publications->links() }}</div>
                     @else
                         @forelse($forums as $forum)
                             @include('partials.federation.forum_card', ['forum' => $forum])
                         @empty
-                            <div class="fed-empty mb-0">No approved partner forums match this filter.</div>
+                            <div class="fed-empty mb-0">No approved member state forums match this filter.</div>
                         @endforelse
                         <div class="py-3">{{ $forums->links() }}</div>
                     @endif
@@ -196,7 +191,7 @@
             </div>
 
             <div class="mt-4 mb-2">
-                <h2 class="h5 fw-semibold text-body mb-3">Linked partner hubs</h2>
+                <h2 class="h5 fw-semibold text-body mb-3">Linked member states</h2>
             </div>
             <div class="row">
                 @foreach($hubs as $hub)

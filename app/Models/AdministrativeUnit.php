@@ -13,4 +13,9 @@ class AdministrativeUnit extends Model
 
        return $this->belongsTo(AdministrativeUnit::class,"parent_id","id");
     }
+
+    public function country()
+    {
+        return $this->belongsTo(Country::class, 'country_id', 'id');
+    }
 }
