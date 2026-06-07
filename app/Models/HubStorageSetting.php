@@ -29,11 +29,17 @@ class HubStorageSetting extends Model
         'last_sql_backup_at' => 'datetime',
     ];
 
+    private static ?self $currentCache = null;
+
     public static function current(): self
     {
+        if (self::$currentCache !== null) {
+            return self::$currentCache;
+        }
+
         $record = static::query()->first();
         if ($record) {
-            return $record;
+            return self::$currentCache = $record;
         }
 
         $siteId = trim((string) env('HUB_SITE_ID', ''));
@@ -48,7 +54,7 @@ class HubStorageSetting extends Model
             $sqlRoot = $paths['sql_backups'];
         }
 
-        return static::query()->create([
+        return self::$currentCache = static::query()->create([
             'files_driver' => 'internal',
             'site_storage_id' => $siteId,
             'local_files_root' => $filesRoot,

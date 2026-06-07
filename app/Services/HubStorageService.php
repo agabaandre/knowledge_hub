@@ -16,10 +16,37 @@ use Illuminate\Support\Str;
 
 class HubStorageService
 {
+    private ?HubStorageSetting $settingsCache = null;
+
+    private ?bool $hasSettingsTable = null;
+
+    private ?string $filesRootCache = null;
+
+    private ?bool $publicStorageLinkOkCache = null;
+
+    /** @var 'storage'|'hub-media'|'mixed'|null */
+    private ?string $internalUrlModeCache = null;
+
+    /** @var array<string, bool> */
+    private array $pathHasUploadsCache = [];
+
+    protected function hubStorageSettingsTableExists(): bool
+    {
+        if ($this->hasSettingsTable !== null) {
+            return $this->hasSettingsTable;
+        }
+
+        return $this->hasSettingsTable = Schema::hasTable('hub_storage_settings');
+    }
+
     public function settings(): HubStorageSetting
     {
-        if (! \Illuminate\Support\Facades\Schema::hasTable('hub_storage_settings')) {
-            return new HubStorageSetting([
+        if ($this->settingsCache !== null) {
+            return $this->settingsCache;
+        }
+
+        if (! $this->hubStorageSettingsTableExists()) {
+            return $this->settingsCache = new HubStorageSetting([
                 'files_driver' => 'internal',
                 'local_files_root' => $this->defaultInternalRoot(),
                 'sql_backup_root' => $this->defaultSqlBackupRoot(),
@@ -27,7 +54,7 @@ class HubStorageService
             ]);
         }
 
-        return HubStorageSetting::current();
+        return $this->settingsCache = HubStorageSetting::current();
     }
 
     public function siteStorageId(): string
@@ -37,7 +64,7 @@ class HubStorageService
             return HubSiteIdentifier::sanitize($override);
         }
 
-        if (Schema::hasTable('hub_storage_settings')) {
+        if ($this->hubStorageSettingsTableExists()) {
             $stored = HubStorageSetting::query()->value('site_storage_id');
             if (is_string($stored) && $stored !== '') {
                 return $stored;
@@ -51,7 +78,7 @@ class HubStorageService
     {
         $id = $this->siteStorageId();
 
-        if (! Schema::hasTable('hub_storage_settings')) {
+        if (! $this->hubStorageSettingsTableExists()) {
             return $id;
         }
 
@@ -157,9 +184,13 @@ class HubStorageService
      */
     public function filesRoot(): string
     {
+        if ($this->filesRootCache !== null) {
+            return $this->filesRootCache;
+        }
+
         $settings = $this->settings();
         if ($settings->files_driver !== 'internal') {
-            return $this->legacyInternalRoot();
+            return $this->filesRootCache = $this->legacyInternalRoot();
         }
 
         $configured = $this->configuredInternalRoot();
@@ -168,10 +199,10 @@ class HubStorageService
         if ($this->pathsDiffer($configured, $legacy)
             && $this->pathHasHubUploads($legacy)
             && ! $this->pathHasHubUploads($configured)) {
-            return $legacy;
+            return $this->filesRootCache = $legacy;
         }
 
-        return $configured;
+        return $this->filesRootCache = $configured;
     }
 
     public function isUsingLegacyUploadFallback(): bool
@@ -333,6 +364,10 @@ class HubStorageService
 
     public function pathHasHubUploads(string $root): bool
     {
+        if (array_key_exists($root, $this->pathHasUploadsCache)) {
+            return $this->pathHasUploadsCache[$root];
+        }
+
         foreach (config('hub_storage.content_prefixes', []) as $prefix) {
             $absolute = rtrim($root, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
             if (! is_dir($absolute)) {
@@ -340,12 +375,12 @@ class HubStorageService
             }
             foreach (scandir($absolute) ?: [] as $entry) {
                 if ($entry !== '.' && $entry !== '..') {
-                    return true;
+                    return $this->pathHasUploadsCache[$root] = true;
                 }
             }
         }
 
-        return false;
+        return $this->pathHasUploadsCache[$root] = false;
     }
 
     public function usesExternalFiles(): bool
@@ -521,8 +556,18 @@ class HubStorageService
      */
     public function publicStorageLinkOk(?string $link = null, ?string $filesRoot = null): bool
     {
+        $useDefaults = $link === null && $filesRoot === null;
+        if ($useDefaults && $this->publicStorageLinkOkCache !== null) {
+            return $this->publicStorageLinkOkCache;
+        }
+
         if ($this->settings()->files_driver !== 'internal') {
-            return true;
+            $result = true;
+            if ($useDefaults) {
+                $this->publicStorageLinkOkCache = $result;
+            }
+
+            return $result;
         }
 
         $link = $link ?? public_path('storage');
@@ -531,16 +576,31 @@ class HubStorageService
         $linkReal = $this->realpathOrNull($link);
 
         if ($targetReal === null) {
-            return false;
+            $result = false;
+            if ($useDefaults) {
+                $this->publicStorageLinkOkCache = $result;
+            }
+
+            return $result;
         }
 
         if ($linkReal !== null && $linkReal === $targetReal) {
+            if ($useDefaults) {
+                $this->publicStorageLinkOkCache = true;
+            }
+
             return true;
         }
 
-        return $this->usesLegacyInternalRoot()
+        $result = $this->usesLegacyInternalRoot()
             && (is_link($link) || is_dir($link))
             && $linkReal === $this->realpathOrNull($this->legacyInternalRoot());
+
+        if ($useDefaults) {
+            $this->publicStorageLinkOkCache = $result;
+        }
+
+        return $result;
     }
 
     /**
@@ -661,11 +721,45 @@ class HubStorageService
             }
         }
 
-        if ($this->settings()->files_driver === 'internal' && $this->canServeViaPublicStorage($relative)) {
+        $mode = $this->internalUrlMode();
+        if ($mode === 'storage') {
+            return url('/storage/'.$relative);
+        }
+        if ($mode === 'hub-media') {
+            return url('/hub-media/'.$relative);
+        }
+
+        if ($this->canServeViaPublicStorage($relative)) {
             return url('/storage/'.$relative);
         }
 
         return url('/hub-media/'.$relative);
+    }
+
+    /**
+     * @return 'storage'|'hub-media'|'mixed'
+     */
+    protected function internalUrlMode(): string
+    {
+        if ($this->internalUrlModeCache !== null) {
+            return $this->internalUrlModeCache;
+        }
+
+        if ($this->settings()->files_driver !== 'internal') {
+            return $this->internalUrlModeCache = 'hub-media';
+        }
+
+        if (! $this->publicStorageLinkOk()) {
+            return $this->internalUrlModeCache = 'hub-media';
+        }
+
+        $deprecated = $this->deprecatedUploadsRoot();
+        if ($this->pathHasHubUploads($deprecated)
+            && $this->pathsDiffer($this->filesRoot(), $deprecated)) {
+            return $this->internalUrlModeCache = 'mixed';
+        }
+
+        return $this->internalUrlModeCache = 'storage';
     }
 
     protected function canServeViaPublicStorage(string $relative): bool

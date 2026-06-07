@@ -93,6 +93,11 @@ if (! function_exists('site_favicon_mime')) {
 if(!function_exists('settings')){
 	 function settings()
 	 {
+        static $resolved = null;
+        if ($resolved !== null) {
+            return $resolved;
+        }
+
 		$minutes = 60 * 24; // 24 hours
 
         $base = cache()->remember('settings', $minutes, function () {
@@ -130,10 +135,10 @@ if(!function_exists('settings')){
 			if (! empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'http') !== 0 && strpos($settings->spotlight_banner, '//') !== 0) {
 				$settings->spotlight_banner = branding_image_url($settings->spotlight_banner);
 			}
-			return $settings;
+			return $resolved = $settings;
 		}
 
-		return $base;
+		return $resolved = $base;
 	 }
 }
 

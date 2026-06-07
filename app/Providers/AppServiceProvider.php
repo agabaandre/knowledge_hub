@@ -10,6 +10,7 @@ use App\Services\ChatPDFService;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use App\Models\StaticLink;
 use App\Services\HubStorageService;
@@ -50,6 +51,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $appUrl = config('app.url');
+        if (is_string($appUrl) && $appUrl !== '') {
+            URL::forceRootUrl(rtrim($appUrl, '/'));
+        }
+
         $this->app->extend('translation.loader', function ($loader, $app) {
             return new \App\Translation\MergingTranslationLoader(
                 $app['files'],
