@@ -27,27 +27,22 @@
                             @endif
                         </button>
                         <div class="dropdown-menu dropdown-menu-end">
-                            <div class="px-3 py-2 border-bottom">
+                            <div class="px-3 py-2 border-bottom notranslate" translate="no">
                                 <h6 class="mb-0">{{ ucwords(current_user()->name) }}</h6>
                                 <small class="text-body-secondary">{{ current_user()->email ?? '' }}</small>
                             </div>
-                            @if (is_admin())
-                            <a href="{{ route('admin.index') }}" class="dropdown-item"><i class="fa fa-th-large me-2"></i> Admin Panel</a>
-                            @endif
-                            <a href="{{ route('account.profile') }}" class="dropdown-item"><i class="fa fa-user me-2"></i> My Profile</a>
-                            <a href="{{ route('account.publications') }}" class="dropdown-item"><i class="fa fa-list me-2"></i> Publications</a>
-                            <a href="{{ route('account.my-forums') }}" class="dropdown-item"><i class="fa fa-comments me-2"></i> My Forums</a>
-                            <a href="{{ route('account.my-communities') }}" class="dropdown-item"><i class="fa fa-users me-2"></i> My Communities</a>
-                            <a href="{{ route('account.favourites') }}" class="dropdown-item"><i class="fa fa-star me-2"></i> My Favourites</a>
-                            <a href="{{ route('account.chats') }}" class="dropdown-item"><i class="fa fa-comments me-2"></i> My Chats</a>
-                            <a href="{{ route('account.publish') }}" class="dropdown-item"><i class="fa fa-plus me-2"></i> Publish resource</a>
-                            <hr class="dropdown-divider">
-                            <a href="{{ url('logout') }}" class="dropdown-item text-danger"><i class="fa fa-sign-out-alt me-2"></i> Logout</a>
+                            <div id="khub-account-dropdown-menu" class="notranslate">
+                                @include('layouts.theme1.partials.account_dropdown_menu')
+                            </div>
                         </div>
                     </div>
                 @else
-                    <a href="{{ url('login') }}" class="btn btn-outline-primary btn-sm d-none d-md-inline-block">Log in</a>
-                    <a href="{{ url('register') }}" class="btn btn-primary btn-sm">Sign up</a>
+                    <a href="{{ url('login') }}" class="btn btn-outline-primary btn-sm d-none d-md-inline-block notranslate">
+                        <span class="khub-i18n-text" data-khub-i18n="ui_body.log_in">{{ __('ui_body.log_in') }}</span>
+                    </a>
+                    <a href="{{ url('register') }}" class="btn btn-primary btn-sm notranslate">
+                        <span class="khub-i18n-text" data-khub-i18n="ui_body.sign_up">{{ __('ui_body.sign_up') }}</span>
+                    </a>
                 @endauth
                 <button class="navbar-toggler border-0 py-2 d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#theme1Navbar" aria-label="Menu">
                     <i class="fa fa-bars fs-5"></i>
@@ -55,7 +50,9 @@
             </div>
 
             <div class="collapse navbar-collapse order-lg-2" id="theme1Navbar">
-                @include('layouts.theme1.partials.nav_linkedin')
+                <div id="khub-theme1-nav" class="notranslate w-100">
+                    @include('layouts.theme1.partials.nav_linkedin')
+                </div>
             </div>
         </nav>
     </div>

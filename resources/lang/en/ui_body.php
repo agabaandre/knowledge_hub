@@ -11,7 +11,11 @@ return [
     'my_favourites' => 'My Favourites',
     'my_chats' => 'My Chats',
     'publish_a_resource' => 'Publish a resource',
+    'publish_resource' => 'Publish Resource',
+    'start_discussion' => 'Start Discussion',
     'log_out' => 'Log Out',
+    'log_in' => 'Log in',
+    'sign_up' => 'Sign up',
 
     'footer_address' => 'Address',
     'footer_navigate' => 'Navigate',

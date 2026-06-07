@@ -42,7 +42,7 @@
 </style>
 <section class="home-health-emergencies" aria-labelledby="home-health-emergencies-heading">
     <div class="container">
-        <h2 id="home-health-emergencies-heading">{{ __('frontend_nav.health_emergencies') }}</h2>
+        <h2 id="home-health-emergencies-heading" class="notranslate" data-khub-i18n="home_sections.health_emergencies">{{ __('home_sections.health_emergencies') }}</h2>
         <ul class="home-health-emergencies-list">
             @foreach($healthEmergencies as $tag)
                 <li>

@@ -476,6 +476,7 @@
     'use strict';
 
     window.khubLangMeta = @json($languages);
+    window.khubInitialNativeLabels = @json(\App\Support\UiLocaleLabels::exportForCurrentLocale());
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
     @php
         $runtimeCookiePath = config('supported_locales.cookie_path', '/');
@@ -573,6 +574,9 @@
     function initializeLanguageUI() {
         var currentLang = getCurrentLang();
         updateLanguageUI(currentLang);
+        if (window.khubInitialNativeLabels) {
+            khubApplyNativeLabels(window.khubInitialNativeLabels);
+        }
     }
     
     // Update immediately if DOM is ready
@@ -620,6 +624,10 @@
                     } else {
                         el.placeholder = value;
                     }
+                    var ariaKey = el.getAttribute('data-khub-i18n-aria');
+                    if (ariaKey && labels[ariaKey]) {
+                        el.setAttribute('aria-label', labels[ariaKey]);
+                    }
                     return;
                 }
 
@@ -638,6 +646,8 @@
             });
         });
     }
+
+    window.khubApplyNativeLabels = khubApplyNativeLabels;
 
     function khubReinitNavigation() {
         if (typeof window.jQuery === 'undefined' || !window.jQuery) return;
@@ -683,6 +693,12 @@
         khubReinitNavigation();
         khubRebindCookieButtons();
         khubApplyNativeLabels(labels);
+        window.khubInitialNativeLabels = labels;
+        if (typeof window.bootstrap !== 'undefined' && window.bootstrap.Dropdown) {
+            document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(toggle) {
+                window.bootstrap.Dropdown.getOrCreateInstance(toggle);
+            });
+        }
         if (typeof window.jQuery !== 'undefined' && window.jQuery) {
             window.jQuery('[data-toggle="tooltip"]').tooltip();
         }

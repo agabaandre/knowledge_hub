@@ -36,11 +36,17 @@ class LocaleSwitchController extends Controller
 
         $fragments = [
             'khub-nav-menus' => view('layouts.partials.nav_menus', $shared)->render(),
+            'khub-theme1-nav' => view('layouts.theme1.partials.nav_linkedin', $shared)->render(),
             'khub-footer-i18n' => view('layouts.partials.footer_i18n_row', $shared)->render(),
             'khub-footer-bottom-i18n' => view('layouts.partials.footer_i18n_bottom', $shared)->render(),
             'khub-login-i18n' => view('layouts.partials.login_i18n', $shared)->render(),
             'khub-cookie-i18n' => view('layouts.partials.cookie_i18n', $shared)->render(),
         ];
+
+        if ($user !== null) {
+            $fragments['khub-account-dropdown-menu'] = view('layouts.theme1.partials.account_dropdown_menu')->render();
+            $fragments['khub-secondary-nav'] = view('partials.secondary_navigation', ['forceShow' => true])->render();
+        }
 
         $cookiePath = $this->cookiePath($request);
         $cookieName = (string) config('supported_locales.locale_cookie', 'khub_locale');

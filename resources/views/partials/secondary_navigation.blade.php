@@ -185,14 +185,14 @@
     }
 </style>
 
-<nav class="secondary-nav">
+<nav class="secondary-nav notranslate" id="khub-secondary-nav">
     <div class="container">
         <div class="secondary-nav-container">
             <a href="{{ route('account.my-communities') }}" 
                class="secondary-nav-link {{ request()->routeIs('account.my-communities') ? 'active' : '' }}"
-               title="My Communities">
+               title="{{ __('ui_body.my_communities') }}">
                 <i class="fa fa-users"></i>
-                <span>My Communities</span>
+                <span class="khub-i18n-text" data-khub-i18n="ui_body.my_communities">{{ __('ui_body.my_communities') }}</span>
                 @if($userCommunitiesCount > 0)
                     <span class="secondary-nav-badge">{{ $userCommunitiesCount }}</span>
                 @endif
@@ -200,9 +200,9 @@
             
             <a href="{{ route('account.my-forums') }}" 
                class="secondary-nav-link {{ request()->routeIs('account.my-forums') ? 'active' : '' }}"
-               title="My Forums">
+               title="{{ __('ui_body.my_forums') }}">
                 <i class="fa fa-comments"></i>
-                <span>My Forums</span>
+                <span class="khub-i18n-text" data-khub-i18n="ui_body.my_forums">{{ __('ui_body.my_forums') }}</span>
                 @if($userForumsCount > 0)
                     <span class="secondary-nav-badge">{{ $userForumsCount }}</span>
                 @endif
@@ -210,23 +210,23 @@
             
             <a href="{{ route('account.chats') }}" 
                class="secondary-nav-link {{ request()->routeIs('account.chats') ? 'active' : '' }}"
-               title="My Chats">
+               title="{{ __('ui_body.my_chats') }}">
                 <i class="fa fa-comment-dots"></i>
-                <span>My Chats</span>
+                <span class="khub-i18n-text" data-khub-i18n="ui_body.my_chats">{{ __('ui_body.my_chats') }}</span>
             </a>
             
             <a href="{{ route('account.publications') }}" 
                class="secondary-nav-link {{ $isPublicationsAccountPage || request()->routeIs('account.publish') || request()->routeIs('account.publication') ? 'active' : '' }}"
-               title="My publications">
+               title="{{ __('ui_body.publish_resource') }}">
                 <i class="fa fa-plus-circle"></i>
-                <span>Publish Resource</span>
+                <span class="khub-i18n-text" data-khub-i18n="ui_body.publish_resource">{{ __('ui_body.publish_resource') }}</span>
             </a>
             
             <a href="{{ route('account.my-discussions') }}" 
                class="secondary-nav-link {{ $isMyDiscussionsPage || request()->routeIs('forums.create') ? 'active' : '' }}"
-               title="My forum posts">
+               title="{{ __('ui_body.start_discussion') }}">
                 <i class="fa fa-comments"></i>
-                <span>Start Discussion</span>
+                <span class="khub-i18n-text" data-khub-i18n="ui_body.start_discussion">{{ __('ui_body.start_discussion') }}</span>
             </a>
         </div>
     </div>

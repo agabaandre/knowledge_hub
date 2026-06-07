@@ -227,7 +227,8 @@
                                        placeholder="{{ __('home_sections.search_placeholder_resources') }}"
                                        value="{{ request('term') }}"
                                        aria-label="{{ __('home_sections.search_resources_label') }}"
-                                       data-khub-i18n="home_sections.search_placeholder_resources">
+                                       data-khub-i18n="home_sections.search_placeholder_resources"
+                                       data-khub-i18n-aria="home_sections.search_resources_label">
                                 <button class="btn btn-search notranslate" type="submit" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</button>
                             </div>
                         </div>

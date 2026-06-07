@@ -48,7 +48,11 @@ class UiLocaleLabels
             $keys = array_keys($service->loadEnglishGroup($group));
             foreach ($keys as $key) {
                 $fullKey = "{$group}.{$key}";
-                $out[$fullKey] = (string) __($fullKey);
+                if ($group === 'home_sections') {
+                    $out[$fullKey] = self::homeSection($key);
+                } else {
+                    $out[$fullKey] = (string) __($fullKey);
+                }
             }
         }
 
