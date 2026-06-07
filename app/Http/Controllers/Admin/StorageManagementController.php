@@ -8,6 +8,7 @@ use App\Jobs\MigrateHubStorageJob;
 use App\Models\HubStorageSetting;
 use App\Services\HubDatabaseBackupService;
 use App\Services\HubStorageMetricsService;
+use App\Services\HubStoragePublicationIndexService;
 use App\Services\HubStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -156,12 +157,35 @@ class StorageManagementController extends Controller
         return response()->json($storage->testConnection());
     }
 
-    public function browse(Request $request, HubStorageService $storage)
+    public function browse(Request $request, HubStorageService $storage, HubStoragePublicationIndexService $publicationIndex)
     {
         $area = (string) $request->input('area', 'publications');
         $path = (string) $request->input('path', '');
 
-        return response()->json($storage->browse($area, $path));
+        $result = $storage->browse($area, $path);
+        $base = config('hub_storage.content_prefixes')[$area] ?? 'uploads/publications';
+
+        foreach ($result['items'] as &$item) {
+            if (($item['type'] ?? '') !== 'file') {
+                continue;
+            }
+
+            $storagePath = trim($base.'/'.($item['path'] ?? $item['name'] ?? ''), '/');
+            $item['publications'] = $publicationIndex->referencesForStoragePath($storagePath);
+        }
+        unset($item);
+
+        return response()->json($result);
+    }
+
+    public function publicationReferences(Request $request, HubStoragePublicationIndexService $publicationIndex)
+    {
+        $path = trim(str_replace(['\\', '..'], ['/', ''], (string) $request->input('path', '')), '/');
+
+        return response()->json([
+            'path' => $path,
+            'files' => $publicationIndex->referencesInDirectory($path),
+        ]);
     }
 
     public function browseBackups(Request $request, HubDatabaseBackupService $backup)

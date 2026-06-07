@@ -308,22 +308,69 @@
         background: #f8fafc;
         border-bottom: 1px solid #e2e8f0;
         font-size: 0.85rem;
+        flex-wrap: wrap;
     }
 
-    .storage-browse-list {
-        max-height: 360px;
-        overflow: auto;
+    .storage-file-manager-wrap {
+        min-height: 560px;
+        border-top: 1px solid #e2e8f0;
     }
 
-    .storage-browse-list .list-group-item {
-        border-left: none;
-        border-right: none;
-        cursor: default;
+    .storage-file-manager-wrap #fm {
+        min-height: 560px;
+        height: 100%;
+    }
+
+    .storage-publication-panel {
+        border-top: 1px solid #e2e8f0;
+        background: #fff;
+    }
+
+    .storage-publication-panel-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.65rem 1rem;
+        background: #f8fafc;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.85rem;
+    }
+
+    .storage-publication-table {
+        width: 100%;
+        margin: 0;
+        font-size: 0.84rem;
+    }
+
+    .storage-publication-table th,
+    .storage-publication-table td {
+        padding: 0.55rem 1rem;
+        vertical-align: top;
+        border-bottom: 1px solid #eef2f7;
+    }
+
+    .storage-publication-table th {
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        background: #fafbfd;
+    }
+
+    .storage-publication-role {
+        display: inline-block;
+        font-size: 0.72rem;
+        padding: 0.1rem 0.45rem;
+        border-radius: 999px;
+        background: #e2e8f0;
+        color: #475569;
+        text-transform: capitalize;
+    }
+
+    .storage-file-manager-wrap .fm-navbar,
+    .storage-file-manager-wrap .fm-body {
         font-size: 0.88rem;
-    }
-
-    .storage-browse-list .list-group-item-action {
-        cursor: pointer;
     }
 
     .storage-form-actions {
@@ -549,6 +596,7 @@
         }
     }
 </style>
+<link rel="stylesheet" href="{{ asset('vendor/file-manager/css/file-manager.css') }}">
 @endsection
 
 @section('content')
@@ -1326,20 +1374,46 @@
         {{-- Browse --}}
         <section class="storage-section" id="storage-section-browse">
             <h2 class="storage-section-title"><i class="fa fa-folder-tree"></i> Browse uploaded files</h2>
+            <p class="text-muted small mb-3">Full file manager powered by <a href="https://github.com/alexusmai/laravel-file-manager" target="_blank" rel="noopener">Laravel File Manager</a>. Linked publication names are loaded from the database for the current folder.</p>
             <div class="storage-panel">
                 <div class="storage-browse-toolbar">
                     <span class="text-muted">Content area</span>
-                    <select id="browseArea" class="form-control form-control-sm" style="width:auto; min-width: 180px;">
+                    <select id="browseArea" class="form-control form-control-sm" style="width:auto; min-width: 220px;">
                         @foreach($contentAreas as $key => $prefix)
-                            <option value="{{ $key }}">{{ str_replace('_', ' ', ucfirst($key)) }} ({{ $prefix }})</option>
+                            <option value="{{ $key }}" data-prefix="{{ $prefix }}" @if($loop->first) selected @endif>{{ str_replace('_', ' ', ucfirst($key)) }} ({{ $prefix }})</option>
                         @endforeach
                     </select>
+                    <span class="text-muted ms-auto"><i class="fa fa-hdd me-1"></i> Disk: <code>hub</code></span>
                 </div>
                 <div class="storage-browse-toolbar border-top-0">
                     <span class="text-muted"><i class="fa fa-folder-open me-1"></i> Path</span>
-                    <code id="browsePath" class="small">/</code>
+                    <code id="browsePath" class="small">{{ request('leftPath', 'uploads/publications') }}</code>
                 </div>
-                <ul class="list-group list-group-flush storage-browse-list" id="browseList"></ul>
+                <div class="storage-file-manager-wrap">
+                    <div id="fm"></div>
+                </div>
+                <div class="storage-publication-panel">
+                    <div class="storage-publication-panel-header">
+                        <span class="fw-semibold"><i class="fa fa-book me-1"></i> Linked publications in this folder</span>
+                        <span class="text-muted small" id="browsePublicationMeta">—</span>
+                    </div>
+                    <div class="table-responsive" style="max-height: 220px; overflow: auto;">
+                        <table class="table storage-publication-table mb-0">
+                            <thead>
+                                <tr>
+                                    <th style="width: 28%;">File</th>
+                                    <th>Publication / resource</th>
+                                    <th style="width: 14%;">Type</th>
+                                </tr>
+                            </thead>
+                            <tbody id="browsePublicationRows">
+                                <tr>
+                                    <td colspan="3" class="text-muted">Open a folder in the file manager to see linked publications.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
             <p class="small text-muted mt-2 mb-0">Active files root: <code>{{ $filesRoot }}</code></p>
         </section>
@@ -1445,6 +1519,7 @@
 @endsection
 
 @section('scripts')
+<script src="{{ asset('vendor/file-manager/js/file-manager.js') }}"></script>
 <script>
 (function () {
     function activateStorageTab(tabId) {
@@ -1455,7 +1530,7 @@
             section.classList.toggle('active', section.id === 'storage-section-' + tabId);
         });
         if (tabId === 'browse') {
-            loadBrowse(browsePath || '');
+            refreshPublicationPanel(currentBrowsePath());
         }
     }
 
@@ -1532,47 +1607,109 @@
         return (v / 1024).toFixed(1) + ' TB';
     }
 
-    var browsePath = '';
-    function loadBrowse(subPath) {
-        var area = document.getElementById('browseArea').value;
-        fetch('{{ route('admin.storage.browse') }}?area=' + encodeURIComponent(area) + '&path=' + encodeURIComponent(subPath || ''))
+    var contentAreaPrefixes = @json($contentAreas);
+    var browseAreaSelect = document.getElementById('browseArea');
+
+    function currentBrowsePath() {
+        var params = new URLSearchParams(window.location.search);
+        return params.get('leftPath') || 'uploads/publications';
+    }
+
+    function syncBrowseAreaFromPath() {
+        if (!browseAreaSelect) {
+            return;
+        }
+        var path = currentBrowsePath();
+        Array.prototype.forEach.call(browseAreaSelect.options, function (option) {
+            if ((option.getAttribute('data-prefix') || '') === path) {
+                browseAreaSelect.value = option.value;
+            }
+        });
+    }
+
+    function renderPublicationPanel(path, filesMap) {
+        var tbody = document.getElementById('browsePublicationRows');
+        var meta = document.getElementById('browsePublicationMeta');
+        var pathEl = document.getElementById('browsePath');
+        if (pathEl) {
+            pathEl.textContent = path || '/';
+        }
+        if (!tbody) {
+            return;
+        }
+
+        var rows = [];
+        Object.keys(filesMap || {}).sort(function (a, b) {
+            return a.localeCompare(b, undefined, { sensitivity: 'base' });
+        }).forEach(function (filename) {
+            (filesMap[filename] || []).forEach(function (ref, index) {
+                rows.push(
+                    '<tr>'
+                    + '<td>' + (index === 0 ? '<code>' + filename + '</code>' : '') + '</td>'
+                    + '<td><a href="' + ref.edit_url + '">' + ref.title + '</a></td>'
+                    + '<td><span class="storage-publication-role">' + (ref.role || 'linked').replace(/_/g, ' ') + '</span></td>'
+                    + '</tr>'
+                );
+            });
+        });
+
+        if (!rows.length) {
+            tbody.innerHTML = '<tr><td colspan="3" class="text-muted">No database links found for files in this folder.</td></tr>';
+            if (meta) {
+                meta.textContent = '0 linked file(s)';
+            }
+            return;
+        }
+
+        tbody.innerHTML = rows.join('');
+        if (meta) {
+            meta.textContent = Object.keys(filesMap).length + ' linked file(s)';
+        }
+    }
+
+    function refreshPublicationPanel(path) {
+        fetch('{{ route('admin.storage.publication-references') }}?path=' + encodeURIComponent(path || ''))
             .then(function (r) { return r.json(); })
             .then(function (data) {
-                browsePath = subPath || '';
-                document.getElementById('browsePath').textContent = '/' + (data.path || '');
-                var list = document.getElementById('browseList');
-                list.innerHTML = '';
-                if (!data.items || !data.items.length) {
-                    var empty = document.createElement('li');
-                    empty.className = 'list-group-item text-muted text-center py-4';
-                    empty.textContent = 'This folder is empty.';
-                    list.appendChild(empty);
-                    return;
-                }
-                if (browsePath) {
-                    var up = document.createElement('li');
-                    up.className = 'list-group-item list-group-item-action';
-                    up.innerHTML = '<i class="fa fa-level-up-alt me-2 text-muted"></i><span>Parent folder</span>';
-                    up.addEventListener('click', function () {
-                        var parts = browsePath.split('/').filter(Boolean);
-                        parts.pop();
-                        loadBrowse(parts.join('/'));
-                    });
-                    list.appendChild(up);
-                }
-                (data.items || []).forEach(function (item) {
-                    var li = document.createElement('li');
-                    li.className = 'list-group-item d-flex justify-content-between align-items-center' + (item.type === 'dir' ? ' list-group-item-action' : '');
-                    li.innerHTML = '<span><i class="fa fa-' + (item.type === 'dir' ? 'folder text-warning' : 'file text-secondary') + ' me-2"></i>' + item.name + '</span>'
-                        + (item.size ? '<span class="badge bg-light text-dark">' + formatBytes(item.size) + '</span>' : '');
-                    if (item.type === 'dir') {
-                        li.addEventListener('click', function () { loadBrowse(item.path); });
-                    }
-                    list.appendChild(li);
-                });
+                renderPublicationPanel(data.path || path || '', data.files || {});
+            })
+            .catch(function () {
+                renderPublicationPanel(path || '', {});
             });
     }
-    document.getElementById('browseArea').addEventListener('change', function () { loadBrowse(''); });
+
+    if (browseAreaSelect) {
+        browseAreaSelect.addEventListener('change', function () {
+            var option = browseAreaSelect.options[browseAreaSelect.selectedIndex];
+            var prefix = option.getAttribute('data-prefix') || contentAreaPrefixes[browseAreaSelect.value] || 'uploads/publications';
+            var url = new URL(window.location.href);
+            url.searchParams.set('leftDisk', 'hub');
+            url.searchParams.set('leftPath', prefix);
+            url.hash = 'storage-browse';
+            window.location.href = url.toString();
+        });
+    }
+
+    syncBrowseAreaFromPath();
+    refreshPublicationPanel(currentBrowsePath());
+
+    var nativeFetch = window.fetch.bind(window);
+    window.fetch = function (input, init) {
+        return nativeFetch(input, init).then(function (response) {
+            try {
+                var url = typeof input === 'string' ? input : (input && input.url ? input.url : '');
+                if (url.indexOf('/file-manager/content') !== -1) {
+                    var parsed = new URL(url, window.location.origin);
+                    var disk = parsed.searchParams.get('disk') || 'hub';
+                    var path = parsed.searchParams.get('path') || '';
+                    if (disk === 'hub') {
+                        refreshPublicationPanel(path);
+                    }
+                }
+            } catch (e) {}
+            return response;
+        });
+    };
 
     var backupTablesInDir = [];
     var restorePath = document.getElementById('restoreBackupPath');

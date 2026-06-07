@@ -72,5 +72,6 @@ class Kernel extends HttpKernel
         'installed' => \App\Http\Middleware\EnsureAppInstalled::class,
         'install.guest' => \App\Http\Middleware\RedirectIfInstalled::class,
         'prerequisites' => \App\Http\Middleware\EnsureApplicationPrerequisites::class,
+        'hub.storage.disk' => \App\Http\Middleware\RegisterHubStorageDisk::class,
     ];
 }
