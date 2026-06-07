@@ -242,14 +242,14 @@
 
             <div class="metrics-map-card">
                 <div class="metrics-map-card__head">
-                    <h3><i class="fa fa-globe-africa mr-1"></i> Africa map</h3>
-                    <p class="text-muted mb-0 small">Portal traffic and published member-state indicators</p>
+                    <h3><i class="fa fa-globe mr-1"></i> Geographic map</h3>
+                    <p class="text-muted mb-0 small">Worldwide portal traffic and Africa member-state indicators</p>
                 </div>
                 <div style="padding: 1.25rem 1.5rem;">
                     <ul class="nav admin-africa-map-tabs" id="adminAfricaMapTabs" role="tablist">
                         <li class="nav-item">
                             <button type="button" class="nav-link active" data-map-mode="visits" id="adminMapTabVisits">
-                                <i class="fa fa-chart-line mr-1"></i> Portal traffic
+                                <i class="fa fa-chart-line mr-1"></i> Worldwide traffic
                             </button>
                         </li>
                         <li class="nav-item">

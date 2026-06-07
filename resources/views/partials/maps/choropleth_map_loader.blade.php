@@ -104,6 +104,13 @@
         return loadPromise;
     }
 
+    function configure(newSettings) {
+        settings = newSettings || {};
+        loadPromise = null;
+        topologyCache = null;
+        global.KhChoroplethMap.settings = settings;
+    }
+
     function load() {
         if (settings.type === 'topojson_url' || settings.type === 'geojson_url') {
             return loadTopologyMap();
@@ -207,6 +214,7 @@
     global.KhChoroplethMap = {
         _ready: true,
         settings: settings,
+        configure: configure,
         provider: provider,
         load: load,
         dataLabels: dataLabels,

@@ -35,6 +35,7 @@ if (! function_exists('map_view_context_labels')) {
         return [
             'frontend_countries' => 'Frontend member states map',
             'admin_metrics' => 'Admin dashboard metrics map',
+            'admin_visits' => 'Admin dashboard visits map (worldwide)',
             'admin_rcc' => 'Admin RCC dashboard map',
             'frontend_admin_units' => 'Frontend admin units map',
             'country_hub' => 'Country hub map (owner country)',

@@ -1,5 +1,8 @@
 {{-- Defines window.renderMetricsCharts(chartData) for dashboard AJAX. Highcharts core is loaded in admin header. --}}
 @include('partials.maps.africa_map_config', ['mapContext' => 'admin_metrics'])
+<script>
+window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
+</script>
 @include('partials.maps.africa_map_loader')
 <script>
 (function() {
@@ -201,6 +204,16 @@
     var adminMapMode = 'visits';
     var adminKpiRegionId = null;
 
+    function useMapSettings(scope) {
+        if (!window.KhAfricaMap || typeof KhAfricaMap.configure !== 'function') {
+            return;
+        }
+        var settings = scope === 'world'
+            ? (window.__khWorldMapSettings || {})
+            : (window.__khAfricaMapSettings || {});
+        KhAfricaMap.configure(settings);
+    }
+
     function destroyAdminMap() {
         if (adminMapChart) {
             try { adminMapChart.destroy(); } catch (e) { /* ignore */ }
@@ -236,7 +249,12 @@
         config = config || {};
         var joinBy = (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
         return {
-            chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 480, style: { fontFamily: 'inherit' } },
+            chart: {
+                map: KhAfricaMap.chartMapOption(mapAsset),
+                backgroundColor: '#f8f9fa',
+                height: config.height || 480,
+                style: { fontFamily: 'inherit' }
+            },
             title: { text: null },
             credits: { enabled: true, text: config.credits || KhAfricaMap.creditsPrefix(), style: { fontSize: '10px', color: '#94a3b8' } },
             mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
@@ -254,7 +272,7 @@
                 mapData: KhAfricaMap.seriesMapData(mapAsset),
                 data: mapData,
                 joinBy: joinBy,
-                dataLabels: KhAfricaMap.dataLabels(),
+                dataLabels: config.dataLabels !== undefined ? config.dataLabels : KhAfricaMap.dataLabels(),
                 tooltip: config.tooltip || { pointFormat: '<b>{point.name}</b><br/>{point.value}' }
             }]
         };
@@ -308,12 +326,13 @@
         }
         updateVisitsMapStats(data);
         var total = data.values.reduce(function (a, b) { return a + b; }, 0);
-        updateAdminScopeSummary('<strong>Portal traffic</strong><span class="admin-map-scope-summary__value">' + total.toLocaleString() + ' visits</span><span class="admin-map-scope-summary__meta">' + data.values.length + ' countries with activity</span>');
+        updateAdminScopeSummary('<strong>Worldwide portal traffic</strong><span class="admin-map-scope-summary__value">' + total.toLocaleString() + ' visits</span><span class="admin-map-scope-summary__meta">' + data.values.length + ' countries with activity</span>');
         var min = Math.min.apply(null, data.values);
         var max = Math.max.apply(null, data.values);
         updateAdminMapLegend('Visits by country', min, max, function (v) { return Number(v).toLocaleString() + ' visits'; });
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
+            useMapSettings('world');
             KhAfricaMap.load().then(function(mapAsset) {
                 var joinBy = KhAfricaMap.joinKey();
                 var iso3Codes = data.iso3 || [];
@@ -331,7 +350,9 @@
                     return point;
                 });
                 renderAdminAfricaMap(mapAsset, mapData, {
-                    min: 0, max: max, seriesName: 'Visits', credits: 'Map © Natural Earth · Portal access logs',
+                    min: 0, max: max, height: 504, seriesName: 'Visits',
+                    credits: KhAfricaMap.creditsPrefix() + ' · Portal access logs',
+                    dataLabels: { enabled: false },
                     tooltip: { useHTML: true, pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits' }
                 });
             }).catch(function() {
@@ -368,6 +389,7 @@
         });
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
+            useMapSettings('africa');
             KhAfricaMap.load().then(function(mapAsset) {
                 var mapData = mapPayload.points.map(function (p) {
                     return KhAfricaMap.mapPoint(p);
