@@ -38,7 +38,7 @@
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Default map</label>
-                            <select name="default_map_id" class="form-control no-select2">
+                            <select name="default_map_id" class="form-select map-assignment-select">
                                 @if($defaultMapId !== '' && empty($definitions[$defaultMapId]))
                                     <option value="{{ $defaultMapId }}" selected>Saved: {{ $defaultMapId }} (missing definition)</option>
                                 @endif
@@ -53,7 +53,7 @@
                         @foreach($viewContexts as $contextKey => $contextLabel)
                             <div class="mb-3">
                                 <label class="form-label">{{ $contextLabel }}</label>
-                                <select name="view_map_{{ $contextKey }}" class="form-control no-select2">
+                                <select name="view_map_{{ $contextKey }}" class="form-select map-assignment-select">
                                     @php $selectedViewMap = $viewAssignments[$contextKey] ?? ''; @endphp
                                     <option value="" {{ $selectedViewMap === '' ? 'selected' : '' }}>Use default</option>
                                     @if($selectedViewMap !== '' && empty($definitions[$selectedViewMap]))
@@ -165,6 +165,19 @@
 
 @section('scripts')
 <script>
+(function () {
+    var form = document.getElementById('mapAssignmentsForm');
+    if (form) {
+        form.addEventListener('submit', function () {
+            form.querySelectorAll('select.map-assignment-select').forEach(function (select) {
+                if (typeof $ !== 'undefined' && $(select).data('select2')) {
+                    $(select).select2('destroy');
+                }
+            });
+        });
+    }
+})();
+
 document.querySelectorAll('.js-map-preview').forEach(function (btn) {
     btn.addEventListener('click', function () {
         var slug = this.getAttribute('data-slug');

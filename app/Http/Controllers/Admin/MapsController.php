@@ -17,6 +17,7 @@ class MapsController extends Controller
 
     public function index()
     {
+        $this->mapsRepository->ensureMapAssignmentColumns();
         $definitions = map_all_definitions();
         $managed = $this->mapsRepository->managedDefinitions();
         $assignments = session('mapAssignments') ?: $this->mapsRepository->assignmentState();
@@ -104,7 +105,7 @@ class MapsController extends Controller
         if (! $saved) {
             return redirect()
                 ->route('admin.maps.index')
-                ->with('message', 'Map preferences could not be saved. Run database migrations on this server (php artisan migrate), then try again.')
+                ->with('message', 'Map preferences could not be saved. Per-view assignment columns may be missing — run php artisan migrate on this server, then try again.')
                 ->with('status', 'failure');
         }
 

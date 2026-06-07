@@ -172,7 +172,7 @@ class MapsRepository
         $hasDefaultColumn = Schema::hasColumn('setting', 'africa_map_version');
         $hasViewColumn = Schema::hasColumn('setting', 'africa_map_view_versions');
         $hasAdminUnitsColumn = Schema::hasColumn('setting', 'show_admin_units_map');
-        $columnsReady = $hasDefaultColumn;
+        $columnsReady = $hasDefaultColumn && $hasViewColumn && $hasAdminUnitsColumn;
 
         if ($row) {
             if ($hasDefaultColumn && ! empty($row->africa_map_version)) {
@@ -268,6 +268,8 @@ class MapsRepository
 
     public function saveAssignments(Request $request): bool
     {
+        $this->ensureMapAssignmentColumns();
+
         if (! Schema::hasColumn('setting', 'africa_map_version')) {
             return false;
         }
@@ -284,7 +286,8 @@ class MapsRepository
                 : (string) config('maps.default_version_id', 'africa-sadr-topo-2.3.3'),
         ];
 
-        if (Schema::hasColumn('setting', 'africa_map_view_versions')) {
+        $viewColumnReady = Schema::hasColumn('setting', 'africa_map_view_versions');
+        if ($viewColumnReady) {
             $viewVersions = [];
             foreach (array_keys(map_view_context_labels()) as $context) {
                 $selected = trim((string) $request->input('view_map_'.$context, ''));
@@ -308,6 +311,40 @@ class MapsRepository
             clear_settings_cache();
         }
 
-        return $updated >= 0;
+        return $updated >= 0 && $viewColumnReady;
+    }
+
+    /**
+     * Ensure per-view assignment columns exist (handles servers where the first migration ran partially).
+     */
+    public function ensureMapAssignmentColumns(): void
+    {
+        if (! Schema::hasTable('setting')) {
+            return;
+        }
+
+        if (Schema::hasColumn('setting', 'africa_map_view_versions')
+            && Schema::hasColumn('setting', 'show_admin_units_map')) {
+            return;
+        }
+
+        Schema::table('setting', function ($table) {
+            if (! Schema::hasColumn('setting', 'africa_map_view_versions')) {
+                if (Schema::hasColumn('setting', 'africa_map_custom_versions')) {
+                    $table->text('africa_map_view_versions')->nullable()->after('africa_map_custom_versions');
+                } elseif (Schema::hasColumn('setting', 'africa_map_version')) {
+                    $table->text('africa_map_view_versions')->nullable()->after('africa_map_version');
+                } else {
+                    $table->text('africa_map_view_versions')->nullable();
+                }
+            }
+            if (! Schema::hasColumn('setting', 'show_admin_units_map')) {
+                if (Schema::hasColumn('setting', 'africa_map_view_versions')) {
+                    $table->boolean('show_admin_units_map')->default(false)->after('africa_map_view_versions');
+                } else {
+                    $table->boolean('show_admin_units_map')->default(false);
+                }
+            }
+        });
     }
 }
