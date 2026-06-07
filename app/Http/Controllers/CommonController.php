@@ -66,4 +66,9 @@ class CommonController extends Controller
         return response()->json(['url' => $url]);
     }
 
+    public function favicon()
+    {
+        return redirect()->away(site_favicon_url(), 301);
+    }
+
 }

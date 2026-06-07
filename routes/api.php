@@ -164,10 +164,9 @@ Route::prefix('events')->group(function () {
     Route::get('/', [EventsApiController::class, 'index'])->name('events.index');
     Route::get('/{id}', [EventsApiController::class, 'show'])->name('events.show');
 
-Route::group(['middleware' => 'auth:api'], function () {
-    Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
-});
-
+    Route::middleware('auth:api')->group(function () {
+        Route::post('/', [EventsApiController::class, 'store'])->name('events.store');
+    });
 });
 
 Route::prefix('communities')->group(function () {

@@ -134,9 +134,7 @@ Route::get('password/reset/{token}', [ResetPasswordController::class, 'showReset
 Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('password.update');
 
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
-Route::get('/favicon.ico', function () {
-    return redirect(site_favicon_url(), 301);
-})->name('favicon');
+Route::get('/favicon.ico', [CommonController::class, 'favicon'])->name('favicon');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour.get'); // Backward compatibility
@@ -145,7 +143,7 @@ Route::get('/logout', function () {
     Auth::logout();
     clear_cache();
     return redirect()->route('home');
-});
+})->name('logout.get');
 
 if(states_enabled()):
 
