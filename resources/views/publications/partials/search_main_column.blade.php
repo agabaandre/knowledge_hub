@@ -26,7 +26,7 @@
         </div>
         @endif
 
-        @if(!empty($aiSearchInsights))
+        @if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null))
             @include('publications.partials.ai_search_insights')
         @endif
 

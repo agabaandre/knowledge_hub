@@ -371,7 +371,8 @@ class PublicationsController extends Controller
         $data['aiSearchInsights'] = null;
         $data['aiSearchEnabled'] = (bool) (settings()->enable_ai_search ?? false);
 
-        if ($data['aiSearchEnabled'] && $request->filled('term')) {
+        $searchTerm = trim((string) ($request->input('term', '')));
+        if ($data['aiSearchEnabled'] && mb_strlen($searchTerm) >= 2) {
             try {
                 $data['aiSearchInsights'] = app(\App\Services\AiSearchInsightsService::class)->generate(
                     $request,

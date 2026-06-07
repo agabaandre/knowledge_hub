@@ -45,35 +45,54 @@ class AiSearchInsightsService
             return null;
         }
 
-        if (AiConfig::resolveChatProviderForFeature('ai_search') === null) {
-            return null;
-        }
-
         $cacheKey = 'ai_search_insights:'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
-            return Cache::remember($cacheKey, now()->addMinutes(15), function () use (
+            $cached = Cache::get($cacheKey);
+            if (is_array($cached) && self::isDisplayable($cached)) {
+                return $cached;
+            }
+
+            $built = $this->buildInsights(
                 $request,
                 $term,
                 $publicationsPaginator,
                 $searchForums,
                 $searchCommunities,
                 $federatedPublications
-            ) {
-                return $this->buildInsights(
-                    $request,
-                    $term,
-                    $publicationsPaginator,
-                    $searchForums,
-                    $searchCommunities,
-                    $federatedPublications
-                );
-            });
+            );
+
+            if (self::isDisplayable($built)) {
+                Cache::put($cacheKey, $built, now()->addMinutes(15));
+            }
+
+            return $built;
         } catch (\Throwable $e) {
-            Log::debug('ai_search_insights.failed', ['message' => $e->getMessage()]);
+            Log::warning('ai_search_insights.failed', [
+                'term' => $term,
+                'message' => $e->getMessage(),
+            ]);
 
             return null;
         }
+    }
+
+    /**
+     * @param  array<string, mixed>|null  $insights
+     */
+    public static function isDisplayable(?array $insights): bool
+    {
+        if ($insights === null || $insights === []) {
+            return false;
+        }
+
+        foreach (['overview', 'key_points', 'publications', 'forums', 'communities', 'health_topics', 'internet_results', 'external_resources'] as $key) {
+            if (! empty($insights[$key])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -95,10 +114,19 @@ class AiSearchInsightsService
         $themeCatalog = $this->themeCatalog($term);
         $subThemeCatalog = $this->subThemeCatalog($term);
         $authorCatalog = $this->authorCatalog($term, $publicationCatalog);
-        $internetResults = $this->internetSearch->search($term, 3);
+        $internetResults = $this->fetchInternetResults($term);
 
-        if ($publicationCatalog === [] && $forumCatalog === [] && $communityCatalog === [] && $federatedCatalog === []
-            && $healthTopicCatalog === [] && $internetResults === []) {
+        if (! $this->hasSourceContent(
+            $publicationCatalog,
+            $forumCatalog,
+            $communityCatalog,
+            $federatedCatalog,
+            $healthTopicCatalog,
+            $internetResults,
+            $themeCatalog,
+            $subThemeCatalog,
+            $authorCatalog
+        )) {
             return null;
         }
 
@@ -132,31 +160,102 @@ class AiSearchInsightsService
             'internet_results' => $internetResults,
         ];
 
-        $result = app(AiCompletionService::class)->completeForFeature('ai_search', [
-            ['role' => 'system', 'content' => $system],
-            ['role' => 'user', 'content' => json_encode($userPayload, JSON_UNESCAPED_UNICODE)],
-        ], 700, null, true);
+        $aiProvider = AiConfig::resolveChatProviderForFeature('ai_search');
+        if ($aiProvider !== null) {
+            $result = app(AiCompletionService::class)->completeForFeature('ai_search', [
+                ['role' => 'system', 'content' => $system],
+                ['role' => 'user', 'content' => json_encode($userPayload, JSON_UNESCAPED_UNICODE)],
+            ], 700, null, true);
 
-        if (! ($result['ok'] ?? false)) {
-            return $this->fallbackInsights($internetResults, $healthTopicCatalog, $publicationCatalog, $forumCatalog, $communityCatalog);
+            if ($result['ok'] ?? false) {
+                $decoded = json_decode((string) ($result['content'] ?? ''), true);
+                if (is_array($decoded) && trim((string) ($decoded['overview'] ?? '')) !== '') {
+                    $normalized = $this->normalizeInsights(
+                        $decoded,
+                        $publicationCatalog,
+                        $forumCatalog,
+                        $communityCatalog,
+                        $healthTopicCatalog,
+                        $internetResults,
+                        $themeCatalog,
+                        $subThemeCatalog,
+                        $authorCatalog
+                    );
+
+                    if (self::isDisplayable($normalized)) {
+                        return $normalized;
+                    }
+                }
+            } else {
+                Log::debug('ai_search_insights.ai_unavailable', [
+                    'term' => $term,
+                    'error' => $result['error'] ?? 'unknown',
+                ]);
+            }
+        } else {
+            Log::debug('ai_search_insights.no_provider', ['term' => $term]);
         }
 
-        $decoded = json_decode((string) ($result['content'] ?? ''), true);
-        if (! is_array($decoded) || trim((string) ($decoded['overview'] ?? '')) === '') {
-            return $this->fallbackInsights($internetResults, $healthTopicCatalog, $publicationCatalog, $forumCatalog, $communityCatalog);
-        }
-
-        return $this->normalizeInsights(
-            $decoded,
+        return $this->fallbackInsights(
+            $internetResults,
+            $healthTopicCatalog,
             $publicationCatalog,
             $forumCatalog,
             $communityCatalog,
-            $healthTopicCatalog,
-            $internetResults,
             $themeCatalog,
             $subThemeCatalog,
             $authorCatalog
         );
+    }
+
+    /**
+     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     */
+    private function fetchInternetResults(string $term): array
+    {
+        try {
+            return $this->internetSearch->search($term, 3);
+        } catch (\Throwable $e) {
+            Log::debug('ai_search_insights.internet_failed', [
+                'term' => $term,
+                'message' => $e->getMessage(),
+            ]);
+
+            return [];
+        }
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $publicationCatalog
+     * @param  list<array<string, mixed>>  $forumCatalog
+     * @param  list<array<string, mixed>>  $communityCatalog
+     * @param  list<array<string, mixed>>  $federatedCatalog
+     * @param  list<array<string, mixed>>  $healthTopicCatalog
+     * @param  list<array<string, mixed>>  $internetResults
+     * @param  list<array<string, mixed>>  $themeCatalog
+     * @param  list<array<string, mixed>>  $subThemeCatalog
+     * @param  list<array<string, mixed>>  $authorCatalog
+     */
+    private function hasSourceContent(
+        array $publicationCatalog,
+        array $forumCatalog,
+        array $communityCatalog,
+        array $federatedCatalog,
+        array $healthTopicCatalog,
+        array $internetResults,
+        array $themeCatalog = [],
+        array $subThemeCatalog = [],
+        array $authorCatalog = []
+    ): bool {
+        return $publicationCatalog !== []
+            || $forumCatalog !== []
+            || $communityCatalog !== []
+            || $federatedCatalog !== []
+            || $healthTopicCatalog !== []
+            || $internetResults !== []
+            || $themeCatalog !== []
+            || $subThemeCatalog !== []
+            || $authorCatalog !== [];
     }
 
     /**
@@ -172,23 +271,38 @@ class AiSearchInsightsService
         array $healthTopicCatalog,
         array $publicationCatalog,
         array $forumCatalog,
-        array $communityCatalog
+        array $communityCatalog,
+        array $themeCatalog = [],
+        array $subThemeCatalog = [],
+        array $authorCatalog = []
     ): ?array {
-        if ($internetResults === [] && $healthTopicCatalog === [] && $publicationCatalog === []) {
+        if (! $this->hasSourceContent(
+            $publicationCatalog,
+            $forumCatalog,
+            $communityCatalog,
+            [],
+            $healthTopicCatalog,
+            $internetResults,
+            $themeCatalog,
+            $subThemeCatalog,
+            $authorCatalog
+        )) {
             return null;
         }
 
-        return $this->normalizeInsights(
+        $normalized = $this->normalizeInsights(
             ['overview' => '', 'key_points' => [], 'featured_publication_ids' => [], 'featured_forum_ids' => [], 'featured_community_ids' => [], 'featured_health_topic_ids' => [], 'external_resources' => []],
             $publicationCatalog,
             $forumCatalog,
             $communityCatalog,
             $healthTopicCatalog,
             $internetResults,
-            [],
-            [],
-            []
+            $themeCatalog,
+            $subThemeCatalog,
+            $authorCatalog
         );
+
+        return self::isDisplayable($normalized) ? $normalized : null;
     }
 
     /**
@@ -479,6 +593,9 @@ class AiSearchInsightsService
                 $pickForums[] = $forumById->get($id);
             }
         }
+        if ($pickForums === [] && $forumCatalog !== []) {
+            $pickForums = array_slice($forumCatalog, 0, 2);
+        }
 
         $pickCommunities = [];
         foreach ((array) ($decoded['featured_community_ids'] ?? []) as $id) {
@@ -486,6 +603,9 @@ class AiSearchInsightsService
             if ($communityById->has($id)) {
                 $pickCommunities[] = $communityById->get($id);
             }
+        }
+        if ($pickCommunities === [] && $communityCatalog !== []) {
+            $pickCommunities = array_slice($communityCatalog, 0, 2);
         }
 
         $pickHealthTopics = [];
@@ -524,7 +644,13 @@ class AiSearchInsightsService
         }
 
         $overview = Str::limit(trim((string) ($decoded['overview'] ?? '')), 500);
-        if ($overview === '' && ($pickHealthTopics !== [] || $internetResults !== [] || $pickPublications !== [])) {
+        if ($overview === '' && (
+            $pickHealthTopics !== []
+            || $internetResults !== []
+            || $pickPublications !== []
+            || $pickForums !== []
+            || $pickCommunities !== []
+        )) {
             $overview = __('publications.search.ai_overview_fallback');
         }
 

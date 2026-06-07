@@ -1,4 +1,4 @@
-@if(!empty($aiSearchInsights) && !empty($aiSearchInsights['overview']))
+@if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null) && !empty($aiSearchInsights['overview']))
 <div class="ai-search-insights mb-4" style="background:#fff;border-radius:0.5rem;padding:1rem 1.15rem;box-shadow:0 2px 10px rgba(15,23,42,.04);">
     <div class="d-flex align-items-start gap-2 mb-2">
         <span style="width:2rem;height:2rem;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--theme-color-primary,#119A48),color-mix(in srgb,var(--theme-color-primary,#119A48) 70%,#0ea5e9));color:#fff;flex-shrink:0;">
