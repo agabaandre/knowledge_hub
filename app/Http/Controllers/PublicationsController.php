@@ -368,6 +368,22 @@ class PublicationsController extends Controller
         $data['searchHeading'] = $seo['searchHeading'];
         $data['ogType'] = 'website';
         $data['jsonLdFlags'] = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_INVALID_UTF8_SUBSTITUTE;
+        $data['aiSearchInsights'] = null;
+        $data['aiSearchEnabled'] = (bool) (settings()->enable_ai_search ?? false);
+
+        if ($data['aiSearchEnabled'] && $request->filled('term')) {
+            try {
+                $data['aiSearchInsights'] = app(\App\Services\AiSearchInsightsService::class)->generate(
+                    $request,
+                    $data['publications'],
+                    $data['searchForums'],
+                    $data['searchCommunities'],
+                    $data['federatedPublications']
+                );
+            } catch (\Throwable $e) {
+                $data['aiSearchInsights'] = null;
+            }
+        }
 
         return $data;
     }

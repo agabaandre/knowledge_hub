@@ -30,22 +30,8 @@
         $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
     }
     
-    // Check if AI Search is enabled
-    $aiSearchEnabled = settings()->enable_ai_search ?? true;
-    
-    // Get primary color and create a shade for AI Search button
+    $aiSearchEnabled = (bool) ($settings->enable_ai_search ?? false);
     $primaryColor = $settings->primary_color ?? '#119A48';
-    // Create a darker shade (reduce lightness by ~15%)
-    $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
-    if ($primaryColorRgb) {
-        $aiSearchColor = sprintf("#%02x%02x%02x", 
-            max(0, min(255, (int)($primaryColorRgb[0] * 0.85))),
-            max(0, min(255, (int)($primaryColorRgb[1] * 0.85))),
-            max(0, min(255, (int)($primaryColorRgb[2] * 0.85)))
-        );
-    } else {
-        $aiSearchColor = '#0e7a3a'; // Fallback darker green
-    }
 @endphp
 <style>
     .home-spotlight {
@@ -66,6 +52,10 @@
         position: relative;
         z-index: 1;
     }
+    .home-spotlight .search-btn-unified:hover {
+        opacity: 0.92;
+        filter: brightness(0.96);
+    }
 </style>
 <div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }} --spotlight-overlay-bg: {{ !empty($bannerImage) ? $overlayGradient : 'transparent' }};">
     <h1 class="sr-only notranslate">
@@ -81,13 +71,12 @@
                            name="term" value="{{ old('term') }}" placeholder="{{ __('home_sections.search_placeholder_keywords') }}" data-khub-i18n="home_sections.search_placeholder_keywords" />
                 </div>
             </div>
-            <div class="{{ $aiSearchEnabled ? 'col-xl-2' : 'col-xl-4' }} col-lg-{{ $aiSearchEnabled ? '2' : '4' }} col-md-{{ $aiSearchEnabled ? '2' : '4' }} col-sm-12 col-12 bg-show">
+            <div class="col-xl-4 col-lg-4 col-md-4 col-sm-12 col-12 bg-show">
                 <div class="form-group mb-0 position-relative">
-                    <button class="btn full-width text-white fs-md ai-search-btn-primary" type="submit" style="
+                    <button class="btn full-width text-white fs-md search-btn-unified" type="submit" style="
                         background: {{ $primaryColor }};
                         border: none;
-                        border-radius: {{ $aiSearchEnabled ? '0' : '0 0.375rem 0.375rem 0' }};
-                        border-right: {{ $aiSearchEnabled ? '1px solid rgba(255,255,255,0.3)' : 'none' }};
+                        border-radius: 0 0.375rem 0.375rem 0;
                         height: 100%;
                         min-height: 62px;
                         display: flex;
@@ -95,44 +84,25 @@
                         justify-content: center;
                         gap: 0.5rem;
                     ">
-                        <i class="fa fa-magnifying-glass"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
+                        <i class="fa fa-magnifying-glass"></i>
+                        <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
+                        @if($aiSearchEnabled)
+                            <span class="d-none d-md-inline" style="opacity:0.85;font-size:0.8rem;">+ AI insights</span>
+                        @endif
                     </button>
                 </div>
             </div>
-            @if($aiSearchEnabled)
-            <div class="col-xl-2 col-lg-2 col-md-2 col-sm-12 col-12 bg-show">
-                <div class="form-group mb-0 position-relative">
-                    <button type="button" class="btn full-width text-white fs-md ai-search-btn-home" style="
-                        background: {{ $aiSearchColor }};
-                        border: none;
-                        border-radius: 0;
-                        border-left: 1px solid rgba(255,255,255,0.3);
-                        height: 100%;
-                        min-height: 62px;
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        gap: 0.5rem;
-                    ">
-                        <i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span>
-                    </button>
-                </div>
-            </div>
-            @endif
         </div>
         @include('partials.search.advanced_search')
-        <div class="{{ $aiSearchEnabled ? 'col-md-6' : 'col-md-12' }} sm-show mt-1 d-md-none">
-            <button class="btn full-width text-white fs-md py-3 ai-search-btn-primary" type="submit" style="background: {{ $primaryColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <i class="fa fa-magnifying-glass"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
+        <div class="col-md-12 sm-show mt-1 d-md-none">
+            <button class="btn full-width text-white fs-md py-3 search-btn-unified" type="submit" style="background: {{ $primaryColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                <i class="fa fa-magnifying-glass"></i>
+                <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
+                @if($aiSearchEnabled)
+                    <span style="opacity:0.85;font-size:0.8rem;">+ AI</span>
+                @endif
             </button>
         </div>
-        @if($aiSearchEnabled)
-        <div class="col-md-6 sm-show mt-1 d-md-none">
-            <button type="button" class="btn full-width text-white fs-md py-3 ai-search-btn-home" style="background: {{ $aiSearchColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span>
-            </button>
-        </div>
-        @endif
         </form>
 
         @if(settings()->show_quotes ?? false)
@@ -142,47 +112,5 @@
             </div>
         </div>
         @endif
-        
-        @if($aiSearchEnabled)
-        <style>
-            .ai-search-btn-primary:hover {
-                opacity: 0.9 !important;
-                filter: brightness(0.95) !important;
-            }
-            .ai-search-btn-home:hover {
-                opacity: 0.9 !important;
-                filter: brightness(0.95) !important;
-            }
-        </style>
-        <script src="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/js/lobibox.min.js"></script>
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/css/lobibox.min.css" />
-        <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const aiSearchBtns = document.querySelectorAll('.ai-search-btn-home');
-            aiSearchBtns.forEach(function(btn) {
-                btn.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    if (typeof Lobibox !== 'undefined') {
-                        Lobibox.notify('info', {
-                            title: 'AI Search',
-                            msg: 'Coming Soon',
-                            sound: false,
-                            delay: 3000,
-                            position: 'top right'
-                        });
-                    } else {
-                        alert('AI Search - Coming Soon');
-                    }
-                });
-            });
-        });
-        </script>
-        @endif
     </div>
-
-    @if(settings()->show_health_themes ?? true)
-    <div class="row spot-row col-sm-12 d-flex align-items-center" style="margin-top: 1rem;">
-        @include('home.partials.theme_tabs')
-    </div>
-    @endif
 </div>

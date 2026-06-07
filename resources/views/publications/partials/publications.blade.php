@@ -184,8 +184,8 @@
          @include('partials.federation.publication_card', ['row' => $row])
      @endforeach
      <p class="mb-3">
-         <a href="{{ route('federation.browse', ['term' => request('term')]) }}" class="btn btn-sm btn-outline-primary">
-             Browse all partner hub resources
+         <a href="{{ route('federation.browse', ['term' => request('term')]) }}" class="btn btn-sm theme-bg text-white">
+             <i class="fa fa-globe-africa me-1"></i>{{ __('frontend_nav.partner_hubs') }}
          </a>
      </p>
  @endif

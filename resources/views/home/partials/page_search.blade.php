@@ -30,22 +30,8 @@
        $searchAction = url('records/search');
    }
    
-   // Check if AI Search is enabled
-   $aiSearchEnabled = settings()->enable_ai_search ?? true;
-   
-   // Get primary color and create a shade for AI Search button
+   $aiSearchEnabled = (bool) (settings()->enable_ai_search ?? false);
    $primaryColor = settings()->primary_color ?? '#119A48';
-   // Create a darker shade (reduce lightness by ~15%)
-   $primaryColorRgb = sscanf($primaryColor, "#%02x%02x%02x");
-   if ($primaryColorRgb) {
-       $aiSearchColor = sprintf("#%02x%02x%02x", 
-           max(0, min(255, (int)($primaryColorRgb[0] * 0.85))),
-           max(0, min(255, (int)($primaryColorRgb[1] * 0.85))),
-           max(0, min(255, (int)($primaryColorRgb[2] * 0.85)))
-       );
-   } else {
-       $aiSearchColor = '#0e7a3a'; // Fallback darker green
-   }
 @endphp
 
  <div class="pt-5 pt-0 custom-bg">
@@ -61,16 +47,15 @@
                          action="{{ $searchAction }}"
                          class="sidebar-search-form px-0 py-0 filter">
                          <div class="search-buttons-container" style="display: flex; align-items: stretch; width: 100%;">
-                             <input class="px-3 py-0 main_search notranslate" style="font-size: 12pt; flex: {{ $aiSearchEnabled ? '1' : '2' }}; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
+                             <input class="px-3 py-0 main_search notranslate" style="font-size: 12pt; flex: 1; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
                                  type="search" name="term" placeholder="{{ __('home_sections.search_placeholder') }}" data-khub-i18n="home_sections.search_placeholder">
 
                              <button type="submit" class="search-btn-primary bg-show" style="
                                  background: {{ $primaryColor }};
                                  border: none;
-                                 border-right: {{ $aiSearchEnabled ? '1px solid rgba(255,255,255,0.3)' : 'none' }};
-                                 border-radius: {{ $aiSearchEnabled ? '0' : '0 4px 4px 0' }};
+                                 border-radius: 0 4px 4px 0;
                                  white-space: nowrap;
-                                 {{ $aiSearchEnabled ? 'flex-shrink: 0;' : 'flex: 1; min-width: 120px;' }}
+                                 flex-shrink: 0;
                                  padding: 0.5rem 1rem;
                                  min-height: 40px;
                                  display: flex;
@@ -78,24 +63,7 @@
                                  justify-content: center;
                                  gap: 0.5rem;
                                  color: white;
-                             "><i class="ti-search"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span></button>
-                             
-                             @if($aiSearchEnabled)
-                                 <button type="button" class="ai-search-btn bg-show" style="
-                                     background: {{ $aiSearchColor }};
-                                     border: none;
-                                     border-left: 1px solid rgba(255,255,255,0.3);
-                                     white-space: nowrap;
-                                     flex-shrink: 0;
-                                     padding: 0.5rem 0.5rem;
-                                     min-height: 40px;
-                                     display: flex;
-                                     align-items: center;
-                                     justify-content: center;
-                                     gap: 0.5rem;
-                                     color: white;
-                                 "><i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span></button>
-                             @endif
+                             "><i class="ti-search"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>@if($aiSearchEnabled)<span class="d-none d-md-inline" style="opacity:0.85;font-size:0.78rem;">+ AI</span>@endif</button>
                          </div>
 
                          @if ($show_types)
@@ -111,7 +79,6 @@
                      </form>
                  </div>
                  
-                 @if($aiSearchEnabled)
                  <style>
                      .search-buttons-container {
                          display: flex !important;
@@ -127,13 +94,11 @@
                          margin-top: 8px !important;
                          padding: 0.8rem 1rem !important;
                      }
-                     .search-buttons-container .search-btn-primary,
-                     .search-buttons-container .ai-search-btn {
-                         /* Override any conflicting styles */
+                     .search-buttons-container .search-btn-primary {
                          position: relative !important;
                          margin: 0 !important;
                          float: none !important;
-                         border-radius: 0 !important;
+                         border-radius: 0 4px 4px 0 !important;
                          height: 60px !important;
                          margin-top: 3px !important;
                          padding: 0.8rem 1rem !important;
@@ -142,35 +107,7 @@
                          opacity: 0.9;
                          filter: brightness(0.95);
                      }
-                     .ai-search-btn:hover {
-                         opacity: 0.9;
-                         filter: brightness(0.95);
-                     }
                  </style>
-                 <script src="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/js/lobibox.min.js"></script>
-                 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/lobibox@1.2.7/dist/css/lobibox.min.css" />
-                 <script>
-                 document.addEventListener('DOMContentLoaded', function() {
-                     const aiSearchBtn = document.querySelector('.ai-search-btn');
-                     if (aiSearchBtn) {
-                         aiSearchBtn.addEventListener('click', function(e) {
-                             e.preventDefault();
-                             if (typeof Lobibox !== 'undefined') {
-                                 Lobibox.notify('info', {
-                                     title: 'AI Search',
-                                     msg: 'Coming Soon',
-                                     sound: false,
-                                     delay: 3000,
-                                     position: 'top right'
-                                 });
-                             } else {
-                                 alert('AI Search - Coming Soon');
-                             }
-                         });
-                     }
-                 });
-                 </script>
-                 @endif
 
 
              </div>
