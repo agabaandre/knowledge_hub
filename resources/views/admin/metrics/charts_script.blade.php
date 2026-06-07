@@ -310,7 +310,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 colorKey: 'value',
                 nullColor: '#f1f5f9',
                 data: mapData,
-                dataLabels: { enabled: false },
+                dataLabels: KhAfricaMap.dataLabels(),
                 tooltip: config.tooltip || {
                     useHTML: true,
                     formatter: function () {
@@ -483,6 +483,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 renderAdminAfricaMap(mapAsset, mapData, {
                     min: mapPayload.min,
                     max: mapPayload.max,
+                    plotVariant: 'world',
                     title: mapPayload.kpi_name || 'Indicator value',
                     seriesName: mapPayload.kpi_name || 'Indicator value',
                     credits: isPublicationsMap(mapPayload)
