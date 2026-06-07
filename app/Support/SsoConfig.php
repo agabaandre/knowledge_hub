@@ -181,7 +181,7 @@ class SsoConfig
 
         $fields = [];
         foreach ($map as $key => $meta) {
-            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']] : null;
+            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
             $effective = ! empty($meta['env_key'])
                 ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
                 : ($dbValue !== null ? (bool) $dbValue : (bool) $meta['default']);
