@@ -2,7 +2,6 @@
 @extends('layouts.plain')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
 @endsection
 @section('content')      	
 <!-- ======================= Administrative Units ======================== -->

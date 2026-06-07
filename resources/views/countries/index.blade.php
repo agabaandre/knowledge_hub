@@ -1,7 +1,6 @@
 @extends('layouts.plain')
 
 @section('styles')
-<link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
 <style>
     .countries-page-wrapper {
         background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);

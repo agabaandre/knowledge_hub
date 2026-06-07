@@ -1,4 +1,14 @@
 {{-- Provider-aware choropleth loader (Highcharts, Fusion, generic TopoJSON). --}}
+<style>
+    /*
+     * highcharts.css assigns .highcharts-color-0 { fill: #7cb5ec } which overrides
+     * colorAxis choropleth fills on public pages that still load that stylesheet.
+     * RCC/admin maps omit highcharts.css so they are unaffected.
+     */
+    .highcharts-map-series.highcharts-color-0 {
+        fill: none;
+    }
+</style>
 <script>
 (function (global) {
     if (global.KhChoroplethMap && global.KhChoroplethMap._ready) {
@@ -298,6 +308,7 @@
             mapData: seriesMapData(mapAsset),
             data: seriesData,
             joinBy: joinBy,
+            color: undefined,
             colorAxis: 0,
             colorKey: 'value',
             nullColor: t.nullColor,
@@ -328,6 +339,7 @@
                 map: chartMapOption(mapAsset),
                 backgroundColor: '#f8f9fa',
                 height: config.height || 480,
+                styledMode: false,
                 style: { fontFamily: 'inherit' }
             },
             title: titleOption,
