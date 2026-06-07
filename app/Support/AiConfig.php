@@ -323,27 +323,60 @@ class AiConfig
         $db = self::dbSettings();
         $column = 'ai_'.$provider.'_enabled';
         if (! $db || ! Schema::hasColumn('setting', $column)) {
-            return $defaultEnabled;
-        }
-
-        if ($db->{$column} === null) {
-            return $defaultEnabled;
+            return $defaultEnabled && self::providerConfigured($provider);
         }
 
         if ((bool) $db->{$column}) {
             return true;
         }
 
-        // Migration seeded enabled=0; until admin saves AI config, honor defaults when only .env has credentials.
-        if ($defaultEnabled && self::providerHasEnvCredentialsOnly($provider) && ! self::adminAiConfigSaved()) {
+        // Migration seeds enabled=0; treat that as "unset" until admin saves AI settings.
+        if ($defaultEnabled && self::providerConfigured($provider) && ! self::providerExplicitlyDisabled($provider)) {
             return true;
         }
 
         return false;
     }
 
+    public static function providerExplicitlyDisabled(string $provider): bool
+    {
+        if (! self::aiIntegrationsFormSaved()) {
+            return false;
+        }
+
+        $db = self::dbSettings();
+        if (! $db) {
+            return false;
+        }
+
+        $column = 'ai_'.$provider.'_enabled';
+        if (! Schema::hasColumn('setting', $column)) {
+            return false;
+        }
+
+        return ! (bool) $db->{$column};
+    }
+
+    public static function aiIntegrationsFormSaved(): bool
+    {
+        $db = self::dbSettings();
+        if (! $db) {
+            return false;
+        }
+
+        if (Schema::hasColumn('setting', 'ai_settings_saved_at') && ! empty($db->ai_settings_saved_at)) {
+            return true;
+        }
+
+        return self::hasDbStoredAiSecrets();
+    }
+
     public static function adminAiConfigSaved(): bool
     {
+        if (self::aiIntegrationsFormSaved()) {
+            return true;
+        }
+
         $db = self::dbSettings();
         if (! $db) {
             return false;
@@ -357,7 +390,11 @@ class AiConfig
             return true;
         }
 
-        return self::hasDbStoredAiSecrets();
+        if (Schema::hasColumn('setting', 'ai_source_priority') && ! empty($db->ai_source_priority)) {
+            return true;
+        }
+
+        return false;
     }
 
     public static function hasDbStoredAiSecrets(): bool

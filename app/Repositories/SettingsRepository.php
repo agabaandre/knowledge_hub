@@ -713,6 +713,10 @@ class SettingsRepository
             }
             $settings->ai_source_priority = $priorities !== [] ? json_encode($priorities) : null;
         }
+
+        if (Schema::hasColumn('setting', 'ai_settings_saved_at')) {
+            $settings->ai_settings_saved_at = now();
+        }
     }
 
     /**

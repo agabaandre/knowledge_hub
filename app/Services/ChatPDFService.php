@@ -87,6 +87,12 @@ class ChatPDFService implements AIModel
      */
     public function chatStream(string $sourceId, array $messages, callable $onChunk): void
     {
+        if (! $this->isAvailable()) {
+            $onChunk(json_encode(['error' => 'ChatPDF is not enabled or configured.']));
+
+            return;
+        }
+
         $endpoint = 'https://api.chatpdf.com/v1/chats/message';
         $payload = [
             'sourceId' => $sourceId,
