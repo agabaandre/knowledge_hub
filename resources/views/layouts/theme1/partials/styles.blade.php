@@ -12,8 +12,6 @@
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     {{-- description, canonical, og:* come from partials.seo.meta in header_resources (avoid duplicate global site_description) --}}
-    <link rel="icon" href="{{ settings()->favicon ?? asset('theme1/assets/img/favicon.ico') }}" type="image/x-icon">
-
     @include('layouts.partials.header_resources')
 
     {{-- Webfonts: loaded from Admin > Appearance (typography partial: Montserrat, custom uploads, etc.); avoid fixed Poppins/Ubuntu so settings font applies everywhere --}}

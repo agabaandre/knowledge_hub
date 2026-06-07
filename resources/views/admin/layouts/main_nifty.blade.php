@@ -6,7 +6,8 @@
    <meta name="csrf-token" content="{{ csrf_token() }}">
    <meta name="robots" content="noindex">
    <title>{{ $title ?? 'Admin' }} | {{ settings()->site_name ?? 'Knowledge Hub' }}</title>
-   <link rel="icon" href="{{ settings()->favicon ?? asset('theme1/assets/img/favicon.ico') }}" type="image/x-icon">
+   <link rel="icon" href="{{ site_favicon_url() }}" type="{{ site_favicon_mime() }}">
+   <link rel="apple-touch-icon" sizes="180x180" href="{{ site_favicon_url() }}">
 
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -68,7 +68,7 @@
     "@type": "Organization",
     "name": "{{ $siteName }}",
     "url": "{{ $siteUrl }}",
-    "logo": "{{ $pageImage }}",
+    "logo": "{{ site_favicon_url() }}",
     "description": "{{ strip_tags($pageDescription) }}",
     "sameAs": [
         "https://africacdc.org",
@@ -113,7 +113,14 @@
 <link rel="dns-prefetch" href="https://translate.google.com">
 <link rel="dns-prefetch" href="https://www.google.com">
 
-{{-- Favicon and Icons --}}
-<link rel="icon" href="{{ settings()->favicon ?? asset('assets/images/favicon.ico') }}" type="image/x-icon">
-<link rel="apple-touch-icon" href="{{ settings()->logo ?? asset('assets/images/logo.png') }}">
+{{-- Favicon and Icons (square favicon only — do not use the wide site logo here; Google squashes it in search results) --}}
+@php
+    $faviconUrl = site_favicon_url();
+    $faviconMime = site_favicon_mime();
+@endphp
+<link rel="icon" href="{{ $faviconUrl }}" type="{{ $faviconMime }}">
+<link rel="shortcut icon" href="{{ $faviconUrl }}" type="{{ $faviconMime }}">
+<link rel="icon" type="{{ $faviconMime }}" sizes="48x48" href="{{ $faviconUrl }}">
+<link rel="icon" type="{{ $faviconMime }}" sizes="192x192" href="{{ $faviconUrl }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ $faviconUrl }}">
 

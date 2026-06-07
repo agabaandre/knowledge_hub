@@ -21,8 +21,6 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
 @endif
 
-<link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
-
 <link href="{{ asset('frontend/css/styles.css') }}" rel="stylesheet">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css') }}">

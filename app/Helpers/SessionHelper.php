@@ -45,6 +45,51 @@ if(!function_exists('current_user')){
 	}
 }
 
+if (! function_exists('branding_image_url')) {
+	function branding_image_url(?string $filename): string
+	{
+		if ($filename === null || $filename === '') {
+			return '';
+		}
+		if (preg_match('#^https?://#i', $filename) || str_starts_with($filename, '//')) {
+			return $filename;
+		}
+		$basename = basename($filename);
+		if (function_exists('storage_link')) {
+			return storage_link('uploads/config/'.$basename);
+		}
+
+		return asset('storage/uploads/config/'.$basename);
+	}
+}
+
+if (! function_exists('site_favicon_url')) {
+	function site_favicon_url(): string
+	{
+		$url = settings()->favicon ?? '';
+
+		return $url !== '' ? $url : asset('assets/images/favicon.ico');
+	}
+}
+
+if (! function_exists('site_favicon_mime')) {
+	function site_favicon_mime(): string
+	{
+		$url = strtolower(site_favicon_url());
+		if (str_contains($url, '.png')) {
+			return 'image/png';
+		}
+		if (str_contains($url, '.svg')) {
+			return 'image/svg+xml';
+		}
+		if (str_contains($url, '.webp')) {
+			return 'image/webp';
+		}
+
+		return 'image/x-icon';
+	}
+}
+
 if(!function_exists('settings')){
 	 function settings()
 	 {
@@ -56,9 +101,9 @@ if(!function_exists('settings')){
 				$settings = DB::table("setting")->first();
 			}
 			if ($settings) {
-				$settings->logo = !empty($settings->logo) ? asset('storage/uploads/config/'.$settings->logo) : '';
-				$settings->favicon = !empty($settings->favicon) ? asset('storage/uploads/config/' . $settings->favicon) : '';
-				$settings->spotlight_banner = !empty($settings->spotlight_banner) ? asset('storage/uploads/config/' . $settings->spotlight_banner) : '';
+				$settings->logo = branding_image_url($settings->logo ?? '');
+				$settings->favicon = branding_image_url($settings->favicon ?? '');
+				$settings->spotlight_banner = branding_image_url($settings->spotlight_banner ?? '');
 			}
 			return $settings;
         });
@@ -76,14 +121,14 @@ if(!function_exists('settings')){
 				$settings->{$key} = $value;
 			}
 			// Re-apply image URLs (values from theme_settings are filenames)
-			if (!empty($settings->logo) && strpos($settings->logo, 'http') !== 0 && strpos($settings->logo, '//') !== 0) {
-				$settings->logo = asset('storage/uploads/config/' . $settings->logo);
+			if (! empty($settings->logo) && strpos($settings->logo, 'http') !== 0 && strpos($settings->logo, '//') !== 0) {
+				$settings->logo = branding_image_url($settings->logo);
 			}
-			if (!empty($settings->favicon) && strpos($settings->favicon, 'http') !== 0 && strpos($settings->favicon, '//') !== 0) {
-				$settings->favicon = asset('storage/uploads/config/' . $settings->favicon);
+			if (! empty($settings->favicon) && strpos($settings->favicon, 'http') !== 0 && strpos($settings->favicon, '//') !== 0) {
+				$settings->favicon = branding_image_url($settings->favicon);
 			}
-			if (!empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'http') !== 0 && strpos($settings->spotlight_banner, '//') !== 0) {
-				$settings->spotlight_banner = asset('storage/uploads/config/' . $settings->spotlight_banner);
+			if (! empty($settings->spotlight_banner) && strpos($settings->spotlight_banner, 'http') !== 0 && strpos($settings->spotlight_banner, '//') !== 0) {
+				$settings->spotlight_banner = branding_image_url($settings->spotlight_banner);
 			}
 			return $settings;
 		}

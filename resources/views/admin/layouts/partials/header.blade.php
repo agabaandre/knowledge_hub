@@ -14,7 +14,8 @@
 	<title>{{ @$title ?? 'Africa CDC Knowledge Hub' }}</title>
 
 	<!-- Favicon -->
-	<link rel="icon" href="{{ settings()->favicon }}" type="image/x-icon" />
+	<link rel="icon" href="{{ site_favicon_url() }}" type="{{ site_favicon_mime() }}" />
+	<link rel="apple-touch-icon" sizes="180x180" href="{{ site_favicon_url() }}" />
 
 	<!-- Icons css -->
 	<link href="{{ asset('assets/css/icons.css') }}" rel="stylesheet">
