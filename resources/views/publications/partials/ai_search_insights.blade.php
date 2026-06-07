@@ -25,9 +25,12 @@
                 @foreach($aiSearchInsights['internet_results'] as $web)
                     @if(!empty($web['url']))
                         <a href="{{ $web['url'] }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none d-flex align-items-start gap-2 p-2 rounded" style="background:#f8fafc;">
-                            <i class="fa fa-globe mt-1" style="color:var(--theme-color-primary,#119A48);"></i>
+                            <i class="fa {{ ($web['source'] ?? '') === 'pubmed' ? 'fa-book-medical' : 'fa-graduation-cap' }} mt-1" style="color:var(--theme-color-primary,#119A48);"></i>
                             <span>
-                                <span class="d-block fw-semibold" style="color:#0f172a;font-size:0.88rem;">{{ $web['title'] ?? 'Web result' }}</span>
+                                <span class="d-block fw-semibold" style="color:#0f172a;font-size:0.88rem;">{{ $web['title'] ?? (($web['source'] ?? '') === 'pubmed' ? __('publications.search.pubmed') : __('publications.search.google_scholar')) }}</span>
+                                @if(!empty($web['source']))
+                                    <span class="d-block small text-muted" style="font-size:0.72rem;">{{ ($web['source'] ?? '') === 'pubmed' ? __('publications.search.pubmed') : __('publications.search.google_scholar') }}</span>
+                                @endif
                                 @if(!empty($web['snippet']))
                                     <span class="d-block small text-muted" style="line-height:1.45;">{{ $web['snippet'] }}</span>
                                 @endif

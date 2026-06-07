@@ -19,30 +19,56 @@ class AiInternetSearchService
             return [];
         }
 
+        $results = [];
+
         if (AiConfig::serperAvailable()) {
-            $results = $this->searchViaSerper($query, $limit, AiConfig::serperApiKey());
-            if ($results !== []) {
-                return $results;
+            $apiKey = AiConfig::serperApiKey();
+            $results = array_merge($results, $this->searchViaSerperScholar($query, min(2, $limit), $apiKey));
+            if (count($results) < $limit) {
+                $results = array_merge(
+                    $results,
+                    $this->searchViaSerperWeb($query, $limit - count($results), $apiKey, 'site:pubmed.ncbi.nlm.nih.gov')
+                );
             }
         }
 
-        $results = $this->searchViaDuckDuckGo($query, $limit);
-        if ($results !== []) {
-            return $results;
+        if (count($results) < $limit) {
+            $results = array_merge(
+                $results,
+                $this->searchViaDuckDuckGo($query.' site:pubmed.ncbi.nlm.nih.gov', $limit - count($results))
+            );
         }
 
-        return $this->authoritativeFallbackResults($query, $limit);
+        $results = $this->uniqueResults($results);
+
+        if (count($results) >= $limit) {
+            return array_slice($results, 0, $limit);
+        }
+
+        foreach ($this->scholarlyFallbackResults($query, $limit) as $fallback) {
+            $results[] = $fallback;
+            $results = $this->uniqueResults($results);
+            if (count($results) >= $limit) {
+                break;
+            }
+        }
+
+        return array_slice($results, 0, $limit);
     }
 
     /**
      * @return list<array{title: string, url: string, snippet: string, source: string}>
      */
-    private function searchViaSerper(string $query, int $limit, string $apiKey): array
+    private function searchViaSerperScholar(string $query, int $limit, string $apiKey): array
     {
+        if ($limit < 1) {
+            return [];
+        }
+
         try {
             $response = Http::timeout(12)
                 ->withHeaders(['X-API-KEY' => $apiKey])
-                ->post('https://google.serper.dev/search', [
+                ->post('https://google.serper.dev/scholar', [
                     'q' => $query,
                     'num' => min($limit, 10),
                 ]);
@@ -60,10 +86,10 @@ class AiInternetSearchService
                 $normalized = $this->normalizeResult(
                     (string) ($row['title'] ?? ''),
                     (string) ($row['link'] ?? ''),
-                    (string) ($row['snippet'] ?? ''),
-                    'serper'
+                    (string) ($row['snippet'] ?? ($row['publicationInfo'] ?? '')),
+                    'google_scholar'
                 );
-                if ($normalized !== null) {
+                if ($normalized !== null && $this->isScholarlyUrl($normalized['url'])) {
                     $results[] = $normalized;
                 }
                 if (count($results) >= $limit) {
@@ -73,7 +99,59 @@ class AiInternetSearchService
 
             return $results;
         } catch (\Throwable $e) {
-            Log::debug('ai_internet_search.serper_failed', ['message' => $e->getMessage()]);
+            Log::debug('ai_internet_search.serper_scholar_failed', ['message' => $e->getMessage()]);
+
+            return [];
+        }
+    }
+
+    /**
+     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     */
+    private function searchViaSerperWeb(string $query, int $limit, string $apiKey, ?string $queryPrefix = null): array
+    {
+        if ($limit < 1) {
+            return [];
+        }
+
+        try {
+            $searchQuery = $queryPrefix ? trim($queryPrefix.' '.$query) : $query;
+            $response = Http::timeout(12)
+                ->withHeaders(['X-API-KEY' => $apiKey])
+                ->post('https://google.serper.dev/search', [
+                    'q' => $searchQuery,
+                    'num' => min($limit, 10),
+                ]);
+
+            if (! $response->successful()) {
+                return [];
+            }
+
+            $organic = (array) ($response->json('organic') ?? []);
+            $results = [];
+            foreach ($organic as $row) {
+                if (! is_array($row)) {
+                    continue;
+                }
+                $url = (string) ($row['link'] ?? '');
+                $source = str_contains(strtolower($url), 'pubmed') ? 'pubmed' : 'google_scholar';
+                $normalized = $this->normalizeResult(
+                    (string) ($row['title'] ?? ''),
+                    $url,
+                    (string) ($row['snippet'] ?? ''),
+                    $source
+                );
+                if ($normalized !== null && $this->isScholarlyUrl($normalized['url'])) {
+                    $results[] = $normalized;
+                }
+                if (count($results) >= $limit) {
+                    break;
+                }
+            }
+
+            return $results;
+        } catch (\Throwable $e) {
+            Log::debug('ai_internet_search.serper_web_failed', ['message' => $e->getMessage()]);
 
             return [];
         }
@@ -84,6 +162,10 @@ class AiInternetSearchService
      */
     private function searchViaDuckDuckGo(string $query, int $limit): array
     {
+        if ($limit < 1) {
+            return [];
+        }
+
         try {
             $response = Http::timeout(12)
                 ->withHeaders([
@@ -109,29 +191,12 @@ class AiInternetSearchService
             )) {
                 foreach ($matches as $match) {
                     $url = $this->resolveDuckDuckGoRedirectUrl(html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+                    if (! $this->isScholarlyUrl($url)) {
+                        continue;
+                    }
                     $title = $this->cleanHtmlFragment($match[2]);
-                    $normalized = $this->normalizeResult($title, $url, '', 'duckduckgo');
-                    if ($normalized !== null) {
-                        $results[] = $normalized;
-                    }
-                    if (count($results) >= $limit) {
-                        break;
-                    }
-                }
-            }
-
-            if ($results !== []) {
-                return $results;
-            }
-
-            if (preg_match_all(
-                '/<a[^>]+href="(https?:\/\/[^"]+)"[^>]*class="[^"]*result-link[^"]*"/is',
-                $html,
-                $altMatches,
-                PREG_SET_ORDER
-            )) {
-                foreach ($altMatches as $match) {
-                    $normalized = $this->normalizeResult('', $match[1], '', 'duckduckgo');
+                    $source = str_contains(strtolower($url), 'pubmed') ? 'pubmed' : 'google_scholar';
+                    $normalized = $this->normalizeResult($title, $url, '', $source);
                     if ($normalized !== null) {
                         $results[] = $normalized;
                     }
@@ -152,63 +217,55 @@ class AiInternetSearchService
     /**
      * @return list<array{title: string, url: string, snippet: string, source: string}>
      */
-    private function authoritativeFallbackResults(string $query, int $limit): array
+    private function scholarlyFallbackResults(string $query, int $limit): array
     {
         $encoded = rawurlencode($query);
+
         $candidates = [
             [
-                'title' => 'WHO — search: '.$query,
-                'url' => 'https://www.who.int/search?query='.$encoded,
-                'snippet' => 'World Health Organization resources related to this topic.',
-                'source' => 'who',
-            ],
-            [
-                'title' => 'Africa CDC — search: '.$query,
-                'url' => 'https://africacdc.org/?s='.$encoded,
-                'snippet' => 'Africa CDC news, guidance, and public health updates.',
-                'source' => 'africa_cdc',
+                'title' => 'Google Scholar — '.$query,
+                'url' => 'https://scholar.google.com/scholar?q='.$encoded,
+                'snippet' => 'Peer-reviewed articles, theses, books, and conference papers.',
+                'source' => 'google_scholar',
             ],
             [
                 'title' => 'PubMed — '.$query,
                 'url' => 'https://pubmed.ncbi.nlm.nih.gov/?term='.$encoded,
-                'snippet' => 'Peer-reviewed biomedical literature from PubMed.',
+                'snippet' => 'Biomedical and life sciences literature from MEDLINE and related databases.',
                 'source' => 'pubmed',
             ],
         ];
 
-        $who = app(WhoFactsheetFetcher::class)->fetchForTopic($query);
-        if (($who['ok'] ?? false) && ! empty($who['references'])) {
-            foreach ((array) $who['references'] as $ref) {
-                if (! is_array($ref)) {
-                    continue;
-                }
-                $normalized = $this->normalizeResult(
-                    (string) ($ref['label'] ?? 'WHO resource'),
-                    (string) ($ref['url'] ?? ''),
-                    Str::limit((string) ($who['excerpt'] ?? ''), 180),
-                    'who'
-                );
-                if ($normalized !== null) {
-                    array_unshift($candidates, $normalized);
-                }
-            }
-        }
+        return array_slice($candidates, 0, max(1, $limit));
+    }
 
+    /**
+     * @param  list<array{title: string, url: string, snippet: string, source: string}>  $results
+     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     */
+    private function uniqueResults(array $results): array
+    {
         $unique = [];
         $seen = [];
-        foreach ($candidates as $row) {
-            $key = mb_strtolower($row['url']);
-            if (isset($seen[$key])) {
+        foreach ($results as $row) {
+            $key = mb_strtolower($row['url'] ?? '');
+            if ($key === '' || isset($seen[$key])) {
                 continue;
             }
             $seen[$key] = true;
             $unique[] = $row;
-            if (count($unique) >= $limit) {
-                break;
-            }
         }
 
         return $unique;
+    }
+
+    private function isScholarlyUrl(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+
+        return str_contains($host, 'scholar.google')
+            || str_contains($host, 'pubmed.ncbi.nlm.nih.gov')
+            || str_contains($host, 'ncbi.nlm.nih.gov');
     }
 
     /**
@@ -223,7 +280,7 @@ class AiInternetSearchService
 
         $title = Str::limit(trim($this->cleanHtmlFragment($title)), 120);
         if ($title === '') {
-            $title = parse_url($url, PHP_URL_HOST) ?: 'Web result';
+            $title = $source === 'pubmed' ? 'PubMed' : 'Google Scholar';
         }
 
         return [

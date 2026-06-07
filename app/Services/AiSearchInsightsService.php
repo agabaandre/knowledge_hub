@@ -138,7 +138,8 @@ class AiSearchInsightsService
             .'Write a brief, helpful overview (like a search engine AI overview) for the user query. '
             .'Use ONLY the catalog data provided from this platform. Do not invent hub resources. '
             .'Health topics, thematic areas, sub-themes, and contributors are provided for context—prefer citing them when relevant. '
-            .'Internet search results are provided separately for external context; you may reference them but do not treat them as on-platform resources. '
+            .'Internet search results are provided separately from Google Scholar and PubMed; you may reference them but do not treat them as on-platform resources. '
+            .'For external_resources, prefer Google Scholar and PubMed links only—do not suggest WHO, Africa CDC, or other general websites. '
             .'Never include private contact details (emails, phone numbers, postal addresses). '
             .'Keep overview under 80 words and key_points to 3 short bullets. '
             .'Return strict JSON with keys: overview (string), key_points (array of strings), '
@@ -429,13 +430,13 @@ class AiSearchInsightsService
             if (! $tag instanceof Tag) {
                 continue;
             }
-            $overview = Schema::hasColumn('tags', 'overview')
-                ? strip_tags((string) ($tag->overview ?? ''))
+            $rawOverview = Schema::hasColumn('tags', 'overview')
+                ? (string) ($tag->overview ?? '')
                 : '';
             $catalog[] = [
                 'id' => (int) $tag->id,
                 'name' => Str::limit((string) ($tag->tag_text ?? ''), 100),
-                'overview' => Str::limit(html_entity_decode($overview, ENT_QUOTES | ENT_HTML5, 'UTF-8'), 200),
+                'overview' => plain_text_excerpt_from_html($rawOverview, 200),
                 'url' => health_topic_url($tag),
             ];
         }
@@ -625,7 +626,7 @@ class AiSearchInsightsService
                 continue;
             }
             $url = trim((string) ($row['url'] ?? ''));
-            if ($url === '' || ! preg_match('#^https?://#i', $url)) {
+            if ($url === '' || ! preg_match('#^https?://#i', $url) || ! $this->isScholarlyExternalUrl($url)) {
                 continue;
             }
             $external[] = [
@@ -667,6 +668,24 @@ class AiSearchInsightsService
             'contributors' => array_slice($authorCatalog, 0, 6),
             'external_resources' => array_slice($external, 0, 3),
         ];
+    }
+
+    private function isScholarlyExternalUrl(string $url): bool
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        if ($host === '') {
+            return false;
+        }
+
+        if (str_contains($host, 'who.int')
+            || str_contains($host, 'africacdc.org')
+            || str_contains($host, 'africa-cdc')) {
+            return false;
+        }
+
+        return str_contains($host, 'scholar.google')
+            || str_contains($host, 'pubmed.ncbi.nlm.nih.gov')
+            || str_contains($host, 'ncbi.nlm.nih.gov');
     }
 
     private function filterFingerprint(Request $request): string

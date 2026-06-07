@@ -1600,6 +1600,39 @@ if (!function_exists('trim_rich_text_input')) {
     }
 }
 
+if (! function_exists('plain_text_excerpt_from_html')) {
+    /**
+     * Decode entities, strip markup, and return a short plain-text excerpt.
+     */
+    function plain_text_excerpt_from_html($html, int $limit = 200): string
+    {
+        $text = trim((string) $html);
+        if ($text === '') {
+            return '';
+        }
+
+        for ($i = 0; $i < 3; $i++) {
+            $decoded = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $text) {
+                break;
+            }
+            $text = $decoded;
+        }
+
+        $text = preg_replace('/<(br\s*\/?>|\/(p|div|h[1-6]|li|tr|td|th|blockquote))>/i', ' ', $text) ?? $text;
+        $text = strip_tags($text);
+        $text = html_entity_decode($text, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $text = preg_replace('/\s+/u', ' ', $text) ?? $text;
+        $text = trim($text);
+
+        if (function_exists('clean_unicode')) {
+            $text = clean_unicode($text);
+        }
+
+        return \Illuminate\Support\Str::limit($text, $limit);
+    }
+}
+
 if (!function_exists('sanitize_rich_text_for_display')) {
     /**
      * Sanitize Summernote/rich HTML for safe on-site rendering.
