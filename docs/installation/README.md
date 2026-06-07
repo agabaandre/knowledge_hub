@@ -29,7 +29,7 @@ All paths run the same **six-step** configuration (prerequisites through adminis
 ## After installation
 
 - `APP_INSTALLED=true` and installer lock are set automatically.
-- Configure cloud storage, backups, and migration in **Settings → Storage Management**.
+- Configure cloud storage, backups, migration, and browse uploads in **Settings → Storage Management** (live metrics, SQL restore, Laravel File Manager with publication linking). See [../deployment/STORAGE.md](../deployment/STORAGE.md).
 - Import search index: `php artisan scout:import "App\Models\Publication"` (when Meilisearch is enabled).
 
 **Existing production database?** Do not run the web installer blindly — read [EXISTING_DEPLOYMENTS.md](EXISTING_DEPLOYMENTS.md) first.

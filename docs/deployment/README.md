@@ -49,10 +49,17 @@ Includes daily SQL backup (`hub:backup-database`) when enabled in Storage Manage
 | Command | Purpose |
 |---------|---------|
 | `php artisan hub:link-storage` | Create or repair `public/storage` → hub files root |
-| `php artisan hub:backup-database` | Run SQL backup manually (same as scheduled job) |
+| `php artisan hub:recover-storage` | Diagnose storage symlink and active files root |
+| `php artisan hub:recover-storage --sync-legacy` | Merge legacy `storage/uploads/` tree into `storage/app/public/uploads/` |
+| `php artisan hub:migrate-storage-to-host` | Copy legacy uploads to `/var/khubdata/{site-id}/files` |
+| `php artisan hub:purge-legacy-storage` | Remove verified legacy copies after host migration (`--dry-run` to preview) |
+| `php artisan hub:backup-database` | Run incremental SQL backup (same as scheduled job) |
+| `php artisan hub:backup-database --full` | Run full SQL backup |
 | `php artisan federation:sync` | Sync public content from country hubs (`--all` for every active hub) |
 | `php artisan federation:sync --hub=1` | Sync a single federated hub by ID |
 
-Shell helpers: `./link-hub-storage.sh`, `./fix-storage-permissions.sh` (Linux/macOS); `link-hub-storage.bat` / `link-hub-storage.ps1` (Windows).
+Shell helpers: `./link-hub-storage.sh`, `./recover-hub-storage.sh`, `./fix-storage-permissions.sh` (Linux/macOS); `link-hub-storage.bat` / `link-hub-storage.ps1` (Windows).
 
-See [STORAGE.md](STORAGE.md) and [PERMISSIONS.md](PERMISSIONS.md).
+**Storage Management UI** (`/admin/storage-management`): tabbed overview with live metrics, configuration, host/cloud migration, SQL backup/restore, Laravel File Manager browse with publication linking, and server setup reference. See [STORAGE.md](STORAGE.md).
+
+See also [PERMISSIONS.md](PERMISSIONS.md).

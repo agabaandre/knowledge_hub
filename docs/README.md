@@ -35,7 +35,7 @@ Central index for operators, administrators, and developers. Start with [install
 |----------|----------|-------------|
 | [deployment/README.md](deployment/README.md) | Ops | Production checklist |
 | [deployment/DOCKER.md](deployment/DOCKER.md) | Dev / ops | Containers, volumes, queue, Meilisearch |
-| [deployment/STORAGE.md](deployment/STORAGE.md) | Ops / admin | Host paths, cloud drivers, SQL backups, migration |
+| [deployment/STORAGE.md](deployment/STORAGE.md) | Ops / admin | Host paths, cloud drivers, SQL backups, migration, file manager, live metrics |
 | [deployment/PERMISSIONS.md](deployment/PERMISSIONS.md) | Ops | `fix-storage-permissions.sh`, ownership |
 
 ### Features & modules
@@ -59,9 +59,15 @@ Central index for operators, administrators, and developers. Start with [install
 
 After install, file storage is managed at **Settings → Storage Management** (`/admin/storage-management`):
 
-- Files driver (internal, S3, GCS, Azure, SharePoint, SFTP)
-- Host paths for internal storage and SQL backups
-- Connection test, file browser, migration to external storage
-- SQL backup and restore
+| Tab | Features |
+|-----|----------|
+| **Overview** | Live storage & system metrics (disk, uploads, backups, RAM, CPU, queue, DB, deployment); auto-refresh every 30s |
+| **Configuration** | Files driver, host paths, cloud credentials, SQL backup root & retention, test connection |
+| **Migration** | Legacy → host path copy, purge verified legacy copies, migration to cloud storage |
+| **SQL backups** | Incremental/full backup, selective table restore |
+| **Browse files** | [Laravel File Manager](https://github.com/alexusmai/laravel-file-manager) on hub disk; linked publication names from database |
+| **Server setup** | DevOps commands, paths, `.env` overrides |
 
-See [deployment/STORAGE.md](deployment/STORAGE.md) for full configuration.
+Drivers: internal (host path), S3, GCS, Azure Blob, SharePoint, SFTP.
+
+See [deployment/STORAGE.md](deployment/STORAGE.md) for architecture, Artisan commands, API endpoints, and recovery procedures.
