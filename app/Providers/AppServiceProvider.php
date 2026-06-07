@@ -58,7 +58,9 @@ class AppServiceProvider extends ServiceProvider
             );
         });
 
-        define('PHPGRID_LIBPATH', 'libs/phpgrid/');
+        if (! defined('PHPGRID_LIBPATH')) {
+            define('PHPGRID_LIBPATH', 'libs/phpgrid/');
+        }
         Paginator::useBootstrap();
         Schema::defaultStringLength(191);
 
