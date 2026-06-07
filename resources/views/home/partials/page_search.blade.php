@@ -30,7 +30,6 @@
        $searchAction = url('records/search');
    }
    
-   $aiSearchEnabled = (bool) (settings()->enable_ai_search ?? false);
    $primaryColor = settings()->primary_color ?? '#119A48';
 @endphp
 
@@ -63,7 +62,7 @@
                                  justify-content: center;
                                  gap: 0.5rem;
                                  color: white;
-                             "><i class="ti-search"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>@if($aiSearchEnabled)<span class="d-none d-md-inline" style="opacity:0.85;font-size:0.78rem;">+ AI</span>@endif</button>
+                             "><i class="ti-search"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span></button>
                          </div>
 
                          @if ($show_types)

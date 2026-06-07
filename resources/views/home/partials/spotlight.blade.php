@@ -30,7 +30,6 @@
         $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
     }
     
-    $aiSearchEnabled = (bool) ($settings->enable_ai_search ?? false);
     $primaryColor = $settings->primary_color ?? '#119A48';
 @endphp
 <style>
@@ -86,9 +85,6 @@
                     ">
                         <i class="fa fa-magnifying-glass"></i>
                         <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
-                        @if($aiSearchEnabled)
-                            <span class="d-none d-md-inline" style="opacity:0.85;font-size:0.8rem;">+ AI insights</span>
-                        @endif
                     </button>
                 </div>
             </div>
@@ -98,9 +94,6 @@
             <button class="btn full-width text-white fs-md py-3 search-btn-unified" type="submit" style="background: {{ $primaryColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
                 <i class="fa fa-magnifying-glass"></i>
                 <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
-                @if($aiSearchEnabled)
-                    <span style="opacity:0.85;font-size:0.8rem;">+ AI</span>
-                @endif
             </button>
         </div>
         </form>

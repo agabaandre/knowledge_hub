@@ -37,8 +37,19 @@
                         $recordsSearchTagQuery = request()->except('page');
                         $sidebarTagsList = (isset($tags) && count($tags) > 0) ? $tags->take(10) : \App\Models\Tag::query()->orderBy('tag_text', 'asc')->limit(10)->get();
                     @endphp
+                    @include('publications.partials.contributor_sidebar_styles')
                     <style>
                         .sidebar-content{background:#fff;border:1px solid #e2e8f0;border-radius:0.5rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);margin-bottom:20px}
+                        .search-sidebar-panel{margin-bottom:1.25rem}
+                        .search-sidebar-list{display:flex;flex-direction:column;gap:0.5rem}
+                        .search-sidebar-list__link{display:flex;flex-direction:column;gap:0.25rem;padding:0.75rem 0.85rem;border:1px solid #e2e8f0;border-radius:8px;text-decoration:none;background:#f8fafc;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+                        .search-sidebar-list__link:hover{border-color:rgba(17,154,72,.35);background:#fff;box-shadow:0 2px 8px rgba(15,23,42,.05)}
+                        .search-sidebar-list__title{font-size:0.9rem;font-weight:600;color:#0f172a;line-height:1.35}
+                        .search-sidebar-list__excerpt{font-size:0.8rem;color:#64748b;line-height:1.45}
+                        .search-sidebar-list__meta{display:flex;flex-wrap:wrap;gap:0.5rem 0.75rem;font-size:0.75rem;color:#94a3b8}
+                        .search-sidebar-list__meta i{color:var(--theme-color-primary,#119A48);margin-right:0.2rem}
+                        .search-sidebar-view-all{display:inline-block;margin-top:0.85rem;font-size:0.8125rem;font-weight:600;color:var(--theme-color-primary,#119A48);text-decoration:none}
+                        .search-sidebar-view-all:hover{text-decoration:underline}
                         .sidebar-content h5.popular-tags-title{margin-bottom:10px;font-size:15px;font-weight:500;text-transform:capitalize;color:#2d3748}
                         .search-facet-filters h5.popular-tags-title{font-size:15px;font-weight:500;margin-bottom:10px;color:#2d3748}
                         .search-facet-filters h5.facet-subheading{font-size:15px;font-weight:500;margin:0 0 8px 0;color:#2d3748;text-transform:none}
@@ -62,7 +73,7 @@
 
                     @if($sidebarTagsList->count() > 0)
                     <div class="sidebar-content">
-                        <h5 class="popular-tags-title">{{ __('Popular Tags') }}</h5>
+                        <h5 class="popular-tags-title">{{ __('ui_body.footer_popular_tags') }}</h5>
                       <div class="sidebar-tags">
                             @foreach($sidebarTagsList as $tag)
                                 @php

@@ -2,6 +2,8 @@
 
 return [
 
+    'serper_api_key' => env('SERPER_API_KEY', ''),
+
     'open_api_key' => env('OPEN_API_KEY', ''),
     'openai_model' => env('OPENAI_MODEL', 'gpt-3.5-turbo'),
     'chat_pdf_key' => env('CHAT_PDF_API_KEY', ''),
@@ -27,6 +29,7 @@ return [
         'gemini' => 'db',
         'deepseek' => 'db',
         'custom' => 'db',
+        'serper' => 'env',
     ],
 
     'provider_env_keys' => [
@@ -35,6 +38,17 @@ return [
         'gemini' => ['GEMINI_API_KEY', 'GEMINI_MODEL'],
         'deepseek' => ['DEEPSEEK_API_KEY', 'DEEPSEEK_MODEL'],
         'custom' => ['AI_CUSTOM_BASE_URL', 'AI_CUSTOM_API_KEY', 'AI_CUSTOM_MODEL'],
+        'serper' => ['SERPER_API_KEY'],
+    ],
+
+    'web_search_providers' => [
+        'serper' => [
+            'label' => 'Serper',
+            'description' => 'Google web search API for the top matching internet results in AI search insights.',
+            'default_enabled' => true,
+            'icon' => 'fa-globe',
+            'color' => '#2563eb',
+        ],
     ],
 
     'providers' => [

@@ -82,7 +82,10 @@ class AiConfig
     public static function envKeysToClearOnSave(): array
     {
         $keys = [];
-        foreach (array_keys(config('ai.providers', [])) as $provider) {
+        foreach (array_merge(
+            array_keys(config('ai.providers', [])),
+            array_keys(config('ai.web_search_providers', []))
+        ) as $provider) {
             if (self::sourcePriority($provider) === 'db') {
                 $keys = array_merge($keys, self::providerEnvKeys($provider));
             }
@@ -410,6 +413,7 @@ class AiConfig
             'ai_gemini_api_key',
             'ai_deepseek_api_key',
             'ai_custom_api_key',
+            'ai_serper_api_key',
         ] as $column) {
             if (Schema::hasColumn('setting', $column) && ! empty($db->{$column})) {
                 return true;
@@ -579,6 +583,77 @@ class AiConfig
         return (string) self::resolveForProvider('custom', 'AI_CUSTOM_MODEL', 'ai_custom_model', '');
     }
 
+    public static function serperApiKey(): string
+    {
+        return (string) self::resolveForProvider('serper', 'SERPER_API_KEY', 'ai_serper_api_key', '');
+    }
+
+    public static function serperConfigured(): bool
+    {
+        return trim(self::serperApiKey()) !== '';
+    }
+
+    public static function serperExplicitlyDisabled(): bool
+    {
+        if (! self::aiIntegrationsFormSaved()) {
+            return false;
+        }
+
+        $db = self::dbSettings();
+        if (! $db || ! Schema::hasColumn('setting', 'ai_serper_enabled')) {
+            return false;
+        }
+
+        return ! (bool) $db->ai_serper_enabled;
+    }
+
+    public static function serperEnabled(): bool
+    {
+        $defaultEnabled = (bool) config('ai.web_search_providers.serper.default_enabled', true);
+        $db = self::dbSettings();
+
+        if (! $db || ! Schema::hasColumn('setting', 'ai_serper_enabled')) {
+            return $defaultEnabled && self::serperConfigured();
+        }
+
+        if ((bool) $db->ai_serper_enabled) {
+            return true;
+        }
+
+        if ($defaultEnabled && self::serperConfigured() && ! self::serperExplicitlyDisabled()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function serperAvailable(): bool
+    {
+        return self::serperEnabled() && self::serperConfigured();
+    }
+
+    public static function serperActiveSource(): ?string
+    {
+        return self::activeCredentialSource('serper', 'SERPER_API_KEY', 'ai_serper_api_key');
+    }
+
+    public static function serperStatus(): string
+    {
+        if (self::serperAvailable()) {
+            return 'ready';
+        }
+
+        if (self::serperEnabled() && ! self::serperConfigured()) {
+            return 'incomplete';
+        }
+
+        if (! self::serperEnabled() && self::serperConfigured()) {
+            return 'disabled';
+        }
+
+        return 'unavailable';
+    }
+
     /**
      * @return array{driver: string, api_key: string, model: string, base_url: string, label: string}|null
      */
@@ -734,6 +809,7 @@ class AiConfig
             'ai.custom_base_url' => self::customBaseUrl(),
             'ai.custom_api_key' => self::customApiKey(),
             'ai.custom_model' => self::customModel(),
+            'ai.serper_api_key' => self::serperApiKey(),
             'ai.primary_provider' => self::primaryChatProvider(),
             'ai.feature_routing' => self::featureRouting(),
             'ai.custom_integrations' => self::customIntegrations(),
@@ -764,6 +840,8 @@ class AiConfig
             'ai_custom_api_key' => ['provider' => 'custom', 'db_column' => 'ai_custom_api_key', 'env_key' => 'AI_CUSTOM_API_KEY', 'default' => '', 'secret' => true],
             'ai_custom_model' => ['provider' => 'custom', 'db_column' => 'ai_custom_model', 'env_key' => 'AI_CUSTOM_MODEL', 'default' => ''],
             'ai_custom_enabled' => ['db_column' => 'ai_custom_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],
+            'ai_serper_api_key' => ['provider' => 'serper', 'db_column' => 'ai_serper_api_key', 'env_key' => 'SERPER_API_KEY', 'default' => '', 'secret' => true],
+            'ai_serper_enabled' => ['db_column' => 'ai_serper_enabled', 'env_key' => '', 'default' => true, 'boolean' => true],
         ];
 
         $fields = [];
@@ -843,8 +921,34 @@ class AiConfig
             ];
         }
 
+        $webSearch = [];
+        foreach (config('ai.web_search_providers', []) as $id => $meta) {
+            $webSearch[] = [
+                'id' => $id,
+                'label' => (string) ($meta['label'] ?? $id),
+                'description' => (string) ($meta['description'] ?? ''),
+                'icon' => (string) ($meta['icon'] ?? 'fa-globe'),
+                'color' => (string) ($meta['color'] ?? '#2563eb'),
+                'status' => $id === 'serper' ? self::serperStatus() : 'unavailable',
+                'enabled' => $id === 'serper' ? self::serperEnabled() : false,
+                'configured' => $id === 'serper' ? self::serperConfigured() : false,
+                'source_priority' => self::sourcePriority($id),
+                'active_source' => $id === 'serper' ? self::serperActiveSource() : null,
+            ];
+        }
+
         $readyCount = 0;
-        foreach (array_merge(array_column($builtin, 'id'), array_map(fn ($i) => self::integrationProviderId($i['id']), $integrations)) as $pid) {
+        foreach (array_merge(
+            array_column($builtin, 'id'),
+            array_map(fn ($i) => self::integrationProviderId($i['id']), $integrations),
+            array_column($webSearch, 'id')
+        ) as $pid) {
+            if ($pid === 'serper') {
+                if (self::serperAvailable()) {
+                    $readyCount++;
+                }
+                continue;
+            }
             if (self::providerAvailable($pid)) {
                 $readyCount++;
             }
@@ -854,6 +958,7 @@ class AiConfig
             'fields' => $fields,
             'features' => $features,
             'builtin_providers' => $builtin,
+            'web_search_providers' => $webSearch,
             'custom_integrations' => array_map(function (array $integration) {
                 $pid = self::integrationProviderId($integration['id']);
 

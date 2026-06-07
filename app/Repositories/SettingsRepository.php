@@ -651,6 +651,7 @@ class SettingsRepository
             'ai_gemini_api_key',
             'ai_deepseek_api_key',
             'ai_custom_api_key',
+            'ai_serper_api_key',
         ] as $secretColumn) {
             if ($request->filled($secretColumn)) {
                 $settings->{$secretColumn} = $request->input($secretColumn);
@@ -675,6 +676,7 @@ class SettingsRepository
             'ai_gemini_enabled',
             'ai_deepseek_enabled',
             'ai_custom_enabled',
+            'ai_serper_enabled',
         ] as $toggle) {
             if ($request->has($toggle)) {
                 $settings->{$toggle} = self::parseSubmittedBoolean($request, $toggle);
@@ -705,7 +707,10 @@ class SettingsRepository
 
         if (Schema::hasColumn('setting', 'ai_source_priority') && $request->has('ai_source_priority')) {
             $priorities = [];
-            foreach (array_keys(config('ai.providers', [])) as $provider) {
+            foreach (array_merge(
+                array_keys(config('ai.providers', [])),
+                array_keys(config('ai.web_search_providers', []))
+            ) as $provider) {
                 $value = $request->input('ai_source_priority.'.$provider);
                 if (in_array($value, ['env', 'db'], true)) {
                     $priorities[$provider] = $value;

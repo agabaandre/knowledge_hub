@@ -123,6 +123,7 @@ return [
         'AI_CUSTOM_API_KEY',
         'AI_CUSTOM_MODEL',
         'AI_PRIMARY_PROVIDER',
+        'SERPER_API_KEY',
     ],
 
     'database_defaults' => [

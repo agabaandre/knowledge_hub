@@ -9,9 +9,9 @@
         <div class="sidebar-content mb-3" style="background:#fff;border:1px solid #e2e8f0;border-radius:0.25rem;padding:18px;box-shadow:0 2px 8px rgba(0,0,0,.04);">
             <div class="d-flex align-items-center justify-content-between flex-wrap">
                 <div class="d-flex align-items-center mb-2 mb-md-0">
-                    <p class="mb-0 me-4 fw-semibold" style="color:var(--theme-color-primary, #119A48);">Results summary</p>
+                    <p class="mb-0 me-4 fw-semibold" style="color:var(--theme-color-primary, #119A48);">{{ __('publications.search.results_summary') }}</p>
                     <span class="fw-bold" style="color:#1e293b;font-size:1rem;">
-                        {{ $results_count ?? ($publications->total() ?? 0) }} {{ ($results_count ?? ($publications->total() ?? 0)) == 1 ? 'result' : 'results' }} found
+                        {{ $results_count ?? ($publications->total() ?? 0) }} {{ ($results_count ?? ($publications->total() ?? 0)) == 1 ? __('publications.search.result_found') : __('publications.search.results_found') }}
                     </span>
                 </div>
                 @if(isset($search_time))
@@ -54,50 +54,11 @@
         </div>
         @endif
 
-        {{-- Related Discussions (forums matching search term) --}}
-        @if(isset($searchForums) && $searchForums->count() > 0)
-        <div class="mb-4">
-            <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
-                <i class="fa fa-comments mr-2"></i>Related Discussions
-            </h5>
-            <div class="row">
-                @foreach($searchForums as $forum)
-                <div class="col-12 mb-3">
-                    <div class="card border rounded" style="border-color:#e2e8f0;">
-                        <div class="card-body py-3">
-                            <a href="{{ forum_thread_url($forum)}}" class="text-decoration-none">
-                                <h6 class="mb-1" style="color:#0f172a;font-size:1rem;">{!! Str::limit(strip_tags($forum->forum_title ?? ''), 120) !!}</h6>
-                            </a>
-                            @if(!empty($forum->forum_description))
-                            <p class="mb-2 text-muted" style="font-size:0.875rem;">{{ Str::limit(strip_tags($forum->forum_description), 140) }}</p>
-                            @endif
-                            <div class="d-flex align-items-center flex-wrap" style="font-size:0.8rem;color:#64748b;">
-                                @if($forum->user)
-                                <span class="mr-3"><i class="fa fa-user mr-1"></i>{{ $forum->user->name ?? 'Unknown' }}</span>
-                                @endif
-                                <span class="mr-3"><i class="fa fa-clock mr-1"></i>{{ time_ago($forum->created_at) }}</span>
-                                <span class="mr-3"><i class="fa fa-comments mr-1"></i>{{ $forum->total_comments ?? 0 }} Comments</span>
-                                <span><i class="fa fa-eye mr-1"></i>{{ $forum->views ?? 0 }} Views</span>
-                            </div>
-                            <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-primary mt-2">
-                                <i class="fa fa-arrow-right mr-1"></i>View Discussion
-                            </a>
-                        </div>
-                    </div>
-                </div>
-                @endforeach
-            </div>
-            <p class="mb-0 mt-2">
-                <a href="{{ url('forums') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-secondary">View all discussions</a>
-            </p>
-        </div>
-        @endif
-
         {{-- Related Communities (matching search term) --}}
         @if(isset($searchCommunities) && $searchCommunities->count() > 0)
         <div class="mb-4">
             <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
-                <i class="fa fa-users mr-2"></i>Related Communities
+                <i class="fa fa-users mr-2"></i>{{ __('publications.search.related_communities') }}
             </h5>
             <div class="row">
                 @foreach($searchCommunities as $community)
@@ -118,8 +79,8 @@
                                 <span class="mr-3"><i class="fa fa-globe mr-1"></i>{{ $community->region->name ?? '' }}</span>
                                 @endif
                             </div>
-                            <a href="{{ community_detail_url($community) }}" class="btn btn-sm btn-primary mt-2">
-                                <i class="fa fa-arrow-right mr-1"></i>View Community
+                            <a href="{{ community_detail_url($community) }}" class="btn btn-sm btn-outline-primary mt-2" style="border-color:var(--theme-color-primary,#119A48);color:var(--theme-color-primary,#119A48);">
+                                <i class="fa fa-arrow-right mr-1"></i>{{ __('publications.search.view_community') }}
                             </a>
                         </div>
                     </div>
@@ -127,7 +88,7 @@
                 @endforeach
             </div>
             <p class="mb-0 mt-2">
-                <a href="{{ url('communities') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-secondary">View all communities</a>
+                <a href="{{ url('communities') }}{{ request()->filled('term') ? '?term=' . urlencode(request('term')) : '' }}" class="btn btn-sm btn-outline-primary" style="border-color:var(--theme-color-primary,#119A48);color:var(--theme-color-primary,#119A48);">{{ __('publications.search.view_all_communities') }}</a>
             </p>
         </div>
         @endif

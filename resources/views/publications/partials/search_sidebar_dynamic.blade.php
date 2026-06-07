@@ -1,60 +1,96 @@
+@php
+    $discussionsUrl = url('forums') . (request()->filled('term') ? '?term=' . urlencode(request('term')) : '');
+@endphp
+
+{{-- Related Discussions (sidebar, before Related Resources) --}}
+@if(isset($searchForums) && $searchForums->count() > 0)
+<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
+    <div class="contributor-sidebar-panel__header">
+        <i class="fa fa-comments contributor-sidebar-panel__icon" aria-hidden="true"></i>
+        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_discussions') }}</h3>
+    </div>
+    <ul class="search-sidebar-list list-unstyled mb-0">
+        @foreach($searchForums as $forum)
+        <li class="search-sidebar-list__item">
+            <a href="{{ forum_thread_url($forum) }}" class="search-sidebar-list__link">
+                <span class="search-sidebar-list__title">{!! Str::limit(strip_tags($forum->forum_title ?? ''), 90) !!}</span>
+                @if(!empty($forum->forum_description))
+                <span class="search-sidebar-list__excerpt">{{ Str::limit(strip_tags($forum->forum_description), 110) }}</span>
+                @endif
+                <span class="search-sidebar-list__meta">
+                    @if($forum->user)
+                    <span><i class="fa fa-user" aria-hidden="true"></i> {{ $forum->user->name ?? 'Unknown' }}</span>
+                    @endif
+                    <span><i class="fa fa-clock" aria-hidden="true"></i> {{ time_ago($forum->created_at) }}</span>
+                    <span><i class="fa fa-comments" aria-hidden="true"></i> {{ $forum->total_comments ?? 0 }} {{ __('publications.search.comments') }}</span>
+                    <span><i class="fa fa-eye" aria-hidden="true"></i> {{ $forum->views ?? 0 }} {{ __('publications.search.views') }}</span>
+                </span>
+            </a>
+        </li>
+        @endforeach
+    </ul>
+    <a href="{{ $discussionsUrl }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_discussions') }}</a>
+</div>
+@endif
+
 {{-- Related Resources + Latest (refreshed with AJAX when filters change) --}}
 @if(isset($relatedPublications) && $relatedPublications->count() > 0)
-<div class="sidebar-content">
-  <h5 class="mb-3">Related Resources</h5>
-  @foreach($relatedPublications->take(5) as $pub)
-  <div class="mb-3 pb-3 border-bottom">
-    <a href="{{ publication_url($pub) }}" class="text-decoration-none">
-      <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
-    </a>
-    <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>
-    <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
-      @if($pub->author)
-      <span class="mr-2"><i class="fa fa-user mr-1"></i>
-        @if(!empty($pub->author->orcid))
-            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;">
-                {{ $pub->author->name }}
-                <i class="fa fa-external-link-alt" style="font-size: 0.65rem; margin-left: 2px;"></i>
-            </a>
-        @else
-            <span class="notranslate" translate="no">{{ $pub->author->name }}</span>
-        @endif
-      </span>
-      @endif
-      <span><i class="fa fa-calendar mr-1"></i>{{ $pub->created_at->format('M Y') }}</span>
+<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
+    <div class="contributor-sidebar-panel__header">
+        <i class="fa fa-file-lines contributor-sidebar-panel__icon" aria-hidden="true"></i>
+        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_resources') }}</h3>
     </div>
-  </div>
-  @endforeach
-  <a href="{{ url('records') }}" class="btn btn-sm btn-primary w-100 mt-2">View All Resources</a>
+    <ul class="search-sidebar-list list-unstyled mb-0">
+        @foreach($relatedPublications->take(5) as $pub)
+        <li class="search-sidebar-list__item">
+            <a href="{{ publication_url($pub) }}" class="search-sidebar-list__link">
+                <span class="search-sidebar-list__title">{{ Str::limit(strip_tags($pub->title), 90) }}</span>
+                <span class="search-sidebar-list__excerpt">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</span>
+                <span class="search-sidebar-list__meta">
+                    @if($pub->author)
+                    <span class="notranslate" translate="no">
+                        <i class="fa fa-user" aria-hidden="true"></i>
+                        @if(!empty($pub->author->orcid))
+                            {{ $pub->author->name }}
+                        @else
+                            {{ $pub->author->name }}
+                        @endif
+                    </span>
+                    @endif
+                    <span><i class="fa fa-calendar" aria-hidden="true"></i> {{ $pub->created_at->format('M Y') }}</span>
+                </span>
+            </a>
+        </li>
+        @endforeach
+    </ul>
+    <a href="{{ url('records') }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_resources') }}</a>
 </div>
 @endif
 
 @if(isset($latestPublications) && $latestPublications->count() > 0)
-<div class="sidebar-content">
-  <h5 class="mb-3">Latest Publications</h5>
-  @foreach($latestPublications->take(5) as $pub)
-  <div class="mb-3 pb-3 border-bottom">
-    <a href="{{ publication_url($pub) }}" class="text-decoration-none">
-      <h6 class="mb-1" style="font-size:0.9rem;color:#0f172a;line-height:1.4;">{{ Str::limit(strip_tags($pub->title), 80) }}</h6>
-    </a>
-    <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</p>
-    <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
-      @if($pub->author)
-      <span class="mr-2"><i class="fa fa-user mr-1"></i>
-        @if(!empty($pub->author->orcid))
-            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;">
-                {{ $pub->author->name }}
-                <i class="fa fa-external-link-alt" style="font-size: 0.65rem; margin-left: 2px;"></i>
-            </a>
-        @else
-            <span class="notranslate" translate="no">{{ $pub->author->name }}</span>
-        @endif
-      </span>
-      @endif
-      <span><i class="fa fa-calendar mr-1"></i>{{ $pub->created_at->format('M Y') }}</span>
+<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
+    <div class="contributor-sidebar-panel__header">
+        <i class="fa fa-clock contributor-sidebar-panel__icon" aria-hidden="true"></i>
+        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.latest_publications') }}</h3>
     </div>
-  </div>
-  @endforeach
-  <a href="{{ url('records') }}" class="btn btn-sm btn-primary w-100 mt-2">View All Publications</a>
+    <ul class="search-sidebar-list list-unstyled mb-0">
+        @foreach($latestPublications->take(5) as $pub)
+        <li class="search-sidebar-list__item">
+            <a href="{{ publication_url($pub) }}" class="search-sidebar-list__link">
+                <span class="search-sidebar-list__title">{{ Str::limit(strip_tags($pub->title), 90) }}</span>
+                <span class="search-sidebar-list__excerpt">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</span>
+                <span class="search-sidebar-list__meta">
+                    @if($pub->author)
+                    <span class="notranslate" translate="no">
+                        <i class="fa fa-user" aria-hidden="true"></i> {{ $pub->author->name }}
+                    </span>
+                    @endif
+                    <span><i class="fa fa-calendar" aria-hidden="true"></i> {{ $pub->created_at->format('M Y') }}</span>
+                </span>
+            </a>
+        </li>
+        @endforeach
+    </ul>
+    <a href="{{ url('records') }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_publications') }}</a>
 </div>
 @endif
