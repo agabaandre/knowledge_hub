@@ -80,7 +80,7 @@
 </div>
 
 <style>
-    .contributor-lifetime-badge-wrap { margin-top: 0.85rem; }
+    .contributor-lifetime-badge-wrap { margin-top: 0; }
     .contributor-lifetime-badge-btn {
         display: flex;
         align-items: center;

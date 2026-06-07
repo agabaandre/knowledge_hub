@@ -36,7 +36,28 @@
     .contributor-hero-inner {
         display: flex;
         gap: 1.25rem;
+        align-items: stretch;
+    }
+    .contributor-hero-profile {
+        display: flex;
+        gap: 1.25rem;
         align-items: flex-start;
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+    .contributor-hero-badge-aside {
+        flex: 0 0 280px;
+        max-width: 300px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .contributor-hero-badge-aside .contributor-lifetime-badge-wrap {
+        margin-top: 0;
+        height: 100%;
+    }
+    .contributor-hero-badge-aside .contributor-lifetime-badge-btn {
+        height: 100%;
     }
     .contributor-avatar {
         width: 112px;
@@ -259,9 +280,20 @@
         .contributor-stats-grid {
             grid-template-columns: repeat(2, minmax(0, 1fr));
         }
+        .contributor-hero-inner {
+            flex-wrap: wrap;
+        }
+        .contributor-hero-badge-aside {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
     }
     @media (max-width: 575.98px) {
         .contributor-hero-inner {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .contributor-hero-profile {
             flex-direction: column;
             align-items: center;
             text-align: center;
@@ -281,51 +313,57 @@
 
 <div class="contributor-hero">
     <div class="contributor-hero-inner">
-        <div class="contributor-avatar" aria-hidden="true">
-            @if($avatarUrl)
-                <img src="{{ $avatarUrl }}" alt="{{ $author->name }}" onerror="this.style.display='none'; this.parentElement.querySelector('.contributor-avatar-fallback')?.classList.remove('d-none');">
-                <i class="contributor-avatar-icon contributor-avatar-fallback d-none {{ $isOrganisation ? 'fa fa-building' : 'fa fa-user' }}"></i>
-            @else
-                <i class="contributor-avatar-icon {{ $isOrganisation ? 'fa fa-building' : 'fa fa-user' }}"></i>
-            @endif
-        </div>
-        <div class="contributor-hero-body">
-            <div class="contributor-kicker">{{ $profileKicker }}</div>
-            <h1 class="contributor-name">
-                @if(!empty($author->orcid))
-                    <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile">
-                        {{ $author->name }}
-                        <i class="fa fa-external-link-alt" style="font-size: 0.55em; margin-left: 0.35rem;"></i>
-                    </a>
+        <div class="contributor-hero-profile">
+            <div class="contributor-avatar" aria-hidden="true">
+                @if($avatarUrl)
+                    <img src="{{ $avatarUrl }}" alt="{{ $author->name }}" onerror="this.style.display='none'; this.parentElement.querySelector('.contributor-avatar-fallback')?.classList.remove('d-none');">
+                    <i class="contributor-avatar-icon contributor-avatar-fallback d-none {{ $isOrganisation ? 'fa fa-building' : 'fa fa-user' }}"></i>
                 @else
-                    {{ $author->name }}
-                @endif
-            </h1>
-            @if($jobTitle)
-                <div class="contributor-title">{{ $jobTitle }}</div>
-            @endif
-            @if($organization)
-                <div class="contributor-org-block">
-                    <span class="contributor-org-label">Organization / Institution</span>
-                    <div class="contributor-org-value"><i class="fa fa-building mr-1" style="color: {{ $primary }};"></i>{{ $organization }}</div>
-                </div>
-            @endif
-            <div class="contributor-meta-line">
-                @if($countryName)
-                    <span><i class="fa fa-map-marker-alt"></i>{{ $countryName }}</span>
-                @endif
-                @if(!empty($author->email))
-                    <span><i class="fa fa-envelope"></i>{{ $author->email }}</span>
+                    <i class="contributor-avatar-icon {{ $isOrganisation ? 'fa fa-building' : 'fa fa-user' }}"></i>
                 @endif
             </div>
-            @include('publications.partials.contributor_lifetime_badge', [
-                'author' => $author,
-                'lifetimeBadge' => $lifetimeBadge,
-                'badgeDrilldownYear' => $badgeDrilldownYear ?? null,
-                'badgeDrilldownMonth' => $badgeDrilldownMonth ?? null,
-                'communityBadgeStarCount' => $communityBadgeStarCount ?? 0,
-            ])
+            <div class="contributor-hero-body">
+                <div class="contributor-kicker">{{ $profileKicker }}</div>
+                <h1 class="contributor-name">
+                    @if(!empty($author->orcid))
+                        <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile">
+                            {{ $author->name }}
+                            <i class="fa fa-external-link-alt" style="font-size: 0.55em; margin-left: 0.35rem;"></i>
+                        </a>
+                    @else
+                        {{ $author->name }}
+                    @endif
+                </h1>
+                @if($jobTitle)
+                    <div class="contributor-title">{{ $jobTitle }}</div>
+                @endif
+                @if($organization)
+                    <div class="contributor-org-block">
+                        <span class="contributor-org-label">Organization / Institution</span>
+                        <div class="contributor-org-value"><i class="fa fa-building mr-1" style="color: {{ $primary }};"></i>{{ $organization }}</div>
+                    </div>
+                @endif
+                <div class="contributor-meta-line">
+                    @if($countryName)
+                        <span><i class="fa fa-map-marker-alt"></i>{{ $countryName }}</span>
+                    @endif
+                    @if(!empty($author->email))
+                        <span><i class="fa fa-envelope"></i>{{ $author->email }}</span>
+                    @endif
+                </div>
+            </div>
         </div>
+        @if($lifetimeBadge && ($lifetimeBadge->badgeType ?? null) && $user)
+            <div class="contributor-hero-badge-aside">
+                @include('publications.partials.contributor_lifetime_badge', [
+                    'author' => $author,
+                    'lifetimeBadge' => $lifetimeBadge,
+                    'badgeDrilldownYear' => $badgeDrilldownYear ?? null,
+                    'badgeDrilldownMonth' => $badgeDrilldownMonth ?? null,
+                    'communityBadgeStarCount' => $communityBadgeStarCount ?? 0,
+                ])
+            </div>
+        @endif
     </div>
 </div>
 
