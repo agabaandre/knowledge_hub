@@ -13,6 +13,8 @@ use Illuminate\Validation\ValidationException;
  */
 final class PublicationSubmissionValidation
 {
+    public const AUTHOR_FIELD_MAX_LENGTH = 1000;
+
     public static function rules(Request $request): array
     {
         $minWords = settings()->publication_min_words ?? 150;
@@ -41,8 +43,10 @@ final class PublicationSubmissionValidation
         $val_rules = [
             'title' => ($requiredFields['title'] ?? true) ? 'required|string|max:500' : 'nullable|string|max:500',
             'description' => ($requiredFields['description'] ?? true) ? 'required|string|min:'.$minChars : 'nullable|string|min:'.$minChars,
-            'associated_authors' => ($requiredFields['associated_authors'] ?? true) ? 'required|string|max:500' : 'nullable|string|max:500',
-            'author_affiliation' => 'required|string|max:500',
+            'associated_authors' => ($requiredFields['associated_authors'] ?? true)
+                ? 'required|string|max:'.self::AUTHOR_FIELD_MAX_LENGTH
+                : 'nullable|string|max:'.self::AUTHOR_FIELD_MAX_LENGTH,
+            'author_affiliation' => 'required|string|max:'.self::AUTHOR_FIELD_MAX_LENGTH,
             'tags' => ($requiredFields['tags'] ?? true) ? 'required|array|min:1' : 'nullable|array',
             'tags.*' => 'exists:tags,id',
             'theme' => ($requiredFields['theme'] ?? true) ? 'required' : 'nullable',
@@ -210,9 +214,9 @@ final class PublicationSubmissionValidation
             'description.required' => 'A description is required. Please describe your resource in detail.',
             'description.min' => 'The description must be at least '.$minWords.' words (approximately '.$minChars.' characters). Please provide more details about your resource.',
             'associated_authors.required' => 'Associated authors are required. Please list the authors or co-authors.',
-            'associated_authors.max' => 'Associated authors cannot exceed 500 characters.',
+            'associated_authors.max' => 'Associated authors cannot exceed '.self::AUTHOR_FIELD_MAX_LENGTH.' characters.',
             'author_affiliation.required' => 'Author affiliation/institution is required. Please enter the institution or organization of the authors.',
-            'author_affiliation.max' => 'Author affiliation cannot exceed 500 characters.',
+            'author_affiliation.max' => 'Author affiliation cannot exceed '.self::AUTHOR_FIELD_MAX_LENGTH.' characters.',
             'tags.required' => 'Please select at least one tag/health topic to help categorize your publication.',
             'tags.min' => 'Please select at least one tag/health topic.',
             'tags.*.exists' => 'One or more selected tags are invalid.',

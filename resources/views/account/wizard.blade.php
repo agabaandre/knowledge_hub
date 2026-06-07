@@ -543,18 +543,17 @@
                             <span class="text-danger">*</span>
                         @endif
                     </label>
-                    <input type="text" class="form-control" name="associated_authors" id="associated_authors"
-                           placeholder="Associated Authors" {{ ($requiredFields['associated_authors'] ?? true) ? 'required' : '' }}
-                           value="{{ @$publication->associated_authors ?? old('associated_authors') }}">
-                    <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas.</small>
+                    <textarea class="form-control" name="associated_authors" id="associated_authors" rows="3"
+                              maxlength="1000" placeholder="Associated Authors"
+                              {{ ($requiredFields['associated_authors'] ?? true) ? 'required' : '' }}>{{ old('associated_authors', @$publication->associated_authors ?? '') }}</textarea>
+                    <small class="text-muted">List the individuals or organisations who authored or co-authored this publication or any attached documents. Separate multiple names with commas. Maximum 1,000 characters.</small>
                 </div>
                 
                 <div class="col-md-12 mb-2">
                     <label class="form-label" for="author_affiliation">Author Affiliation/Institution <span class="text-danger">*</span></label>
-                    <input type="text" class="form-control" name="author_affiliation" id="author_affiliation"
-                           placeholder="Author Affiliation/Institution" required
-                           value="{{ @$publication->author_affiliation ?? old('author_affiliation') }}">
-                    <small class="text-muted">Enter the institution, organization, or affiliation of the authors listed above.</small>
+                    <textarea class="form-control" name="author_affiliation" id="author_affiliation" rows="3"
+                              maxlength="1000" placeholder="Author Affiliation/Institution" required>{{ old('author_affiliation', @$publication->author_affiliation ?? '') }}</textarea>
+                    <small class="text-muted">Enter the institution, organization, or affiliation of the authors listed above. Maximum 1,000 characters.</small>
                             </div>
                 
                 <div class="col-md-12 mb-2">
