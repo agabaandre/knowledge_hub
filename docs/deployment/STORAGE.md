@@ -131,6 +131,29 @@ For **internal** storage, `public/storage` must point at your **hub files root**
 
 `storage_link()` returns `/storage/...` when the symlink/junction is correct, or `/hub-media/...` for custom host paths.
 
+### Legacy installs (`storage/app/public/uploads`)
+
+Older hubs may still have all uploads under `storage/app/public/uploads/` while Storage Management points at `/var/khubdata/{site-id}/files`. Running `fix-storage-permissions.sh` or `hub:link-storage` alone can break URLs if the host path is empty.
+
+From current app versions:
+
+1. **Automatic fallback** — if the configured host path has no uploads but legacy storage does, the hub serves files from legacy storage until migration completes.
+2. **Migrate to host path** — Admin → Storage Management → **Migrate to host files root**, or:
+
+```bash
+php artisan hub:migrate-storage-to-host
+```
+
+3. After migration, `public/storage` is relinked to `/var/khubdata/{site-id}/files`.
+
+**Emergency recovery (before deploy):** point `public/storage` back at legacy storage:
+
+```bash
+cd /var/www/khub.africacdc.org   # your app root
+rm -f public/storage
+ln -sfn "$(pwd)/storage/app/public" public/storage
+```
+
 ---
 
 ## Cloud drivers

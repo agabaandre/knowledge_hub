@@ -19,6 +19,23 @@
     <div class="alert alert-danger">{{ session('alert-danger') }}</div>
 @endif
 
+@if($isUsingLegacyUploadFallback)
+    <div class="alert alert-warning">
+        <strong>Files are being served from legacy storage</strong> because uploads still live under
+        <code>{{ $legacyFilesRoot }}</code> while the configured host path
+        <code>{{ $configuredFilesRoot }}</code> is empty.
+        Use <strong>Migrate to host files root</strong> below to copy files, or run
+        <code>php artisan hub:migrate-storage-to-host</code> on the server.
+        Until then, the hub automatically serves from legacy storage so existing URLs keep working.
+    </div>
+@elseif(! $publicStorageLinkOk && $settings->files_driver === 'internal')
+    <div class="alert alert-danger">
+        <strong>public/storage is not linked correctly.</strong>
+        Active files root: <code>{{ $filesRoot }}</code>.
+        Run <code>php artisan hub:link-storage</code> on the server (or open this page again after deploy).
+    </div>
+@endif
+
 <div class="alert alert-info">
     <strong>Site storage ID:</strong> <code>{{ $siteStorageId }}</code>
     — paths are isolated under <code>/var/khubdata/{{ $siteStorageId }}/</code> so multiple hubs on one server or Docker host do not share files.
@@ -107,18 +124,51 @@
             </div>
         </div>
 
-        <div class="card mb-4">
+        @if($needsLegacyToHostMigration)
+        <div class="card mb-4 border-warning">
             <div class="card-header d-flex justify-content-between align-items-center">
-                <h3 class="card-title mb-0">Migrate files to external storage</h3>
+                <h3 class="card-title mb-0">Migrate to host files root</h3>
             </div>
             <div class="card-body">
-                <p class="text-muted small">Copies existing publication and forum uploads from internal storage to the configured external driver. Internal copies are kept until you verify the migration.</p>
+                <p class="text-muted small mb-2">
+                    Copies publication and forum uploads from legacy <code>storage/app/public</code> to the configured host path
+                    <code>{{ $configuredFilesRoot }}</code>. Original files are kept until you verify the copy.
+                </p>
+                <p class="small mb-3">Source: <code>{{ $legacyFilesRoot }}</code></p>
                 @if($settings->migration_status === 'running')
+                    <div class="progress mb-2">
+                        <div class="progress-bar progress-bar-striped progress-bar-animated bg-warning" id="hostMigrationProgressBar" style="width:0%"></div>
+                    </div>
+                    <p class="small mb-2" id="hostMigrationProgressLabel">Migration in progress…</p>
+                @elseif($settings->migration_message && $settings->files_driver === 'internal')
+                    <p class="small text-muted">{{ $settings->migration_message }}</p>
+                @endif
+                <form method="post" action="{{ route('admin.storage.migrate-host') }}" class="d-inline" onsubmit="return confirm('Copy all uploads to the host files root?');">
+                    @csrf
+                    <input type="hidden" name="mode" value="queue">
+                    <button type="submit" class="btn btn-warning" {{ $settings->migration_status === 'running' ? 'disabled' : '' }}>Queue migration</button>
+                </form>
+                <form method="post" action="{{ route('admin.storage.migrate-host') }}" class="d-inline ms-2" onsubmit="return confirm('Run host migration now? This may take a long time.');">
+                    @csrf
+                    <input type="hidden" name="mode" value="sync">
+                    <button type="submit" class="btn btn-outline-warning" {{ $settings->migration_status === 'running' ? 'disabled' : '' }}>Run now</button>
+                </form>
+            </div>
+        </div>
+        @endif
+
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">Migrate files to cloud / external storage</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small">Copies existing uploads to S3, Azure, GCS, SharePoint, or SFTP after you switch the files driver above. Internal copies are kept until you verify the migration.</p>
+                @if($settings->migration_status === 'running' && $settings->files_driver !== 'internal')
                     <div class="progress mb-2">
                         <div class="progress-bar progress-bar-striped progress-bar-animated" id="migrationProgressBar" style="width:0%"></div>
                     </div>
                     <p class="small mb-2" id="migrationProgressLabel">Migration in progress…</p>
-                @elseif($settings->migration_message)
+                @elseif($settings->migration_message && $settings->files_driver !== 'internal')
                     <p class="small text-muted">{{ $settings->migration_message }}</p>
                 @endif
                 <form method="post" action="{{ route('admin.storage.migrate') }}" class="d-inline" onsubmit="return confirm('Start file migration to external storage?');">
@@ -131,6 +181,9 @@
                     <input type="hidden" name="mode" value="sync">
                     <button type="submit" class="btn btn-outline-warning" {{ $settings->files_driver === 'internal' ? 'disabled' : '' }}>Run now</button>
                 </form>
+                @if($settings->files_driver === 'internal')
+                    <p class="small text-muted mt-2 mb-0">Select a cloud driver and save settings first. Host-path migration is separate (card above).</p>
+                @endif
             </div>
         </div>
     </div>
@@ -139,7 +192,10 @@
         <div class="card mb-4">
             <div class="card-header"><h3 class="card-title mb-0">SQL backups &amp; restore</h3></div>
             <div class="card-body">
-                <p class="small text-muted mb-2">Current files root: <code>{{ $filesRoot }}</code></p>
+                <p class="small text-muted mb-2">Active files root: <code>{{ $filesRoot }}</code></p>
+                @if($configuredFilesRoot !== $filesRoot)
+                    <p class="small text-muted mb-2">Configured host path: <code>{{ $configuredFilesRoot }}</code></p>
+                @endif
                 <p class="small text-muted mb-3">SQL backup root: <code>{{ $sqlBackupRoot }}</code></p>
                 @if($settings->last_sql_backup_at)
                     <p class="small">Last backup: {{ $settings->last_sql_backup_at->format('Y-m-d H:i') }}</p>
@@ -355,19 +411,24 @@
     });
 
     @if($settings->migration_status === 'running')
-    function pollMigration() {
+    function pollMigration(barId, labelId) {
+        var bar = document.getElementById(barId);
+        var label = document.getElementById(labelId);
+        if (!bar || !label) return;
         fetch('{{ route('admin.storage.migration-status') }}')
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 var total = parseInt(data.total || 0, 10);
                 var done = parseInt(data.done || 0, 10);
                 var pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                document.getElementById('migrationProgressBar').style.width = pct + '%';
-                document.getElementById('migrationProgressLabel').textContent = done + ' / ' + total + ' files';
-                if (data.status === 'running') setTimeout(pollMigration, 2000);
+                bar.style.width = pct + '%';
+                label.textContent = done + ' / ' + total + ' files' + (data.message ? ' — ' + data.message : '');
+                if (data.status === 'running') setTimeout(function () { pollMigration(barId, labelId); }, 2000);
+                else if (data.status === 'completed') setTimeout(function () { window.location.reload(); }, 1500);
             });
     }
-    pollMigration();
+    pollMigration('hostMigrationProgressBar', 'hostMigrationProgressLabel');
+    pollMigration('migrationProgressBar', 'migrationProgressLabel');
     @endif
 })();
 </script>

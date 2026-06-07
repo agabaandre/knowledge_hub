@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\MigrateHostStorageJob;
 use App\Jobs\MigrateHubStorageJob;
 use App\Models\HubStorageSetting;
 use App\Services\HubDatabaseBackupService;
@@ -18,6 +19,12 @@ class StorageManagementController extends Controller
         $settings = $storage->settings();
         $recommended = $storage->recommendedPaths();
 
+        try {
+            $storage->ensurePublicStorageSymlink();
+        } catch (\Throwable) {
+            // Admin page should still load if linking fails (permissions, etc.).
+        }
+
         return view('admin.storage.index', [
             'settings' => $settings,
             'recommended' => $recommended,
@@ -27,6 +34,11 @@ class StorageManagementController extends Controller
             'contentAreas' => config('hub_storage.content_prefixes', []),
             'backups' => $backup->listBackups(),
             'filesRoot' => $storage->filesRoot(),
+            'configuredFilesRoot' => $storage->configuredInternalRoot(),
+            'legacyFilesRoot' => $storage->legacyInternalRoot(),
+            'isUsingLegacyUploadFallback' => $storage->isUsingLegacyUploadFallback(),
+            'needsLegacyToHostMigration' => $storage->needsLegacyToHostMigration(),
+            'publicStorageLinkOk' => $storage->publicStorageLinkOk(),
             'sqlBackupRoot' => $storage->sqlBackupRoot(),
             'usesExternal' => $storage->usesExternalFiles(),
             'siteStorageId' => $storage->siteStorageId(),
@@ -234,12 +246,43 @@ class StorageManagementController extends Controller
         if ($mode === 'sync') {
             app(HubStorageService::class)->migrateInternalToExternal();
 
-            return redirect()->route('admin.storage.index')->with('alert-success', 'File migration completed.');
+            return redirect()->route('admin.storage.index')->with('alert-success', 'File migration to external storage completed.');
         }
 
         MigrateHubStorageJob::dispatch();
 
-        return redirect()->route('admin.storage.index')->with('alert-success', 'File migration queued.');
+        return redirect()->route('admin.storage.index')->with('alert-success', 'External file migration queued.');
+    }
+
+    public function migrateHost(Request $request)
+    {
+        $storage = app(HubStorageService::class);
+
+        if (! $storage->needsLegacyToHostMigration()) {
+            return redirect()
+                ->route('admin.storage.index')
+                ->with('alert-danger', 'No legacy uploads need copying to the host files root.');
+        }
+
+        $mode = $request->input('mode', 'queue');
+        if ($mode === 'sync') {
+            $result = $storage->migrateLegacyToHostPath();
+            if (($result['status'] ?? '') === 'completed') {
+                return redirect()
+                    ->route('admin.storage.index')
+                    ->with('alert-success', 'Files copied to host path. public/storage has been relinked.');
+            }
+
+            return redirect()
+                ->route('admin.storage.index')
+                ->with('alert-danger', $result['message'] ?? 'Host path migration did not complete.');
+        }
+
+        MigrateHostStorageJob::dispatch();
+
+        return redirect()
+            ->route('admin.storage.index')
+            ->with('alert-success', 'Host path migration queued.');
     }
 
     public function migrationStatus()

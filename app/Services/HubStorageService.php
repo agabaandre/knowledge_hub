@@ -107,19 +107,87 @@ class HubStorageService
         return $this->recommendedPaths()['sql_backups'];
     }
 
+    /**
+     * Admin-configured internal files root (host path or legacy), without legacy fallback.
+     */
+    public function configuredInternalRoot(): string
+    {
+        $settings = $this->settings();
+        if ($settings->files_driver !== 'internal') {
+            return $this->legacyInternalRoot();
+        }
+
+        $root = trim((string) ($settings->local_files_root ?: ''));
+        if ($root !== '') {
+            return rtrim($root, '/\\');
+        }
+
+        $envRoot = trim((string) env('HUB_FILES_ROOT', ''));
+        if ($envRoot !== '') {
+            return rtrim($envRoot, '/\\');
+        }
+
+        return $this->resolveInternalRootForInstall();
+    }
+
+    /**
+     * Active internal files root. Falls back to legacy storage/app/public when the
+     * configured host path is empty but legacy still contains uploads.
+     */
     public function filesRoot(): string
     {
         $settings = $this->settings();
-        if ($settings->files_driver === 'internal') {
-            $root = trim((string) ($settings->local_files_root ?: ''));
-            if ($root !== '') {
-                return rtrim($root, '/\\');
-            }
-
-            return $this->resolveInternalRootForInstall();
+        if ($settings->files_driver !== 'internal') {
+            return $this->legacyInternalRoot();
         }
 
-        return $this->legacyInternalRoot();
+        $configured = $this->configuredInternalRoot();
+        $legacy = $this->legacyInternalRoot();
+
+        if ($this->pathsDiffer($configured, $legacy)
+            && $this->pathHasHubUploads($legacy)
+            && ! $this->pathHasHubUploads($configured)) {
+            return $legacy;
+        }
+
+        return $configured;
+    }
+
+    public function isUsingLegacyUploadFallback(): bool
+    {
+        if ($this->settings()->files_driver !== 'internal') {
+            return false;
+        }
+
+        $configured = $this->configuredInternalRoot();
+        $legacy = $this->legacyInternalRoot();
+
+        return $this->pathsDiffer($configured, $legacy)
+            && realpath($this->filesRoot()) === realpath($legacy);
+    }
+
+    public function needsLegacyToHostMigration(): bool
+    {
+        if ($this->settings()->files_driver !== 'internal') {
+            return false;
+        }
+
+        $configured = $this->configuredInternalRoot();
+        $legacy = $this->legacyInternalRoot();
+
+        return $this->pathsDiffer($configured, $legacy) && $this->pathHasHubUploads($legacy);
+    }
+
+    protected function pathsDiffer(string $a, string $b): bool
+    {
+        $realA = realpath($a);
+        $realB = realpath($b);
+
+        if ($realA && $realB) {
+            return $realA !== $realB;
+        }
+
+        return rtrim(str_replace('\\', '/', $a), '/') !== rtrim(str_replace('\\', '/', $b), '/');
     }
 
     public function sqlBackupRoot(): string
@@ -599,6 +667,71 @@ class HubStorageService
         }
     }
 
+    /**
+     * Copy uploads from storage/app/public to the configured host files root.
+     */
+    public function migrateLegacyToHostPath(?callable $progress = null): array
+    {
+        $settings = $this->settings();
+        if ($settings->files_driver !== 'internal') {
+            return ['status' => 'skipped', 'message' => 'Host migration applies only to the internal driver.'];
+        }
+
+        $sourceRoot = $this->legacyInternalRoot();
+        $destRoot = $this->configuredInternalRoot();
+
+        if (! $this->pathsDiffer($sourceRoot, $destRoot)) {
+            return ['status' => 'skipped', 'message' => 'Configured host path is the same as legacy storage.'];
+        }
+
+        if (! $this->pathHasHubUploads($sourceRoot)) {
+            return ['status' => 'skipped', 'message' => 'No uploads found under legacy storage/app/public.'];
+        }
+
+        File::ensureDirectoryExists($destRoot, 0775, true);
+        $files = $this->collectUploadFilesUnderRoot($sourceRoot);
+
+        $settings->update([
+            'migration_status' => 'running',
+            'migration_files_total' => count($files),
+            'migration_files_done' => 0,
+            'migration_message' => 'Copying uploads to '.$destRoot,
+        ]);
+
+        $done = 0;
+        foreach ($files as $relative) {
+            $source = $sourceRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            $target = $destRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            File::ensureDirectoryExists(dirname($target), 0775, true);
+
+            if (! is_file($source)) {
+                continue;
+            }
+
+            if (! is_file($target)) {
+                File::copy($source, $target);
+            }
+
+            $done++;
+            if ($progress) {
+                $progress($done, count($files), $relative);
+            }
+            if ($done % 25 === 0) {
+                $settings->update(['migration_files_done' => $done]);
+            }
+        }
+
+        $settings->update([
+            'migration_status' => 'completed',
+            'migration_files_done' => $done,
+            'migration_message' => "Copied {$done} file(s) to host path {$destRoot}. Originals kept under legacy storage.",
+        ]);
+
+        $this->ensurePublicStorageSymlink();
+
+        return ['status' => 'completed', 'files' => $done, 'destination' => $destRoot];
+    }
+
     public function migrateInternalToExternal(?callable $progress = null): array
     {
         $settings = $this->settings();
@@ -606,34 +739,17 @@ class HubStorageService
             return ['status' => 'skipped', 'message' => 'Files driver is still internal.'];
         }
 
-        $sourceRoot = $this->legacyInternalRoot();
-        if ($this->pathHasHubUploads($this->filesRoot()) && ! $this->pathHasHubUploads($sourceRoot)) {
-            $sourceRoot = $this->filesRoot();
+        $sourceRoot = $this->filesRoot();
+        if (! $this->pathHasHubUploads($sourceRoot)) {
+            $sourceRoot = $this->legacyInternalRoot();
         }
-        $prefixes = array_values(config('hub_storage.content_prefixes', []));
-        $files = [];
-        foreach ($prefixes as $prefix) {
-            $dir = $sourceRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
-            if (! is_dir($dir)) {
-                continue;
-            }
-            $iterator = new \RecursiveIteratorIterator(
-                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
-            );
-            foreach ($iterator as $fileInfo) {
-                if ($fileInfo->isFile()) {
-                    $full = $fileInfo->getPathname();
-                    $relative = $prefix.'/'.substr($full, strlen($dir) + 1);
-                    $files[] = str_replace('\\', '/', $relative);
-                }
-            }
-        }
+        $files = $this->collectUploadFilesUnderRoot($sourceRoot);
 
         $settings->update([
             'migration_status' => 'running',
             'migration_files_total' => count($files),
             'migration_files_done' => 0,
-            'migration_message' => null,
+            'migration_message' => 'Migrating to '.$settings->files_driver.' storage',
         ]);
 
         $done = 0;
@@ -664,5 +780,33 @@ class HubStorageService
         ]);
 
         return ['status' => 'completed', 'files' => $done];
+    }
+
+    /**
+     * @return list<string> paths relative to $root (e.g. uploads/publications/foo.pdf)
+     */
+    protected function collectUploadFilesUnderRoot(string $root): array
+    {
+        $prefixes = array_values(config('hub_storage.content_prefixes', []));
+        $files = [];
+
+        foreach ($prefixes as $prefix) {
+            $dir = $root.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
+            if (! is_dir($dir)) {
+                continue;
+            }
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS)
+            );
+            foreach ($iterator as $fileInfo) {
+                if ($fileInfo->isFile()) {
+                    $full = $fileInfo->getPathname();
+                    $relative = $prefix.'/'.substr($full, strlen($dir) + 1);
+                    $files[] = str_replace('\\', '/', $relative);
+                }
+            }
+        }
+
+        return $files;
     }
 }
