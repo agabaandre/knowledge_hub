@@ -731,6 +731,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::get("/", [AdminCoursesController::class, 'index'])->name('admin.courses.index');
         Route::get('/integrations', [AdminCoursesController::class, 'integrations'])->name('admin.courses.integrations');
         Route::post('/integrations', [AdminCoursesController::class, 'saveIntegrations'])->name('admin.courses.integrations.save');
+        Route::get('/ai-config', [AdminCoursesController::class, 'aiConfig'])->name('admin.courses.ai-config');
+        Route::post('/ai-config', [AdminCoursesController::class, 'saveAiConfig'])->name('admin.courses.ai-config.save');
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
         Route::get("/delete", [AdminCoursesController::class, 'destroy']);

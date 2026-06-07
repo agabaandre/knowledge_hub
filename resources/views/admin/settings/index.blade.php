@@ -2221,26 +2221,7 @@
                                     <i class="fa fa-sign-in-alt"></i>
                                     Authentication & Social Sign-In
                                 </div>
-                                <div class="form-group mb-0">
-                                    <label>Social Login Providers</label>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="enable_microsoft_login" name="enable_microsoft_login" value="1" @if(!empty($settings->enable_microsoft_login)) checked @endif>
-                                        <label class="form-check-label" for="enable_microsoft_login">
-                                            <i class="lni lni-microsoft me-2" style="color: #00a1f1;"></i>Enable Microsoft Login
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="enable_google_login" name="enable_google_login" value="1" @if(!empty($settings->enable_google_login)) checked @endif>
-                                        <label class="form-check-label" for="enable_google_login">
-                                            <i class="lni lni-google me-2" style="color: #db4437;"></i>Enable Google Login
-                                        </label>
-                                    </div>
-                                    <div class="form-check">
-                                        <input type="checkbox" class="form-check-input" id="enable_linkedin_login" name="enable_linkedin_login" value="1" @if(!empty($settings->enable_linkedin_login)) checked @endif>
-                                        <label class="form-check-label" for="enable_linkedin_login">
-                                            <i class="fab fa-linkedin me-2" style="color: #0077b5;"></i>Enable LinkedIn Login
-                                        </label>
-                                    </div>
+                                <div class="form-group">
                                     <div class="form-check mt-2">
                                         <input type="checkbox" class="form-check-input" id="allow_email_password_accounts_social_login" name="allow_email_password_accounts_social_login" value="1" @if(!isset($settings->allow_email_password_accounts_social_login) || $settings->allow_email_password_accounts_social_login) checked @endif>
                                         <label class="form-check-label" for="allow_email_password_accounts_social_login">
@@ -2248,8 +2229,8 @@
                                         </label>
                                     </div>
                                     <small class="info-text d-block">When enabled, users who originally registered with email/password can use social login if the email matches. A successful social login verifies unverified accounts and updates sign-in method to social.</small>
-                                    <small class="info-text">Toggle which social login providers are available to users. Make sure the corresponding credentials are configured in your .env file.</small>
                                 </div>
+                                @include('admin.settings.partials.sso_credentials_form', ['ssoFields' => $ssoFields ?? []])
                                 @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'block_disposable_email_registration'))
                                 <hr class="my-3">
                                 <div class="form-group mb-2">

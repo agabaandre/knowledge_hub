@@ -1,10 +1,16 @@
 <?php
 namespace App\Services;
 
+use App\Support\AiConfig;
 use Illuminate\Support\Facades\Log;
 
 class ChatPDFService implements AIModel
 {
+    private function isAvailable(): bool
+    {
+        return AiConfig::providerAvailable('chatpdf');
+    }
+
     private function getApiKey()
     {
         return config('ai.chat_pdf_key');
@@ -16,6 +22,10 @@ class ChatPDFService implements AIModel
      */
     public function getSourceIdFromUrl(string $pdfUrl)
     {
+        if (! $this->isAvailable()) {
+            return null;
+        }
+
         $endpoint = 'https://api.chatpdf.com/v1/sources/add-url';
         $headers = [
             'Content-Type: application/json',
@@ -31,6 +41,10 @@ class ChatPDFService implements AIModel
      */
     public function getSourceIdFromFile(string $filePath)
     {
+        if (! $this->isAvailable()) {
+            return null;
+        }
+
         $source = $this->submitFile($filePath);
         return $source->sourceId ?? null;
     }
@@ -47,6 +61,10 @@ class ChatPDFService implements AIModel
      */
     public function chat(string $sourceId, array $messages, bool $referenceSources = false)
     {
+        if (! $this->isAvailable()) {
+            return (object) ['content' => '', 'error' => 'ChatPDF is not enabled or configured.'];
+        }
+
         $endpoint = 'https://api.chatpdf.com/v1/chats/message';
         $headers = [
             'Content-Type: application/json',

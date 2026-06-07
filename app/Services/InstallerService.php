@@ -432,6 +432,69 @@ class InstallerService
         Artisan::call('config:clear');
     }
 
+    public function clearSsoEnvOverrides(): void
+    {
+        $this->clearEnvKeys(config('install.sso_env_keys', []));
+        Artisan::call('config:clear');
+    }
+
+    public function clearAiEnvOverrides(): void
+    {
+        $this->clearEnvKeys(config('install.ai_env_keys', []));
+        Artisan::call('config:clear');
+    }
+
+    /**
+     * @param  array<string, mixed>  $sso
+     */
+    public function saveSsoSettings(array $sso): Setting
+    {
+        $setting = Setting::query()->where('status', 'active')->first()
+            ?? Setting::query()->orderBy('id')->first();
+
+        if (! $setting) {
+            throw new \RuntimeException('No site settings row found. Complete the site step first.');
+        }
+
+        if (! Schema::hasColumn('setting', 'microsoft_client_id')) {
+            throw new \RuntimeException('SSO settings require a database migration. Run php artisan migrate.');
+        }
+
+        $payload = [
+            'microsoft_client_id' => trim((string) ($sso['microsoft_client_id'] ?? '')),
+            'microsoft_redirect_uri' => trim((string) ($sso['microsoft_redirect_uri'] ?? '')),
+            'microsoft_tenant_id' => trim((string) ($sso['microsoft_tenant_id'] ?? 'common')) ?: 'common',
+            'google_client_id' => trim((string) ($sso['google_client_id'] ?? '')),
+            'google_redirect_uri' => trim((string) ($sso['google_redirect_uri'] ?? '')),
+            'linkedin_client_id' => trim((string) ($sso['linkedin_client_id'] ?? '')),
+            'linkedin_redirect_uri' => trim((string) ($sso['linkedin_redirect_uri'] ?? '')),
+            'enable_microsoft_login' => (bool) ($sso['enable_microsoft_login'] ?? false),
+            'enable_google_login' => (bool) ($sso['enable_google_login'] ?? false),
+            'enable_linkedin_login' => (bool) ($sso['enable_linkedin_login'] ?? false),
+        ];
+
+        if (! empty($sso['microsoft_client_secret'])) {
+            $payload['microsoft_client_secret'] = $sso['microsoft_client_secret'];
+        }
+        if (! empty($sso['google_client_secret'])) {
+            $payload['google_client_secret'] = $sso['google_client_secret'];
+        }
+        if (! empty($sso['linkedin_client_secret'])) {
+            $payload['linkedin_client_secret'] = $sso['linkedin_client_secret'];
+        }
+
+        $setting->forceFill($payload)->save();
+
+        $this->clearSsoEnvOverrides();
+
+        \App\Support\SsoConfig::clearCache();
+        \App\Support\SsoConfig::applyRuntimeConfig();
+        Cache::forget('settings');
+        Artisan::call('config:clear');
+
+        return $setting;
+    }
+
     /**
      * @param  array<string, mixed>  $moodle
      */

@@ -48,7 +48,7 @@
                         <input type="hidden" name="moodle_sync_enabled" value="0">
                         <div class="form-check mt-4">
                             <input type="checkbox" class="form-check-input" id="moodle_sync_enabled" name="moodle_sync_enabled" value="1"
-                                   @checked((bool) ($moodleFields['moodle_sync_enabled']['form_value'] ?? $moodleFields['moodle_sync_enabled']['value'] ?? true))>
+                                   @checked($moodleFields['moodle_sync_enabled']['form_value'] ?? true)>
                             <label class="form-check-label" for="moodle_sync_enabled">Enable automatic Moodle course sync</label>
                         </div>
                         <small class="form-text text-muted">Env key: <code>MOODLE_SYNC_ENABLED</code></small>
@@ -101,7 +101,7 @@
                     <input type="hidden" name="frappe_sync_enabled" value="0">
                     <div class="form-check mt-2">
                         <input type="checkbox" class="form-check-input" id="frappe_sync_enabled" name="frappe_sync_enabled" value="1"
-                               @checked((bool) ($frappeFields['frappe_sync_enabled']['form_value'] ?? false))>
+                               @checked($frappeFields['frappe_sync_enabled']['form_value'] ?? false)>
                         <label class="form-check-label" for="frappe_sync_enabled">Enable Frappe LMS sync</label>
                     </div>
                 </div>
@@ -153,7 +153,7 @@
                     <input type="hidden" name="openedx_sync_enabled" value="0">
                     <div class="form-check mt-2">
                         <input type="checkbox" class="form-check-input" id="openedx_sync_enabled" name="openedx_sync_enabled" value="1"
-                               @checked((bool) ($openEdxFields['openedx_sync_enabled']['form_value'] ?? false))>
+                               @checked($openEdxFields['openedx_sync_enabled']['form_value'] ?? false)>
                         <label class="form-check-label" for="openedx_sync_enabled">Enable Open edX sync</label>
                     </div>
                 </div>

@@ -77,6 +77,7 @@
             <ul class="mininav-content nav collapse" id="nav-learning">
                 <li class="nav-item"><a href="{{ route('admin.courses.index') }}" class="nav-link">{{ __('admin_nav.courses') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.courses.integrations') }}" class="nav-link">{{ __('admin_nav.platform_integrations') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.courses.ai-config') }}" class="nav-link">{{ __('admin_nav.ai_config') }}</a></li>
                 @can('view_events')
                 <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link">{{ __('admin_nav.events') }}</a></li>
                 @endcan

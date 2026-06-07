@@ -3,7 +3,7 @@
 @section('title', 'Database')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 2 of 8</div>
+    <div class="step-badge text-muted mb-2">Step 2 of 9</div>
     <h2 class="h5 mb-3">Database connection</h2>
     <p class="text-muted small">
         @if(($runtime ?? 'local') === 'docker')

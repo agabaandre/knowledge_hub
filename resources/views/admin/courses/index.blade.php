@@ -12,6 +12,9 @@
 				<div class="card">
 					<div class="card-header">
 						<h4 class="card-title">{{ __('admin_nav.courses') }}</h4>
+						<a href="{{ route('admin.courses.ai-config') }}" class="btn btn-outline-secondary float-right ml-2">
+							<i class="fa fa-robot"></i> {{ __('admin_nav.ai_config') }}
+						</a>
 						<a href="{{ route('admin.courses.integrations') }}" class="btn btn-outline-primary float-right ml-2">
 							<i class="fa fa-plug"></i> {{ __('admin_nav.platform_integrations') }}
 						</a>

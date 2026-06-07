@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\CoursesRepository;
 use App\Repositories\SettingsRepository;
+use App\Support\AiConfig;
 use App\Support\FrappeConfig;
 use App\Support\MoodleConfig;
 use App\Support\OpenEdxConfig;
@@ -149,6 +150,28 @@ class AdminCoursesController extends Controller
             ->with('status', 'failure');
     }
 
+    public function aiConfig()
+    {
+        return view('admin.courses.ai_config', $this->aiConfigFields());
+    }
+
+    public function saveAiConfig(Request $request)
+    {
+        $saved = $this->settingsRepository->saveAiIntegrations($request);
+
+        if ($saved) {
+            return redirect()
+                ->route('admin.courses.ai-config')
+                ->with('message', __('admin_nav.ai_config_saved_success'))
+                ->with('status', 'success');
+        }
+
+        return redirect()
+            ->route('admin.courses.ai-config')
+            ->with('message', __('admin_nav.ai_config_saved_failure'))
+            ->with('status', 'failure');
+    }
+
     /**
      * @return array<string, mixed>
      */
@@ -163,6 +186,18 @@ class AdminCoursesController extends Controller
                 : [],
             'openEdxFields' => Schema::hasColumn('setting', 'openedx_lms_url')
                 ? OpenEdxConfig::fieldsForAdmin()
+                : [],
+        ];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function aiConfigFields(): array
+    {
+        return [
+            'aiFields' => Schema::hasColumn('setting', 'ai_openai_api_key')
+                ? AiConfig::fieldsForAdmin()
                 : [],
         ];
     }

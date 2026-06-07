@@ -14,9 +14,11 @@ use Illuminate\Support\Facades\URL;
 use Illuminate\Support\Facades\View;
 use App\Models\StaticLink;
 use App\Services\HubStorageService;
+use App\Support\AiConfig;
 use App\Support\EmailConfig;
 use App\Support\LearningConfig;
 use App\Support\MapConfig;
+use App\Support\SsoConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -78,6 +80,8 @@ class AppServiceProvider extends ServiceProvider
             EmailConfig::applyRuntimeConfig();
             LearningConfig::applyRuntimeConfig();
             MapConfig::applyRuntimeConfig();
+            SsoConfig::applyRuntimeConfig();
+            AiConfig::applyRuntimeConfig();
         } catch (\Throwable $e) {
             // Database may be unavailable during install or early bootstrap.
         }

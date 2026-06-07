@@ -1,6 +1,7 @@
 <?php
 namespace App\Services;
 
+use App\Support\AiConfig;
 use App\Support\HealthTopicSourceCatalog;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
@@ -18,35 +19,26 @@ class ChatGPTService implements AIModel{
             return null;
         }
 
-        $api_key = config('ai.open_api_key');
-        if (empty($api_key)) {
+        if (AiConfig::primaryChatProvider() === null) {
             return null;
         }
-
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            "Authorization: Bearer $api_key",
-        ];
 
         $guide = 'Rewrite the input as a clean publication/discussion title in English title case. '
             .'Capitalize major words, keep short function words lower-case in the middle (for, and, of, to, in, on, at, by, with, from, a, an, the), '
             .'but always capitalize the first and last word. Preserve acronyms and numbers. '
             .'Do not add or remove meaning. Return only the rewritten title text with no quotes and no explanation.';
 
-        $payload = [
-            'messages' => [
-                ['role' => 'user', 'content' => $guide],
-                ['role' => 'user', 'content' => $title],
-            ],
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'max_tokens' => 120,
-            'temperature' => 0,
-        ];
+        $result = app(AiCompletionService::class)->complete([
+            ['role' => 'user', 'content' => $guide],
+            ['role' => 'user', 'content' => $title],
+        ], 120);
 
-        $response = $this->sendRequest($endpoint, $headers, $payload);
-        $content = $this->extractOpenAiMessageContent($response);
-        if ($content === null || trim($content) === '') {
+        if (! ($result['ok'] ?? false)) {
+            return null;
+        }
+
+        $content = $result['content'] ?? '';
+        if (trim($content) === '') {
             return null;
         }
 

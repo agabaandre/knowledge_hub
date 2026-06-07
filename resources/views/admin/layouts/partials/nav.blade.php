@@ -185,6 +185,7 @@
                         <ul class="sub-menu">
                             <li aria-haspopup="true"><a href="{{ route('admin.courses.index') }}" class="slide-item">{{ __('admin_nav.courses') }}</a></li>
                             <li aria-haspopup="true"><a href="{{ route('admin.courses.integrations') }}" class="slide-item">{{ __('admin_nav.platform_integrations') }}</a></li>
+                            <li aria-haspopup="true"><a href="{{ route('admin.courses.ai-config') }}" class="slide-item">{{ __('admin_nav.ai_config') }}</a></li>
                             @can('view_events')
                             <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="slide-item">{{ __('admin_nav.events') }}</a></li>
                             @endcan

@@ -290,13 +290,16 @@ class SettingsRepository
         // Social login toggles (default false when unchecked)
         // Only set if columns exist to avoid errors on production
         if (Schema::hasColumn('setting', 'enable_microsoft_login')) {
-            $settings->enable_microsoft_login = (bool)$request->boolean('enable_microsoft_login', false);
+            $settings->enable_microsoft_login = self::parseSubmittedBoolean($request, 'enable_microsoft_login');
         }
         if (Schema::hasColumn('setting', 'enable_google_login')) {
-            $settings->enable_google_login = (bool)$request->boolean('enable_google_login', false);
+            $settings->enable_google_login = self::parseSubmittedBoolean($request, 'enable_google_login');
         }
         if (Schema::hasColumn('setting', 'enable_linkedin_login')) {
-            $settings->enable_linkedin_login = (bool)$request->boolean('enable_linkedin_login', false);
+            $settings->enable_linkedin_login = self::parseSubmittedBoolean($request, 'enable_linkedin_login');
+        }
+        if (Schema::hasColumn('setting', 'microsoft_client_id')) {
+            $this->applySsoSettings($settings, $request);
         }
         if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
             $settings->allow_email_password_accounts_social_login = (bool)$request->boolean('allow_email_password_accounts_social_login', true);
@@ -478,6 +481,53 @@ class SettingsRepository
         DisposableEmailChecker::forgetCache();
         EmailConfig::clearCache();
         EmailConfig::applyRuntimeConfig();
+        if (Schema::hasColumn('setting', 'microsoft_client_id')) {
+            app(InstallerService::class)->clearSsoEnvOverrides();
+            \App\Support\SsoConfig::clearCache();
+            \App\Support\SsoConfig::applyRuntimeConfig();
+        }
+        if (Schema::hasColumn('setting', 'ai_openai_api_key')) {
+            \App\Support\AiConfig::clearCache();
+            \App\Support\AiConfig::applyRuntimeConfig();
+        }
+        clear_cache();
+
+        return $settings;
+    }
+
+    public function saveSsoIntegrations(Request $request): ?Setting
+    {
+        $settings = Setting::where('status', 'active')->first() ?: Setting::query()->first();
+        if (! $settings || ! Schema::hasColumn('setting', 'microsoft_client_id')) {
+            return null;
+        }
+
+        $this->applySsoSettings($settings, $request);
+        $settings->save();
+
+        \App\Support\SsoConfig::clearCache();
+        app(InstallerService::class)->clearSsoEnvOverrides();
+        \App\Support\SsoConfig::applyRuntimeConfig();
+        clear_settings_cache();
+        clear_cache();
+
+        return $settings;
+    }
+
+    public function saveAiIntegrations(Request $request): ?Setting
+    {
+        $settings = Setting::where('status', 'active')->first() ?: Setting::query()->first();
+        if (! $settings || ! Schema::hasColumn('setting', 'ai_openai_api_key')) {
+            return null;
+        }
+
+        $this->applyAiSettings($settings, $request);
+        $settings->save();
+
+        \App\Support\AiConfig::clearCache();
+        app(InstallerService::class)->clearAiEnvOverrides();
+        \App\Support\AiConfig::applyRuntimeConfig();
+        clear_settings_cache();
         clear_cache();
 
         return $settings;
@@ -490,33 +540,45 @@ class SettingsRepository
             return null;
         }
 
-        if (Schema::hasColumn('setting', 'moodle_api_url') && $request->has('moodle_api_url')) {
-            $settings->moodle_api_url = $request->input('moodle_api_url');
-            $settings->moodle_base_url = $request->input('moodle_base_url');
-            if ($request->filled('moodle_api_token')) {
-                $settings->moodle_api_token = $request->input('moodle_api_token');
+        if (Schema::hasColumn('setting', 'moodle_api_url')) {
+            if ($request->has('moodle_api_url')) {
+                $settings->moodle_api_url = $request->input('moodle_api_url');
+                $settings->moodle_base_url = $request->input('moodle_base_url');
+                if ($request->filled('moodle_api_token')) {
+                    $settings->moodle_api_token = $request->input('moodle_api_token');
+                }
             }
-            $settings->moodle_sync_enabled = $request->boolean('moodle_sync_enabled');
+            if ($request->has('moodle_sync_enabled')) {
+                $settings->moodle_sync_enabled = self::parseSubmittedBoolean($request, 'moodle_sync_enabled');
+            }
         }
 
-        if (Schema::hasColumn('setting', 'frappe_base_url') && $request->has('frappe_base_url')) {
-            $settings->frappe_base_url = $request->input('frappe_base_url');
-            $settings->frappe_api_key = $request->input('frappe_api_key');
-            $settings->frappe_course_doctype = $request->input('frappe_course_doctype', 'LMS Course');
-            if ($request->filled('frappe_api_secret')) {
-                $settings->frappe_api_secret = $request->input('frappe_api_secret');
+        if (Schema::hasColumn('setting', 'frappe_base_url')) {
+            if ($request->has('frappe_base_url')) {
+                $settings->frappe_base_url = $request->input('frappe_base_url');
+                $settings->frappe_api_key = $request->input('frappe_api_key');
+                $settings->frappe_course_doctype = $request->input('frappe_course_doctype', 'LMS Course');
+                if ($request->filled('frappe_api_secret')) {
+                    $settings->frappe_api_secret = $request->input('frappe_api_secret');
+                }
             }
-            $settings->frappe_sync_enabled = $request->boolean('frappe_sync_enabled');
+            if ($request->has('frappe_sync_enabled')) {
+                $settings->frappe_sync_enabled = self::parseSubmittedBoolean($request, 'frappe_sync_enabled');
+            }
         }
 
-        if (Schema::hasColumn('setting', 'openedx_lms_url') && $request->has('openedx_lms_url')) {
-            $settings->openedx_lms_url = $request->input('openedx_lms_url');
-            $settings->openedx_client_id = $request->input('openedx_client_id');
-            $settings->openedx_token_url = $request->input('openedx_token_url');
-            if ($request->filled('openedx_client_secret')) {
-                $settings->openedx_client_secret = $request->input('openedx_client_secret');
+        if (Schema::hasColumn('setting', 'openedx_lms_url')) {
+            if ($request->has('openedx_lms_url')) {
+                $settings->openedx_lms_url = $request->input('openedx_lms_url');
+                $settings->openedx_client_id = $request->input('openedx_client_id');
+                $settings->openedx_token_url = $request->input('openedx_token_url');
+                if ($request->filled('openedx_client_secret')) {
+                    $settings->openedx_client_secret = $request->input('openedx_client_secret');
+                }
             }
-            $settings->openedx_sync_enabled = $request->boolean('openedx_sync_enabled');
+            if ($request->has('openedx_sync_enabled')) {
+                $settings->openedx_sync_enabled = self::parseSubmittedBoolean($request, 'openedx_sync_enabled');
+            }
         }
 
         $settings->save();
@@ -530,6 +592,94 @@ class SettingsRepository
         clear_cache();
 
         return $settings;
+    }
+
+    private static function parseSubmittedBoolean(Request $request, string $key): bool
+    {
+        $value = $request->input($key);
+        if (is_array($value)) {
+            $value = end($value);
+        }
+
+        return filter_var($value, FILTER_VALIDATE_BOOLEAN);
+    }
+
+    private function applySsoSettings(Setting $settings, Request $request): void
+    {
+        if ($request->has('microsoft_client_id')) {
+            $settings->microsoft_client_id = trim((string) $request->input('microsoft_client_id', ''));
+            $settings->microsoft_redirect_uri = trim((string) $request->input('microsoft_redirect_uri', ''));
+            $settings->microsoft_tenant_id = trim((string) $request->input('microsoft_tenant_id', 'common')) ?: 'common';
+            if ($request->filled('microsoft_client_secret')) {
+                $settings->microsoft_client_secret = $request->input('microsoft_client_secret');
+            }
+        }
+        if ($request->has('google_client_id')) {
+            $settings->google_client_id = trim((string) $request->input('google_client_id', ''));
+            $settings->google_redirect_uri = trim((string) $request->input('google_redirect_uri', ''));
+            if ($request->filled('google_client_secret')) {
+                $settings->google_client_secret = $request->input('google_client_secret');
+            }
+        }
+        if ($request->has('linkedin_client_id')) {
+            $settings->linkedin_client_id = trim((string) $request->input('linkedin_client_id', ''));
+            $settings->linkedin_redirect_uri = trim((string) $request->input('linkedin_redirect_uri', ''));
+            if ($request->filled('linkedin_client_secret')) {
+                $settings->linkedin_client_secret = $request->input('linkedin_client_secret');
+            }
+        }
+        if ($request->has('enable_microsoft_login')) {
+            $settings->enable_microsoft_login = self::parseSubmittedBoolean($request, 'enable_microsoft_login');
+        }
+        if ($request->has('enable_google_login')) {
+            $settings->enable_google_login = self::parseSubmittedBoolean($request, 'enable_google_login');
+        }
+        if ($request->has('enable_linkedin_login')) {
+            $settings->enable_linkedin_login = self::parseSubmittedBoolean($request, 'enable_linkedin_login');
+        }
+    }
+
+    private function applyAiSettings(Setting $settings, Request $request): void
+    {
+        if ($request->has('ai_primary_provider')) {
+            $settings->ai_primary_provider = trim((string) $request->input('ai_primary_provider', 'openai')) ?: 'openai';
+        }
+
+        foreach ([
+            'ai_openai_api_key',
+            'ai_chatpdf_api_key',
+            'ai_gemini_api_key',
+            'ai_deepseek_api_key',
+            'ai_custom_api_key',
+        ] as $secretColumn) {
+            if ($request->filled($secretColumn)) {
+                $settings->{$secretColumn} = $request->input($secretColumn);
+            }
+        }
+
+        foreach ([
+            'ai_openai_model',
+            'ai_gemini_model',
+            'ai_deepseek_model',
+            'ai_custom_base_url',
+            'ai_custom_model',
+        ] as $column) {
+            if ($request->has($column)) {
+                $settings->{$column} = trim((string) $request->input($column, ''));
+            }
+        }
+
+        foreach ([
+            'ai_openai_enabled',
+            'ai_chatpdf_enabled',
+            'ai_gemini_enabled',
+            'ai_deepseek_enabled',
+            'ai_custom_enabled',
+        ] as $toggle) {
+            if ($request->has($toggle)) {
+                $settings->{$toggle} = self::parseSubmittedBoolean($request, $toggle);
+            }
+        }
     }
 
     /**

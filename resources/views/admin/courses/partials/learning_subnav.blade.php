@@ -9,4 +9,9 @@
             <i class="fa fa-plug me-1"></i>{{ __('admin_nav.platform_integrations') }}
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ ($learningNav ?? 'courses') === 'ai' ? 'active' : '' }}" href="{{ route('admin.courses.ai-config') }}">
+            <i class="fa fa-robot me-1"></i>{{ __('admin_nav.ai_config') }}
+        </a>
+    </li>
 </ul>

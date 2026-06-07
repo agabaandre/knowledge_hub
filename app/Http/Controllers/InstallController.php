@@ -468,7 +468,65 @@ class InstallController extends Controller
 
         $request->session()->put('installer.mail_ready', true);
 
-        return redirect()->route('install.admin')->with('status', 'Mail settings saved. You can change them later under Admin → Configure.');
+        return redirect()->route('install.sso')->with('status', 'Mail settings saved. You can change them later under Admin → Configure.');
+    }
+
+    public function showSso(Request $request): RedirectResponse|View
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        $appUrl = rtrim((string) $request->getSchemeAndHttpHost(), '/');
+        $fields = \Illuminate\Support\Facades\Schema::hasColumn('setting', 'microsoft_client_id')
+            ? \App\Support\SsoConfig::fieldsForAdmin()
+            : [];
+
+        return view('install.sso', [
+            'fields' => $fields,
+            'appUrl' => $appUrl,
+        ]);
+    }
+
+    public function storeSso(Request $request): RedirectResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        if (! \Illuminate\Support\Facades\Schema::hasColumn('setting', 'microsoft_client_id')) {
+            return redirect()->route('install.admin');
+        }
+
+        $data = $request->validate([
+            'microsoft_client_id' => 'nullable|string|max:255',
+            'microsoft_client_secret' => 'nullable|string|max:2000',
+            'microsoft_redirect_uri' => 'nullable|string|max:500',
+            'microsoft_tenant_id' => 'nullable|string|max:100',
+            'google_client_id' => 'nullable|string|max:255',
+            'google_client_secret' => 'nullable|string|max:2000',
+            'google_redirect_uri' => 'nullable|string|max:500',
+            'linkedin_client_id' => 'nullable|string|max:255',
+            'linkedin_client_secret' => 'nullable|string|max:2000',
+            'linkedin_redirect_uri' => 'nullable|string|max:500',
+            'enable_microsoft_login' => 'nullable|boolean',
+            'enable_google_login' => 'nullable|boolean',
+            'enable_linkedin_login' => 'nullable|boolean',
+        ]);
+
+        foreach (['enable_microsoft_login', 'enable_google_login', 'enable_linkedin_login'] as $toggle) {
+            $data[$toggle] = filter_var($request->input($toggle, false), FILTER_VALIDATE_BOOLEAN);
+        }
+
+        try {
+            $this->installer->saveSsoSettings($data);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Could not save SSO settings: '.$e->getMessage());
+        }
+
+        $request->session()->put('installer.sso_ready', true);
+
+        return redirect()->route('install.admin')->with('status', 'SSO settings saved. You can change them later under Admin → Configure.');
     }
 
     /**
@@ -541,6 +599,7 @@ class InstallController extends Controller
             'installer.central_ready',
             'installer.central_import_summary',
             'installer.mail_ready',
+            'installer.sso_ready',
         ]);
         $request->session()->put('install_show_complete', true);
 

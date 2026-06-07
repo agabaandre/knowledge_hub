@@ -3,7 +3,7 @@
 @section('title', 'Learning Platforms')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 6 of 8</div>
+    <div class="step-badge text-muted mb-2">Step 6 of 9</div>
     <h2 class="h5 mb-3">Learning platform integrations</h2>
     <p class="text-muted small">
         Connect one or more eLearning platforms. Courses sync into this hub and learners open them on the source platform.

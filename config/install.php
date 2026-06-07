@@ -98,6 +98,33 @@ return [
         'EXCHANGE_AUTH_METHOD',
     ],
 
+    'sso_env_keys' => [
+        'MICROSOFT_CLIENT_ID',
+        'MICROSOFT_CLIENT_SECRET',
+        'MICROSOFT_REDIRECT_URI',
+        'MICROSOFT_TENANT_ID',
+        'GOOGLE_CLIENT_ID',
+        'GOOGLE_CLIENT_SECRET',
+        'GOOGLE_REDIRECT_URI',
+        'LINKEDIN_CLIENT_ID',
+        'LINKEDIN_CLIENT_SECRET',
+        'LINKEDIN_REDIRECT_URI',
+    ],
+
+    'ai_env_keys' => [
+        'OPEN_API_KEY',
+        'OPENAI_MODEL',
+        'CHAT_PDF_API_KEY',
+        'GEMINI_API_KEY',
+        'GEMINI_MODEL',
+        'DEEPSEEK_API_KEY',
+        'DEEPSEEK_MODEL',
+        'AI_CUSTOM_BASE_URL',
+        'AI_CUSTOM_API_KEY',
+        'AI_CUSTOM_MODEL',
+        'AI_PRIMARY_PROVIDER',
+    ],
+
     'database_defaults' => [
         'docker' => [
             'host' => 'mysql',

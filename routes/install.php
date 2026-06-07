@@ -22,6 +22,8 @@ Route::middleware(['web', 'install.guest'])->prefix('install')->name('install.')
     Route::get('/mail', [InstallController::class, 'showMail'])->name('mail');
     Route::post('/mail/test', [InstallController::class, 'testMail'])->name('mail.test');
     Route::post('/mail', [InstallController::class, 'storeMail'])->name('mail.store');
+    Route::get('/sso', [InstallController::class, 'showSso'])->name('sso');
+    Route::post('/sso', [InstallController::class, 'storeSso'])->name('sso.store');
     Route::get('/admin', [InstallController::class, 'showAdmin'])->name('admin');
     Route::post('/admin', [InstallController::class, 'storeAdmin'])->name('admin.store');
     Route::get('/complete', [InstallController::class, 'complete'])->name('complete');

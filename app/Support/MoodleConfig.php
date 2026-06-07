@@ -139,13 +139,22 @@ class MoodleConfig
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
             $effective = self::resolve($meta['env_key'], $meta['db_column'], $meta['default']);
-            $hasDbValue = $dbValue !== null && $dbValue !== '';
+            $isBoolean = str_ends_with($key, '_sync_enabled');
+            if ($isBoolean) {
+                $hasDbValue = $dbValue !== null;
+                $formValue = filter_var($hasDbValue ? $dbValue : $effective, FILTER_VALIDATE_BOOLEAN);
+                $value = filter_var($effective, FILTER_VALIDATE_BOOLEAN);
+            } else {
+                $hasDbValue = $dbValue !== null && $dbValue !== '';
+                $formValue = $hasDbValue ? $dbValue : $effective;
+                $value = $effective;
+            }
 
             $fields[$key] = [
                 'env_key' => $meta['env_key'],
                 'db_column' => $meta['db_column'],
-                'value' => $effective,
-                'form_value' => $hasDbValue ? $dbValue : $effective,
+                'value' => $value,
+                'form_value' => $formValue,
             ];
         }
 

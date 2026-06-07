@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
 use App\Support\EmailConfig;
+use App\Support\SsoConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -45,6 +46,9 @@ class SettingsController extends Controller
             : collect();
         $data['emailFields'] = Schema::hasColumn('setting', 'email_driver')
             ? EmailConfig::fieldsForAdmin()
+            : [];
+        $data['ssoFields'] = Schema::hasColumn('setting', 'microsoft_client_id')
+            ? SsoConfig::fieldsForAdmin()
             : [];
         $data['hubCountries'] = Schema::hasTable('country')
             ? \App\Models\Country::orderBy('name')->get()

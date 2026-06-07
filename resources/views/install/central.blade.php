@@ -3,7 +3,7 @@
 @section('title', 'Central Knowledge Hub')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 5 of 8</div>
+    <div class="step-badge text-muted mb-2">Step 5 of 9</div>
     <h2 class="h5 mb-3">Connect to central Knowledge Hub</h2>
     <p class="text-muted small">
         Country and regional hubs can pull <strong>branding</strong> (colors, theme, mobile app settings) and

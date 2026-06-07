@@ -3,7 +3,7 @@
 @section('title', 'Admin account')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 8 of 8</div>
+    <div class="step-badge text-muted mb-2">Step 9 of 9</div>
     <h2 class="h5 mb-3">Administrator account</h2>
     <p class="text-muted small">This user receives the <strong>Admin</strong> role with full access. Completing this step locks the installer permanently.</p>
 
@@ -34,7 +34,7 @@
             <input type="url" name="app_url" class="form-control" value="{{ old('app_url', url('/')) }}" placeholder="http://localhost:8080/">
         </div>
         <div class="col-12 d-flex gap-2">
-            <a href="{{ route('install.mail') }}" class="btn btn-outline-secondary">Back</a>
+            <a href="{{ route('install.sso') }}" class="btn btn-outline-secondary">Back</a>
             <button type="submit" class="btn btn-success">Finish installation</button>
         </div>
     </form>

@@ -3,7 +3,7 @@
 @section('title', 'Site settings')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 4 of 8</div>
+    <div class="step-badge text-muted mb-2">Step 4 of 9</div>
     <h2 class="h5 mb-3">Site settings</h2>
     <p class="text-muted small">These values are saved to the active <strong>setting</strong> record so the hub can render the homepage, SEO metadata, and contact details.</p>
 
