@@ -17,7 +17,7 @@ use App\Http\Controllers\AuthorsController;
 use App\Http\Controllers\ExpertsController;
 use App\Http\Controllers\FaqsController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\LocaleSwitchController;
 use App\Http\Controllers\PublicationsController;
 use App\Http\Controllers\Admin\ResourcesController;
 use App\Http\Controllers\AreasController;
@@ -101,10 +101,6 @@ use App\Http\Controllers\DocsController;
 
 Auth::routes(['verify' => true, 'reset' => false]);
 
-Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
-    ->name('locale.switch')
-    ->where('locale', '[a-z]{2,8}');
-
 /*
 |--------------------------------------------------------------------------
 | API Docs helpers
@@ -141,6 +137,8 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('
 
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/favicon.ico', [CommonController::class, 'favicon'])->name('favicon');
+Route::post('/locale/apply', [LocaleSwitchController::class, 'apply'])->name('locale.apply');
+Route::get('/locale/{locale}', [LocaleSwitchController::class, 'switch'])->where('locale', '[a-z]{2}')->name('locale.switch');
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::post('/endtour', [CommonController::class, 'endtour'])->name('endtour');
 Route::get('/endtour', [CommonController::class, 'endtour'])->name('endtour.get'); // Backward compatibility

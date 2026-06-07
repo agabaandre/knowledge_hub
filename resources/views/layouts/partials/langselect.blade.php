@@ -486,6 +486,7 @@
     @endphp
     var khubLocaleCookiePath = @json($runtimeCookiePath);
     var khubLocaleMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
+    var khubLocaleApplyUrl = @json(route('locale.apply'));
     var khubLocaleSwitchTemplate = @json(route('locale.switch', ['locale' => '__LOCALE__']));
 
     function writeAppCookie(name, value, maxAgeSec) {
@@ -584,7 +585,85 @@
     // Also update after a short delay to catch any late changes from cookie/translation
     setTimeout(initializeLanguageUI, 500);
 
-    // Global changeLanguage: server sets khub_locale + googtrans cookies, then reloads with Laravel locale for nav/footer.
+    function closeLanguageDropdowns() {
+        document.querySelectorAll('#languageSelector').forEach(function(selector) {
+            selector.classList.remove('active');
+            var dropdown = selector.querySelector('#languageDropdown');
+            if (dropdown) {
+                dropdown.style.cssText = '';
+            }
+        });
+    }
+
+    function swapLocaleFragments(fragments) {
+        if (!fragments || typeof fragments !== 'object') return;
+
+        Object.keys(fragments).forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el && fragments[id]) {
+                el.outerHTML = fragments[id];
+            }
+        });
+    }
+
+    function khubReinitNavigation() {
+        if (typeof window.jQuery === 'undefined' || !window.jQuery) return;
+        var $nav = window.jQuery('#navigation');
+        if (!$nav.length) return;
+        $nav.removeData('navigation');
+        $nav.find('.nav-menus-wrapper-close-button').remove();
+        if (typeof $nav.navigation === 'function') {
+            $nav.navigation();
+        }
+    }
+
+    function khubRebindCookieButtons() {
+        if (typeof window.jQuery === 'undefined' || !window.jQuery) return;
+        window.jQuery('.allow-button').off('click.khubLocale').on('click.khubLocale', function () {
+            var allow = window.jQuery(this).attr('allow');
+            if (parseInt(allow, 10) === 1) {
+                var date = new Date();
+                date.setTime(date.getTime() + (90 * 24 * 60 * 60 * 1000));
+                document.cookie = 'is_returning=yes; expires=' + date.toUTCString() + '; path=' + khubLocaleCookiePath;
+            }
+            window.jQuery('.cookie-consent').hide();
+        });
+    }
+
+    function khubApplyGoogleTranslateWhenReady(googleCode, attempt) {
+        attempt = attempt || 0;
+        if (typeof window.khubApplyGoogleTranslate === 'function') {
+            window.khubApplyGoogleTranslate(googleCode);
+            return;
+        }
+        if (attempt < 25) {
+            setTimeout(function() {
+                khubApplyGoogleTranslateWhenReady(googleCode, attempt + 1);
+            }, 200);
+        }
+    }
+
+    function khubAfterLocaleSwap(googleCode) {
+        if (typeof window.khubInitMegaMenus === 'function') {
+            window.khubInitMegaMenus();
+        }
+        khubReinitNavigation();
+        khubRebindCookieButtons();
+        if (typeof window.jQuery !== 'undefined' && window.jQuery) {
+            window.jQuery('[data-toggle="tooltip"]').tooltip();
+        }
+        khubApplyGoogleTranslateWhenReady(googleCode);
+        document.documentElement.setAttribute('lang', googleCode || 'en');
+    }
+
+    function khubFallbackLocaleRedirect(localeCode) {
+        var redirectTarget = window.location.pathname + window.location.search + window.location.hash;
+        var switchUrl = khubLocaleSwitchTemplate.replace('__LOCALE__', encodeURIComponent(localeCode));
+        switchUrl += (switchUrl.indexOf('?') === -1 ? '?' : '&') + 'redirect=' + encodeURIComponent(redirectTarget);
+        window.location.href = switchUrl;
+    }
+
+    // Global changeLanguage: AJAX swap for native nav/footer + Google Translate for page body.
     window.changeLanguage = function(localeCode, googleCode) {
         googleCode = googleCode || localeCode;
 
@@ -596,19 +675,37 @@
         }
 
         updateLanguageUI(localeCode);
+        closeLanguageDropdowns();
 
-        document.querySelectorAll('#languageSelector').forEach(function(selector) {
-            selector.classList.remove('active');
-            var dropdown = selector.querySelector('#languageDropdown');
-            if (dropdown) {
-                dropdown.style.cssText = '';
+        var csrfToken = document.querySelector('meta[name="csrf-token"]');
+        var headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-Requested-With': 'XMLHttpRequest'
+        };
+        if (csrfToken && csrfToken.content) {
+            headers['X-CSRF-TOKEN'] = csrfToken.content;
+        }
+
+        fetch(khubLocaleApplyUrl, {
+            method: 'POST',
+            headers: headers,
+            credentials: 'same-origin',
+            body: JSON.stringify({ locale: localeCode })
+        })
+        .then(function(response) {
+            if (!response.ok) {
+                throw new Error('Locale apply failed');
             }
+            return response.json();
+        })
+        .then(function(data) {
+            swapLocaleFragments(data.fragments);
+            khubAfterLocaleSwap(data.google_code || googleCode);
+        })
+        .catch(function() {
+            khubFallbackLocaleRedirect(localeCode);
         });
-
-        var redirectTarget = window.location.pathname + window.location.search + window.location.hash;
-        var switchUrl = khubLocaleSwitchTemplate.replace('__LOCALE__', encodeURIComponent(localeCode));
-        switchUrl += (switchUrl.indexOf('?') === -1 ? '?' : '&') + 'redirect=' + encodeURIComponent(redirectTarget);
-        window.location.href = switchUrl;
 
         return false;
     };

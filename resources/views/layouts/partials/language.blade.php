@@ -77,46 +77,28 @@
     function doGTranslate(lang_code) {
       var lang = lang_code || 'en'; // translate to provided language
       
-      // Special handling for English - remove translation and reload
+      // English: clear translation cookie and revert via Google combo (no page reload).
       if (lang === 'en') {
-        // Clear the translation cookie
-        var date = new Date();
-        date.setTime(date.getTime() - 1); // Expire immediately
-        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path={{ $localeCookiePath }}";
-        
-        // Remove all Google Translate classes and restore original content
+        var clearDate = new Date();
+        clearDate.setTime(clearDate.getTime() - 1);
+        document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
+
         $('body').removeClass('translated-rtl');
         $('html').removeClass('translated-rtl');
         $('head').find('link[href*="translate.googleapis.com"]').remove();
-        
-        // Remove inline styles added by Google Translate
         $('[style*="direction"]').css('direction', '');
-        
-        // Try to restore original page content by triggering revert
-        var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
-        if (teCombo) {
-          // Find the original language option (English should be the first or default)
-          var enIndex = Array.from(teCombo.options).findIndex(option => {
+
+        var teComboEn = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
+        if (teComboEn) {
+          var enIndex = Array.from(teComboEn.options).findIndex(function(option) {
             return option.value === 'en' || option.value === '';
           });
           if (enIndex !== -1) {
-            teCombo.selectedIndex = enIndex;
-            khubFireComboChange(teCombo);
+            teComboEn.selectedIndex = enIndex;
+            khubFireComboChange(teComboEn);
+            setTimeout(function () { khubFireComboChange(teComboEn); }, 150);
           }
-          
-          // Force page reload to ensure clean state
-          setTimeout(function() {
-            window.location.reload();
-          }, 300);
-        } else {
-          // If widget not ready, just reload
-          window.location.reload();
         }
-        
-        // Save English preference
-        date = new Date();
-        date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
-        document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path={{ $localeCookiePath }}";
         return;
       }
 
@@ -155,7 +137,6 @@
       $('.selectpicker').selectpicker();
     });
 
-
-   
+    window.khubApplyGoogleTranslate = doGTranslate;
 
     </script>

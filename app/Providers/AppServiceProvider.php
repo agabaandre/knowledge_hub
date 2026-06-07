@@ -42,6 +42,16 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(SharedRepo::class, function ($app) {
             return new SharedRepo();
         });
+
+        // Must run in register() so the translator singleton receives the merging loader
+        // (boot() is too late — translator keeps the default FileLoader otherwise).
+        $this->app->extend('translation.loader', function ($loader, $app) {
+            return new \App\Translation\MergingTranslationLoader(
+                $app['files'],
+                $app['path.lang'],
+                storage_path('app/ui_translations')
+            );
+        });
     }
 
     /**
@@ -55,14 +65,6 @@ class AppServiceProvider extends ServiceProvider
         if (is_string($appUrl) && $appUrl !== '') {
             URL::forceRootUrl(rtrim($appUrl, '/'));
         }
-
-        $this->app->extend('translation.loader', function ($loader, $app) {
-            return new \App\Translation\MergingTranslationLoader(
-                $app['files'],
-                $app['path.lang'],
-                storage_path('app/ui_translations')
-            );
-        });
 
         if (! defined('PHPGRID_LIBPATH')) {
             define('PHPGRID_LIBPATH', 'libs/phpgrid/');
