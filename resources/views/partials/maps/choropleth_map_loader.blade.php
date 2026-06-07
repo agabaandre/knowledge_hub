@@ -120,8 +120,11 @@
 
     function mapPoint(row) {
         row = row || {};
-        var point = { value: row.value };
+        var point = {};
         var key = joinKey();
+        if (row.value !== undefined && row.value !== null && row.value !== '') {
+            point.value = Number(row.value);
+        }
 
         if (row.name) point.name = row.name;
         if (row.country_name) point.country_name = row.country_name;
