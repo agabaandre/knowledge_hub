@@ -10,6 +10,7 @@ use App\Models\PdfChatMessage;
 use App\Services\ChatGPTService;
 use App\Services\ChatPDFService;
 use App\Support\ForumAssistantContext;
+use App\Support\ForumsListingAssistantContext;
 use App\Support\PublicationAssistantContext;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -43,10 +44,12 @@ class PdfChatController extends Controller
     {
         try {
             $request->validate([
-                'publication_id' => 'nullable|integer|required_without:forum_id',
-                'forum_id' => 'nullable|integer|required_without:publication_id|exists:forums,id',
+                'publication_id' => 'nullable|integer',
+                'forum_id' => 'nullable|integer|exists:forums,id',
+                'forum_ids' => 'nullable|array',
+                'forum_ids.*' => 'integer|exists:forums,id',
                 'attachment_id' => 'nullable|integer',
-                'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum',
+                'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum,forums_index',
             ]);
 
             if ($request->filled('publication_id') && $request->filled('forum_id')) {
@@ -55,8 +58,16 @@ class PdfChatController extends Controller
 
             $userId = $this->resolveUserId($request);
 
+            if ($request->input('assistant_mode') === 'forums_index') {
+                return $this->getOrCreateForumsIndexSession($userId);
+            }
+
             if ($request->filled('forum_id')) {
                 return $this->getOrCreateForumSession((int) $request->forum_id, $userId);
+            }
+
+            if (! $request->filled('publication_id')) {
+                return response()->json(['error' => 'publication_id, forum_id, or forums_index mode is required.'], 422);
             }
 
             $publicationId = (int) $request->publication_id;
@@ -223,6 +234,105 @@ class PdfChatController extends Controller
         }
     }
 
+    private function getOrCreateForumsIndexSession(?int $userId)
+    {
+        $session = PdfChatSession::where('assistant_mode', 'forums_index')
+            ->whereNull('publication_id')
+            ->whereNull('forum_id')
+            ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+            ->when($userId === null, fn ($q) => $q->whereNull('user_id'))
+            ->first();
+
+        if (! $session) {
+            $data = [
+                'user_id' => $userId,
+                'publication_id' => null,
+                'forum_id' => null,
+                'source_id' => null,
+                'assistant_mode' => 'forums_index',
+            ];
+            if ($this->hasAttachmentIdColumn()) {
+                $data['attachment_id'] = null;
+            }
+            $session = PdfChatSession::create($data);
+        }
+
+        $messages = $userId
+            ? $session->messages()->get()->map(fn ($m) => ['role' => $m->role, 'content' => $m->content])
+            : [];
+
+        return response()->json([
+            'session_id' => $session->id,
+            'source_id' => null,
+            'assistant_mode' => 'forums_index',
+            'context_type' => 'forums_index',
+            'messages' => $messages,
+        ]);
+    }
+
+    /**
+     * @param  mixed  $raw
+     * @return list<int>
+     */
+    private function normalizeForumIds($raw): array
+    {
+        if (! is_array($raw)) {
+            return [];
+        }
+
+        return array_values(array_unique(array_filter(array_map('intval', $raw))));
+    }
+
+    private function sendForumsIndexMessage(?int $sessionId, ?int $userId, string $userMessage, bool $stream, array $forumIds)
+    {
+        if ($sessionId) {
+            $session = PdfChatSession::where('id', $sessionId)
+                ->where('assistant_mode', 'forums_index')
+                ->whereNull('forum_id')
+                ->whereNull('publication_id')
+                ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+                ->when($userId === null, fn ($q) => $q->whereNull('user_id'))
+                ->first();
+            if (! $session) {
+                return response()->json(['error' => 'Session not found or invalid.'], 404);
+            }
+        } else {
+            $session = PdfChatSession::where('assistant_mode', 'forums_index')
+                ->whereNull('publication_id')
+                ->whereNull('forum_id')
+                ->when($userId !== null, fn ($q) => $q->where('user_id', $userId))
+                ->when($userId === null, fn ($q) => $q->whereNull('user_id'))
+                ->first();
+            if (! $session) {
+                $session = PdfChatSession::create([
+                    'user_id' => $userId,
+                    'publication_id' => null,
+                    'forum_id' => null,
+                    'source_id' => null,
+                    'assistant_mode' => 'forums_index',
+                ]);
+            }
+        }
+
+        $systemContent = ForumsListingAssistantContext::buildForMessage($userMessage, $forumIds);
+        $history = $this->buildMessagesForApi($session, $userId, $userMessage);
+        $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
+
+        if ($stream) {
+            return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages, 'forums');
+        }
+
+        $content = $this->chatGpt->chatMessagesComplete($openAiMessages, 'forums');
+        if ($userId) {
+            $this->savePair($session, $userMessage, $content);
+        }
+
+        return response()->json([
+            'content' => $content,
+            'references' => [],
+        ]);
+    }
+
     private function getOrCreateForumSession(int $forumId, ?int $userId)
     {
         if (! Forum::query()->whereKey($forumId)->exists()) {
@@ -318,12 +428,15 @@ class PdfChatController extends Controller
     {
         try {
             $request->validate([
-                'publication_id' => 'nullable|integer|required_without:forum_id',
-                'forum_id' => 'nullable|integer|required_without:publication_id|exists:forums,id',
+                'publication_id' => 'nullable|integer',
+                'forum_id' => 'nullable|integer|exists:forums,id',
+                'forum_ids' => 'nullable|array',
+                'forum_ids.*' => 'integer|exists:forums,id',
                 'session_id' => 'nullable|integer',
                 'attachment_id' => 'nullable|integer',
                 'message' => 'required|string|max:4000',
                 'stream' => 'nullable|boolean',
+                'assistant_mode' => 'nullable|string|in:chatpdf,publication,auto,forum,forums_index',
             ]);
 
             if ($request->filled('publication_id') && $request->filled('forum_id')) {
@@ -336,8 +449,22 @@ class PdfChatController extends Controller
 
             $userId = $this->resolveUserId($request);
 
+            if ($request->input('assistant_mode') === 'forums_index') {
+                return $this->sendForumsIndexMessage(
+                    $sessionId,
+                    $userId,
+                    $userMessage,
+                    $stream,
+                    $this->normalizeForumIds($request->input('forum_ids', []))
+                );
+            }
+
             if ($request->filled('forum_id')) {
                 return $this->sendForumMessage((int) $request->forum_id, $sessionId, $userId, $userMessage, $stream);
+            }
+
+            if (! $request->filled('publication_id')) {
+                return response()->json(['error' => 'publication_id, forum_id, or forums_index mode is required.'], 422);
             }
 
             $publicationId = (int) $request->publication_id;
@@ -433,10 +560,10 @@ class PdfChatController extends Controller
         $openAiMessages = $this->mergeSystemAndHistory($systemContent, $history);
 
         if ($stream) {
-            return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages);
+            return $this->streamPublicationResponse($session, $userId, $userMessage, $openAiMessages, 'forums');
         }
 
-        $content = $this->chatGpt->chatMessagesComplete($openAiMessages);
+        $content = $this->chatGpt->chatMessagesComplete($openAiMessages, 'forums');
         if ($userId) {
             $this->savePair($session, $userMessage, $content);
         }
@@ -536,9 +663,9 @@ class PdfChatController extends Controller
         return array_merge($out, $tail);
     }
 
-    private function streamPublicationResponse(PdfChatSession $session, ?int $userId, string $userMessage, array $openAiMessages): StreamedResponse
+    private function streamPublicationResponse(PdfChatSession $session, ?int $userId, string $userMessage, array $openAiMessages, string $feature = 'chat'): StreamedResponse
     {
-        return new StreamedResponse(function () use ($session, $userId, $userMessage, $openAiMessages) {
+        return new StreamedResponse(function () use ($session, $userId, $userMessage, $openAiMessages, $feature) {
             $buffer = '';
             $this->chatGpt->chatMessagesStream($openAiMessages, function ($chunk) use (&$buffer) {
                 $buffer .= $chunk;
@@ -547,7 +674,7 @@ class PdfChatController extends Controller
                     ob_flush();
                 }
                 flush();
-            });
+            }, $feature);
 
             if ($userId && $buffer !== '') {
                 $this->savePair($session, $userMessage, $buffer);

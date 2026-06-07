@@ -599,6 +599,83 @@
     border: 1px solid #e2e8f0;
 }
 
+.khub-forums-ai-banner {
+    background: #fff;
+    border: 1px solid #dbe3ec;
+    border-left: 4px solid var(--theme-color-primary, #119A48);
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04);
+}
+.khub-forums-ai-banner-inner {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.15rem 1.25rem 0.9rem;
+    flex-wrap: wrap;
+}
+.khub-forums-ai-banner-icon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--theme-color-primary, #119A48), color-mix(in srgb, var(--theme-color-primary, #119A48) 70%, #0ea5e9));
+    color: #fff;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+}
+.khub-forums-ai-banner-copy {
+    flex: 1;
+    min-width: 220px;
+}
+.khub-forums-ai-banner-title {
+    margin: 0 0 0.35rem;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #0f172a;
+}
+.khub-forums-ai-banner-text {
+    margin: 0;
+    color: #475569;
+    font-size: 0.9rem;
+    line-height: 1.55;
+    max-width: 760px;
+}
+.khub-forums-ai-banner-meta {
+    margin: 0.55rem 0 0;
+    font-size: 0.8rem;
+    color: #64748b;
+}
+.khub-forums-ai-banner-actions {
+    display: flex;
+    align-items: center;
+    margin-left: auto;
+}
+.khub-forums-ai-suggestions-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding: 0 1.25rem 1rem;
+    border-top: 1px solid #eef2f6;
+    padding-top: 0.75rem;
+}
+.khub-forums-ai-chip {
+    border: 1px solid #cbd5e1;
+    background: #f8fafc;
+    color: #334155;
+    font-size: 0.78rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+.khub-forums-ai-chip:hover {
+    background: #fff;
+    border-color: var(--theme-color-primary, #119A48);
+    color: var(--theme-color-primary, #119A48);
+}
+
 @media (max-width: 768px) {
     .custom-bg h1 {
         font-size: 1.75rem;
@@ -621,6 +698,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 0.75rem;
+    }
+
+    .khub-forums-ai-banner-inner {
+        flex-direction: column;
+    }
+    .khub-forums-ai-banner-actions {
+        margin-left: 0;
+        width: 100%;
     }
 }
 </style>
@@ -666,6 +751,14 @@
                         <button class="filter-btn" data-filter="popular">Most Active</button>
                     </div>
                 </div>
+
+                @php
+                    $pageForumIds = $forums instanceof \Illuminate\Pagination\AbstractPaginator
+                        ? $forums->getCollection()->pluck('id')->values()->all()
+                        : collect($forums ?? [])->pluck('id')->values()->all();
+                @endphp
+
+                @include('forums.partials.khub_ai_listing_banner')
 
                 <!-- Forums List -->
                 <div id="forums-list">
@@ -1852,4 +1945,33 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+@auth
+@include('common.pdf-chat-modal')
+<script>
+    window.khubAiChat = { type: 'forums_index', forum_ids: @json($pageForumIds ?? []) };
+    window.forumsIndexForumIds = @json($pageForumIds ?? []);
+    var pdfChatDocumentTitle = 'Discussion forums';
+</script>
+@include('common.pdf-chat-js')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    var openBtn = document.getElementById('btn-open-forums-khub-ai');
+    if (openBtn && typeof window.openForumsListingAssistant === 'function') {
+        openBtn.addEventListener('click', function () {
+            window.openForumsListingAssistant(window.forumsIndexForumIds || [], 'Discussion forums');
+        });
+    }
+    document.querySelectorAll('.js-forums-ai-chip').forEach(function (chip) {
+        chip.addEventListener('click', function () {
+            var prompt = chip.getAttribute('data-prompt') || '';
+            if (!prompt) return;
+            if (typeof window.openForumsListingAssistant === 'function') {
+                window.openForumsListingAssistant(window.forumsIndexForumIds || [], 'Discussion forums', prompt);
+            }
+        });
+    });
+});
+</script>
+@endauth
 @endsection
