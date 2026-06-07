@@ -60,31 +60,39 @@ class MetricsRepository
             ->orderByDesc('count')
             ->get();
 
-        $labels = [];
-        $values = [];
-        $iso2 = [];
-        $iso3 = [];
+        $aggregated = [];
         foreach ($records as $row) {
-            $code = strtoupper(trim((string) $row->country));
-            if ($code === '' || $code === 'UNKNOWN') {
+            $normalized = $this->normalizeVisitCountryCode((string) $row->country);
+            if ($normalized === null) {
                 continue;
             }
-            // Access logs store ISO 3166-1 alpha-2 from geo IP (e.g. US, GB, ET).
-            if (strlen($code) !== 2 || ! ctype_alpha($code)) {
-                continue;
+            $key = $normalized['iso2'];
+            if (! isset($aggregated[$key])) {
+                $aggregated[$key] = [
+                    'iso2' => $key,
+                    'iso3' => $normalized['iso3'] ?? '',
+                    'label' => $normalized['label'],
+                    'value' => 0,
+                ];
             }
-            $alpha3 = $this->iso2ToIso3($code);
-            $iso2[] = strtolower($code);
-            $iso3[] = $alpha3 ?? '';
-            $labels[] = $this->iso2ToCountryName($code);
-            $values[] = (int) $row->count;
+            $aggregated[$key]['value'] += (int) $row->count;
         }
 
+        uasort($aggregated, fn (array $a, array $b): int => $b['value'] <=> $a['value']);
+        $rows = array_values($aggregated);
+
         return [
-            'labels' => $labels,
-            'values' => $values,
-            'iso2' => $iso2,
-            'iso3' => $iso3,
+            'labels' => array_column($rows, 'label'),
+            'values' => array_column($rows, 'value'),
+            'iso2' => array_column($rows, 'iso2'),
+            'iso3' => array_map(fn (array $row): string => $row['iso3'] ?? '', $rows),
+            'map_points' => array_map(fn (array $row): array => [
+                'hc-key' => $row['iso2'],
+                'iso-a2' => strtoupper($row['iso2']),
+                'iso-a3' => $row['iso3'] ?: null,
+                'name' => $row['label'],
+                'value' => $row['value'],
+            ], $rows),
             'chartType' => 'map',
             'renderAsChart' => false,
             'period' => [
@@ -277,20 +285,134 @@ class MetricsRepository
             $query->whereDate('created_at', '<=', $to);
         }
 
-        return $query->groupBy('country')
-            ->select('country', DB::raw('count(id) as count'))
-            ->orderByDesc('count')
-            ->get()
-            ->map(function ($row) {
-                $code = strtoupper((string) $row->country);
-                return [
-                    'code' => $code,
-                    'name' => $this->iso2ToCountryName($code),
-                    'count' => (int) $row->count,
+        $aggregated = [];
+        foreach ($query->groupBy('country')->select('country', DB::raw('count(id) as count'))->orderByDesc('count')->get() as $row) {
+            $normalized = $this->normalizeVisitCountryCode((string) $row->country);
+            if ($normalized === null) {
+                continue;
+            }
+            $key = $normalized['iso2'];
+            if (! isset($aggregated[$key])) {
+                $aggregated[$key] = [
+                    'code' => strtoupper($key),
+                    'name' => $normalized['label'],
+                    'count' => 0,
                 ];
-            })
-            ->values()
-            ->all();
+            }
+            $aggregated[$key]['count'] += (int) $row->count;
+        }
+
+        uasort($aggregated, fn (array $a, array $b): int => $b['count'] <=> $a['count']);
+
+        return array_values($aggregated);
+    }
+
+    /**
+     * @return array{iso2: string, iso3: string, label: string}|null
+     */
+    private function normalizeVisitCountryCode(string $raw): ?array
+    {
+        $raw = trim($raw);
+        if ($raw === '' || strtoupper($raw) === 'UNKNOWN') {
+            return null;
+        }
+
+        $upper = strtoupper($raw);
+
+        if (strlen($upper) === 2 && ctype_alpha($upper)) {
+            return [
+                'iso2' => strtolower($upper),
+                'iso3' => $this->iso2ToIso3($upper) ?? '',
+                'label' => $this->iso2ToCountryName($upper),
+            ];
+        }
+
+        if (strlen($upper) === 3 && ctype_alpha($upper)) {
+            $iso2 = $this->iso3ToIso2($upper);
+            if ($iso2) {
+                return [
+                    'iso2' => strtolower($iso2),
+                    'iso3' => $upper,
+                    'label' => $this->iso2ToCountryName($iso2),
+                ];
+            }
+        }
+
+        $nameKey = strtolower($raw);
+        $aliases = [
+            'united kingdom' => 'GB',
+            'united states' => 'US',
+            'united states of america' => 'US',
+            'russia' => 'RU',
+            'south korea' => 'KR',
+            'north korea' => 'KP',
+            'ivory coast' => 'CI',
+            'czech republic' => 'CZ',
+        ];
+        $fromName = $aliases[$nameKey] ?? null;
+        if (! $fromName) {
+            $nameMap = config('iso3166.name_to_alpha2', []);
+            $fromName = is_array($nameMap) ? ($nameMap[$nameKey] ?? null) : null;
+        }
+        if (is_string($fromName) && strlen($fromName) === 2) {
+            $iso2 = strtoupper($fromName);
+
+            return [
+                'iso2' => strtolower($iso2),
+                'iso3' => $this->iso2ToIso3($iso2) ?? $upper,
+                'label' => $this->iso2ToCountryName($iso2),
+            ];
+        }
+
+        $fromDb = \App\Models\Country::query()
+            ->whereRaw('UPPER(name) = ?', [$upper])
+            ->orWhereRaw('UPPER(iso_code) = ?', [$upper])
+            ->orWhereRaw('UPPER(iso3_code) = ?', [$upper])
+            ->first(['iso_code', 'iso3_code', 'name']);
+
+        if ($fromDb && ! empty($fromDb->iso_code)) {
+            $iso2 = strtoupper((string) $fromDb->iso_code);
+
+            return [
+                'iso2' => strtolower($iso2),
+                'iso3' => strtoupper((string) ($fromDb->iso3_code ?: $this->iso2ToIso3($iso2) ?: '')),
+                'label' => (string) ($fromDb->name ?: $this->iso2ToCountryName($iso2)),
+            ];
+        }
+
+        return null;
+    }
+
+    private function iso3ToIso2(string $iso3): ?string
+    {
+        $iso3 = strtoupper(trim($iso3));
+        if (strlen($iso3) !== 3) {
+            return null;
+        }
+
+        $alpha3Map = config('iso3166.alpha3_to_alpha2', []);
+        $fromConfig = is_array($alpha3Map) ? ($alpha3Map[$iso3] ?? null) : null;
+        if (is_string($fromConfig) && strlen($fromConfig) === 2) {
+            return strtoupper($fromConfig);
+        }
+
+        $fromDb = \App\Models\Country::query()
+            ->where('iso3_code', $iso3)
+            ->value('iso_code');
+
+        if (is_string($fromDb) && strlen(trim($fromDb)) === 2) {
+            return strtoupper(trim($fromDb));
+        }
+
+        try {
+            if (class_exists(\Symfony\Component\Intl\Countries::class)) {
+                return strtoupper(\Symfony\Component\Intl\Countries::getAlpha2Code($iso3));
+            }
+        } catch (\Throwable $e) {
+            // fall through
+        }
+
+        return null;
     }
 
     private function iso2ToIso3(string $iso2): ?string
@@ -298,6 +420,12 @@ class MetricsRepository
         $iso2 = strtoupper(trim($iso2));
         if ($iso2 === '' || strlen($iso2) !== 2) {
             return null;
+        }
+
+        $alpha2Map = config('iso3166.alpha2_to_alpha3', []);
+        $fromConfig = is_array($alpha2Map) ? ($alpha2Map[$iso2] ?? null) : null;
+        if (is_string($fromConfig) && strlen($fromConfig) === 3) {
+            return strtoupper($fromConfig);
         }
 
         if (function_exists('map_iso3_from_iso2')) {

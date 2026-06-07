@@ -55,7 +55,7 @@ class MetricsController extends Controller
     private function chartData(?string $from, ?string $to, ?string $country): array
     {
         $useFilters = $from || $to || $country;
-        $cacheKey = 'metrics_chart_data'.($useFilters ? '_'.md5(serialize([$from, $to, $country])) : '_all');
+        $cacheKey = 'metrics_chart_data_v2'.($useFilters ? '_'.md5(serialize([$from, $to, $country])) : '_all');
         $ttl = MetricsCache::ttl($useFilters ? 'filtered' : 'default');
 
         return MetricsCache::store()->remember($cacheKey, $ttl, function () use ($from, $to, $country) {

@@ -214,6 +214,121 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         KhAfricaMap.configure(settings);
     }
 
+    var worldVisitsTopologyPromise = null;
+
+    function worldVisitsTopologyUrl() {
+        return (window.__khWorldMapSettings && window.__khWorldMapSettings.topologyUrl)
+            || 'https://code.highcharts.com/mapdata/2.3.3/custom/world.topo.json';
+    }
+
+    function loadWorldVisitsTopology() {
+        if (!worldVisitsTopologyPromise) {
+            worldVisitsTopologyPromise = fetch(worldVisitsTopologyUrl(), { mode: 'cors', credentials: 'omit' })
+                .then(function (response) {
+                    if (!response.ok) {
+                        throw new Error('World map topology unavailable');
+                    }
+                    return response.json();
+                });
+        }
+        return worldVisitsTopologyPromise;
+    }
+
+    function buildVisitsMapSeriesData(data) {
+        if (data.map_points && data.map_points.length) {
+            return data.map_points.map(function (point) {
+                var iso2 = String(point['hc-key'] || point.iso2 || '').toLowerCase();
+                return {
+                    'hc-key': iso2,
+                    name: point.name || iso2.toUpperCase(),
+                    value: point.value
+                };
+            }).filter(function (point) { return point['hc-key']; });
+        }
+
+        var points = [];
+        var iso2Codes = data.iso2 || [];
+        var values = data.values || [];
+        for (var i = 0; i < values.length; i++) {
+            var iso2 = String(iso2Codes[i] || '').toLowerCase();
+            if (!iso2) {
+                var label = String((data.labels && data.labels[i]) || '').trim();
+                if (label.length === 2) {
+                    iso2 = label.toLowerCase();
+                }
+            }
+            if (!iso2) {
+                continue;
+            }
+            points.push({
+                'hc-key': iso2,
+                name: (data.labels && data.labels[i]) ? data.labels[i] : iso2.toUpperCase(),
+                value: values[i]
+            });
+        }
+        return points;
+    }
+
+    function renderWorldVisitsMap(topology, mapData, config) {
+        var mapContainer = document.getElementById('admin-africa-map');
+        if (!mapContainer || typeof Highcharts === 'undefined' || typeof Highcharts.mapChart !== 'function') {
+            return;
+        }
+        config = config || {};
+        mapContainer.innerHTML = '';
+        destroyAdminMap();
+        adminMapChart = Highcharts.mapChart('admin-africa-map', {
+            chart: {
+                map: topology,
+                backgroundColor: '#f8f9fa',
+                height: config.height || 504,
+                style: { fontFamily: 'inherit' }
+            },
+            title: { text: null },
+            credits: {
+                enabled: true,
+                text: config.credits || 'Map © Natural Earth · Portal access logs',
+                style: { fontSize: '10px', color: '#94a3b8' }
+            },
+            mapNavigation: {
+                enabled: true,
+                buttonOptions: { verticalAlign: 'bottom', align: 'right' }
+            },
+            colorAxis: {
+                min: config.min,
+                max: config.max,
+                minColor: '#f0f7f4',
+                maxColor: auColors.corporateGreen
+            },
+            legend: { enabled: false },
+            plotOptions: {
+                map: {
+                    nullColor: '#f1f5f9',
+                    borderColor: '#ffffff',
+                    borderWidth: 0.5,
+                    states: {
+                        hover: {
+                            color: auColors.gold,
+                            borderColor: auColors.red,
+                            borderWidth: 1.1
+                        }
+                    }
+                }
+            },
+            series: [{
+                type: 'map',
+                name: config.seriesName || 'Visits',
+                joinBy: ['hc-key', 'hc-key'],
+                data: mapData,
+                dataLabels: { enabled: false },
+                tooltip: config.tooltip || {
+                    useHTML: true,
+                    pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits'
+                }
+            }]
+        });
+    }
+
     function destroyAdminMap() {
         if (adminMapChart) {
             try { adminMapChart.destroy(); } catch (e) { /* ignore */ }
@@ -317,7 +432,8 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         if (stats) stats.style.display = '';
         if (kpiControls) kpiControls.style.display = 'none';
         if (chips) chips.style.display = 'none';
-        if (!data || !data.iso2 || !data.values || data.iso2.length === 0) {
+        var mapData = buildVisitsMapSeriesData(data || {});
+        if (!data || !mapData.length) {
             mapContainer.innerHTML = '<div class="text-muted text-center p-4">No visit data for the selected period.</div>';
             updateAdminScopeSummary('<strong>Portal traffic</strong><span class="admin-map-scope-summary__meta">No visits recorded for this filter.</span>');
             updateAdminMapLegend('Visits', null, null);
@@ -326,40 +442,26 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         }
         updateVisitsMapStats(data);
         var total = data.values.reduce(function (a, b) { return a + b; }, 0);
-        updateAdminScopeSummary('<strong>Worldwide portal traffic</strong><span class="admin-map-scope-summary__value">' + total.toLocaleString() + ' visits</span><span class="admin-map-scope-summary__meta">' + data.values.length + ' countries with activity</span>');
-        var min = Math.min.apply(null, data.values);
-        var max = Math.max.apply(null, data.values);
+        updateAdminScopeSummary('<strong>Worldwide portal traffic</strong><span class="admin-map-scope-summary__value">' + total.toLocaleString() + ' visits</span><span class="admin-map-scope-summary__meta">' + mapData.length + ' countries with activity</span>');
+        var values = mapData.map(function (point) { return point.value; });
+        var min = Math.min.apply(null, values);
+        var max = Math.max.apply(null, values);
         updateAdminMapLegend('Visits by country', min, max, function (v) { return Number(v).toLocaleString() + ' visits'; });
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
-            useMapSettings('world');
-            KhAfricaMap.load().then(function(mapAsset) {
-                var joinBy = KhAfricaMap.joinKey() || 'hc-key';
-                var iso2Codes = data.iso2 || [];
-                var iso3Codes = data.iso3 || [];
-                var mapData = iso2Codes.map(function(iso2, i) {
-                    iso2 = (iso2 || '').toLowerCase();
-                    var iso3 = (iso3Codes[i] || '').toUpperCase();
-                    var point = {
-                        value: data.values[i],
-                        name: (data.labels && data.labels[i]) ? data.labels[i] : iso2.toUpperCase(),
-                        'hc-key': iso2,
-                        'iso-a2': iso2.toUpperCase()
-                    };
-                    if (iso3) {
-                        point['iso-a3'] = iso3;
+            loadWorldVisitsTopology().then(function (topology) {
+                renderWorldVisitsMap(topology, mapData, {
+                    min: 0,
+                    max: max,
+                    height: 504,
+                    seriesName: 'Visits',
+                    credits: 'Map © Natural Earth (Highcharts v2.3.3) · Portal access logs',
+                    tooltip: {
+                        useHTML: true,
+                        pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits'
                     }
-                    point[joinBy] = joinBy === 'hc-key' ? iso2 : (iso3 || iso2);
-                    return point;
                 });
-                renderAdminAfricaMap(mapAsset, mapData, {
-                    joinBy: joinBy,
-                    min: 0, max: max, height: 504, seriesName: 'Visits',
-                    credits: KhAfricaMap.creditsPrefix() + ' · Portal access logs',
-                    dataLabels: { enabled: false },
-                    tooltip: { useHTML: true, pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits' }
-                });
-            }).catch(function() {
+            }).catch(function () {
                 mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Please refresh and try again.</div>';
             });
         });
