@@ -31,11 +31,140 @@ class AiConfig
     }
 
     /**
+     * @return array<string, string>
+     */
+    public static function defaultSourcePriorities(): array
+    {
+        return config('ai.default_source_priority', []);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function sourcePriorities(): array
+    {
+        $defaults = self::defaultSourcePriorities();
+        $db = self::dbSettings();
+
+        if ($db && Schema::hasColumn('setting', 'ai_source_priority') && ! empty($db->ai_source_priority)) {
+            $stored = json_decode((string) $db->ai_source_priority, true);
+            if (is_array($stored)) {
+                foreach ($stored as $provider => $priority) {
+                    if (is_string($provider) && in_array($priority, ['env', 'db'], true)) {
+                        $defaults[$provider] = $priority;
+                    }
+                }
+            }
+        }
+
+        return $defaults;
+    }
+
+    public static function sourcePriority(string $provider): string
+    {
+        $priorities = self::sourcePriorities();
+        $priority = $priorities[$provider] ?? 'db';
+
+        return in_array($priority, ['env', 'db'], true) ? $priority : 'db';
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function providerEnvKeys(string $provider): array
+    {
+        return config('ai.provider_env_keys.'.$provider, []);
+    }
+
+    /**
+     * @return list<string>
+     */
+    public static function envKeysToClearOnSave(): array
+    {
+        $keys = [];
+        foreach (array_keys(config('ai.providers', [])) as $provider) {
+            if (self::sourcePriority($provider) === 'db') {
+                $keys = array_merge($keys, self::providerEnvKeys($provider));
+            }
+        }
+
+        return array_values(array_unique($keys));
+    }
+
+    /**
      * @param  mixed  $default
      * @return mixed
      */
-    public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
+    public static function resolveForProvider(string $provider, string $envKey, string $dbColumn, $default = null)
     {
+        $db = self::dbSettings();
+        $dbValue = null;
+        if ($db && Schema::hasColumn('setting', $dbColumn) && property_exists($db, $dbColumn)) {
+            $raw = $db->{$dbColumn};
+            if ($raw !== null && $raw !== '') {
+                $dbValue = $raw;
+            }
+        }
+
+        $envValue = env($envKey);
+        $hasEnv = $envValue !== null && $envValue !== '';
+
+        if (self::sourcePriority($provider) === 'env') {
+            if ($hasEnv) {
+                return $envValue;
+            }
+
+            return $dbValue ?? $default;
+        }
+
+        if ($dbValue !== null) {
+            return $dbValue;
+        }
+
+        if ($hasEnv) {
+            return $envValue;
+        }
+
+        return $default;
+    }
+
+    public static function activeCredentialSource(string $provider, string $envKey, string $dbColumn): ?string
+    {
+        $db = self::dbSettings();
+        $hasDb = $db
+            && Schema::hasColumn('setting', $dbColumn)
+            && property_exists($db, $dbColumn)
+            && $db->{$dbColumn} !== null
+            && $db->{$dbColumn} !== '';
+
+        $envValue = env($envKey);
+        $hasEnv = $envValue !== null && $envValue !== '';
+
+        if (self::sourcePriority($provider) === 'env') {
+            if ($hasEnv) {
+                return 'env';
+            }
+
+            return $hasDb ? 'db' : null;
+        }
+
+        if ($hasDb) {
+            return 'db';
+        }
+
+        return $hasEnv ? 'env' : null;
+    }
+
+    /**
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public static function resolve(string $envKey, ?string $dbColumn = null, $default = null, ?string $provider = null)
+    {
+        if ($provider !== null && $dbColumn !== null) {
+            return self::resolveForProvider($provider, $envKey, $dbColumn, $default);
+        }
+
         $db = self::dbSettings();
         $column = $dbColumn ?? strtolower($envKey);
         if ($db && $column && property_exists($db, $column)) {
@@ -365,52 +494,52 @@ class AiConfig
 
     public static function openaiApiKey(): string
     {
-        return (string) self::resolve('OPEN_API_KEY', 'ai_openai_api_key', '');
+        return (string) self::resolveForProvider('openai', 'OPEN_API_KEY', 'ai_openai_api_key', '');
     }
 
     public static function openaiModel(): string
     {
-        return (string) self::resolve('OPENAI_MODEL', 'ai_openai_model', 'gpt-3.5-turbo');
+        return (string) self::resolveForProvider('openai', 'OPENAI_MODEL', 'ai_openai_model', 'gpt-3.5-turbo');
     }
 
     public static function chatPdfApiKey(): string
     {
-        return (string) self::resolve('CHAT_PDF_API_KEY', 'ai_chatpdf_api_key', '');
+        return (string) self::resolveForProvider('chatpdf', 'CHAT_PDF_API_KEY', 'ai_chatpdf_api_key', '');
     }
 
     public static function geminiApiKey(): string
     {
-        return (string) self::resolve('GEMINI_API_KEY', 'ai_gemini_api_key', '');
+        return (string) self::resolveForProvider('gemini', 'GEMINI_API_KEY', 'ai_gemini_api_key', '');
     }
 
     public static function geminiModel(): string
     {
-        return (string) self::resolve('GEMINI_MODEL', 'ai_gemini_model', 'gemini-1.5-flash');
+        return (string) self::resolveForProvider('gemini', 'GEMINI_MODEL', 'ai_gemini_model', 'gemini-1.5-flash');
     }
 
     public static function deepseekApiKey(): string
     {
-        return (string) self::resolve('DEEPSEEK_API_KEY', 'ai_deepseek_api_key', '');
+        return (string) self::resolveForProvider('deepseek', 'DEEPSEEK_API_KEY', 'ai_deepseek_api_key', '');
     }
 
     public static function deepseekModel(): string
     {
-        return (string) self::resolve('DEEPSEEK_MODEL', 'ai_deepseek_model', 'deepseek-chat');
+        return (string) self::resolveForProvider('deepseek', 'DEEPSEEK_MODEL', 'ai_deepseek_model', 'deepseek-chat');
     }
 
     public static function customBaseUrl(): string
     {
-        return rtrim((string) self::resolve('AI_CUSTOM_BASE_URL', 'ai_custom_base_url', ''), '/');
+        return rtrim((string) self::resolveForProvider('custom', 'AI_CUSTOM_BASE_URL', 'ai_custom_base_url', ''), '/');
     }
 
     public static function customApiKey(): string
     {
-        return (string) self::resolve('AI_CUSTOM_API_KEY', 'ai_custom_api_key', '');
+        return (string) self::resolveForProvider('custom', 'AI_CUSTOM_API_KEY', 'ai_custom_api_key', '');
     }
 
     public static function customModel(): string
     {
-        return (string) self::resolve('AI_CUSTOM_MODEL', 'ai_custom_model', '');
+        return (string) self::resolveForProvider('custom', 'AI_CUSTOM_MODEL', 'ai_custom_model', '');
     }
 
     /**
@@ -515,6 +644,25 @@ class AiConfig
         return self::featureStatus($providerId);
     }
 
+    public static function providerActiveSource(string $provider): ?string
+    {
+        $map = [
+            'openai' => ['OPEN_API_KEY', 'ai_openai_api_key'],
+            'chatpdf' => ['CHAT_PDF_API_KEY', 'ai_chatpdf_api_key'],
+            'gemini' => ['GEMINI_API_KEY', 'ai_gemini_api_key'],
+            'deepseek' => ['DEEPSEEK_API_KEY', 'ai_deepseek_api_key'],
+            'custom' => ['AI_CUSTOM_API_KEY', 'ai_custom_api_key'],
+        ];
+
+        if (! isset($map[$provider])) {
+            return null;
+        }
+
+        [$envKey, $dbColumn] = $map[$provider];
+
+        return self::activeCredentialSource($provider, $envKey, $dbColumn);
+    }
+
     public static function featureStatus(string $providerId): string
     {
         if (self::providerAvailable($providerId)) {
@@ -552,6 +700,7 @@ class AiConfig
             'ai.primary_provider' => self::primaryChatProvider(),
             'ai.feature_routing' => self::featureRouting(),
             'ai.custom_integrations' => self::customIntegrations(),
+            'ai.source_priority' => self::sourcePriorities(),
         ]);
     }
 
@@ -563,28 +712,28 @@ class AiConfig
         $db = self::dbSettings();
         $map = [
             'ai_primary_provider' => ['db_column' => 'ai_primary_provider', 'env_key' => 'AI_PRIMARY_PROVIDER', 'default' => 'openai'],
-            'ai_openai_api_key' => ['db_column' => 'ai_openai_api_key', 'env_key' => 'OPEN_API_KEY', 'default' => '', 'secret' => true],
-            'ai_openai_model' => ['db_column' => 'ai_openai_model', 'env_key' => 'OPENAI_MODEL', 'default' => 'gpt-3.5-turbo'],
+            'ai_openai_api_key' => ['provider' => 'openai', 'db_column' => 'ai_openai_api_key', 'env_key' => 'OPEN_API_KEY', 'default' => '', 'secret' => true],
+            'ai_openai_model' => ['provider' => 'openai', 'db_column' => 'ai_openai_model', 'env_key' => 'OPENAI_MODEL', 'default' => 'gpt-3.5-turbo'],
             'ai_openai_enabled' => ['db_column' => 'ai_openai_enabled', 'env_key' => '', 'default' => true, 'boolean' => true],
-            'ai_chatpdf_api_key' => ['db_column' => 'ai_chatpdf_api_key', 'env_key' => 'CHAT_PDF_API_KEY', 'default' => '', 'secret' => true],
+            'ai_chatpdf_api_key' => ['provider' => 'chatpdf', 'db_column' => 'ai_chatpdf_api_key', 'env_key' => 'CHAT_PDF_API_KEY', 'default' => '', 'secret' => true],
             'ai_chatpdf_enabled' => ['db_column' => 'ai_chatpdf_enabled', 'env_key' => '', 'default' => true, 'boolean' => true],
-            'ai_gemini_api_key' => ['db_column' => 'ai_gemini_api_key', 'env_key' => 'GEMINI_API_KEY', 'default' => '', 'secret' => true],
-            'ai_gemini_model' => ['db_column' => 'ai_gemini_model', 'env_key' => 'GEMINI_MODEL', 'default' => 'gemini-1.5-flash'],
+            'ai_gemini_api_key' => ['provider' => 'gemini', 'db_column' => 'ai_gemini_api_key', 'env_key' => 'GEMINI_API_KEY', 'default' => '', 'secret' => true],
+            'ai_gemini_model' => ['provider' => 'gemini', 'db_column' => 'ai_gemini_model', 'env_key' => 'GEMINI_MODEL', 'default' => 'gemini-1.5-flash'],
             'ai_gemini_enabled' => ['db_column' => 'ai_gemini_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],
-            'ai_deepseek_api_key' => ['db_column' => 'ai_deepseek_api_key', 'env_key' => 'DEEPSEEK_API_KEY', 'default' => '', 'secret' => true],
-            'ai_deepseek_model' => ['db_column' => 'ai_deepseek_model', 'env_key' => 'DEEPSEEK_MODEL', 'default' => 'deepseek-chat'],
+            'ai_deepseek_api_key' => ['provider' => 'deepseek', 'db_column' => 'ai_deepseek_api_key', 'env_key' => 'DEEPSEEK_API_KEY', 'default' => '', 'secret' => true],
+            'ai_deepseek_model' => ['provider' => 'deepseek', 'db_column' => 'ai_deepseek_model', 'env_key' => 'DEEPSEEK_MODEL', 'default' => 'deepseek-chat'],
             'ai_deepseek_enabled' => ['db_column' => 'ai_deepseek_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],
-            'ai_custom_base_url' => ['db_column' => 'ai_custom_base_url', 'env_key' => 'AI_CUSTOM_BASE_URL', 'default' => ''],
-            'ai_custom_api_key' => ['db_column' => 'ai_custom_api_key', 'env_key' => 'AI_CUSTOM_API_KEY', 'default' => '', 'secret' => true],
-            'ai_custom_model' => ['db_column' => 'ai_custom_model', 'env_key' => 'AI_CUSTOM_MODEL', 'default' => ''],
+            'ai_custom_base_url' => ['provider' => 'custom', 'db_column' => 'ai_custom_base_url', 'env_key' => 'AI_CUSTOM_BASE_URL', 'default' => ''],
+            'ai_custom_api_key' => ['provider' => 'custom', 'db_column' => 'ai_custom_api_key', 'env_key' => 'AI_CUSTOM_API_KEY', 'default' => '', 'secret' => true],
+            'ai_custom_model' => ['provider' => 'custom', 'db_column' => 'ai_custom_model', 'env_key' => 'AI_CUSTOM_MODEL', 'default' => ''],
             'ai_custom_enabled' => ['db_column' => 'ai_custom_enabled', 'env_key' => '', 'default' => false, 'boolean' => true],
         ];
 
         $fields = [];
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $effective = $meta['env_key'] !== ''
-                ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
+            $effective = $meta['env_key'] !== '' && ! empty($meta['provider'])
+                ? self::resolveForProvider($meta['provider'], $meta['env_key'], $meta['db_column'], $meta['default'])
                 : ($dbValue !== null ? $dbValue : $meta['default']);
 
             if (! empty($meta['boolean'])) {
@@ -608,6 +757,7 @@ class AiConfig
                 'form_value' => $formValue,
                 'boolean' => ! empty($meta['boolean']),
                 'secret' => ! empty($meta['secret']),
+                'provider' => $meta['provider'] ?? null,
             ];
         }
 
@@ -637,6 +787,8 @@ class AiConfig
                 'status' => self::providerStatus($id),
                 'enabled' => self::providerEnabled($id),
                 'configured' => self::providerConfigured($id),
+                'source_priority' => self::sourcePriority($id),
+                'active_source' => self::providerActiveSource($id),
             ];
         }
 

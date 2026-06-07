@@ -702,6 +702,17 @@ class SettingsRepository
             );
             $settings->ai_custom_integrations = $normalized !== [] ? json_encode($normalized) : null;
         }
+
+        if (Schema::hasColumn('setting', 'ai_source_priority') && $request->has('ai_source_priority')) {
+            $priorities = [];
+            foreach (array_keys(config('ai.providers', [])) as $provider) {
+                $value = $request->input('ai_source_priority.'.$provider);
+                if (in_array($value, ['env', 'db'], true)) {
+                    $priorities[$provider] = $value;
+                }
+            }
+            $settings->ai_source_priority = $priorities !== [] ? json_encode($priorities) : null;
+        }
     }
 
     /**

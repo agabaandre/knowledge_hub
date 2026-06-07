@@ -440,7 +440,10 @@ class InstallerService
 
     public function clearAiEnvOverrides(): void
     {
-        $this->clearEnvKeys(config('install.ai_env_keys', []));
+        $keys = \App\Support\AiConfig::envKeysToClearOnSave();
+        if ($keys !== []) {
+            $this->clearEnvKeys($keys);
+        }
         Artisan::call('config:clear');
     }
 

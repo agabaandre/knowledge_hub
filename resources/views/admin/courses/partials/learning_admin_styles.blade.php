@@ -162,6 +162,24 @@
         background: #f1f5f9;
         color: #475569;
     }
+    .learning-admin-page .source-pill {
+        font-size: 0.68rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        padding: 0.2rem 0.5rem;
+        border-radius: 999px;
+        background: #eef2ff;
+        color: #4338ca;
+        border: 1px solid #c7d2fe;
+    }
+    .learning-admin-page .source-priority-wrap {
+        min-width: 210px;
+    }
+    .learning-admin-page .source-priority-wrap label {
+        font-size: 0.72rem;
+        margin-bottom: 0.2rem;
+    }
     .learning-admin-page .integration-row {
         border: 1px dashed #cbd5e1;
         border-radius: 0.65rem;

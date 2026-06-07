@@ -73,7 +73,12 @@
                             @endif
                         </div>
                     </div>
-                    <div class="d-flex align-items-center gap-3">
+                    <div class="d-flex align-items-center flex-wrap gap-3 justify-content-end">
+                        @if($provider['active_source'])
+                            <span class="source-pill">
+                                {{ $provider['active_source'] === 'env' ? __('admin_nav.ai_active_source_env') : __('admin_nav.ai_active_source_db') }}
+                            </span>
+                        @endif
                         <span class="status-pill {{ $provider['status'] }}">
                             {{ $statusLabels[$provider['status']] ?? $provider['status'] }}
                         </span>
@@ -85,7 +90,18 @@
                         </div>
                     </div>
                 </div>
-                <div class="px-3 pb-3">
+                <div class="px-3 pb-2 border-bottom">
+                    <div class="row g-2 align-items-end">
+                        <div class="col-md-4 source-priority-wrap">
+                            <label class="form-label mb-1" for="ai_source_priority_{{ $provider['id'] }}">{{ __('admin_nav.ai_source_priority') }}</label>
+                            <select name="ai_source_priority[{{ $provider['id'] }}]" id="ai_source_priority_{{ $provider['id'] }}" class="form-select form-select-sm">
+                                <option value="env" @selected(($provider['source_priority'] ?? 'db') === 'env')>{{ __('admin_nav.ai_source_env') }}</option>
+                                <option value="db" @selected(($provider['source_priority'] ?? 'db') === 'db')>{{ __('admin_nav.ai_source_db') }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-3 pb-3 pt-3">
                     @if($provider['id'] === 'openai')
                         <div class="row g-3">
                             <div class="col-md-6">

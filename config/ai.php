@@ -17,6 +17,26 @@ return [
     'default_primary_provider' => env('AI_PRIMARY_PROVIDER', 'openai'),
     'primary_provider' => null,
 
+    /*
+    | Credential source order per provider: "env" (.env first) or "db" (admin settings first).
+    | OpenAI and ChatPDF default to env on existing deployments; others default to db.
+    */
+    'default_source_priority' => [
+        'openai' => 'env',
+        'chatpdf' => 'env',
+        'gemini' => 'db',
+        'deepseek' => 'db',
+        'custom' => 'db',
+    ],
+
+    'provider_env_keys' => [
+        'openai' => ['OPEN_API_KEY', 'OPENAI_MODEL'],
+        'chatpdf' => ['CHAT_PDF_API_KEY'],
+        'gemini' => ['GEMINI_API_KEY', 'GEMINI_MODEL'],
+        'deepseek' => ['DEEPSEEK_API_KEY', 'DEEPSEEK_MODEL'],
+        'custom' => ['AI_CUSTOM_BASE_URL', 'AI_CUSTOM_API_KEY', 'AI_CUSTOM_MODEL'],
+    ],
+
     'providers' => [
         'openai' => [
             'label' => 'OpenAI',
