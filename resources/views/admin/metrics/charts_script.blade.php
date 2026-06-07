@@ -247,7 +247,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
 
     function africaMapChartOptions(mapAsset, mapData, config) {
         config = config || {};
-        var joinBy = (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
+        var joinBy = config.joinBy || (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
         return {
             chart: {
                 map: KhAfricaMap.chartMapOption(mapAsset),
@@ -334,22 +334,26 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         ensureHighchartsMapsLoaded(function() {
             useMapSettings('world');
             KhAfricaMap.load().then(function(mapAsset) {
-                var joinBy = KhAfricaMap.joinKey();
-                var iso3Codes = data.iso3 || [];
+                var joinBy = KhAfricaMap.joinKey() || 'hc-key';
                 var iso2Codes = data.iso2 || [];
-                var mapData = iso3Codes.map(function(code, i) {
-                    var iso2 = (iso2Codes[i] || '').toLowerCase();
+                var iso3Codes = data.iso3 || [];
+                var mapData = iso2Codes.map(function(iso2, i) {
+                    iso2 = (iso2 || '').toLowerCase();
+                    var iso3 = (iso3Codes[i] || '').toUpperCase();
                     var point = {
                         value: data.values[i],
-                        name: (data.labels && data.labels[i]) ? data.labels[i] : code.toUpperCase(),
-                        'iso-a3': code,
+                        name: (data.labels && data.labels[i]) ? data.labels[i] : iso2.toUpperCase(),
                         'hc-key': iso2,
                         'iso-a2': iso2.toUpperCase()
                     };
-                    point[joinBy] = joinBy === 'hc-key' ? iso2 : code;
+                    if (iso3) {
+                        point['iso-a3'] = iso3;
+                    }
+                    point[joinBy] = joinBy === 'hc-key' ? iso2 : (iso3 || iso2);
                     return point;
                 });
                 renderAdminAfricaMap(mapAsset, mapData, {
+                    joinBy: joinBy,
                     min: 0, max: max, height: 504, seriesName: 'Visits',
                     credits: KhAfricaMap.creditsPrefix() + ' · Portal access logs',
                     dataLabels: { enabled: false },

@@ -53,7 +53,7 @@ return [
     'views' => [
         'frontend_countries' => env('MAP_VIEW_FRONTEND_COUNTRIES'),
         'admin_metrics' => env('MAP_VIEW_ADMIN_METRICS'),
-        'admin_visits' => env('MAP_VIEW_ADMIN_VISITS', 'world-topo-2.3.3'),
+        'admin_visits' => env('MAP_VIEW_ADMIN_VISITS', 'world-visits-topo-2.3.3'),
         'admin_rcc' => env('MAP_VIEW_ADMIN_RCC'),
         'frontend_admin_units' => env('MAP_VIEW_FRONTEND_ADMIN_UNITS'),
         'country_hub' => env('MAP_VIEW_COUNTRY_HUB'),
@@ -113,6 +113,17 @@ return [
             'topology_url' => $topologyBase.'custom/world.topo.json',
             'version' => $topologyVersion,
             'join_by' => 'iso-a3',
+            'scope' => 'world',
+        ],
+        'world-visits-topo-2.3.3' => [
+            'label' => 'World (portal visits) — Highcharts TopoJSON v2.3.3',
+            'provider' => 'highcharts',
+            'type' => 'topojson_url',
+            'topology_preset' => 'world',
+            'topology_url' => $topologyBase.'custom/world.topo.json',
+            'version' => $topologyVersion,
+            'join_by' => 'hc-key',
+            'iso_property' => 'hc-key',
             'scope' => 'world',
         ],
         'fusion-africa-sadr-2.3.3' => [

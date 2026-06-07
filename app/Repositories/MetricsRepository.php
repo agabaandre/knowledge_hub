@@ -69,12 +69,13 @@ class MetricsRepository
             if ($code === '' || $code === 'UNKNOWN') {
                 continue;
             }
-            $alpha3 = $this->iso2ToIso3($code);
-            if (! $alpha3) {
+            // Access logs store ISO 3166-1 alpha-2 from geo IP (e.g. US, GB, ET).
+            if (strlen($code) !== 2 || ! ctype_alpha($code)) {
                 continue;
             }
+            $alpha3 = $this->iso2ToIso3($code);
             $iso2[] = strtolower($code);
-            $iso3[] = $alpha3;
+            $iso3[] = $alpha3 ?? '';
             $labels[] = $this->iso2ToCountryName($code);
             $values[] = (int) $row->count;
         }
@@ -295,8 +296,15 @@ class MetricsRepository
     private function iso2ToIso3(string $iso2): ?string
     {
         $iso2 = strtoupper(trim($iso2));
-        if ($iso2 === '') {
+        if ($iso2 === '' || strlen($iso2) !== 2) {
             return null;
+        }
+
+        if (function_exists('map_iso3_from_iso2')) {
+            $fromCatalog = map_iso3_from_iso2($iso2);
+            if ($fromCatalog !== '') {
+                return $fromCatalog;
+            }
         }
 
         $fromDb = \App\Models\Country::query()
