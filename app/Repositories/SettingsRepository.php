@@ -2,6 +2,7 @@
 namespace App\Repositories;
 
 use App\Models\Setting;
+use App\Services\InstallerService;
 use App\Support\DisposableEmailChecker;
 use App\Support\EmailConfig;
 use Illuminate\Http\Request;
@@ -464,6 +465,10 @@ class SettingsRepository
         }
 
         $settings->save();
+
+        if (Schema::hasColumn('setting', 'email_driver')) {
+            app(InstallerService::class)->clearMailEnvOverrides();
+        }
 
         DisposableEmailChecker::forgetCache();
         EmailConfig::clearCache();

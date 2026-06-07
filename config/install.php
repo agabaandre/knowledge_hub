@@ -33,6 +33,11 @@ return [
         'HUB_SQL_BACKUP_ROOT',
     ],
 
+    'central_hub_env_keys' => [
+        'CENTRAL_HUB_URL',
+        'CENTRAL_HUB_API_TOKEN',
+    ],
+
     'mail_env_keys' => [
         'MAIL_MAILER',
         'MAIL_HOST',
@@ -42,6 +47,15 @@ return [
         'MAIL_ENCRYPTION',
         'MAIL_FROM_ADDRESS',
         'MAIL_FROM_NAME',
+    ],
+
+    'exchange_env_keys' => [
+        'EXCHANGE_TENANT_ID',
+        'EXCHANGE_CLIENT_ID',
+        'EXCHANGE_CLIENT_SECRET',
+        'EXCHANGE_REDIRECT_URI',
+        'EXCHANGE_SCOPE',
+        'EXCHANGE_AUTH_METHOD',
     ],
 
     'database_defaults' => [

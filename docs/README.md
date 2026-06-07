@@ -46,6 +46,7 @@ Central index for operators, administrators, and developers. Start with [install
 | [features/KPI_INDICATORS_OWID.md](features/KPI_INDICATORS_OWID.md) | Admin, dev | Country indicators, OWID import, KPI queues |
 | [features/CONTENT_REQUEST_REFERRALS.md](features/CONTENT_REQUEST_REFERRALS.md) | Admin, dev | Content request referrals |
 | [features/FORUM_ATTACHMENTS_PDF.md](features/FORUM_ATTACHMENTS_PDF.md) | Dev / ops | Forum Office → PDF conversion |
+| [features/FEDERATION.md](features/FEDERATION.md) | Admin, dev | Federated hubs, central metadata/branding sync, federation API |
 
 ### Project root
 

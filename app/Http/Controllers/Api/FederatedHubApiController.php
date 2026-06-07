@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Services\FederatedHubLookupService;
 use App\Services\FederatedHubService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -47,6 +48,34 @@ class FederatedHubApiController extends ApiController
             'status' => 'success',
             'hub' => $this->federation->localManifest(),
             ...$this->federation->publicForumsPayload($perPage, $page),
+        ]);
+    }
+
+    public function lookupIndex(FederatedHubLookupService $lookup): JsonResponse
+    {
+        return response()->json([
+            'status' => 'success',
+            'data' => $lookup->lookupIndex(),
+        ]);
+    }
+
+    public function lookupSettings(Request $request, FederatedHubLookupService $lookup): JsonResponse
+    {
+        $this->authorizeFederationRequest($request);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $lookup->exportBrandingPayload(),
+        ]);
+    }
+
+    public function lookupMetadata(Request $request, FederatedHubLookupService $lookup): JsonResponse
+    {
+        $this->authorizeFederationRequest($request);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => $lookup->exportMetadataPayload(),
         ]);
     }
 

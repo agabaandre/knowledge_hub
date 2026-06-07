@@ -11,7 +11,11 @@ Route::middleware(['web', 'install.guest'])->prefix('install')->name('install.')
     Route::post('/storage', [InstallController::class, 'storeStorage'])->name('storage.store');
     Route::get('/site', [InstallController::class, 'showSite'])->name('site');
     Route::post('/site', [InstallController::class, 'storeSite'])->name('site.store');
+    Route::get('/central-hub', [InstallController::class, 'showCentralHub'])->name('central');
+    Route::post('/central-hub', [InstallController::class, 'storeCentralHub'])->name('central.store');
+    Route::post('/central-hub/test', [InstallController::class, 'testCentralHub'])->name('central.test');
     Route::get('/mail', [InstallController::class, 'showMail'])->name('mail');
+    Route::post('/mail/test', [InstallController::class, 'testMail'])->name('mail.test');
     Route::post('/mail', [InstallController::class, 'storeMail'])->name('mail.store');
     Route::get('/admin', [InstallController::class, 'showAdmin'])->name('admin');
     Route::post('/admin', [InstallController::class, 'storeAdmin'])->name('admin.store');

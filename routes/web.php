@@ -309,6 +309,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::delete('/federated-hubs/{hub}', [FederatedHubsController::class, 'destroy'])->name('admin.federation.destroy');
     Route::post('/federated-hubs/{hub}/connect', [FederatedHubsController::class, 'connect'])->name('admin.federation.connect');
     Route::post('/federated-hubs/{hub}/sync', [FederatedHubsController::class, 'sync'])->name('admin.federation.sync');
+    Route::post('/federated-hubs/sync-central', [FederatedHubsController::class, 'syncFromCentral'])->name('admin.federation.sync-central');
+    Route::post('/federated-hubs/test-central', [FederatedHubsController::class, 'testCentral'])->name('admin.federation.test-central');
 
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');

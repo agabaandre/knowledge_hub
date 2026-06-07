@@ -12,8 +12,9 @@ Open **`{APP_URL}/install`** after `composer install`. Docker and bare-metal hos
 | 2. Database | `/install/database` | `DB_*` in `.env`, migrations (optional skip), `APP_KEY`, baseline seed |
 | 3. **Storage** | `/install/storage` | Files driver, host paths, SQL backup root, optional cloud credentials |
 | 4. Site settings | `/install/site` | Active `setting` row (name, SEO, timezone, contact) |
-| 5. Mail | `/install/mail` | SMTP or log driver in `.env` |
-| 6. Administrator | `/install/admin` | First admin user; locks the installer |
+| 5. Central hub | `/install/central-hub` | Optional: connect to continental hub; import branding & lookup metadata |
+| 6. Mail | `/install/mail` | Microsoft Exchange (default), SMTP, or log driver; saved to `setting` table; test connection during install |
+| 7. Administrator | `/install/admin` | First admin user; locks the installer |
 
 ---
 

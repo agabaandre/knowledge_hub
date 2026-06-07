@@ -3,7 +3,7 @@
 @section('title', 'Storage')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 3 of 6</div>
+    <div class="step-badge text-muted mb-2">Step 3 of 7</div>
     <h2 class="h5 mb-3">File &amp; backup storage</h2>
     <p class="text-muted small">
         Publication and forum uploads are stored <strong>outside</strong> the application tree so they survive container rebuilds and deployments.

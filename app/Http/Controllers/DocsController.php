@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\File;
 
 class DocsController extends Controller
@@ -15,8 +16,18 @@ class DocsController extends Controller
     public function openApiJson(Request $request)
     {
         $path = storage_path('api-docs/api-docs.json');
-        if (!File::exists($path)) {
-            return response()->json(['message' => 'OpenAPI spec not found.'], 404);
+        if (! File::exists($path)) {
+            try {
+                Artisan::call('l5-swagger:generate');
+            } catch (\Throwable) {
+                // Fall through to 404 below.
+            }
+        }
+
+        if (! File::exists($path)) {
+            return response()->json([
+                'message' => 'OpenAPI spec not found. Run: php artisan l5-swagger:generate',
+            ], 404);
         }
 
         $raw = File::get($path);

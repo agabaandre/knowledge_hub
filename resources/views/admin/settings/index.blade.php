@@ -1860,8 +1860,8 @@
                         <div class="email-section-intro">
                             <i class="fa fa-info-circle"></i>
                             Choose the default sending method for system emails (password reset, notifications, reminders).
-                            <strong>.env values always take priority</strong> when set; database values below are used as fallback when an environment variable is empty.
-                            Exchange is the default method.
+                            Settings are saved to the database; saving clears obsolete mail overrides from <code>.env</code> so your changes take effect immediately.
+                            Set <code>EMAIL_DRIVER</code> in <code>.env</code> only when you need to lock the driver from this screen.
                         </div>
 
                         <label class="branding-field-label d-block">Default sending method</label>
@@ -1879,7 +1879,7 @@
                             <input type="hidden" name="email_driver" value="{{ $emailDriverDb ?: 'exchange' }}">
                             <p class="email-effective-hint mb-3">
                                 <span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>
-                                Active driver: <strong>{{ strtoupper($emailDriverEffective) }}</strong> (locked via <code>EMAIL_DRIVER</code> or <code>MAIL_MAILER</code> in .env)
+                                Active driver: <strong>{{ strtoupper($emailDriverEffective) }}</strong> (locked via <code>EMAIL_DRIVER</code> in .env)
                             </p>
                         @else
                             <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>

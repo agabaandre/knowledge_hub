@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\FederatedKnowledgeHub;
+use App\Services\FederatedHubLookupService;
 use App\Services\FederatedHubService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
@@ -17,12 +18,20 @@ class FederatedHubsController extends Controller
             ? FederatedKnowledgeHub::with('mappedCountry')->orderBy('name')->get()
             : collect();
 
+        $settings = function_exists('settings') ? settings() : null;
+
         return view('admin.federation.index', [
             'hubs' => $hubs,
             'localManifest' => $federation->localManifest(),
+            'lookupIndex' => app(FederatedHubLookupService::class)->lookupIndex(),
             'countries' => Country::orderBy('name')->get(),
             'federationToken' => $federation->federationToken(),
             'federationApiBase' => url('/api/federation'),
+            'centralHubUrl' => $settings->central_hub_url ?? env('CENTRAL_HUB_URL'),
+            'centralHubSiteId' => $settings->central_hub_site_id ?? null,
+            'centralHubConnectedAt' => $settings->central_hub_connected_at ?? null,
+            'centralMetadataSyncedAt' => $settings->central_metadata_synced_at ?? null,
+            'isCountryHub' => hub_admin_units_enabled(),
         ]);
     }
 
@@ -110,6 +119,49 @@ class FederatedHubsController extends Controller
 
             return redirect()->route('admin.federation.index')
                 ->with('alert-danger', 'Sync failed for "'.$hub->name.'": '.$e->getMessage());
+        }
+    }
+
+    public function testCentral(Request $request, FederatedHubLookupService $lookup)
+    {
+        $data = $request->validate([
+            'central_hub_url' => 'required|url|max:500',
+            'central_hub_api_token' => 'nullable|string|max:255',
+        ]);
+
+        $result = $lookup->testCentralConnection(
+            $data['central_hub_url'],
+            $data['central_hub_api_token'] ?: null
+        );
+
+        return response()->json($result);
+    }
+
+    public function syncFromCentral(Request $request, FederatedHubLookupService $lookup)
+    {
+        $data = $request->validate([
+            'central_hub_url' => 'required|url|max:500',
+            'central_hub_api_token' => 'nullable|string|max:255',
+            'import_branding' => 'nullable|boolean',
+            'import_metadata' => 'nullable|boolean',
+        ]);
+
+        try {
+            $summary = $lookup->importFromCentral(
+                $data['central_hub_url'],
+                $data['central_hub_api_token'] ?: null,
+                $request->boolean('import_branding', true),
+                $request->boolean('import_metadata', true)
+            );
+
+            $metaTotal = array_sum($summary['metadata'] ?? []);
+            $brandTotal = array_sum($summary['branding'] ?? []);
+
+            return redirect()->route('admin.federation.index')
+                ->with('alert-success', "Central hub sync complete: {$brandTotal} branding field(s), {$metaTotal} metadata row(s) imported.");
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.federation.index')
+                ->with('alert-danger', 'Central hub sync failed: '.$e->getMessage());
         }
     }
 }

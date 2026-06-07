@@ -32,6 +32,9 @@ use App\Http\Controllers\Api\FederatedHubApiController;
 // Publications Routes
 
 Route::prefix('federation')->group(function () {
+    Route::get('/lookup', [FederatedHubApiController::class, 'lookupIndex']);
+    Route::get('/lookup/settings', [FederatedHubApiController::class, 'lookupSettings']);
+    Route::get('/lookup/metadata', [FederatedHubApiController::class, 'lookupMetadata']);
     Route::get('/manifest', [FederatedHubApiController::class, 'manifest']);
     Route::get('/public/publications', [FederatedHubApiController::class, 'publicPublications']);
     Route::get('/public/forums', [FederatedHubApiController::class, 'publicForums']);

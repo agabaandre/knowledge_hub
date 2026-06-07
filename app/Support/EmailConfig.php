@@ -86,9 +86,6 @@ class EmailConfig
         if (self::isEnvLocked('EMAIL_DRIVER')) {
             return 'env';
         }
-        if (self::isEnvLocked('MAIL_MAILER') && in_array(env('MAIL_MAILER'), ['smtp', 'exchange'], true)) {
-            return 'env';
-        }
 
         $db = self::dbSettings();
         if ($db && ! empty($db->email_driver)) {
@@ -163,14 +160,16 @@ class EmailConfig
 
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $envLocked = self::isEnvLocked($meta['env_key']);
-            $source = $envLocked ? 'env' : (($dbValue !== null && $dbValue !== '') ? 'db' : 'default');
+            $hasEnvOverride = self::isEnvLocked($meta['env_key']);
+            $envLocked = $key === 'email_driver' && self::isEnvLocked('EMAIL_DRIVER');
+            $source = $hasEnvOverride ? 'env' : (($dbValue !== null && $dbValue !== '') ? 'db' : 'default');
             $effective = self::resolve($meta['env_key'], $meta['db_column'], $meta['default']);
 
             if ($key === 'email_driver') {
                 $effective = self::driver();
                 $source = self::driverSource();
                 $envLocked = $source === 'env';
+                $hasEnvOverride = self::isEnvLocked('MAIL_MAILER') || self::isEnvLocked('EMAIL_DRIVER');
             }
 
             $fields[$key] = [
@@ -179,6 +178,7 @@ class EmailConfig
                 'value' => $effective,
                 'db_value' => $dbValue,
                 'env_locked' => $envLocked,
+                'has_env_override' => $hasEnvOverride,
                 'source' => $source,
             ];
         }

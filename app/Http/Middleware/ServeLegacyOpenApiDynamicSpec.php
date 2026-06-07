@@ -7,22 +7,29 @@ use Closure;
 use Illuminate\Http\Request;
 
 /**
- * Serves the dynamic OpenAPI JSON for the legacy Swagger UI URL
- * `/docs/spec/api-docs.dynamic.json`.
+ * Serves the dynamic OpenAPI JSON before routing.
  *
- * That path sits under l5-swagger's `docs/spec/*` handling and can 404 or be
- * shadowed; this middleware runs before routing and fixes cached `/docs` pages.
+ * Swagger UI at `/docs` fetches `docs/openapi-dynamic.json`. That path must not
+ * live under l5-swagger's `docs/spec/*` routes (which shadow custom web routes when
+ * route cache or server rewrite order differs). This middleware also keeps the
+ * legacy alias `docs/spec/api-docs.dynamic.json` working.
  */
 class ServeLegacyOpenApiDynamicSpec
 {
+    /** @var array<int, string> */
+    private const DYNAMIC_SPEC_PATHS = [
+        'docs/openapi-dynamic.json',
+        'docs/spec/api-docs.dynamic.json',
+    ];
+
     public function handle(Request $request, Closure $next)
     {
-        if (!$request->isMethod('GET')) {
+        if (! $request->isMethod('GET')) {
             return $next($request);
         }
 
         $path = ltrim($request->path(), '/');
-        if ($path === 'docs/spec/api-docs.dynamic.json') {
+        if (in_array($path, self::DYNAMIC_SPEC_PATHS, true)) {
             return app(DocsController::class)->openApiJson($request);
         }
 

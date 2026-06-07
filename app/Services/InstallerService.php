@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\HubStorageSetting;
 use App\Models\Setting;
 use App\Models\User;
+use App\Support\EmailConfig;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -397,6 +398,30 @@ class InstallerService
     }
 
     /**
+     * @param  list<string>  $keys
+     */
+    public function clearEnvKeys(array $keys): void
+    {
+        $values = [];
+        foreach ($keys as $key) {
+            $values[$key] = '';
+        }
+        $this->writeEnvValues($values);
+    }
+
+    /**
+     * Remove mail overrides from .env so database settings in admin configure take effect.
+     */
+    public function clearMailEnvOverrides(): void
+    {
+        $this->clearEnvKeys(array_merge(
+            config('install.mail_env_keys', []),
+            config('install.exchange_env_keys', [])
+        ));
+        Artisan::call('config:clear');
+    }
+
+    /**
      * @param  array<string, mixed>  $db
      */
     public function configureDatabaseConnection(array $db): void
@@ -565,34 +590,69 @@ class InstallerService
     }
 
     /**
+     * @param  array<string, mixed>  $mail
+     */
+    public function saveMailSettings(array $mail): Setting
+    {
+        $driver = (string) ($mail['mail_mailer'] ?? 'exchange');
+        $setting = Setting::query()->where('status', 'active')->first()
+            ?? Setting::query()->orderBy('id')->first();
+
+        if (! $setting) {
+            throw new \RuntimeException('No site settings row found. Complete the site step first.');
+        }
+
+        $payload = [
+            'mail_from_address' => $mail['mail_from_address'] ?? 'noreply@localhost',
+            'mail_from_name' => $mail['mail_from_name'] ?? env('APP_NAME', 'Knowledge Hub'),
+        ];
+
+        if (Schema::hasColumn('setting', 'email_driver')) {
+            $payload['email_driver'] = $driver === 'log' ? 'exchange' : $driver;
+        }
+
+        if ($driver === 'smtp') {
+            $payload['mail_host'] = $mail['mail_host'] ?? '';
+            $payload['mail_port'] = (string) ($mail['mail_port'] ?? '587');
+            $payload['mail_username'] = $mail['mail_username'] ?? '';
+            $payload['mail_password'] = $mail['mail_password'] ?? '';
+            $encryption = $mail['mail_encryption'] ?? 'tls';
+            $payload['mail_encryption'] = in_array($encryption, ['tls', 'ssl', 'none'], true) ? $encryption : 'tls';
+        } elseif ($driver === 'exchange') {
+            $payload['exchange_tenant_id'] = $mail['exchange_tenant_id'] ?? '';
+            $payload['exchange_client_id'] = $mail['exchange_client_id'] ?? '';
+            $payload['exchange_client_secret'] = $mail['exchange_client_secret'] ?? '';
+            $payload['exchange_redirect_uri'] = $mail['exchange_redirect_uri'] ?? '';
+            $payload['exchange_scope'] = $mail['exchange_scope'] ?? 'https://graph.microsoft.com/.default';
+            $authMethod = $mail['exchange_auth_method'] ?? 'client_credentials';
+            $payload['exchange_auth_method'] = in_array($authMethod, ['client_credentials', 'authorization_code'], true)
+                ? $authMethod
+                : 'client_credentials';
+        }
+
+        $setting->forceFill($payload)->save();
+
+        $this->clearMailEnvOverrides();
+
+        if ($driver === 'log') {
+            $this->writeEnvValues(['MAIL_MAILER' => 'log']);
+        }
+
+        EmailConfig::clearCache();
+        Cache::forget('settings');
+        Artisan::call('config:clear');
+
+        return $setting;
+    }
+
+    /**
      * @param  array<string, string>  $mail
+     *
+     * @deprecated Use saveMailSettings() so values are stored in the database.
      */
     public function writeMailConfig(array $mail): void
     {
-        $driver = $mail['mail_mailer'] ?? 'log';
-        $values = [
-            'MAIL_MAILER' => $driver,
-            'MAIL_FROM_ADDRESS' => $mail['mail_from_address'] ?? 'noreply@localhost',
-            'MAIL_FROM_NAME' => $mail['mail_from_name'] ?? env('APP_NAME', 'Knowledge Hub'),
-        ];
-
-        if ($driver === 'smtp') {
-            $values['MAIL_HOST'] = $mail['mail_host'] ?? '';
-            $values['MAIL_PORT'] = (string) ($mail['mail_port'] ?? '587');
-            $values['MAIL_USERNAME'] = $mail['mail_username'] ?? '';
-            $values['MAIL_PASSWORD'] = $mail['mail_password'] ?? '';
-            $encryption = $mail['mail_encryption'] ?? 'tls';
-            $values['MAIL_ENCRYPTION'] = $encryption === 'none' ? '' : $encryption;
-        } elseif ($driver === 'log') {
-            $values['MAIL_HOST'] = '';
-            $values['MAIL_PORT'] = '';
-            $values['MAIL_USERNAME'] = '';
-            $values['MAIL_PASSWORD'] = '';
-            $values['MAIL_ENCRYPTION'] = '';
-        }
-
-        $this->writeEnvValues($values);
-        Artisan::call('config:clear');
+        $this->saveMailSettings($mail);
     }
 
     /**

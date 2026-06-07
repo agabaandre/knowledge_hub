@@ -43,6 +43,7 @@ class FederatedHubService
                 'name' => $region->region_name ?? $region->name ?? null,
             ] : null,
             'generated_at' => now()->toIso8601String(),
+            'lookup' => app(FederatedHubLookupService::class)->lookupIndex(),
         ];
     }
 

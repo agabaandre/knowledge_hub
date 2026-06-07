@@ -3,7 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Setting;
+use App\Services\FederatedHubLookupService;
 use App\Services\InstallerService;
+use App\Services\MailConfigTestService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -187,7 +189,87 @@ class InstallController extends Controller
 
         $request->session()->put('installer.site_ready', true);
 
-        return redirect()->route('install.mail')->with('status', 'Site settings saved.');
+        return redirect()->route('install.central')->with('status', 'Site settings saved.');
+    }
+
+    public function showCentralHub(Request $request): RedirectResponse|View
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        return view('install.central', [
+            'defaults' => [
+                'central_hub_url' => old('central_hub_url', env('CENTRAL_HUB_URL', 'https://khub.africacdc.org')),
+                'central_hub_api_token' => old('central_hub_api_token', env('CENTRAL_HUB_API_TOKEN', '')),
+            ],
+        ]);
+    }
+
+    public function testCentralHub(Request $request, FederatedHubLookupService $lookup)
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return response()->json(['ok' => false, 'error' => 'Complete site settings first.'], 422);
+        }
+
+        $data = $request->validate([
+            'central_hub_url' => 'required|url|max:500',
+            'central_hub_api_token' => 'nullable|string|max:255',
+        ]);
+
+        $result = $lookup->testCentralConnection(
+            $data['central_hub_url'],
+            $data['central_hub_api_token'] ?: null
+        );
+
+        return response()->json($result);
+    }
+
+    public function storeCentralHub(Request $request, FederatedHubLookupService $lookup): RedirectResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        if ($request->boolean('skip_central')) {
+            $request->session()->put('installer.central_ready', true);
+
+            return redirect()->route('install.mail')->with('status', 'Skipped central hub connection.');
+        }
+
+        $data = $request->validate([
+            'central_hub_url' => 'required|url|max:500',
+            'central_hub_api_token' => 'nullable|string|max:255',
+            'import_branding' => 'nullable|boolean',
+            'import_metadata' => 'nullable|boolean',
+        ]);
+
+        try {
+            $summary = $lookup->importFromCentral(
+                $data['central_hub_url'],
+                $data['central_hub_api_token'] ?: null,
+                $request->boolean('import_branding', true),
+                $request->boolean('import_metadata', true)
+            );
+
+            $this->installer->writeEnvValues([
+                'CENTRAL_HUB_URL' => rtrim($data['central_hub_url'], '/'),
+                'CENTRAL_HUB_API_TOKEN' => $data['central_hub_api_token'] ?? '',
+            ]);
+
+            $request->session()->put('installer.central_ready', true);
+            $request->session()->put('installer.central_import_summary', $summary);
+
+            $metaTotal = array_sum($summary['metadata'] ?? []);
+            $brandTotal = array_sum($summary['branding'] ?? []);
+
+            return redirect()->route('install.mail')->with(
+                'status',
+                'Connected to central hub. Imported '.$brandTotal.' branding field(s) and '.$metaTotal.' metadata row(s).'
+            );
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Central hub connection failed: '.$e->getMessage());
+        }
     }
 
     public function showMail(Request $request): RedirectResponse|View
@@ -196,18 +278,51 @@ class InstallController extends Controller
             return redirect()->route('install.site');
         }
 
+        $active = null;
+        try {
+            $active = Setting::query()->where('status', 'active')->first()
+                ?? Setting::query()->orderBy('id')->first();
+        } catch (\Throwable) {
+            $active = null;
+        }
+
+        $mailer = old('mail_mailer');
+        if ($mailer === null) {
+            $mailer = env('MAIL_MAILER') === 'log' ? 'log' : ($active?->email_driver ?? 'exchange');
+        }
+
         return view('install.mail', [
             'defaults' => [
-                'mail_mailer' => env('MAIL_MAILER', 'log'),
-                'mail_host' => env('MAIL_HOST', ''),
-                'mail_port' => env('MAIL_PORT', '587'),
-                'mail_username' => env('MAIL_USERNAME', ''),
-                'mail_password' => env('MAIL_PASSWORD', ''),
-                'mail_encryption' => env('MAIL_ENCRYPTION', 'tls') ?: 'none',
-                'mail_from_address' => env('MAIL_FROM_ADDRESS', 'noreply@localhost'),
-                'mail_from_name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Knowledge Hub')),
+                'mail_mailer' => $mailer,
+                'mail_host' => old('mail_host', $active?->mail_host ?? env('MAIL_HOST', '')),
+                'mail_port' => old('mail_port', $active?->mail_port ?? env('MAIL_PORT', '587')),
+                'mail_username' => old('mail_username', $active?->mail_username ?? env('MAIL_USERNAME', '')),
+                'mail_password' => old('mail_password', $active?->mail_password ?? env('MAIL_PASSWORD', '')),
+                'mail_encryption' => old('mail_encryption', $active?->mail_encryption ?? env('MAIL_ENCRYPTION', 'tls')) ?: 'none',
+                'mail_from_address' => old('mail_from_address', $active?->mail_from_address ?? env('MAIL_FROM_ADDRESS', 'noreply@localhost')),
+                'mail_from_name' => old('mail_from_name', $active?->mail_from_name ?? env('APP_NAME', 'Knowledge Hub')),
+                'exchange_tenant_id' => old('exchange_tenant_id', $active?->exchange_tenant_id ?? env('EXCHANGE_TENANT_ID', '')),
+                'exchange_client_id' => old('exchange_client_id', $active?->exchange_client_id ?? env('EXCHANGE_CLIENT_ID', '')),
+                'exchange_client_secret' => old('exchange_client_secret', $active?->exchange_client_secret ?? ''),
+                'exchange_auth_method' => old('exchange_auth_method', $active?->exchange_auth_method ?? env('EXCHANGE_AUTH_METHOD', 'client_credentials')),
+                'exchange_redirect_uri' => old('exchange_redirect_uri', $active?->exchange_redirect_uri ?? env('EXCHANGE_REDIRECT_URI', '')),
+                'exchange_scope' => old('exchange_scope', $active?->exchange_scope ?? env('EXCHANGE_SCOPE', 'https://graph.microsoft.com/.default')),
             ],
         ]);
+    }
+
+    public function testMail(Request $request, MailConfigTestService $mailTest): \Illuminate\Http\JsonResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return response()->json(['ok' => false, 'error' => 'Complete site settings first.'], 422);
+        }
+
+        $data = $this->validateMailInput($request);
+        $recipient = $request->input('test_email');
+
+        $result = $mailTest->testAndSend($data, is_string($recipient) ? $recipient : null);
+
+        return response()->json($result);
     }
 
     public function storeMail(Request $request): RedirectResponse
@@ -216,11 +331,30 @@ class InstallController extends Controller
             return redirect()->route('install.site');
         }
 
-        $driver = $request->input('mail_mailer', 'log');
+        $data = $this->validateMailInput($request);
+
+        try {
+            $this->installer->saveMailSettings($data);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Could not save mail settings: '.$e->getMessage());
+        }
+
+        $request->session()->put('installer.mail_ready', true);
+
+        return redirect()->route('install.admin')->with('status', 'Mail settings saved. You can change them later under Admin → Configure.');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function validateMailInput(Request $request): array
+    {
+        $driver = $request->input('mail_mailer', 'exchange');
         $rules = [
-            'mail_mailer' => 'required|in:log,smtp',
+            'mail_mailer' => 'required|in:log,smtp,exchange',
             'mail_from_address' => 'required|email|max:255',
             'mail_from_name' => 'required|string|max:255',
+            'test_email' => 'nullable|email|max:255',
         ];
 
         if ($driver === 'smtp') {
@@ -231,17 +365,16 @@ class InstallController extends Controller
             $rules['mail_encryption'] = 'required|in:tls,ssl,none';
         }
 
-        $data = $request->validate($rules);
-
-        try {
-            $this->installer->writeMailConfig($data);
-        } catch (\Throwable $e) {
-            return back()->withInput()->with('error', 'Could not save mail settings: '.$e->getMessage());
+        if ($driver === 'exchange') {
+            $rules['exchange_tenant_id'] = 'required|string|max:255';
+            $rules['exchange_client_id'] = 'required|string|max:255';
+            $rules['exchange_client_secret'] = 'required|string|max:2000';
+            $rules['exchange_auth_method'] = 'required|in:client_credentials,authorization_code';
+            $rules['exchange_redirect_uri'] = 'nullable|string|max:500';
+            $rules['exchange_scope'] = 'nullable|string|max:500';
         }
 
-        $request->session()->put('installer.mail_ready', true);
-
-        return redirect()->route('install.admin')->with('status', 'Mail settings saved to .env.');
+        return $request->validate($rules);
     }
 
     public function showAdmin(Request $request): RedirectResponse|View
@@ -274,7 +407,14 @@ class InstallController extends Controller
             return back()->withInput()->with('error', 'Could not create admin account: '.$e->getMessage());
         }
 
-        $request->session()->forget(['installer.database_ready', 'installer.storage_ready', 'installer.site_ready', 'installer.mail_ready']);
+        $request->session()->forget([
+            'installer.database_ready',
+            'installer.storage_ready',
+            'installer.site_ready',
+            'installer.central_ready',
+            'installer.central_import_summary',
+            'installer.mail_ready',
+        ]);
         $request->session()->put('install_show_complete', true);
 
         return redirect()->route('install.complete');
