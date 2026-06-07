@@ -195,7 +195,7 @@ Route::group(["prefix" => "records"], function () {
 });
 
 // Public Events
-Route::get('/events/{id}', [PublicEventsController::class, 'show'])->name('events.show');
+Route::get('/events/{id}', [PublicEventsController::class, 'show'])->name('public.events.show');
 
 Route::group(["prefix" => "authors"], function () {
     Route::get("/", [AuthorsController::class, 'index']);
@@ -704,7 +704,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
         Route::get("/delete", [AdminCoursesController::class, 'destroy']);
-        Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
+        Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('admin.courses.details');
     });
 });
 

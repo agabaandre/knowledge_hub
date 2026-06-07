@@ -45,7 +45,7 @@ class SeoDefaults
             $name === 'forums.thread' => "Forum thread and replies on {$site}.",
             $name === 'courses.details' => "Course overview, modules, and enrolment on {$site} learning.",
             str_starts_with($name, 'account.') => "Your {$site} account: profile, favourites, publications, forums, and communities.",
-            $name === 'events.show' => "Event details, dates, and registration information on {$site}.",
+            $name === 'public.events.show' => "Event details, dates, and registration information on {$site}.",
             $name === 'content-request' => "Request health content or a resource to be added to {$site}.",
             $name === 'content-request.track' => "Track the status of your content request to {$site}.",
             default => null,

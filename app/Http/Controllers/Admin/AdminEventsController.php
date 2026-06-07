@@ -100,6 +100,6 @@ class AdminEventsController extends Controller
         $event = $this->eventsRepo->find($id);
         $this->eventsRepo->delete($event);
 
-        return redirect()->route('events.index')->with('success', 'Event deleted successfully.');
+        return redirect()->route('admin.events.index')->with('success', 'Event deleted successfully.');
     }
 }

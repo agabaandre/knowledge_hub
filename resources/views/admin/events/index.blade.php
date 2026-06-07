@@ -61,7 +61,7 @@
                         <td>
                             <a href="{{ route('admin.events.edit', $ev->id) }}" class="btn btn-sm btn-outline-primary" title="Edit"><i class="fa fa-edit"></i></a>
                             <a href="{{ route('admin.events.show', $ev->id) }}" class="btn btn-sm btn-outline-secondary" title="Preview (Admin)"><i class="fa fa-eye"></i></a>
-                            <a href="{{ route('events.show', $ev->id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Web Preview"><i class="fa fa-external-link mr-1"></i>Web Preview</a>
+                            <a href="{{ route('public.events.show', $ev->id) }}" target="_blank" class="btn btn-sm btn-outline-info" title="Web Preview"><i class="fa fa-external-link mr-1"></i>Web Preview</a>
                             <form action="{{ route('admin.events.destroy', $ev->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Delete this event?')">
                                 @csrf
                                 @method('DELETE')
