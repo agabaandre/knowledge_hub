@@ -94,9 +94,15 @@ class AccountController extends Controller
             ->where('is_approved', 1)
             ->with('community')
             ->get()
-            ->pluck('community.community_name')
+            ->map(fn ($membership) => $membership->community)
             ->filter()
-            ->toArray();
+            ->map(fn ($community) => [
+                'id' => (int) $community->id,
+                'name' => (string) $community->community_name,
+                'url' => community_detail_url($community),
+            ])
+            ->values()
+            ->all();
         
         $data['stats'] = $stats;
         return view('account.mypublications', $data);

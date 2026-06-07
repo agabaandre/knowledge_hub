@@ -461,4 +461,207 @@
             text-align: center;
         }
     }
+
+    /* Mobile card layout for wide admin/account tables (class kh-table-mobile-cards) */
+    .kh-table-mobile-hint {
+        display: none;
+        font-size: 0.75rem;
+        color: var(--kh-table-muted);
+        margin-bottom: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+        .kh-table-mobile-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        table.kh-table-mobile-cards {
+            table-layout: auto !important;
+            width: 100% !important;
+            min-width: 900px;
+        }
+
+        table.kh-table-mobile-cards.kh-table-mobile-cards--compact {
+            min-width: 640px;
+        }
+
+        table.kh-table-mobile-cards.kh-table-mobile-cards--medium {
+            min-width: 960px;
+        }
+
+        table.kh-table-mobile-cards.kh-table-mobile-cards--wide {
+            min-width: 1200px;
+        }
+
+        table.kh-table-mobile-cards thead th {
+            white-space: nowrap !important;
+            word-break: normal !important;
+            overflow-wrap: normal !important;
+        }
+
+        table.kh-table-mobile-cards tbody td {
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .kh-table-mobile-hint {
+            display: block;
+        }
+
+        .kh-table-mobile-scroll .dataTables_wrapper,
+        .kh-table-mobile-scroll .dataTables_scroll,
+        .kh-table-mobile-scroll .dataTables_scrollBody,
+        .publication-table-wrap.kh-table-mobile-scroll .dataTables_wrapper,
+        .publication-table-wrap.kh-table-mobile-scroll .dataTables_scroll,
+        .publication-table-wrap.kh-table-mobile-scroll .dataTables_scrollBody {
+            overflow: visible !important;
+        }
+
+        table.kh-table-mobile-cards {
+            table-layout: auto !important;
+            width: 100% !important;
+            min-width: 0 !important;
+            border: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+        }
+
+        table.kh-table-mobile-cards colgroup {
+            display: none;
+        }
+
+        table.kh-table-mobile-cards thead {
+            display: none;
+        }
+
+        table.kh-table-mobile-cards tbody {
+            display: block;
+        }
+
+        table.kh-table-mobile-cards tbody tr {
+            display: block;
+            margin-bottom: 0.85rem;
+            padding: 0.85rem 0.9rem;
+            border: 1px solid var(--kh-table-border) !important;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+        }
+
+        table.kh-table-mobile-cards tbody tr.pub-row-featured,
+        table.kh-table-mobile-cards tbody tr.pub-row-inactive {
+            border-radius: 12px;
+        }
+
+        table.kh-table-mobile-cards tbody tr td {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 0.75rem;
+            border: none !important;
+            padding: 0.4rem 0 !important;
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+
+        table.kh-table-mobile-cards tbody tr td,
+        table.kh-table-mobile-cards tbody tr td * {
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+
+        table.kh-table-mobile-cards tbody tr td::before {
+            content: attr(data-label);
+            flex: 0 0 38%;
+            max-width: 38%;
+            font-size: 0.68rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--kh-table-muted);
+            line-height: 1.35;
+            padding-top: 0.15rem;
+        }
+
+        table.kh-table-mobile-cards tbody tr td > * {
+            flex: 1 1 auto;
+            min-width: 0;
+            text-align: right;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-hide {
+            display: none !important;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-primary {
+            display: block;
+            padding-bottom: 0.55rem !important;
+            margin-bottom: 0.35rem;
+            border-bottom: 1px solid #eef2f7 !important;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-primary::before {
+            display: none;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-primary > * {
+            text-align: left;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-select {
+            align-items: center;
+            padding-bottom: 0.5rem !important;
+            margin-bottom: 0.25rem;
+            border-bottom: 1px solid #eef2f7 !important;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-select > * {
+            text-align: left;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-actions::before {
+            margin-bottom: 0.25rem;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-actions .btn-group,
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-actions .pub-actions-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            gap: 0.35rem;
+            justify-content: stretch;
+        }
+
+        table.kh-table-mobile-cards tbody tr td.kh-mcard-actions .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        table.kh-table-mobile-cards .pub-title-link,
+        table.kh-table-mobile-cards .pub-desc-preview {
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+        }
+
+        .dataTables_wrapper .dataTables_length,
+        .dataTables_wrapper .dataTables_filter,
+        .dataTables_wrapper .dataTables_info,
+        .dataTables_wrapper .dataTables_paginate {
+            font-size: 0.8rem;
+        }
+
+        .dataTables_wrapper .dataTables_paginate .paginate_button {
+            padding: 0.25rem 0.55rem !important;
+        }
+    }
 </style>

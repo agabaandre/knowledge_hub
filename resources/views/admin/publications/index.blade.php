@@ -11,26 +11,19 @@
         .pub-state-swatch-featured { background:#ecfdf3; }
         .pub-state-swatch-inactive { background:#fef2f2; }
         #publicationTable_wrapper .dataTables_length label { margin-bottom: 0; }
-        #publicationTable_wrapper,
-        #publicationTable_wrapper .dataTables_scroll,
-        .publication-table-wrap {
-            overflow-x: visible;
-            max-width: 100%;
+        @media (min-width: 768px) {
+            #publicationTable .pub-col-checkbox { width: 2.5rem; min-width: 2.5rem; }
+            #publicationTable .pub-col-index { width: 3rem; min-width: 3rem; }
+            #publicationTable .pub-col-title { min-width: 160px; }
+            #publicationTable .pub-col-description { min-width: 140px; }
+            #publicationTable .pub-col-author { min-width: 100px; }
+            #publicationTable .pub-col-affiliation { min-width: 120px; }
+            #publicationTable .pub-col-member-state { min-width: 100px; }
+            #publicationTable .pub-col-status { min-width: 88px; }
+            #publicationTable .pub-col-date { min-width: 108px; white-space: nowrap; }
+            #publicationTable .pub-col-moderator { min-width: 120px; }
+            #publicationTable .pub-col-actions { min-width: 11.5rem; white-space: nowrap; vertical-align: middle; }
         }
-        #publicationTable_wrapper table.dataTable {
-            table-layout: fixed !important;
-        }
-        #publicationTable .pub-col-checkbox { width: 2.5rem; min-width: 2.5rem; }
-        #publicationTable .pub-col-index { width: 3rem; min-width: 3rem; }
-        #publicationTable .pub-col-title { width: 16%; }
-        #publicationTable .pub-col-description { width: 14%; }
-        #publicationTable .pub-col-author { width: 9%; }
-        #publicationTable .pub-col-affiliation { width: 14%; }
-        #publicationTable .pub-col-member-state { width: 8%; }
-        #publicationTable .pub-col-status { width: 7%; }
-        #publicationTable .pub-col-date { width: 8%; }
-        #publicationTable .pub-col-moderator { width: 10%; }
-        #publicationTable .pub-col-actions { width: 11.5rem; min-width: 11.5rem; }
         .pub-actions-group {
             display: inline-flex;
             flex-wrap: wrap;
@@ -234,11 +227,12 @@
                             <small class="text-muted">Select rows and an action in any order, then click Apply.</small>
                         </div>
 
-                        <div class="publication-table-wrap">
-                            <table id="publicationTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
+                        <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+                        <div class="publication-table-wrap kh-table-mobile-scroll">
+                            <table id="publicationTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-mobile-cards kh-table-mobile-cards--wide">
                                 <thead>
                                     <tr>
-                                        <th class="pub-col-checkbox">
+                                        <th class="pub-col-checkbox" data-mobile-label="Select">
                                             <input type="checkbox" id="selectAllPublications">
                                         </th>
                                         <th class="pub-col-index">#</th>
@@ -386,9 +380,9 @@ $(function () {
         ],
         columnDefs: [
             { targets: [0, 10], orderable: false },
-            { targets: 0, className: 'pub-col-checkbox text-center' },
-            { targets: 1, className: 'pub-col-index' },
-            { targets: 2, className: 'pub-col-title' },
+            { targets: 0, className: 'pub-col-checkbox kh-mcard-select text-center' },
+            { targets: 1, className: 'pub-col-index kh-mcard-hide' },
+            { targets: 2, className: 'pub-col-title kh-mcard-primary' },
             { targets: 3, className: 'pub-col-description' },
             { targets: 4, className: 'pub-col-author' },
             { targets: 5, className: 'pub-col-affiliation' },
@@ -396,7 +390,7 @@ $(function () {
             { targets: 7, className: 'pub-col-status' },
             { targets: 8, className: 'pub-col-date' },
             { targets: 9, className: 'pub-col-moderator' },
-            { targets: 10, className: 'pub-col-actions text-nowrap' }
+            { targets: 10, className: 'pub-col-actions kh-mcard-actions text-nowrap' }
         ],
         language: {
             processing: '<i class="fa fa-spinner fa-spin"></i> Loading publications...',

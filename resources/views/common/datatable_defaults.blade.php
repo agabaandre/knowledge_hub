@@ -27,6 +27,27 @@
 
         $.extend(true, $.fn.dataTable.defaults, window.khDataTableDefaults);
 
+        function applyKhTableMobileLabels(tableNode) {
+            var $table = $(tableNode);
+            if (!$table.hasClass('kh-table-mobile-cards')) {
+                return;
+            }
+
+            var labels = [];
+            $table.find('thead th').each(function () {
+                var custom = $(this).attr('data-mobile-label');
+                labels.push(custom || $(this).text().trim());
+            });
+
+            $table.find('tbody tr').each(function () {
+                $(this).find('td').each(function (i) {
+                    if (labels[i]) {
+                        $(this).attr('data-label', labels[i]);
+                    }
+                });
+            });
+        }
+
         $(document).on('init.dt draw.dt', function (_e, settings) {
             var api = new $.fn.dataTable.Api(settings);
             var $wrapper = $(api.table().container());
@@ -37,6 +58,8 @@
             if ($table.hasClass('kh-table-wrap-cells')) {
                 $table.removeClass('nowrap');
             }
+
+            applyKhTableMobileLabels($table);
 
             var $footer = $wrapper.find('.kh-dt-footer');
             if ($footer.length) {

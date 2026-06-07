@@ -10,11 +10,12 @@
     .af-card .card-body{padding:16px}
     #communities-table .badge-danger,
     .badge.badge-danger.badge-pill { background-color: #dc3545 !important; color: #fff !important; }
-    #communities-table_wrapper table.dataTable { table-layout: fixed !important; }
-    #communities-table .cop-col-index { width: 3rem; min-width: 3rem; }
-    #communities-table .cop-col-community { width: 22%; }
-    #communities-table .cop-col-description { width: 48%; }
-    #communities-table .cop-col-actions { width: 11rem; white-space: nowrap; vertical-align: middle; }
+    @media (min-width: 768px) {
+        #communities-table .cop-col-index { width: 3rem; min-width: 3rem; }
+        #communities-table .cop-col-community { min-width: 200px; }
+        #communities-table .cop-col-description { min-width: 280px; }
+        #communities-table .cop-col-actions { min-width: 11rem; white-space: nowrap; vertical-align: middle; }
+    }
  </style>
 @endsection
 
@@ -123,8 +124,9 @@
                 </div>
             </div>
 
-            <div class="publication-table-wrap">
-                <table id="communities-table" data-kh-datatable="custom" class="table table-striped table-hover table-bordered w-100 kh-table-wrap-cells">
+            <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+            <div class="publication-table-wrap kh-table-mobile-scroll">
+                <table id="communities-table" data-kh-datatable="custom" class="table table-striped table-hover table-bordered w-100 kh-table-mobile-cards kh-table-mobile-cards--compact">
                     <thead>
                         <tr>
                             <th class="cop-col-index">#</th>
@@ -181,10 +183,10 @@ $(function(){
             }
         },
         columns: [
-            { data: 'index', orderable: false, searchable: false, className: 'cop-col-index text-center' },
-            { data: 'community_name', orderable: true, className: 'cop-col-community' },
+            { data: 'index', orderable: false, searchable: false, className: 'cop-col-index kh-mcard-hide text-center' },
+            { data: 'community_name', orderable: true, className: 'cop-col-community kh-mcard-primary' },
             { data: 'description', orderable: true, className: 'cop-col-description' },
-            { data: 'actions', orderable: false, searchable: false, className: 'cop-col-actions text-center' }
+            { data: 'actions', orderable: false, searchable: false, className: 'cop-col-actions kh-mcard-actions text-center' }
         ],
         columnDefs: [
             { targets: [0, 3], orderable: false }

@@ -4,53 +4,200 @@
 @include('common.table')
 @include('admin.publications.partials.filter_styles')
 <style>
-    /* Stat card styles with colored backgrounds */
-    .stat-card {
-        border-radius: 8px;
-        padding: 0.75rem;
-        margin-bottom: 1rem;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
+    .my-pub-page {
+        --mp-green: {{ settings()->au_corporate_green ?? '#1A5632' }};
+        --mp-gold: {{ settings()->au_gold ?? '#B4A269' }};
+        --mp-red: {{ settings()->au_red ?? '#9F2241' }};
+        --mp-plum: {{ settings()->au_plum ?? '#522B39' }};
+        --mp-grey: {{ settings()->au_grey_text ?? '#58595B' }};
+    }
+    .my-pub-shell {
         border: none;
-        color: white !important;
-        min-height: auto;
+        border-radius: 16px;
+        box-shadow: 0 4px 24px rgba(15, 23, 42, 0.06);
+        overflow: hidden;
     }
-    .stat-card:hover {
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        transform: translateY(-2px);
+    .my-pub-shell > .card-header {
+        background: linear-gradient(135deg, #f8fafc 0%, #f0f7f4 100%);
+        border-bottom: 1px solid #e2e8f0;
+        padding: 1.25rem 1.5rem;
     }
-    .stat-card .stat-icon-wrapper {
+    .my-pub-shell .card-title {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin: 0;
+    }
+    .my-pub-shell__subtitle {
+        font-size: 0.875rem;
+        color: #64748b;
+        margin: 0.25rem 0 0;
+    }
+    .my-pub-quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-bottom: 1.25rem;
+    }
+    .my-pub-quick-links a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        padding: 0.45rem 0.85rem;
+        border-radius: 999px;
+        border: 1px solid #e2e8f0;
+        background: #fff;
+        color: #334155;
+        font-size: 0.8125rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    }
+    .my-pub-quick-links a:hover {
+        border-color: var(--mp-green);
+        color: var(--mp-green);
+        box-shadow: 0 2px 8px rgba(26, 86, 50, 0.08);
+        text-decoration: none;
+    }
+    .my-pub-section {
+        margin-bottom: 1.25rem;
+    }
+    .my-pub-section__title {
+        font-size: 0.78rem;
+        font-weight: 700;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: #64748b;
+        margin: 0 0 0.65rem;
+    }
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(132px, 1fr));
+        gap: 0.65rem;
+    }
+    .metric-card {
         display: flex;
         align-items: center;
-        justify-content: flex-start;
-        margin-bottom: 0.4rem;
+        gap: 0.65rem;
+        padding: 0.7rem 0.85rem;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        min-height: 0;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
     }
-    .stat-card .stat-icon {
-        width: 36px;
-        height: 36px;
-        border-radius: 8px;
+    .metric-card__icon {
+        width: 34px;
+        height: 34px;
+        border-radius: 10px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 0.95rem;
         flex-shrink: 0;
-        background: rgba(255, 255, 255, 0.2) !important;
-        color: white !important;
     }
-    .stat-card .stat-value {
-        font-size: 1.5rem;
-        font-weight: bold;
-        color: white !important;
-        margin-bottom: 0.15rem;
-        line-height: 1.2;
+    .metric-card__icon--green { background: #ecfdf3; color: var(--mp-green); }
+    .metric-card__icon--gold { background: #faf6eb; color: var(--mp-gold); }
+    .metric-card__icon--red { background: #fdf2f6; color: var(--mp-red); }
+    .metric-card__icon--grey { background: #f1f5f9; color: var(--mp-grey); }
+    .metric-card__icon--plum { background: #f6f0f3; color: var(--mp-plum); }
+    .metric-card__value {
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.1;
     }
-    .stat-card .stat-label {
-        font-size: 0.75rem;
-        color: rgba(255, 255, 255, 0.9) !important;
-        text-transform: uppercase;
+    .metric-card__label {
+        font-size: 0.72rem;
+        color: #64748b;
         font-weight: 500;
         line-height: 1.2;
+        margin-top: 0.1rem;
+    }
+    .community-panel {
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        padding: 1rem 1.1rem 1.1rem;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    }
+    .community-panel__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-bottom: 0.85rem;
+        flex-wrap: wrap;
+    }
+    .community-panel__head h6 {
+        margin: 0;
+        font-size: 0.95rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .community-panel__head p {
+        margin: 0.2rem 0 0;
+        font-size: 0.8rem;
+        color: #64748b;
+    }
+    .community-panel__count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 2rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        background: #ecfdf3;
+        color: var(--mp-green);
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .community-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 0.65rem;
+    }
+    .community-card {
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        padding: 0.75rem 0.9rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        background: #f8fafc;
+        color: #0f172a;
+        text-decoration: none;
+        transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .community-card:hover {
+        border-color: var(--mp-green);
+        background: #fff;
+        transform: translateY(-1px);
+        text-decoration: none;
+        color: var(--mp-green);
+    }
+    .community-card__icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--mp-green);
+        flex-shrink: 0;
+    }
+    .community-card__name {
+        font-size: 0.84rem;
+        font-weight: 600;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+    .community-card__meta {
+        font-size: 0.7rem;
+        color: #94a3b8;
+        margin-top: 0.15rem;
     }
     
     /* A4-like PDF Preview Modal Styles */
@@ -149,17 +296,14 @@
         }
     }
 
-    #my-publications_wrapper table.dataTable { table-layout: fixed !important; }
-    #my-publications .my-pub-col-index { width: 3rem; min-width: 3rem; }
-    #my-publications .my-pub-col-title { width: 18%; }
-    #my-publications .my-pub-col-description { width: 26%; }
-    #my-publications .my-pub-col-status { width: 8%; }
-    #my-publications .my-pub-col-views { width: 6rem; text-align: center; }
-    #my-publications .my-pub-col-created { width: 9%; }
-    #my-publications .my-pub-col-actions { width: 11rem; white-space: nowrap; vertical-align: middle; }
-    #my-publications .pub-title-link {
-        word-break: break-word;
-        overflow-wrap: anywhere;
+    @media (min-width: 768px) {
+        #my-publications .my-pub-col-index { width: 3rem; min-width: 3rem; }
+        #my-publications .my-pub-col-title { min-width: 160px; }
+        #my-publications .my-pub-col-description { min-width: 180px; }
+        #my-publications .my-pub-col-status { min-width: 88px; }
+        #my-publications .my-pub-col-views { min-width: 88px; text-align: center; }
+        #my-publications .my-pub-col-created { min-width: 108px; white-space: nowrap; }
+        #my-publications .my-pub-col-actions { min-width: 200px; white-space: nowrap; vertical-align: middle; }
     }
     .pub-desc-preview {
         font-size: 0.8125rem;
@@ -167,6 +311,16 @@
         color: var(--theme-color-primary, #119A48) !important;
         text-decoration: none !important;
         white-space: nowrap;
+    }
+    @media (max-width: 767.98px) {
+        .my-pub-page.row {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .my-pub-shell > .card-body {
+            padding-left: 0.85rem;
+            padding-right: 0.85rem;
+        }
     }
     .pub-desc-preview:hover { text-decoration: underline !important; }
     #pubDescriptionPreviewBody {
@@ -188,151 +342,113 @@
 @endsection
 
 @section('content')
-<div class="row px-3">
+<div class="row px-3 my-pub-page">
 
-	<div class="card col-lg-12">
-		<div class="card-header text-left">
-			<h3 class="card-title float-left">My Publications</h3>
-			<div class="float-right">
-				<a href="{{ route('account.publish') }}" class="btn btn-success">
-					<i class="fa fa-plus mr-1"></i> Create Publication
-				</a>
+	<div class="card col-lg-12 my-pub-shell">
+		<div class="card-header text-left d-flex flex-wrap align-items-center justify-content-between">
+			<div>
+				<h3 class="card-title">My Publications</h3>
+				<p class="my-pub-shell__subtitle">Track your contributions, engagement, and community memberships.</p>
 			</div>
-			<div class="clearfix"></div>
+			<a href="{{ route('account.publish') }}" class="btn btn-success mt-2 mt-md-0">
+				<i class="fa fa-plus mr-1"></i> Create Publication
+			</a>
 		</div>
 
-		<!-- Statistics Cards -->
-		<div class="card-body">
-			<!-- Action Buttons -->
-			<div class="row mb-4">
-				<div class="col-12">
-					<div class="d-flex flex-wrap" style="gap: 0.5rem;">
-						<a href="{{ route('account.my-discussions') }}" class="btn btn-au btn-sm">
-							<i class="fa fa-comment-dots mr-1"></i> My forum posts
-						</a>
-						<a href="{{ route('account.my-forums') }}" class="btn btn-au btn-sm">
-							<i class="fa fa-comments mr-1"></i> My Forums
-						</a>
-						<a href="{{ route('account.my-communities') }}" class="btn btn-au btn-sm">
-							<i class="fa fa-users mr-1"></i> My Communities
-						</a>
+		<div class="card-body pb-2">
+			<div class="my-pub-quick-links">
+				<a href="{{ route('account.my-discussions') }}"><i class="fa fa-comment-dots"></i> My forum posts</a>
+				<a href="{{ route('account.my-forums') }}"><i class="fa fa-comments"></i> My Forums</a>
+				<a href="{{ route('account.my-communities') }}"><i class="fa fa-users"></i> My Communities</a>
+			</div>
+
+			<div class="my-pub-section">
+				<h4 class="my-pub-section__title">Overview</h4>
+				<div class="metric-grid">
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-file-alt"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['total'] ?? 0) }}</div>
+							<div class="metric-card__label">Publications</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-check-circle"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['approved'] ?? 0) }}</div>
+							<div class="metric-card__label">Approved</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--gold"><i class="fa fa-clock"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['pending'] ?? 0) }}</div>
+							<div class="metric-card__label">Pending</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--red"><i class="fa fa-eye"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['total_views'] ?? 0) }}</div>
+							<div class="metric-card__label">Total views</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--grey"><i class="fa fa-comment-dots"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['forum_posts'] ?? 0) }}</div>
+							<div class="metric-card__label">Forum posts</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--plum"><i class="fa fa-reply"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['forum_comments'] ?? 0) }}</div>
+							<div class="metric-card__label">Comments</div>
+						</div>
+					</div>
+					<div class="metric-card">
+						<div class="metric-card__icon metric-card__icon--green"><i class="fa fa-chart-line"></i></div>
+						<div>
+							<div class="metric-card__value">{{ number_format($stats['forum_engagements'] ?? 0) }}</div>
+							<div class="metric-card__label">Engagements</div>
+						</div>
 					</div>
 				</div>
 			</div>
-			
-			<h5 class="mb-3"><i class="fa fa-file-alt mr-2"></i>Publications Statistics</h5>
-			<div class="row mb-3">
-				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_corporate_green ?? '#1A5632' }} 0%, {{ settings()->au_green ?? '#1A5632' }} 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-file-alt"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['total'] ?? 0) }}</div>
-						<div class="stat-label">Total Publications</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_green ?? '#1A5632' }} 0%, #0d7a3a 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-check-circle"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['approved'] ?? 0) }}</div>
-						<div class="stat-label">Approved</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_gold ?? '#B4A269' }} 0%, #9a884f 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-clock"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['pending'] ?? 0) }}</div>
-						<div class="stat-label">Pending</div>
-					</div>
-				</div>
-				<div class="col-md-3 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_red ?? '#9F2241' }} 0%, #7a1a33 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-eye"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['total_views'] ?? 0) }}</div>
-						<div class="stat-label">Total Views</div>
-					</div>
-				</div>
-			</div>
-			
-			<h5 class="mb-3 mt-3"><i class="fa fa-comments mr-2"></i>Forum Engagement Statistics</h5>
-			<div class="row mb-3">
-				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_grey_text ?? '#58595B' }} 0%, #464749 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-comment-dots"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['forum_posts'] ?? 0) }}</div>
-						<div class="stat-label">Forum Posts</div>
-					</div>
-				</div>
-				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_plum ?? '#522B39' }} 0%, #3d1f2a 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-reply"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['forum_comments'] ?? 0) }}</div>
-						<div class="stat-label">Forum Comments</div>
-					</div>
-				</div>
-				<div class="col-md-4 col-sm-6 mb-2">
-					<div class="stat-card" style="background: linear-gradient(135deg, {{ settings()->au_corporate_green ?? '#1A5632' }} 0%, {{ settings()->au_green ?? '#1A5632' }} 100%);">
-						<div class="stat-icon-wrapper">
-							<div class="stat-icon">
-								<i class="fa fa-chart-line"></i>
-							</div>
-						</div>
-						<div class="stat-value">{{ number_format($stats['forum_engagements'] ?? 0) }}</div>
-						<div class="stat-label">Total Engagements</div>
-					</div>
-				</div>
-			</div>
-			
+
 			@if(!empty($stats['communities']) && count($stats['communities']) > 0)
-			<h5 class="mb-3 mt-3"><i class="fa fa-users mr-2"></i>Communities of Practice</h5>
-			<div class="row mb-3">
-				<div class="col-12">
-					<div class="card" style="border-radius: 0.25rem; border: 1px solid #e0e0e0;">
-						<div class="card-body p-3">
-							<div class="d-flex align-items-center mb-2">
-								<i class="fa fa-users fa-lg text-primary mr-2"></i>
-								<div>
-									<h6 class="mb-0">You belong to <strong>{{ count($stats['communities']) }}</strong> {{ count($stats['communities']) == 1 ? 'Community' : 'Communities' }}</h6>
-									<small class="text-muted">Active member of the following Communities of Practice</small>
-								</div>
-							</div>
-							<div class="mt-2">
-								@foreach($stats['communities'] as $community)
-									<span class="badge badge-primary mr-1 mb-1" style="font-size: 0.8rem; padding: 0.4rem 0.8rem; border-radius: 0.25rem;">
-										<i class="fa fa-circle mr-1" style="font-size: 0.6rem;"></i>{{ $community }}
-									</span>
-								@endforeach
-							</div>
+			<div class="my-pub-section">
+				<h4 class="my-pub-section__title">Communities of Practice</h4>
+				<div class="community-panel">
+					<div class="community-panel__head">
+						<div>
+							<h6>Your memberships</h6>
+							<p>Communities where you are an approved member.</p>
 						</div>
+						<span class="community-panel__count">{{ count($stats['communities']) }}</span>
+					</div>
+					<div class="community-grid">
+						@foreach($stats['communities'] as $community)
+							@php
+								$communityName = is_array($community) ? ($community['name'] ?? '') : (string) $community;
+								$communityUrl = is_array($community) ? ($community['url'] ?? route('account.my-communities')) : route('account.my-communities');
+							@endphp
+							<a href="{{ $communityUrl }}" class="community-card">
+								<span class="community-card__icon"><i class="fa fa-users"></i></span>
+								<span>
+									<span class="community-card__name">{{ $communityName }}</span>
+									<span class="community-card__meta">View community</span>
+								</span>
+							</a>
+						@endforeach
 					</div>
 				</div>
 			</div>
 			@endif
 		</div>
-	
-		<div class="card-body text-left">
+
+		<div class="card-body text-left pt-3 border-top">
             @php
                 $hasActiveMyPubFilters = request()->filled('search.title')
                     || request()->filled('search.description')
@@ -392,8 +508,9 @@
                 </div>
             </div>
 
-            <div class="publication-table-wrap">
-                <table id="my-publications" data-kh-datatable="custom" class="table table-striped table-bordered align-middle w-100 kh-table-wrap-cells">
+            <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Publication rows are shown as cards on small screens.</p>
+            <div class="publication-table-wrap kh-table-mobile-scroll">
+                <table id="my-publications" data-kh-datatable="custom" class="table table-striped table-bordered align-middle w-100 kh-table-mobile-cards kh-table-mobile-cards--medium">
                     <thead>
                         <tr>
                             <th class="my-pub-col-index">#</th>
@@ -488,13 +605,13 @@ $(function(){
       }
     },
     columns: [
-      { data: 'index', orderable: false, searchable: false, className: 'my-pub-col-index text-center' },
-      { data: 'title', orderable: true, className: 'my-pub-col-title' },
+      { data: 'index', orderable: false, searchable: false, className: 'my-pub-col-index kh-mcard-hide text-center' },
+      { data: 'title', orderable: true, className: 'my-pub-col-title kh-mcard-primary' },
       { data: 'description', orderable: true, className: 'my-pub-col-description' },
       { data: 'status', orderable: true, searchable: false, className: 'my-pub-col-status' },
       { data: 'views', orderable: true, searchable: false, className: 'my-pub-col-views text-center' },
       { data: 'created_at', orderable: true, searchable: false, className: 'my-pub-col-created' },
-      { data: 'actions', orderable: false, searchable: false, className: 'my-pub-col-actions text-center' }
+      { data: 'actions', orderable: false, searchable: false, className: 'my-pub-col-actions kh-mcard-actions text-center' }
     ],
     columnDefs: [
       { targets: [0, 6], orderable: false }
@@ -503,7 +620,7 @@ $(function(){
       processing: '<i class="fa fa-spinner fa-spin"></i> Loading publications...',
       emptyTable: 'No publications match your filters.',
       zeroRecords: 'No matching publications found.'
-    }
+    },
   });
 
   $('#filterMyPubTitle, #filterMyPubDescription').on('input', scheduleMyPublicationsFilterReload);

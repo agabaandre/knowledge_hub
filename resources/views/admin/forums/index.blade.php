@@ -27,14 +27,15 @@
         color: #0f172a;
         line-height: 1.2;
     }
-    #forumsTable_wrapper table.dataTable { table-layout: fixed !important; }
-    #forumsTable .forum-col-index { width: 3rem; min-width: 3rem; }
-    #forumsTable .forum-col-title { width: 18%; }
-    #forumsTable .forum-col-description { width: 22%; }
-    #forumsTable .forum-col-author { width: 10%; }
-    #forumsTable .forum-col-created { width: 9%; }
-    #forumsTable .forum-col-moderator { width: 14%; }
-    #forumsTable .forum-col-actions { width: 11rem; min-width: 11rem; }
+    @media (min-width: 768px) {
+        #forumsTable .forum-col-index { width: 3rem; min-width: 3rem; }
+        #forumsTable .forum-col-title { min-width: 160px; }
+        #forumsTable .forum-col-description { min-width: 180px; }
+        #forumsTable .forum-col-author { min-width: 100px; }
+        #forumsTable .forum-col-created { min-width: 100px; white-space: nowrap; }
+        #forumsTable .forum-col-moderator { min-width: 140px; }
+        #forumsTable .forum-col-actions { min-width: 11rem; white-space: nowrap; vertical-align: middle; }
+    }
     .pub-actions-group { display: inline-flex; flex-wrap: wrap; gap: 4px; }
     .pub-actions-group .btn { padding: 0.25rem 0.45rem; }
 </style>
@@ -131,8 +132,9 @@
                 @if(session('success'))<div class="alert alert-success">{{ session('success') }}</div>@endif
                 @if(session('error'))<div class="alert alert-danger">{{ session('error') }}</div>@endif
 
-                <div class="publication-table-wrap">
-                    <table id="forumsTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-wrap-cells">
+                <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+                <div class="publication-table-wrap kh-table-mobile-scroll">
+                    <table id="forumsTable" data-kh-datatable="custom" class="table table-striped table-bordered table-hover w-100 kh-table-mobile-cards kh-table-mobile-cards--medium">
                         <thead>
                             <tr>
                                 <th class="forum-col-index">#</th>
@@ -197,13 +199,13 @@ $(function () {
             }
         },
         columns: [
-            { data: 'index', orderable: false, searchable: false, className: 'forum-col-index text-center' },
-            { data: 'title', orderable: true, className: 'forum-col-title' },
+            { data: 'index', orderable: false, searchable: false, className: 'forum-col-index kh-mcard-hide text-center' },
+            { data: 'title', orderable: true, className: 'forum-col-title kh-mcard-primary' },
             { data: 'description', orderable: true, className: 'forum-col-description' },
             { data: 'author', orderable: false, className: 'forum-col-author' },
             { data: 'created_at', orderable: true, className: 'forum-col-created' },
             { data: 'moderator', orderable: false, className: 'forum-col-moderator' },
-            { data: 'actions', orderable: false, searchable: false, className: 'forum-col-actions text-nowrap' }
+            { data: 'actions', orderable: false, searchable: false, className: 'forum-col-actions kh-mcard-actions text-nowrap' }
         ],
         columnDefs: [
             { targets: [0, 6], orderable: false }

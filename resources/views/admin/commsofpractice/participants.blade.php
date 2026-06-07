@@ -82,22 +82,24 @@
             gap: 0.5rem;
             margin-bottom: 0.75rem;
         }
-        #participants-table_wrapper table.dataTable,
-        #pending-participants-table_wrapper table.dataTable { table-layout: fixed !important; }
-        #participants-table .part-col-index,
-        #pending-participants-table .part-col-index { width: 3rem; min-width: 3rem; }
-        #participants-table .part-col-name { width: 12%; }
-        #participants-table .part-col-contact,
-        #pending-participants-table .part-col-contact { width: 14%; }
-        #participants-table .part-col-title { width: 10%; }
-        #participants-table .part-col-org { width: 11%; }
-        #participants-table .part-col-geo,
-        #pending-participants-table .part-col-geo { width: 9%; }
-        #participants-table .part-col-pub,
-        #participants-table .part-col-forum { width: 5rem; text-align: center; }
-        #participants-table .part-col-badges { width: 11%; }
-        #participants-table .part-col-communities,
-        #pending-participants-table .part-col-community { width: 18%; min-width: 180px; }
+        @media (min-width: 768px) {
+            #participants-table .part-col-index,
+            #pending-participants-table .part-col-index { width: 3rem; min-width: 3rem; }
+            #participants-table .part-col-name,
+            #pending-participants-table .part-col-name { min-width: 140px; }
+            #participants-table .part-col-contact,
+            #pending-participants-table .part-col-contact { min-width: 140px; }
+            #participants-table .part-col-title { min-width: 100px; }
+            #participants-table .part-col-org { min-width: 120px; }
+            #participants-table .part-col-geo,
+            #pending-participants-table .part-col-geo { min-width: 100px; }
+            #participants-table .part-col-pub,
+            #participants-table .part-col-forum { min-width: 5rem; text-align: center; }
+            #participants-table .part-col-badges { min-width: 100px; }
+            #participants-table .part-col-communities,
+            #pending-participants-table .part-col-community { min-width: 180px; }
+            #pending-participants-table .part-col-actions { min-width: 7rem; text-align: center; }
+        }
         .cop-community-list,
         .cop-community-list-modal {
             padding-left: 1.2rem;
@@ -127,7 +129,6 @@
             vertical-align: middle !important;
             padding: 12px 8px !important;
         }
-        #pending-participants-table .part-col-actions { width: 7rem; text-align: center; }
         #pending-participants-table .cop-pending-checkbox-wrap {
             display: inline-flex;
             align-items: center;
@@ -294,11 +295,12 @@
                         <i class="fa fa-times mr-1"></i> Reject selected
                     </button>
                 </div>
-                <div class="publication-table-wrap">
-                    <table id="pending-participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
+                <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+                <div class="publication-table-wrap kh-table-mobile-scroll">
+                    <table id="pending-participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-mobile-cards kh-table-mobile-cards--medium">
                         <thead>
                             <tr>
-                                <th class="part-col-select">
+                                <th class="part-col-select" data-mobile-label="Select">
                                     <span class="cop-pending-checkbox-wrap">
                                         <input type="checkbox" id="pendingSelectAll" class="cop-pending-checkbox" aria-label="Select all pending">
                                     </span>
@@ -328,8 +330,9 @@
         </div>
         <div class="card-body">
             <p class="text-muted small mb-3">Approved members appear once. Up to five communities are shown per member; click <strong>+ N more</strong> to preview the full numbered list.</p>
-            <div class="publication-table-wrap">
-                <table id="participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-wrap-cells">
+            <p class="kh-table-mobile-hint"><i class="fa fa-mobile-alt mr-1"></i> Rows are shown as cards on small screens.</p>
+            <div class="publication-table-wrap kh-table-mobile-scroll">
+                <table id="participants-table" data-kh-datatable="custom" class="table table-bordered table-striped table-hover w-100 kh-table-mobile-cards kh-table-mobile-cards--wide">
                     <thead>
                         <tr>
                             <th class="part-col-index">#</th>
@@ -467,14 +470,14 @@ $(function () {
             }
         },
         columns: [
-            { data: 'select', orderable: false, searchable: false, className: 'part-col-select' },
-            { data: 'index', orderable: false, searchable: false, className: 'part-col-index text-center' },
-            { data: 'name', orderable: false, className: 'part-col-name' },
+            { data: 'select', orderable: false, searchable: false, className: 'part-col-select kh-mcard-select' },
+            { data: 'index', orderable: false, searchable: false, className: 'part-col-index kh-mcard-hide text-center' },
+            { data: 'name', orderable: false, className: 'part-col-name kh-mcard-primary' },
             { data: 'contact', orderable: false, className: 'part-col-contact' },
             { data: 'community', orderable: false, className: 'part-col-community' },
             { data: 'geography', orderable: false, className: 'part-col-geo' },
             { data: 'requested', orderable: false },
-            { data: 'actions', orderable: false, searchable: false, className: 'part-col-actions text-center' }
+            { data: 'actions', orderable: false, searchable: false, className: 'part-col-actions kh-mcard-actions text-center' }
         ],
         language: {
             processing: '<i class="fa fa-spinner fa-spin"></i> Loading pending requests...',
@@ -500,8 +503,8 @@ $(function () {
             }
         },
         columns: [
-            { data: 'index', orderable: false, searchable: false, className: 'part-col-index text-center' },
-            { data: 'name', orderable: true, className: 'part-col-name' },
+            { data: 'index', orderable: false, searchable: false, className: 'part-col-index kh-mcard-hide text-center' },
+            { data: 'name', orderable: true, className: 'part-col-name kh-mcard-primary' },
             { data: 'contact', orderable: true, className: 'part-col-contact' },
             { data: 'title', orderable: true, className: 'part-col-title' },
             { data: 'organisation', orderable: true, className: 'part-col-org' },
