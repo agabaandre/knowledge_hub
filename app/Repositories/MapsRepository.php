@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Models\MapDefinition;
 use App\Models\Setting;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
 
@@ -158,41 +159,155 @@ class MapsRepository
         return (bool) $record->delete();
     }
 
-    public function saveAssignments(Request $request): void
+    public function assignmentState(): array
     {
-        $settings = Setting::query()->where('status', 'active')->first()
-            ?? Setting::query()->first();
+        $row = $this->mapSettingsRow();
+        $definitions = map_all_definitions();
+        $configDefault = (string) config('maps.default_version_id', 'africa-sadr-topo-2.3.3');
+        $defaultMapId = $configDefault;
+        $formDefaultMapId = $configDefault;
+        $viewAssignments = [];
+        $formViewAssignments = [];
+        $showAdminUnitsMap = false;
+        $hasDefaultColumn = Schema::hasColumn('setting', 'africa_map_version');
+        $hasViewColumn = Schema::hasColumn('setting', 'africa_map_view_versions');
+        $hasAdminUnitsColumn = Schema::hasColumn('setting', 'show_admin_units_map');
+        $columnsReady = $hasDefaultColumn;
 
-        if (! $settings) {
-            return;
+        if ($row) {
+            if ($hasDefaultColumn && ! empty($row->africa_map_version)) {
+                $candidate = trim((string) $row->africa_map_version);
+                $formDefaultMapId = $candidate;
+                if (isset($definitions[$candidate])) {
+                    $defaultMapId = $candidate;
+                }
+            }
+
+            if ($hasViewColumn && is_string($row->africa_map_view_versions)) {
+                $decoded = json_decode($row->africa_map_view_versions, true);
+                if (is_array($decoded)) {
+                    foreach ($decoded as $context => $mapId) {
+                        if (! is_string($mapId) || trim($mapId) === '') {
+                            continue;
+                        }
+                        $mapId = trim($mapId);
+                        $formViewAssignments[$context] = $mapId;
+                        if (isset($definitions[$mapId])) {
+                            $viewAssignments[$context] = $mapId;
+                        }
+                    }
+                }
+            }
+
+            if ($hasAdminUnitsColumn) {
+                $showAdminUnitsMap = (bool) $row->show_admin_units_map;
+            }
+        }
+
+        if (! isset($definitions[$defaultMapId])) {
+            $defaultMapId = $configDefault;
+        }
+
+        return [
+            'defaultMapId' => $formDefaultMapId,
+            'resolvedDefaultMapId' => $defaultMapId,
+            'viewAssignments' => $formViewAssignments,
+            'resolvedViewAssignments' => $viewAssignments,
+            'showAdminUnitsMap' => $showAdminUnitsMap,
+            'columnsReady' => $columnsReady,
+            'missingColumns' => array_values(array_filter([
+                ! $hasDefaultColumn ? 'africa_map_version' : null,
+                ! $hasViewColumn ? 'africa_map_view_versions' : null,
+                ! $hasAdminUnitsColumn ? 'show_admin_units_map' : null,
+            ])),
+            'settingsRowId' => $row->id ?? null,
+            'settingsRowTheme' => isset($row->site_theme) ? trim((string) $row->site_theme) : null,
+            'rawDefaultMapId' => $row->africa_map_version ?? null,
+            'rawViewVersions' => $row->africa_map_view_versions ?? null,
+        ];
+    }
+
+    /**
+     * Resolve which setting row holds map preferences (active row, or any row that has saved map data).
+     */
+    public function mapSettingsRow(): ?object
+    {
+        if (! Schema::hasTable('setting')) {
+            return null;
+        }
+
+        $active = DB::table('setting')->where('status', 'active')->first();
+
+        if ($active && Schema::hasColumn('setting', 'africa_map_version') && ! empty($active->africa_map_version)) {
+            return $active;
         }
 
         if (Schema::hasColumn('setting', 'africa_map_version')) {
-            $versionId = trim((string) $request->input('default_map_id', ''));
-            $allowed = array_keys(map_all_definitions());
-            $settings->africa_map_version = in_array($versionId, $allowed, true)
-                ? $versionId
-                : (string) config('maps.default_version_id', 'africa-sadr-topo-2.3.3');
+            $withMaps = DB::table('setting')
+                ->whereNotNull('africa_map_version')
+                ->where('africa_map_version', '!=', '')
+                ->orderByDesc('id')
+                ->first();
+            if ($withMaps) {
+                return $withMaps;
+            }
         }
+
+        return $active ?? DB::table('setting')->orderByDesc('id')->first();
+    }
+
+    public function activeSettingRow(): ?Setting
+    {
+        $row = $this->mapSettingsRow();
+        if (! $row) {
+            return null;
+        }
+
+        return Setting::query()->find($row->id);
+    }
+
+    public function saveAssignments(Request $request): bool
+    {
+        if (! Schema::hasColumn('setting', 'africa_map_version')) {
+            return false;
+        }
+
+        if (! DB::table('setting')->exists()) {
+            return false;
+        }
+
+        $definitions = map_all_definitions();
+        $versionId = trim((string) $request->input('default_map_id', ''));
+        $payload = [
+            'africa_map_version' => isset($definitions[$versionId])
+                ? $versionId
+                : (string) config('maps.default_version_id', 'africa-sadr-topo-2.3.3'),
+        ];
 
         if (Schema::hasColumn('setting', 'africa_map_view_versions')) {
             $viewVersions = [];
             foreach (array_keys(map_view_context_labels()) as $context) {
                 $selected = trim((string) $request->input('view_map_'.$context, ''));
-                if ($selected !== '') {
+                if ($selected !== '' && isset($definitions[$selected])) {
                     $viewVersions[$context] = $selected;
                 }
             }
-            $settings->africa_map_view_versions = $viewVersions === []
+            $payload['africa_map_view_versions'] = $viewVersions === []
                 ? null
                 : json_encode($viewVersions);
         }
 
         if (Schema::hasColumn('setting', 'show_admin_units_map')) {
-            $settings->show_admin_units_map = $request->boolean('show_admin_units_map');
+            $payload['show_admin_units_map'] = $request->boolean('show_admin_units_map') ? 1 : 0;
         }
 
-        $settings->save();
-        cache()->forget('settings');
+        // Sync map prefs onto every setting row (default + per-theme rows).
+        $updated = DB::table('setting')->update($payload);
+
+        if ($updated >= 0) {
+            clear_settings_cache();
+        }
+
+        return $updated >= 0;
     }
 }

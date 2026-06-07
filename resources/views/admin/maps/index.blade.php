@@ -3,7 +3,17 @@
 @section('content')
 <div class="container-fluid py-3">
     @if(session('message'))
-        <div class="alert alert-{{ session('status') === 'success' ? 'success' : 'warning' }}">{{ session('message') }}</div>
+        <div class="alert alert-{{ session('status') === 'success' ? 'success' : 'danger' }}">{{ session('message') }}</div>
+    @endif
+
+    @if(empty($mapColumnsReady))
+        <div class="alert alert-warning">
+            Map preference columns are missing from the database
+            @if(!empty($missingMapColumns))
+                (<code>{{ implode('</code>, <code>', $missingMapColumns) }}</code>)
+            @endif
+            . On the server run <code>php artisan migrate</code>, then reload this page and save again.
+        </div>
     @endif
 
     <div class="card shadow-sm mb-4">
@@ -24,11 +34,14 @@
             <div class="card shadow-sm h-100">
                 <div class="card-header"><strong>View assignments</strong></div>
                 <div class="card-body">
-                    <form method="post" action="{{ route('admin.maps.assignments') }}">
+                    <form method="post" action="{{ route('admin.maps.assignments') }}" id="mapAssignmentsForm">
                         @csrf
                         <div class="mb-3">
                             <label class="form-label">Default map</label>
-                            <select name="default_map_id" class="form-control">
+                            <select name="default_map_id" class="form-control no-select2">
+                                @if($defaultMapId !== '' && empty($definitions[$defaultMapId]))
+                                    <option value="{{ $defaultMapId }}" selected>Saved: {{ $defaultMapId }} (missing definition)</option>
+                                @endif
                                 @foreach($definitions as $id => $definition)
                                     <option value="{{ $id }}" {{ $defaultMapId === $id ? 'selected' : '' }}>
                                         {{ $definition['label'] ?? $id }}
@@ -40,10 +53,14 @@
                         @foreach($viewContexts as $contextKey => $contextLabel)
                             <div class="mb-3">
                                 <label class="form-label">{{ $contextLabel }}</label>
-                                <select name="view_map_{{ $contextKey }}" class="form-control">
-                                    <option value="">Use default</option>
+                                <select name="view_map_{{ $contextKey }}" class="form-control no-select2">
+                                    @php $selectedViewMap = $viewAssignments[$contextKey] ?? ''; @endphp
+                                    <option value="" {{ $selectedViewMap === '' ? 'selected' : '' }}>Use default</option>
+                                    @if($selectedViewMap !== '' && empty($definitions[$selectedViewMap]))
+                                        <option value="{{ $selectedViewMap }}" selected>Saved: {{ $selectedViewMap }} (missing definition)</option>
+                                    @endif
                                     @foreach($definitions as $id => $definition)
-                                        <option value="{{ $id }}" {{ ($viewAssignments[$contextKey] ?? '') === $id ? 'selected' : '' }}>
+                                        <option value="{{ $id }}" {{ $selectedViewMap === $id ? 'selected' : '' }}>
                                             {{ $definition['label'] ?? $id }}
                                         </option>
                                     @endforeach
@@ -56,6 +73,18 @@
                         </div>
                         <button type="submit" class="btn btn-primary btn-sm">Save assignments</button>
                     </form>
+
+                    @if(!empty($mapSettingsDebug['rawDefault']))
+                    <div class="mt-3 p-2 bg-light rounded small text-muted">
+                        Saved in database: default <code>{{ $mapSettingsDebug['rawDefault'] }}</code>
+                        @if(!empty($mapSettingsDebug['rawViews']))
+                            · views <code>{{ $mapSettingsDebug['rawViews'] }}</code>
+                        @endif
+                        @if(!empty($mapSettingsDebug['rowId']))
+                            · setting row #{{ $mapSettingsDebug['rowId'] }}
+                        @endif
+                    </div>
+                    @endif
                 </div>
             </div>
         </div>

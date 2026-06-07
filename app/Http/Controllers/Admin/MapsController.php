@@ -19,6 +19,7 @@ class MapsController extends Controller
     {
         $definitions = map_all_definitions();
         $managed = $this->mapsRepository->managedDefinitions();
+        $assignments = session('mapAssignments') ?: $this->mapsRepository->assignmentState();
 
         return view('admin.maps.index', [
             'definitions' => $definitions,
@@ -27,9 +28,17 @@ class MapsController extends Controller
             'topologyPresets' => map_topology_presets(),
             'joinOptions' => map_join_options(),
             'viewContexts' => map_view_context_labels(),
-            'defaultMapId' => africa_map_active_version_id(),
-            'viewAssignments' => map_view_versions_from_settings(),
-            'showAdminUnitsMap' => show_admin_units_map_enabled(),
+            'defaultMapId' => $assignments['defaultMapId'],
+            'viewAssignments' => $assignments['viewAssignments'],
+            'showAdminUnitsMap' => $assignments['showAdminUnitsMap'],
+            'mapColumnsReady' => $assignments['columnsReady'],
+            'missingMapColumns' => $assignments['missingColumns'] ?? [],
+            'mapSettingsDebug' => [
+                'rowId' => $assignments['settingsRowId'] ?? null,
+                'rowTheme' => $assignments['settingsRowTheme'] ?? null,
+                'rawDefault' => $assignments['rawDefaultMapId'] ?? null,
+                'rawViews' => $assignments['rawViewVersions'] ?? null,
+            ],
             'topologyVersion' => config('maps.topology_version', '2.3.3'),
         ]);
     }
@@ -90,12 +99,22 @@ class MapsController extends Controller
 
     public function saveAssignments(Request $request)
     {
-        $this->mapsRepository->saveAssignments($request);
+        $saved = $this->mapsRepository->saveAssignments($request);
+
+        if (! $saved) {
+            return redirect()
+                ->route('admin.maps.index')
+                ->with('message', 'Map preferences could not be saved. Run database migrations on this server (php artisan migrate), then try again.')
+                ->with('status', 'failure');
+        }
+
+        $assignments = $this->mapsRepository->assignmentState();
 
         return redirect()
             ->route('admin.maps.index')
             ->with('message', 'Map assignments updated.')
-            ->with('status', 'success');
+            ->with('status', 'success')
+            ->with('mapAssignments', $assignments);
     }
 
     public function preview(Request $request, ?string $slug = null)

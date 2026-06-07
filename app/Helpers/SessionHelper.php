@@ -102,6 +102,9 @@ if(!function_exists('clear_settings_cache')){
                 cache()->forget('theme_settings_'.$themeKey);
             }
         }
+        if (function_exists('settings')) {
+            settings(true);
+        }
     }
 }
 
