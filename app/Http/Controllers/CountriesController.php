@@ -50,10 +50,7 @@ class CountriesController extends Controller
 
         $data['map_indicators'] = $this->dashRepo->get_published_map_indicators();
         $data['continental_indicators'] = $this->dashRepo->get_continental_indicator_summaries();
-        $defaultKpiId = (int) ($data['map_indicators']->first()->id ?? 0);
-        $data['initial_map_data'] = $defaultKpiId > 0
-            ? $this->dashRepo->get_indicator_map_values($defaultKpiId, null)
-            : null;
+        $data['initial_map_data'] = $this->dashRepo->get_member_state_map_values(0, null, 'frontend_countries');
         $data['regions_json'] = $data['regions']->map(fn ($r) => [
             'id' => (int) $r->id,
             'name' => $r->region_name,
@@ -67,11 +64,7 @@ class CountriesController extends Controller
         $kpiId = (int) $request->input('kpi_id', 0);
         $regionId = $request->filled('region_id') ? (int) $request->input('region_id') : null;
 
-        if ($kpiId <= 0) {
-            return response()->json(['error' => 'Indicator required'], 422);
-        }
-
-        $mapData = $this->dashRepo->get_indicator_map_values($kpiId, $regionId);
+        $mapData = $this->dashRepo->get_member_state_map_values($kpiId, $regionId, 'frontend_countries');
 
         return response()->json([
             'map' => $mapData,

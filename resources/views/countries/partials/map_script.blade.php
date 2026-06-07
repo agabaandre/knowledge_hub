@@ -12,6 +12,17 @@
     var currentRegionId = null;
     var currentKpiId = parseInt(document.getElementById('mapIndicatorSelect')?.value || '0', 10);
 
+    function isPublicationsMap(payload) {
+        return !payload || parseInt(payload.kpi_id, 10) === 0;
+    }
+
+    function mapCreditsText(payload) {
+        if (isPublicationsMap(payload)) {
+            return KhAfricaMap.creditsPrefix() + ' · Knowledge Hub publications';
+        }
+        return KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)';
+    }
+
     function formatLegendValue(value, mapPayload) {
         if (value === null || value === undefined || !isFinite(value)) {
             return '—';
@@ -201,16 +212,19 @@
                 max: mapPayload.max,
                 height: 520,
                 title: null,
-                seriesName: mapPayload.kpi_name || 'Indicator',
-                credits: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
+                seriesName: mapPayload.kpi_name || 'Publications by country',
+                credits: mapCreditsText(mapPayload),
                 tooltip: {
                     useHTML: true,
                     formatter: function () {
                         var p = this.point;
-                        return '<b>' + (p.country_name || p.name || '') + '</b><br/>'
-                            + (p.display_value || p.value)
-                            + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>'
-                            + '<br/><span style="color:#1A5632;font-size:11px">Click for country profile</span>';
+                        var html = '<b>' + (p.country_name || p.name || '') + '</b><br/>'
+                            + (p.display_value || p.value);
+                        if (!isPublicationsMap(mapPayload) && p.period) {
+                            html += '<br/><span style="color:#64748b">Period: ' + p.period + '</span>';
+                        }
+                        html += '<br/><span style="color:#1A5632;font-size:11px">Click for country profile</span>';
+                        return html;
                     }
                 },
                 point: {
@@ -263,9 +277,7 @@
             }
         }
         fetchScopeSummaries(currentRegionId);
-        if (currentKpiId > 0) {
-            fetchMapData(currentKpiId, currentRegionId);
-        }
+        fetchMapData(currentKpiId, currentRegionId);
     }
 
     function setIndicator(kpiId) {
@@ -273,9 +285,7 @@
         var select = document.getElementById('mapIndicatorSelect');
         if (select) select.value = String(currentKpiId);
         setActiveIndicatorButton(currentKpiId);
-        if (currentKpiId > 0) {
-            fetchMapData(currentKpiId, currentRegionId);
-        }
+        fetchMapData(currentKpiId, currentRegionId);
     }
 
     window.CountriesMap = { setRegion: setRegion, setIndicator: setIndicator };
@@ -306,10 +316,8 @@
             });
         }
 
-        @if(!empty($initial_map_data))
         renderMap(@json($initial_map_data));
         setActiveIndicatorButton({{ (int) ($initial_map_data['kpi_id'] ?? 0) }});
-        @endif
     }
 
     window.__khMapModuleUrl = '{{ asset('assets/plugins/highcharts/modules/map.js') }}';

@@ -209,6 +209,73 @@ class AreasRepository{
     }
 
     /**
+     * Choropleth: approved public publications per member state (default hub map metric).
+     */
+    public function get_publications_map_values(?int $regionId = null, ?string $mapContext = 'frontend_countries'): array
+    {
+        $countryQuery = Country::query()
+            ->where('region_id', '>', 0)
+            ->whereNotNull('iso_code')
+            ->where('iso_code', '!=', '');
+
+        if ($regionId) {
+            $countryQuery->where('region_id', $regionId);
+        }
+
+        $countries = $countryQuery->get(['id', 'name', 'iso_code', 'iso3_code', 'slug', 'region_id']);
+
+        $publicationCounts = DB::table('publication_countries as pc')
+            ->join('publication as p', 'p.id', '=', 'pc.publication_id')
+            ->where('p.is_version', 0)
+            ->where('p.is_admin_only_access', 0)
+            ->where('p.is_active', 'Active')
+            ->where('p.is_approved', 1)
+            ->groupBy('pc.country_id')
+            ->select('pc.country_id', DB::raw('COUNT(DISTINCT pc.publication_id) as c'))
+            ->pluck('c', 'country_id')
+            ->mapWithKeys(fn ($v, $k) => [(int) $k => (int) $v]);
+
+        $points = [];
+        $numericValues = [];
+
+        foreach ($countries as $country) {
+            $countryId = (int) $country->id;
+            $value = (int) ($publicationCounts->get($countryId, 0));
+            $numericValues[] = $value;
+
+            $points[] = map_point_from_country($country, [
+                'country_id' => $countryId,
+                'name' => $country->name,
+                'value' => $value,
+                'display_value' => number_format($value).' publication'.($value === 1 ? '' : 's'),
+                'unit_plain' => 'publications',
+                'detail_url' => country_detail_url($country),
+            ], $mapContext);
+        }
+
+        $aggregateValue = array_sum($numericValues);
+        $countriesWithData = count(array_filter($numericValues, fn ($v) => $v > 0));
+
+        return [
+            'kpi_id' => 0,
+            'kpi_name' => 'Publications by country',
+            'unit_label' => 'publications',
+            'aggregation' => 'sum',
+            'aggregation_label' => 'Total publications',
+            'country_count' => $countriesWithData,
+            'aggregate' => [
+                'value' => number_format($aggregateValue),
+                'unit_plain' => 'publications',
+                'type' => 'count',
+                'value_with_unit' => number_format($aggregateValue).' publications',
+            ],
+            'points' => map_expand_choropleth_points($points),
+            'min' => $numericValues === [] ? null : min($numericValues),
+            'max' => $numericValues === [] ? null : max($numericValues),
+        ];
+    }
+
+    /**
      * Member states (country.region_id set) with publication, forum, and user enrolment aggregates for API consumers.
      *
      * @return list<array<string, mixed>>

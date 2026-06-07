@@ -435,6 +435,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         });
     }
 
+    function isPublicationsMap(payload) {
+        return !payload || parseInt(payload.kpi_id, 10) === 0;
+    }
+
     function renderKpiMap(mapPayload) {
         var mapContainer = document.getElementById('admin-africa-map');
         if (!mapContainer || !mapPayload) return;
@@ -445,7 +449,11 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         if (kpiControls) kpiControls.style.display = 'flex';
         if (chips) chips.style.display = 'block';
         var periodLabel = document.getElementById('visitsMapPeriodLabel');
-        if (periodLabel) periodLabel.textContent = 'Indicator data from Our World in Data (CC BY 4.0).';
+        if (periodLabel) {
+            periodLabel.textContent = isPublicationsMap(mapPayload)
+                ? 'Publication counts from the Knowledge Hub catalogue.'
+                : 'Indicator data from Our World in Data (CC BY 4.0).';
+        }
         var scopeName = 'Africa (all member states)';
         if (adminKpiRegionId && window.__adminMapRegions) {
             var region = window.__adminMapRegions.find(function (r) { return r.id === adminKpiRegionId; });
@@ -477,12 +485,18 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                     max: mapPayload.max,
                     title: mapPayload.kpi_name || 'Indicator value',
                     seriesName: mapPayload.kpi_name || 'Indicator value',
-                    credits: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
+                    credits: isPublicationsMap(mapPayload)
+                        ? KhAfricaMap.creditsPrefix() + ' · Knowledge Hub publications'
+                        : KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
                     tooltip: {
                         useHTML: true,
                         formatter: function () {
                             var p = this.point;
-                            return '<b>' + (p.country_name || p.name || '') + '</b><br/>' + (p.display_value || p.value) + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>';
+                            var html = '<b>' + (p.country_name || p.name || '') + '</b><br/>' + (p.display_value || p.value);
+                            if (!isPublicationsMap(mapPayload) && p.period) {
+                                html += '<br/><span style="color:#64748b">Period: ' + p.period + '</span>';
+                            }
+                            return html;
                         }
                     }
                 });
@@ -515,8 +529,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 if (mode === 'visits') renderVisitsMap(lastChartData);
                 else {
                     var kpiId = parseInt((document.getElementById('adminMapIndicatorSelect') || {}).value || '0', 10);
-                    if (kpiId > 0) fetchAdminKpiMap(kpiId, adminKpiRegionId);
-                    else if (window.__adminInitialKpiMap) renderKpiMap(window.__adminInitialKpiMap);
+                    fetchAdminKpiMap(kpiId, adminKpiRegionId);
                 }
             };
         });
@@ -538,7 +551,7 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 adminKpiRegionId = this.value ? parseInt(this.value, 10) : null;
                 if (adminMapMode === 'indicators') {
                     var kpiId = parseInt((document.getElementById('adminMapIndicatorSelect') || {}).value || '0', 10);
-                    if (kpiId > 0) fetchAdminKpiMap(kpiId, adminKpiRegionId);
+                    fetchAdminKpiMap(kpiId, adminKpiRegionId);
                 }
             });
         }

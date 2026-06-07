@@ -17,6 +17,10 @@
         return KhAfricaMap.ensureMapModule(window.__rccMapModuleUrl);
     }
 
+    function isPublicationsMap(payload) {
+        return !payload || parseInt(payload.kpi_id, 10) === 0;
+    }
+
     function renderMap(mapPayload) {
         var container = document.getElementById('rccMapChart');
         if (!container || !mapPayload || !mapPayload.points || !mapPayload.points.length) {
@@ -42,12 +46,18 @@
                 height: 460,
                 title: mapSeriesName,
                 seriesName: mapSeriesName,
-                credits: KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)',
+                credits: isPublicationsMap(mapPayload)
+                    ? KhAfricaMap.creditsPrefix() + ' · Knowledge Hub publications'
+                    : KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)',
                 tooltip: {
                     useHTML: true,
                     formatter: function () {
                         var p = this.point;
-                        return '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
+                        var html = '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
+                        if (!isPublicationsMap(mapPayload) && p.period) {
+                            html += '<br/><span style="color:#64748b">Period: ' + escapeHtml(p.period) + '</span>';
+                        }
+                        return html;
                     }
                 }
             });

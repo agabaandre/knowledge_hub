@@ -26,16 +26,12 @@ class MetricsController extends Controller
         $cache = MetricsCache::store();
         $ttl = MetricsCache::ttl('map_context');
         $indicators = $this->graphsRepository->get_published_map_indicators();
-        $defaultKpiId = (int) ($indicators->first()->id ?? 0);
 
-        $initialKpiMap = null;
-        if ($defaultKpiId > 0) {
-            $initialKpiMap = $cache->remember(
-                'metrics_initial_kpi_map_'.$defaultKpiId,
-                $ttl,
-                fn () => $this->graphsRepository->get_indicator_map_values($defaultKpiId, null)
-            );
-        }
+        $initialKpiMap = $cache->remember(
+            'metrics_initial_publications_map',
+            $ttl,
+            fn () => $this->graphsRepository->get_member_state_map_values(0, null, 'admin_metrics')
+        );
 
         $continentalIndicators = $cache->remember(
             'metrics_continental_indicators',

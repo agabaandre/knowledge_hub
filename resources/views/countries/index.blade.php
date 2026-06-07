@@ -630,18 +630,17 @@
             <!-- Map Section -->
             <div class="col-lg-8 col-md-12 mb-4">
                 <div class="map-container-wrapper">
-                    <h3><i class="fa fa-map me-2"></i>Indicator Map</h3>
+                    <h3><i class="fa fa-map me-2"></i>Member State Map</h3>
                     <div class="map-controls">
                         <div class="map-control-group">
-                            <label for="mapIndicatorSelect">Indicator</label>
+                            <label for="mapIndicatorSelect">Map metric</label>
                             <select id="mapIndicatorSelect" class="search-input" style="padding-left:0.85rem;">
-                                @forelse($map_indicators as $indicator)
+                                <option value="0" @if(($initial_map_data['kpi_id'] ?? 0) == 0) selected @endif>Publications by country</option>
+                                @foreach($map_indicators as $indicator)
                                     <option value="{{ $indicator->id }}" @if(($initial_map_data['kpi_id'] ?? null) == $indicator->id) selected @endif>
                                         {{ $indicator->name }}
                                     </option>
-                                @empty
-                                    <option value="">No published indicators</option>
-                                @endforelse
+                                @endforeach
                             </select>
                         </div>
                         <div class="map-control-group" style="flex:0 0 auto; min-width:140px;">
@@ -662,9 +661,7 @@
                     </div>
                     <div id="mapScopeSummary" class="map-scope-summary"></div>
                     <div id="countriesMapChart">
-                        @if($map_indicators->isEmpty())
-                            <div class="text-muted text-center p-5">Publish KPI indicators to enable the interactive map.</div>
-                        @endif
+                        <div class="map-loading text-center p-5 text-muted"><i class="fa fa-spinner fa-spin me-2"></i>Loading map…</div>
                     </div>
                     <div class="map-legend" aria-hidden="false">
                         <div class="map-legend__title" id="mapLegendTitle">Indicator scale</div>
@@ -819,7 +816,6 @@
 
     });
 </script>
-@if($map_indicators->isNotEmpty())
-    @include('countries.partials.map_script')
-@endif
+@include('partials.maps.highcharts_core')
+@include('countries.partials.map_script')
 @endsection

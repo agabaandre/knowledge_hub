@@ -2,8 +2,7 @@
 @extends('layouts.plain')
 
 @section('styles')
-
-
+<link rel="stylesheet" href="{{ asset('assets/plugins/highcharts/css/highcharts.css') }}"/>
 @endsection
 @section('content')      	
 <!-- ======================= Administrative Units ======================== -->
@@ -38,5 +37,6 @@
 <!-- ======================= Administrative Units ======================== -->
 @endsection
 @section('scripts')
+@include('partials.maps.highcharts_core')
 @include('adminunits.partials.map_script')
 @endsection

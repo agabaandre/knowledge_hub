@@ -220,7 +220,7 @@
                 <div>
                     <label for="rccIndicator">Indicator</label>
                     <select name="kpi_id" id="rccIndicator" class="form-control select2">
-                        <option value="">All published indicators</option>
+                        <option value="0" @if(empty($filter['kpi_id']) || (int) ($filter['kpi_id'] ?? 0) === 0) selected @endif>Publications by country</option>
                         @foreach($indicators as $indicator)
                             <option value="{{ $indicator->id }}" data-subject="{{ $indicator->subject_area }}" @if(!empty($filter['kpi_id']) && (int) $filter['kpi_id'] === (int) $indicator->id) selected @endif>{{ $indicator->name }}</option>
                         @endforeach

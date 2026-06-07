@@ -266,11 +266,10 @@
                         <div>
                             <label for="adminMapIndicatorSelect">Indicator</label>
                             <select id="adminMapIndicatorSelect">
-                                @forelse($mapIndicators as $indicator)
+                                <option value="0" @if(($initialKpiMap['kpi_id'] ?? 0) == 0) selected @endif>Publications by country</option>
+                                @foreach($mapIndicators as $indicator)
                                     <option value="{{ $indicator->id }}" @if(($initialKpiMap['kpi_id'] ?? null) == $indicator->id) selected @endif>{{ $indicator->name }}</option>
-                                @empty
-                                    <option value="">No published indicators</option>
-                                @endforelse
+                                @endforeach
                             </select>
                         </div>
                         <div>

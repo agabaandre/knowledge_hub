@@ -638,6 +638,18 @@ class GraphsRepository extends SharedRepo{
     }
 
     /**
+     * Member-state choropleth: publications (kpi_id 0) or a published OWID indicator.
+     */
+    public function get_member_state_map_values(int $kpiId, ?int $regionId = null, ?string $mapContext = 'frontend_countries'): array
+    {
+        if ($kpiId === 0) {
+            return app(AreasRepository::class)->get_publications_map_values($regionId, $mapContext);
+        }
+
+        return $this->get_indicator_map_values($kpiId, $regionId);
+    }
+
+    /**
      * Choropleth data for one indicator, optionally scoped to a region.
      */
     public function get_indicator_map_values(int $kpiId, ?int $regionId = null): array
@@ -828,8 +840,8 @@ class GraphsRepository extends SharedRepo{
             'kpi_id' => $kpiId,
         ], fn ($v) => $v !== null && $v !== '');
 
-        $mapKpiId = $kpiId ?: (int) ($this->get_published_map_indicators()->first()->id ?? 0);
-        $map = $mapKpiId > 0 ? $this->get_indicator_map_values($mapKpiId, $regionId) : null;
+        $mapKpiId = $kpiId ?? 0;
+        $map = $this->get_member_state_map_values($mapKpiId, $regionId, 'admin_rcc');
 
         $chartFilter = $kpiFilter;
         if ($countryId) {
