@@ -43,7 +43,7 @@
             return KhAfricaMap.load();
         }).then(function (mapAsset) {
             if (mapChart) { mapChart.destroy(); mapChart = null; }
-            var joinBy = KhAfricaMap.joinByPairs();
+            var joinBy = KhAfricaMap.joinKey();
             var mapData = mapPayload.points.map(function (p) {
                 return KhAfricaMap.mapPoint(p);
             });

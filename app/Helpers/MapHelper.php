@@ -553,7 +553,6 @@ if (! function_exists('map_settings_for_js')) {
             'joinBy' => $config['join_by'],
             'isoProperty' => $config['iso_property'] ?? $config['join_by'],
             'scope' => $config['scope'] ?? 'custom',
-            'joinByPairs' => map_highcharts_join_by($context),
         ];
     }
 }

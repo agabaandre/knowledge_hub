@@ -17,17 +17,6 @@
         return settings.joinBy || settings.isoProperty || 'iso-a3';
     }
 
-    function joinByPairs() {
-        if (Array.isArray(settings.joinByPairs) && settings.joinByPairs.length) {
-            return settings.joinByPairs;
-        }
-        var key = joinKey();
-        if (key === 'hc-key') {
-            return [['hc-key', 'hc-key'], ['iso-a3', 'iso-a3']];
-        }
-        return [['iso-a3', 'iso-a3'], ['hc-key', 'hc-key']];
-    }
-
     function isoProperty() {
         return settings.isoProperty || joinKey();
     }
@@ -168,11 +157,14 @@
         if (settings.type === 'topojson_url' || settings.type === 'geojson_url') {
             return mapData;
         }
-        return settings.key || mapData;
+        return settings.key;
     }
 
     function seriesMapData(mapData) {
-        return undefined;
+        if (settings.type === 'topojson_url' || settings.type === 'geojson_url') {
+            return undefined;
+        }
+        return mapData;
     }
 
     function creditsPrefix() {
@@ -205,7 +197,7 @@
                 name: chartOptions.seriesName || 'Value',
                 mapData: seriesMapData(mapAsset),
                 data: seriesData,
-                joinBy: joinByPairs(),
+                joinBy: joinKey(),
                 dataLabels: dataLabels(),
                 tooltip: chartOptions.tooltip || {}
             }]
@@ -219,7 +211,6 @@
         load: load,
         dataLabels: dataLabels,
         joinKey: joinKey,
-        joinByPairs: joinByPairs,
         isoProperty: isoProperty,
         mapPoint: mapPoint,
         fusionSeriesData: fusionSeriesData,

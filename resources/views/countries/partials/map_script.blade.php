@@ -200,7 +200,7 @@
                 mapChart = null;
             }
 
-            var joinBy = KhAfricaMap.joinByPairs();
+            var joinBy = KhAfricaMap.joinKey();
             var seriesData = (mapPayload.points || []).map(function (p) {
                 return KhAfricaMap.mapPoint({
                     'iso-a3': p['iso-a3'],
