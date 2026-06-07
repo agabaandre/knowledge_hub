@@ -34,6 +34,7 @@
     sourceId = null;
     var titleEl = document.getElementById('pdf-chat-doc-title');
     if (titleEl) titleEl.textContent = (typeof docTitle === 'string' && docTitle) ? docTitle : (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Document');
+    setupWelcomeForMode(pdfChatAssistantMode === 'forum' ? 'forum' : (pdfChatAssistantMode === 'chatpdf' ? 'chatpdf' : 'publication'));
     var modalEl = document.getElementById('pdf-chat-modal');
     if (!modalEl) {
       if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
@@ -71,6 +72,7 @@
         ? threadTitle
         : (typeof pdfChatDocumentTitle !== 'undefined' ? pdfChatDocumentTitle : 'Forum thread');
     }
+    setupWelcomeForMode('forum');
     var modalEl = document.getElementById('pdf-chat-modal');
     if (!modalEl) {
       if (typeof loadPdfChatSession === 'function') loadPdfChatSession();
@@ -138,21 +140,144 @@
     return document.getElementById('pdf-chat-messages');
   }
 
+  function scrollEl() {
+    return document.getElementById('pdf-chat-scroll');
+  }
+
+  function welcomeEl() {
+    return document.getElementById('pdf-chat-welcome');
+  }
+
+  function suggestionsEl() {
+    return document.getElementById('pdf-chat-suggestions');
+  }
+
+  function scrollChatToBottom() {
+    var sc = scrollEl();
+    if (sc) sc.scrollTop = sc.scrollHeight;
+  }
+
+  function setWelcomeVisible(visible) {
+    var w = welcomeEl();
+    var s = suggestionsEl();
+    if (w) {
+      w.classList.toggle('is-hidden', !visible);
+      w.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    }
+    if (s) {
+      s.classList.toggle('is-hidden', !visible);
+    }
+  }
+
+  function updateModeBadge(mode) {
+    var badge = document.getElementById('pdf-chat-mode-badge');
+    var icon = document.getElementById('pdf-chat-doc-icon');
+    var hint = document.getElementById('pdf-chat-doc-hint');
+    if (!badge) return;
+    badge.classList.remove('forum', 'publication');
+    if (icon) icon.classList.remove('is-forum', 'is-resource');
+    if (mode === 'forum') {
+      badge.textContent = 'Forum thread';
+      badge.classList.add('forum');
+      if (icon) { icon.classList.add('is-forum'); icon.innerHTML = '<i class="fa fa-comments"></i>'; }
+      if (hint) hint.textContent = 'Summaries and answers are drawn from this discussion thread only.';
+    } else if (mode === 'publication') {
+      badge.textContent = 'Resource context';
+      badge.classList.add('publication');
+      if (icon) { icon.classList.add('is-resource'); icon.innerHTML = '<i class="fa fa-book-open"></i>'; }
+      if (hint) hint.textContent = 'Answers combine the title, description, and extracted text from this resource.';
+    } else {
+      badge.textContent = 'PDF document';
+      if (icon) icon.innerHTML = '<i class="fa fa-file-pdf"></i>';
+      if (hint) hint.textContent = 'Answers are grounded in the PDF attached to this resource.';
+    }
+  }
+
+  function welcomeCopyForMode(mode) {
+    if (mode === 'forum') {
+      return {
+        text: 'Ask for a thread summary, clarifications, or follow-up questions. Khub AI uses only what appears in this discussion.',
+        tips: [
+          'Request a concise summary of the main arguments.',
+          'Ask what questions or gaps remain in the thread.',
+          'Follow up to explore a specific comment in more detail.'
+        ],
+        prompts: ['Summarize this discussion', 'What are the main points raised?', 'What questions remain open?']
+      };
+    }
+    if (mode === 'publication') {
+      return {
+        text: 'Explore this resource with natural-language questions. Khub AI uses the title, description, and available document text.',
+        tips: [
+          'Request an executive summary of the resource.',
+          'Ask about recommendations, findings, or definitions.',
+          'Use follow-ups to drill into a specific theme.'
+        ],
+        prompts: ['Give me an overview', 'What are the key takeaways?', 'Summarize the main recommendations']
+      };
+    }
+    return {
+      text: 'Chat directly with the PDF document. Ask for summaries, section explanations, or targeted questions.',
+      tips: [
+        'Start with a high-level summary of the document.',
+        'Ask about specific sections, figures, or data points.',
+        'Request bullet-point highlights for quick reading.'
+      ],
+      prompts: ['Summarize this document', 'What are the main findings?', 'List the key recommendations']
+    };
+  }
+
+  function renderSuggestions(prompts) {
+    var container = suggestionsEl();
+    if (!container) return;
+    container.innerHTML = '';
+    (prompts || []).forEach(function (text) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'khub-ai-suggestion';
+      btn.textContent = text;
+      btn.addEventListener('click', function () {
+        var input = document.getElementById('pdf-chat-input');
+        if (input) input.value = text;
+        sendMessage();
+      });
+      container.appendChild(btn);
+    });
+  }
+
+  function setupWelcomeForMode(mode) {
+    var copy = welcomeCopyForMode(mode);
+    var textEl = document.getElementById('pdf-chat-welcome-text');
+    var tipsEl = document.getElementById('pdf-chat-welcome-tips');
+    if (textEl) textEl.textContent = copy.text;
+    if (tipsEl) {
+      tipsEl.innerHTML = copy.tips.map(function (t) { return '<li>' + escapeHtml(t) + '</li>'; }).join('');
+    }
+    renderSuggestions(copy.prompts);
+    updateModeBadge(mode);
+  }
+
   function appendMessage(role, content, isStreamingPlaceholder) {
+    setWelcomeVisible(false);
+    var row = document.createElement('div');
+    row.className = 'pdf-chat-msg-row ' + role;
     var el = document.createElement('div');
     el.className = 'pdf-chat-msg ' + role;
     var label = role === 'user' ? 'You' : 'Khub AI';
+    var avatarIcon = role === 'user' ? '<i class="fa fa-user"></i>' : '<i class="fa-solid fa-microchip"></i>';
     var contentHtml = isStreamingPlaceholder ? '' : (role === 'assistant' ? formatAssistantReply(content) : escapeHtml(content));
     var showExportOnResponse = role === 'assistant' && content && !isStreamingPlaceholder;
     var actionsHtml = showExportOnResponse
       ? '<div class="pdf-chat-msg-actions"><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-pdf" title="Download as PDF"><i class="fa fa-file-pdf"></i> PDF</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-export-word" title="Export as Word"><i class="fa fa-file-word"></i> Word</button><button type="button" class="btn btn-outline-secondary btn-sm pdf-chat-share-msg" title="Share"><i class="fa fa-share-alt"></i> Share</button></div>'
       : '';
-    el.innerHTML = '<div class="role-label">' + escapeHtml(label) + '</div><div class="content">' + contentHtml + '</div>' + actionsHtml;
+    el.innerHTML = '<div class="role-label">' + escapeHtml(label) + '</div><div class="pdf-chat-msg-bubble"><div class="content">' + contentHtml + '</div></div>' + actionsHtml;
+    row.innerHTML = '<div class="pdf-chat-avatar" aria-hidden="true">' + avatarIcon + '</div>';
+    row.appendChild(el);
     if (isStreamingPlaceholder) {
       el.dataset.streaming = '1';
     }
-    messagesEl().appendChild(el);
-    messagesEl().scrollTop = messagesEl().scrollHeight;
+    messagesEl().appendChild(row);
+    scrollChatToBottom();
     var contentEl = el.querySelector('.content');
     if (el.querySelector('.pdf-chat-export-pdf')) {
       el.querySelector('.pdf-chat-export-pdf').addEventListener('click', function() {
@@ -263,7 +388,7 @@
 
   function setStreamingContent(contentEl, text) {
     contentEl.textContent = text;
-    messagesEl().scrollTop = messagesEl().scrollHeight;
+    scrollChatToBottom();
   }
 
   function finalizeStreamingMessage(contentEl) {
@@ -416,16 +541,18 @@
   }
 
   function showError(msg) {
+    setWelcomeVisible(false);
     var el = document.createElement('div');
-    el.className = 'alert alert-danger pdf-chat-msg';
-    el.textContent = msg;
+    el.className = 'pdf-chat-error';
+    el.innerHTML = '<i class="fa fa-circle-exclamation" aria-hidden="true"></i><span>' + escapeHtml(msg) + '</span>';
     messagesEl().appendChild(el);
-    messagesEl().scrollTop = messagesEl().scrollHeight;
+    scrollChatToBottom();
   }
 
   function loadPdfChatSession() {
     var container = messagesEl();
-    container.innerHTML = '<div class="text-center py-4"><span class="spinner-border text-primary"></span> Loading...</div>';
+    setWelcomeVisible(false);
+    container.innerHTML = '<div class="pdf-chat-loading"><span class="spinner-border" role="status" aria-hidden="true"></span><p>Preparing your assistant session…</p></div>';
 
     if (chatType === 'forum' && !forumId) {
       container.innerHTML = '';
@@ -470,21 +597,15 @@
         if (data.assistant_mode === 'publication' || data.assistant_mode === 'chatpdf' || data.assistant_mode === 'forum') {
           pdfChatAssistantMode = data.assistant_mode;
         }
+        var activeMode = data.assistant_mode || pdfChatAssistantMode || (chatType === 'forum' ? 'forum' : 'publication');
+        setupWelcomeForMode(activeMode);
         container.innerHTML = '';
         if (data.messages && data.messages.length) {
           data.messages.forEach(function (m) {
             appendMessage(m.role, m.content, false);
           });
         } else {
-          var hint;
-          if (data.assistant_mode === 'forum') {
-            hint = 'Ask for a summary of this discussion thread, clarifications, or follow-up questions. Answers use only what appears in the thread.';
-          } else if (pdfChatAssistantMode === 'publication' || data.assistant_mode === 'publication') {
-            hint = 'Ask anything about this resource using the title, description, and available context. You can request a summary, clarify details, or explore topics related to the content.';
-          } else {
-            hint = 'Ask anything about this PDF. You can request a summary, ask about specific sections, or pose questions.';
-          }
-          appendMessage('assistant', hint, false);
+          setWelcomeVisible(true);
         }
       })
       .catch(function (err) {
@@ -593,6 +714,10 @@
           e.preventDefault();
           sendMessage();
         }
+      });
+      input.addEventListener('input', function () {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 140) + 'px';
       });
     }
     var modalEl = document.getElementById('pdf-chat-modal');
