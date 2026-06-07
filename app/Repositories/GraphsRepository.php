@@ -719,7 +719,7 @@ class GraphsRepository extends SharedRepo{
             'aggregate' => $aggregateValue !== null
                 ? kpi_indicator_display($aggregateValue, $unitLabel, $kpiName)
                 : null,
-            'points' => $points,
+            'points' => map_expand_choropleth_points($points),
             'min' => $numericValues === [] ? null : min($numericValues),
             'max' => $numericValues === [] ? null : max($numericValues),
         ];

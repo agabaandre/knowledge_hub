@@ -17,6 +17,17 @@
         return settings.joinBy || settings.isoProperty || 'iso-a3';
     }
 
+    function joinByPairs() {
+        if (Array.isArray(settings.joinByPairs) && settings.joinByPairs.length) {
+            return settings.joinByPairs;
+        }
+        var key = joinKey();
+        if (key === 'hc-key') {
+            return [['hc-key', 'hc-key'], ['iso-a3', 'iso-a3']];
+        }
+        return [['iso-a3', 'iso-a3'], ['hc-key', 'hc-key']];
+    }
+
     function isoProperty() {
         return settings.isoProperty || joinKey();
     }
@@ -116,7 +127,7 @@
         var point = { value: row.value };
         var key = joinKey();
 
-        if (row.name) point.country_name = row.name;
+        if (row.name) point.name = row.name;
         if (row.country_name) point.country_name = row.country_name;
         if (row.display_value) point.display_value = row.display_value;
         if (row.period) point.period = row.period;
@@ -124,14 +135,16 @@
         if (row.country_id) point.country_id = row.country_id;
         if (row.unit_id) point.unit_id = row.unit_id;
 
-        if (row[key]) {
-            point[key] = row[key];
-        } else if (row['iso-a3']) {
-            point['iso-a3'] = row['iso-a3'];
-        } else if (row['hc-key']) {
-            point['hc-key'] = row['hc-key'];
-        } else if (row['iso-a2']) {
-            point['iso-a2'] = row['iso-a2'];
+        ['iso-a3', 'hc-key', 'iso-a2'].forEach(function (prop) {
+            if (row[prop] !== undefined && row[prop] !== null && row[prop] !== '') {
+                point[prop] = row[prop];
+            }
+        });
+
+        if (!point[key]) {
+            if (row['iso-a3']) point['iso-a3'] = row['iso-a3'];
+            if (row['hc-key']) point['hc-key'] = row['hc-key'];
+            if (row['iso-a2']) point['iso-a2'] = row['iso-a2'];
         }
 
         point.id = row.id || point[key] || point['iso-a3'] || point['hc-key'] || point['iso-a2'];
@@ -155,14 +168,11 @@
         if (settings.type === 'topojson_url' || settings.type === 'geojson_url') {
             return mapData;
         }
-        return settings.key;
+        return settings.key || mapData;
     }
 
     function seriesMapData(mapData) {
-        if (settings.type === 'topojson_url' || settings.type === 'geojson_url') {
-            return undefined;
-        }
-        return mapData;
+        return undefined;
     }
 
     function creditsPrefix() {
@@ -195,7 +205,7 @@
                 name: chartOptions.seriesName || 'Value',
                 mapData: seriesMapData(mapAsset),
                 data: seriesData,
-                joinBy: joinKey(),
+                joinBy: joinByPairs(),
                 dataLabels: dataLabels(),
                 tooltip: chartOptions.tooltip || {}
             }]
@@ -209,6 +219,7 @@
         load: load,
         dataLabels: dataLabels,
         joinKey: joinKey,
+        joinByPairs: joinByPairs,
         isoProperty: isoProperty,
         mapPoint: mapPoint,
         fusionSeriesData: fusionSeriesData,

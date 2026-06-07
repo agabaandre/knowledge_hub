@@ -26,7 +26,7 @@ window.__khAfricaMapSettings = @json($admin_units_map_settings);
                 mapChart = null;
             }
 
-            var joinBy = KhAfricaMap.joinKey();
+            var joinBy = KhAfricaMap.joinByPairs();
             var seriesData = (mapPayload.points || []).map(function (p) {
                 return KhAfricaMap.mapPoint(p);
             });

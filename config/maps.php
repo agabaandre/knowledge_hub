@@ -149,6 +149,27 @@ return [
         'provider' => env('ADMIN_UNITS_MAP_PROVIDER', 'highcharts'),
     ],
 
+    /*
+    | Extra map polygons (e.g. Somaliland on the prioritisation Africa map) use non-standard
+    | ISO keys. Duplicate indicator data onto these keys when the source member state has data.
+    */
+    'choropleth_territory_aliases' => [
+        [
+            'label' => 'Somaliland',
+            'inherit_iso3' => 'SOM',
+            'iso-a3' => '-99',
+            'hc-key' => 'sx',
+            'iso-a2' => 'SX',
+        ],
+    ],
+
+    /*
+    | Map feature names that differ from member-state country names in the database.
+    */
+    'choropleth_map_name_aliases' => [
+        'Sahrawi Republic' => 'Western Sahara',
+    ],
+
     // Legacy keys kept for backward compatibility.
     'africa_topology_url' => env(
         'AFRICA_MAP_TOPOLOGY_URL',

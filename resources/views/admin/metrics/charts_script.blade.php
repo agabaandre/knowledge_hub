@@ -234,7 +234,7 @@
 
     function africaMapChartOptions(mapAsset, mapData, config) {
         config = config || {};
-        var joinBy = (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
+        var joinBy = (window.KhAfricaMap && KhAfricaMap.joinByPairs()) || [['iso-a3', 'iso-a3'], ['hc-key', 'hc-key']];
         return {
             chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 480, style: { fontFamily: 'inherit' } },
             title: { text: null },
@@ -315,12 +315,17 @@
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
             KhAfricaMap.load().then(function(mapAsset) {
-                var joinBy = KhAfricaMap.joinKey();
+                var joinBy = KhAfricaMap.joinByPairs();
                 var iso3Codes = data.iso3 || [];
                 var iso2Codes = data.iso2 || [];
-                var mapData = (joinBy === 'hc-key' ? iso2Codes : iso3Codes).map(function(code, i) {
-                    var point = { value: data.values[i], name: (data.labels && data.labels[i]) ? data.labels[i] : code.toUpperCase() };
-                    point[joinBy] = code;
+                var mapData = iso3Codes.map(function(code, i) {
+                    var point = {
+                        value: data.values[i],
+                        name: (data.labels && data.labels[i]) ? data.labels[i] : code.toUpperCase(),
+                        'iso-a3': code,
+                        'hc-key': (iso2Codes[i] || '').toLowerCase(),
+                        'iso-a2': (iso2Codes[i] || code.substring(0, 2)).toUpperCase()
+                    };
                     return point;
                 });
                 renderAdminAfricaMap(mapAsset, mapData, {

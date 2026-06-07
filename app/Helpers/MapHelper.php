@@ -553,6 +553,7 @@ if (! function_exists('map_settings_for_js')) {
             'joinBy' => $config['join_by'],
             'isoProperty' => $config['iso_property'] ?? $config['join_by'],
             'scope' => $config['scope'] ?? 'custom',
+            'joinByPairs' => map_highcharts_join_by($context),
         ];
     }
 }
@@ -577,14 +578,119 @@ if (! function_exists('map_point_from_country')) {
         $iso2 = strtolower(trim((string) ($country->iso_code ?? '')));
         $iso3 = strtoupper(trim((string) ($country->iso3_code ?? '')));
         if ($iso3 === '' && $iso2 !== '') {
-            $iso3 = strtoupper((string) (Country::query()->where('iso_code', strtoupper($iso2))->value('iso3_code') ?? ''));
+            $iso3 = map_iso3_from_iso2($iso2);
         }
 
+        $name = trim((string) ($extra['name'] ?? $country->name ?? ''));
+        $mapName = config('maps.choropleth_map_name_aliases.'.$name, $name);
+
         return array_merge($extra, [
+            'name' => $mapName,
+            'country_name' => $country->name ?? $name,
             'hc-key' => $iso2,
             'iso-a3' => $iso3,
             'iso-a2' => strtoupper($iso2),
         ]);
+    }
+}
+
+if (! function_exists('map_iso3_from_iso2')) {
+    function map_iso3_from_iso2(string $iso2): string
+    {
+        $iso2 = strtoupper(trim($iso2));
+        if ($iso2 === '') {
+            return '';
+        }
+
+        static $catalog = null;
+        if ($catalog === null) {
+            $catalog = [];
+            foreach (map_african_countries_catalog() as $code => $meta) {
+                if (! is_array($meta)) {
+                    continue;
+                }
+                $catalog[strtoupper((string) $code)] = strtoupper((string) ($meta['iso3'] ?? ''));
+            }
+            $catalog += [
+                'SO' => 'SOM',
+                'EH' => 'ESH',
+                'SX' => '-99',
+            ];
+        }
+
+        if (! empty($catalog[$iso2])) {
+            return $catalog[$iso2];
+        }
+
+        return strtoupper((string) (Country::query()->where('iso_code', $iso2)->value('iso3_code') ?? ''));
+    }
+}
+
+if (! function_exists('map_expand_choropleth_points')) {
+    /**
+     * Add data points for map territories that use non-standard join keys (e.g. Somaliland).
+     *
+     * @param  list<array<string, mixed>>  $points
+     * @return list<array<string, mixed>>
+     */
+    function map_expand_choropleth_points(array $points): array
+    {
+        $aliases = config('maps.choropleth_territory_aliases', []);
+        if (! is_array($aliases) || $aliases === []) {
+            return $points;
+        }
+
+        $byIso3 = [];
+        foreach ($points as $point) {
+            $iso3 = strtoupper(trim((string) ($point['iso-a3'] ?? '')));
+            if ($iso3 !== '') {
+                $byIso3[$iso3] = $point;
+            }
+        }
+
+        foreach ($aliases as $alias) {
+            if (! is_array($alias)) {
+                continue;
+            }
+            $sourceIso3 = strtoupper(trim((string) ($alias['inherit_iso3'] ?? '')));
+            if ($sourceIso3 === '' || empty($byIso3[$sourceIso3])) {
+                continue;
+            }
+
+            $source = $byIso3[$sourceIso3];
+            $clone = $source;
+            $clone['name'] = (string) ($alias['label'] ?? $clone['name'] ?? '');
+            $clone['territory_alias'] = true;
+            if (! empty($alias['iso-a3'])) {
+                $clone['iso-a3'] = (string) $alias['iso-a3'];
+            }
+            if (! empty($alias['hc-key'])) {
+                $clone['hc-key'] = strtolower((string) $alias['hc-key']);
+            }
+            if (! empty($alias['iso-a2'])) {
+                $clone['iso-a2'] = strtoupper((string) $alias['iso-a2']);
+            }
+            unset($clone['country_id'], $clone['detail_url']);
+            $points[] = $clone;
+        }
+
+        return $points;
+    }
+}
+
+if (! function_exists('map_highcharts_join_by')) {
+    /**
+     * Highcharts joinBy option with ISO key fallbacks for disputed territories.
+     */
+    function map_highcharts_join_by(?string $context = null): array
+    {
+        $primary = map_join_property($context);
+
+        if ($primary === 'hc-key') {
+            return [['hc-key', 'hc-key'], ['iso-a3', 'iso-a3']];
+        }
+
+        return [['iso-a3', 'iso-a3'], ['hc-key', 'hc-key']];
     }
 }
 
