@@ -500,6 +500,15 @@
             overflow-wrap: normal !important;
         }
 
+        table.kh-table-mobile-cards thead th.kh-th-wrap {
+            white-space: normal !important;
+            word-break: normal !important;
+            overflow-wrap: break-word !important;
+            hyphens: auto;
+            line-height: 1.25;
+            vertical-align: bottom;
+        }
+
         table.kh-table-mobile-cards tbody td {
             word-break: normal !important;
             overflow-wrap: break-word !important;

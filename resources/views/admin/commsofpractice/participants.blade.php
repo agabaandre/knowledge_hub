@@ -94,7 +94,20 @@
             #participants-table .part-col-geo,
             #pending-participants-table .part-col-geo { min-width: 100px; }
             #participants-table .part-col-pub,
-            #participants-table .part-col-forum { min-width: 5rem; text-align: center; }
+            #participants-table .part-col-forum {
+                width: 4.25rem;
+                min-width: 4.25rem;
+                max-width: 4.25rem;
+                text-align: center;
+                vertical-align: middle;
+            }
+            #participants-table thead th.part-col-pub,
+            #participants-table thead th.part-col-forum {
+                font-size: 0.65rem;
+                letter-spacing: 0.02em;
+                padding-left: 4px;
+                padding-right: 4px;
+            }
             #participants-table .part-col-badges { min-width: 100px; }
             #participants-table .part-col-communities,
             #pending-participants-table .part-col-community { min-width: 180px; }
@@ -341,8 +354,8 @@
                             <th class="part-col-title">Title</th>
                             <th class="part-col-org">Organisation</th>
                             <th class="part-col-geo">{{ $geoLabel }}</th>
-                            <th class="part-col-pub">Publication Contributions</th>
-                            <th class="part-col-forum">Forum Contributions</th>
+                            <th class="part-col-pub kh-th-wrap" data-mobile-label="Publication Contributions">Publication<br>Contributions</th>
+                            <th class="part-col-forum kh-th-wrap" data-mobile-label="Forum Contributions">Forum<br>Contributions</th>
                             <th class="part-col-badges">Badge(s)</th>
                             <th class="part-col-communities">Communities Subscribed</th>
                         </tr>
