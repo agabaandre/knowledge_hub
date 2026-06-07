@@ -421,6 +421,85 @@ class InstallerService
         Artisan::call('config:clear');
     }
 
+    public function clearMoodleEnvOverrides(): void
+    {
+        $this->clearLearningEnvOverrides();
+    }
+
+    public function clearLearningEnvOverrides(): void
+    {
+        $this->clearEnvKeys(config('install.learning_env_keys', []));
+        Artisan::call('config:clear');
+    }
+
+    /**
+     * @param  array<string, mixed>  $moodle
+     */
+    public function saveMoodleSettings(array $moodle): Setting
+    {
+        return $this->saveLearningSettings($moodle);
+    }
+
+    /**
+     * @param  array<string, mixed>  $learning
+     */
+    public function saveLearningSettings(array $learning): Setting
+    {
+        $setting = Setting::query()->where('status', 'active')->first()
+            ?? Setting::query()->orderBy('id')->first();
+
+        if (! $setting) {
+            throw new \RuntimeException('No site settings row found. Complete the site step first.');
+        }
+
+        if (! Schema::hasColumn('setting', 'moodle_api_url')) {
+            throw new \RuntimeException('Learning settings require a database migration. Run php artisan migrate.');
+        }
+
+        $payload = [];
+
+        if (array_key_exists('moodle_api_url', $learning)) {
+            $payload['moodle_api_url'] = $learning['moodle_api_url'] ?? '';
+            $payload['moodle_base_url'] = rtrim((string) ($learning['moodle_base_url'] ?? ''), '/');
+            $payload['moodle_sync_enabled'] = (bool) ($learning['moodle_sync_enabled'] ?? false);
+        }
+
+        if (! empty($learning['moodle_api_token'])) {
+            $payload['moodle_api_token'] = $learning['moodle_api_token'];
+        }
+
+        if (Schema::hasColumn('setting', 'frappe_base_url')) {
+            $payload['frappe_base_url'] = rtrim((string) ($learning['frappe_base_url'] ?? ''), '/');
+            $payload['frappe_api_key'] = $learning['frappe_api_key'] ?? '';
+            $payload['frappe_course_doctype'] = $learning['frappe_course_doctype'] ?? 'LMS Course';
+            $payload['frappe_sync_enabled'] = (bool) ($learning['frappe_sync_enabled'] ?? false);
+            if (! empty($learning['frappe_api_secret'])) {
+                $payload['frappe_api_secret'] = $learning['frappe_api_secret'];
+            }
+        }
+
+        if (Schema::hasColumn('setting', 'openedx_lms_url')) {
+            $payload['openedx_lms_url'] = rtrim((string) ($learning['openedx_lms_url'] ?? ''), '/');
+            $payload['openedx_client_id'] = $learning['openedx_client_id'] ?? '';
+            $payload['openedx_token_url'] = $learning['openedx_token_url'] ?? '';
+            $payload['openedx_sync_enabled'] = (bool) ($learning['openedx_sync_enabled'] ?? false);
+            if (! empty($learning['openedx_client_secret'])) {
+                $payload['openedx_client_secret'] = $learning['openedx_client_secret'];
+            }
+        }
+
+        $setting->forceFill($payload)->save();
+
+        $this->clearLearningEnvOverrides();
+
+        \App\Support\LearningConfig::clearAllCaches();
+        \App\Support\LearningConfig::applyRuntimeConfig();
+        Cache::forget('settings');
+        Artisan::call('config:clear');
+
+        return $setting;
+    }
+
     /**
      * @param  array<string, mixed>  $db
      */

@@ -87,9 +87,9 @@
 												</div>
 												<div class="jb-list-01-info d-block mb-3">
 													<span class="text-muted mr-2"><i class="lni lni-alarm-clock mr-1"></i>Added: {{ time_ago($course->created_at) }}</span>
-													@if($course->is_moodle)
-														<a href="https://khub.africacdc.org/elearning/course/view.php?id={{$course->moodle_id}}" target="_blank" class="btn btn-dark float-right ml-2"><i class="fa fa-edit"></i> View on Moodle</a>
-													@else
+													@if($course->isExternalCourse() && $course->external_course_url)
+														<a href="{{ $course->external_course_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-dark float-right ml-2"><i class="fa fa-external-link"></i> View on {{ $course->provider ?: 'eLearning Platform' }}</a>
+													@elseif($course->course_url)
 														<a href="{{ $course->course_url }}" target="_blank" class="btn btn-dark float-right ml-2"><i class="fa fa-external-link"></i> View Course</a>
 													@endif
 													<button type="button" class="btn btn-danger float-right ml-2" onclick="openDeleteCourseModal({{ $course->id }}, '{{ addslashes($course->fullname) }}')">

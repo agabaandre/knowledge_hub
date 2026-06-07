@@ -73,9 +73,12 @@
             </ul>
         </li>
         <li class="nav-item has-sub">
-            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-lms"><i class="fa fa-book fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.lms') }}</span></a>
-            <ul class="mininav-content nav collapse" id="nav-lms">
+            <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-learning"><i class="fa fa-book fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.learning') }}</span></a>
+            <ul class="mininav-content nav collapse" id="nav-learning">
                 <li class="nav-item"><a href="{{ url('admin/courses') }}" class="nav-link">{{ __('admin_nav.courses') }}</a></li>
+                @can('view_events')
+                <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link">{{ __('admin_nav.events') }}</a></li>
+                @endcan
             </ul>
         </li>
         <li class="nav-item has-sub">
@@ -85,9 +88,6 @@
                 <li class="nav-item"><a href="{{ route('admin.commsofpractice.participants') }}" class="nav-link">{{ __('admin_nav.cop_participants_directory') }}</a></li>
             </ul>
         </li>
-        @endcan
-        @can('view_events')
-        <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link mininav-toggle"><i class="pli-calendar-4 fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.events') }}</span></a></li>
         @endcan
         <li class="nav-item has-sub">
             <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-dropdowns"><i class="fa fa-list fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.dropdown_lists') }}</span></a>

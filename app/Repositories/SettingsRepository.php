@@ -469,6 +469,35 @@ class SettingsRepository
             }
         }
 
+        if (Schema::hasColumn('setting', 'moodle_api_url') && $request->has('moodle_api_url')) {
+            $settings->moodle_api_url = $request->input('moodle_api_url');
+            $settings->moodle_base_url = $request->input('moodle_base_url');
+            if ($request->filled('moodle_api_token')) {
+                $settings->moodle_api_token = $request->input('moodle_api_token');
+            }
+            $settings->moodle_sync_enabled = $request->boolean('moodle_sync_enabled');
+        }
+
+        if (Schema::hasColumn('setting', 'frappe_base_url') && $request->has('frappe_base_url')) {
+            $settings->frappe_base_url = $request->input('frappe_base_url');
+            $settings->frappe_api_key = $request->input('frappe_api_key');
+            $settings->frappe_course_doctype = $request->input('frappe_course_doctype', 'LMS Course');
+            if ($request->filled('frappe_api_secret')) {
+                $settings->frappe_api_secret = $request->input('frappe_api_secret');
+            }
+            $settings->frappe_sync_enabled = $request->boolean('frappe_sync_enabled');
+        }
+
+        if (Schema::hasColumn('setting', 'openedx_lms_url') && $request->has('openedx_lms_url')) {
+            $settings->openedx_lms_url = $request->input('openedx_lms_url');
+            $settings->openedx_client_id = $request->input('openedx_client_id');
+            $settings->openedx_token_url = $request->input('openedx_token_url');
+            if ($request->filled('openedx_client_secret')) {
+                $settings->openedx_client_secret = $request->input('openedx_client_secret');
+            }
+            $settings->openedx_sync_enabled = $request->boolean('openedx_sync_enabled');
+        }
+
         $settings->save();
 
         if (Schema::hasColumn('setting', 'email_driver')) {
@@ -478,6 +507,11 @@ class SettingsRepository
         DisposableEmailChecker::forgetCache();
         EmailConfig::clearCache();
         EmailConfig::applyRuntimeConfig();
+        if (Schema::hasColumn('setting', 'moodle_api_url')) {
+            \App\Support\LearningConfig::clearAllCaches();
+            app(InstallerService::class)->clearLearningEnvOverrides();
+            \App\Support\LearningConfig::applyRuntimeConfig();
+        }
         clear_cache();
 
         return $settings;

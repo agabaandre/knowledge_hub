@@ -33,7 +33,7 @@ return [
     'approved_forums' => 'Approved forums',
     'rejected_forums' => 'Rejected forums',
     'moderate_forums' => 'Moderate Forums',
-    'lms' => 'LMS',
+    'learning' => 'Learning',
     'courses' => 'Courses',
     'cops' => 'COPs',
     'manage_cops' => 'Manage COPs',

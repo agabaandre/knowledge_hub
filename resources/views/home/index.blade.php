@@ -148,7 +148,7 @@
 
     @if((settings()->show_events ?? false) && isset($events) && count($events) > 0)
         {{-- Events section header (same style as Explore Key Sections) --}}
-        <div class="container">
+        <div class="container" id="home-events">
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <div class="sec_title text-center">

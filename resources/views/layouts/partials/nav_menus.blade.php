@@ -154,6 +154,7 @@
             <a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-graduation-cap mr-1"></i> @endif {{ __('frontend_nav.learning') }}<span class="submenu-indicator"></span></a>
             <ul class="nav-dropdown nav-submenu">
                 <li><a href="{{ url('courses') }}">{{ __('frontend_nav.courses') }}</a></li>
+                <li><a href="{{ url('/') }}#home-events">{{ __('frontend_nav.events') }}</a></li>
             </ul>
         </li>
 

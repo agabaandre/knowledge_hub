@@ -14,6 +14,11 @@ Route::middleware(['web', 'install.guest'])->prefix('install')->name('install.')
     Route::get('/central-hub', [InstallController::class, 'showCentralHub'])->name('central');
     Route::post('/central-hub', [InstallController::class, 'storeCentralHub'])->name('central.store');
     Route::post('/central-hub/test', [InstallController::class, 'testCentralHub'])->name('central.test');
+    Route::get('/moodle', [InstallController::class, 'showMoodle'])->name('moodle');
+    Route::post('/moodle', [InstallController::class, 'storeMoodle'])->name('moodle.store');
+    Route::post('/moodle/test', [InstallController::class, 'testMoodle'])->name('moodle.test');
+    Route::post('/moodle/test-frappe', [InstallController::class, 'testFrappe'])->name('moodle.test-frappe');
+    Route::post('/moodle/test-openedx', [InstallController::class, 'testOpenEdx'])->name('moodle.test-openedx');
     Route::get('/mail', [InstallController::class, 'showMail'])->name('mail');
     Route::post('/mail/test', [InstallController::class, 'testMail'])->name('mail.test');
     Route::post('/mail', [InstallController::class, 'storeMail'])->name('mail.store');

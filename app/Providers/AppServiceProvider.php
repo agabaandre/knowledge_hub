@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\View;
 use App\Models\StaticLink;
 use App\Services\HubStorageService;
 use App\Support\EmailConfig;
+use App\Support\LearningConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -74,6 +75,7 @@ class AppServiceProvider extends ServiceProvider
 
         try {
             EmailConfig::applyRuntimeConfig();
+            LearningConfig::applyRuntimeConfig();
         } catch (\Throwable $e) {
             // Database may be unavailable during install or early bootstrap.
         }

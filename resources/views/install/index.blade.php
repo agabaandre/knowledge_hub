@@ -3,7 +3,7 @@
 @section('title', 'Requirements')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 1 of 7</div>
+    <div class="step-badge text-muted mb-2">Step 1 of 8</div>
     <h2 class="h5 mb-3">Server prerequisites</h2>
     <p class="text-muted small mb-3">
         Detected environment: <strong>{{ $requirements['runtime'] === 'docker' ? 'Docker / container stack' : 'Local server (Apache/Nginx + PHP)' }}</strong>.

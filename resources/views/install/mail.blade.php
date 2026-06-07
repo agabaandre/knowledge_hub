@@ -3,7 +3,7 @@
 @section('title', 'Mail')
 
 @section('content')
-    <div class="step-badge text-muted mb-2">Step 6 of 7</div>
+    <div class="step-badge text-muted mb-2">Step 7 of 8</div>
     <h2 class="h5 mb-3">Mail configuration</h2>
     <p class="text-muted small">
         Choose how the hub sends system email (password reset, notifications, reminders).
@@ -111,7 +111,7 @@
         </div>
 
         <div class="col-12 d-flex gap-2">
-            <a href="{{ route('install.central') }}" class="btn btn-outline-secondary">Back</a>
+            <a href="{{ route('install.moodle') }}" class="btn btn-outline-secondary">Back</a>
             <button type="submit" class="btn btn-success">Save mail settings &amp; continue</button>
         </div>
     </form>

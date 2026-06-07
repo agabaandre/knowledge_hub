@@ -3,6 +3,8 @@
 return [
     'api_url' => env('MOODLE_API_URL', ''),
     'api_token' => env('MOODLE_API_TOKEN', ''),
+    'base_url' => env('MOODLE_URL', ''),
+    'default_course_image' => env('LEARNING_DEFAULT_COURSE_IMAGE', 'https://img.freepik.com/free-vector/digital-online-education-concept-blank-space-laptop_255625-422.jpg?semt=ais_items_boosted&w=740'),
     /*
     | Set to false in production to stop the hourly Moodle course sync so that
     | demo/seed courses are not re-imported. When false, moodle:fetch-courses

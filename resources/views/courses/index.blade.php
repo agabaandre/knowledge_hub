@@ -105,10 +105,15 @@
     <div class="container">
         <div class="row">
             <div class="col-12">
-                <div class="d-flex align-items-center justify-content-between">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                     <h4 class="mb-0 ft-medium fs-lg">
                         Knowledge Hub Courses
                     </h4>
+                    @if(!empty($canFetchCourses))
+                        <button type="button" class="btn btn-sm theme-primary" id="courseFetchBtn">
+                            <i class="fa fa-refresh me-1"></i> Fetch courses
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -117,11 +122,12 @@
 
 <!-- ======================= Course Cards ======================== -->
 <div class="container middle">
-    <div class="row justify-content-center mt-3">
+    @include('courses.partials.sync_progress')
+    <div class="row justify-content-center mt-3" id="coursesGrid">
         @foreach ($courses as $row)
             <div class="col-md-6 col-lg-4 d-flex mb-4" data-aos="fade-up">
                 <div class="course-card w-100">
-                    <img src="{{ $row->cover_image ?? asset('frontend/img/default-course.jpg') }}" alt="Course Image" class="course-image">
+                    <img src="{{ $row->cover_image }}" alt="Course Image" class="course-image">
 
                     <div class="course-body">
                         <div>
@@ -165,16 +171,16 @@
                         </div>
 
                         <div class="course-button mt-2">
-                            @if($row->is_moodle)
-                                <a href="https://khub.africacdc.org/elearning/course/view.php?id={{$row->moodle_id}}" target="_blank" class="btn theme-primary btn-sm">
-                                    View on Moodle
+                            @if($row->isExternalCourse() && $row->external_course_url)
+                                <a href="{{ $row->external_course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary btn-sm">
+                                    Open on eLearning Platform
                                 </a>
                             @elseif($row->content)
                                 <a href="{{ url('courses/details/'.$row->id) }}" class="btn theme-secondary btn-sm">
                                     Details
                                 </a>
-                            @else
-                                <a href="{{ $row->course_url }}" target="_blank" class="btn theme-primary btn-sm">
+                            @elseif($row->course_url)
+                                <a href="{{ $row->course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary btn-sm">
                                     View Course
                                 </a>
                             @endif

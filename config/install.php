@@ -38,6 +38,46 @@ return [
         'CENTRAL_HUB_API_TOKEN',
     ],
 
+    'moodle_env_keys' => [
+        'MOODLE_API_URL',
+        'MOODLE_API_TOKEN',
+        'MOODLE_URL',
+        'MOODLE_SYNC_ENABLED',
+    ],
+
+    'frappe_env_keys' => [
+        'FRAPPE_BASE_URL',
+        'FRAPPE_API_KEY',
+        'FRAPPE_API_SECRET',
+        'FRAPPE_COURSE_DOCTYPE',
+        'FRAPPE_SYNC_ENABLED',
+    ],
+
+    'openedx_env_keys' => [
+        'OPENEDX_LMS_URL',
+        'OPENEDX_CLIENT_ID',
+        'OPENEDX_CLIENT_SECRET',
+        'OPENEDX_TOKEN_URL',
+        'OPENEDX_SYNC_ENABLED',
+    ],
+
+    'learning_env_keys' => [
+        'MOODLE_API_URL',
+        'MOODLE_API_TOKEN',
+        'MOODLE_URL',
+        'MOODLE_SYNC_ENABLED',
+        'FRAPPE_BASE_URL',
+        'FRAPPE_API_KEY',
+        'FRAPPE_API_SECRET',
+        'FRAPPE_COURSE_DOCTYPE',
+        'FRAPPE_SYNC_ENABLED',
+        'OPENEDX_LMS_URL',
+        'OPENEDX_CLIENT_ID',
+        'OPENEDX_CLIENT_SECRET',
+        'OPENEDX_TOKEN_URL',
+        'OPENEDX_SYNC_ENABLED',
+    ],
+
     'mail_env_keys' => [
         'MAIL_MAILER',
         'MAIL_HOST',

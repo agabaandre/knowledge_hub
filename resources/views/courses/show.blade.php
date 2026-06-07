@@ -107,14 +107,12 @@
                     </div>
 
                     <!-- Cover Image -->
-                    @if($course->cover_image)
-                        <div class="text-center mb-4">
-                            <img src="{{ $course->cover_image }}" 
-                                 alt="{{ $course->fullname }}" 
-                                 class="img-fluid rounded-3 shadow-sm" 
-                                 style="max-height: 320px; object-fit: cover;">
-                        </div>
-                    @endif
+                    <div class="text-center mb-4">
+                        <img src="{{ $course->cover_image }}"
+                             alt="{{ $course->fullname }}"
+                             class="img-fluid rounded-3 shadow-sm"
+                             style="max-height: 320px; object-fit: cover;">
+                    </div>
 
                     <!-- Summary -->
                     @if($course->summary)
@@ -138,12 +136,12 @@
 
                     <!-- Action Button -->
                     <div class="mt-4">
-                        @if($course->is_moodle)
-                            <a href="https://khub.africacdc.org/elearning/course/view.php?id={{ $course->moodle_id }}" target="_blank" class="btn theme-primary text-white px-4">
-                                Go to Course on Moodle
+                        @if($course->isExternalCourse() && $course->external_course_url)
+                            <a href="{{ $course->external_course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-primary text-white px-4">
+                                Open on eLearning Platform
                             </a>
-                        @else
-                            <a href="{{ $course->course_url }}" target="_blank" class="btn theme-secondary text-white px-4">
+                        @elseif($course->course_url)
+                            <a href="{{ $course->course_url }}" target="_blank" rel="noopener noreferrer" class="btn theme-secondary text-white px-4">
                                 Go to Course
                             </a>
                         @endif

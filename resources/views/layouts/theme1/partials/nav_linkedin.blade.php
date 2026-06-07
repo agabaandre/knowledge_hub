@@ -106,6 +106,7 @@
         <ul class="dropdown-menu dropdown-menu-end">
             <li><h6 class="dropdown-header">{{ __('frontend_nav.learning') }}</h6></li>
             <li><a class="dropdown-item" href="{{ url('courses') }}">{{ __('frontend_nav.courses') }}</a></li>
+            <li><a class="dropdown-item" href="{{ url('/') }}#home-events">{{ __('frontend_nav.events') }}</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><h6 class="dropdown-header">{{ __('frontend_nav.support') }}</h6></li>
             <li><a class="dropdown-item" href="{{ url('faqs') }}">{{ __('frontend_nav.faqs') }}</a></li>

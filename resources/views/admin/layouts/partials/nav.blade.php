@@ -180,15 +180,16 @@
                     </li>
                 @endcan
                 @can('view_forumns')
-                    <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>LMS<i
+                    <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>{{ __('admin_nav.learning') }}<i
                                 class="fe fe-chevron-down horizontal-icon"></i></a>
                         <ul class="sub-menu">
-                            <li aria-haspopup="true"><a href="{{ url('admin/courses') }}" class="slide-item">Courses</a>
-                            </li>
+                            <li aria-haspopup="true"><a href="{{ url('admin/courses') }}" class="slide-item">{{ __('admin_nav.courses') }}</a></li>
+                            @can('view_events')
+                            <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="slide-item">{{ __('admin_nav.events') }}</a></li>
+                            @endcan
+                        </ul>
                     </li>
-                </ul>
-                </li>
-            @endcan
+                @endcan
 
 
             @can('view_forumns')
@@ -205,10 +206,6 @@
                         <li aria-haspopup="true"><a href="{{ route('admin.commsofpractice.participants') }}" class="slide-item">COP Participants Directory</a></li>
                     </ul>
                 </li>
-            @endcan
-
-            @can('view_events')
-                <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="sub-icon"><i class=""></i>Events</a></li>
             @endcan
 
             <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>Dropdown Lists<i
@@ -275,7 +272,6 @@
                     @can('view_privacy_policy')
                         <li aria-haspopup="true"><a href="{{ url('admin/privacy') }}">Privacy Policy</a></li>
                     @endcan
-                        <li aria-haspopup="true"><a href="{{ url('admin/events') }}">Events</a></li>
                 </ul>
             </li>
 

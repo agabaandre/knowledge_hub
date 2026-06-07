@@ -18,6 +18,7 @@ return [
     'communities' => 'Communities',
     'learning' => 'Learning',
     'courses' => 'Courses',
+    'events' => 'Events',
     'support' => 'Support',
     'faqs' => 'FAQs',
     'content_request' => 'Content Request',

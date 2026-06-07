@@ -827,6 +827,8 @@ Route::post('/image-upload', [App\Http\Controllers\CommonController::class, 'ima
 Route::group(["prefix" => "courses"], function () {
     Route::get("/",  [CoursesController::class, 'index']);
     Route::get('/details/{id}', [CoursesController::class, 'showDetails'])->name('courses.details');
+    Route::post('/fetch', [CoursesController::class, 'startFetch'])->middleware('auth')->name('courses.fetch');
+    Route::get('/fetch/{id}', [CoursesController::class, 'fetchStatus'])->middleware('auth')->name('courses.fetch.status');
 });
 
 Route::group(["prefix" => "communities"], function () {

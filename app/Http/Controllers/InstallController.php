@@ -6,6 +6,9 @@ use App\Models\Setting;
 use App\Services\FederatedHubLookupService;
 use App\Services\InstallerService;
 use App\Services\MailConfigTestService;
+use App\Services\FrappeLmsService;
+use App\Services\MoodleService;
+use App\Services\OpenEdxService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -234,7 +237,7 @@ class InstallController extends Controller
         if ($request->boolean('skip_central')) {
             $request->session()->put('installer.central_ready', true);
 
-            return redirect()->route('install.mail')->with('status', 'Skipped central hub connection.');
+            return redirect()->route('install.moodle')->with('status', 'Skipped central hub connection.');
         }
 
         $data = $request->validate([
@@ -263,13 +266,137 @@ class InstallController extends Controller
             $metaTotal = array_sum($summary['metadata'] ?? []);
             $brandTotal = array_sum($summary['branding'] ?? []);
 
-            return redirect()->route('install.mail')->with(
+            return redirect()->route('install.moodle')->with(
                 'status',
                 'Connected to central hub. Imported '.$brandTotal.' branding field(s) and '.$metaTotal.' metadata row(s).'
             );
         } catch (\Throwable $e) {
             return back()->withInput()->with('error', 'Central hub connection failed: '.$e->getMessage());
         }
+    }
+
+    public function showMoodle(Request $request): RedirectResponse|View
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        $active = null;
+        try {
+            $active = Setting::query()->where('status', 'active')->first()
+                ?? Setting::query()->orderBy('id')->first();
+        } catch (\Throwable) {
+            $active = null;
+        }
+
+        return view('install.moodle', [
+            'defaults' => [
+                'moodle_api_url' => old('moodle_api_url', $active->moodle_api_url ?? env('MOODLE_API_URL', '')),
+                'moodle_api_token' => old('moodle_api_token', $active->moodle_api_token ?? env('MOODLE_API_TOKEN', '')),
+                'moodle_base_url' => old('moodle_base_url', $active->moodle_base_url ?? env('MOODLE_URL', '')),
+                'moodle_sync_enabled' => old('moodle_sync_enabled', $active->moodle_sync_enabled ?? env('MOODLE_SYNC_ENABLED', true)),
+                'frappe_base_url' => old('frappe_base_url', $active->frappe_base_url ?? env('FRAPPE_BASE_URL', '')),
+                'frappe_api_key' => old('frappe_api_key', $active->frappe_api_key ?? env('FRAPPE_API_KEY', '')),
+                'frappe_api_secret' => old('frappe_api_secret', $active->frappe_api_secret ?? env('FRAPPE_API_SECRET', '')),
+                'frappe_course_doctype' => old('frappe_course_doctype', $active->frappe_course_doctype ?? env('FRAPPE_COURSE_DOCTYPE', 'LMS Course')),
+                'frappe_sync_enabled' => old('frappe_sync_enabled', $active->frappe_sync_enabled ?? env('FRAPPE_SYNC_ENABLED', false)),
+                'openedx_lms_url' => old('openedx_lms_url', $active->openedx_lms_url ?? env('OPENEDX_LMS_URL', '')),
+                'openedx_client_id' => old('openedx_client_id', $active->openedx_client_id ?? env('OPENEDX_CLIENT_ID', '')),
+                'openedx_client_secret' => old('openedx_client_secret', $active->openedx_client_secret ?? env('OPENEDX_CLIENT_SECRET', '')),
+                'openedx_token_url' => old('openedx_token_url', $active->openedx_token_url ?? env('OPENEDX_TOKEN_URL', '')),
+                'openedx_sync_enabled' => old('openedx_sync_enabled', $active->openedx_sync_enabled ?? env('OPENEDX_SYNC_ENABLED', false)),
+            ],
+        ]);
+    }
+
+    public function testMoodle(Request $request, MoodleService $moodleService): \Illuminate\Http\JsonResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return response()->json(['ok' => false, 'error' => 'Complete site settings first.'], 422);
+        }
+
+        $data = $request->validate([
+            'moodle_api_url' => 'required|url|max:500',
+            'moodle_api_token' => 'required|string|max:500',
+        ]);
+
+        $result = $moodleService->testConnection([
+            'moodle_api_url' => $data['moodle_api_url'],
+            'moodle_api_token' => $data['moodle_api_token'],
+        ]);
+
+        return response()->json($result);
+    }
+
+    public function testFrappe(Request $request, FrappeLmsService $frappeService): \Illuminate\Http\JsonResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return response()->json(['ok' => false, 'error' => 'Complete site settings first.'], 422);
+        }
+
+        $data = $request->validate([
+            'frappe_base_url' => 'required|url|max:500',
+            'frappe_api_key' => 'required|string|max:500',
+            'frappe_api_secret' => 'required|string|max:500',
+        ]);
+
+        return response()->json($frappeService->testConnection($data));
+    }
+
+    public function testOpenEdx(Request $request, OpenEdxService $openEdxService): \Illuminate\Http\JsonResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return response()->json(['ok' => false, 'error' => 'Complete site settings first.'], 422);
+        }
+
+        $data = $request->validate([
+            'openedx_lms_url' => 'required|url|max:500',
+            'openedx_client_id' => 'required|string|max:500',
+            'openedx_client_secret' => 'required|string|max:500',
+            'openedx_token_url' => 'nullable|url|max:500',
+        ]);
+
+        return response()->json($openEdxService->testConnection($data));
+    }
+
+    public function storeMoodle(Request $request): RedirectResponse
+    {
+        if (! $request->session()->get('installer.site_ready')) {
+            return redirect()->route('install.site');
+        }
+
+        if ($request->boolean('skip_moodle')) {
+            $request->session()->put('installer.moodle_ready', true);
+
+            return redirect()->route('install.mail')->with('status', 'Skipped learning platform integrations.');
+        }
+
+        $data = $request->validate([
+            'moodle_api_url' => 'nullable|url|max:500',
+            'moodle_api_token' => 'nullable|string|max:500',
+            'moodle_base_url' => 'nullable|url|max:500',
+            'moodle_sync_enabled' => 'nullable|boolean',
+            'frappe_base_url' => 'nullable|url|max:500',
+            'frappe_api_key' => 'nullable|string|max:500',
+            'frappe_api_secret' => 'nullable|string|max:500',
+            'frappe_course_doctype' => 'nullable|string|max:120',
+            'frappe_sync_enabled' => 'nullable|boolean',
+            'openedx_lms_url' => 'nullable|url|max:500',
+            'openedx_client_id' => 'nullable|string|max:500',
+            'openedx_client_secret' => 'nullable|string|max:500',
+            'openedx_token_url' => 'nullable|url|max:500',
+            'openedx_sync_enabled' => 'nullable|boolean',
+        ]);
+
+        try {
+            $this->installer->saveLearningSettings($data);
+        } catch (\Throwable $e) {
+            return back()->withInput()->with('error', 'Could not save learning platform settings: '.$e->getMessage());
+        }
+
+        $request->session()->put('installer.moodle_ready', true);
+
+        return redirect()->route('install.mail')->with('status', 'Learning platform settings saved. You can change them later under Admin → Configure → Advanced.');
     }
 
     public function showMail(Request $request): RedirectResponse|View
