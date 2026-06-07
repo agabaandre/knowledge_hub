@@ -28,7 +28,9 @@
         .root.front-container #content.content { flex: 1; pointer-events: auto; }
         .root.front-container .content__boxed,
         .root.front-container .content__wrap { pointer-events: auto; }
-        .root.front-container .header { box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+        .root.front-container .header { box-shadow: 0 1px 3px rgba(0,0,0,0.06); margin-bottom: 2px; }
+        .root.front-container .navbar-nav.kh-linkedin-nav { justify-content: center; width: 100%; }
+        .root.front-container #theme1Navbar .navbar-collapse { justify-content: center; }
         .root.front-container .navbar-nav .nav-link { font-weight: var(--nav-font-weight, 500); }
         .kh-linkedin-nav .kh-nav-item-stack {
             display: flex;

@@ -13,6 +13,7 @@
         border-bottom: 2px solid transparent;
         position: relative;
         gap: 0.08rem;
+        margin-bottom: 2px;
         font-size: var(--nav-font-size, 11px);
         font-weight: var(--nav-font-weight, 500);
     }
@@ -73,31 +74,41 @@
         display: none !important;
     }
     /* Legacy navigation plugin */
+    .header.modern-header .navigation,
+    .header.modern-header .menu-container {
+        margin-bottom: 2px;
+    }
     .navigation-landscape .nav-menus-wrapper {
         display: flex !important;
         align-items: stretch !important;
-        justify-content: center;
+        justify-content: center !important;
         width: 100%;
         float: none !important;
+        margin-bottom: 2px;
     }
     .navigation-landscape .nav-menus-wrapper > .nav-menu.kh-linkedin-nav {
         display: flex !important;
         flex-wrap: nowrap;
         align-items: stretch;
+        justify-content: center;
         float: none !important;
         margin: 0;
     }
     .navigation-landscape .nav-menus-wrapper > .nav-menu.nav-menu-social.kh-linkedin-nav {
         float: none !important;
-        margin-left: auto;
+        margin-left: 0;
         flex-shrink: 0;
         display: flex !important;
         align-items: stretch;
+        justify-content: center;
     }
     .navigation-landscape .nav-menus-wrapper > .nav-menu.nav-menu-social.kh-linkedin-nav > li {
         float: none;
         display: flex;
         align-items: stretch;
+    }
+    .navigation-landscape .nav-menu.kh-linkedin-nav.align-to-right {
+        float: none !important;
     }
     .navigation .nav-menu.kh-linkedin-nav {
         display: flex;
