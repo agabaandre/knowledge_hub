@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Models\MapDefinition;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
@@ -159,7 +160,9 @@ class MapsRepository
 
     public function saveAssignments(Request $request): void
     {
-        $settings = settings();
+        $settings = Setting::query()->where('status', 'active')->first()
+            ?? Setting::query()->first();
+
         if (! $settings) {
             return;
         }
@@ -190,5 +193,6 @@ class MapsRepository
         }
 
         $settings->save();
+        cache()->forget('settings');
     }
 }
