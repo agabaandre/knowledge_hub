@@ -313,9 +313,13 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
 
     Route::get('/maps', [MapsController::class, 'index'])->name('admin.maps.index');
+    Route::get('/maps/topology/status', [MapsController::class, 'topologyVersionStatus'])->name('admin.maps.topology.status');
+    Route::post('/maps/topology/check', [MapsController::class, 'checkTopologyVersion'])->name('admin.maps.topology.check');
+    Route::post('/maps/topology/apply', [MapsController::class, 'applyTopologyVersion'])->name('admin.maps.topology.apply');
+    Route::post('/maps/topology/revert/{id}', [MapsController::class, 'revertTopologyVersion'])->name('admin.maps.topology.revert')->where('id', '[0-9]+');
     Route::get('/maps/definitions/search', [MapsController::class, 'searchDefinitions'])->name('admin.maps.definitions.search');
     Route::get('/maps/create', [MapsController::class, 'create'])->name('admin.maps.create');
-    Route::get('/maps/preview/{slug?}', [MapsController::class, 'preview'])->name('admin.maps.preview');
+    Route::get('/maps/preview', [MapsController::class, 'preview'])->name('admin.maps.preview');
     Route::get('/maps/{id}/edit', [MapsController::class, 'edit'])->name('admin.maps.edit')->where('id', '[0-9]+');
     Route::post('/maps', [MapsController::class, 'store'])->name('admin.maps.store');
     Route::post('/maps/assignments', [MapsController::class, 'saveAssignments'])->name('admin.maps.assignments');

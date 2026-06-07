@@ -3,6 +3,49 @@
 use App\Models\Country;
 use App\Repositories\MapsRepository;
 
+if (! function_exists('map_topology_version')) {
+    function map_topology_version(): string
+    {
+        return \App\Support\MapConfig::topologyVersion();
+    }
+}
+
+if (! function_exists('map_clear_definition_cache')) {
+    function map_clear_definition_cache(): void
+    {
+        \App\Support\MapConfig::clearCache();
+    }
+}
+
+if (! function_exists('map_remap_definition_id')) {
+    function map_remap_definition_id(string $id, string $fromVersion, string $toVersion): string
+    {
+        if ($fromVersion === $toVersion || $id === '') {
+            return $id;
+        }
+
+        $fromDashed = str_replace('.', '-', $fromVersion);
+        $toDashed = str_replace('.', '-', $toVersion);
+
+        $replacements = [
+            '-topo-'.$fromDashed => '-topo-'.$toDashed,
+            '-topo-'.$fromVersion => '-topo-'.$toVersion,
+        ];
+
+        foreach ($replacements as $from => $to) {
+            if (str_contains($id, $from)) {
+                return str_replace($from, $to, $id);
+            }
+        }
+
+        if (str_ends_with($id, '-'.$fromVersion)) {
+            return substr($id, 0, -strlen($fromVersion)).$toVersion;
+        }
+
+        return $id;
+    }
+}
+
 if (! function_exists('map_providers')) {
     function map_providers(): array
     {
@@ -56,7 +99,7 @@ if (! function_exists('map_country_definition_id')) {
     function map_country_definition_id(string $iso2): string
     {
         $iso2 = strtolower(trim($iso2));
-        $version = str_replace('.', '-', (string) config('maps.topology_version', '2.3.3'));
+        $version = str_replace('.', '-', map_topology_version());
 
         return 'country-'.$iso2.'-topo-'.$version;
     }
@@ -81,7 +124,7 @@ if (! function_exists('map_country_topology_url')) {
     function map_country_topology_url(string $iso2, ?string $topoFile = null): string
     {
         $iso2 = strtolower(trim($iso2));
-        $version = (string) config('maps.topology_version', '2.3.3');
+        $version = map_topology_version();
         $base = str_replace('{version}', $version, (string) config('maps.topology_base_url', 'https://code.highcharts.com/mapdata/{version}/'));
         $filename = $topoFile ?: map_country_topology_filename($iso2);
 
@@ -93,11 +136,12 @@ if (! function_exists('map_african_country_definitions')) {
     function map_african_country_definitions(): array
     {
         static $cached = null;
-        if ($cached !== null) {
+        static $cachedVersion = null;
+        $version = map_topology_version();
+        if ($cached !== null && $cachedVersion === $version) {
             return $cached;
         }
-
-        $version = (string) config('maps.topology_version', '2.3.3');
+        $cachedVersion = $version;
         $definitions = [];
 
         foreach (map_african_countries_catalog() as $iso2 => $meta) {
@@ -200,7 +244,7 @@ if (! function_exists('map_country_map_config_for_country')) {
             'provider' => config('maps.admin_units.provider', 'highcharts'),
             'type' => 'topojson_url',
             'topology_url' => $topologyUrl,
-            'version' => config('maps.topology_version', '2.3.3'),
+            'version' => map_topology_version(),
             'join_by' => config('maps.admin_units.join_by', 'iso-a3'),
             'iso_property' => config('maps.admin_units.join_by', 'iso-a3'),
         ];
@@ -260,7 +304,7 @@ if (! function_exists('map_build_topology_url')) {
             return null;
         }
 
-        $version = trim((string) ($definition['collection_version'] ?? $definition['version'] ?? config('maps.topology_version', '2.3.3')));
+        $version = trim((string) ($definition['collection_version'] ?? $definition['version'] ?? map_topology_version()));
         $base = str_replace('{version}', $version, (string) config('maps.topology_base_url', 'https://code.highcharts.com/mapdata/{version}/'));
         $path = map_topology_presets()[$preset] ?? null;
 
@@ -283,17 +327,36 @@ if (! function_exists('map_build_topology_url')) {
 if (! function_exists('map_builtin_definitions')) {
     function map_builtin_definitions(): array
     {
-        $builtins = config('maps.versions', []);
-        $normalized = [];
+        static $cached = null;
+        static $cachedVersion = null;
+        $version = map_topology_version();
+        if ($cached !== null && $cachedVersion === $version) {
+            return $cached;
+        }
+        $cachedVersion = $version;
 
-        foreach ($builtins as $id => $config) {
+        $normalized = [];
+        foreach (config('maps.static_versions', []) as $id => $config) {
             if (! is_array($config)) {
                 continue;
             }
             $normalized[$id] = normalize_map_definition_config($id, $config + ['builtin' => true]);
         }
 
-        return $normalized;
+        foreach (config('maps.version_templates', []) as $template) {
+            if (! is_array($template) || empty($template['slug'])) {
+                continue;
+            }
+            $id = str_replace('{version}', $version, (string) $template['slug']);
+            $label = str_replace('{version}', $version, (string) ($template['label'] ?? $id));
+            $config = $template;
+            unset($config['slug']);
+            $config['label'] = $label;
+            $config['version'] = $version;
+            $normalized[$id] = normalize_map_definition_config($id, $config + ['builtin' => true]);
+        }
+
+        return $cached = $normalized;
     }
 }
 
@@ -419,7 +482,7 @@ if (! function_exists('map_view_versions_from_settings')) {
 if (! function_exists('africa_map_active_version_id')) {
     function africa_map_active_version_id(): string
     {
-        $fallback = (string) config('maps.default_version_id', 'africa-sadr-topo-2.3.3');
+        $fallback = (string) config('maps.default_version_id', 'africa-sadr-topo-'.map_topology_version());
         try {
             $settings = function_exists('settings') ? settings() : null;
             if ($settings && \Illuminate\Support\Facades\Schema::hasColumn('setting', 'africa_map_version')) {
@@ -474,7 +537,7 @@ if (! function_exists('normalize_map_definition_config')) {
         $topologyUrl = map_build_topology_url([
             'topology_url' => $config['topology_url'] ?? null,
             'topology_preset' => $config['topology_preset'] ?? null,
-            'collection_version' => $config['version'] ?? $config['collection_version'] ?? config('maps.topology_version', '2.3.3'),
+            'collection_version' => $config['version'] ?? $config['collection_version'] ?? map_topology_version(),
             'country_iso2' => $config['country_iso2'] ?? null,
         ]);
 
@@ -489,7 +552,7 @@ if (! function_exists('normalize_map_definition_config')) {
             'script_url' => isset($config['script']) ? asset($config['script']) : null,
             'topology_preset' => $config['topology_preset'] ?? null,
             'topology_url' => $topologyUrl,
-            'version' => $config['version'] ?? $config['collection_version'] ?? config('maps.topology_version', '2.3.3'),
+            'version' => $config['version'] ?? $config['collection_version'] ?? map_topology_version(),
             'join_by' => $joinBy,
             'iso_property' => $config['iso_property'] ?? $joinBy,
             'scope' => $config['scope'] ?? 'custom',

@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Repositories\MapsRepository;
+use App\Services\MapTopologyVersionService;
 use Illuminate\Http\Request;
 
 class MapsController extends Controller
 {
     private MapsRepository $mapsRepository;
 
-    public function __construct(MapsRepository $mapsRepository)
+    private MapTopologyVersionService $topologyVersionService;
+
+    public function __construct(MapsRepository $mapsRepository, MapTopologyVersionService $topologyVersionService)
     {
         $this->mapsRepository = $mapsRepository;
+        $this->topologyVersionService = $topologyVersionService;
     }
 
     public function index()
@@ -55,7 +59,8 @@ class MapsController extends Controller
                 'rawDefault' => $assignments['rawDefaultMapId'] ?? null,
                 'rawViews' => $assignments['rawViewVersions'] ?? null,
             ],
-            'topologyVersion' => config('maps.topology_version', '2.3.3'),
+            'topologyVersion' => map_topology_version(),
+            'topologyStatus' => $this->topologyVersionService->status(),
         ]);
     }
 
@@ -66,7 +71,7 @@ class MapsController extends Controller
             'providers' => map_providers(),
             'topologyPresets' => map_topology_presets(),
             'joinOptions' => map_join_options(),
-            'topologyVersion' => config('maps.topology_version', '2.3.3'),
+            'topologyVersion' => map_topology_version(),
         ]);
     }
 
@@ -82,7 +87,7 @@ class MapsController extends Controller
             'providers' => map_providers(),
             'topologyPresets' => map_topology_presets(),
             'joinOptions' => map_join_options(),
-            'topologyVersion' => config('maps.topology_version', '2.3.3'),
+            'topologyVersion' => map_topology_version(),
         ]);
     }
 
@@ -183,9 +188,9 @@ class MapsController extends Controller
         ]);
     }
 
-    public function preview(Request $request, ?string $slug = null)
+    public function preview(Request $request)
     {
-        $slug = $slug ?: trim((string) $request->input('slug', ''));
+        $slug = trim((string) $request->query('slug', ''));
         if ($slug === '') {
             return response()->json(['error' => 'Map slug required.'], 422);
         }
@@ -202,10 +207,72 @@ class MapsController extends Controller
             'label' => $config['label'] ?? $slug,
             'provider' => $config['provider'] ?? 'highcharts',
             'topology_url' => $config['topology_url'] ?? null,
+            'script_url' => $config['script_url'] ?? null,
+            'key' => $config['key'] ?? null,
             'join_by' => $config['join_by'] ?? 'iso-a3',
             'iso_property' => $config['iso_property'] ?? null,
             'version' => $config['version'] ?? null,
             'type' => $config['type'] ?? null,
+            'scope' => $config['scope'] ?? 'custom',
+            'settings' => [
+                'versionId' => $config['version_id'] ?? $slug,
+                'provider' => $config['provider'] ?? 'highcharts',
+                'type' => $config['type'] ?? 'topojson_url',
+                'key' => $config['key'] ?? null,
+                'scriptUrl' => $config['script_url'] ?? null,
+                'topologyUrl' => $config['topology_url'] ?? null,
+                'topologyPreset' => $config['topology_preset'] ?? null,
+                'version' => $config['version'] ?? null,
+                'joinBy' => $config['join_by'] ?? 'iso-a3',
+                'isoProperty' => $config['iso_property'] ?? ($config['join_by'] ?? 'iso-a3'),
+                'scope' => $config['scope'] ?? 'custom',
+            ],
         ]);
+    }
+
+    public function topologyVersionStatus()
+    {
+        return response()->json($this->topologyVersionService->status());
+    }
+
+    public function checkTopologyVersion()
+    {
+        return response()->json($this->topologyVersionService->checkForUpdates());
+    }
+
+    public function applyTopologyVersion(Request $request)
+    {
+        $request->validate([
+            'version' => 'required|string|max:20',
+        ]);
+
+        $result = $this->topologyVersionService->applyVersion(
+            (string) $request->input('version'),
+            auth()->id(),
+            'upgrade'
+        );
+
+        if ($request->expectsJson()) {
+            return response()->json($result, $result['ok'] ? 200 : 422);
+        }
+
+        return redirect()
+            ->route('admin.maps.index')
+            ->with('message', $result['message'])
+            ->with('status', $result['ok'] ? 'success' : 'failure');
+    }
+
+    public function revertTopologyVersion(Request $request, int $id)
+    {
+        $result = $this->topologyVersionService->revert($id, auth()->id());
+
+        if ($request->expectsJson()) {
+            return response()->json($result, $result['ok'] ? 200 : 422);
+        }
+
+        return redirect()
+            ->route('admin.maps.index')
+            ->with('message', $result['message'])
+            ->with('status', $result['ok'] ? 'success' : 'failure');
     }
 }

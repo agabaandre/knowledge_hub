@@ -228,6 +228,49 @@
         opacity: 0.55;
         pointer-events: none;
     }
+    .maps-admin-page .topology-status-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    @media (min-width: 992px) {
+        .maps-admin-page .topology-status-grid {
+            grid-template-columns: 1.2fr 1fr;
+        }
+    }
+    .maps-admin-page .topology-metric {
+        border: 1px solid #e2e8f0;
+        border-radius: 0.65rem;
+        padding: 0.85rem 1rem;
+        background: #f8fafc;
+    }
+    .maps-admin-page .topology-metric .label {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        font-weight: 700;
+        margin-bottom: 0.25rem;
+    }
+    .maps-admin-page .topology-metric .value {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #0f172a;
+    }
+    .maps-admin-page .topology-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        align-items: center;
+    }
+    .maps-admin-page .topology-history-table td {
+        font-size: 0.875rem;
+        vertical-align: middle;
+    }
+    .maps-admin-page .topology-alert {
+        font-size: 0.875rem;
+        margin-bottom: 0;
+    }
 </style>
 @endsection
 
@@ -271,6 +314,126 @@
                 Source: <a href="https://code.highcharts.com/mapdata/" target="_blank" rel="noopener">Highcharts Map Collection</a>.
                 When a country hub is configured, map views auto-use that country's TopoJSON unless overridden below.
             </p>
+        </div>
+    </div>
+
+    @php
+        $topologyStatus = $topologyStatus ?? [];
+        $topologyLatest = $topologyStatus['latest'] ?? null;
+        $topologyUpdateAvailable = !empty($topologyStatus['update_available']);
+        $topologyCheckedAt = $topologyStatus['checked_at'] ?? null;
+        $topologyCandidates = $topologyStatus['candidates'] ?? [];
+        $topologyHistory = $topologyStatus['history'] ?? [];
+    @endphp
+
+    <div class="card maps-section-card shadow-sm mb-4" id="topologyVersionCard">
+        <div class="card-header d-flex flex-wrap justify-content-between align-items-start gap-2">
+            <div>
+                <h4><i class="fa fa-code-branch me-2 text-primary"></i>Topology collection version</h4>
+                <p>Check for newer Highcharts Map Collection releases, upgrade, or revert to a previous version.</p>
+            </div>
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle" id="topologyCurrentBadge">
+                Active v{{ $topologyVersion }}
+            </span>
+        </div>
+        <div class="card-body p-4">
+            <div class="topology-status-grid mb-3">
+                <div class="topology-status-metrics d-grid gap-2">
+                    <div class="topology-metric">
+                        <div class="label">Current version</div>
+                        <div class="value" id="topologyCurrentValue">v{{ $topologyVersion }}</div>
+                    </div>
+                    <div class="topology-metric">
+                        <div class="label">Latest available</div>
+                        <div class="value" id="topologyLatestValue">
+                            @if($topologyLatest)
+                                v{{ $topologyLatest }}
+                                @if($topologyUpdateAvailable)
+                                    <span class="badge bg-warning text-dark ms-1">Update available</span>
+                                @else
+                                    <span class="badge bg-success ms-1">Up to date</span>
+                                @endif
+                            @else
+                                <span class="text-muted fs-6">Not checked yet</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="topology-metric">
+                        <div class="label">Last checked</div>
+                        <div class="value fs-6" id="topologyCheckedAtValue">
+                            {{ $topologyCheckedAt ? \Carbon\Carbon::parse($topologyCheckedAt)->diffForHumans() : 'Never' }}
+                        </div>
+                    </div>
+                </div>
+                <div>
+                    <div class="alert alert-info topology-alert" id="topologyStatusMessage">
+                        Map definition slugs and view assignments are remapped automatically when you change the topology version.
+                    </div>
+                    <div class="topology-actions mb-3">
+                        <button type="button" class="btn btn-outline-primary btn-sm" id="topologyCheckBtn">
+                            <i class="fa fa-sync me-1"></i>Check for updates
+                        </button>
+                        <button type="button" class="btn btn-primary btn-sm {{ $topologyUpdateAvailable ? '' : 'd-none' }}" id="topologyUpgradeBtn"
+                            data-version="{{ $topologyLatest }}">
+                            <i class="fa fa-arrow-up me-1"></i>Upgrade to latest
+                        </button>
+                    </div>
+                    <form method="post" action="{{ route('admin.maps.topology.apply') }}" class="topology-actions" id="topologyApplyForm">
+                        @csrf
+                        <select name="version" class="form-select form-select-sm" style="max-width: 11rem;" id="topologyVersionSelect">
+                            @foreach($topologyCandidates as $candidate)
+                                <option value="{{ $candidate }}" {{ $candidate === $topologyVersion ? 'selected' : '' }}>
+                                    v{{ $candidate }}{{ $candidate === $topologyVersion ? ' (current)' : '' }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <button type="submit" class="btn btn-outline-secondary btn-sm" id="topologyApplyBtn">
+                            Apply version
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            @if(!empty($topologyHistory))
+                <h5 class="h6 text-muted text-uppercase mb-2" style="letter-spacing: 0.04em;">Version history</h5>
+                <div class="table-responsive">
+                    <table class="table table-sm topology-history-table mb-0">
+                        <thead>
+                            <tr>
+                                <th>When</th>
+                                <th>Change</th>
+                                <th>By</th>
+                                <th class="text-end">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="topologyHistoryBody">
+                            @foreach($topologyHistory as $entry)
+                                <tr>
+                                    <td>{{ $entry['created_at'] ?? '—' }}</td>
+                                    <td>
+                                        v{{ $entry['from_version'] ?? '?' }}
+                                        <i class="fa fa-arrow-right mx-1 text-muted"></i>
+                                        v{{ $entry['to_version'] ?? '?' }}
+                                        <span class="badge bg-light text-dark border ms-1">{{ $entry['action'] ?? 'change' }}</span>
+                                    </td>
+                                    <td>{{ $entry['user'] ?? 'System' }}</td>
+                                    <td class="text-end">
+                                        <form method="post" action="{{ route('admin.maps.topology.revert', $entry['id']) }}" class="d-inline js-topology-revert-form">
+                                            @csrf
+                                            <button type="submit" class="btn btn-link btn-sm p-0"
+                                                onclick="return confirm('Restore topology v{{ $entry['from_version'] }} and the map assignments saved before this change?');">
+                                                Revert
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <p class="text-muted small mb-0" id="topologyHistoryEmpty">No topology version changes recorded yet.</p>
+            @endif
         </div>
     </div>
 
@@ -420,10 +583,27 @@
     </div>
 </div>
 
-<pre id="mapPreviewOutput" class="bg-light border rounded p-3 mt-3 d-none"></pre>
+<div class="modal fade" id="mapPreviewModal" tabindex="-1" role="dialog" aria-labelledby="mapPreviewModalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="mapPreviewModalTitle">Map preview</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body p-0">
+                <div id="mapPreviewStatus" class="text-center text-muted py-5 px-3">Loading map…</div>
+                <div id="mapPreviewChart" style="min-height: 460px;"></div>
+                <div id="mapPreviewMeta" class="small text-muted border-top px-3 py-2 d-none"></div>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @section('scripts')
+@include('partials.maps.choropleth_map_loader')
 <script>
 (function () {
     var form = document.getElementById('mapAssignmentsForm');
@@ -439,7 +619,13 @@
 })();
 
 (function () {
-    var previewUrlTemplate = @json(route('admin.maps.preview', ['slug' => '__SLUG__']));
+    var previewUrl = @json(route('admin.maps.preview'));
+    var previewChart = null;
+    var previewModalEl = document.getElementById('mapPreviewModal');
+    var previewChartEl = document.getElementById('mapPreviewChart');
+    var previewStatusEl = document.getElementById('mapPreviewStatus');
+    var previewMetaEl = document.getElementById('mapPreviewMeta');
+    var previewTitleEl = document.getElementById('mapPreviewModalTitle');
     var searchUrl = @json(route('admin.maps.definitions.search'));
     var searchInput = document.getElementById('mapDefinitionsSearch');
     var searchClear = document.getElementById('mapDefinitionsSearchClear');
@@ -509,21 +695,246 @@
         });
     }
 
+    var topologyCheckUrl = @json(route('admin.maps.topology.check'));
+    var topologyStatusUrl = @json(route('admin.maps.topology.status'));
+    var topologyApplyUrl = @json(route('admin.maps.topology.apply'));
+    var csrfToken = @json(csrf_token());
+    var topologyCheckBtn = document.getElementById('topologyCheckBtn');
+    var topologyUpgradeBtn = document.getElementById('topologyUpgradeBtn');
+    var topologyApplyForm = document.getElementById('topologyApplyForm');
+    var topologyApplyBtn = document.getElementById('topologyApplyBtn');
+    var topologyVersionSelect = document.getElementById('topologyVersionSelect');
+    var topologyCurrentValue = document.getElementById('topologyCurrentValue');
+    var topologyLatestValue = document.getElementById('topologyLatestValue');
+    var topologyCheckedAtValue = document.getElementById('topologyCheckedAtValue');
+    var topologyCurrentBadge = document.getElementById('topologyCurrentBadge');
+
+    function topologyPost(url, body) {
+        return fetch(url, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': csrfToken,
+                'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify(body || {})
+        }).then(function (r) { return r.json().then(function (json) { return { ok: r.ok, json: json }; }); });
+    }
+
+    function renderTopologyStatus(data) {
+        if (!data) return;
+        var current = data.current || '';
+        var latest = data.latest || null;
+        var updateAvailable = !!data.update_available;
+
+        if (topologyCurrentValue) topologyCurrentValue.textContent = 'v' + current;
+        if (topologyCurrentBadge) topologyCurrentBadge.textContent = 'Active v' + current;
+
+        if (topologyLatestValue) {
+            if (latest) {
+                topologyLatestValue.innerHTML = 'v' + latest + (updateAvailable
+                    ? ' <span class="badge bg-warning text-dark ms-1">Update available</span>'
+                    : ' <span class="badge bg-success ms-1">Up to date</span>');
+            } else {
+                topologyLatestValue.innerHTML = '<span class="text-muted fs-6">Not available</span>';
+            }
+        }
+
+        if (topologyCheckedAtValue && data.checked_at) {
+            topologyCheckedAtValue.textContent = data.checked_at;
+        }
+
+        if (topologyUpgradeBtn) {
+            topologyUpgradeBtn.classList.toggle('d-none', !updateAvailable || !latest);
+            if (latest) topologyUpgradeBtn.setAttribute('data-version', latest);
+        }
+    }
+
+    function applyTopologyVersion(version) {
+        if (!version) return;
+        if (!confirm('Apply topology collection v' + version + '? Map assignments will be remapped automatically.')) {
+            return;
+        }
+
+        if (topologyApplyBtn) topologyApplyBtn.disabled = true;
+        if (topologyCheckBtn) topologyCheckBtn.disabled = true;
+
+        topologyPost(topologyApplyUrl, { version: version })
+            .then(function (result) {
+                if (!result.ok) {
+                    alert(result.json.message || 'Could not apply topology version.');
+                    return;
+                }
+                window.location.reload();
+            })
+            .catch(function () {
+                alert('Could not apply topology version.');
+            })
+            .finally(function () {
+                if (topologyApplyBtn) topologyApplyBtn.disabled = false;
+                if (topologyCheckBtn) topologyCheckBtn.disabled = false;
+            });
+    }
+
+    if (topologyCheckBtn) {
+        topologyCheckBtn.addEventListener('click', function () {
+            topologyCheckBtn.disabled = true;
+            topologyPost(topologyCheckUrl)
+                .then(function (result) {
+                    renderTopologyStatus(result.json);
+                    if (!result.ok) {
+                        alert(result.json.message || 'Version check failed.');
+                    }
+                })
+                .catch(function () {
+                    alert('Version check failed.');
+                })
+                .finally(function () {
+                    topologyCheckBtn.disabled = false;
+                });
+        });
+    }
+
+    if (topologyUpgradeBtn) {
+        topologyUpgradeBtn.addEventListener('click', function () {
+            applyTopologyVersion(topologyUpgradeBtn.getAttribute('data-version'));
+        });
+    }
+
+    if (topologyApplyForm) {
+        topologyApplyForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+            var selected = topologyVersionSelect ? topologyVersionSelect.value : '';
+            applyTopologyVersion(selected);
+        });
+    }
+
+    function destroyPreviewChart() {
+        if (previewChart) {
+            try { previewChart.destroy(); } catch (e) { /* ignore */ }
+            previewChart = null;
+        }
+        if (previewChartEl) previewChartEl.innerHTML = '';
+    }
+
+    function setPreviewStatus(message, isError) {
+        if (!previewStatusEl) return;
+        previewStatusEl.textContent = message || '';
+        previewStatusEl.classList.toggle('text-danger', !!isError);
+        previewStatusEl.classList.toggle('d-none', !message);
+    }
+
+    function openPreviewModal() {
+        if (typeof $ !== 'undefined' && previewModalEl) {
+            $(previewModalEl).modal('show');
+            return;
+        }
+        if (previewModalEl) previewModalEl.classList.add('show');
+    }
+
+    function renderMapPreview(json) {
+        if (!window.KhChoroplethMap) {
+            setPreviewStatus('Map preview loader is unavailable.', true);
+            return;
+        }
+
+        var settings = json.settings || {};
+        if (settings.type === 'topojson_url' && !settings.topologyUrl) {
+            setPreviewStatus('This map has no topology URL to preview.', true);
+            return;
+        }
+        if (settings.type === 'geojson_script' && !settings.scriptUrl) {
+            setPreviewStatus('This map has no script URL to preview.', true);
+            return;
+        }
+
+        window.KhChoroplethMap.configure(settings);
+        setPreviewStatus('Loading topology…', false);
+
+        window.KhChoroplethMap.ensureMapModule()
+            .then(function () { return window.KhChoroplethMap.load(); })
+            .then(function (mapAsset) {
+                destroyPreviewChart();
+                setPreviewStatus('', false);
+
+                var plotVariant = (settings.scope === 'world') ? 'world' : 'africa';
+                previewChart = window.KhChoroplethMap.renderHighcharts('mapPreviewChart', mapAsset, [], {
+                    height: 460,
+                    title: json.label || json.slug,
+                    seriesName: 'Preview',
+                    plotVariant: plotVariant,
+                    dataLabels: { enabled: false },
+                    tooltip: { enabled: false },
+                    credits: window.KhChoroplethMap.creditsPrefix()
+                });
+
+                if (previewMetaEl) {
+                    var meta = [];
+                    if (json.provider) meta.push('Provider: ' + json.provider);
+                    if (json.join_by) meta.push('Join: ' + json.join_by);
+                    if (json.version) meta.push('Collection v' + json.version);
+                    if (json.topology_url) {
+                        meta.push('<a href="' + json.topology_url + '" target="_blank" rel="noopener">TopoJSON source</a>');
+                    } else if (json.script_url) {
+                        meta.push('<a href="' + json.script_url + '" target="_blank" rel="noopener">Script source</a>');
+                    }
+                    previewMetaEl.innerHTML = meta.join(' · ');
+                    previewMetaEl.classList.remove('d-none');
+                }
+            })
+            .catch(function (err) {
+                destroyPreviewChart();
+                setPreviewStatus((err && err.message) ? err.message : 'Map preview could not be loaded.', true);
+            });
+    }
+
+    if (previewModalEl && typeof $ !== 'undefined') {
+        $(previewModalEl).on('hidden.bs.modal', function () {
+            destroyPreviewChart();
+            setPreviewStatus('', false);
+            if (previewMetaEl) {
+                previewMetaEl.innerHTML = '';
+                previewMetaEl.classList.add('d-none');
+            }
+        });
+    }
+
     document.addEventListener('click', function (event) {
         var btn = event.target.closest('.js-map-preview');
         if (!btn) return;
 
         var slug = btn.getAttribute('data-slug');
-        var out = document.getElementById('mapPreviewOutput');
-        fetch(previewUrlTemplate.replace('__SLUG__', encodeURIComponent(slug)), {
+        if (!slug) return;
+
+        if (previewTitleEl) previewTitleEl.textContent = 'Map preview';
+        destroyPreviewChart();
+        setPreviewStatus('Loading map…', false);
+        if (previewMetaEl) {
+            previewMetaEl.innerHTML = '';
+            previewMetaEl.classList.add('d-none');
+        }
+        openPreviewModal();
+
+        fetch(previewUrl + '?slug=' + encodeURIComponent(slug), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
-        }).then(function (r) { return r.json(); }).then(function (json) {
-            out.classList.remove('d-none');
-            out.textContent = JSON.stringify(json, null, 2);
-        }).catch(function () {
-            out.classList.remove('d-none');
-            out.textContent = 'Preview failed.';
-        });
+        })
+            .then(function (r) {
+                return r.json().then(function (json) {
+                    if (!r.ok) {
+                        throw new Error(json.error || 'Preview request failed.');
+                    }
+                    return json;
+                });
+            })
+            .then(function (json) {
+                if (previewTitleEl) previewTitleEl.textContent = json.label || json.slug || 'Map preview';
+                renderMapPreview(json);
+            })
+            .catch(function (err) {
+                destroyPreviewChart();
+                setPreviewStatus((err && err.message) ? err.message : 'Map preview failed.', true);
+            });
     });
 })();
 </script>

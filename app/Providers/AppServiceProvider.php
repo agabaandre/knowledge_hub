@@ -16,6 +16,7 @@ use App\Models\StaticLink;
 use App\Services\HubStorageService;
 use App\Support\EmailConfig;
 use App\Support\LearningConfig;
+use App\Support\MapConfig;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -76,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
         try {
             EmailConfig::applyRuntimeConfig();
             LearningConfig::applyRuntimeConfig();
+            MapConfig::applyRuntimeConfig();
         } catch (\Throwable $e) {
             // Database may be unavailable during install or early bootstrap.
         }

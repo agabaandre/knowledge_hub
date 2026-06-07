@@ -11,6 +11,20 @@ return [
 
     'topology_base_url' => env('MAP_TOPOLOGY_BASE_URL', 'https://code.highcharts.com/mapdata/{version}/'),
 
+    'topology_probe_url' => 'https://code.highcharts.com/mapdata/{version}/custom/world.topo.json',
+
+    /*
+    | Known Highcharts Map Collection releases (newest first). Used when checking for updates.
+    */
+    'topology_version_candidates' => [
+        '2.3.3',
+        '2.3.0',
+        '2.2.0',
+        '2.1.0',
+        '2.0.0',
+        '1.1.3',
+    ],
+
     /*
     | Rendering engines that consume ISO-keyed TopoJSON (Highcharts Map Collection format).
     */
@@ -72,9 +86,9 @@ return [
     ],
 
     /*
-    | Built-in map definitions (read-only in admin UI).
+    | Built-in map definitions that do not follow the active topology collection version.
     */
-    'versions' => [
+    'static_versions' => [
         'africa-prioritisation-1.1.3' => [
             'label' => 'Africa (Western Sahara separate) — Prioritisation v1.1.3',
             'provider' => 'highcharts',
@@ -85,70 +99,74 @@ return [
             'join_by' => 'iso-a3',
             'scope' => 'africa',
         ],
-        'africa-sadr-topo-2.3.3' => [
-            'label' => 'Africa SADR — Highcharts TopoJSON v2.3.3',
+    ],
+
+    /*
+    | Built-in TopoJSON maps generated from the active topology collection version.
+    | Slug patterns use {version} (e.g. africa-sadr-topo-2.3.3).
+    */
+    'version_templates' => [
+        [
+            'slug' => 'africa-sadr-topo-{version}',
+            'label' => 'Africa SADR — Highcharts TopoJSON v{version}',
             'provider' => 'highcharts',
             'type' => 'topojson_url',
             'topology_preset' => 'africa-sadr',
-            'topology_url' => $topologyBase.'custom/africa-sadr.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'hc-key',
             'scope' => 'africa',
         ],
-        'world-highres-topo-2.3.3' => [
-            'label' => 'World high resolution — Highcharts TopoJSON v2.3.3',
+        [
+            'slug' => 'world-highres-topo-{version}',
+            'label' => 'World high resolution — Highcharts TopoJSON v{version}',
             'provider' => 'highcharts',
             'type' => 'topojson_url',
             'topology_preset' => 'world-highres',
-            'topology_url' => $topologyBase.'custom/world-highres.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'iso-a3',
             'scope' => 'world',
         ],
-        'world-topo-2.3.3' => [
-            'label' => 'World — Highcharts TopoJSON v2.3.3',
+        [
+            'slug' => 'world-topo-{version}',
+            'label' => 'World — Highcharts TopoJSON v{version}',
             'provider' => 'highcharts',
             'type' => 'topojson_url',
             'topology_preset' => 'world',
-            'topology_url' => $topologyBase.'custom/world.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'iso-a3',
             'scope' => 'world',
         ],
-        'world-visits-topo-2.3.3' => [
-            'label' => 'World (portal visits) — Highcharts TopoJSON v2.3.3',
+        [
+            'slug' => 'world-visits-topo-{version}',
+            'label' => 'World (portal visits) — Highcharts TopoJSON v{version}',
             'provider' => 'highcharts',
             'type' => 'topojson_url',
             'topology_preset' => 'world',
-            'topology_url' => $topologyBase.'custom/world.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'hc-key',
             'iso_property' => 'hc-key',
             'scope' => 'world',
         ],
-        'fusion-africa-sadr-2.3.3' => [
-            'label' => 'Africa SADR — FusionCharts (HC TopoJSON v2.3.3)',
+        [
+            'slug' => 'fusion-africa-sadr-{version}',
+            'label' => 'Africa SADR — FusionCharts (HC TopoJSON v{version})',
             'provider' => 'fusion',
             'type' => 'topojson_url',
             'topology_preset' => 'africa-sadr',
-            'topology_url' => $topologyBase.'custom/africa-sadr.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'iso-a3',
             'iso_property' => 'iso-a3',
             'scope' => 'africa',
         ],
-        'fusion-world-highres-2.3.3' => [
-            'label' => 'World high res — FusionCharts (HC TopoJSON v2.3.3)',
+        [
+            'slug' => 'fusion-world-highres-{version}',
+            'label' => 'World high res — FusionCharts (HC TopoJSON v{version})',
             'provider' => 'fusion',
             'type' => 'topojson_url',
             'topology_preset' => 'world-highres',
-            'topology_url' => $topologyBase.'custom/world-highres.topo.json',
-            'version' => $topologyVersion,
             'join_by' => 'iso-a3',
             'iso_property' => 'iso-a3',
             'scope' => 'world',
         ],
     ],
+
+    // Legacy alias kept for backward compatibility.
+    'versions' => [],
 
     'admin_units' => [
         'topology_preset' => 'country-admin1',
