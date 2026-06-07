@@ -18,64 +18,6 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         mapBorder: '{{ settings()->au_grey_text ?? "#58595B" }}'
     };
 
-    function normalizeMapAxisRange(min, max) {
-        min = Number(min);
-        max = Number(max);
-        if (!isFinite(min)) min = 0;
-        if (!isFinite(max)) max = min;
-        if (min === max) {
-            max = min + (min === 0 ? 1 : Math.abs(min) * 0.05 || 1);
-        }
-        return { min: min, max: max };
-    }
-
-    function themeMapColorAxis(min, max) {
-        var axis = normalizeMapAxisRange(min, max);
-        return {
-            min: axis.min,
-            max: axis.max,
-            minColor: auColors.light,
-            maxColor: auColors.green,
-            labels: { style: { color: '#475569', fontSize: '10px' } }
-        };
-    }
-
-    /** Choropleth styling aligned with /countries indicator map. */
-    function choroplethMapPlotOptions() {
-        return {
-            map: {
-                nullColor: '#f1f5f9',
-                borderColor: '#ffffff',
-                borderWidth: 0.5,
-                states: {
-                    hover: {
-                        color: auColors.gold,
-                        borderColor: auColors.red,
-                        borderWidth: 1.2
-                    }
-                }
-            }
-        };
-    }
-
-    /** World visits map — clearer borders on the global basemap. */
-    function worldVisitsMapPlotOptions() {
-        return {
-            map: {
-                nullColor: '#f1f5f9',
-                borderColor: auColors.mapBorder,
-                borderWidth: 1,
-                states: {
-                    hover: {
-                        color: auColors.gold,
-                        borderColor: auColors.red,
-                        borderWidth: 1.5
-                    }
-                }
-            }
-        };
-    }
-
     var mapModulePromise = null;
     var visitsTimelineChart = null;
     var signupsTimelineChart = null;
@@ -357,9 +299,9 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 enabled: true,
                 buttonOptions: { verticalAlign: 'bottom', align: 'right' }
             },
-            colorAxis: themeMapColorAxis(config.min, config.max),
+            colorAxis: KhAfricaMap.colorAxisOptions(config.min, config.max),
             legend: { enabled: false },
-            plotOptions: worldVisitsMapPlotOptions(),
+            plotOptions: KhAfricaMap.choroplethPlotOptions('world'),
             series: [{
                 type: 'map',
                 name: config.seriesName || 'Visits by country',
@@ -414,38 +356,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
 
     function africaMapChartOptions(mapAsset, mapData, config) {
         config = config || {};
-        var joinBy = config.joinBy || (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
-        return {
-            chart: {
-                map: KhAfricaMap.chartMapOption(mapAsset),
-                backgroundColor: '#f8f9fa',
-                height: config.height || 480,
-                style: { fontFamily: 'inherit' }
-            },
-            title: config.title === null
-                ? { text: null }
-                : {
-                    text: config.title || config.seriesName || 'Indicator value',
-                    style: { fontSize: '14px', color: '#64748b', fontWeight: '600' }
-                },
-            credits: { enabled: true, text: config.credits || KhAfricaMap.creditsPrefix(), style: { fontSize: '10px', color: '#94a3b8' } },
-            mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
-            colorAxis: themeMapColorAxis(config.min, config.max),
-            legend: { enabled: false },
-            plotOptions: choroplethMapPlotOptions(),
-            series: [{
-                type: 'map',
-                name: config.seriesName || 'Indicator value',
-                mapData: KhAfricaMap.seriesMapData(mapAsset),
-                data: mapData,
-                joinBy: joinBy,
-                colorAxis: 0,
-                colorKey: 'value',
-                nullColor: '#f1f5f9',
-                dataLabels: config.dataLabels !== undefined ? config.dataLabels : KhAfricaMap.dataLabels(),
-                tooltip: config.tooltip || { pointFormat: '<b>{point.name}</b><br/>{point.value}' }
-            }]
-        };
+        if (!window.KhAfricaMap || typeof KhAfricaMap.buildChoroplethChartOptions !== 'function') {
+            return {};
+        }
+        return KhAfricaMap.buildChoroplethChartOptions(mapAsset, mapData, config);
     }
 
     function renderAdminAfricaMap(mapAsset, mapData, config) {

@@ -1,4 +1,5 @@
 @if(!empty($show_admin_units_map) && !empty($admin_units_map_settings))
+@include('partials.maps.map_theme_config')
 <script>
 window.__khAfricaMapSettings = @json($admin_units_map_settings);
 </script>
@@ -6,12 +7,6 @@ window.__khAfricaMapSettings = @json($admin_units_map_settings);
 <script>
 (function () {
     var mapDataUrl = @json(route('adminunits.map-data'));
-    var auColors = {
-        green: '{{ settings()->au_corporate_green ?? '#1A5632' }}',
-        gold: '{{ settings()->au_gold ?? '#B4A269' }}',
-        red: '{{ settings()->au_red ?? '#9F2241' }}',
-        light: '#f0f7f4'
-    };
     var mapChart = null;
 
     function renderMap(mapPayload) {
@@ -26,60 +21,34 @@ window.__khAfricaMapSettings = @json($admin_units_map_settings);
                 mapChart = null;
             }
 
-            var joinBy = KhAfricaMap.joinKey();
             var seriesData = (mapPayload.points || []).map(function (p) {
                 return KhAfricaMap.mapPoint(p);
             });
 
-            mapChart = Highcharts.mapChart('adminUnitsMapChart', {
-                chart: {
-                    map: KhAfricaMap.chartMapOption(mapAsset),
-                    backgroundColor: '#f8f9fa',
-                    height: 460
+            mapChart = KhAfricaMap.renderHighcharts('adminUnitsMapChart', mapAsset, seriesData, {
+                min: mapPayload.min,
+                max: mapPayload.max,
+                height: 460,
+                title: @json($admin_units_map_settings['countryName'] ?? 'Administrative units'),
+                seriesName: 'Members & localities',
+                tooltip: {
+                    useHTML: true,
+                    formatter: function () {
+                        var p = this.point;
+                        return '<b>' + (p.country_name || p.name || '') + '</b><br/>'
+                            + (p.display_value || p.value)
+                            + '<br/><span style="color:#1A5632;font-size:11px">Click for unit profile</span>';
+                    }
                 },
-                title: {
-                    text: @json($admin_units_map_settings['countryName'] ?? 'Administrative units'),
-                    style: { fontSize: '14px', color: '#64748b' }
-                },
-                credits: {
-                    enabled: true,
-                    text: KhAfricaMap.creditsPrefix(),
-                    style: { fontSize: '10px', color: '#94a3b8' }
-                },
-                mapNavigation: { enabled: true },
-                colorAxis: {
-                    min: mapPayload.min,
-                    max: mapPayload.max,
-                    minColor: auColors.light,
-                    maxColor: auColors.green
-                },
-                legend: { enabled: false },
-                series: [{
-                    type: 'map',
-                    name: 'Members & localities',
-                    mapData: KhAfricaMap.seriesMapData(mapAsset),
-                    data: seriesData,
-                    joinBy: joinBy,
-                    dataLabels: KhAfricaMap.dataLabels(),
-                    tooltip: {
-                        useHTML: true,
-                        formatter: function () {
-                            var p = this.point;
-                            return '<b>' + (p.country_name || p.name || '') + '</b><br/>'
-                                + (p.display_value || p.value)
-                                + '<br/><span style="color:#1A5632;font-size:11px">Click for unit profile</span>';
-                        }
-                    },
-                    point: {
-                        events: {
-                            click: function () {
-                                if (this.detail_url) {
-                                    window.location.href = this.detail_url;
-                                }
+                point: {
+                    events: {
+                        click: function () {
+                            if (this.detail_url) {
+                                window.location.href = this.detail_url;
                             }
                         }
                     }
-                }]
+                }
             });
         }).catch(function () {
             container.innerHTML = '<div class="text-muted text-center p-4">Map could not be loaded.</div>';
@@ -90,8 +59,10 @@ window.__khAfricaMapSettings = @json($admin_units_map_settings);
         var container = document.getElementById('adminUnitsMapChart');
         if (!container) return;
 
-        fetch(mapDataUrl, { headers: { 'Accept': 'application/json' } })
-            .then(function (r) { return r.json(); })
+        window.__khMapModuleUrl = '{{ asset('assets/plugins/highcharts/modules/map.js') }}';
+        KhAfricaMap.ensureMapModule(window.__khMapModuleUrl).then(function () {
+            return fetch(mapDataUrl, { headers: { 'Accept': 'application/json' } });
+        }).then(function (r) { return r.json(); })
             .then(function (payload) {
                 if (!payload.points || !payload.points.length) {
                     container.innerHTML = '<div class="text-muted text-center p-4">Add ISO alpha-3 codes to administrative units to display the map.</div>';

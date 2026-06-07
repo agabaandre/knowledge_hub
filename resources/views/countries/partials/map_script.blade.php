@@ -8,14 +8,6 @@
         collect($countries ?? [])->mapWithKeys(fn ($country) => [(string) $country->id => country_detail_url($country)])->all()
     );
     var regions = @json($regions_json ?? []);
-    var auColors = {
-        green: '{{ settings()->au_corporate_green ?? '#1A5632' }}',
-        gold: '{{ settings()->au_gold ?? '#B4A269' }}',
-        red: '{{ settings()->au_red ?? '#9F2241' }}',
-        light: '#f0f7f4',
-        grey: '#94a3b8'
-    };
-
     var mapChart = null;
     var currentRegionId = null;
     var currentKpiId = parseInt(document.getElementById('mapIndicatorSelect')?.value || '0', 10);
@@ -200,87 +192,37 @@
                 mapChart = null;
             }
 
-            var joinBy = KhAfricaMap.joinKey();
             var seriesData = (mapPayload.points || []).map(function (p) {
-                return KhAfricaMap.mapPoint({
-                    'iso-a3': p['iso-a3'],
-                    'hc-key': p['hc-key'],
-                    value: p.value,
-                    name: p.name,
-                    country_id: p.country_id,
-                    display_value: p.display_value,
-                    period: p.period,
-                    detail_url: p.detail_url
-                });
+                return KhAfricaMap.mapPoint(p);
             });
 
-            mapChart = Highcharts.mapChart('countriesMapChart', {
-                chart: {
-                    map: KhAfricaMap.chartMapOption(mapAsset),
-                    backgroundColor: '#f8f9fa',
-                    height: 520,
-                    style: { fontFamily: 'inherit' }
-                },
-                title: { text: null },
-                credits: {
-                    enabled: true,
-                    text: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
-                    style: { fontSize: '10px', color: '#94a3b8' }
-                },
-                mapNavigation: {
-                    enabled: true,
-                    buttonOptions: { verticalAlign: 'bottom', align: 'right' }
-                },
-                colorAxis: {
-                    min: mapPayload.min,
-                    max: mapPayload.max,
-                    minColor: auColors.light,
-                    maxColor: auColors.green,
-                    labels: { style: { color: '#475569', fontSize: '10px' } }
-                },
-                legend: { enabled: false },
-                plotOptions: {
-                    map: {
-                        nullColor: '#f1f5f9',
-                        borderColor: '#ffffff',
-                        borderWidth: 0.5,
-                        states: {
-                            hover: {
-                                color: auColors.gold,
-                                borderColor: auColors.red,
-                                borderWidth: 1.2
-                            }
-                        }
+            mapChart = KhAfricaMap.renderHighcharts('countriesMapChart', mapAsset, seriesData, {
+                min: mapPayload.min,
+                max: mapPayload.max,
+                height: 520,
+                title: null,
+                seriesName: mapPayload.kpi_name || 'Indicator',
+                credits: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
+                tooltip: {
+                    useHTML: true,
+                    formatter: function () {
+                        var p = this.point;
+                        return '<b>' + (p.country_name || p.name || '') + '</b><br/>'
+                            + (p.display_value || p.value)
+                            + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>'
+                            + '<br/><span style="color:#1A5632;font-size:11px">Click for country profile</span>';
                     }
                 },
-                series: [{
-                    type: 'map',
-                    name: mapPayload.kpi_name || 'Indicator',
-                    mapData: KhAfricaMap.seriesMapData(mapAsset),
-                    data: seriesData,
-                    joinBy: joinBy,
-                    dataLabels: KhAfricaMap.dataLabels(),
-                    tooltip: {
-                        useHTML: true,
-                        formatter: function () {
-                            var p = this.point;
-                            return '<b>' + (p.country_name || p.name || '') + '</b><br/>'
-                                + (p.display_value || p.value)
-                                + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>'
-                                + '<br/><span style="color:#1A5632;font-size:11px">Click for country profile</span>';
-                        }
-                    },
-                    point: {
-                        events: {
-                            click: function () {
-                                var url = this.detail_url
-                                    || countryDetailUrls[String(this.country_id)]
-                                    || null;
-                                if (url) window.location.href = url;
-                            }
+                point: {
+                    events: {
+                        click: function () {
+                            var url = this.detail_url
+                                || countryDetailUrls[String(this.country_id)]
+                                || null;
+                            if (url) window.location.href = url;
                         }
                     }
-                }]
+                }
             });
 
             updateLegend(mapPayload);
@@ -370,34 +312,7 @@
         @endif
     }
 
-    function loadHighchartsMaps(done) {
-        if (typeof Highcharts !== 'undefined' && Highcharts.mapChart) {
-            done();
-            return;
-        }
-        var sources = [
-            '{{ asset('assets/plugins/highcharts/highmaps.js') }}',
-            'https://code.highcharts.com/maps/highmaps.js'
-        ];
-        var i = 0;
-        function next() {
-            if (typeof Highcharts !== 'undefined' && Highcharts.mapChart) {
-                done();
-                return;
-            }
-            if (i >= sources.length) {
-                done();
-                return;
-            }
-            var s = document.createElement('script');
-            s.src = sources[i++];
-            s.onload = next;
-            s.onerror = next;
-            document.head.appendChild(s);
-        }
-        next();
-    }
-
-    loadHighchartsMaps(init);
+    window.__khMapModuleUrl = '{{ asset('assets/plugins/highcharts/modules/map.js') }}';
+    KhAfricaMap.ensureMapModule(window.__khMapModuleUrl).then(init).catch(init);
 })();
 </script>

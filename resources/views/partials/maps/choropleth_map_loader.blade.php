@@ -8,6 +8,7 @@
     var settings = global.__khAfricaMapSettings || global.__khChoroplethMapSettings || {};
     var loadPromise = null;
     var topologyCache = null;
+    var mapModulePromise = null;
 
     function provider() {
         return (settings.provider || 'highcharts').toLowerCase();
@@ -19,6 +20,59 @@
 
     function isoProperty() {
         return settings.isoProperty || joinKey();
+    }
+
+    function theme() {
+        return global.__khMapTheme || {
+            green: '#1A5632',
+            gold: '#B4A269',
+            red: '#9F2241',
+            grey: '#58595B',
+            light: '#f0f7f4',
+            nullColor: '#f1f5f9'
+        };
+    }
+
+    function normalizeAxisRange(min, max) {
+        min = Number(min);
+        max = Number(max);
+        if (!isFinite(min)) min = 0;
+        if (!isFinite(max)) max = min;
+        if (min === max) {
+            max = min + (min === 0 ? 1 : Math.abs(min) * 0.05 || 1);
+        }
+        return { min: min, max: max };
+    }
+
+    function colorAxisOptions(min, max) {
+        var t = theme();
+        var axis = normalizeAxisRange(min, max);
+        return {
+            min: axis.min,
+            max: axis.max,
+            minColor: t.light,
+            maxColor: t.green,
+            labels: { style: { color: '#475569', fontSize: '10px' } }
+        };
+    }
+
+    function choroplethPlotOptions(variant) {
+        var t = theme();
+        var isWorld = variant === 'world';
+        return {
+            map: {
+                nullColor: t.nullColor,
+                borderColor: isWorld ? t.grey : '#ffffff',
+                borderWidth: isWorld ? 1 : 0.5,
+                states: {
+                    hover: {
+                        color: t.gold,
+                        borderColor: t.red,
+                        borderWidth: isWorld ? 1.5 : 1.2
+                    }
+                }
+            }
+        };
     }
 
     function dataLabels() {
@@ -35,6 +89,58 @@
             borderRadius: 3,
             padding: 2
         };
+    }
+
+    function defaultMapModuleUrl() {
+        if (global.__khMapModuleUrl) {
+            return global.__khMapModuleUrl;
+        }
+        var base = document.querySelector('script[src*="highcharts"]');
+        if (base && base.src) {
+            return base.src.replace(/highcharts(\.min)?\.js.*/, 'modules/map.js');
+        }
+        return '/assets/plugins/highcharts/modules/map.js';
+    }
+
+    function ensureMapModule(moduleUrl) {
+        if (typeof global.Highcharts !== 'undefined' && typeof global.Highcharts.mapChart === 'function') {
+            return Promise.resolve();
+        }
+        if (typeof global.Highcharts === 'undefined') {
+            return Promise.reject(new Error('Highcharts core not loaded'));
+        }
+        if (mapModulePromise) {
+            return mapModulePromise;
+        }
+        moduleUrl = moduleUrl || defaultMapModuleUrl();
+        mapModulePromise = new Promise(function (resolve, reject) {
+            var existing = document.querySelector('script[data-kh-map-module="1"]');
+            if (existing) {
+                if (existing.getAttribute('data-loaded') === '1') {
+                    resolve();
+                    return;
+                }
+                existing.addEventListener('load', function () {
+                    existing.setAttribute('data-loaded', '1');
+                    resolve();
+                });
+                existing.addEventListener('error', reject);
+                return;
+            }
+            var s = document.createElement('script');
+            s.src = moduleUrl;
+            s.setAttribute('data-kh-map-module', '1');
+            s.onload = function () {
+                s.setAttribute('data-loaded', '1');
+                resolve();
+            };
+            s.onerror = function () {
+                mapModulePromise = null;
+                reject(new Error('Highcharts map module failed to load'));
+            };
+            document.head.appendChild(s);
+        });
+        return mapModulePromise;
     }
 
     function waitForScriptMap(timeoutMs) {
@@ -182,36 +288,75 @@
         return 'Map © Natural Earth (' + providerLabel + ' v' + (settings.version || '1.0') + ')';
     }
 
+    function buildChoroplethChartOptions(mapAsset, seriesData, config) {
+        config = config || {};
+        var t = theme();
+        var joinBy = config.joinBy || joinKey();
+        var series = {
+            type: 'map',
+            name: config.seriesName || 'Value',
+            mapData: seriesMapData(mapAsset),
+            data: seriesData,
+            joinBy: joinBy,
+            colorAxis: 0,
+            colorKey: 'value',
+            nullColor: t.nullColor,
+            dataLabels: config.dataLabels !== undefined ? config.dataLabels : dataLabels(),
+            tooltip: config.tooltip || { pointFormat: '<b>{point.name}</b><br/>{point.value}' }
+        };
+        if (config.point) {
+            series.point = config.point;
+        }
+
+        var titleOption = { text: null };
+        if (config.title === null) {
+            titleOption = { text: null };
+        } else if (config.title !== undefined) {
+            titleOption = {
+                text: config.title,
+                style: { fontSize: '14px', color: '#64748b', fontWeight: config.titleWeight || '600' }
+            };
+        } else if (config.seriesName) {
+            titleOption = {
+                text: config.seriesName,
+                style: { fontSize: '14px', color: '#64748b' }
+            };
+        }
+
+        return {
+            chart: {
+                map: chartMapOption(mapAsset),
+                backgroundColor: '#f8f9fa',
+                height: config.height || 480,
+                style: { fontFamily: 'inherit' }
+            },
+            title: titleOption,
+            credits: {
+                enabled: true,
+                text: config.credits || creditsPrefix(),
+                style: { fontSize: '10px', color: '#94a3b8' }
+            },
+            mapNavigation: config.mapNavigation || {
+                enabled: true,
+                buttonOptions: { verticalAlign: 'bottom', align: 'right' }
+            },
+            colorAxis: config.colorAxis || colorAxisOptions(config.min, config.max),
+            legend: { enabled: false },
+            plotOptions: choroplethPlotOptions(config.plotVariant || 'africa'),
+            series: [series]
+        };
+    }
+
     function renderHighcharts(containerId, mapAsset, seriesData, chartOptions) {
         chartOptions = chartOptions || {};
         if (typeof global.Highcharts === 'undefined' || !global.Highcharts.mapChart) {
             throw new Error('Highcharts map module not loaded');
         }
-        return global.Highcharts.mapChart(containerId, Object.assign({
-            chart: {
-                map: chartMapOption(mapAsset),
-                backgroundColor: '#f8f9fa',
-                height: chartOptions.height || 480
-            },
-            title: { text: chartOptions.title || null },
-            credits: {
-                enabled: true,
-                text: chartOptions.credits || creditsPrefix(),
-                style: { fontSize: '10px', color: '#94a3b8' }
-            },
-            mapNavigation: { enabled: true },
-            colorAxis: chartOptions.colorAxis || {},
-            legend: { enabled: false },
-            series: [{
-                type: 'map',
-                name: chartOptions.seriesName || 'Value',
-                mapData: seriesMapData(mapAsset),
-                data: seriesData,
-                joinBy: joinKey(),
-                dataLabels: dataLabels(),
-                tooltip: chartOptions.tooltip || {}
-            }]
-        }, chartOptions.extra || {}));
+        var options = buildChoroplethChartOptions(mapAsset, seriesData, chartOptions);
+        if (chartOptions.extra) {
+            Object.assign(options, chartOptions.extra);
+        }
+        return global.Highcharts.mapChart(containerId, options);
     }
 
     global.KhChoroplethMap = {
@@ -219,6 +364,12 @@
         settings: settings,
         configure: configure,
         provider: provider,
+        theme: theme,
+        normalizeAxisRange: normalizeAxisRange,
+        colorAxisOptions: colorAxisOptions,
+        choroplethPlotOptions: choroplethPlotOptions,
+        buildChoroplethChartOptions: buildChoroplethChartOptions,
+        ensureMapModule: ensureMapModule,
         load: load,
         dataLabels: dataLabels,
         joinKey: joinKey,

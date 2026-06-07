@@ -11,21 +11,10 @@
     var chartsTabRendered = false;
 
     function ensureMapModule() {
-        return new Promise(function (resolve, reject) {
-            if (typeof Highcharts !== 'undefined' && Highcharts.mapChart) {
-                resolve();
-                return;
-            }
-            if (typeof Highcharts === 'undefined') {
-                reject(new Error('Highcharts not loaded'));
-                return;
-            }
-            var s = document.createElement('script');
-            s.src = window.__rccMapModuleUrl;
-            s.onload = resolve;
-            s.onerror = reject;
-            document.head.appendChild(s);
-        });
+        if (!window.KhAfricaMap || typeof KhAfricaMap.ensureMapModule !== 'function') {
+            return Promise.reject(new Error('Map loader unavailable'));
+        }
+        return KhAfricaMap.ensureMapModule(window.__rccMapModuleUrl);
     }
 
     function renderMap(mapPayload) {
@@ -43,33 +32,24 @@
             return KhAfricaMap.load();
         }).then(function (mapAsset) {
             if (mapChart) { mapChart.destroy(); mapChart = null; }
-            var joinBy = KhAfricaMap.joinKey();
             var mapData = mapPayload.points.map(function (p) {
                 return KhAfricaMap.mapPoint(p);
             });
             var mapSeriesName = mapPayload.kpi_name || 'Indicator value';
-            mapChart = Highcharts.mapChart('rccMapChart', {
-                chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 460 },
-                title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
-                credits: { enabled: true, text: KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
-                mapNavigation: { enabled: true },
-                colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
-                legend: { enabled: false },
-                series: [{
-                    name: mapSeriesName,
-                    type: 'map',
-                    mapData: KhAfricaMap.seriesMapData(mapAsset),
-                    data: mapData,
-                    joinBy: joinBy,
-                    dataLabels: KhAfricaMap.dataLabels(),
-                    tooltip: {
-                        useHTML: true,
-                        formatter: function () {
-                            var p = this.point;
-                            return '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
-                        }
+            mapChart = KhAfricaMap.renderHighcharts('rccMapChart', mapAsset, mapData, {
+                min: mapPayload.min,
+                max: mapPayload.max,
+                height: 460,
+                title: mapSeriesName,
+                seriesName: mapSeriesName,
+                credits: KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)',
+                tooltip: {
+                    useHTML: true,
+                    formatter: function () {
+                        var p = this.point;
+                        return '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
                     }
-                }]
+                }
             });
         }).catch(function () {
             container.innerHTML = '<div class="rcc-empty">Map could not be loaded.</div>';
