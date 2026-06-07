@@ -17,12 +17,12 @@
 
 <div class="card mb-3">
     <div class="card-header d-flex justify-content-between align-items-center">
-        <h3 class="card-title mb-0">Review member state content</h3>
+        <h3 class="card-title mb-0">Review partner hub content</h3>
         <a href="{{ route('federation.browse') }}" class="btn btn-sm btn-outline-primary" target="_blank">View public catalogue</a>
     </div>
     <div class="card-body">
         <p class="text-muted small mb-3">
-            Member state hubs share content that is already approved locally. Items below must be approved on this central portal before they appear in search and the member states catalogue.
+            Country hubs share content that is already approved locally. Items below must be approved on this central portal before they appear in search and the partner hub catalogue.
         </p>
 
         <form method="get" class="row g-2 mb-3">

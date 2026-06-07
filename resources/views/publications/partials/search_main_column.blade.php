@@ -28,22 +28,22 @@
 
         @if(($federationBrowseEnabled ?? false) && !request()->filled('term'))
             <div class="alert alert-light border mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
-                <span><i class="fa fa-globe-africa me-2" style="color:var(--theme-color-primary,#119A48);"></i>Browse resources synced from member state knowledge hubs.</span>
-                <a href="{{ route('federation.browse') }}" class="btn btn-sm btn-primary">Member States catalogue</a>
+                <span><i class="fa fa-globe-africa me-2" style="color:var(--theme-color-primary,#119A48);"></i>Browse resources synced from partner country knowledge hubs.</span>
+                <a href="{{ route('federation.browse') }}" class="btn btn-sm btn-primary">Partner hub catalogue</a>
             </div>
         @endif
 
-        {{-- Federated forums (member state hubs) --}}
+        {{-- Federated forums (partner country hubs) --}}
         @if(isset($federatedForums) && $federatedForums->count() > 0)
         <div class="mb-4">
             <h5 class="mb-3" style="color:var(--theme-color-primary, #119A48);">
-                <i class="fa fa-globe-africa mr-2"></i>Discussions from member states
+                <i class="fa fa-globe-africa mr-2"></i>Discussions from partner hubs
             </h5>
             @foreach($federatedForums as $forum)
                 @include('partials.federation.forum_card', ['forum' => $forum])
             @endforeach
             <p class="mb-0 mt-2">
-                <a href="{{ route('federation.browse', ['type' => 'forums', 'term' => request('term')]) }}" class="btn btn-sm btn-secondary">View all member state forums</a>
+                <a href="{{ route('federation.browse', ['type' => 'forums', 'term' => request('term')]) }}" class="btn btn-sm btn-secondary">View all partner hub forums</a>
             </p>
         </div>
         @endif

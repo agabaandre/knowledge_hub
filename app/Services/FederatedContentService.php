@@ -21,6 +21,25 @@ class FederatedContentService
     }
 
     /**
+     * Active hubs registered on this continental portal (may not be synced yet).
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, FederatedKnowledgeHub>
+     */
+    public function linkedActiveHubs(?int $hubId = null)
+    {
+        if (! $this->federationConsumerEnabled()) {
+            return collect();
+        }
+
+        return FederatedKnowledgeHub::query()
+            ->with('mappedCountry')
+            ->where('is_active', true)
+            ->when($hubId, fn ($q) => $q->whereKey($hubId))
+            ->orderBy('name')
+            ->get();
+    }
+
+    /**
      * @return \Illuminate\Database\Eloquent\Collection<int, FederatedKnowledgeHub>
      */
     public function hubsWithCachedData(?int $hubId = null)
@@ -87,7 +106,8 @@ class FederatedContentService
         $term = trim((string) $request->input('term', ''));
 
         $hubs = $this->hubsWithCachedData();
-        $activeHub = $hubId ? $hubs->firstWhere('id', $hubId) : null;
+        $linkedHubs = $this->linkedActiveHubs();
+        $activeHub = $hubId ? ($linkedHubs->firstWhere('id', $hubId) ?? $hubs->firstWhere('id', $hubId)) : null;
 
         $publications = collect();
         $forums = collect();
@@ -108,6 +128,7 @@ class FederatedContentService
 
         return [
             'hubs' => $hubs,
+            'linkedHubs' => $linkedHubs,
             'activeHub' => $activeHub,
             'type' => in_array($type, ['publications', 'forums'], true) ? $type : 'publications',
             'term' => $term,

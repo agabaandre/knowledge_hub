@@ -11,7 +11,7 @@
         @endif
         <div class="d-flex align-items-center flex-wrap" style="font-size:0.8rem;color:#64748b;gap:0.75rem;">
             @if(!empty($forum->federation_country))
-                <span><i class="fa fa-map-marker-alt me-1"></i>{{ $forum->federation_country }}</span>
+                <span><i class="fa fa-map-marker me-1" aria-hidden="true"></i>{{ $forum->federation_country }}</span>
             @endif
             @if(!empty($forum->created_at))
                 <span><i class="fa fa-clock me-1"></i>{{ time_ago($forum->created_at) }}</span>

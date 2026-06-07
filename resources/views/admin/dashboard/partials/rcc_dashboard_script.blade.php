@@ -1,11 +1,10 @@
-@include('partials.maps.africa_map_config')
-@include('partials.maps.africa_map_loader')
 <script>
 (function () {
     var colors = window.__rccColors || {};
     var mapChart = null;
     var mainChart = null;
     var subjectCharts = [];
+    var topologyCache = null;
     var debounceTimer = null;
     var lastPayload = null;
     var chartsTabRendered = false;
@@ -26,6 +25,13 @@
             s.onerror = reject;
             document.head.appendChild(s);
         });
+    }
+
+    function loadTopology() {
+        if (topologyCache) return Promise.resolve(topologyCache);
+        return fetch(window.__rccMapTopologyUrl, { mode: 'cors' })
+            .then(function (r) { return r.json(); })
+            .then(function (t) { topologyCache = t; return t; });
     }
 
     function filterParams() {
@@ -214,40 +220,31 @@
         }
         container.innerHTML = '';
         ensureMapModule().then(function () {
-            return KhAfricaMap.load();
-        }).then(function (mapAsset) {
+            return loadTopology();
+        }).then(function (topology) {
             if (mapChart) { mapChart.destroy(); mapChart = null; }
             var mapData = mapPayload.points.map(function (p) {
-                return KhAfricaMap.mapPoint(p);
+                return { 'hc-key': p['hc-key'], value: p.value, name: p.name, display_value: p.display_value, period: p.period };
             });
             var mapSeriesName = mapPayload.kpi_name || 'Indicator value';
-            var joinBy = KhAfricaMap.joinKey();
             mapChart = Highcharts.mapChart('rccMapChart', {
-                chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 460 },
+                chart: { map: topology, backgroundColor: 'transparent', height: 460 },
                 title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
-                credits: { enabled: true, text: KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
+                credits: { enabled: true, text: 'Map © Natural Earth · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
                 mapNavigation: { enabled: true },
+                mapView: { projection: { name: 'WebMercator' } },
                 colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
                 legend: { enabled: false },
-                plotOptions: {
-                    map: {
-                        nullColor: '#f1f5f9',
-                        borderColor: '#ffffff',
-                        borderWidth: 0.5
-                    }
-                },
                 series: [{
                     name: mapSeriesName,
                     type: 'map',
-                    mapData: KhAfricaMap.seriesMapData(mapAsset),
                     data: mapData,
-                    joinBy: joinBy,
-                    dataLabels: KhAfricaMap.dataLabels(),
+                    joinBy: 'hc-key',
                     tooltip: {
                         useHTML: true,
                         formatter: function () {
                             var p = this.point;
-                            return '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
+                            return '<b>' + escapeHtml(p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
                         }
                     }
                 }]

@@ -25,7 +25,7 @@
                     {!! Str::words(strip_tags(clean_unicode($row->description ?? '')), 40, '...') !!}
                 </p>
                 @if(!empty($row->federation_country))
-                    <span class="muted medium d-block"><i class="fa fa-map-marker-alt me-1"></i>{{ $row->federation_country }}</span>
+                    <span class="muted medium d-block"><i class="fa fa-map-marker me-1" aria-hidden="true"></i>{{ $row->federation_country }}</span>
                 @endif
                 <div class="d-flex align-items-center mt-2" style="gap:0.5rem;flex-wrap:wrap;">
                     <a href="{{ $row->federation_source_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm fed-btn-primary">

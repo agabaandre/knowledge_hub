@@ -71,7 +71,11 @@ $(function() {
 			};
 			var v = function() {
 				n(t).find("li").each(function() {
-					n(this).children(".nav-dropdown,.megamenu-panel").length > 0 && (n(this).children(".nav-dropdown,.megamenu-panel").addClass("nav-submenu"), u.settings.submenuIndicator && n(this).children("a").append("<span class='submenu-indicator'><span class='submenu-indicator-chevron'></span></span>"))
+					n(this).children(".nav-dropdown,.megamenu-panel").length > 0 && (n(this).children(".nav-dropdown,.megamenu-panel").addClass("nav-submenu"), u.settings.submenuIndicator && n(this).children("a").each(function() {
+						var a = n(this);
+						if (0 === a.children(".submenu-indicator").length) a.append("<span class='submenu-indicator'><span class='submenu-indicator-chevron'></span></span>");
+						else 0 === a.children(".submenu-indicator .submenu-indicator-chevron").length && a.children(".submenu-indicator").first().append("<span class='submenu-indicator-chevron'></span>")
+					}))
 				})
 			};
 			u.showSubmenu = function(e, i) {

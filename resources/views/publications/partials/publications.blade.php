@@ -176,7 +176,7 @@
      @if(request()->filled('term'))
          <div class="mb-3">
              <h5 style="color:var(--theme-color-primary,#119A48);font-size:1rem;">
-                 <i class="fa fa-globe-africa me-2"></i>From member state hubs
+                 <i class="fa fa-globe-africa me-2"></i>From partner country hubs
              </h5>
          </div>
      @endif
@@ -185,7 +185,7 @@
      @endforeach
      <p class="mb-3">
          <a href="{{ route('federation.browse', ['term' => request('term')]) }}" class="btn btn-sm btn-outline-primary">
-             Browse all member state resources
+             Browse all partner hub resources
          </a>
      </p>
  @endif
