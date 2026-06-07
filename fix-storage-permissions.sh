@@ -46,8 +46,8 @@ if [[ -d /var/khubdata ]]; then
 fi
 
 if [[ -f artisan ]] && command -v php >/dev/null 2>&1; then
-  echo "Linking public/storage to hub files root…"
-  php artisan hub:link-storage || ./link-hub-storage.sh
+  echo "Recovering hub storage (symlink + legacy path detection)…"
+  php artisan hub:recover-storage || php artisan hub:link-storage || ./link-hub-storage.sh
 fi
 
 echo "Done. Reload the site and clear compiled views if needed:"

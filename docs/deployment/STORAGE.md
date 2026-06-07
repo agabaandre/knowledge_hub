@@ -146,6 +146,24 @@ php artisan hub:migrate-storage-to-host
 
 3. After migration, `public/storage` is relinked to `/var/khubdata/{site-id}/files`.
 
+**Production recovery (after deploying latest code):**
+
+```bash
+cd /var/www/khub.africacdc.org   # your app root
+
+# 1. Diagnose + fix symlink (serves from legacy when host path is empty)
+php artisan hub:recover-storage
+
+# 2. If files also exist under storage/uploads/ (old tree), merge them:
+php artisan hub:recover-storage --sync-legacy
+
+# 3. When ready, copy everything to /var/khubdata/{site-id}/files:
+php artisan hub:recover-storage --sync-legacy --migrate-host
+# or: php artisan hub:migrate-storage-to-host
+```
+
+Or use `./recover-hub-storage.sh --sync-legacy` (runs cache clear at the end).
+
 **Emergency recovery (before deploy):** point `public/storage` back at legacy storage:
 
 ```bash
@@ -153,6 +171,8 @@ cd /var/www/khub.africacdc.org   # your app root
 rm -f public/storage
 ln -sfn "$(pwd)/storage/app/public" public/storage
 ```
+
+Files only under `storage/uploads/` need `--sync-legacy` or they are served via `/hub-media/...` after deploy.
 
 ---
 

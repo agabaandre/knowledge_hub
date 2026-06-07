@@ -11,18 +11,12 @@ class HubMediaController extends Controller
     public function show(Request $request, string $path, HubStorageService $storage)
     {
         $path = str_replace(['..', '\\'], ['', '/'], $path);
-        $absolute = $storage->absolutePath($path);
+        $resolved = $storage->resolveReadableFile($path);
 
-        if (! is_file($absolute)) {
+        if ($resolved === null) {
             abort(404);
         }
 
-        $root = realpath($storage->filesRoot());
-        $real = realpath($absolute);
-        if (! $root || ! $real || ! str_starts_with($real, $root)) {
-            abort(403);
-        }
-
-        return new BinaryFileResponse($real);
+        return new BinaryFileResponse($resolved['path']);
     }
 }

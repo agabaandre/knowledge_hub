@@ -87,6 +87,27 @@ class HubStorageService
         return storage_path('app/public');
     }
 
+    /**
+     * Pre-Laravel-public-disk uploads tree (storage/uploads/…), still used on some installs.
+     */
+    public function deprecatedUploadsRoot(): string
+    {
+        return storage_path('uploads');
+    }
+
+    /**
+     * Map uploads/publications/foo.pdf → storage/uploads/publications/foo.pdf
+     */
+    public function deprecatedAbsolutePath(string $relative): ?string
+    {
+        $relative = ltrim(str_replace(['\\', '..'], ['/', ''], $relative), '/');
+        if (! str_starts_with($relative, 'uploads/')) {
+            return null;
+        }
+
+        return $this->deprecatedUploadsRoot().'/'.substr($relative, strlen('uploads/'));
+    }
+
     public function defaultInternalRoot(): string
     {
         $env = trim((string) env('HUB_FILES_ROOT', ''));
@@ -204,8 +225,94 @@ class HubStorageService
 
     public function usesLegacyInternalRoot(): bool
     {
-        return $this->settings()->files_driver === 'internal'
-            && realpath($this->filesRoot()) === realpath($this->legacyInternalRoot());
+        if ($this->settings()->files_driver !== 'internal') {
+            return false;
+        }
+
+        if ($this->isUsingLegacyUploadFallback()) {
+            return true;
+        }
+
+        $root = realpath($this->filesRoot());
+        $legacy = realpath($this->legacyInternalRoot());
+
+        return $root !== false && $legacy !== false && $root === $legacy;
+    }
+
+    /**
+     * Resolve a relative uploads path to a readable file on disk (active root, then legacy).
+     *
+     * @return array{path: string, root: string}|null
+     */
+    public function resolveReadableFile(string $relative): ?array
+    {
+        if ($this->usesExternalFiles()) {
+            $absolute = $this->absolutePath($relative);
+            if (! is_file($absolute)) {
+                return null;
+            }
+            $root = realpath($this->filesRoot());
+
+            return $root ? ['path' => realpath($absolute) ?: $absolute, 'root' => $root] : null;
+        }
+
+        $relative = ltrim(str_replace(['\\', '..'], ['/', ''], $relative), '/');
+
+        foreach ($this->readableInternalRoots() as $root) {
+            $absolute = rtrim($root, '/\\').DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            $resolved = $this->readableFileUnderRoot($absolute, $root);
+            if ($resolved !== null) {
+                return $resolved;
+            }
+        }
+
+        $deprecated = $this->deprecatedAbsolutePath($relative);
+        if ($deprecated !== null) {
+            $resolved = $this->readableFileUnderRoot($deprecated, $this->deprecatedUploadsRoot());
+            if ($resolved !== null) {
+                return $resolved;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * @return list<string>
+     */
+    protected function readableInternalRoots(): array
+    {
+        $roots = [$this->filesRoot()];
+        $legacy = $this->legacyInternalRoot();
+        $configured = $this->configuredInternalRoot();
+
+        foreach ([$legacy, $configured] as $candidate) {
+            if ($this->pathsDiffer($candidate, $roots[0])) {
+                $roots[] = $candidate;
+            }
+        }
+
+        return array_values(array_unique($roots));
+    }
+
+    /**
+     * @return array{path: string, root: string}|null
+     */
+    protected function readableFileUnderRoot(string $absolute, string $root): ?array
+    {
+        if (! is_file($absolute)) {
+            return null;
+        }
+        $rootReal = realpath($root);
+        $fileReal = realpath($absolute);
+        if ($rootReal === false || $fileReal === false) {
+            return null;
+        }
+        if (! str_starts_with($fileReal, $rootReal)) {
+            return null;
+        }
+
+        return ['path' => $fileReal, 'root' => $rootReal];
     }
 
     /**
@@ -453,9 +560,8 @@ class HubStorageService
         }
 
         if (realpath($target) === realpath($this->legacyInternalRoot())) {
-            if (! File::exists($link)) {
-                Artisan::call('storage:link');
-            }
+            $this->removePublicStorageLink($link);
+            Artisan::call('storage:link');
 
             return;
         }
@@ -555,11 +661,30 @@ class HubStorageService
             }
         }
 
-        if ($this->settings()->files_driver === 'internal' && $this->usesLegacyInternalRoot()) {
+        if ($this->settings()->files_driver === 'internal' && $this->canServeViaPublicStorage($relative)) {
             return url('/storage/'.$relative);
         }
 
         return url('/hub-media/'.$relative);
+    }
+
+    protected function canServeViaPublicStorage(string $relative): bool
+    {
+        if (! $this->publicStorageLinkOk()) {
+            return false;
+        }
+
+        $resolved = $this->resolveReadableFile($relative);
+        if ($resolved === null) {
+            return false;
+        }
+
+        $linkRoot = $this->realpathOrNull($this->filesRoot());
+        if ($linkRoot === null) {
+            return false;
+        }
+
+        return str_starts_with($resolved['path'], $linkRoot);
     }
 
     /**
@@ -592,21 +717,9 @@ class HubStorageService
                 ];
             }
         } else {
-            $absolute = $this->absolutePath($relative);
-            if (! is_dir($absolute)) {
+            $items = $this->browseInternalDirectory($relative, $subPath);
+            if ($items === []) {
                 return ['items' => [], 'path' => $relative];
-            }
-            foreach (scandir($absolute) ?: [] as $entry) {
-                if ($entry === '.' || $entry === '..') {
-                    continue;
-                }
-                $full = $absolute.DIRECTORY_SEPARATOR.$entry;
-                $items[] = [
-                    'name' => $entry,
-                    'type' => is_dir($full) ? 'dir' : 'file',
-                    'path' => trim(($subPath === '' ? '' : $subPath.'/').$entry, '/'),
-                    'size' => is_file($full) ? filesize($full) : null,
-                ];
             }
         }
 
@@ -780,6 +893,44 @@ class HubStorageService
         ]);
 
         return ['status' => 'completed', 'files' => $done];
+    }
+
+    /**
+     * @return array<int, array<string, mixed>>
+     */
+    protected function browseInternalDirectory(string $relative, string $subPath): array
+    {
+        $items = [];
+        $seen = [];
+        $directories = [$this->absolutePath($relative)];
+        $deprecated = $this->deprecatedAbsolutePath($relative);
+        if ($deprecated !== null) {
+            $directories[] = $deprecated;
+        }
+
+        foreach ($directories as $absolute) {
+            if (! is_dir($absolute)) {
+                continue;
+            }
+            foreach (scandir($absolute) ?: [] as $entry) {
+                if ($entry === '.' || $entry === '..') {
+                    continue;
+                }
+                if (isset($seen[$entry])) {
+                    continue;
+                }
+                $seen[$entry] = true;
+                $full = $absolute.DIRECTORY_SEPARATOR.$entry;
+                $items[] = [
+                    'name' => $entry,
+                    'type' => is_dir($full) ? 'dir' : 'file',
+                    'path' => trim(($subPath === '' ? '' : $subPath.'/').$entry, '/'),
+                    'size' => is_file($full) ? filesize($full) : null,
+                ];
+            }
+        }
+
+        return $items;
     }
 
     /**
