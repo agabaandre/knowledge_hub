@@ -26,10 +26,23 @@ class HubStorageSetting extends Model
     protected $casts = [
         'cloud_config' => 'array',
         'auto_sql_backup' => 'boolean',
+        'sql_backup_retention_days' => 'integer',
         'last_sql_backup_at' => 'datetime',
     ];
 
     private static ?self $currentCache = null;
+
+    protected static function booted(): void
+    {
+        static::saved(static function () {
+            self::$currentCache = null;
+        });
+    }
+
+    public static function forgetCache(): void
+    {
+        self::$currentCache = null;
+    }
 
     public static function current(): self
     {

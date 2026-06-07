@@ -1128,7 +1128,10 @@
                                     </div>
                                     <div class="col-lg-4 mb-3">
                                         <label class="form-label fw-semibold">Retain backups (days)</label>
-                                        <input type="number" name="sql_backup_retention_days" class="form-control" min="1" max="3650" value="{{ old('sql_backup_retention_days', $settings->sql_backup_retention_days) }}">
+                                        <input type="number" name="sql_backup_retention_days" class="form-control @error('sql_backup_retention_days') is-invalid @enderror" min="1" max="3650" required value="{{ old('sql_backup_retention_days', $settings->sql_backup_retention_days ?? 30) }}">
+                                        @error('sql_backup_retention_days')
+                                            <div class="invalid-feedback d-block">{{ $message }}</div>
+                                        @enderror
                                     </div>
                                 </div>
                                 <div class="form-check">
@@ -1472,8 +1475,6 @@
     var hash = (window.location.hash || '').replace(/^#storage-/, '');
     if (hash && document.getElementById('storage-section-' + hash)) {
         activateStorageTab(hash);
-    } else if (window.location.search.indexOf('refresh_metrics=1') !== -1) {
-        activateStorageTab('overview');
     }
 
     var driver = document.getElementById('filesDriver');

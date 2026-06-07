@@ -20,6 +20,9 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/test_compiled.php
+/tinker_diagnose.php
+/storage/logs/test_write
 /Afcdc theme/
 /HTML
 /public/.well-known/assets.json

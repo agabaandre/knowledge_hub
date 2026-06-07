@@ -11,7 +11,9 @@ use App\Services\HubStorageMetricsService;
 use App\Services\HubStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\ValidationException;
 
 class StorageManagementController extends Controller
 {
@@ -60,7 +62,7 @@ class StorageManagementController extends Controller
             'local_files_root' => 'nullable|string|max:512',
             'sql_backup_root' => 'nullable|string|max:512',
             'auto_sql_backup' => 'nullable|boolean',
-            'sql_backup_retention_days' => 'nullable|integer|min:1|max:3650',
+            'sql_backup_retention_days' => 'required|integer|min:1|max:3650',
             'cloud_key' => 'nullable|string|max:255',
             'cloud_secret' => 'nullable|string|max:255',
             'cloud_region' => 'nullable|string|max:64',
@@ -91,7 +93,13 @@ class StorageManagementController extends Controller
             'sharepoint_drive_id' => 'nullable|string|max:255',
         ]);
 
-        $settings = $storage->settings();
+        if (! Schema::hasTable('hub_storage_settings')) {
+            throw ValidationException::withMessages([
+                'sql_backup_root' => 'Storage settings table is missing. Run database migrations first.',
+            ]);
+        }
+
+        $settings = HubStorageSetting::current();
         $existingCloud = $settings->cloud_config ?? [];
 
         $cloud = array_merge($existingCloud, array_filter([
@@ -131,10 +139,11 @@ class StorageManagementController extends Controller
                 : null,
             'sql_backup_root' => $validated['sql_backup_root'] ?: $storage->defaultSqlBackupRoot(),
             'auto_sql_backup' => $request->boolean('auto_sql_backup'),
-            'sql_backup_retention_days' => (int) ($validated['sql_backup_retention_days'] ?? 30),
+            'sql_backup_retention_days' => (int) $validated['sql_backup_retention_days'],
             'cloud_config' => $cloud,
         ]);
 
+        $storage->forgetSettingsCache();
         $storage->ensureDirectories();
 
         return redirect()

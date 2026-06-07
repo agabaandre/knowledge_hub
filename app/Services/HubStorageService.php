@@ -32,11 +32,22 @@ class HubStorageService
 
     protected function hubStorageSettingsTableExists(): bool
     {
-        if ($this->hasSettingsTable !== null) {
-            return $this->hasSettingsTable;
+        if ($this->hasSettingsTable === true) {
+            return true;
         }
 
-        return $this->hasSettingsTable = Schema::hasTable('hub_storage_settings');
+        if (Schema::hasTable('hub_storage_settings')) {
+            return $this->hasSettingsTable = true;
+        }
+
+        return false;
+    }
+
+    public function forgetSettingsCache(): void
+    {
+        $this->settingsCache = null;
+        $this->hasSettingsTable = null;
+        HubStorageSetting::forgetCache();
     }
 
     public function settings(): HubStorageSetting
@@ -51,6 +62,7 @@ class HubStorageService
                 'local_files_root' => $this->defaultInternalRoot(),
                 'sql_backup_root' => $this->defaultSqlBackupRoot(),
                 'auto_sql_backup' => true,
+                'sql_backup_retention_days' => 30,
             ]);
         }
 
