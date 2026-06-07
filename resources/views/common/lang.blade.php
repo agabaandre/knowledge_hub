@@ -1,5 +1,5 @@
 <div id="google_translate_element" style="display: none;"></div>
-    <select class="form-control select2" onchange="translateLanguage();" style="border:#FFF;" name="langauge">
+    <select class="form-control select2 khub-profile-lang-select" style="border:#FFF;" name="langauge" id="khubProfileLangSelect">
         @foreach(\App\Models\SiteLanguage::selectorMap() as $code => $row)
             <option value="{{ $code }}"
                     data-google-code="{{ $row['google_code'] ?? $code }}"
@@ -111,4 +111,32 @@ window.translateLanguage = function() {
     }
     @endauth
 };
+
+(function () {
+    function bindProfileLangSelect() {
+        var sel = document.getElementById('khubProfileLangSelect') || document.querySelector('select[name="langauge"]');
+        if (!sel || sel.dataset.khubLangBound === '1') return;
+        sel.dataset.khubLangBound = '1';
+        sel.addEventListener('change', function () {
+            if (typeof window.translateLanguage === 'function') {
+                window.translateLanguage();
+            }
+        });
+        if (typeof jQuery !== 'undefined' && jQuery && jQuery.fn.select2) {
+            jQuery(sel).on('select2:select select2:clear', function () {
+                if (typeof window.translateLanguage === 'function') {
+                    window.translateLanguage();
+                }
+            });
+        }
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bindProfileLangSelect);
+    } else {
+        bindProfileLangSelect();
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        setTimeout(bindProfileLangSelect, 300);
+    });
+})();
 </script>

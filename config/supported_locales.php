@@ -40,4 +40,13 @@ return [
     'locale_cookie' => 'khub_locale',
 
     'locale_cookie_minutes' => 60 * 24 * 365,
+
+    /*
+    | Cookie path for locale / Google Translate (subdir installs e.g. /knowledge_hub/).
+    */
+    'cookie_path' => ($__localeCookiePath = parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_PATH))
+        && $__localeCookiePath !== '/'
+        && $__localeCookiePath !== ''
+        ? rtrim($__localeCookiePath, '/').'/'
+        : '/',
 ];

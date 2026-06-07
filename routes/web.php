@@ -17,6 +17,7 @@ use App\Http\Controllers\AuthorsController;
 use App\Http\Controllers\ExpertsController;
 use App\Http\Controllers\FaqsController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PublicationsController;
 use App\Http\Controllers\Admin\ResourcesController;
 use App\Http\Controllers\AreasController;
@@ -99,6 +100,10 @@ use App\Http\Controllers\DocsController;
 */
 
 Auth::routes(['verify' => true, 'reset' => false]);
+
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
+    ->name('locale.switch')
+    ->where('locale', '[a-z]{2,8}');
 
 /*
 |--------------------------------------------------------------------------

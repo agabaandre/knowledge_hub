@@ -155,12 +155,12 @@ class SiteLanguage extends Model
         $codes = array_keys($map);
         $default = in_array('en', $codes, true) ? 'en' : ($codes[0] ?? 'en');
 
-        if (is_string($userLocale) && $userLocale !== '' && in_array($userLocale, $codes, true)) {
-            return $userLocale;
-        }
-
         if (is_string($khubLocale) && $khubLocale !== '' && in_array($khubLocale, $codes, true)) {
             return $khubLocale;
+        }
+
+        if (is_string($userLocale) && $userLocale !== '' && in_array($userLocale, $codes, true)) {
+            return $userLocale;
         }
 
         if (is_string($googtransRaw) && $googtransRaw !== '') {

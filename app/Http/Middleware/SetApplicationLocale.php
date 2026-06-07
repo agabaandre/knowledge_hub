@@ -16,21 +16,20 @@ class SetApplicationLocale
         $defaultCfg = config('supported_locales.default', config('app.locale', 'en'));
         $locale = in_array($defaultCfg, $supported, true) ? $defaultCfg : (in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en'));
 
-        if ($request->user()) {
-            $userLang = $request->user()->langauge ?? null;
-            if (is_string($userLang) && in_array($userLang, $supported, true)) {
-                $locale = $userLang;
-            }
-        }
-
+        // Explicit selector choice (cookie) wins — menu/footer use Laravel lang files, not Google Translate.
         $cookieName = config('supported_locales.locale_cookie');
-        if ($cookieName && ($cookieLocale = $request->cookie($cookieName))) {
-            if (is_string($cookieLocale) && in_array($cookieLocale, $supported, true)) {
-                // Guest or preference before login: cookie applies when user has no DB preference
-                if (! $request->user() || empty($request->user()->langauge)) {
-                    $locale = $cookieLocale;
-                }
-            }
+        $cookieLocale = $cookieName ? $request->cookie($cookieName) : null;
+        $userLang = $request->user()?->langauge ?? null;
+        $googtrans = $request->cookie('googtrans');
+
+        $locale = SiteLanguage::resolveActiveLocale(
+            is_string($userLang) ? $userLang : null,
+            is_string($googtrans) ? $googtrans : null,
+            is_string($cookieLocale) ? $cookieLocale : null
+        );
+
+        if (! in_array($locale, $supported, true)) {
+            $locale = in_array('en', $supported, true) ? 'en' : ($supported[0] ?? 'en');
         }
 
         App::setLocale($locale);

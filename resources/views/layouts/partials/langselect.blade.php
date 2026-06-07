@@ -477,6 +477,34 @@
 
     window.khubLangMeta = @json($languages);
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
+    @php
+        $runtimeCookiePath = config('supported_locales.cookie_path', '/');
+        $basePath = request()->getBasePath();
+        if (is_string($basePath) && $basePath !== '' && $basePath !== '/') {
+            $runtimeCookiePath = rtrim($basePath, '/').'/';
+        }
+    @endphp
+    var khubLocaleCookiePath = @json($runtimeCookiePath);
+    var khubLocaleMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
+    var khubLocaleSwitchTemplate = @json(route('locale.switch', ['locale' => '__LOCALE__']));
+
+    function writeAppCookie(name, value, maxAgeSec) {
+        var parts = [
+            name + '=' + encodeURIComponent(value),
+            'path=' + khubLocaleCookiePath,
+            'SameSite=Lax'
+        ];
+        if (typeof maxAgeSec === 'number') {
+            parts.push('max-age=' + maxAgeSec);
+        }
+        document.cookie = parts.join(';');
+    }
+
+    function clearAppCookie(name) {
+        writeAppCookie(name, '', 0);
+        // Legacy cookies set with path=/ before subdir fix
+        document.cookie = name + '=;path=/;max-age=0;SameSite=Lax';
+    }
 
     function readCookie(name) {
         var m = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
@@ -499,20 +527,10 @@
 
     function getCurrentLang() {
         var serverLang = '{{ $currentLang }}';
-
-        @auth
-        if (serverLang) {
-            return serverLang;
-        }
         var khub = readCookie(khubLocaleCookieName);
         if (khub && window.khubLangMeta && window.khubLangMeta[khub]) return khub;
+        if (serverLang && window.khubLangMeta && window.khubLangMeta[serverLang]) return serverLang;
         return resolveLocaleFromGoogleCookie() || serverLang || 'en';
-        @else
-        var khubG = readCookie(khubLocaleCookieName);
-        if (khubG && window.khubLangMeta && window.khubLangMeta[khubG]) return khubG;
-        var fromGoog = resolveLocaleFromGoogleCookie();
-        return fromGoog || serverLang || 'en';
-        @endauth
     }
 
     function updateLanguageUI(langCode) {
@@ -553,7 +571,6 @@
     // Update UI on load - check immediately and also after a short delay to catch any changes
     function initializeLanguageUI() {
         var currentLang = getCurrentLang();
-        console.log('Initializing language UI with:', currentLang);
         updateLanguageUI(currentLang);
     }
     
@@ -567,165 +584,32 @@
     // Also update after a short delay to catch any late changes from cookie/translation
     setTimeout(initializeLanguageUI, 500);
 
-    // Global changeLanguage function (localeCode = Laravel/users.langauge; googleCode = Google Translate widget)
+    // Global changeLanguage: server sets khub_locale + googtrans cookies, then reloads with Laravel locale for nav/footer.
     window.changeLanguage = function(localeCode, googleCode) {
         googleCode = googleCode || localeCode;
-        // Laravel UI locale (nav/footer/account chrome) — complements Google Translate on page body
-        try {
-            var localeMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
-            document.cookie = khubLocaleCookieName + '=' + encodeURIComponent(localeCode) + ';path=/;max-age=' + localeMaxAgeSec + ';SameSite=Lax';
-        } catch (e) { /* non-fatal */ }
+
+        writeAppCookie(khubLocaleCookieName, localeCode, khubLocaleMaxAgeSec);
+        if (localeCode === 'en') {
+            clearAppCookie('googtrans');
+        } else {
+            writeAppCookie('googtrans', '/auto/' + googleCode, khubLocaleMaxAgeSec);
+        }
 
         updateLanguageUI(localeCode);
-        
-        // Close all dropdowns
-        var selectors = document.querySelectorAll('#languageSelector');
-        selectors.forEach(function(selector) {
+
+        document.querySelectorAll('#languageSelector').forEach(function(selector) {
             selector.classList.remove('active');
             var dropdown = selector.querySelector('#languageDropdown');
             if (dropdown) {
                 dropdown.style.cssText = '';
             }
         });
-        
-        // Save language preference (non-blocking, handles errors gracefully)
-        @auth
-        if (typeof window.jQuery !== 'undefined' && window.jQuery && window.jQuery.ajax) {
-            // Get current user preferences as JSON array
-            @php
-                $userPreferences = [];
-                if (auth()->check() && current_user()) {
-                    $userPreferences = current_user()->preferences()->pluck('subtheme_id')->toArray();
-                }
-            @endphp
-            
-            window.jQuery.ajax({
-                url: '{{ route("account.update") }}',
-                method: 'POST',
-                data: {
-                    _token: '{{ csrf_token() }}',
-                    langauge: localeCode,
-                    id: {{ current_user()->id ?? 0 }},
-                    first_name: '{{ current_user()->first_name ?? "" }}',
-                    last_name: '{{ current_user()->last_name ?? "" }}',
-                    email: '{{ current_user()->email ?? "" }}',
-                    preferences: {{ json_encode($userPreferences) }}
-                },
-                success: function() {
-                    console.log('Language preference saved');
-                },
-                error: function(xhr, status, error) {
-                    // Fail silently - language change via Google Translate still works
-                    console.log('Language preference save failed (non-critical):', error);
-                }
-            });
-        }
-        @endauth
-        
-        // Special handling for English - remove translation without reload
-        if (localeCode === 'en') {
-            // Clear the translation cookie
-            var date = new Date();
-            date.setTime(date.getTime() - 1); // Expire immediately
-            document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
-            
-            // Remove translation classes and styles using vanilla JS (no jQuery dependency)
-            document.body.classList.remove('translated-rtl');
-            document.documentElement.classList.remove('translated-rtl');
-            
-            // Remove Google Translate stylesheet links
-            var translateLinks = document.querySelectorAll('head link[href*="translate.googleapis.com"]');
-            translateLinks.forEach(function(link) {
-                link.remove();
-            });
-            
-            // Remove inline direction styles
-            var elementsWithDirection = document.querySelectorAll('[style*="direction"]');
-            elementsWithDirection.forEach(function(el) {
-                if (el.style.direction) {
-                    el.style.direction = '';
-                }
-            });
-            
-            // Try to revert translation using Google Translate widget (if available)
-            var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
-            if (teCombo) {
-                // Find English option
-                var enIndex = Array.from(teCombo.options).findIndex(function(option) {
-                    return option.value === 'en' || option.value === '';
-                });
-                if (enIndex !== -1) {
-                    teCombo.selectedIndex = enIndex;
-                    // Fire change event
-                    try {
-                        if (typeof GTranslateFireEvent === 'function') {
-                            GTranslateFireEvent(teCombo, 'change');
-                        } else {
-                            // Fallback: create and dispatch event
-                            var event = new Event('change', { bubbles: true });
-                            teCombo.dispatchEvent(event);
-                        }
-                    } catch (e) {
-                        console.log('Error firing translate event:', e);
-                    }
-                }
-            }
-            
-            // Save English preference cookie
-            date = new Date();
-            date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
-            document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
-            
-            console.log('Translation removed (English selected)');
-            return false;
-        }
-        
-        // For non-English languages, use doGTranslate function
-        var translationAttempts = 0;
-        var maxAttempts = 50; // Wait up to 5 seconds (50 * 100ms)
-        
-        function triggerTranslation() {
-            translationAttempts++;
-            
-            // Check if doGTranslate function is available
-            if (typeof doGTranslate === 'function') {
-                // Also check if jQuery is available (doGTranslate uses it)
-                if (typeof window.jQuery === 'undefined' && typeof $ === 'undefined') {
-                    if (translationAttempts < maxAttempts) {
-                        setTimeout(triggerTranslation, 100);
-                        return;
-                    }
-                }
-                
-                try {
-                    console.log('Calling doGTranslate with language:', googleCode);
-                    doGTranslate(googleCode);
-                } catch (e) {
-                    console.error('Translation error:', e);
-                    // Fallback: set cookie and reload page (only for non-English)
-                    var date = new Date();
-                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
-                    window.location.reload();
-                }
-            } else {
-                // Function not loaded yet, wait a bit and try again
-                if (translationAttempts < maxAttempts) {
-                    setTimeout(triggerTranslation, 100);
-                } else {
-                    // Still not available after max attempts, use cookie fallback
-                    console.log('doGTranslate not available after ' + maxAttempts + ' attempts, using cookie fallback');
-                    var date = new Date();
-                    date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
-                    document.cookie = "googtrans=/auto/" + googleCode + "; expires=" + date.toUTCString() + "; path=/";
-                    window.location.reload();
-                }
-            }
-        }
-        
-        // Start translation attempt
-        triggerTranslation();
-        
+
+        var redirectTarget = window.location.pathname + window.location.search + window.location.hash;
+        var switchUrl = khubLocaleSwitchTemplate.replace('__LOCALE__', encodeURIComponent(localeCode));
+        switchUrl += (switchUrl.indexOf('?') === -1 ? '?' : '&') + 'redirect=' + encodeURIComponent(redirectTarget);
+        window.location.href = switchUrl;
+
         return false;
     };
 })();
