@@ -300,6 +300,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::post('/storage-management/migrate-host', [StorageManagementController::class, 'migrateHost'])->name('admin.storage.migrate-host');
     Route::post('/storage-management/purge-legacy', [StorageManagementController::class, 'purgeLegacy'])->name('admin.storage.purge-legacy');
     Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
+    Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
 
     Route::get('/federated-hubs', [FederatedHubsController::class, 'index'])->name('admin.federation.index');
     Route::post('/federated-hubs', [FederatedHubsController::class, 'store'])->name('admin.federation.store');

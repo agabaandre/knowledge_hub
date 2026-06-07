@@ -7,6 +7,7 @@ use App\Jobs\MigrateHostStorageJob;
 use App\Jobs\MigrateHubStorageJob;
 use App\Models\HubStorageSetting;
 use App\Services\HubDatabaseBackupService;
+use App\Services\HubStorageMetricsService;
 use App\Services\HubStorageService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
@@ -14,7 +15,7 @@ use Illuminate\Validation\Rule;
 
 class StorageManagementController extends Controller
 {
-    public function index(HubStorageService $storage, HubDatabaseBackupService $backup)
+    public function index(HubStorageService $storage, HubDatabaseBackupService $backup, HubStorageMetricsService $metrics)
     {
         $settings = $storage->settings();
         $recommended = $storage->recommendedPaths();
@@ -24,6 +25,8 @@ class StorageManagementController extends Controller
         } catch (\Throwable) {
             // Admin page should still load if linking fails (permissions, etc.).
         }
+
+        $freshMetrics = request()->boolean('refresh_metrics');
 
         return view('admin.storage.index', [
             'settings' => $settings,
@@ -46,6 +49,7 @@ class StorageManagementController extends Controller
             'siteStorageId' => $storage->siteStorageId(),
             'backupTableGroups' => $backup->backupTableGroups(),
             'kpiExcludedTables' => config('hub_storage.backup_kpi_tables', []),
+            'systemMetrics' => $metrics->snapshot($storage, $freshMetrics),
         ]);
     }
 
@@ -322,5 +326,10 @@ class StorageManagementController extends Controller
             'done' => (int) $settings->migration_files_done,
             'message' => $settings->migration_message,
         ]);
+    }
+
+    public function systemMetrics(HubStorageService $storage, HubStorageMetricsService $metrics)
+    {
+        return response()->json($metrics->snapshot($storage, request()->boolean('fresh')));
     }
 }

@@ -7,6 +7,20 @@
     $purgeBytesMb = ($legacyPurgePreview['bytes'] ?? 0) > 0
         ? number_format(($legacyPurgePreview['bytes'] ?? 0) / 1048576, 1)
         : '0';
+    $metrics = $systemMetrics ?? [];
+    $hostDisk = $metrics['disk']['host_site'] ?? null;
+    $uploadSize = $metrics['sizes']['uploads'] ?? null;
+    $backupSize = $metrics['sizes']['sql_backups'] ?? null;
+    $sysMem = $metrics['memory']['system'] ?? null;
+    $phpMem = $metrics['memory']['php'] ?? null;
+    $loadAvg = $metrics['load'] ?? null;
+    $queueHealth = $metrics['queue'] ?? null;
+    $deployment = $metrics['deployment'] ?? [];
+    $database = $metrics['database'] ?? [];
+    $stack = $metrics['stack'] ?? [];
+    $runtime = $metrics['runtime'] ?? [];
+    $deploymentLabel = $deployment['custom_label'] ?? $deployment['label'] ?? '—';
+    $metricsCollectedAt = isset($metrics['collected_at']) ? \Illuminate\Support\Carbon::parse($metrics['collected_at']) : null;
 @endphp
 
 @section('styles')
@@ -322,6 +336,200 @@
         margin-top: 1rem;
     }
 
+    .storage-kpi-row.metrics-row {
+        border-top: 1px dashed #e2e8f0;
+        padding-top: 1rem;
+    }
+
+    .storage-kpi-value.metric-number {
+        font-size: 1.15rem;
+    }
+
+    .storage-metric-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .storage-metric-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 1rem 1.1rem;
+        background: #fff;
+    }
+
+    .storage-metric-card h4 {
+        font-size: 0.82rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: #64748b;
+        margin: 0 0 0.65rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .storage-metric-card h4 i {
+        color: var(--theme-color-primary, #119A48);
+        margin-right: 0.35rem;
+        text-transform: none;
+    }
+
+    .storage-metric-main {
+        font-size: 1.35rem;
+        font-weight: 700;
+        color: #0f172a;
+        line-height: 1.2;
+        margin-bottom: 0.35rem;
+    }
+
+    .storage-metric-sub {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin-bottom: 0.65rem;
+    }
+
+    .storage-metric-bar {
+        height: 8px;
+        border-radius: 999px;
+        background: #e2e8f0;
+        overflow: hidden;
+    }
+
+    .storage-metric-bar-fill {
+        height: 100%;
+        border-radius: 999px;
+        transition: width 0.4s ease;
+    }
+
+    .storage-metric-bar-fill.ok { background: linear-gradient(90deg, #22c55e, #16a34a); }
+    .storage-metric-bar-fill.warn { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+    .storage-metric-bar-fill.bad { background: linear-gradient(90deg, #f87171, #ef4444); }
+    .storage-metric-bar-fill.info { background: linear-gradient(90deg, #38bdf8, #0ea5e9); }
+
+    .storage-metric-footer {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.72rem;
+        color: #94a3b8;
+        margin-top: 0.35rem;
+    }
+
+    .storage-metrics-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .storage-metrics-toolbar .small {
+        color: #64748b;
+    }
+
+    .storage-spec-table td:first-child {
+        width: 38%;
+        color: #64748b;
+        font-size: 0.82rem;
+    }
+
+    .storage-spec-table td:last-child {
+        font-size: 0.85rem;
+        word-break: break-word;
+    }
+
+    .storage-spec-table code {
+        font-size: 0.8rem;
+    }
+
+    .storage-env-badge {
+        font-size: 0.72rem;
+        vertical-align: middle;
+    }
+
+    /* High-contrast status badges (admin theme overrides Bootstrap bg-* text colour) */
+    .storage-status-badge {
+        display: inline-block;
+        padding: 0.28rem 0.6rem;
+        border-radius: 6px;
+        font-size: 0.78rem;
+        font-weight: 700;
+        line-height: 1.25;
+        letter-spacing: 0.02em;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .storage-status-badge--success {
+        background: #dcfce7;
+        color: #14532d !important;
+        border-color: #86efac;
+    }
+
+    .storage-status-badge--info {
+        background: #e0f2fe;
+        color: #0c4a6e !important;
+        border-color: #7dd3fc;
+    }
+
+    .storage-status-badge--danger {
+        background: #fee2e2;
+        color: #991b1b !important;
+        border-color: #fca5a5;
+    }
+
+    .storage-status-badge--warning {
+        background: #fef3c7;
+        color: #92400e !important;
+        border-color: #fcd34d;
+    }
+
+    .storage-status-badge--neutral {
+        background: #e2e8f0;
+        color: #1e293b !important;
+        border-color: #94a3b8;
+    }
+
+    .storage-status-badge--running {
+        background: #ffedd5;
+        color: #9a3412 !important;
+        border-color: #fdba74;
+        animation: storage-badge-pulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes storage-badge-pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.72; }
+    }
+
+    .storage-live-indicator {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        font-size: 0.75rem;
+        color: #64748b;
+        font-weight: 500;
+    }
+
+    .storage-live-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #22c55e;
+        box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+        animation: storage-live-pulse 2s infinite;
+    }
+
+    @keyframes storage-live-pulse {
+        0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45); }
+        70% { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+    }
+
     @media (max-width: 767px) {
         .storage-hero,
         .storage-kpi-row,
@@ -398,34 +606,130 @@
         </div>
         <div class="storage-kpi">
             <div class="storage-kpi-label">Public URL link</div>
-            <div class="storage-kpi-value">
+            <div class="storage-kpi-value" id="liveLinkBadgeWrap">
                 @if($settings->files_driver !== 'internal')
-                    <span class="badge bg-info">External driver</span>
+                    <span class="storage-status-badge storage-status-badge--info" id="liveLinkBadge">External driver</span>
                 @elseif($linkStatusOk)
-                    <span class="badge bg-success">Linked</span>
+                    <span class="storage-status-badge storage-status-badge--success" id="liveLinkBadge">Linked</span>
                 @else
-                    <span class="badge bg-danger">Needs fix</span>
+                    <span class="storage-status-badge storage-status-badge--danger" id="liveLinkBadge">Needs fix</span>
                 @endif
             </div>
             <div class="storage-kpi-meta">public/storage → files root</div>
         </div>
         <div class="storage-kpi">
             <div class="storage-kpi-label">Migration</div>
-            <div class="storage-kpi-value">
+            <div class="storage-kpi-value" id="liveMigrationBadgeWrap">
                 @if($migrationRunning)
-                    <span class="badge bg-warning text-dark">Running</span>
+                    <span class="storage-status-badge storage-status-badge--running" id="liveMigrationBadge">Running</span>
                 @elseif($settings->migration_status === 'completed')
-                    <span class="badge bg-success">Completed</span>
+                    <span class="storage-status-badge storage-status-badge--success" id="liveMigrationBadge">Completed</span>
                 @else
-                    <span class="badge bg-secondary">Idle</span>
+                    <span class="storage-status-badge storage-status-badge--neutral" id="liveMigrationBadge">Idle</span>
                 @endif
             </div>
-            <div class="storage-kpi-meta">
+            <div class="storage-kpi-meta" id="liveMigrationMeta">
                 @if($settings->migration_message)
                     {{ Str::limit($settings->migration_message, 48) }}
                 @else
                     No recent migration activity
                 @endif
+            </div>
+        </div>
+    </div>
+
+    <div class="storage-kpi-row metrics-row">
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-hdd me-1"></i> Host disk free</div>
+            <div class="storage-kpi-value metric-number" id="liveDiskFree">
+                @if($hostDisk['available'] ?? false)
+                    {{ $hostDisk['free_human'] }}
+                @else
+                    —
+                @endif
+            </div>
+            <div class="storage-kpi-meta" id="liveDiskMeta">
+                @if($hostDisk['available'] ?? false)
+                    {{ $hostDisk['used_percent'] }}% used of {{ $hostDisk['total_human'] }}
+                @else
+                    Disk stats unavailable
+                @endif
+            </div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-file-upload me-1"></i> Upload storage</div>
+            <div class="storage-kpi-value metric-number" id="liveUploadSize">{{ $uploadSize['human'] ?? '—' }}</div>
+            <div class="storage-kpi-meta">Active files root</div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-database me-1"></i> SQL backups</div>
+            <div class="storage-kpi-value metric-number" id="liveBackupSize">{{ $backupSize['human'] ?? '—' }}</div>
+            <div class="storage-kpi-meta">{{ $sqlBackupRoot }}</div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-memory me-1"></i> Server RAM</div>
+            <div class="storage-kpi-value metric-number" id="liveRamValue">
+                @if($sysMem)
+                    {{ $sysMem['available_human'] }} free
+                @elseif($phpMem)
+                    {{ $phpMem['used_human'] }} PHP
+                @else
+                    —
+                @endif
+            </div>
+            <div class="storage-kpi-meta" id="liveRamMeta">
+                @if($sysMem)
+                    {{ $sysMem['used_percent'] }}% used of {{ $sysMem['total_human'] }}
+                @elseif($phpMem)
+                    Limit {{ $phpMem['limit_human'] }}
+                @else
+                    System RAM not exposed on this OS
+                @endif
+            </div>
+        </div>
+    </div>
+
+    <div class="storage-kpi-row metrics-row" style="border-top: none; padding-top: 0;">
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-code me-1"></i> PHP</div>
+            <div class="storage-kpi-value metric-number">{{ $runtime['php_version'] ?? PHP_VERSION }}</div>
+            <div class="storage-kpi-meta">Laravel {{ $runtime['laravel_version'] ?? app()->version() }}</div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-database me-1"></i> MySQL</div>
+            <div class="storage-kpi-value metric-number" id="liveMysqlVersion">
+                @if($database['connected'] ?? false)
+                    {{ $database['version_short'] ?? 'Connected' }}
+                @else
+                    <span class="text-danger">Offline</span>
+                @endif
+            </div>
+            <div class="storage-kpi-meta" id="liveMysqlMeta">
+                @if($database['connected'] ?? false)
+                    {{ $database['size_human'] ?? '—' }} · {{ $database['database'] ?? '' }}
+                @else
+                    {{ Str::limit($database['error'] ?? 'Connection failed', 40) }}
+                @endif
+            </div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-server me-1"></i> Deployment</div>
+            <div class="storage-kpi-value">{{ $deploymentLabel }}</div>
+            <div class="storage-kpi-meta">
+                {{ strtoupper($runtime['app_env'] ?? config('app.env')) }}
+                @if($runtime['app_debug'] ?? config('app.debug'))
+                    · <span class="text-warning">debug on</span>
+                @endif
+            </div>
+        </div>
+        <div class="storage-kpi">
+            <div class="storage-kpi-label"><i class="fa fa-layer-group me-1"></i> Stack</div>
+            <div class="storage-kpi-value" style="font-size: 0.88rem;">
+                cache <code>{{ $stack['cache_driver'] ?? '—' }}</code>
+            </div>
+            <div class="storage-kpi-meta">
+                queue <code>{{ $stack['queue_connection'] ?? '—' }}</code>
+                · scout <code>{{ $stack['scout_driver'] ?? '—' }}</code>
             </div>
         </div>
     </div>
@@ -442,6 +746,221 @@
     <div class="storage-body">
         {{-- Overview --}}
         <section class="storage-section active" id="storage-section-overview">
+            <div class="storage-metrics-toolbar">
+                <h2 class="storage-section-title mb-0"><i class="fa fa-tachometer-alt"></i> Storage &amp; system metrics</h2>
+                <div class="d-flex align-items-center gap-2 flex-wrap">
+                    @if($metricsCollectedAt)
+                        <span class="small" id="metricsCollectedLabel">Updated {{ $metricsCollectedAt->diffForHumans() }}</span>
+                    @endif
+                    <span class="storage-live-indicator" id="storageLiveIndicator" title="Metrics refresh every 30 seconds">
+                        <span class="storage-live-dot"></span> Live
+                    </span>
+                    <button type="button" class="btn btn-sm btn-outline-secondary" id="refreshMetricsBtn">
+                        <i class="fa fa-sync-alt me-1"></i> Refresh
+                    </button>
+                </div>
+            </div>
+
+            <div class="storage-metric-grid" id="storageMetricsGrid">
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-hdd"></i> Host disk</span>
+                        @if($hostDisk['available'] ?? false)
+                            <span class="storage-status-badge storage-status-badge--{{ ($hostDisk['status'] ?? 'info') === 'ok' ? 'success' : (($hostDisk['status'] ?? '') === 'warn' ? 'warning' : 'danger') }}" id="liveDiskUsedBadge">{{ $hostDisk['used_percent'] }}%</span>
+                        @endif
+                    </h4>
+                    @if($hostDisk['available'] ?? false)
+                        <div class="storage-metric-main">{{ $hostDisk['free_human'] }} <span class="fs-6 fw-normal text-muted">free</span></div>
+                        <div class="storage-metric-sub">{{ $hostDisk['used_human'] }} used · {{ $hostDisk['total_human'] }} total</div>
+                        <div class="storage-metric-bar"><div class="storage-metric-bar-fill {{ $hostDisk['status'] ?? 'info' }}" style="width: {{ min(100, $hostDisk['used_percent']) }}%"></div></div>
+                        <div class="storage-metric-footer"><span>{{ $hostDisk['probe_path'] ?? $recommended['site_root'] }}</span></div>
+                    @else
+                        <div class="storage-metric-main text-muted">—</div>
+                        <div class="storage-metric-sub">Could not read disk space for the host data path.</div>
+                    @endif
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-cloud-upload-alt"></i> Upload files</span></h4>
+                    <div class="storage-metric-main">{{ $uploadSize['human'] ?? '—' }}</div>
+                    <div class="storage-metric-sub">Publication &amp; forum uploads on disk</div>
+                    <div class="storage-metric-footer"><span>{{ $filesRoot }}</span></div>
+                    @if(! empty($metrics['sizes']['legacy_uploads']))
+                        <div class="storage-metric-sub mt-2 text-warning"><i class="fa fa-copy me-1"></i> Legacy copy: {{ $metrics['sizes']['legacy_uploads']['human'] ?? '—' }}</div>
+                    @endif
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-archive"></i> SQL backup storage</span></h4>
+                    <div class="storage-metric-main">{{ $backupSize['human'] ?? '—' }}</div>
+                    <div class="storage-metric-sub">
+                        @if($settings->last_sql_backup_at)
+                            Last backup {{ $settings->last_sql_backup_at->diffForHumans() }}
+                        @else
+                            No backup recorded yet
+                        @endif
+                    </div>
+                    <div class="storage-metric-footer"><span>{{ $sqlBackupRoot }}</span></div>
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-memory"></i> Memory</span>
+                        @if($sysMem)
+                            <span class="storage-status-badge storage-status-badge--{{ $sysMem['status'] === 'ok' ? 'success' : ($sysMem['status'] === 'warn' ? 'warning' : 'danger') }}" id="liveSysMemBadge">{{ $sysMem['used_percent'] }}%</span>
+                        @endif
+                    </h4>
+                    @if($sysMem)
+                        <div class="storage-metric-main">{{ $sysMem['available_human'] }} <span class="fs-6 fw-normal text-muted">available</span></div>
+                        <div class="storage-metric-sub">{{ $sysMem['used_human'] }} used · {{ $sysMem['total_human'] }} total RAM</div>
+                        <div class="storage-metric-bar"><div class="storage-metric-bar-fill {{ $sysMem['status'] }}" style="width: {{ min(100, $sysMem['used_percent']) }}%"></div></div>
+                    @elseif($phpMem)
+                        <div class="storage-metric-main">{{ $phpMem['used_human'] }}</div>
+                        <div class="storage-metric-sub">PHP process (peak {{ $phpMem['peak_human'] }}) · limit {{ $phpMem['limit_human'] }}</div>
+                        @if($phpMem['used_percent'])
+                            <div class="storage-metric-bar"><div class="storage-metric-bar-fill {{ $phpMem['status'] }}" style="width: {{ min(100, $phpMem['used_percent']) }}%"></div></div>
+                        @endif
+                    @else
+                        <div class="storage-metric-main text-muted">—</div>
+                        <div class="storage-metric-sub">System RAM metrics require Linux /proc/meminfo.</div>
+                    @endif
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-microchip"></i> CPU load</span></h4>
+                    @if($loadAvg)
+                        <div class="storage-metric-main" id="liveLoadMain">{{ $loadAvg['1m'] }}</div>
+                        <div class="storage-metric-sub" id="liveLoadSub">1 min · 5 min {{ $loadAvg['5m'] }} · 15 min {{ $loadAvg['15m'] }}</div>
+                        <div class="storage-metric-footer"><span>Unix load average</span></div>
+                    @else
+                        <div class="storage-metric-main text-muted">—</div>
+                        <div class="storage-metric-sub">Load average not available on this platform.</div>
+                    @endif
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-tasks"></i> Queue</span></h4>
+                    <div class="storage-metric-main" id="liveQueuePending">{{ $queueHealth['pending_jobs'] ?? '—' }} <span class="fs-6 fw-normal text-muted">pending</span></div>
+                    <div class="storage-metric-sub" id="liveQueueMeta">
+                        <code>{{ $queueHealth['driver'] ?? '—' }}</code>
+                        · {{ $queueHealth['failed_jobs'] ?? 0 }} failed job(s)
+                    </div>
+                    <div class="storage-metric-footer"><span>{{ Str::limit($queueHealth['worker_hint'] ?? '', 72) }}</span></div>
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-code"></i> PHP &amp; Laravel</span>
+                        <span class="storage-status-badge storage-status-badge--{{ ($runtime['app_debug'] ?? false) ? 'warning' : 'neutral' }} storage-env-badge">{{ strtoupper($runtime['app_env'] ?? 'app') }}</span>
+                    </h4>
+                    <div class="storage-metric-main">PHP {{ $runtime['php_version'] ?? PHP_VERSION }}</div>
+                    <div class="storage-metric-sub">
+                        Laravel {{ $runtime['laravel_version'] ?? app()->version() }}
+                        · {{ $runtime['sapi'] ?? php_sapi_name() }}
+                        · upload max {{ $runtime['limits']['upload_max_filesize'] ?? '—' }}
+                    </div>
+                    <div class="storage-metric-footer"><span>{{ $runtime['web_server'] ?? 'Web server unknown' }}</span></div>
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-database"></i> Database</span>
+                        @if($database['connected'] ?? false)
+                            <span class="storage-status-badge storage-status-badge--success storage-env-badge" id="liveDbBadge">Online</span>
+                        @else
+                            <span class="storage-status-badge storage-status-badge--danger storage-env-badge" id="liveDbBadge">Offline</span>
+                        @endif
+                    </h4>
+                    @if($database['connected'] ?? false)
+                        <div class="storage-metric-main">{{ $database['version_short'] ?? 'MySQL' }}</div>
+                        <div class="storage-metric-sub">
+                            {{ $database['size_human'] ?? '—' }}
+                            @if(isset($database['tables']))
+                                · {{ number_format($database['tables']) }} tables
+                            @endif
+                            · <code>{{ $database['database'] ?? '' }}</code>
+                        </div>
+                        <div class="storage-metric-footer"><span>{{ $database['host'] ?? '' }}{{ ($database['port'] ?? '') !== '' ? ':'.$database['port'] : '' }}</span></div>
+                    @else
+                        <div class="storage-metric-main text-danger">Not connected</div>
+                        <div class="storage-metric-sub">{{ Str::limit($database['error'] ?? 'Could not connect to the database.', 120) }}</div>
+                        <div class="storage-metric-footer"><span>{{ $database['driver'] ?? 'mysql' }} · {{ $database['host'] ?? '' }}</span></div>
+                    @endif
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-server"></i> Deployment</span></h4>
+                    <div class="storage-metric-main">{{ $deploymentLabel }}</div>
+                    <div class="storage-metric-sub">
+                        @if(! empty($deployment['url_path']))
+                            URL base <code>{{ $deployment['url_path'] }}</code> ·
+                        @endif
+                        {{ $runtime['os'] ?? PHP_OS_FAMILY }}
+                        @if(! empty($runtime['os_kernel']))
+                            · {{ Str::limit($runtime['os_kernel'], 40) }}
+                        @endif
+                    </div>
+                    <div class="storage-metric-footer"><span>{{ $runtime['app_url'] ?? config('app.url') }}</span></div>
+                </div>
+
+                <div class="storage-metric-card">
+                    <h4><span><i class="fa fa-layer-group"></i> Application stack</span></h4>
+                    <div class="storage-metric-main" style="font-size: 1rem;">Hub files: <code>{{ $stack['hub_files_driver'] ?? 'internal' }}</code></div>
+                    <div class="storage-metric-sub">
+                        Cache <code>{{ $stack['cache_driver'] ?? '—' }}</code>
+                        · Session <code>{{ $stack['session_driver'] ?? '—' }}</code>
+                        · Queue <code>{{ $stack['queue_connection'] ?? '—' }}</code>
+                    </div>
+                    <div class="storage-metric-sub">
+                        Search <code>{{ $stack['scout_driver'] ?? '—' }}</code>
+                        @if(($stack['scout_driver'] ?? '') === 'meilisearch')
+                            · Meilisearch {{ ($stack['meilisearch_ok'] ?? false) ? 'OK' : 'unreachable' }}
+                        @endif
+                        @if($stack['redis_ok'] !== null)
+                            · Redis {{ $stack['redis_ok'] ? 'OK' : 'down' }}
+                        @elseif($stack['redis_available'] ?? false)
+                            · Redis available
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="storage-panel mb-4">
+                <div class="storage-panel-header">
+                    <h3>Platform details</h3>
+                    <span class="badge bg-light text-dark border">Reference for support &amp; DevOps</span>
+                </div>
+                <div class="storage-panel-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-sm mb-0 storage-spec-table">
+                            <tbody>
+                                <tr><td>Deployment type</td><td><strong>{{ $deploymentLabel }}</strong>@if(! empty($deployment['custom_label'])) <span class="text-muted">(HUB_DEPLOYMENT_TYPE)</span>@endif</td></tr>
+                                <tr><td>APP URL</td><td><code>{{ $runtime['app_url'] ?? config('app.url') }}</code></td></tr>
+                                <tr><td>Environment</td><td><code>{{ $runtime['app_env'] ?? config('app.env') }}</code> · Debug {{ ($runtime['app_debug'] ?? false) ? 'enabled' : 'disabled' }} · Timezone {{ $runtime['timezone'] ?? config('app.timezone') }}</td></tr>
+                                <tr><td>PHP</td><td>{{ $runtime['php_version'] ?? PHP_VERSION }} ({{ $runtime['sapi'] ?? php_sapi_name() }}) · memory {{ $runtime['limits']['memory_limit'] ?? '—' }} · max execution {{ $runtime['limits']['max_execution_time'] ?? '—' }}s</td></tr>
+                                <tr><td>Laravel</td><td>{{ $runtime['laravel_version'] ?? app()->version() }}</td></tr>
+                                <tr><td>Web server</td><td>{{ $runtime['web_server'] ?? '—' }}</td></tr>
+                                <tr><td>Operating system</td><td>{{ $runtime['os_kernel'] ?? (PHP_OS_FAMILY.' '.php_uname('r')) }}</td></tr>
+                                <tr><td>Database</td><td>
+                                    @if($database['connected'] ?? false)
+                                        {{ $database['driver'] ?? 'mysql' }} {{ $database['version'] ?? '' }} · {{ $database['database'] ?? '' }} @ {{ $database['host'] ?? '' }}{{ ($database['port'] ?? '') !== '' ? ':'.$database['port'] : '' }} · {{ $database['size_human'] ?? '—' }}
+                                    @else
+                                        <span class="text-danger">{{ $database['error'] ?? 'Not connected' }}</span>
+                                    @endif
+                                </td></tr>
+                                <tr><td>Cache / session / queue</td><td><code>{{ $stack['cache_driver'] ?? '—' }}</code> / <code>{{ $stack['session_driver'] ?? '—' }}</code> / <code>{{ $stack['queue_connection'] ?? '—' }}</code></td></tr>
+                                <tr><td>Search (Scout)</td><td><code>{{ $stack['scout_driver'] ?? '—' }}</code>@if(! empty($stack['meilisearch_host'])) · {{ $stack['meilisearch_host'] }}@endif</td></tr>
+                                <tr><td>Hub file driver</td><td><code>{{ $stack['hub_files_driver'] ?? $settings->files_driver }}</code> · Site ID <code>{{ $siteStorageId }}</code></td></tr>
+                                <tr><td>PHP extensions</td><td>
+                                    @php $ext = $runtime['extensions'] ?? []; @endphp
+                                    OPcache {{ ! empty($ext['opcache']) ? 'yes' : 'no' }}
+                                    · Redis {{ ! empty($ext['redis']) ? 'yes' : 'no' }}
+                                    · intl {{ ! empty($ext['intl']) ? 'yes' : 'no' }}
+                                    · gd {{ ! empty($ext['gd']) ? 'yes' : 'no' }}
+                                </td></tr>
+                                <tr><td>Upload limits</td><td>upload_max_filesize {{ $runtime['limits']['upload_max_filesize'] ?? '—' }} · post_max_size {{ $runtime['limits']['post_max_size'] ?? '—' }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
             <h2 class="storage-section-title"><i class="fa fa-chart-pie"></i> System status</h2>
 
             <ul class="storage-status-list storage-panel mb-4">
@@ -840,6 +1359,7 @@
                         <li><code>HUB_SITE_ID</code> — override site storage ID</li>
                         <li><code>HUB_FILES_ROOT</code> — full files path override</li>
                         <li><code>HUB_SQL_BACKUP_ROOT</code> — SQL backup path override</li>
+                        <li><code>HUB_DEPLOYMENT_TYPE</code> — override auto-detected deployment label (e.g. <code>Production VPS</code>)</li>
                     </ul>
                 </div>
                 <div class="storage-dev-block">
@@ -952,6 +1472,8 @@
     var hash = (window.location.hash || '').replace(/^#storage-/, '');
     if (hash && document.getElementById('storage-section-' + hash)) {
         activateStorageTab(hash);
+    } else if (window.location.search.indexOf('refresh_metrics=1') !== -1) {
+        activateStorageTab('overview');
     }
 
     var driver = document.getElementById('filesDriver');
@@ -1104,26 +1626,160 @@
         return confirm('Restore ' + selected + ' selected table(s) from this backup?');
     });
 
-    @if($migrationRunning)
-    function pollMigration(barId, labelId) {
-        var bar = document.getElementById(barId);
-        var label = document.getElementById(labelId);
-        if (!bar || !label) return;
+    function storageBadgeClass(kind) {
+        return 'storage-status-badge storage-status-badge--' + kind;
+    }
+
+    function setMigrationKpi(status, message) {
+        var wrap = document.getElementById('liveMigrationBadgeWrap');
+        var meta = document.getElementById('liveMigrationMeta');
+        if (!wrap) return;
+        var label = 'Idle';
+        var kind = 'neutral';
+        if (status === 'running') {
+            label = 'Running';
+            kind = 'running';
+        } else if (status === 'completed') {
+            label = 'Completed';
+            kind = 'success';
+        }
+        wrap.innerHTML = '<span class="' + storageBadgeClass(kind) + '" id="liveMigrationBadge">' + label + '</span>';
+        if (meta) {
+            meta.textContent = message ? String(message).substring(0, 72) : 'No recent migration activity';
+        }
+    }
+
+    function setLiveText(id, text) {
+        var el = document.getElementById(id);
+        if (el) el.textContent = text;
+    }
+
+    function applyLiveMetrics(data) {
+        if (!data) return;
+
+        var disk = data.disk && data.disk.host_site;
+        if (disk && disk.available) {
+            setLiveText('liveDiskFree', disk.free_human);
+            setLiveText('liveDiskMeta', disk.used_percent + '% used of ' + disk.total_human);
+            var diskBadge = document.getElementById('liveDiskUsedBadge');
+            if (diskBadge) {
+                diskBadge.textContent = disk.used_percent + '%';
+                diskBadge.className = storageBadgeClass(disk.status === 'ok' ? 'success' : (disk.status === 'warn' ? 'warning' : 'danger'));
+            }
+        }
+
+        if (data.sizes && data.sizes.uploads) {
+            setLiveText('liveUploadSize', data.sizes.uploads.human || '—');
+        }
+        if (data.sizes && data.sizes.sql_backups) {
+            setLiveText('liveBackupSize', data.sizes.sql_backups.human || '—');
+        }
+
+        var sysMem = data.memory && data.memory.system;
+        var phpMem = data.memory && data.memory.php;
+        if (sysMem) {
+            setLiveText('liveRamValue', sysMem.available_human + ' free');
+            setLiveText('liveRamMeta', sysMem.used_percent + '% used of ' + sysMem.total_human);
+        } else if (phpMem) {
+            setLiveText('liveRamValue', phpMem.used_human + ' PHP');
+            setLiveText('liveRamMeta', 'Limit ' + phpMem.limit_human);
+        }
+
+        var db = data.database || {};
+        if (db.connected) {
+            setLiveText('liveMysqlVersion', db.version_short || 'Connected');
+            setLiveText('liveMysqlMeta', (db.size_human || '—') + ' · ' + (db.database || ''));
+        } else if (db.error) {
+            setLiveText('liveMysqlMeta', String(db.error).substring(0, 48));
+        }
+        var dbBadge = document.getElementById('liveDbBadge');
+        if (dbBadge) {
+            dbBadge.textContent = db.connected ? 'Online' : 'Offline';
+            dbBadge.className = storageBadgeClass(db.connected ? 'success' : 'danger') + ' storage-env-badge';
+        }
+
+        var queue = data.queue || {};
+        var queueMain = document.getElementById('liveQueuePending');
+        if (queueMain) {
+            queueMain.innerHTML = (queue.pending_jobs != null ? queue.pending_jobs : '—') + ' <span class="fs-6 fw-normal text-muted">pending</span>';
+        }
+        var queueMeta = document.getElementById('liveQueueMeta');
+        if (queueMeta) {
+            queueMeta.innerHTML = '<code>' + (queue.driver || '—') + '</code> · ' + (queue.failed_jobs || 0) + ' failed job(s)';
+        }
+
+        var load = data.load;
+        var loadMain = document.getElementById('liveLoadMain');
+        if (loadMain && load) {
+            loadMain.textContent = load['1m'];
+            var loadSub = document.getElementById('liveLoadSub');
+            if (loadSub) loadSub.textContent = '1 min · 5 min ' + load['5m'] + ' · 15 min ' + load['15m'];
+        }
+
+        var label = document.getElementById('metricsCollectedLabel');
+        if (label && data.collected_at) {
+            label.textContent = 'Updated just now';
+        }
+    }
+
+    function fetchLiveMetrics(fresh, onDone) {
+        fetch('{{ route('admin.storage.system-metrics') }}' + (fresh ? '?fresh=1' : ''), {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                applyLiveMetrics(data);
+                if (onDone) onDone();
+            })
+            .catch(function () {
+                if (onDone) onDone();
+            });
+    }
+
+    var migrationWasRunning = {{ $migrationRunning ? 'true' : 'false' }};
+
+    function pollMigrationLive() {
         fetch('{{ route('admin.storage.migration-status') }}')
             .then(function (r) { return r.json(); })
             .then(function (data) {
+                setMigrationKpi(data.status, data.message);
                 var total = parseInt(data.total || 0, 10);
                 var done = parseInt(data.done || 0, 10);
                 var pct = total > 0 ? Math.round((done / total) * 100) : 0;
-                bar.style.width = pct + '%';
-                label.textContent = done + ' / ' + total + ' files' + (data.message ? ' — ' + data.message : '');
-                if (data.status === 'running') setTimeout(function () { pollMigration(barId, labelId); }, 2000);
-                else if (data.status === 'completed') setTimeout(function () { window.location.reload(); }, 1500);
+                ['hostMigrationProgressBar', 'migrationProgressBar'].forEach(function (id) {
+                    var bar = document.getElementById(id);
+                    if (bar) bar.style.width = pct + '%';
+                });
+                ['hostMigrationProgressLabel', 'migrationProgressLabel'].forEach(function (id) {
+                    var lbl = document.getElementById(id);
+                    if (lbl) lbl.textContent = done + ' / ' + total + ' files' + (data.message ? ' — ' + data.message : '');
+                });
+                if (migrationWasRunning && data.status === 'completed') {
+                    migrationWasRunning = false;
+                    fetchLiveMetrics(true);
+                }
+                if (data.status === 'running') {
+                    migrationWasRunning = true;
+                }
             });
     }
-    pollMigration('hostMigrationProgressBar', 'hostMigrationProgressLabel');
-    pollMigration('migrationProgressBar', 'migrationProgressLabel');
-    @endif
+
+    setInterval(function () { fetchLiveMetrics(false); }, 30000);
+    setInterval(pollMigrationLive, 5000);
+    pollMigrationLive();
+
+    var refreshMetricsBtn = document.getElementById('refreshMetricsBtn');
+    if (refreshMetricsBtn) {
+        refreshMetricsBtn.addEventListener('click', function () {
+            var icon = refreshMetricsBtn.querySelector('.fa-sync-alt');
+            refreshMetricsBtn.disabled = true;
+            if (icon) icon.classList.add('fa-spin');
+            fetchLiveMetrics(true, function () {
+                refreshMetricsBtn.disabled = false;
+                if (icon) icon.classList.remove('fa-spin');
+            });
+        });
+    }
 })();
 </script>
 @endsection
