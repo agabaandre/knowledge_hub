@@ -38,6 +38,8 @@ class StorageManagementController extends Controller
             'legacyFilesRoot' => $storage->legacyInternalRoot(),
             'isUsingLegacyUploadFallback' => $storage->isUsingLegacyUploadFallback(),
             'needsLegacyToHostMigration' => $storage->needsLegacyToHostMigration(),
+            'canPurgeLegacyInternalStorage' => $storage->canPurgeLegacyInternalStorage(),
+            'legacyPurgePreview' => $storage->previewPurgeLegacyInternalStorage(),
             'publicStorageLinkOk' => $storage->publicStorageLinkOk(),
             'sqlBackupRoot' => $storage->sqlBackupRoot(),
             'usesExternal' => $storage->usesExternalFiles(),
@@ -283,6 +285,31 @@ class StorageManagementController extends Controller
         return redirect()
             ->route('admin.storage.index')
             ->with('alert-success', 'Host path migration queued.');
+    }
+
+    public function purgeLegacy(HubStorageService $storage)
+    {
+        if (! $storage->canPurgeLegacyInternalStorage()) {
+            $preview = $storage->previewPurgeLegacyInternalStorage();
+
+            return redirect()
+                ->route('admin.storage.index')
+                ->with('alert-danger', $preview['skipped'] > 0
+                    ? "Cannot purge legacy storage: {$preview['skipped']} file(s) missing or mismatched on the host path."
+                    : 'Legacy uploads cannot be purged yet. Complete host migration and verify files first.');
+        }
+
+        $result = $storage->purgeLegacyInternalStorage(false);
+
+        if (($result['status'] ?? '') === 'completed') {
+            return redirect()
+                ->route('admin.storage.index')
+                ->with('alert-success', $result['message'] ?? 'Legacy upload copies removed.');
+        }
+
+        return redirect()
+            ->route('admin.storage.index')
+            ->with('alert-danger', $result['message'] ?? 'Legacy purge did not complete.');
     }
 
     public function migrationStatus()

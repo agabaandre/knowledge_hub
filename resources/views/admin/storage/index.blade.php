@@ -157,6 +157,33 @@
         </div>
         @endif
 
+        @if($legacyPurgePreview['can_purge'] ?? false)
+        <div class="card mb-4 border-success">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h3 class="card-title mb-0">Remove legacy upload copies</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted small mb-2">
+                    Host migration copied uploads to <code>{{ $legacyPurgePreview['host_root'] }}</code>.
+                    Verified legacy copies under <code>{{ $legacyPurgePreview['legacy_root'] }}</code> can be deleted to reclaim disk space.
+                    Each file is checked on the host path (same size) before removal.
+                </p>
+                <p class="small mb-3">
+                    {{ number_format($legacyPurgePreview['verified']) }} verified file(s),
+                    ~{{ number_format($legacyPurgePreview['bytes'] / 1048576, 1) }} MB reclaimable.
+                    @if(($legacyPurgePreview['skipped'] ?? 0) > 0)
+                        <span class="text-danger">{{ number_format($legacyPurgePreview['skipped']) }} file(s) not verified — purge blocked until resolved.</span>
+                    @endif
+                </p>
+                <form method="post" action="{{ route('admin.storage.purge-legacy') }}" class="d-inline" onsubmit="return confirm('Delete verified legacy upload copies from storage/app/public? This cannot be undone.');">
+                    @csrf
+                    <button type="submit" class="btn btn-success" {{ $canPurgeLegacyInternalStorage ? '' : 'disabled' }}>Remove legacy copies</button>
+                </form>
+                <p class="small text-muted mt-2 mb-0">CLI: <code>php artisan hub:purge-legacy-storage --dry-run</code> then <code>php artisan hub:purge-legacy-storage</code></p>
+            </div>
+        </div>
+        @endif
+
         <div class="card mb-4">
             <div class="card-header d-flex justify-content-between align-items-center">
                 <h3 class="card-title mb-0">Migrate files to cloud / external storage</h3>

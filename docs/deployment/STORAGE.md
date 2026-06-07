@@ -146,6 +146,14 @@ php artisan hub:migrate-storage-to-host
 
 3. After migration, `public/storage` is relinked to `/var/khubdata/{site-id}/files`.
 
+4. **Remove legacy copies (after verification)** — migration keeps originals under `storage/app/public` until you confirm the host path works. Then either:
+
+   - Admin → Storage Management → **Remove legacy upload copies**, or
+   - Preview: `php artisan hub:purge-legacy-storage --dry-run`
+   - Purge: `php artisan hub:purge-legacy-storage`
+
+   Only files that exist on the host path with the same size are deleted. If any legacy file is missing or differs on the host path, purge is blocked until you re-run migration or fix the mismatch.
+
 **Production recovery (after deploying latest code):**
 
 ```bash

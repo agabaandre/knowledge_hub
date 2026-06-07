@@ -227,7 +227,223 @@ class HubStorageService
         $configured = $this->configuredInternalRoot();
         $legacy = $this->legacyInternalRoot();
 
-        return $this->pathsDiffer($configured, $legacy) && $this->pathHasHubUploads($legacy);
+        if (! $this->pathsDiffer($configured, $legacy) || ! $this->pathHasHubUploads($legacy)) {
+            return false;
+        }
+
+        if (! $this->pathHasHubUploads($configured)) {
+            return true;
+        }
+
+        return $this->settings()->migration_status !== 'completed';
+    }
+
+    public function canPurgeLegacyInternalStorage(): bool
+    {
+        $preview = $this->previewPurgeLegacyInternalStorage();
+
+        return ($preview['can_purge'] ?? false)
+            && ($preview['verified'] ?? 0) > 0
+            && ($preview['skipped'] ?? 0) === 0;
+    }
+
+    /**
+     * @return array{
+     *     can_purge: bool,
+     *     legacy_root: string,
+     *     host_root: string,
+     *     total: int,
+     *     verified: int,
+     *     skipped: int,
+     *     bytes: int,
+     *     skipped_samples: list<string>
+     * }
+     */
+    public function previewPurgeLegacyInternalStorage(): array
+    {
+        $legacyRoot = $this->legacyInternalRoot();
+        $hostRoot = $this->configuredInternalRoot();
+
+        $empty = [
+            'can_purge' => false,
+            'legacy_root' => $legacyRoot,
+            'host_root' => $hostRoot,
+            'total' => 0,
+            'verified' => 0,
+            'skipped' => 0,
+            'bytes' => 0,
+            'skipped_samples' => [],
+        ];
+
+        if ($this->settings()->files_driver !== 'internal') {
+            return $empty;
+        }
+
+        if (! $this->pathsDiffer($legacyRoot, $hostRoot) || ! $this->pathHasHubUploads($legacyRoot)) {
+            return $empty;
+        }
+
+        if (! $this->pathHasHubUploads($hostRoot) || $this->isUsingLegacyUploadFallback()) {
+            return $empty;
+        }
+
+        $files = $this->collectUploadFilesUnderRoot($legacyRoot);
+        $verified = 0;
+        $skipped = 0;
+        $bytes = 0;
+        $skippedSamples = [];
+
+        foreach ($files as $relative) {
+            $legacyFile = $legacyRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (! is_file($legacyFile)) {
+                continue;
+            }
+
+            if ($this->legacyUploadVerifiedOnHost($relative, $legacyFile, $hostRoot)) {
+                $verified++;
+                $bytes += (int) filesize($legacyFile);
+
+                continue;
+            }
+
+            $skipped++;
+            if (count($skippedSamples) < 5) {
+                $skippedSamples[] = $relative;
+            }
+        }
+
+        return [
+            'can_purge' => $verified > 0,
+            'legacy_root' => $legacyRoot,
+            'host_root' => $hostRoot,
+            'total' => count($files),
+            'verified' => $verified,
+            'skipped' => $skipped,
+            'bytes' => $bytes,
+            'skipped_samples' => $skippedSamples,
+        ];
+    }
+
+    /**
+     * Remove legacy upload copies after verifying each file exists on the host path.
+     *
+     * @return array{status: string, deleted: int, skipped: int, bytes: int, message?: string}
+     */
+    public function purgeLegacyInternalStorage(bool $dryRun = false): array
+    {
+        $preview = $this->previewPurgeLegacyInternalStorage();
+
+        if (! ($preview['can_purge'] ?? false)) {
+            return [
+                'status' => 'skipped',
+                'deleted' => 0,
+                'skipped' => (int) ($preview['skipped'] ?? 0),
+                'bytes' => 0,
+                'message' => 'Legacy uploads cannot be purged yet. Complete host migration and verify files on the host path first.',
+            ];
+        }
+
+        if (($preview['skipped'] ?? 0) > 0) {
+            return [
+                'status' => 'blocked',
+                'deleted' => 0,
+                'skipped' => (int) $preview['skipped'],
+                'bytes' => 0,
+                'message' => "{$preview['skipped']} legacy file(s) are missing or differ on the host path. Resolve mismatches before purging.",
+            ];
+        }
+
+        $legacyRoot = $preview['legacy_root'];
+        $hostRoot = $preview['host_root'];
+        $deleted = 0;
+        $bytes = 0;
+
+        foreach ($this->collectUploadFilesUnderRoot($legacyRoot) as $relative) {
+            $legacyFile = $legacyRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+            if (! is_file($legacyFile) || ! $this->legacyUploadVerifiedOnHost($relative, $legacyFile, $hostRoot)) {
+                continue;
+            }
+
+            $size = (int) filesize($legacyFile);
+            if (! $dryRun) {
+                File::delete($legacyFile);
+            }
+            $deleted++;
+            $bytes += $size;
+        }
+
+        if (! $dryRun) {
+            $this->removeEmptyLegacyUploadDirectories($legacyRoot);
+            unset($this->pathHasUploadsCache[$legacyRoot]);
+            $this->filesRootCache = null;
+
+            $this->settings()->update([
+                'migration_message' => "Removed {$deleted} legacy copy/copies from {$legacyRoot}. Active files root: {$hostRoot}.",
+            ]);
+
+            $this->ensurePublicStorageSymlink();
+        }
+
+        return [
+            'status' => $dryRun ? 'dry_run' : 'completed',
+            'deleted' => $deleted,
+            'skipped' => 0,
+            'bytes' => $bytes,
+            'message' => $dryRun
+                ? "Would remove {$deleted} verified legacy file(s)."
+                : "Removed {$deleted} verified legacy file(s) from {$legacyRoot}.",
+        ];
+    }
+
+    protected function legacyUploadVerifiedOnHost(string $relative, string $legacyFile, string $hostRoot): bool
+    {
+        $hostFile = $hostRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $relative);
+        if (! is_file($hostFile)) {
+            return false;
+        }
+
+        return filesize($legacyFile) === filesize($hostFile);
+    }
+
+    protected function removeEmptyLegacyUploadDirectories(string $legacyRoot): void
+    {
+        foreach (array_values(config('hub_storage.content_prefixes', [])) as $prefix) {
+            $dir = $legacyRoot.DIRECTORY_SEPARATOR.str_replace('/', DIRECTORY_SEPARATOR, $prefix);
+            if (! is_dir($dir)) {
+                continue;
+            }
+
+            $iterator = new \RecursiveIteratorIterator(
+                new \RecursiveDirectoryIterator($dir, \FilesystemIterator::SKIP_DOTS),
+                \RecursiveIteratorIterator::CHILD_FIRST
+            );
+
+            foreach ($iterator as $fileInfo) {
+                $path = $fileInfo->getPathname();
+                if ($fileInfo->isDir() && $this->directoryIsEmpty($path)) {
+                    @rmdir($path);
+                }
+            }
+
+            if ($this->directoryIsEmpty($dir)) {
+                @rmdir($dir);
+            }
+        }
+    }
+
+    protected function directoryIsEmpty(string $path): bool
+    {
+        if (! is_dir($path)) {
+            return false;
+        }
+
+        foreach (scandir($path) ?: [] as $entry) {
+            if ($entry !== '.' && $entry !== '..') {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     protected function pathsDiffer(string $a, string $b): bool
