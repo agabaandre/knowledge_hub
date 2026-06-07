@@ -19,7 +19,7 @@ class ChatGPTService implements AIModel{
             return null;
         }
 
-        if (AiConfig::primaryChatProvider() === null) {
+        if (AiConfig::resolveChatProviderForFeature('title_formatting') === null) {
             return null;
         }
 
@@ -28,7 +28,7 @@ class ChatGPTService implements AIModel{
             .'but always capitalize the first and last word. Preserve acronyms and numbers. '
             .'Do not add or remove meaning. Return only the rewritten title text with no quotes and no explanation.';
 
-        $result = app(AiCompletionService::class)->complete([
+        $result = app(AiCompletionService::class)->completeForFeature('title_formatting', [
             ['role' => 'user', 'content' => $guide],
             ['role' => 'user', 'content' => $title],
         ], 120);
@@ -50,34 +50,145 @@ class ChatGPTService implements AIModel{
         return $out !== '' ? $out : null;
     }
 
-    function prompt($question=null){
+    /**
+     * @return array{driver: string, endpoint?: string, headers?: array<int, string>, model?: string, feature?: string}|null
+     */
+    private function resolveProviderTransport(string $feature): ?array
+    {
+        $provider = AiConfig::resolveChatProviderForFeature($feature);
+        if ($provider === null) {
+            return null;
+        }
 
-    $api_key  = config("ai.open_api_key");
-    $endpoint = 'https://api.openai.com/v1/chat/completions';
+        $creds = AiConfig::providerCredentials($provider);
+        if ($creds === null) {
+            return null;
+        }
 
-    $headers = [
-        'Content-Type: application/json',
-        "Authorization: Bearer $api_key"
-    ];
+        if ($creds['driver'] === 'gemini') {
+            return ['driver' => 'gemini', 'feature' => $feature, 'model' => $creds['model']];
+        }
 
-    $prompt =  [
-        ["role"=> "user", "content"=>"
-        You are to act as a high accuracy content development and reveiw expert,  providing accurate comprehensive summarization and or comparison without being ridiculously brief and not mentioning specific sections in the document but you can still use bullets and headings , comparison and enrichment of content given to you.If Attached content ('attached_content:<content here>') contains data, work on that first but ignoring table of contents and unreadble characters,for atatched content remember to mention that the section u are summarising is from the attachment. Make sure you use only factual data to guide and engage. 
-        If you receive or are asked in form a greeting like Hi or hello, reply with a greeting and what you can offer as help in line with your field. Summaries, always end with a parapgraph to summarise the major points and give a general picture. If the content is short for you to summarise, i.e less than 100 words, make it clear in your the title of the response that it is short and what you are providing is what know about the topic.
-        Reject any other questions humbly. Before rejecting, analyse the questions and if it relates your line of work, answer it in that context.If the question is about sex, repond inline with health and only refer them to other sources for additional explicit details. if the comments array contains any, summarise the commments in the comments section, describing what people said with out mentioning names,else don't talk about comments at all. Only and only use the given data in your summarisation, don't make assumptions.
-        Always return responses in raw html format in a div, ignore html,head and body tags, use nice styling especially using  lists,headings and paragraphs, don't use any h1 and h2 tags. Use teal color for headings and bold words.For short content given for summarising, always respond saying there's not enough content to be summarised,remember to make your summaries rich enough, to atleast aquarter of what you are given but not less. and avoid using background colors. Translate the summary to the summary ;anguage if provided. Only do comparison if it is a comparison question."]
-    ];
+        $baseUrl = rtrim($creds['base_url'], '/');
+        if ($baseUrl === '' || trim($creds['api_key']) === '' || trim($creds['model']) === '') {
+            return null;
+        }
 
-    $prompt[] = ["role"=>"user","content"=>$question];
+        return [
+            'driver' => 'openai_compatible',
+            'endpoint' => $baseUrl.'/chat/completions',
+            'headers' => [
+                'Content-Type: application/json',
+                'Authorization: Bearer '.$creds['api_key'],
+            ],
+            'model' => $creds['model'],
+        ];
+    }
 
-    $payload = [
-        'messages'=> $prompt,
-        'model'=>"gpt-3.5-turbo",
-        'max_tokens'=> 3096 //1685  
-    ];
+    private function wrapContentAsOpenAiResponse(string $content): object
+    {
+        return (object) [
+            'choices' => [
+                (object) ['message' => (object) ['content' => $content]],
+            ],
+        ];
+    }
 
-    return $this->sendRequest($endpoint, $headers, $payload);
-     
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function completeMessagesAsOpenAiResponse(string $feature, array $messages, int $maxTokens = 3096, bool $jsonMode = false): ?object
+    {
+        $result = app(AiCompletionService::class)->completeForFeature($feature, $messages, $maxTokens, null, $jsonMode);
+        if (! ($result['ok'] ?? false)) {
+            Log::warning('AI completion failed', ['feature' => $feature, 'error' => $result['error'] ?? 'unknown']);
+
+            return null;
+        }
+
+        return $this->wrapContentAsOpenAiResponse((string) ($result['content'] ?? ''));
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     */
+    private function streamMessagesForFeature(string $feature, array $messages, callable $onChunk, int $maxTokens = 3096): void
+    {
+        $transport = $this->resolveProviderTransport($feature);
+        if ($transport === null) {
+            $onChunk('<div class="alert alert-danger">AI is not configured for this feature.</div>');
+
+            return;
+        }
+
+        if ($transport['driver'] === 'gemini') {
+            $response = $this->completeMessagesAsOpenAiResponse($feature, $messages, $maxTokens);
+            $content = $this->extractOpenAiMessageContent($response);
+            $onChunk($content !== null && $content !== '' ? $content : '<div class="alert alert-danger">No response from AI.</div>');
+
+            return;
+        }
+
+        $payload = [
+            'model' => $transport['model'],
+            'messages' => $messages,
+            'max_tokens' => $maxTokens,
+            'stream' => true,
+        ];
+        $jsonData = json_encode($payload);
+        $headers = $transport['headers'];
+        $headers[] = 'Content-Length: '.strlen($jsonData);
+
+        $ch = curl_init($transport['endpoint']);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
+        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
+            $len = strlen($data);
+            if ($len > 0) {
+                $this->parseSSELine($data, $onChunk);
+            }
+
+            return $len;
+        });
+
+        curl_exec($ch);
+        if (curl_errno($ch)) {
+            Log::error('AI stream error: '.curl_error($ch));
+            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
+        }
+        curl_close($ch);
+    }
+
+    function prompt($question = null, string $feature = 'chat')
+    {
+        $systemContent = 'You are to act as a high accuracy content development and reveiw expert,  providing accurate comprehensive summarization and or comparison without being ridiculously brief and not mentioning specific sections in the document but you can still use bullets and headings , comparison and enrichment of content given to you.If Attached content (\'attached_content:<content here>\') contains data, work on that first but ignoring table of contents and unreadble characters,for atatched content remember to mention that the section u are summarising is from the attachment. Make sure you use only factual data to guide and engage. '
+            .'If you receive or are asked in form a greeting like Hi or hello, reply with a greeting and what you can offer as help in line with your field. Summaries, always end with a parapgraph to summarise the major points and give a general picture. If the content is short for you to summarise, i.e less than 100 words, make it clear in your the title of the response that it is short and what you are providing is what know about the topic. '
+            .'Reject any other questions humbly. Before rejecting, analyse the questions and if it relates your line of work, answer it in that context.If the question is about sex, repond inline with health and only refer them to other sources for additional explicit details. if the comments array contains any, summarise the commments in the comments section, describing what people said with out mentioning names,else don\'t talk about comments at all. Only and only use the given data in your summarisation, don\'t make assumptions. '
+            .'Always return responses in raw html format in a div, ignore html,head and body tags, use nice styling especially using  lists,headings and paragraphs, don\'t use any h1 and h2 tags. Use teal color for headings and bold words.For short content given for summarising, always respond saying there\'s not enough content to be summarised,remember to make your summaries rich enough, to atleast aquarter of what you are given but not less. and avoid using background colors. Translate the summary to the summary ;anguage if provided. Only do comparison if it is a comparison question.';
+
+        $messages = [
+            ['role' => 'user', 'content' => $systemContent],
+            ['role' => 'user', 'content' => (string) $question],
+        ];
+
+        $transport = $this->resolveProviderTransport($feature);
+        if ($transport === null) {
+            return null;
+        }
+
+        if ($transport['driver'] === 'gemini') {
+            return $this->completeMessagesAsOpenAiResponse($feature, $messages, 3096);
+        }
+
+        $payload = [
+            'messages' => $messages,
+            'model' => $transport['model'],
+            'max_tokens' => 3096,
+        ];
+
+        return $this->sendRequest($transport['endpoint'], $transport['headers'], $payload);
     }
 
     
@@ -107,46 +218,14 @@ class ChatGPTService implements AIModel{
      * Stream completion: call $onChunk(string $content) for each delta.
      * Uses OpenAI stream: true (SSE). Parses data: lines and extracts delta.content.
      */
-    public function promptStream(string $question, callable $onChunk): void
+    public function promptStream(string $question, callable $onChunk, string $feature = 'chat'): void
     {
-        $api_key  = config("ai.open_api_key");
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            "Authorization: Bearer $api_key"
-        ];
         $systemContent = "You are to act as a high accuracy content development and review expert, providing accurate comprehensive summarization and or comparison without being ridiculously brief and not mentioning specific sections in the document but you can still use bullets and headings , comparison and enrichment of content given to you.If Attached content ('attached_content:<content here>') contains data, work on that first but ignoring table of contents and unreadable characters,for attached content remember to mention that the section u are summarising is from the attachment. Make sure you use only factual data to guide and engage. If the content is short for you to summarise, i.e less than 100 words, make it clear in the title of the response. Always return responses in raw html format in a div, ignore html,head and body tags, use nice styling especially using lists,headings and paragraphs, don't use h1 and h2 tags. Use teal color for headings and bold words. Avoid using background colors. Translate the summary to the summary language if provided.";
-        $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => [
-                ['role' => 'system', 'content' => $systemContent],
-                ['role' => 'user', 'content' => $question],
-            ],
-            'max_tokens' => 3096,
-            'stream' => true,
-        ];
-        $jsonData = json_encode($payload);
-        $headers[] = 'Content-Length: ' . strlen($jsonData);
 
-        $ch = curl_init($endpoint);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
-            $len = strlen($data);
-            if ($len > 0) {
-                $this->parseSSELine($data, $onChunk);
-            }
-            return $len;
-        });
-
-        curl_exec($ch);
-        if (curl_errno($ch)) {
-            Log::error('OpenAI stream error: ' . curl_error($ch));
-            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
-        }
-        curl_close($ch);
+        $this->streamMessagesForFeature($feature, [
+            ['role' => 'system', 'content' => $systemContent],
+            ['role' => 'user', 'content' => $question],
+        ], $onChunk);
     }
 
     /**
@@ -154,70 +233,17 @@ class ChatGPTService implements AIModel{
      *
      * @param  array<int, array{role: string, content: string}>  $messages
      */
-    public function chatMessagesStream(array $messages, callable $onChunk): void
+    public function chatMessagesStream(array $messages, callable $onChunk, string $feature = 'chat'): void
     {
-        $api_key = config('ai.open_api_key');
-        if (empty($api_key)) {
-            $onChunk('<div class="alert alert-danger">AI is not configured.</div>');
-
-            return;
-        }
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$api_key,
-        ];
-        $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => $messages,
-            'max_tokens' => 3096,
-            'stream' => true,
-        ];
-        $jsonData = json_encode($payload);
-        $headers[] = 'Content-Length: '.strlen($jsonData);
-
-        $ch = curl_init($endpoint);
-        curl_setopt($ch, CURLOPT_POST, true);
-        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonData);
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, false);
-        curl_setopt($ch, CURLOPT_WRITEFUNCTION, function ($ch, $data) use ($onChunk) {
-            $len = strlen($data);
-            if ($len > 0) {
-                $this->parseSSELine($data, $onChunk);
-            }
-
-            return $len;
-        });
-
-        curl_exec($ch);
-        if (curl_errno($ch)) {
-            Log::error('OpenAI chat stream error: '.curl_error($ch));
-            $onChunk('<div class="alert alert-danger">Stream error. Please try again.</div>');
-        }
-        curl_close($ch);
+        $this->streamMessagesForFeature($feature, $messages, $onChunk);
     }
 
     /**
      * @param  array<int, array{role: string, content: string}>  $messages
      */
-    public function chatMessagesComplete(array $messages): string
+    public function chatMessagesComplete(array $messages, string $feature = 'chat'): string
     {
-        $api_key = config('ai.open_api_key');
-        if (empty($api_key)) {
-            return '<div class="alert alert-danger">AI is not configured.</div>';
-        }
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$api_key,
-        ];
-        $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => $messages,
-            'max_tokens' => 3096,
-        ];
-        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $response = $this->completeMessagesAsOpenAiResponse($feature, $messages, 3096);
         $content = $this->extractOpenAiMessageContent($response);
 
         return $content !== null && $content !== ''
@@ -350,13 +376,6 @@ class ChatGPTService implements AIModel{
             return [];
         }
 
-        $api_key = config('ai.open_api_key');
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$api_key,
-        ];
-
         $requiredKeys = implode(', ', array_keys($chunk));
 
         $guide = 'You translate short UI strings for a public health knowledge hub (navigation labels, buttons, footer links). '
@@ -376,21 +395,12 @@ class ChatGPTService implements AIModel{
             ."\n\nRequired keys (exact spelling, all of them): ".$requiredKeys
             ."\n\n".json_encode($chunk, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
 
-        // Match forum summarization: stacked user messages + model from config (see promptStream)
-        $payload = [
-            'messages' => [
-                ['role' => 'user', 'content' => $guide],
-                ['role' => 'user', 'content' => $userTask],
-            ],
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'max_tokens' => 4096,
-            'temperature' => 0.2,
-        ];
+        $result = app(AiCompletionService::class)->completeForFeature('translation', [
+            ['role' => 'user', 'content' => $guide],
+            ['role' => 'user', 'content' => $userTask],
+        ], 4096);
 
-        $response = $this->sendRequest($endpoint, $headers, $payload);
-        $this->logTranslateFinishReason($response);
-
-        $content = $this->extractOpenAiMessageContent($response);
+        $content = ($result['ok'] ?? false) ? ($result['content'] ?? '') : null;
         if ($content === null || $content === '') {
             Log::warning('translateUiStringChunk: empty OpenAI content', [
                 'retry' => $retryPass,
@@ -419,13 +429,6 @@ class ChatGPTService implements AIModel{
      */
     private function translateSingleUiLabel(string $targetLanguageLabel, string $key, string $englishSource): ?string
     {
-        $api_key = config('ai.open_api_key');
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$api_key,
-        ];
-
         $guide = 'You translate one short UI label for a public health website. '
             .'Target language: '.$targetLanguageLabel.'. '
             .'Output ONLY the translated label text on one line. No quotes, no JSON, no key name, no explanation.';
@@ -433,18 +436,16 @@ class ChatGPTService implements AIModel{
         $userTask = 'Context key (do not translate this word, it is only context): '.$key."\n"
             .'English label to translate: '.$englishSource;
 
-        $payload = [
-            'messages' => [
-                ['role' => 'user', 'content' => $guide],
-                ['role' => 'user', 'content' => $userTask],
-            ],
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'max_tokens' => 256,
-            'temperature' => 0.2,
-        ];
+        $result = app(AiCompletionService::class)->completeForFeature('translation', [
+            ['role' => 'user', 'content' => $guide],
+            ['role' => 'user', 'content' => $userTask],
+        ], 256);
 
-        $response = $this->sendRequest($endpoint, $headers, $payload);
-        $content = $this->extractOpenAiMessageContent($response);
+        if (! ($result['ok'] ?? false)) {
+            return null;
+        }
+
+        $content = $result['content'] ?? null;
         if ($content === null) {
             return null;
         }
@@ -623,21 +624,14 @@ class ChatGPTService implements AIModel{
      */
     public function proofreadHtmlForGrammar(string $html): array
     {
-        $key = config('ai.open_api_key');
-        if (empty($key)) {
-            return ['ok' => false, 'error' => 'OpenAI API key is not configured.'];
+        if (AiConfig::resolveChatProviderForFeature('chat') === null) {
+            return ['ok' => false, 'error' => 'No AI chat provider is configured.'];
         }
 
         $html = $html ?? '';
         if (mb_strlen($html) > 120000) {
             return ['ok' => false, 'error' => 'Content is too long for AI proofreading (max 120,000 characters).'];
         }
-
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$key,
-        ];
 
         $system = 'You are a careful copy-editor for a public health discussion forum. '
             .'Fix only grammar, spelling, punctuation, and obvious typos. '
@@ -647,17 +641,10 @@ class ChatGPTService implements AIModel{
             .'Keep the same language as the source. '
             .'Output only the corrected HTML fragment with no markdown code fences and no explanation before or after.';
 
-        $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => [
-                ['role' => 'system', 'content' => $system],
-                ['role' => 'user', 'content' => "Proofread this HTML:\n\n".$html],
-            ],
-            'max_tokens' => 8192,
-            'temperature' => 0.15,
-        ];
-
-        $response = $this->sendRequest($endpoint, $headers, $payload);
+        $response = $this->completeMessagesAsOpenAiResponse('chat', [
+            ['role' => 'system', 'content' => $system],
+            ['role' => 'user', 'content' => "Proofread this HTML:\n\n".$html],
+        ], 8192);
         $content = $this->extractOpenAiMessageContent($response);
         if ($content === null || $content === '') {
             Log::warning('proofreadHtmlForGrammar: empty OpenAI response');
@@ -682,16 +669,9 @@ class ChatGPTService implements AIModel{
     public function generateAfricaHealthFacts(int $count = 10): array
     {
         $count = max(10, min(15, $count));
-        $apiKey = config('ai.open_api_key');
-        if (empty($apiKey)) {
-            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        if (AiConfig::resolveChatProviderForFeature('insights') === null) {
+            return ['ok' => false, 'error' => 'No AI provider is configured for insights.'];
         }
-
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$apiKey,
-        ];
 
         $system = 'You are an evidence-focused public health editor for the Africa CDC Knowledge Hub. '
             .'Your job is to write short “Did you know?” facts about **real health issues, programmes, and research in Africa**. '
@@ -721,20 +701,16 @@ class ChatGPTService implements AIModel{
             .'(e) where useful, add **one line of policy or programme implication** (scale-up, financing, integration)—still factual, not advocacy slogans. '
             .'Do not pad with filler; every sentence should add information. Output only valid JSON, no markdown fences.';
 
-        $payload = [
-            'model' => config('ai.openai_model', 'gpt-3.5-turbo'),
-            'messages' => [
-                ['role' => 'system', 'content' => $system],
-                ['role' => 'user', 'content' => $user],
-            ],
-            'max_tokens' => 8192,
-            'temperature' => 0.45,
-        ];
-
-        $response = $this->sendRequest($endpoint, $headers, $payload);
-        $content = $this->extractOpenAiMessageContent($response);
-        if ($content === null || trim($content) === '') {
-            return ['ok' => false, 'error' => 'Empty response from OpenAI.'];
+        $result = $this->chatCompletionJson([
+            ['role' => 'system', 'content' => $system],
+            ['role' => 'user', 'content' => $user],
+        ], 8192, null, 'insights');
+        if (! ($result['ok'] ?? false)) {
+            return ['ok' => false, 'error' => $result['error'] ?? 'AI request failed.'];
+        }
+        $content = $result['content'] ?? '';
+        if (trim($content) === '') {
+            return ['ok' => false, 'error' => 'Empty response from AI.'];
         }
 
         $facts = $this->parseAfricaHealthFactsJson($content);
@@ -778,9 +754,8 @@ class ChatGPTService implements AIModel{
     public function generateHealthTopics(array $existingTagNames, array $referenceTopics, int $count = 15): array
     {
         $count = max(5, min(40, $count));
-        $apiKey = config('ai.open_api_key');
-        if (empty($apiKey)) {
-            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        if (AiConfig::resolveChatProviderForFeature('insights') === null) {
+            return ['ok' => false, 'error' => 'No AI provider is configured for insights.'];
         }
 
         $seen = [];
@@ -859,9 +834,8 @@ class ChatGPTService implements AIModel{
             return ['ok' => false, 'error' => 'Topic name is required.'];
         }
 
-        $apiKey = config('ai.open_api_key');
-        if (empty($apiKey)) {
-            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        if (AiConfig::resolveChatProviderForFeature('insights') === null) {
+            return ['ok' => false, 'error' => 'No AI provider is configured for insights.'];
         }
 
         $excerpt = trim((string) ($whoSource['excerpt'] ?? ''));
@@ -901,14 +875,14 @@ class ChatGPTService implements AIModel{
             ['role' => 'user', 'content' => implode("\n\n", $userParts)],
         ];
 
-        $result = $this->chatCompletionJson($messages, 4096, config('ai.openai_model', 'gpt-3.5-turbo'));
+        $result = $this->chatCompletionJson($messages, 4096, null, 'insights');
         if (! ($result['ok'] ?? false)) {
-            return ['ok' => false, 'error' => $result['error'] ?? 'OpenAI request failed.'];
+            return ['ok' => false, 'error' => $result['error'] ?? 'AI request failed.'];
         }
 
         $overview = $this->parseHealthTopicOverviewJson($result['content']);
         if ($overview === '') {
-            return ['ok' => false, 'error' => 'Could not parse overview HTML from OpenAI.'];
+            return ['ok' => false, 'error' => 'Could not parse overview HTML from AI.'];
         }
 
         $overview = $this->ensureReferencesSection($overview, $references);
@@ -1102,9 +1076,9 @@ class ChatGPTService implements AIModel{
             ['role' => 'user', 'content' => $user],
         ];
 
-        $result = $this->chatCompletionJson($messages, 3096, $model);
+        $result = $this->chatCompletionJson($messages, 3096, $model, 'insights');
         if (! ($result['ok'] ?? false)) {
-            return ['ok' => false, 'error' => $result['error'] ?? 'OpenAI request failed.'];
+            return ['ok' => false, 'error' => $result['error'] ?? 'AI request failed.'];
         }
 
         $topics = $this->parseHealthTopicsJson($result['content']);
@@ -1134,38 +1108,21 @@ class ChatGPTService implements AIModel{
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array{ok: true, content: string}|array{ok: false, error: string}
      */
-    private function chatCompletionJson(array $messages, int $maxTokens, ?string $model = null): array
+    private function chatCompletionJson(array $messages, int $maxTokens, ?string $model = null, string $feature = 'insights'): array
     {
-        $apiKey = config('ai.open_api_key');
-        if (empty($apiKey)) {
-            return ['ok' => false, 'error' => 'OpenAI API key is not configured (OPEN_API_KEY).'];
+        $result = app(AiCompletionService::class)->completeForFeature(
+            $feature,
+            $messages,
+            max(512, min(4096, $maxTokens)),
+            $model,
+            true
+        );
+
+        if ($result['ok'] ?? false) {
+            return ['ok' => true, 'content' => $result['content']];
         }
 
-        $model = $model ?: config('ai.openai_model', 'gpt-3.5-turbo');
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-        $headers = [
-            'Content-Type: application/json',
-            'Authorization: Bearer '.$apiKey,
-        ];
-
-        $payload = [
-            'model' => $model,
-            'messages' => $messages,
-            'max_tokens' => max(512, min(4096, $maxTokens)),
-            'temperature' => 0.3,
-            'response_format' => ['type' => 'json_object'],
-        ];
-
-        $response = $this->sendRequest($endpoint, $headers, $payload);
-        $parsed = $this->openAiResponseContentOrError($response);
-        if (! ($parsed['ok'] ?? false)) {
-            // Older/chat models may reject response_format — retry like forum summarisation (plain completion).
-            unset($payload['response_format']);
-            $response = $this->sendRequest($endpoint, $headers, $payload);
-            $parsed = $this->openAiResponseContentOrError($response);
-        }
-
-        return $parsed;
+        return ['ok' => false, 'error' => $result['error'] ?? 'AI request failed.'];
     }
 
     /**

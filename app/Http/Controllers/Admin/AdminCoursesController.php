@@ -195,10 +195,12 @@ class AdminCoursesController extends Controller
      */
     private function aiConfigFields(): array
     {
+        if (! Schema::hasColumn('setting', 'ai_openai_api_key')) {
+            return ['aiPage' => null];
+        }
+
         return [
-            'aiFields' => Schema::hasColumn('setting', 'ai_openai_api_key')
-                ? AiConfig::fieldsForAdmin()
-                : [],
+            'aiPage' => AiConfig::adminPageData(),
         ];
     }
 }

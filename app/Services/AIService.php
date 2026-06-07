@@ -119,7 +119,7 @@ Please summarize this forum discussion, including:
                 $prompt .= " Pay attention to: " . $additional_prompt;
             }
             $chatGpt = app('chatgpt');
-            $chatGpt->promptStream($prompt, $onChunk);
+            $chatGpt->promptStream($prompt, $onChunk, 'forums');
             return;
         }
 
@@ -146,7 +146,7 @@ Please summarize this forum discussion, including:
             $prompt .= " Pay attention to this: " . $additional_prompt;
         }
         $chatGpt = app('chatgpt');
-        $chatGpt->promptStream($prompt, $onChunk);
+        $chatGpt->promptStream($prompt, $onChunk, 'chat');
     }
 
     public function compare($resourceId, $otherResourceId,$additional_prompt=null)

@@ -3,6 +3,7 @@
 namespace App\Support;
 
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 class AiConfig
 {
@@ -60,8 +61,131 @@ class AiConfig
         return array_keys(config('ai.providers', []));
     }
 
+    /**
+     * @return array<string, array<string, mixed>>
+     */
+    public static function features(): array
+    {
+        return config('ai.features', []);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function defaultFeatureRouting(): array
+    {
+        return config('ai.default_feature_routing', []);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function featureRouting(): array
+    {
+        $defaults = self::defaultFeatureRouting();
+        $db = self::dbSettings();
+
+        if ($db && Schema::hasColumn('setting', 'ai_feature_routing') && ! empty($db->ai_feature_routing)) {
+            $stored = json_decode((string) $db->ai_feature_routing, true);
+            if (is_array($stored)) {
+                return array_merge($defaults, array_filter($stored, fn ($v) => is_string($v) && $v !== ''));
+            }
+        }
+
+        return $defaults;
+    }
+
+    public static function featureProvider(string $feature): string
+    {
+        $routing = self::featureRouting();
+        if (isset($routing[$feature]) && $routing[$feature] !== '') {
+            return (string) $routing[$feature];
+        }
+
+        return (string) (config('ai.features.'.$feature.'.default_provider') ?? 'openai');
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function customIntegrations(): array
+    {
+        $db = self::dbSettings();
+        if (! $db || ! Schema::hasColumn('setting', 'ai_custom_integrations') || empty($db->ai_custom_integrations)) {
+            return [];
+        }
+
+        $decoded = json_decode((string) $db->ai_custom_integrations, true);
+        if (! is_array($decoded)) {
+            return [];
+        }
+
+        $integrations = [];
+        foreach ($decoded as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+            $id = trim((string) ($row['id'] ?? ''));
+            if ($id === '') {
+                continue;
+            }
+            $integrations[] = [
+                'id' => $id,
+                'name' => trim((string) ($row['name'] ?? 'Custom integration')),
+                'driver' => in_array($row['driver'] ?? '', ['openai_compatible', 'gemini'], true)
+                    ? $row['driver']
+                    : 'openai_compatible',
+                'base_url' => rtrim(trim((string) ($row['base_url'] ?? '')), '/'),
+                'api_key' => (string) ($row['api_key'] ?? ''),
+                'model' => trim((string) ($row['model'] ?? '')),
+                'enabled' => filter_var($row['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            ];
+        }
+
+        return $integrations;
+    }
+
+    public static function integrationProviderId(string $integrationId): string
+    {
+        return 'integration_'.$integrationId;
+    }
+
+    public static function isIntegrationProvider(string $providerId): bool
+    {
+        return str_starts_with($providerId, 'integration_');
+    }
+
+    public static function integrationIdFromProvider(string $providerId): ?string
+    {
+        if (! self::isIntegrationProvider($providerId)) {
+            return null;
+        }
+
+        return substr($providerId, strlen('integration_'));
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function customIntegrationById(string $integrationId): ?array
+    {
+        foreach (self::customIntegrations() as $integration) {
+            if ($integration['id'] === $integrationId) {
+                return $integration;
+            }
+        }
+
+        return null;
+    }
+
     public static function providerEnabled(string $provider): bool
     {
+        if (self::isIntegrationProvider($provider)) {
+            $integration = self::customIntegrationById((string) self::integrationIdFromProvider($provider));
+
+            return $integration !== null && $integration['enabled'];
+        }
+
         if (! in_array($provider, self::providers(), true)) {
             return false;
         }
@@ -77,6 +201,20 @@ class AiConfig
 
     public static function providerConfigured(string $provider): bool
     {
+        if (self::isIntegrationProvider($provider)) {
+            $integration = self::customIntegrationById((string) self::integrationIdFromProvider($provider));
+            if ($integration === null) {
+                return false;
+            }
+            if ($integration['driver'] === 'gemini') {
+                return trim($integration['api_key']) !== '' && trim($integration['model']) !== '';
+            }
+
+            return trim($integration['base_url']) !== ''
+                && trim($integration['api_key']) !== ''
+                && trim($integration['model']) !== '';
+        }
+
         return match ($provider) {
             'openai' => trim((string) self::openaiApiKey()) !== '',
             'chatpdf' => trim((string) self::chatPdfApiKey()) !== '',
@@ -95,24 +233,49 @@ class AiConfig
     }
 
     /**
-     * First enabled + configured chat provider, or null.
+     * @return list<string>
      */
-    public static function primaryChatProvider(): ?string
+    public static function chatProviderIds(): array
     {
-        $preferred = trim((string) self::resolve('', 'ai_primary_provider', config('ai.default_primary_provider', 'openai')));
-        $chatProviders = ['openai', 'gemini', 'deepseek', 'custom'];
+        $ids = [];
+        foreach (self::providers() as $provider) {
+            if (config('ai.providers.'.$provider.'.chat', false)) {
+                $ids[] = $provider;
+            }
+        }
+        foreach (self::customIntegrations() as $integration) {
+            $ids[] = self::integrationProviderId($integration['id']);
+        }
 
-        if (in_array($preferred, $chatProviders, true) && self::providerAvailable($preferred)) {
+        return $ids;
+    }
+
+    /**
+     * First enabled + configured chat provider for a feature, with fallback chain.
+     */
+    public static function resolveChatProviderForFeature(string $feature): ?string
+    {
+        $preferred = self::featureProvider($feature);
+        if (self::providerAvailable($preferred)) {
             return $preferred;
         }
 
-        foreach ($chatProviders as $provider) {
+        if (self::providerAvailable('openai')) {
+            return 'openai';
+        }
+
+        foreach (self::chatProviderIds() as $provider) {
             if (self::providerAvailable($provider)) {
                 return $provider;
             }
         }
 
         return null;
+    }
+
+    public static function primaryChatProvider(): ?string
+    {
+        return self::resolveChatProviderForFeature('chat');
     }
 
     public static function openaiApiKey(): string
@@ -165,6 +328,112 @@ class AiConfig
         return (string) self::resolve('AI_CUSTOM_MODEL', 'ai_custom_model', '');
     }
 
+    /**
+     * @return array{driver: string, api_key: string, model: string, base_url: string, label: string}|null
+     */
+    public static function providerCredentials(string $providerId): ?array
+    {
+        if (self::isIntegrationProvider($providerId)) {
+            $integration = self::customIntegrationById((string) self::integrationIdFromProvider($providerId));
+            if ($integration === null) {
+                return null;
+            }
+
+            return [
+                'driver' => $integration['driver'],
+                'api_key' => $integration['api_key'],
+                'model' => $integration['model'],
+                'base_url' => $integration['base_url'],
+                'label' => $integration['name'],
+            ];
+        }
+
+        return match ($providerId) {
+            'openai' => [
+                'driver' => 'openai_compatible',
+                'api_key' => self::openaiApiKey(),
+                'model' => self::openaiModel(),
+                'base_url' => 'https://api.openai.com/v1',
+                'label' => 'OpenAI',
+            ],
+            'deepseek' => [
+                'driver' => 'openai_compatible',
+                'api_key' => self::deepseekApiKey(),
+                'model' => self::deepseekModel(),
+                'base_url' => 'https://api.deepseek.com/v1',
+                'label' => 'DeepSeek',
+            ],
+            'custom' => [
+                'driver' => 'openai_compatible',
+                'api_key' => self::customApiKey(),
+                'model' => self::customModel(),
+                'base_url' => self::customBaseUrl(),
+                'label' => 'Custom endpoint',
+            ],
+            'gemini' => [
+                'driver' => 'gemini',
+                'api_key' => self::geminiApiKey(),
+                'model' => self::geminiModel(),
+                'base_url' => '',
+                'label' => 'Google Gemini',
+            ],
+            default => null,
+        };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function providerOptionsForFeature(string $feature): array
+    {
+        $featureMeta = config('ai.features.'.$feature, []);
+        $types = $featureMeta['provider_types'] ?? ['chat'];
+        $options = [];
+
+        if (in_array('document', $types, true)) {
+            $options['chatpdf'] = (string) config('ai.providers.chatpdf.label', 'ChatPDF');
+        }
+
+        if (in_array('chat', $types, true)) {
+            foreach (self::providers() as $provider) {
+                if (config('ai.providers.'.$provider.'.chat', false)) {
+                    $options[$provider] = (string) config('ai.providers.'.$provider.'.label', $provider);
+                }
+            }
+            foreach (self::customIntegrations() as $integration) {
+                $pid = self::integrationProviderId($integration['id']);
+                $options[$pid] = $integration['name'];
+            }
+        }
+
+        return $options;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public static function allProviderLabels(): array
+    {
+        $labels = [];
+        foreach (config('ai.providers', []) as $id => $meta) {
+            $labels[$id] = (string) ($meta['label'] ?? $id);
+        }
+        foreach (self::customIntegrations() as $integration) {
+            $labels[self::integrationProviderId($integration['id'])] = $integration['name'];
+        }
+
+        return $labels;
+    }
+
+    public static function providerStatus(string $providerId): string
+    {
+        if (! self::providerEnabled($providerId)) {
+            return 'disabled';
+        }
+
+        return self::providerConfigured($providerId) ? 'ready' : 'incomplete';
+    }
+
     public static function applyRuntimeConfig(): void
     {
         if (! Schema::hasTable('setting')) {
@@ -183,6 +452,8 @@ class AiConfig
             'ai.custom_api_key' => self::customApiKey(),
             'ai.custom_model' => self::customModel(),
             'ai.primary_provider' => self::primaryChatProvider(),
+            'ai.feature_routing' => self::featureRouting(),
+            'ai.custom_integrations' => self::customIntegrations(),
         ]);
     }
 
@@ -243,5 +514,133 @@ class AiConfig
         }
 
         return $fields;
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public static function adminPageData(): array
+    {
+        $fields = self::fieldsForAdmin();
+        $routing = self::featureRouting();
+        $integrations = self::customIntegrations();
+        $providerLabels = self::allProviderLabels();
+
+        $builtin = [];
+        foreach (config('ai.providers', []) as $id => $meta) {
+            $builtin[] = [
+                'id' => $id,
+                'label' => (string) ($meta['label'] ?? $id),
+                'description' => (string) ($meta['description'] ?? ''),
+                'icon' => (string) ($meta['icon'] ?? 'fa-robot'),
+                'color' => (string) ($meta['color'] ?? '#6c757d'),
+                'capabilities' => $meta['capabilities'] ?? [],
+                'chat' => (bool) ($meta['chat'] ?? false),
+                'status' => self::providerStatus($id),
+                'enabled' => self::providerEnabled($id),
+                'configured' => self::providerConfigured($id),
+            ];
+        }
+
+        $features = [];
+        foreach (self::features() as $key => $meta) {
+            $assigned = $routing[$key] ?? ($meta['default_provider'] ?? 'openai');
+            $features[] = [
+                'key' => $key,
+                'label' => (string) ($meta['label'] ?? $key),
+                'description' => (string) ($meta['description'] ?? ''),
+                'assigned_provider' => $assigned,
+                'assigned_label' => $providerLabels[$assigned] ?? $assigned,
+                'provider_options' => self::providerOptionsForFeature($key),
+                'status' => self::providerAvailable($assigned) ? 'ready' : 'unavailable',
+            ];
+        }
+
+        $readyCount = 0;
+        foreach (array_merge(array_column($builtin, 'id'), array_map(fn ($i) => self::integrationProviderId($i['id']), $integrations)) as $pid) {
+            if (self::providerAvailable($pid)) {
+                $readyCount++;
+            }
+        }
+
+        return [
+            'fields' => $fields,
+            'features' => $features,
+            'builtin_providers' => $builtin,
+            'custom_integrations' => array_map(function (array $integration) {
+                $pid = self::integrationProviderId($integration['id']);
+
+                return array_merge($integration, [
+                    'provider_id' => $pid,
+                    'status' => self::providerStatus($pid),
+                    'has_stored_key' => trim($integration['api_key']) !== '',
+                ]);
+            }, $integrations),
+            'stats' => [
+                'ready_providers' => $readyCount,
+                'total_features' => count($features),
+                'features_ready' => count(array_filter($features, fn ($f) => $f['status'] === 'ready')),
+                'primary_chat' => self::primaryChatProvider(),
+                'primary_chat_label' => $providerLabels[self::primaryChatProvider() ?? ''] ?? 'Not configured',
+            ],
+        ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $submitted
+     * @param  list<array<string, mixed>>  $existing
+     * @return list<array<string, mixed>>
+     */
+    public static function normalizeCustomIntegrationsInput(array $submitted, array $existing = []): array
+    {
+        $existingById = [];
+        foreach ($existing as $row) {
+            $existingById[$row['id']] = $row;
+        }
+
+        $normalized = [];
+        $usedIds = [];
+
+        foreach ($submitted as $index => $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $name = trim((string) ($row['name'] ?? ''));
+            if ($name === '') {
+                continue;
+            }
+
+            $id = trim((string) ($row['id'] ?? ''));
+            if ($id === '') {
+                $id = Str::slug($name);
+            }
+            $baseId = $id;
+            $suffix = 2;
+            while (in_array($id, $usedIds, true)) {
+                $id = $baseId.'-'.$suffix;
+                $suffix++;
+            }
+            $usedIds[] = $id;
+
+            $apiKey = trim((string) ($row['api_key'] ?? ''));
+            if ($apiKey === '' && isset($existingById[$id])) {
+                $apiKey = (string) ($existingById[$id]['api_key'] ?? '');
+            }
+
+            $normalized[] = [
+                'id' => $id,
+                'name' => $name,
+                'driver' => in_array($row['driver'] ?? '', ['openai_compatible', 'gemini'], true)
+                    ? $row['driver']
+                    : 'openai_compatible',
+                'base_url' => rtrim(trim((string) ($row['base_url'] ?? '')), '/'),
+                'api_key' => $apiKey,
+                'model' => trim((string) ($row['model'] ?? '')),
+                'enabled' => filter_var($row['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            ];
+        }
+
+        return $normalized;
     }
 }

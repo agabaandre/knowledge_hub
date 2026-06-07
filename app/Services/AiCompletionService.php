@@ -11,49 +11,64 @@ class AiCompletionService
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
      */
-    public function complete(array $messages, int $maxTokens = 2048, ?string $model = null, bool $jsonMode = false): array
+    public function completeForFeature(string $feature, array $messages, int $maxTokens = 2048, ?string $model = null, bool $jsonMode = false): array
     {
-        $provider = AiConfig::primaryChatProvider();
+        $provider = AiConfig::resolveChatProviderForFeature($feature);
         if ($provider === null) {
-            return ['ok' => false, 'error' => 'No AI chat provider is enabled and configured.'];
+            return ['ok' => false, 'error' => 'No AI provider is enabled and configured for '.$feature.'.'];
         }
 
-        return match ($provider) {
-            'openai' => $this->completeOpenAiCompatible(
-                'https://api.openai.com/v1/chat/completions',
-                AiConfig::openaiApiKey(),
-                $model ?: AiConfig::openaiModel(),
+        return $this->completeWithProvider($provider, $messages, $maxTokens, $model, $jsonMode);
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
+     */
+    public function complete(array $messages, int $maxTokens = 2048, ?string $model = null, bool $jsonMode = false): array
+    {
+        return $this->completeForFeature('chat', $messages, $maxTokens, $model, $jsonMode);
+    }
+
+    /**
+     * @param  array<int, array{role: string, content: string}>  $messages
+     * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
+     */
+    public function completeWithProvider(string $provider, array $messages, int $maxTokens = 2048, ?string $model = null, bool $jsonMode = false): array
+    {
+        if (! AiConfig::providerAvailable($provider)) {
+            return ['ok' => false, 'error' => 'Provider "'.$provider.'" is not enabled or configured.'];
+        }
+
+        $credentials = AiConfig::providerCredentials($provider);
+        if ($credentials === null) {
+            return ['ok' => false, 'error' => 'Unsupported AI provider: '.$provider];
+        }
+
+        if ($credentials['driver'] === 'gemini') {
+            return $this->completeGemini(
+                $model ?: $credentials['model'],
                 $messages,
                 $maxTokens,
                 $jsonMode,
-                'openai'
-            ),
-            'deepseek' => $this->completeOpenAiCompatible(
-                'https://api.deepseek.com/v1/chat/completions',
-                AiConfig::deepseekApiKey(),
-                $model ?: AiConfig::deepseekModel(),
-                $messages,
-                $maxTokens,
-                $jsonMode,
-                'deepseek'
-            ),
-            'custom' => $this->completeOpenAiCompatible(
-                rtrim(AiConfig::customBaseUrl(), '/').'/chat/completions',
-                AiConfig::customApiKey(),
-                $model ?: AiConfig::customModel(),
-                $messages,
-                $maxTokens,
-                $jsonMode,
-                'custom'
-            ),
-            'gemini' => $this->completeGemini(
-                $model ?: AiConfig::geminiModel(),
-                $messages,
-                $maxTokens,
-                $jsonMode
-            ),
-            default => ['ok' => false, 'error' => 'Unsupported AI provider: '.$provider],
-        };
+                $credentials['api_key']
+            );
+        }
+
+        $baseUrl = rtrim($credentials['base_url'], '/');
+        if ($baseUrl === '') {
+            return ['ok' => false, 'error' => 'Base URL is not configured for '.$provider.'.'];
+        }
+
+        return $this->completeOpenAiCompatible(
+            $baseUrl.'/chat/completions',
+            $credentials['api_key'],
+            $model ?: $credentials['model'],
+            $messages,
+            $maxTokens,
+            $jsonMode,
+            $provider
+        );
     }
 
     /**
@@ -126,9 +141,9 @@ class AiCompletionService
      * @param  array<int, array{role: string, content: string}>  $messages
      * @return array{ok: true, content: string, provider: string}|array{ok: false, error: string}
      */
-    private function completeGemini(string $model, array $messages, int $maxTokens, bool $jsonMode): array
+    private function completeGemini(string $model, array $messages, int $maxTokens, bool $jsonMode, ?string $apiKey = null): array
     {
-        $apiKey = AiConfig::geminiApiKey();
+        $apiKey = $apiKey ?? AiConfig::geminiApiKey();
         if (trim($apiKey) === '') {
             return ['ok' => false, 'error' => 'Gemini API key is not configured.'];
         }

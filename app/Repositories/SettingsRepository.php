@@ -680,6 +680,28 @@ class SettingsRepository
                 $settings->{$toggle} = self::parseSubmittedBoolean($request, $toggle);
             }
         }
+
+        if (Schema::hasColumn('setting', 'ai_feature_routing') && $request->has('ai_feature_routing')) {
+            $routing = [];
+            $features = array_keys(config('ai.features', []));
+            foreach ($features as $feature) {
+                $value = trim((string) $request->input('ai_feature_routing.'.$feature, ''));
+                if ($value !== '') {
+                    $routing[$feature] = $value;
+                }
+            }
+            $settings->ai_feature_routing = $routing !== [] ? json_encode($routing) : null;
+        }
+
+        if (Schema::hasColumn('setting', 'ai_custom_integrations') && $request->has('custom_integrations_submitted')) {
+            $existing = \App\Support\AiConfig::customIntegrations();
+            $submitted = $request->input('custom_integrations', []);
+            $normalized = \App\Support\AiConfig::normalizeCustomIntegrationsInput(
+                is_array($submitted) ? $submitted : [],
+                $existing
+            );
+            $settings->ai_custom_integrations = $normalized !== [] ? json_encode($normalized) : null;
+        }
     }
 
     /**
