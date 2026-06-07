@@ -295,6 +295,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get('/storage-management/publication-references', [StorageManagementController::class, 'publicationReferences'])->name('admin.storage.publication-references');
     Route::get('/storage-management/browse-backups', [StorageManagementController::class, 'browseBackups'])->name('admin.storage.browse-backups');
     Route::post('/storage-management/backup', [StorageManagementController::class, 'runBackup'])->name('admin.storage.backup');
+    Route::post('/storage-management/backup-env', [StorageManagementController::class, 'runEnvBackup'])->name('admin.storage.backup-env');
+    Route::get('/storage-management/download-env-backup', [StorageManagementController::class, 'downloadEnvBackup'])->name('admin.storage.download-env-backup');
     Route::post('/storage-management/restore', [StorageManagementController::class, 'restoreBackup'])->name('admin.storage.restore');
     Route::get('/storage-management/backup-tables', [StorageManagementController::class, 'backupTablesInDirectory'])->name('admin.storage.backup-tables');
     Route::post('/storage-management/migrate', [StorageManagementController::class, 'migrate'])->name('admin.storage.migrate');

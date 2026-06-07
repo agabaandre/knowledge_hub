@@ -7,6 +7,7 @@ use App\Jobs\MigrateHostStorageJob;
 use App\Jobs\MigrateHubStorageJob;
 use App\Models\HubStorageSetting;
 use App\Services\HubDatabaseBackupService;
+use App\Services\HubEnvBackupService;
 use App\Services\HubStorageMetricsService;
 use App\Services\HubStoragePublicationIndexService;
 use App\Services\HubStorageService;
@@ -18,7 +19,12 @@ use Illuminate\Validation\ValidationException;
 
 class StorageManagementController extends Controller
 {
-    public function index(HubStorageService $storage, HubDatabaseBackupService $backup, HubStorageMetricsService $metrics)
+    public function index(
+        HubStorageService $storage,
+        HubDatabaseBackupService $backup,
+        HubEnvBackupService $envBackup,
+        HubStorageMetricsService $metrics
+    )
     {
         $settings = $storage->settings();
         $recommended = $storage->recommendedPaths();
@@ -39,6 +45,7 @@ class StorageManagementController extends Controller
             'driverSetup' => config('hub_storage.driver_setup', []),
             'contentAreas' => config('hub_storage.content_prefixes', []),
             'backups' => $backup->listBackups(),
+            'envBackups' => $envBackup->listBackups(),
             'filesRoot' => $storage->filesRoot(),
             'configuredFilesRoot' => $storage->configuredInternalRoot(),
             'legacyFilesRoot' => $storage->legacyInternalRoot(),
@@ -222,9 +229,43 @@ class StorageManagementController extends Controller
         $incremental = $request->boolean('incremental', true);
         $result = $backup->runBackup($incremental);
 
+        $message = "SQL backup completed ({$result['tables']} tables) at {$result['path']}";
+        if (! empty($result['env_backup']['name'])) {
+            $message .= '. .env snapshot saved as '.$result['env_backup']['name'].'.';
+        }
+
         return redirect()
-            ->route('admin.storage.index')
-            ->with('alert-success', "SQL backup completed ({$result['tables']} tables) at {$result['path']}");
+            ->route('admin.storage.index', [], 303)
+            ->with('alert-success', $message)
+            ->withFragment('storage-backups');
+    }
+
+    public function runEnvBackup(HubEnvBackupService $envBackup)
+    {
+        try {
+            $result = $envBackup->runBackup();
+        } catch (\Throwable $e) {
+            return redirect()
+                ->route('admin.storage.index', [], 303)
+                ->with('alert-danger', '.env backup failed: '.$e->getMessage())
+                ->withFragment('storage-backups');
+        }
+
+        return redirect()
+            ->route('admin.storage.index', [], 303)
+            ->with('alert-success', '.env backup saved as '.$result['name'].'.')
+            ->withFragment('storage-backups');
+    }
+
+    public function downloadEnvBackup(Request $request, HubEnvBackupService $envBackup)
+    {
+        $name = (string) $request->query('name', '');
+        $path = $envBackup->resolveBackupPath($name);
+        if ($path === null) {
+            abort(404, 'Backup file not found.');
+        }
+
+        return response()->download($path, basename($path));
     }
 
     public function restoreBackup(Request $request, HubDatabaseBackupService $backup)

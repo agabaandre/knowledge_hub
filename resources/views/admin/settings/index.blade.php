@@ -1846,10 +1846,9 @@
                         </div>
                     @else
                         @php
-                            $emailDriverDb = $emailFields['email_driver']['db_value'] ?? 'exchange';
+                            $emailDriverForm = $emailFields['email_driver']['form_value'] ?? $emailFields['email_driver']['value'] ?? 'exchange';
                             $emailDriverEffective = $emailFields['email_driver']['value'] ?? 'exchange';
-                            $emailDriverLocked = ($emailFields['email_driver']['source'] ?? '') === 'env';
-                            $showExchange = $emailDriverEffective === 'exchange';
+                            $showExchange = $emailDriverForm === 'exchange';
                         @endphp
 
                         <div class="form-section-title">
@@ -1860,30 +1859,17 @@
                         <div class="email-section-intro">
                             <i class="fa fa-info-circle"></i>
                             Choose the default sending method for system emails (password reset, notifications, reminders).
-                            Settings are saved to the database; saving clears obsolete mail overrides from <code>.env</code> so your changes take effect immediately.
-                            Set <code>EMAIL_DRIVER</code> in <code>.env</code> only when you need to lock the driver from this screen.
+                            Values saved here are stored in the database and <strong>override</strong> any matching <code>.env</code> mail settings.
                         </div>
 
-                        <label class="branding-field-label d-block">Default sending method</label>
-                        <div class="email-driver-switch {{ $emailDriverLocked ? 'is-locked' : '' }}" id="email-driver-switch">
-                            <input type="radio" name="email_driver" id="email_driver_exchange" value="exchange"
-                                   {{ ($emailDriverDb === 'exchange' || $emailDriverDb === null || $emailDriverDb === '') ? 'checked' : '' }}
-                                   {{ $emailDriverLocked ? 'disabled' : '' }}>
-                            <label for="email_driver_exchange"><i class="fa fa-windows mr-1"></i>Microsoft Exchange</label>
-                            <input type="radio" name="email_driver" id="email_driver_smtp" value="smtp"
-                                   {{ $emailDriverDb === 'smtp' ? 'checked' : '' }}
-                                   {{ $emailDriverLocked ? 'disabled' : '' }}>
-                            <label for="email_driver_smtp"><i class="fa fa-server mr-1"></i>SMTP</label>
+                        <div class="form-group" style="max-width: 360px;">
+                            <label class="branding-field-label d-block" for="email_driver">Default sending method</label>
+                            <select name="email_driver" id="email_driver" class="form-control">
+                                <option value="exchange" {{ $emailDriverForm === 'exchange' ? 'selected' : '' }}>Microsoft Exchange</option>
+                                <option value="smtp" {{ $emailDriverForm === 'smtp' ? 'selected' : '' }}>SMTP</option>
+                            </select>
                         </div>
-                        @if($emailDriverLocked)
-                            <input type="hidden" name="email_driver" value="{{ $emailDriverDb ?: 'exchange' }}">
-                            <p class="email-effective-hint mb-3">
-                                <span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>
-                                Active driver: <strong>{{ strtoupper($emailDriverEffective) }}</strong> (locked via <code>EMAIL_DRIVER</code> in .env)
-                            </p>
-                        @else
-                            <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
-                        @endif
+                        <p class="email-effective-hint mb-3">Currently active: <strong>{{ strtoupper($emailDriverEffective) }}</strong></p>
 
                         <div class="email-config-panel" id="email-panel-shared">
                             <h4 class="email-config-panel__title"><i class="fa fa-user"></i>Sender identity</h4>
@@ -1896,11 +1882,10 @@
                                             @endif
                                         </label>
                                         <input type="email" name="mail_from_address" class="form-control"
-                                               value="{{ $emailFields['mail_from_address']['db_value'] ?? '' }}"
-                                               placeholder="{{ $emailFields['mail_from_address']['value'] ?? 'noreply@example.com' }}"
-                                               {{ ($emailFields['mail_from_address']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                                        @if($emailFields['mail_from_address']['env_locked'] ?? false)
-                                            <div class="email-effective-hint">Effective: <strong>{{ $emailFields['mail_from_address']['value'] }}</strong></div>
+                                               value="{{ $emailFields['mail_from_address']['form_value'] ?? '' }}"
+                                               placeholder="{{ $emailFields['mail_from_address']['value'] ?? 'noreply@example.com' }}">
+                                        @if($emailFields['mail_from_address']['has_env_override'] ?? false)
+                                            <div class="email-effective-hint">.env fallback: <strong>{{ $emailFields['mail_from_address']['value'] }}</strong> (database value overrides after save)</div>
                                         @endif
                                     </div>
                                 </div>
@@ -1912,11 +1897,10 @@
                                             @endif
                                         </label>
                                         <input type="text" name="mail_from_name" class="form-control"
-                                               value="{{ $emailFields['mail_from_name']['db_value'] ?? '' }}"
-                                               placeholder="{{ $emailFields['mail_from_name']['value'] ?? config('app.name') }}"
-                                               {{ ($emailFields['mail_from_name']['env_locked'] ?? false) ? 'readonly' : '' }}>
-                                        @if($emailFields['mail_from_name']['env_locked'] ?? false)
-                                            <div class="email-effective-hint">Effective: <strong>{{ $emailFields['mail_from_name']['value'] }}</strong></div>
+                                               value="{{ $emailFields['mail_from_name']['form_value'] ?? '' }}"
+                                               placeholder="{{ $emailFields['mail_from_name']['value'] ?? config('app.name') }}">
+                                        @if($emailFields['mail_from_name']['has_env_override'] ?? false)
+                                            <div class="email-effective-hint">.env fallback: <strong>{{ $emailFields['mail_from_name']['value'] }}</strong> (database value overrides after save)</div>
                                         @endif
                                     </div>
                                 </div>
@@ -1932,8 +1916,7 @@
                                             @if($emailFields['exchange_tenant_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_tenant_id" class="form-control"
-                                               value="{{ $emailFields['exchange_tenant_id']['db_value'] ?? '' }}"
-                                               {{ ($emailFields['exchange_tenant_id']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['exchange_tenant_id']['form_value'] ?? '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1942,8 +1925,7 @@
                                             @if($emailFields['exchange_client_id']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_client_id" class="form-control"
-                                               value="{{ $emailFields['exchange_client_id']['db_value'] ?? '' }}"
-                                               {{ ($emailFields['exchange_client_id']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['exchange_client_id']['form_value'] ?? '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1959,14 +1941,11 @@
                                 <div class="col-md-6">
                                     <div class="form-group">
                                         <label>Auth method</label>
-                                        <select name="exchange_auth_method" class="form-control"
-                                                {{ ($emailFields['exchange_auth_method']['env_locked'] ?? false) ? 'disabled' : '' }}>
-                                            <option value="client_credentials" {{ ($emailFields['exchange_auth_method']['db_value'] ?? 'client_credentials') === 'client_credentials' ? 'selected' : '' }}>Client credentials</option>
-                                            <option value="authorization_code" {{ ($emailFields['exchange_auth_method']['db_value'] ?? '') === 'authorization_code' ? 'selected' : '' }}>Authorization code</option>
+                                        @php $exchangeAuth = $emailFields['exchange_auth_method']['form_value'] ?? 'client_credentials'; @endphp
+                                        <select name="exchange_auth_method" class="form-control">
+                                            <option value="client_credentials" {{ $exchangeAuth === 'client_credentials' ? 'selected' : '' }}>Client credentials</option>
+                                            <option value="authorization_code" {{ $exchangeAuth === 'authorization_code' ? 'selected' : '' }}>Authorization code</option>
                                         </select>
-                                        @if($emailFields['exchange_auth_method']['env_locked'] ?? false)
-                                            <input type="hidden" name="exchange_auth_method" value="{{ $emailFields['exchange_auth_method']['value'] }}">
-                                        @endif
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1975,9 +1954,8 @@
                                             @if($emailFields['exchange_redirect_uri']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_redirect_uri" class="form-control"
-                                               value="{{ $emailFields['exchange_redirect_uri']['db_value'] ?? '' }}"
-                                               placeholder="{{ url('/auth/microsoft/callback') }}"
-                                               {{ ($emailFields['exchange_redirect_uri']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['exchange_redirect_uri']['form_value'] ?? '' }}"
+                                               placeholder="{{ url('/auth/microsoft/callback') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -1986,9 +1964,8 @@
                                             @if($emailFields['exchange_scope']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="exchange_scope" class="form-control"
-                                               value="{{ $emailFields['exchange_scope']['db_value'] ?? '' }}"
-                                               placeholder="https://graph.microsoft.com/.default"
-                                               {{ ($emailFields['exchange_scope']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['exchange_scope']['form_value'] ?? '' }}"
+                                               placeholder="https://graph.microsoft.com/.default">
                                     </div>
                                 </div>
                             </div>
@@ -2003,9 +1980,8 @@
                                             @if($emailFields['mail_host']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_host" class="form-control"
-                                               value="{{ $emailFields['mail_host']['db_value'] ?? '' }}"
-                                               placeholder="{{ $emailFields['mail_host']['value'] ?? 'smtp.office365.com' }}"
-                                               {{ ($emailFields['mail_host']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['mail_host']['form_value'] ?? '' }}"
+                                               placeholder="{{ $emailFields['mail_host']['value'] ?? 'smtp.office365.com' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-4">
@@ -2014,9 +1990,8 @@
                                             @if($emailFields['mail_port']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_port" class="form-control"
-                                               value="{{ $emailFields['mail_port']['db_value'] ?? '' }}"
-                                               placeholder="{{ $emailFields['mail_port']['value'] ?? '587' }}"
-                                               {{ ($emailFields['mail_port']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['mail_port']['form_value'] ?? '' }}"
+                                               placeholder="{{ $emailFields['mail_port']['value'] ?? '587' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -2025,8 +2000,7 @@
                                             @if($emailFields['mail_username']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
                                         <input type="text" name="mail_username" class="form-control"
-                                               value="{{ $emailFields['mail_username']['db_value'] ?? '' }}"
-                                               {{ ($emailFields['mail_username']['env_locked'] ?? false) ? 'readonly' : '' }}>
+                                               value="{{ $emailFields['mail_username']['form_value'] ?? '' }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
@@ -2044,16 +2018,12 @@
                                         <label>Encryption
                                             @if($emailFields['mail_encryption']['env_locked'] ?? false)<span class="email-env-badge"><i class="fa fa-lock"></i>.env</span>@endif
                                         </label>
-                                        <select name="mail_encryption" class="form-control"
-                                                {{ ($emailFields['mail_encryption']['env_locked'] ?? false) ? 'disabled' : '' }}>
-                                            @php $encDb = $emailFields['mail_encryption']['db_value'] ?? 'tls'; @endphp
-                                            <option value="tls" {{ $encDb === 'tls' ? 'selected' : '' }}>TLS</option>
-                                            <option value="ssl" {{ $encDb === 'ssl' ? 'selected' : '' }}>SSL</option>
-                                            <option value="none" {{ in_array($encDb, ['none', ''], true) ? 'selected' : '' }}>None</option>
+                                        @php $encForm = $emailFields['mail_encryption']['form_value'] ?? 'tls'; @endphp
+                                        <select name="mail_encryption" class="form-control">
+                                            <option value="tls" {{ $encForm === 'tls' ? 'selected' : '' }}>TLS</option>
+                                            <option value="ssl" {{ $encForm === 'ssl' ? 'selected' : '' }}>SSL</option>
+                                            <option value="none" {{ in_array($encForm, ['none', ''], true) ? 'selected' : '' }}>None</option>
                                         </select>
-                                        @if($emailFields['mail_encryption']['env_locked'] ?? false)
-                                            <input type="hidden" name="mail_encryption" value="{{ $emailFields['mail_encryption']['value'] }}">
-                                        @endif
                                     </div>
                                 </div>
                             </div>
@@ -2819,16 +2789,11 @@
         $(function() {
             // Tab switching functionality
             function syncEmailDriverPanels() {
-                var $switch = $('#email-driver-switch');
-                if (!$switch.length) {
+                var $driver = $('#email_driver');
+                if (!$driver.length) {
                     return;
                 }
-                var driver;
-                if ($switch.hasClass('is-locked')) {
-                    driver = @json(!empty($emailFields) ? ($emailFields['email_driver']['value'] ?? 'exchange') : 'exchange');
-                } else {
-                    driver = $('input[name="email_driver"]:checked').val() || 'exchange';
-                }
+                var driver = $driver.val() || 'exchange';
                 $('.js-email-driver-panel').hide();
                 if (driver === 'smtp') {
                     $('#email-panel-smtp').show();
@@ -2837,7 +2802,7 @@
                 }
             }
 
-            $('input[name="email_driver"]').on('change', syncEmailDriverPanels);
+            $('#email_driver').on('change', syncEmailDriverPanels);
             syncEmailDriverPanels();
 
             $('.settings-tabs .nav-link').on('click', function(e) {

@@ -786,7 +786,7 @@
         <button type="button" class="storage-tab active" data-storage-tab="overview">Overview</button>
         <button type="button" class="storage-tab" data-storage-tab="config">Configuration</button>
         <button type="button" class="storage-tab" data-storage-tab="migration">Migration</button>
-        <button type="button" class="storage-tab" data-storage-tab="backups">SQL backups</button>
+        <button type="button" class="storage-tab" data-storage-tab="backups">Backups</button>
         <button type="button" class="storage-tab" data-storage-tab="browse">Browse files</button>
         <button type="button" class="storage-tab" data-storage-tab="server">Server setup</button>
     </nav>
@@ -1298,16 +1298,17 @@
 
         {{-- Backups --}}
         <section class="storage-section" id="storage-section-backups">
-            <h2 class="storage-section-title"><i class="fa fa-database"></i> SQL backups &amp; restore</h2>
+            <h2 class="storage-section-title" id="storage-backups"><i class="fa fa-database"></i> SQL &amp; .env backups</h2>
             <div class="row g-3">
                 <div class="col-lg-5">
                     <div class="storage-panel h-100">
-                        <div class="storage-panel-header"><h3>Run backup</h3></div>
+                        <div class="storage-panel-header"><h3>Run SQL backup</h3></div>
                         <div class="storage-panel-body">
                             <p class="small text-muted">Backup root: <span class="storage-path">{{ $sqlBackupRoot }}</span></p>
                             @if($settings->last_sql_backup_at)
-                                <p class="small">Last backup: <strong>{{ $settings->last_sql_backup_at->format('Y-m-d H:i') }}</strong></p>
+                                <p class="small">Last SQL backup: <strong>{{ $settings->last_sql_backup_at->format('Y-m-d H:i') }}</strong></p>
                             @endif
+                            <p class="small text-muted mb-2">Each SQL backup also snapshots the application <code>.env</code> file into <code>{{ $sqlBackupRoot }}/env/</code>.</p>
                             <form method="post" action="{{ route('admin.storage.backup') }}" class="d-inline">
                                 @csrf
                                 <input type="hidden" name="incremental" value="1">
@@ -1318,6 +1319,31 @@
                                 <input type="hidden" name="incremental" value="0">
                                 <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-copy me-1"></i> Full backup</button>
                             </form>
+                        </div>
+                    </div>
+                    <div class="storage-panel mt-3">
+                        <div class="storage-panel-header"><h3>.env backup</h3></div>
+                        <div class="storage-panel-body">
+                            <p class="small text-muted mb-2">Copy the live <code>.env</code> to the backup folder without running a full SQL dump.</p>
+                            <form method="post" action="{{ route('admin.storage.backup-env') }}">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-secondary btn-sm"><i class="fa fa-file-code me-1"></i> Backup .env now</button>
+                            </form>
+                            @if(!empty($envBackups))
+                                <div class="mt-3">
+                                    <div class="small fw-semibold mb-1">Recent .env snapshots</div>
+                                    <ul class="list-unstyled small mb-0">
+                                        @foreach(array_slice($envBackups, 0, 8) as $envBackup)
+                                            <li class="d-flex justify-content-between align-items-center py-1 border-bottom">
+                                                <span><code>{{ $envBackup['name'] }}</code></span>
+                                                <a href="{{ route('admin.storage.download-env-backup', ['name' => $envBackup['name']]) }}" class="btn btn-link btn-sm p-0">Download</a>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @else
+                                <p class="small text-muted mt-2 mb-0">No .env snapshots yet.</p>
+                            @endif
                         </div>
                     </div>
                 </div>

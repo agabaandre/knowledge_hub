@@ -30,18 +30,13 @@ class EmailConfig
     }
 
     /**
-     * ENV value wins when non-empty; otherwise use DB; then default.
+     * Database settings win when present; .env is fallback only.
      *
      * @param  mixed  $default
      * @return mixed
      */
     public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
     {
-        $envValue = env($envKey);
-        if ($envValue !== null && $envValue !== '') {
-            return $envValue;
-        }
-
         $db = self::dbSettings();
         $column = $dbColumn ?? self::envKeyToDbColumn($envKey);
         if ($db && $column && property_exists($db, $column)) {
@@ -51,18 +46,26 @@ class EmailConfig
             }
         }
 
+        $envValue = env($envKey);
+        if ($envValue !== null && $envValue !== '') {
+            return $envValue;
+        }
+
         return $default;
     }
 
     public static function isEnvLocked(string $envKey): bool
     {
-        $value = env($envKey);
-
-        return $value !== null && $value !== '';
+        return false;
     }
 
     public static function driver(): string
     {
+        $db = self::dbSettings();
+        if ($db && ! empty($db->email_driver)) {
+            return self::normalizeDriver((string) $db->email_driver);
+        }
+
         $envDriver = env('EMAIL_DRIVER');
         if ($envDriver !== null && $envDriver !== '') {
             return self::normalizeDriver($envDriver);
@@ -73,23 +76,23 @@ class EmailConfig
             return self::normalizeDriver($mailMailer);
         }
 
-        $db = self::dbSettings();
-        if ($db && ! empty($db->email_driver)) {
-            return self::normalizeDriver((string) $db->email_driver);
-        }
-
         return 'exchange';
     }
 
     public static function driverSource(): string
     {
-        if (self::isEnvLocked('EMAIL_DRIVER')) {
-            return 'env';
-        }
-
         $db = self::dbSettings();
         if ($db && ! empty($db->email_driver)) {
             return 'db';
+        }
+
+        if (env('EMAIL_DRIVER') !== null && env('EMAIL_DRIVER') !== '') {
+            return 'env';
+        }
+
+        if (env('MAIL_MAILER') !== null && env('MAIL_MAILER') !== ''
+            && in_array(env('MAIL_MAILER'), ['smtp', 'exchange'], true)) {
+            return 'env';
         }
 
         return 'default';
@@ -112,6 +115,7 @@ class EmailConfig
             'emails.smtp_secure' => self::resolve('MAIL_ENCRYPTION', 'mail_encryption', 'tls') ?: 'tls',
             'emails.port' => self::resolve('MAIL_PORT', 'mail_port', '587'),
             'emails.sender' => $fromName,
+            'emails.from_address' => self::resolve('MAIL_FROM_ADDRESS', 'mail_from_address'),
             'exchange-email.tenant_id' => self::resolve('EXCHANGE_TENANT_ID', 'exchange_tenant_id'),
             'exchange-email.client_id' => self::resolve('EXCHANGE_CLIENT_ID', 'exchange_client_id'),
             'exchange-email.client_secret' => self::resolve('EXCHANGE_CLIENT_SECRET', 'exchange_client_secret'),
@@ -134,7 +138,7 @@ class EmailConfig
     }
 
     /**
-     * @return array<string, array{env_key: string, db_column: string, value: mixed, db_value: mixed, env_locked: bool, source: string}>
+     * @return array<string, array{env_key: string, db_column: string, value: mixed, db_value: mixed, form_value: mixed, env_locked: bool, has_env_override: bool, source: string}>
      */
     public static function fieldsForAdmin(): array
     {
@@ -160,30 +164,38 @@ class EmailConfig
 
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $hasEnvOverride = self::isEnvLocked($meta['env_key']);
-            $envLocked = $key === 'email_driver' && self::isEnvLocked('EMAIL_DRIVER');
-            $source = $hasEnvOverride ? 'env' : (($dbValue !== null && $dbValue !== '') ? 'db' : 'default');
             $effective = self::resolve($meta['env_key'], $meta['db_column'], $meta['default']);
+            $hasDbValue = $dbValue !== null && $dbValue !== '';
+            $envFallback = self::envValue($meta['env_key']);
+            $hasEnvOverride = $envFallback !== null && $envFallback !== '';
 
             if ($key === 'email_driver') {
                 $effective = self::driver();
-                $source = self::driverSource();
-                $envLocked = $source === 'env';
-                $hasEnvOverride = self::isEnvLocked('MAIL_MAILER') || self::isEnvLocked('EMAIL_DRIVER');
             }
+
+            $source = $hasDbValue ? 'db' : ($hasEnvOverride ? 'env' : 'default');
+            $formValue = $hasDbValue ? $dbValue : ($key === 'mail_password' || $key === 'exchange_client_secret' ? '' : $effective);
 
             $fields[$key] = [
                 'env_key' => $meta['env_key'],
                 'db_column' => $meta['db_column'],
                 'value' => $effective,
                 'db_value' => $dbValue,
-                'env_locked' => $envLocked,
-                'has_env_override' => $hasEnvOverride,
-                'source' => $source,
+                'form_value' => $formValue,
+                'env_locked' => false,
+                'has_env_override' => $hasEnvOverride && ! $hasDbValue,
+                'source' => $key === 'email_driver' ? self::driverSource() : $source,
             ];
         }
 
         return $fields;
+    }
+
+    private static function envValue(string $envKey): ?string
+    {
+        $value = env($envKey);
+
+        return ($value !== null && $value !== '') ? (string) $value : null;
     }
 
     private static function normalizeDriver(string $driver): string

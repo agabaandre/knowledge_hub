@@ -100,7 +100,19 @@ class HubDatabaseBackupService
 
         $this->pruneOldBackups();
 
-        return ['path' => $dir, 'tables' => $exported, 'incremental' => $incremental];
+        $envBackup = null;
+        try {
+            $envBackup = app(HubEnvBackupService::class)->runBackup();
+        } catch (\Throwable) {
+            // SQL backup should succeed even when .env is missing or unreadable.
+        }
+
+        return [
+            'path' => $dir,
+            'tables' => $exported,
+            'incremental' => $incremental,
+            'env_backup' => $envBackup,
+        ];
     }
 
     /**
