@@ -7,9 +7,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Repositories\SettingsRepository;
 use App\Support\EmailConfig;
-use App\Support\FrappeConfig;
-use App\Support\MoodleConfig;
-use App\Support\OpenEdxConfig;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
@@ -48,15 +45,6 @@ class SettingsController extends Controller
             : collect();
         $data['emailFields'] = Schema::hasColumn('setting', 'email_driver')
             ? EmailConfig::fieldsForAdmin()
-            : [];
-        $data['moodleFields'] = Schema::hasColumn('setting', 'moodle_api_url')
-            ? MoodleConfig::fieldsForAdmin()
-            : [];
-        $data['frappeFields'] = Schema::hasColumn('setting', 'frappe_base_url')
-            ? FrappeConfig::fieldsForAdmin()
-            : [];
-        $data['openEdxFields'] = Schema::hasColumn('setting', 'openedx_lms_url')
-            ? OpenEdxConfig::fieldsForAdmin()
             : [];
         $data['hubCountries'] = Schema::hasTable('country')
             ? \App\Models\Country::orderBy('name')->get()

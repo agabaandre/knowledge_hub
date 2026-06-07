@@ -183,7 +183,8 @@
                     <li aria-haspopup="true"><a href="#" class="sub-icon"><i class=""></i>{{ __('admin_nav.learning') }}<i
                                 class="fe fe-chevron-down horizontal-icon"></i></a>
                         <ul class="sub-menu">
-                            <li aria-haspopup="true"><a href="{{ url('admin/courses') }}" class="slide-item">{{ __('admin_nav.courses') }}</a></li>
+                            <li aria-haspopup="true"><a href="{{ route('admin.courses.index') }}" class="slide-item">{{ __('admin_nav.courses') }}</a></li>
+                            <li aria-haspopup="true"><a href="{{ route('admin.courses.integrations') }}" class="slide-item">{{ __('admin_nav.platform_integrations') }}</a></li>
                             @can('view_events')
                             <li aria-haspopup="true"><a href="{{ url('admin/events') }}" class="slide-item">{{ __('admin_nav.events') }}</a></li>
                             @endcan

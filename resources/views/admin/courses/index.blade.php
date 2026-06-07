@@ -11,7 +11,10 @@
 			<div class="col-md-12">
 				<div class="card">
 					<div class="card-header">
-						<h4 class="card-title">Courses</h4>
+						<h4 class="card-title">{{ __('admin_nav.courses') }}</h4>
+						<a href="{{ route('admin.courses.integrations') }}" class="btn btn-outline-primary float-right ml-2">
+							<i class="fa fa-plug"></i> {{ __('admin_nav.platform_integrations') }}
+						</a>
 						<button type="button" class="btn btn-primary float-right ml-2" data-toggle="modal" data-target="#create-course-modal">
 							<i class="fa fa-plus"></i> Add Course
 						</button>
@@ -58,6 +61,7 @@
 
 					<div class="card-body">
 						<div class="container-fluid">
+							@include('admin.courses.partials.learning_subnav', ['learningNav' => 'courses'])
 							<div class="row">
 								@include('layouts.partials.alerts')
 

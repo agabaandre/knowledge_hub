@@ -469,6 +469,27 @@ class SettingsRepository
             }
         }
 
+        $settings->save();
+
+        if (Schema::hasColumn('setting', 'email_driver')) {
+            app(InstallerService::class)->clearMailEnvOverrides();
+        }
+
+        DisposableEmailChecker::forgetCache();
+        EmailConfig::clearCache();
+        EmailConfig::applyRuntimeConfig();
+        clear_cache();
+
+        return $settings;
+    }
+
+    public function saveLearningIntegrations(Request $request): ?Setting
+    {
+        $settings = Setting::where('status', 'active')->first() ?: Setting::query()->first();
+        if (! $settings) {
+            return null;
+        }
+
         if (Schema::hasColumn('setting', 'moodle_api_url') && $request->has('moodle_api_url')) {
             $settings->moodle_api_url = $request->input('moodle_api_url');
             $settings->moodle_base_url = $request->input('moodle_base_url');
@@ -500,18 +521,12 @@ class SettingsRepository
 
         $settings->save();
 
-        if (Schema::hasColumn('setting', 'email_driver')) {
-            app(InstallerService::class)->clearMailEnvOverrides();
-        }
-
-        DisposableEmailChecker::forgetCache();
-        EmailConfig::clearCache();
-        EmailConfig::applyRuntimeConfig();
         if (Schema::hasColumn('setting', 'moodle_api_url')) {
             \App\Support\LearningConfig::clearAllCaches();
             app(InstallerService::class)->clearLearningEnvOverrides();
             \App\Support\LearningConfig::applyRuntimeConfig();
         }
+        clear_settings_cache();
         clear_cache();
 
         return $settings;

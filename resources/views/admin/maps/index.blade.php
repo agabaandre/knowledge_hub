@@ -294,7 +294,7 @@
         <div class="card-body p-4">
             <div class="d-flex flex-wrap justify-content-between align-items-start gap-3">
                 <div>
-                    <h3 class="mb-2"><i class="fa fa-map me-2 text-primary"></i>Maps Management</h3>
+                    <h3 class="mb-2"><i class="fa fa-map me-2 text-primary"></i>{{ __('admin_nav.maps_management') }}</h3>
                     <p class="text-muted mb-2 mb-md-0" style="max-width: 52rem;">
                         Manage ISO-keyed choropleth maps using Highcharts Map Collection TopoJSON.
                         Assign maps to frontend views, dashboards, and country hubs.

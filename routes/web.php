@@ -728,7 +728,9 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     //accessgroup
     Route::group(["prefix" => "courses"], function () {
 
-        Route::get("/", [AdminCoursesController::class, 'index']);
+        Route::get("/", [AdminCoursesController::class, 'index'])->name('admin.courses.index');
+        Route::get('/integrations', [AdminCoursesController::class, 'integrations'])->name('admin.courses.integrations');
+        Route::post('/integrations', [AdminCoursesController::class, 'saveIntegrations'])->name('admin.courses.integrations.save');
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
         Route::get("/delete", [AdminCoursesController::class, 'destroy']);

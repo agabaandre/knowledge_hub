@@ -3,18 +3,25 @@
 namespace App\Http\Controllers\Admin;
 
 use Illuminate\Http\Request;
-use App\Repositories\AdminUnitsRepository;
 use App\Http\Controllers\Controller;
 use App\Repositories\CoursesRepository;
+use App\Repositories\SettingsRepository;
+use App\Support\FrappeConfig;
+use App\Support\MoodleConfig;
+use App\Support\OpenEdxConfig;
+use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
 class AdminCoursesController extends Controller
 {
     private $coursesRepository;
 
-    public function __construct(CoursesRepository $coursesRepository)
+    private SettingsRepository $settingsRepository;
+
+    public function __construct(CoursesRepository $coursesRepository, SettingsRepository $settingsRepository)
     {
         $this->coursesRepository = $coursesRepository;
+        $this->settingsRepository = $settingsRepository;
     }
 
     public function index(Request $request){
@@ -118,5 +125,45 @@ class AdminCoursesController extends Controller
             'message' => $deleted ? 'Course deleted successfully' : 'Delete failed',
             'status' => $deleted ? 'success' : 'failure'
         ]);
+    }
+
+    public function integrations()
+    {
+        return view('admin.courses.integrations', $this->learningIntegrationFields());
+    }
+
+    public function saveIntegrations(Request $request)
+    {
+        $saved = $this->settingsRepository->saveLearningIntegrations($request);
+
+        if ($saved) {
+            return redirect()
+                ->route('admin.courses.integrations')
+                ->with('message', __('admin_nav.learning_integrations_saved_success'))
+                ->with('status', 'success');
+        }
+
+        return redirect()
+            ->route('admin.courses.integrations')
+            ->with('message', __('admin_nav.learning_integrations_saved_failure'))
+            ->with('status', 'failure');
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    private function learningIntegrationFields(): array
+    {
+        return [
+            'moodleFields' => Schema::hasColumn('setting', 'moodle_api_url')
+                ? MoodleConfig::fieldsForAdmin()
+                : [],
+            'frappeFields' => Schema::hasColumn('setting', 'frappe_base_url')
+                ? FrappeConfig::fieldsForAdmin()
+                : [],
+            'openEdxFields' => Schema::hasColumn('setting', 'openedx_lms_url')
+                ? OpenEdxConfig::fieldsForAdmin()
+                : [],
+        ];
     }
 }

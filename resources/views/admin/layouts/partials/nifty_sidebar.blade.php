@@ -75,7 +75,8 @@
         <li class="nav-item has-sub">
             <a href="#" class="mininav-toggle nav-link collapsed" data-bs-toggle="collapse" data-bs-target="#nav-learning"><i class="fa fa-book fs-5 me-2"></i><span class="nav-label ms-1">{{ __('admin_nav.learning') }}</span></a>
             <ul class="mininav-content nav collapse" id="nav-learning">
-                <li class="nav-item"><a href="{{ url('admin/courses') }}" class="nav-link">{{ __('admin_nav.courses') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.courses.index') }}" class="nav-link">{{ __('admin_nav.courses') }}</a></li>
+                <li class="nav-item"><a href="{{ route('admin.courses.integrations') }}" class="nav-link">{{ __('admin_nav.platform_integrations') }}</a></li>
                 @can('view_events')
                 <li class="nav-item"><a href="{{ url('admin/events') }}" class="nav-link">{{ __('admin_nav.events') }}</a></li>
                 @endcan
