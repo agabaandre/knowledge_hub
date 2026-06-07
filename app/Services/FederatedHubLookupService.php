@@ -23,6 +23,7 @@ class FederatedHubLookupService
         return [
             'api_version' => '1.0',
             'endpoints' => [
+                'auth_token' => $base.'/auth/token',
                 'manifest' => $base.'/manifest',
                 'public_publications' => $base.'/public/publications',
                 'public_forums' => $base.'/public/forums',
@@ -185,6 +186,15 @@ class FederatedHubLookupService
     public function testCentralConnection(string $baseUrl, ?string $apiToken = null): array
     {
         try {
+            if ($apiToken) {
+                try {
+                    app(FederationHubAuthService::class)->bootstrapCentralTokens($baseUrl, $apiToken);
+                    $apiToken = null;
+                } catch (\Throwable) {
+                    // Parent hub may still accept the registration token as a static bearer token.
+                }
+            }
+
             $manifest = $this->remoteGet($baseUrl, $apiToken, '/api/federation/manifest');
 
             return [
@@ -201,6 +211,15 @@ class FederatedHubLookupService
      */
     public function importFromCentral(string $baseUrl, ?string $apiToken = null, bool $importBranding = true, bool $importMetadata = true): array
     {
+        if ($apiToken) {
+            try {
+                app(FederationHubAuthService::class)->bootstrapCentralTokens($baseUrl, $apiToken);
+                $apiToken = null;
+            } catch (\Throwable) {
+                // Fall back to static bearer token when the parent hub has no OAuth endpoint yet.
+            }
+        }
+
         $manifestResponse = $this->remoteGet($baseUrl, $apiToken, '/api/federation/manifest');
         $manifest = $manifestResponse['manifest'] ?? $manifestResponse;
 
@@ -348,7 +367,7 @@ class FederatedHubLookupService
             'central_hub_connected_at' => now(),
         ];
 
-        if (Schema::hasColumn('setting', 'central_hub_api_token')) {
+        if ($apiToken !== null && Schema::hasColumn('setting', 'central_hub_api_token')) {
             $updates['central_hub_api_token'] = $apiToken;
         }
         if (Schema::hasColumn('setting', 'central_hub_site_id')) {
@@ -365,21 +384,28 @@ class FederatedHubLookupService
     protected function remoteGet(string $baseUrl, ?string $apiToken, string $path): array
     {
         $url = rtrim($baseUrl, '/').$path;
-        $request = Http::timeout(25)->acceptJson();
+        $auth = app(FederationHubAuthService::class);
 
-        if ($apiToken) {
-            $request = $request->withToken($apiToken);
+        try {
+            return $auth->centralAuthorizedRequest(
+                $baseUrl,
+                fn ($request) => $request->get($url),
+                $apiToken
+            );
+        } catch (\Throwable $e) {
+            if (! $apiToken) {
+                throw $e;
+            }
+
+            $response = Http::timeout(25)->acceptJson()->withToken($apiToken)->get($url);
+            if (! $response->successful()) {
+                throw new \RuntimeException('Central hub request failed ('.$response->status().'): '.$response->body());
+            }
+
+            $json = $response->json();
+
+            return is_array($json) ? $json : [];
         }
-
-        $response = $request->get($url);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException('Central hub request failed ('.$response->status().'): '.$response->body());
-        }
-
-        $json = $response->json();
-
-        return is_array($json) ? $json : [];
     }
 
     /**

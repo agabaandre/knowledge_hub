@@ -4,9 +4,10 @@
         $pref = auth()->user()->theme_preference ?? 'light';
         $userTheme = in_array($pref, ['light','dark','system']) ? $pref : 'light';
     }
+    $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
 @endphp
 <!DOCTYPE html>
-<html lang="en" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}">
+<html lang="en" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" class="{{ $menuIconsClass }}">
 <head>
 
 @include('layouts.partials.header_resources')

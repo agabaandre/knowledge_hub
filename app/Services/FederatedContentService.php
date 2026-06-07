@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\FederatedContentItem;
 use App\Models\FederatedKnowledgeHub;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -120,6 +121,16 @@ class FederatedContentService
      */
     protected function publicationItemsFromHub(FederatedKnowledgeHub $hub): Collection
     {
+        if (Schema::hasTable('federated_content_items')) {
+            return FederatedContentItem::query()
+                ->approved()
+                ->where('federated_knowledge_hub_id', $hub->id)
+                ->where('content_type', 'publication')
+                ->orderByDesc('remote_updated_at')
+                ->get()
+                ->map(fn (FederatedContentItem $item) => $this->normalizePublication((array) $item->payload, $hub));
+        }
+
         $items = data_get($hub->cached_public_data, 'publications.data', []);
 
         if (! is_array($items)) {
@@ -134,6 +145,16 @@ class FederatedContentService
      */
     protected function forumItemsFromHub(FederatedKnowledgeHub $hub): Collection
     {
+        if (Schema::hasTable('federated_content_items')) {
+            return FederatedContentItem::query()
+                ->approved()
+                ->where('federated_knowledge_hub_id', $hub->id)
+                ->where('content_type', 'forum')
+                ->orderByDesc('remote_updated_at')
+                ->get()
+                ->map(fn (FederatedContentItem $item) => $this->normalizeForum((array) $item->payload, $hub));
+        }
+
         $items = data_get($hub->cached_public_data, 'forums.data', []);
 
         if (! is_array($items)) {

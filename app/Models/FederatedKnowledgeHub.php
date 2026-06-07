@@ -14,6 +14,8 @@ class FederatedKnowledgeHub extends Model
         'base_url',
         'remote_site_id',
         'api_token',
+        'api_refresh_token',
+        'api_token_expires_at',
         'mapped_country_id',
         'is_active',
         'auto_sync',
@@ -28,12 +30,14 @@ class FederatedKnowledgeHub extends Model
         'is_active' => 'boolean',
         'auto_sync' => 'boolean',
         'last_synced_at' => 'datetime',
+        'api_token_expires_at' => 'datetime',
         'last_manifest' => 'array',
         'cached_public_data' => 'array',
     ];
 
     protected $hidden = [
         'api_token',
+        'api_refresh_token',
     ];
 
     public function mappedCountry(): BelongsTo

@@ -196,6 +196,11 @@ class SettingsRepository
                 $size = $request->input('admin_body_font_size');
                 $settings->admin_body_font_size = $size !== null && $size !== '' ? (string) $size : '14';
             }
+            if (Schema::hasColumn('setting', 'nav_font_size')) {
+                $navSize = $request->input('nav_font_size');
+                $navSizeInt = is_numeric($navSize) ? (int) $navSize : 11;
+                $settings->nav_font_size = (string) max(9, min(16, $navSizeInt));
+            }
             if (Schema::hasColumn('setting', 'au_red')) {
                 $settings->au_red = $request->au_red ?? '#9F2241';
             }
@@ -550,6 +555,7 @@ class SettingsRepository
             'default_font_color' => $request->input('default_font_color'),
             'front_body_font_size' => $request->input('front_body_font_size') !== null && $request->input('front_body_font_size') !== '' ? (string) $request->input('front_body_font_size') : '14',
             'admin_body_font_size' => $request->input('admin_body_font_size') !== null && $request->input('admin_body_font_size') !== '' ? (string) $request->input('admin_body_font_size') : '14',
+            'nav_font_size' => (string) max(9, min(16, (int) ($request->input('nav_font_size') ?: 11))),
             'show_health_themes' => $request->boolean('show_health_themes', true) ? '1' : '0',
             'section_title_health_themes' => $request->input('section_title_health_themes'),
             'section_title_top_searches' => $request->input('section_title_top_searches'),

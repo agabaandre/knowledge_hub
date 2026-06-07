@@ -232,7 +232,7 @@
                 title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
                 credits: { enabled: true, text: 'Map © Natural Earth · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
                 mapNavigation: { enabled: true },
-                mapView: { zoom: 2.8, center: [20, 2] },
+                mapView: { projection: { name: 'WebMercator' } },
                 colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
                 legend: { enabled: false },
                 series: [{

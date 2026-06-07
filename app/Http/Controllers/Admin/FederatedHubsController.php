@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Country;
 use App\Models\FederatedKnowledgeHub;
+use App\Services\FederatedContentStagingService;
 use App\Services\FederatedHubLookupService;
 use App\Services\FederatedHubService;
+use App\Services\FederationHubAuthService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
 
@@ -31,8 +33,28 @@ class FederatedHubsController extends Controller
             'centralHubSiteId' => $settings->central_hub_site_id ?? null,
             'centralHubConnectedAt' => $settings->central_hub_connected_at ?? null,
             'centralMetadataSyncedAt' => $settings->central_metadata_synced_at ?? null,
+            'centralHubTokenExpiresAt' => $settings->central_hub_token_expires_at ?? null,
+            'centralHubHasRefreshToken' => ! empty($settings->central_hub_refresh_token ?? null),
+            'pendingFederatedContentCount' => app(FederatedContentStagingService::class)->pendingCount(),
             'isCountryHub' => hub_admin_units_enabled(),
         ]);
+    }
+
+    public function refreshCentralToken(FederationHubAuthService $auth)
+    {
+        try {
+            $tokens = $auth->refreshStoredCentralToken();
+            if ($tokens === null) {
+                return redirect()->route('admin.federation.index')
+                    ->with('alert-danger', 'No refresh token stored. Sync from central using the parent hub registration token first.');
+            }
+
+            return redirect()->route('admin.federation.index')
+                ->with('alert-success', 'Central hub access token refreshed successfully.');
+        } catch (\Throwable $e) {
+            return redirect()->route('admin.federation.index')
+                ->with('alert-danger', 'Token refresh failed: '.$e->getMessage());
+        }
     }
 
     public function store(Request $request)
@@ -111,7 +133,7 @@ class FederatedHubsController extends Controller
             $federation->syncPublicData($hub);
 
             return redirect()->route('admin.federation.index')
-                ->with('alert-success', 'Public data synced from "'.$hub->name.'".');
+                ->with('alert-success', 'Public data synced from "'.$hub->name.'". New items are queued for central admin approval before they appear on the portal.');
         } catch (\Throwable $e) {
             $hub->connection_status = 'failed';
             $hub->connection_error = $e->getMessage();

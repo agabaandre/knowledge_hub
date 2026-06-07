@@ -41,4 +41,12 @@ return [
         'static_links',
     ],
 
+    /*
+    | OAuth-style federation tokens (child hub ↔ central hub).
+    | Child hubs exchange the central hub's registration token once, then refresh automatically.
+    */
+    'access_token_ttl_seconds' => (int) env('FEDERATION_ACCESS_TOKEN_TTL', 86400),
+    'refresh_token_ttl_seconds' => (int) env('FEDERATION_REFRESH_TOKEN_TTL', 7776000),
+    'refresh_buffer_seconds' => (int) env('FEDERATION_REFRESH_BUFFER', 300),
+
 ];

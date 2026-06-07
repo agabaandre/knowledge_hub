@@ -34,6 +34,12 @@
 @if(session('alert-danger'))
     <div class="alert alert-danger alert-dismissible fade show">{{ session('alert-danger') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
 @endif
+@if(($pendingFederatedContentCount ?? 0) > 0)
+    <div class="alert alert-warning d-flex justify-content-between align-items-center flex-wrap gap-2">
+        <span><strong>{{ $pendingFederatedContentCount }}</strong> federated publication(s)/forum(s) are waiting for central approval.</span>
+        <a href="{{ route('admin.federation.pending-content') }}" class="btn btn-sm btn-warning">Review now</a>
+    </div>
+@endif
 
 <div class="fed-shell">
     <div class="fed-hero">
@@ -47,6 +53,14 @@
             <button type="button" class="fed-tab" data-fed-tab="central">Central hub connection</button>
         @endif
         <button type="button" class="fed-tab" data-fed-tab="remote">Remote hubs</button>
+        @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
+            <a href="{{ route('admin.federation.pending-content') }}" class="fed-tab text-decoration-none {{ request()->routeIs('admin.federation.pending-content') ? 'active' : '' }}">
+                Content review
+                @if(($pendingFederatedContentCount ?? 0) > 0)
+                    <span class="badge bg-warning text-dark ms-1">{{ $pendingFederatedContentCount }}</span>
+                @endif
+            </a>
+        @endif
     </div>
 
     <section class="fed-section active" id="fed-section-provider">
@@ -81,6 +95,7 @@
                     <table class="table table-sm mb-0">
                         <thead><tr><th>Endpoint</th><th>Purpose</th></tr></thead>
                         <tbody>
+                            <tr><td><code>POST {{ $federationApiBase }}/auth/token</code></td><td>Issue or refresh OAuth access tokens for child hubs</td></tr>
                             <tr><td><code>GET {{ $federationApiBase }}/lookup</code></td><td>Index of all federation URLs</td></tr>
                             <tr><td><code>GET {{ $federationApiBase }}/manifest</code></td><td>Hub identity, type, owner country/region</td></tr>
                             <tr><td><code>GET {{ $federationApiBase }}/lookup/settings</code></td><td>Branding &amp; mobile settings (colors, theme, feature flags, logo URLs)</td></tr>
@@ -127,6 +142,20 @@
                     <div class="fw-semibold">{{ $centralMetadataSyncedAt ? \Illuminate\Support\Carbon::parse($centralMetadataSyncedAt)->diffForHumans() : '—' }}</div>
                 </div>
             </div>
+            <div class="col-md-3">
+                <div class="fed-kpi">
+                    <div class="fed-kpi-label">Access token</div>
+                    <div class="fw-semibold">
+                        @if($centralHubTokenExpiresAt)
+                            Expires {{ \Illuminate\Support\Carbon::parse($centralHubTokenExpiresAt)->diffForHumans() }}
+                        @elseif($centralHubHasRefreshToken)
+                            OAuth connected
+                        @else
+                            Static / not set
+                        @endif
+                    </div>
+                </div>
+            </div>
         </div>
 
         <div class="card">
@@ -140,9 +169,10 @@
                                value="{{ old('central_hub_url', $centralHubUrl ?: 'https://khub.africacdc.org') }}">
                     </div>
                     <div class="col-md-6">
-                        <label class="form-label">API token</label>
+                        <label class="form-label">Registration token</label>
                         <input type="text" name="central_hub_api_token" id="adminCentralToken" class="form-control"
-                               value="{{ old('central_hub_api_token', '') }}" placeholder="Optional Bearer token">
+                               value="{{ old('central_hub_api_token', '') }}" placeholder="Parent hub federation API token">
+                        <div class="form-text">Exchanged once for refreshable OAuth tokens. Leave blank if already connected.</div>
                     </div>
                     <div class="col-12">
                         <div class="form-check form-check-inline">
@@ -157,6 +187,12 @@
                     <div class="col-12 d-flex flex-wrap gap-2 align-items-center">
                         <button type="button" class="btn btn-outline-secondary btn-sm" id="adminTestCentralBtn">Test connection</button>
                         <button type="submit" class="btn btn-primary btn-sm">Sync now</button>
+                        @if($centralHubHasRefreshToken)
+                            <form method="post" action="{{ route('admin.federation.refresh-central') }}" class="d-inline">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-primary btn-sm">Refresh token</button>
+                            </form>
+                        @endif
                         <span id="adminTestCentralResult" class="small text-muted"></span>
                     </div>
                 </form>
@@ -188,8 +224,8 @@
                                 <input type="url" name="base_url" class="form-control" required placeholder="https://kenya.example.com">
                             </div>
                             <div class="mb-3">
-                                <label class="form-label">API token (optional)</label>
-                                <input type="text" name="api_token" class="form-control" placeholder="Bearer token if remote hub requires it">
+                                <label class="form-label">Registration token (optional)</label>
+                                <input type="text" name="api_token" class="form-control" placeholder="Parent federation token — exchanged for refreshable OAuth tokens">
                             </div>
                             <div class="mb-3">
                                 <label class="form-label">Map to country (optional)</label>

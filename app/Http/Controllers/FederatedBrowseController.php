@@ -19,7 +19,7 @@ class FederatedBrowseController extends Controller
 
         $data = $this->federation->browse($request);
         $data['pageTitle'] = 'Partner country knowledge hubs';
-        $data['pageDescription'] = 'Browse public resources and discussions synced from connected country knowledge hubs.';
+        $data['pageDescription'] = 'Browse approved resources and discussions from linked country knowledge hubs.';
 
         return view('federation.browse', $data);
     }

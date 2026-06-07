@@ -21,10 +21,10 @@
             <div class="form-text">The continental hub that exposes <code>/api/federation/lookup/*</code> endpoints.</div>
         </div>
         <div class="col-12">
-            <label class="form-label">API token (optional)</label>
+            <label class="form-label">Registration token (optional)</label>
             <input type="text" name="central_hub_api_token" id="centralHubToken" class="form-control"
                    value="{{ old('central_hub_api_token', $defaults['central_hub_api_token']) }}"
-                   placeholder="Bearer token if the central hub requires authentication">
+                   placeholder="Parent hub federation API token — exchanged for refreshable OAuth tokens">
         </div>
 
         <div class="col-12">

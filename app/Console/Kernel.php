@@ -72,6 +72,15 @@ class Kernel extends ConsoleKernel
                     return false;
                 }
             });
+        $schedule->command('federation:refresh-central-token')
+            ->hourly()
+            ->when(function () {
+                try {
+                    return function_exists('hub_admin_units_enabled') && hub_admin_units_enabled();
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
     }
 
     /**

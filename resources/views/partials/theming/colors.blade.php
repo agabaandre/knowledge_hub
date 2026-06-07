@@ -36,6 +36,27 @@
     .logo-inverse { filter: brightness(0) invert(1); }
     .navigation .nav-menu > li > a,
     .navigation .nav-dropdown a { font-weight: var(--nav-font-weight, 500) !important; }
+    .btn-outline-primary {
+        border-color: var(--theme-color-primary) !important;
+        color: var(--theme-color-primary) !important;
+    }
+    .btn-outline-primary:hover {
+        background: color-mix(in srgb, var(--theme-color-primary) 10%, white) !important;
+        color: var(--theme-color-primary) !important;
+    }
+    .fed-btn-primary {
+        background: var(--theme-color-primary) !important;
+        border-color: var(--theme-color-primary) !important;
+        color: #fff !important;
+    }
+    .fed-btn-outline {
+        border: 1px solid var(--theme-color-primary) !important;
+        color: var(--theme-color-primary) !important;
+        background: transparent !important;
+    }
+    .fed-btn-outline:hover {
+        background: color-mix(in srgb, var(--theme-color-primary) 8%, white) !important;
+    }
     #main-wrapper,
     body { font-family: var(--font-family-primary) !important; font-size: var(--front-body-font-size) !important; color: var(--default-font-color) !important; }
     /* Dark theme (user preference) */

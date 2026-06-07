@@ -11,6 +11,8 @@
     $navLinkHover = settings()->nav_link_hover_color ?? (($navStyle === 'light') ? ($primary) : '#fff');
     $navLinkActive = settings()->nav_link_active_color ?? $primary;
     $navFontWeight = settings()->nav_font_weight ?? '500';
+    $navFontSize = settings()->nav_font_size ?? '11';
+    $navFontSize = (is_numeric($navFontSize) && (int) $navFontSize >= 9 && (int) $navFontSize <= 16) ? (int) $navFontSize : 11;
     $h = ltrim($primary, '#');
     $primaryRgb = strlen($h) >= 6 ? hexdec(substr($h,0,2)).','.hexdec(substr($h,2,2)).','.hexdec(substr($h,4,2)) : '0,98,57';
     $h2 = ltrim($secondary, '#');
@@ -36,9 +38,15 @@
         --bs-primary-rgb: {{ $primaryRgb }};
         --bs-secondary: {{ $secondary }};
         --bs-secondary-rgb: {{ $secondaryRgb }};
+        --nav-font-size: {{ $navFontSize }}px;
+        --nav-icon-size: {{ $navFontSize + 5 }}px;
     }
     .btn-primary { background-color: {{ $primary }} !important; border-color: {{ $primary }} !important; }
     .btn-primary:hover { filter: brightness(1.08); }
+    .btn-outline-primary { border-color: {{ $primary }} !important; color: {{ $primary }} !important; }
+    .btn-outline-primary:hover { background: color-mix(in srgb, {{ $primary }} 10%, white) !important; color: {{ $primary }} !important; }
+    .fed-btn-primary { background: {{ $primary }} !important; border-color: {{ $primary }} !important; color: #fff !important; }
+    .fed-btn-outline { border-color: {{ $primary }} !important; color: {{ $primary }} !important; background: transparent !important; }
     .text-primary, a.text-primary { color: {{ $primary }} !important; }
     .bg-primary { background-color: {{ $primary }} !important; }
     /* Theme1 front nav: use configured nav colors and font-weight for all states */
@@ -97,7 +105,7 @@
     #mainnav-container .nav-label,
     #mainnav-container .mainnav__menu .nav-link .nav-label,
     #mainnav-container .mainnav__menu .mininav-toggle .nav-label,
-    #mainnav-container .mainnav__menu a { color: rgba(255,255,255,0.92) !important; font-weight: {{ $navFontWeight }} !important; visibility: visible !important; opacity: 1 !important; }
+    #mainnav-container .mainnav__menu a { color: rgba(255,255,255,0.92) !important; font-weight: {{ $navFontWeight }} !important; font-size: var(--nav-font-size, 11px) !important; visibility: visible !important; opacity: 1 !important; }
     #mainnav-container .mainnav__menu .nav-link:hover,
     #mainnav-container .mainnav__menu a.nav-link:hover,
     #mainnav-container .mainnav__menu .nav-link.active,
@@ -107,7 +115,9 @@
     #mainnav-container .mininav-content .nav-link:hover { color: #fff !important; }
     #mainnav-container .badge { color: #fff !important; background-color: #dc3545 !important; }
     #mainnav-container .mainnav__menu i[class*="pli-"],
-    #mainnav-container .mainnav__menu .fs-5 { color: rgba(255,255,255,0.92) !important; }
+    #mainnav-container .mainnav__menu .fs-5 { color: rgba(255,255,255,0.92) !important; font-size: var(--nav-icon-size, 16px) !important; font-weight: 400 !important; }
+    html.menu-icons-disabled #mainnav-container .mainnav__menu .nav-link > i.fa,
+    html.menu-icons-disabled #mainnav-container .mainnav__menu .mininav-toggle > i.fa { display: none !important; }
     #mainnav-container .mainnav__top-content { color: rgba(255,255,255,0.92); }
     #mainnav-container .mainnav__menu .nav-label { display: inline-block !important; }
     /* Inverse logo: for use on dark backgrounds (header/footer when option enabled) */

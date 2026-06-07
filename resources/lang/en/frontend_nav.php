@@ -8,6 +8,8 @@ return [
     'member_states' => 'Member States',
     'administrative_units' => 'Administrative Units',
     'partner_hubs' => 'Partner Country Hubs',
+    'network' => 'Network',
+    'more' => 'More',
     'health_emergencies' => 'Health Emergencies',
     'key_links' => 'Key Links',
     'tools' => 'Tools',

@@ -3,6 +3,9 @@
     $defaultFontColor = settings()->default_font_color ?? '#212529';
     $frontBodyFontSize = settings()->front_body_font_size ?? '14';
     $frontBodyFontSize = (is_numeric($frontBodyFontSize) && (int)$frontBodyFontSize >= 10 && (int)$frontBodyFontSize <= 24) ? (int)$frontBodyFontSize : 14;
+    $navFontSize = settings()->nav_font_size ?? '11';
+    $navFontSize = (is_numeric($navFontSize) && (int)$navFontSize >= 9 && (int)$navFontSize <= 16) ? (int)$navFontSize : 11;
+    $menuIconsEnabled = (bool) (settings()->menu_icons_enabled ?? 0);
 
     $fontStack = 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
     $customFontFamily = null;
@@ -55,6 +58,8 @@
         --font-family-primary: {!! $fontStack !!};
         --default-font-color: {{ $defaultFontColor }};
         --front-body-font-size: {{ $frontBodyFontSize }}px;
+        --nav-font-size: {{ $navFontSize }}px;
+        --nav-icon-size: {{ $navFontSize + 5 }}px;
         /* Bootstrap 5 / Nifty: UI text inherits Admin > Appearance primary font */
         --bs-font-sans-serif: var(--font-family-primary);
         --bs-body-font-family: var(--font-family-primary);
@@ -83,5 +88,29 @@
     .h1, .h2, .h3, .h4, .h5, .h6,
     h1, h2, h3, h4, h5, h6 {
         font-family: var(--font-family-primary) !important;
+    }
+    /* Main navigation typography (front + admin) */
+    .kh-linkedin-nav .kh-nav-label,
+    #header .navbar .nav-link,
+    .navigation .nav-menu > li > a,
+    .navigation .nav-dropdown a,
+    #mainnav-container .mainnav__menu .nav-link,
+    #mainnav-container .mainnav__menu .nav-label,
+    #mainnav-container .mainnav__menu a {
+        font-size: var(--nav-font-size, 11px) !important;
+        font-weight: var(--nav-font-weight, 500);
+    }
+    .kh-linkedin-nav .kh-nav-icon {
+        font-size: var(--nav-icon-size, 16px);
+        font-weight: 400;
+        opacity: 0.88;
+    }
+    html.menu-icons-disabled .kh-linkedin-nav .kh-nav-icon,
+    html.menu-icons-disabled #mainnav-container .mainnav__menu .nav-link > i.fa,
+    html.menu-icons-disabled #mainnav-container .mainnav__menu .mininav-toggle > i.fa {
+        display: none !important;
+    }
+    html.menu-icons-disabled #mainnav-container .mininav-toggle .nav-label {
+        margin-left: 0 !important;
     }
 </style>

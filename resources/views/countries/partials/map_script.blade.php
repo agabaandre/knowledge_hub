@@ -1,6 +1,6 @@
 <script>
 (function () {
-    var MAP_TOPOLOGY_URL = 'https://code.highcharts.com/mapdata/custom/world-highres3.topo.json';
+    var MAP_TOPOLOGY_URL = @json(config('maps.africa_topology_url'));
     var mapDataUrl = @json(route('countries.map-data'));
     var indicatorSummariesUrl = @json(route('countries.indicator-summaries'));
     var countryDetailUrls = @json(
@@ -231,7 +231,7 @@
                 title: { text: null },
                 credits: {
                     enabled: true,
-                    text: 'Map © Natural Earth · Data: Our World in Data (CC BY 4.0)',
+                    text: 'Map © Natural Earth (Highcharts {{ config('maps.africa_topology_version') }}) · Data: Our World in Data (CC BY 4.0)',
                     style: { fontSize: '10px', color: '#94a3b8' }
                 },
                 mapNavigation: {
@@ -239,8 +239,6 @@
                     buttonOptions: { verticalAlign: 'bottom', align: 'right' }
                 },
                 mapView: {
-                    zoom: 2.8,
-                    center: [20, 2],
                     projection: { name: 'WebMercator' }
                 },
                 colorAxis: {

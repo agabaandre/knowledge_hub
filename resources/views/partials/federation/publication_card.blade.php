@@ -28,10 +28,10 @@
                     <span class="muted medium d-block"><i class="fa fa-map-marker-alt me-1"></i>{{ $row->federation_country }}</span>
                 @endif
                 <div class="d-flex align-items-center mt-2" style="gap:0.5rem;flex-wrap:wrap;">
-                    <a href="{{ $row->federation_source_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-primary">
-                        <i class="fa fa-external-link-alt me-1"></i>Open on {{ $row->federation_hub_name }}
+                    <a href="{{ $row->federation_source_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm fed-btn-primary">
+                        <i class="fa-regular fa-arrow-up-right-from-square me-1"></i>Open on {{ $row->federation_hub_name }}
                     </a>
-                    <a href="{{ route('federation.browse', ['hub' => $row->federation_hub_id]) }}" class="btn btn-sm btn-outline-secondary">
+                    <a href="{{ route('federation.browse', ['hub' => $row->federation_hub_id]) }}" class="btn btn-sm fed-btn-outline">
                         More from this hub
                     </a>
                 </div>

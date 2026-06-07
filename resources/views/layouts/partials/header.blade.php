@@ -567,6 +567,10 @@
             <div class="nav-menus-wrapper notranslate" style="transition-property: none;">
                 <ul class="nav-menu">
                     <li class="{{ request()->is('/') ? 'active' : '' }}"><a href="{{ url('/') }}">@if($menuIconsEnabled)<i class="fa fa-home mr-1"></i> @endif {{ __('frontend_nav.home') }}</a></li>
+
+                    @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
+                    <li class="{{ request()->is('federated*') ? 'active' : '' }}"><a href="{{ route('federation.browse') }}">@if($menuIconsEnabled)<i class="fa fa-globe-africa mr-1"></i> @endif {{ __('frontend_nav.network') }}</a></li>
+                    @endif
                     
                      <li class="categories {{ ( ((request()->is('records*') && !request()->has('tag'))) || request()->is('health-topics*') || request()->is('countries*') || request()->is('adminunits*') || request()->is('categories/*') ) ? 'active' : '' }}"><a href="javascript:void(0);">@if($menuIconsEnabled)<i class="fa fa-compass mr-1"></i> @endif {{ __('frontend_nav.browse') }}<span
                                 class="submenu-indicator"></span></a>
@@ -608,10 +612,6 @@
                                 <li><a href="{{ url('countries') }}">{{ __('frontend_nav.member_states') }}</a></li>
                             @else
                                 <li><a href="{{ url('adminunits') }}">{{ __('frontend_nav.administrative_units') }}</a></li>
-                            @endif
-
-                            @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
-                                <li><a href="{{ route('federation.browse') }}">{{ __('frontend_nav.partner_hubs') }}</a></li>
                             @endif
 
                         </ul>

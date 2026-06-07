@@ -116,6 +116,9 @@
             <ul class="mininav-content nav collapse {{ request()->is('admin/search-logs*') ? 'show' : '' }}" id="nav-settings">
                 <li class="nav-item"><a href="{{ route('admin.storage.index') }}" class="nav-link">{{ __('admin_nav.storage_management') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.federation.index') }}" class="nav-link">{{ __('admin_nav.federated_hubs') }}</a></li>
+                @if(function_exists('federation_consumer_enabled') && federation_consumer_enabled())
+                <li class="nav-item"><a href="{{ route('admin.federation.pending-content') }}" class="nav-link">{{ __('admin_nav.federated_content_pending') }}</a></li>
+                @endif
                 <li class="nav-item"><a href="{{ url('admin/configure') }}" class="nav-link">{{ __('admin_nav.system_configurations') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.site-languages.index') }}" class="nav-link">{{ __('admin_nav.site_languages') }}</a></li>
                 <li class="nav-item"><a href="{{ route('admin.language-management.index') }}" class="nav-link">{{ __('admin_nav.language_management') }}</a></li>

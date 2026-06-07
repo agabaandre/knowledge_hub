@@ -11,7 +11,7 @@
         white: '{{ settings()->au_white ?? "#FFFFFF" }}'
     };
 
-    var HIGHCHARTS_MAP_TOPOLOGY = 'https://code.highcharts.com/mapdata/custom/world-highres3.topo.json';
+    var HIGHCHARTS_MAP_TOPOLOGY = @json(config('maps.africa_topology_url'));
     var mapTopologyCache = null;
     var mapTopologyPromise = null;
     var mapModulePromise = null;
@@ -261,9 +261,9 @@
         return {
             chart: { map: topology, backgroundColor: 'transparent', height: 480, style: { fontFamily: 'inherit' } },
             title: { text: null },
-            credits: { enabled: true, text: config.credits || 'Map © Natural Earth · Highcharts', style: { fontSize: '10px', color: '#94a3b8' } },
+            credits: { enabled: true, text: config.credits || 'Map © Natural Earth (Highcharts {{ config('maps.africa_topology_version') }})', style: { fontSize: '10px', color: '#94a3b8' } },
             mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
-            mapView: { zoom: 2.8, center: [20, 2], projection: { name: 'WebMercator' } },
+            mapView: { projection: { name: 'WebMercator' } },
             colorAxis: { min: config.min, max: config.max, minColor: '#f0f7f4', maxColor: auColors.corporateGreen },
             legend: { enabled: false },
             plotOptions: {

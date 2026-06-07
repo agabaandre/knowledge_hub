@@ -27,8 +27,25 @@ Base path: `{APP_URL}/api/federation`
 | `GET /lookup/metadata` | Token if set | Lookup tables: health themes, tags, resource types, publication categories, licenses, static links |
 | `GET /public/publications` | Token if set | Approved public publications (paginated) |
 | `GET /public/forums` | Token if set | Approved public forums (paginated) |
+| `POST /auth/token` | Open | Issue OAuth access/refresh tokens for child hubs |
 
 When `federation_api_token` is set (System Configurations or `FEDERATION_API_TOKEN` in `.env`), remote callers must send `Authorization: Bearer {token}` or `?token=`.
+
+### OAuth tokens (child ↔ central)
+
+Country hubs exchange the parent hub's **registration token** once via `POST /api/federation/auth/token`:
+
+```json
+{ "grant_type": "registration", "site_id": "kenya-khub", "registration_token": "…" }
+```
+
+The response includes `access_token`, `refresh_token`, and `expires_in`. Child hubs store these in the `setting` table and **refresh automatically** before expiry (or on HTTP 401) using:
+
+```json
+{ "grant_type": "refresh_token", "refresh_token": "…" }
+```
+
+Scheduled: `php artisan federation:refresh-central-token` (hourly on country hubs).
 
 ### Mobile branding
 
@@ -48,6 +65,12 @@ Imported fields include colors, `site_theme`, navigation/footer styles, section 
 - `static_links`
 
 Import is **additive**: existing rows matched by name/text are skipped.
+
+### Central approval of partner content
+
+When a continental hub syncs public data from country hubs (`federation:sync` or **Sync public data** in admin), items are staged in `federated_content_items`. They **do not appear** in search or `/federated` until a central administrator approves them under **Settings → Federated Knowledge Hubs → Review pending content** (`/admin/federated-content/pending`).
+
+Country hubs must still approve content locally and mark it `public_availability = 1` before it can be synced.
 
 ---
 
@@ -94,6 +117,14 @@ php artisan federation:sync --hub=1  # single hub by ID
 
 Runs daily at **02:45** when the hub is a continental consumer (`federation_consumer_enabled()`).
 
+## Scheduled token refresh (country)
+
+```bash
+php artisan federation:refresh-central-token
+```
+
+Runs **hourly** on country hubs to refresh the parent connection before the access token expires.
+
 ---
 
 ## Database
@@ -103,7 +134,9 @@ Runs daily at **02:45** when the hub is a continental consumer (`federation_cons
 **`setting` columns (country ↔ central):**
 
 - `central_hub_url`
-- `central_hub_api_token`
+- `central_hub_api_token` (current OAuth access token)
+- `central_hub_refresh_token`
+- `central_hub_token_expires_at`
 - `central_hub_site_id`
 - `central_hub_connected_at`
 - `central_metadata_synced_at`

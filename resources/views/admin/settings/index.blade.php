@@ -1276,9 +1276,9 @@
                                 <label>Show Icons in Main Menu</label>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="menu_icons_enabled" name="menu_icons_enabled" value="1" @if($settings->menu_icons_enabled) checked @endif>
-                                    <label class="form-check-label" for="menu_icons_enabled">Enable subtle icons next to top navigation items</label>
+                                    <label class="form-check-label" for="menu_icons_enabled">Show icons in main menu</label>
                                 </div>
-                                <small class="info-text">Turn this on to display icons in the header menu (Home, Browse, Health Emergencies, etc.).</small>
+                                <small class="info-text">When enabled, compact icons appear above nav labels (front header and admin sidebar). When off, text-only navigation is shown.</small>
                 </div>
                         </div>
                         <div class="col-md-6">
@@ -1741,18 +1741,25 @@
                         </div>
                     </div>
                     <div class="row mt-3">
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Front-end body font size (px)</label>
                                 <input type="number" name="front_body_font_size" value="{{ $settings->front_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
                                 <small class="info-text">Default body font size on the public site. Default: 14px.</small>
                             </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
                             <div class="form-group">
                                 <label>Admin panel body font size (px)</label>
                                 <input type="number" name="admin_body_font_size" value="{{ $settings->admin_body_font_size ?? '14' }}" class="form-control" min="10" max="24" step="1" placeholder="14">
                                 <small class="info-text">Default body font size in the admin panel. Default: 14px.</small>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Main navigation font size (px)</label>
+                                <input type="number" name="nav_font_size" value="{{ $settings->nav_font_size ?? '11' }}" class="form-control" min="9" max="16" step="1" placeholder="11">
+                                <small class="info-text">Top menu labels on the public site and admin sidebar. Default: 11px (LinkedIn-style compact nav).</small>
                             </div>
                         </div>
                     </div>

@@ -117,6 +117,14 @@ class FederatedHubService
     public function testConnection(FederatedKnowledgeHub $hub): array
     {
         try {
+            if ($hub->api_token && ! $hub->api_refresh_token) {
+                try {
+                    app(FederationHubAuthService::class)->bootstrapRemoteHubTokens($hub, $hub->api_token);
+                } catch (\Throwable) {
+                    // Parent hub may still use a static bearer token only.
+                }
+            }
+
             $manifest = $this->fetchRemoteManifest($hub);
             $hub->connection_status = 'connected';
             $hub->connection_error = null;
@@ -148,6 +156,8 @@ class FederatedHubService
         $hub->connection_status = 'connected';
         $hub->connection_error = null;
         $hub->save();
+
+        app(FederatedContentStagingService::class)->stageFromSync($hub, $hub->cached_public_data);
 
         return $hub->cached_public_data;
     }
@@ -208,20 +218,28 @@ class FederatedHubService
     protected function remoteGet(FederatedKnowledgeHub $hub, string $path): array
     {
         $url = $hub->normalizedBaseUrl().$path;
-        $request = Http::timeout(20)->acceptJson();
+        $auth = app(FederationHubAuthService::class);
+        $registrationToken = $hub->api_token && ! $hub->api_refresh_token ? $hub->api_token : null;
 
-        if ($hub->api_token) {
-            $request = $request->withToken($hub->api_token);
+        try {
+            return $auth->remoteHubAuthorizedRequest(
+                $hub,
+                fn ($request) => $request->get($url),
+                $registrationToken
+            );
+        } catch (\Throwable $e) {
+            if (! $hub->api_token) {
+                throw $e;
+            }
+
+            $response = Http::timeout(20)->acceptJson()->withToken($hub->api_token)->get($url);
+            if (! $response->successful()) {
+                throw new \RuntimeException('Remote hub request failed ('.$response->status().'): '.$response->body());
+            }
+
+            $json = $response->json();
+
+            return is_array($json) ? $json : [];
         }
-
-        $response = $request->get($url);
-
-        if (! $response->successful()) {
-            throw new \RuntimeException('Remote hub request failed ('.$response->status().'): '.$response->body());
-        }
-
-        $json = $response->json();
-
-        return is_array($json) ? $json : [];
     }
 }
