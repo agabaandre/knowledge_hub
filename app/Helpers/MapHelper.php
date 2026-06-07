@@ -37,7 +37,213 @@ if (! function_exists('map_view_context_labels')) {
             'admin_metrics' => 'Admin dashboard metrics map',
             'admin_rcc' => 'Admin RCC dashboard map',
             'frontend_admin_units' => 'Frontend admin units map',
+            'country_hub' => 'Country hub map (owner country)',
         ];
+    }
+}
+
+if (! function_exists('map_african_countries_catalog')) {
+    function map_african_countries_catalog(): array
+    {
+        $countries = config('maps_african_countries.countries', []);
+
+        return is_array($countries) ? $countries : [];
+    }
+}
+
+if (! function_exists('map_country_definition_id')) {
+    function map_country_definition_id(string $iso2): string
+    {
+        $iso2 = strtolower(trim($iso2));
+        $version = str_replace('.', '-', (string) config('maps.topology_version', '2.3.3'));
+
+        return 'country-'.$iso2.'-topo-'.$version;
+    }
+}
+
+if (! function_exists('map_country_topology_filename')) {
+    function map_country_topology_filename(string $iso2): string
+    {
+        $iso2 = strtolower(trim($iso2));
+        $catalog = map_african_countries_catalog();
+        $meta = $catalog[$iso2] ?? [];
+
+        if (! empty($meta['topo_file'])) {
+            return (string) $meta['topo_file'];
+        }
+
+        return $iso2.'-all.topo.json';
+    }
+}
+
+if (! function_exists('map_country_topology_url')) {
+    function map_country_topology_url(string $iso2, ?string $topoFile = null): string
+    {
+        $iso2 = strtolower(trim($iso2));
+        $version = (string) config('maps.topology_version', '2.3.3');
+        $base = str_replace('{version}', $version, (string) config('maps.topology_base_url', 'https://code.highcharts.com/mapdata/{version}/'));
+        $filename = $topoFile ?: map_country_topology_filename($iso2);
+
+        return rtrim($base, '/').'/countries/'.$iso2.'/'.ltrim($filename, '/');
+    }
+}
+
+if (! function_exists('map_african_country_definitions')) {
+    function map_african_country_definitions(): array
+    {
+        static $cached = null;
+        if ($cached !== null) {
+            return $cached;
+        }
+
+        $version = (string) config('maps.topology_version', '2.3.3');
+        $definitions = [];
+
+        foreach (map_african_countries_catalog() as $iso2 => $meta) {
+            if (! is_array($meta)) {
+                continue;
+            }
+            $iso2 = strtolower(trim((string) $iso2));
+            if ($iso2 === '') {
+                continue;
+            }
+
+            $label = trim((string) ($meta['label'] ?? strtoupper($iso2)));
+            $definitionId = map_country_definition_id($iso2);
+
+            $definitions[$definitionId] = normalize_map_definition_config($definitionId, [
+                'label' => $label.' — Highcharts TopoJSON v'.$version,
+                'provider' => 'highcharts',
+                'type' => 'topojson_url',
+                'topology_preset' => 'country-admin1',
+                'topology_url' => map_country_topology_url($iso2, $meta['topo_file'] ?? null),
+                'version' => $version,
+                'join_by' => 'iso-a3',
+                'scope' => 'country',
+                'country_iso2' => $iso2,
+                'builtin' => true,
+            ]);
+        }
+
+        return $cached = $definitions;
+    }
+}
+
+if (! function_exists('map_country_hub_auto_contexts')) {
+    function map_country_hub_auto_contexts(): array
+    {
+        $contexts = config('maps.country_hub.auto_contexts', []);
+
+        return is_array($contexts) ? $contexts : [];
+    }
+}
+
+if (! function_exists('map_country_definition_id_for_country')) {
+    function map_country_definition_id_for_country(?Country $country): ?string
+    {
+        if (! $country || empty($country->iso_code)) {
+            return null;
+        }
+
+        $iso2 = strtolower(trim((string) $country->iso_code));
+        if ($iso2 === '') {
+            return null;
+        }
+
+        $definitionId = map_country_definition_id($iso2);
+
+        return isset(map_african_country_definitions()[$definitionId]) ? $definitionId : null;
+    }
+}
+
+if (! function_exists('map_auto_country_hub_version_id')) {
+    function map_auto_country_hub_version_id(?string $context): ?string
+    {
+        if ($context === null || $context === '' || ! in_array($context, map_country_hub_auto_contexts(), true)) {
+            return null;
+        }
+
+        if (! function_exists('hub_admin_units_enabled') || ! hub_admin_units_enabled()) {
+            return null;
+        }
+
+        $country = hub_owner_country();
+        if (! $country) {
+            return null;
+        }
+
+        return map_country_definition_id_for_country($country);
+    }
+}
+
+if (! function_exists('map_country_map_config_for_country')) {
+    function map_country_map_config_for_country(?Country $country): ?array
+    {
+        if (! $country || empty($country->iso_code)) {
+            return null;
+        }
+
+        $iso2 = strtolower(trim((string) $country->iso_code));
+        if ($iso2 === '') {
+            return null;
+        }
+
+        $definitionId = map_country_definition_id_for_country($country);
+        $topologyUrl = map_country_topology_url($iso2);
+
+        return [
+            'country_id' => (int) $country->id,
+            'country_name' => $country->name,
+            'iso2' => $iso2,
+            'definition_id' => $definitionId,
+            'provider' => config('maps.admin_units.provider', 'highcharts'),
+            'type' => 'topojson_url',
+            'topology_url' => $topologyUrl,
+            'version' => config('maps.topology_version', '2.3.3'),
+            'join_by' => config('maps.admin_units.join_by', 'iso-a3'),
+            'iso_property' => config('maps.admin_units.join_by', 'iso-a3'),
+        ];
+    }
+}
+
+if (! function_exists('map_country_map_settings_for_js')) {
+    function map_country_map_settings_for_js(?Country $country, ?string $context = 'country_hub'): ?array
+    {
+        $config = map_country_map_config_for_country($country);
+        if (! $config) {
+            return null;
+        }
+
+        return [
+            'context' => $context,
+            'versionId' => $config['definition_id'] ?: ('country-'.$config['iso2']),
+            'provider' => $config['provider'] ?? 'highcharts',
+            'type' => $config['type'],
+            'key' => null,
+            'scriptUrl' => null,
+            'topologyUrl' => $config['topology_url'],
+            'version' => $config['version'],
+            'joinBy' => $config['join_by'],
+            'isoProperty' => $config['iso_property'] ?? $config['join_by'],
+            'countryName' => $config['country_name'],
+            'countryIso2' => $config['iso2'],
+        ];
+    }
+}
+
+if (! function_exists('federated_hub_map_settings_for_js')) {
+    function federated_hub_map_settings_for_js($hub): ?array
+    {
+        if (! $hub || ! method_exists($hub, 'mappedCountry')) {
+            return null;
+        }
+
+        $country = $hub->mappedCountry;
+        if (! $country) {
+            return null;
+        }
+
+        return map_country_map_settings_for_js($country, 'country_hub');
     }
 }
 
@@ -174,6 +380,7 @@ if (! function_exists('map_all_definitions')) {
     {
         return array_merge(
             map_builtin_definitions(),
+            map_african_country_definitions(),
             map_managed_definitions(),
             map_legacy_custom_definitions()
         );
@@ -246,6 +453,11 @@ if (! function_exists('map_version_for_context')) {
             $fromConfig = config("maps.views.{$context}");
             if (is_string($fromConfig) && $fromConfig !== '' && isset($definitions[$fromConfig])) {
                 return $fromConfig;
+            }
+
+            $autoCountry = map_auto_country_hub_version_id($context);
+            if ($autoCountry && isset($definitions[$autoCountry])) {
+                return $autoCountry;
             }
         }
 
@@ -416,57 +628,17 @@ if (! function_exists('hub_owner_country')) {
 if (! function_exists('resolved_admin_units_map_config')) {
     function resolved_admin_units_map_config(): ?array
     {
-        $country = hub_owner_country();
-        if (! $country || ! $country->iso_code) {
-            return null;
-        }
-
-        $iso2 = strtolower(trim((string) $country->iso_code));
-        if ($iso2 === '') {
-            return null;
-        }
-
-        $topologyUrl = map_build_topology_url([
-            'topology_preset' => config('maps.admin_units.topology_preset', 'country-admin1'),
-            'topology_url' => str_replace('{iso2}', $iso2, (string) config('maps.admin_units.topology_url_template')),
-            'collection_version' => config('maps.admin_units.version', '2.3.3'),
-            'country_iso2' => $iso2,
-        ]);
-
-        return [
-            'country_id' => (int) $country->id,
-            'country_name' => $country->name,
-            'iso2' => $iso2,
-            'provider' => config('maps.admin_units.provider', 'highcharts'),
-            'type' => 'topojson_url',
-            'topology_url' => $topologyUrl,
-            'version' => config('maps.admin_units.version', '2.3.3'),
-            'join_by' => config('maps.admin_units.join_by', 'iso-a3'),
-            'iso_property' => config('maps.admin_units.join_by', 'iso-a3'),
-        ];
+        return map_country_map_config_for_country(hub_owner_country());
     }
 }
 
 if (! function_exists('admin_units_map_settings_for_js')) {
     function admin_units_map_settings_for_js(): ?array
     {
-        $config = resolved_admin_units_map_config();
-        if (! $config) {
+        if (! admin_units_map_enabled()) {
             return null;
         }
 
-        return [
-            'context' => 'frontend_admin_units',
-            'versionId' => 'admin-units-'.$config['iso2'],
-            'provider' => $config['provider'] ?? 'highcharts',
-            'type' => $config['type'],
-            'key' => null,
-            'scriptUrl' => null,
-            'topologyUrl' => $config['topology_url'],
-            'version' => $config['version'],
-            'joinBy' => $config['join_by'],
-            'isoProperty' => $config['iso_property'] ?? $config['join_by'],
-            'countryName' => $config['country_name'],
-        ];
+        return map_country_map_settings_for_js(hub_owner_country(), 'frontend_admin_units');
     }
 }

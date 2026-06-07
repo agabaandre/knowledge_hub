@@ -55,6 +55,19 @@ return [
         'admin_metrics' => env('MAP_VIEW_ADMIN_METRICS'),
         'admin_rcc' => env('MAP_VIEW_ADMIN_RCC'),
         'frontend_admin_units' => env('MAP_VIEW_FRONTEND_ADMIN_UNITS'),
+        'country_hub' => env('MAP_VIEW_COUNTRY_HUB'),
+    ],
+
+    /*
+    | When a country hub is configured (admin units + owner country), these view
+    | contexts auto-resolve to that country's Highcharts map unless overridden in Maps Management.
+    */
+    'country_hub' => [
+        'auto_contexts' => [
+            'frontend_countries',
+            'country_hub',
+            'frontend_admin_units',
+        ],
     ],
 
     /*

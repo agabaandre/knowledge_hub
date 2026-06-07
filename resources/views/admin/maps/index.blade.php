@@ -26,6 +26,11 @@
         </div>
         <div class="card-body">
             <p class="text-muted small">Topology collection version: <code>{{ $topologyVersion }}</code> · Base URL pattern: <code>{{ config('maps.topology_base_url') }}</code></p>
+            <p class="text-muted small mb-0">
+                {{ count($definitionGroups['African countries'] ?? []) }} African country maps from
+                <a href="https://code.highcharts.com/mapdata/" target="_blank" rel="noopener">Highcharts Map Collection</a>.
+                When a country hub is configured (System Configurations → owner country), map views auto-use that country's TopoJSON unless overridden below.
+            </p>
         </div>
     </div>
 
@@ -42,11 +47,17 @@
                                 @if($defaultMapId !== '' && empty($definitions[$defaultMapId]))
                                     <option value="{{ $defaultMapId }}" selected>Saved: {{ $defaultMapId }} (missing definition)</option>
                                 @endif
-                                @foreach($definitions as $id => $definition)
-                                    <option value="{{ $id }}" {{ $defaultMapId === $id ? 'selected' : '' }}>
-                                        {{ $definition['label'] ?? $id }}
-                                        @if(!empty($definition['provider'])) ({{ $providers[$definition['provider']]['label'] ?? $definition['provider'] }}) @endif
-                                    </option>
+                                @foreach($definitionGroups ?? ['Maps' => $definitions] as $groupLabel => $groupDefinitions)
+                                    @if(!empty($groupDefinitions))
+                                        <optgroup label="{{ $groupLabel }}">
+                                            @foreach($groupDefinitions as $id => $definition)
+                                                <option value="{{ $id }}" {{ $defaultMapId === $id ? 'selected' : '' }}>
+                                                    {{ $definition['label'] ?? $id }}
+                                                    @if(!empty($definition['provider'])) ({{ $providers[$definition['provider']]['label'] ?? $definition['provider'] }}) @endif
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
                                 @endforeach
                             </select>
                         </div>
@@ -59,10 +70,16 @@
                                     @if($selectedViewMap !== '' && empty($definitions[$selectedViewMap]))
                                         <option value="{{ $selectedViewMap }}" selected>Saved: {{ $selectedViewMap }} (missing definition)</option>
                                     @endif
-                                    @foreach($definitions as $id => $definition)
-                                        <option value="{{ $id }}" {{ $selectedViewMap === $id ? 'selected' : '' }}>
-                                            {{ $definition['label'] ?? $id }}
-                                        </option>
+                                    @foreach($definitionGroups ?? ['Maps' => $definitions] as $groupLabel => $groupDefinitions)
+                                        @if(!empty($groupDefinitions))
+                                            <optgroup label="{{ $groupLabel }}">
+                                                @foreach($groupDefinitions as $id => $definition)
+                                                    <option value="{{ $id }}" {{ $selectedViewMap === $id ? 'selected' : '' }}>
+                                                        {{ $definition['label'] ?? $id }}
+                                                    </option>
+                                                @endforeach
+                                            </optgroup>
+                                        @endif
                                     @endforeach
                                 </select>
                             </div>
@@ -111,6 +128,7 @@
                                         <strong>{{ $definition['label'] ?? $id }}</strong>
                                         <div class="small text-muted"><code>{{ $id }}</code>
                                             @if(!empty($definition['builtin'])) <span class="badge bg-secondary">built-in</span> @endif
+                                            @if(($definition['scope'] ?? '') === 'country') <span class="badge bg-success">country</span> @endif
                                             @if(!empty($definition['managed'])) <span class="badge bg-info">managed</span> @endif
                                         </div>
                                     </td>

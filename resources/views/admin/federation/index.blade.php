@@ -274,7 +274,12 @@
                                                 <td>
                                                     <strong>{{ $hub->name }}</strong>
                                                     @if($hub->mappedCountry)
-                                                        <br><small class="text-muted">{{ $hub->mappedCountry->name }}</small>
+                                                        @php $hubMap = federated_hub_map_settings_for_js($hub); @endphp
+                                                        <br><small class="text-muted">{{ $hub->mappedCountry->name }}
+                                                            @if(!empty($hubMap['topologyUrl']))
+                                                                · <a href="{{ $hubMap['topologyUrl'] }}" target="_blank" rel="noopener">country map</a>
+                                                            @endif
+                                                        </small>
                                                     @endif
                                                 </td>
                                                 <td><code class="small">{{ $hub->base_url }}</code></td>

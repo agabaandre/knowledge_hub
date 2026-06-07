@@ -21,9 +21,24 @@ class MapsController extends Controller
         $definitions = map_all_definitions();
         $managed = $this->mapsRepository->managedDefinitions();
         $assignments = session('mapAssignments') ?: $this->mapsRepository->assignmentState();
+        $definitionGroups = [
+            'Regional & continental' => [],
+            'African countries' => [],
+            'Custom / managed' => [],
+        ];
+        foreach ($definitions as $id => $definition) {
+            if (($definition['scope'] ?? '') === 'country') {
+                $definitionGroups['African countries'][$id] = $definition;
+            } elseif (! empty($definition['managed'])) {
+                $definitionGroups['Custom / managed'][$id] = $definition;
+            } else {
+                $definitionGroups['Regional & continental'][$id] = $definition;
+            }
+        }
 
         return view('admin.maps.index', [
             'definitions' => $definitions,
+            'definitionGroups' => $definitionGroups,
             'managedMaps' => $managed,
             'providers' => map_providers(),
             'topologyPresets' => map_topology_presets(),
