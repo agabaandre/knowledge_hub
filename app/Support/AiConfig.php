@@ -213,7 +213,7 @@ class AiConfig
 
         $fields = [];
         foreach ($map as $key => $meta) {
-            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']] : null;
+            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
             $effective = $meta['env_key'] !== ''
                 ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
                 : ($dbValue !== null ? $dbValue : $meta['default']);
