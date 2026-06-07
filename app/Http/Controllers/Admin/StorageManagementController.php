@@ -8,6 +8,7 @@ use App\Jobs\MigrateHubStorageJob;
 use App\Models\HubStorageSetting;
 use App\Services\HubDatabaseBackupService;
 use App\Services\HubEnvBackupService;
+use App\Services\HubOffsiteBackupService;
 use App\Services\HubStorageMetricsService;
 use App\Services\HubStoragePublicationIndexService;
 use App\Services\HubStorageService;
@@ -99,6 +100,31 @@ class StorageManagementController extends Controller
             'sharepoint_site_hostname' => 'nullable|string|max:255',
             'sharepoint_site_path' => 'nullable|string|max:255',
             'sharepoint_drive_id' => 'nullable|string|max:255',
+            'offsite_backup_enabled' => 'nullable|boolean',
+            'offsite_backup_driver' => ['nullable', Rule::requiredIf(fn () => $request->boolean('offsite_backup_enabled')), 'in:s3,gcs,azure,sftp,ftp'],
+            'offsite_remote_prefix' => 'nullable|string|max:255',
+            'offsite_remote_root' => 'nullable|string|max:512',
+            'offsite_key' => 'nullable|string|max:255',
+            'offsite_secret' => 'nullable|string|max:255',
+            'offsite_region' => 'nullable|string|max:64',
+            'offsite_bucket' => 'nullable|string|max:255',
+            'offsite_endpoint' => 'nullable|string|max:512',
+            'offsite_gcs_project_id' => 'nullable|string|max:255',
+            'offsite_gcs_key_file_path' => 'nullable|string|max:512',
+            'offsite_gcs_bucket' => 'nullable|string|max:255',
+            'offsite_gcs_storage_api_uri' => 'nullable|string|max:512',
+            'offsite_connection_string' => 'nullable|string|max:1024',
+            'offsite_account_name' => 'nullable|string|max:255',
+            'offsite_account_key' => 'nullable|string|max:512',
+            'offsite_container' => 'nullable|string|max:255',
+            'offsite_host' => 'nullable|string|max:255',
+            'offsite_username' => 'nullable|string|max:255',
+            'offsite_password' => 'nullable|string|max:255',
+            'offsite_private_key' => 'nullable|string|max:8192',
+            'offsite_passphrase' => 'nullable|string|max:255',
+            'offsite_port' => 'nullable|integer|min:1|max:65535',
+            'offsite_ftp_ssl' => 'nullable|boolean',
+            'offsite_ftp_passive' => 'nullable|boolean',
         ]);
 
         if (! Schema::hasTable('hub_storage_settings')) {
@@ -109,6 +135,7 @@ class StorageManagementController extends Controller
 
         $settings = HubStorageSetting::current();
         $existingCloud = $settings->cloud_config ?? [];
+        $existingOffsite = $settings->offsite_backup_config ?? [];
 
         $cloud = array_merge($existingCloud, array_filter([
             'key' => $validated['cloud_key'] ?? null,
@@ -140,6 +167,8 @@ class StorageManagementController extends Controller
             'drive_id' => $validated['sharepoint_drive_id'] ?? null,
         ], fn ($v) => $v !== null && $v !== ''));
 
+        $offsite = $this->mergeOffsiteBackupConfig($request, $validated, $existingOffsite);
+
         $settings->update([
             'files_driver' => $validated['files_driver'],
             'local_files_root' => $validated['files_driver'] === 'internal'
@@ -149,6 +178,7 @@ class StorageManagementController extends Controller
             'auto_sql_backup' => $request->boolean('auto_sql_backup'),
             'sql_backup_retention_days' => (int) $validated['sql_backup_retention_days'],
             'cloud_config' => $cloud,
+            'offsite_backup_config' => $offsite,
         ]);
 
         $storage->forgetSettingsCache();
@@ -162,6 +192,28 @@ class StorageManagementController extends Controller
     public function testConnection(HubStorageService $storage)
     {
         return response()->json($storage->testConnection());
+    }
+
+    public function testOffsiteConnection(HubOffsiteBackupService $offsite)
+    {
+        return response()->json($offsite->testConnection());
+    }
+
+    public function runOffsiteBackup(HubOffsiteBackupService $offsite)
+    {
+        $result = $offsite->runWeeklyUpload(true);
+
+        if (($result['status'] ?? '') === 'ok') {
+            return redirect()
+                ->route('admin.storage.index', [], 303)
+                ->with('alert-success', $result['message'])
+                ->withFragment('storage-config');
+        }
+
+        return redirect()
+            ->route('admin.storage.index', [], 303)
+            ->with('alert-danger', $result['message'] ?? 'Offsite backup failed.')
+            ->withFragment('storage-config');
     }
 
     public function browse(Request $request, HubStorageService $storage, HubStoragePublicationIndexService $publicationIndex)
@@ -405,5 +457,62 @@ class StorageManagementController extends Controller
     public function systemMetrics(HubStorageService $storage, HubStorageMetricsService $metrics)
     {
         return response()->json($metrics->snapshot($storage, request()->boolean('fresh')));
+    }
+
+    /**
+     * @param  array<string, mixed>  $validated
+     * @param  array<string, mixed>  $existing
+     * @return array<string, mixed>
+     */
+    private function mergeOffsiteBackupConfig(Request $request, array $validated, array $existing): array
+    {
+        $driver = $validated['offsite_backup_driver'] ?? ($existing['driver'] ?? null);
+        $config = array_merge($existing, array_filter([
+            'enabled' => $request->boolean('offsite_backup_enabled'),
+            'driver' => $driver,
+            'remote_prefix' => $validated['offsite_remote_prefix'] ?? ($existing['remote_prefix'] ?? 'sql-backups'),
+            'remote_root' => $validated['offsite_remote_root'] ?? ($existing['remote_root'] ?? '/khub-backups'),
+            'key' => $validated['offsite_key'] ?? null,
+            'region' => $validated['offsite_region'] ?? null,
+            'bucket' => $validated['offsite_bucket'] ?? ($validated['offsite_gcs_bucket'] ?? null),
+            'endpoint' => $validated['offsite_endpoint'] ?? null,
+            'project_id' => $validated['offsite_gcs_project_id'] ?? null,
+            'key_file_path' => $validated['offsite_gcs_key_file_path'] ?? null,
+            'storage_api_uri' => $validated['offsite_gcs_storage_api_uri'] ?? null,
+            'account_name' => $validated['offsite_account_name'] ?? null,
+            'container' => $validated['offsite_container'] ?? null,
+            'host' => $validated['offsite_host'] ?? null,
+            'username' => $validated['offsite_username'] ?? null,
+            'private_key' => $validated['offsite_private_key'] ?? null,
+            'port' => $validated['offsite_port'] ?? null,
+        ], fn ($value) => $value !== null && $value !== ''));
+
+        if ($driver === 'ftp') {
+            $config['ssl'] = $request->boolean('offsite_ftp_ssl');
+            $config['passive'] = $request->boolean('offsite_ftp_passive');
+        }
+
+        if ($driver === 'gcs' && ! empty($validated['offsite_gcs_bucket'])) {
+            $config['bucket'] = $validated['offsite_gcs_bucket'];
+        }
+
+        foreach ([
+            'secret' => 'offsite_secret',
+            'password' => 'offsite_password',
+            'account_key' => 'offsite_account_key',
+            'connection_string' => 'offsite_connection_string',
+            'passphrase' => 'offsite_passphrase',
+        ] as $key => $field) {
+            $value = $request->input($field);
+            if ($value !== null && $value !== '') {
+                $config[$key] = $value;
+            }
+        }
+
+        if (! $request->boolean('offsite_backup_enabled')) {
+            $config['enabled'] = false;
+        }
+
+        return $config;
     }
 }

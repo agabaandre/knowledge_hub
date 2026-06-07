@@ -3,6 +3,7 @@
 namespace App\Providers;
 
 use App\Filesystem\AzureBlobRestAdapter;
+use App\Filesystem\FtpAdapter;
 use App\Filesystem\SharePointGraphAdapter;
 use App\Filesystem\SftpAdapter;
 use Illuminate\Filesystem\FilesystemAdapter;
@@ -57,6 +58,12 @@ class HubStorageServiceProvider extends ServiceProvider
 
         Storage::extend('sftp-phpseclib', function ($app, array $config) {
             $adapter = new SftpAdapter($config);
+
+            return new FilesystemAdapter(new Filesystem($adapter), $adapter, $config);
+        });
+
+        Storage::extend('ftp-php', function ($app, array $config) {
+            $adapter = new FtpAdapter($config);
 
             return new FilesystemAdapter(new Filesystem($adapter), $adapter, $config);
         });

@@ -62,6 +62,19 @@ class Kernel extends ConsoleKernel
                     return false;
                 }
             });
+        $schedule->command('hub:offsite-backup')
+            ->weeklyOn(
+                (int) config('hub_storage.offsite_backup_schedule_day', 0),
+                config('hub_storage.offsite_backup_schedule_time', '02:15')
+            )
+            ->when(function () {
+                try {
+                    return \Illuminate\Support\Facades\Schema::hasTable('hub_storage_settings')
+                        && app(\App\Services\HubOffsiteBackupService::class)->isEnabled();
+                } catch (\Throwable $e) {
+                    return false;
+                }
+            });
         // Sync public content from country hubs (continental portal only)
         $schedule->command('federation:sync')
             ->dailyAt('02:45')

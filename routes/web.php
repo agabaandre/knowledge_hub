@@ -293,6 +293,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get('/storage-management', [StorageManagementController::class, 'index'])->name('admin.storage.index');
     Route::post('/storage-management', [StorageManagementController::class, 'update'])->name('admin.storage.update');
     Route::post('/storage-management/test-connection', [StorageManagementController::class, 'testConnection'])->name('admin.storage.test');
+    Route::post('/storage-management/test-offsite-backup', [StorageManagementController::class, 'testOffsiteConnection'])->name('admin.storage.test-offsite');
+    Route::post('/storage-management/offsite-backup', [StorageManagementController::class, 'runOffsiteBackup'])->name('admin.storage.offsite-backup');
     Route::get('/storage-management/browse', [StorageManagementController::class, 'browse'])->name('admin.storage.browse');
     Route::get('/storage-management/publication-references', [StorageManagementController::class, 'publicationReferences'])->name('admin.storage.publication-references');
     Route::get('/storage-management/browse-backups', [StorageManagementController::class, 'browseBackups'])->name('admin.storage.browse-backups');

@@ -1068,6 +1068,15 @@
                             @if($settings->last_sql_backup_at)
                                 Last run: {{ $settings->last_sql_backup_at->format('M j, Y H:i') }}.
                             @endif
+                            @php $offsiteCfg = $settings->offsite_backup_config ?? []; @endphp
+                            @if(!empty($offsiteCfg['enabled']))
+                                Weekly offsite upload enabled
+                                @if(!empty($offsiteCfg['last_upload_at']))
+                                    (last: {{ \Carbon\Carbon::parse($offsiteCfg['last_upload_at'])->format('M j, Y H:i') }}).
+                                @else
+                                    .
+                                @endif
+                            @endif
                         </div>
                         <span class="storage-path mt-1">{{ $sqlBackupRoot }}</span>
                     </div>
@@ -1189,6 +1198,8 @@
                                 </div>
                             </div>
                         </div>
+
+                        @include('admin.storage.partials.offsite_backup')
 
                         <div class="storage-form-actions">
                             <button type="submit" class="btn btn-primary"><i class="fa fa-save me-1"></i> Save settings</button>
@@ -1319,6 +1330,13 @@
                                 <input type="hidden" name="incremental" value="0">
                                 <button type="submit" class="btn btn-outline-primary btn-sm"><i class="fa fa-copy me-1"></i> Full backup</button>
                             </form>
+                            @php $offsiteEnabled = !empty(($settings->offsite_backup_config ?? [])['enabled']); @endphp
+                            @if($offsiteEnabled)
+                                <form method="post" action="{{ route('admin.storage.offsite-backup') }}" class="d-inline ms-1" onsubmit="return confirm('Run a full SQL backup and upload it to offsite storage now?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-outline-success btn-sm"><i class="fa fa-cloud-upload-alt me-1"></i> Upload offsite now</button>
+                                </form>
+                            @endif
                         </div>
                     </div>
                     <div class="storage-panel mt-3">
@@ -1621,6 +1639,38 @@
             result.className = 'small text-' + (data.status === 'ok' ? 'success' : (data.status === 'warning' ? 'warning' : 'danger'));
         });
     });
+
+    var offsiteDriver = document.getElementById('offsiteBackupDriver');
+    function toggleOffsiteFields() {
+        if (!offsiteDriver) return;
+        var val = offsiteDriver.value;
+        document.querySelectorAll('.offsite-field').forEach(function (el) {
+            var drivers = (el.getAttribute('data-drivers') || '').split(',');
+            el.style.display = val && drivers.indexOf(val) !== -1 ? '' : 'none';
+        });
+    }
+    if (offsiteDriver) {
+        offsiteDriver.addEventListener('change', toggleOffsiteFields);
+        toggleOffsiteFields();
+    }
+
+    var testOffsiteBtn = document.getElementById('testOffsiteBackupBtn');
+    if (testOffsiteBtn) {
+        testOffsiteBtn.addEventListener('click', function () {
+            var result = document.getElementById('testOffsiteBackupResult');
+            result.textContent = 'Testing saved offsite settings…';
+            fetch('{{ route('admin.storage.test-offsite') }}', {
+                method: 'POST',
+                headers: {'X-CSRF-TOKEN': '{{ csrf_token() }}', 'Accept': 'application/json'}
+            }).then(function (r) { return r.json(); }).then(function (data) {
+                result.textContent = data.message || '';
+                result.className = 'small text-' + (data.status === 'ok' ? 'success' : 'danger');
+            }).catch(function () {
+                result.textContent = 'Connection test failed.';
+                result.className = 'small text-danger';
+            });
+        });
+    }
 
     function formatBytes(bytes) {
         if (!bytes || bytes < 1024) return (bytes || 0) + ' B';

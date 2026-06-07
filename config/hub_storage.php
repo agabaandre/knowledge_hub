@@ -172,4 +172,18 @@ return [
 
     'backup_schedule_time' => '01:30',
 
+    /*
+    | Offsite SQL backup upload (weekly). Separate from publication file storage.
+    */
+    'offsite_backup_drivers' => [
+        's3' => 'Amazon S3 (or S3-compatible)',
+        'gcs' => 'Google Cloud Storage',
+        'azure' => 'Azure Blob Storage',
+        'sftp' => 'SFTP',
+        'ftp' => 'FTP / FTPS',
+    ],
+
+    'offsite_backup_schedule_day' => 0,
+    'offsite_backup_schedule_time' => '02:15',
+
 ];

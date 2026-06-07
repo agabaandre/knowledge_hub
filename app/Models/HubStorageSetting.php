@@ -13,6 +13,7 @@ class HubStorageSetting extends Model
         'local_files_root',
         'sql_backup_root',
         'cloud_config',
+        'offsite_backup_config',
         'auto_sql_backup',
         'sql_backup_retention_days',
         'last_sql_backup_at',
@@ -25,6 +26,7 @@ class HubStorageSetting extends Model
 
     protected $casts = [
         'cloud_config' => 'array',
+        'offsite_backup_config' => 'array',
         'auto_sql_backup' => 'boolean',
         'sql_backup_retention_days' => 'integer',
         'last_sql_backup_at' => 'datetime',
