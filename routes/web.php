@@ -313,6 +313,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
 
     Route::get('/maps', [MapsController::class, 'index'])->name('admin.maps.index');
+    Route::get('/maps/definitions/search', [MapsController::class, 'searchDefinitions'])->name('admin.maps.definitions.search');
     Route::get('/maps/create', [MapsController::class, 'create'])->name('admin.maps.create');
     Route::get('/maps/preview/{slug?}', [MapsController::class, 'preview'])->name('admin.maps.preview');
     Route::get('/maps/{id}/edit', [MapsController::class, 'edit'])->name('admin.maps.edit')->where('id', '[0-9]+');

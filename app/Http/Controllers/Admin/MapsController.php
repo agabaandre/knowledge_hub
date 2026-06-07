@@ -133,6 +133,56 @@ class MapsController extends Controller
             ->with('mapAssignments', $assignments);
     }
 
+    public function searchDefinitions(Request $request)
+    {
+        $definitions = map_all_definitions();
+        $providers = map_providers();
+        $term = mb_strtolower(trim((string) $request->input('q', '')));
+
+        $filtered = $definitions;
+        if ($term !== '') {
+            $filtered = array_filter(
+                $definitions,
+                static function (array $definition, string $id) use ($term, $providers): bool {
+                    $providerLabel = (string) ($providers[$definition['provider'] ?? 'highcharts']['label'] ?? ($definition['provider'] ?? ''));
+                    $tags = [];
+                    if (! empty($definition['builtin'])) {
+                        $tags[] = 'built-in';
+                    }
+                    if (($definition['scope'] ?? '') === 'country') {
+                        $tags[] = 'country';
+                    }
+                    if (! empty($definition['managed'])) {
+                        $tags[] = 'managed';
+                    }
+
+                    $haystack = mb_strtolower(implode(' ', array_filter([
+                        $id,
+                        $definition['label'] ?? '',
+                        $providerLabel,
+                        $definition['provider'] ?? '',
+                        $definition['join_by'] ?? '',
+                        implode(' ', $tags),
+                    ])));
+
+                    return str_contains($haystack, $term);
+                },
+                ARRAY_FILTER_USE_BOTH
+            );
+        }
+
+        $html = view('admin.maps.partials.definitions_table_rows', [
+            'definitions' => $filtered,
+            'providers' => $providers,
+        ])->render();
+
+        return response()->json([
+            'total' => count($definitions),
+            'filtered' => count($filtered),
+            'html' => $html,
+        ]);
+    }
+
     public function preview(Request $request, ?string $slug = null)
     {
         $slug = $slug ?: trim((string) $request->input('slug', ''));

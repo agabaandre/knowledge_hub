@@ -163,6 +163,71 @@
         border-radius: 999px;
         padding: 0.25rem 0.65rem;
     }
+    .maps-admin-page .maps-definitions-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        padding: 0.85rem 1.25rem;
+        border-bottom: 1px solid #e2e8f0;
+        background: #f8fafc;
+    }
+    .maps-admin-page .maps-definitions-search {
+        position: relative;
+        min-width: min(100%, 320px);
+        max-width: 420px;
+        flex: 1 1 280px;
+    }
+    .maps-admin-page .maps-definitions-search .form-control {
+        padding-left: 2.25rem;
+        padding-right: 2.25rem;
+        border-color: #cbd5e1;
+        font-size: 0.875rem;
+    }
+    .maps-admin-page .maps-definitions-search .search-icon {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        color: #94a3b8;
+        pointer-events: none;
+    }
+    .maps-admin-page .maps-definitions-search .search-clear {
+        position: absolute;
+        right: 0.35rem;
+        top: 50%;
+        transform: translateY(-50%);
+        border: 0;
+        background: transparent;
+        color: #64748b;
+        padding: 0.15rem 0.45rem;
+        line-height: 1;
+    }
+    .maps-admin-page .maps-definitions-counter {
+        font-size: 0.8125rem;
+        font-weight: 600;
+        color: #334155;
+        background: #fff;
+        border: 1px solid #e2e8f0;
+        border-radius: 999px;
+        padding: 0.35rem 0.75rem;
+        white-space: nowrap;
+    }
+    .maps-admin-page .maps-definitions-counter.is-filtered {
+        color: #4338ca;
+        border-color: #c7d2fe;
+        background: #eef2ff;
+    }
+    .maps-admin-page .map-row-num {
+        width: 3rem;
+        text-align: center;
+        color: #94a3b8 !important;
+    }
+    .maps-admin-page .maps-table.is-loading {
+        opacity: 0.55;
+        pointer-events: none;
+    }
 </style>
 @endsection
 
@@ -289,17 +354,33 @@
         </div>
     </div>
 
-    <div class="card maps-section-card shadow-sm mb-4">
-        <div class="card-header d-flex flex-wrap justify-content-between align-items-center gap-2">
-            <div>
-                <h4><i class="fa fa-list me-2 text-primary"></i>Map definitions</h4>
-                <p>All built-in and custom map sources available for assignment.</p>
+    <div class="card maps-section-card shadow-sm mb-4" id="mapDefinitionsCard">
+        <div class="card-header">
+            <h4><i class="fa fa-list me-2 text-primary"></i>Map definitions</h4>
+            <p>All built-in and custom map sources available for assignment.</p>
+        </div>
+        <div class="maps-definitions-toolbar">
+            <div class="maps-definitions-search">
+                <i class="fa fa-search search-icon" aria-hidden="true"></i>
+                <input type="search"
+                       id="mapDefinitionsSearch"
+                       class="form-control"
+                       placeholder="Search by name, slug, provider, join key, or tag…"
+                       autocomplete="off"
+                       aria-label="Search map definitions">
+                <button type="button" class="search-clear d-none" id="mapDefinitionsSearchClear" aria-label="Clear search">
+                    <i class="fa fa-times"></i>
+                </button>
             </div>
+            <span class="maps-definitions-counter" id="mapDefinitionsCounter">
+                Showing {{ count($definitions) }} of {{ count($definitions) }}
+            </span>
         </div>
         <div class="table-responsive">
-            <table class="table maps-table mb-0">
+            <table class="table maps-table mb-0" id="mapDefinitionsTable">
                 <thead>
                     <tr>
+                        <th class="map-row-num">#</th>
                         <th style="min-width: 280px;">Map</th>
                         <th>Provider</th>
                         <th>Join key</th>
@@ -307,59 +388,11 @@
                         <th class="text-end" style="min-width: 180px;">Actions</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach($definitions as $id => $definition)
-                        @php $resolved = resolved_map_config(null, $id); @endphp
-                        <tr>
-                            <td class="map-label-cell">
-                                <strong>{{ $definition['label'] ?? $id }}</strong>
-                                <div class="map-slug">{{ $id }}</div>
-                                <div class="map-badge-row">
-                                    @if(!empty($definition['builtin']))
-                                        <span class="map-badge map-badge--builtin">Built-in</span>
-                                    @endif
-                                    @if(($definition['scope'] ?? '') === 'country')
-                                        <span class="map-badge map-badge--country">Country</span>
-                                    @endif
-                                    @if(!empty($definition['managed']))
-                                        <span class="map-badge map-badge--managed">Managed</span>
-                                    @endif
-                                </div>
-                            </td>
-                            <td>{{ $providers[$definition['provider'] ?? 'highcharts']['label'] ?? ($definition['provider'] ?? 'highcharts') }}</td>
-                            <td><span class="map-join-code">{{ $definition['join_by'] ?? 'iso-a3' }}</span></td>
-                            <td class="small">
-                                @if(!empty($resolved['topology_url']))
-                                    <a href="{{ $resolved['topology_url'] }}" target="_blank" rel="noopener" class="text-decoration-none">
-                                        <i class="fa fa-external-link me-1"></i>TopoJSON
-                                    </a>
-                                @elseif(!empty($definition['script']))
-                                    <span class="text-muted">Script map</span>
-                                @else
-                                    <span class="text-muted">—</span>
-                                @endif
-                            </td>
-                            <td class="text-end">
-                                <div class="d-inline-flex flex-wrap gap-1 justify-content-end">
-                                    <button type="button" class="btn btn-outline-secondary btn-sm js-map-preview" data-slug="{{ $id }}">
-                                        <i class="fa fa-eye me-1"></i>Preview
-                                    </button>
-                                    @if(!empty($definition['managed_id']))
-                                        <a href="{{ route('admin.maps.edit', $definition['managed_id']) }}" class="btn btn-outline-primary btn-sm">
-                                            <i class="fa fa-pencil me-1"></i>Edit
-                                        </a>
-                                        <form method="post" action="{{ route('admin.maps.destroy', $definition['managed_id']) }}" class="d-inline" onsubmit="return confirm('Delete this map definition?');">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="btn btn-outline-danger btn-sm">
-                                                <i class="fa fa-trash"></i>
-                                            </button>
-                                        </form>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforeach
+                <tbody id="mapDefinitionsBody">
+                    @include('admin.maps.partials.definitions_table_rows', [
+                        'definitions' => $definitions,
+                        'providers' => $providers,
+                    ])
                 </tbody>
             </table>
         </div>
@@ -405,11 +438,84 @@
     }
 })();
 
-document.querySelectorAll('.js-map-preview').forEach(function (btn) {
-    btn.addEventListener('click', function () {
-        var slug = this.getAttribute('data-slug');
+(function () {
+    var previewUrlTemplate = @json(route('admin.maps.preview', ['slug' => '__SLUG__']));
+    var searchUrl = @json(route('admin.maps.definitions.search'));
+    var searchInput = document.getElementById('mapDefinitionsSearch');
+    var searchClear = document.getElementById('mapDefinitionsSearchClear');
+    var tableBody = document.getElementById('mapDefinitionsBody');
+    var table = document.getElementById('mapDefinitionsTable');
+    var counter = document.getElementById('mapDefinitionsCounter');
+    var debounceTimer = null;
+    var activeController = null;
+
+    function updateCounter(filtered, total) {
+        if (!counter) return;
+        counter.textContent = filtered === total
+            ? 'Showing ' + total + ' of ' + total
+            : 'Showing ' + filtered + ' of ' + total;
+        counter.classList.toggle('is-filtered', filtered !== total);
+    }
+
+    function setLoading(isLoading) {
+        if (table) table.classList.toggle('is-loading', isLoading);
+    }
+
+    function runSearch() {
+        if (!searchInput || !tableBody) return;
+
+        var term = searchInput.value.trim();
+        if (searchClear) {
+            searchClear.classList.toggle('d-none', term === '');
+        }
+
+        if (activeController) {
+            activeController.abort();
+        }
+        activeController = new AbortController();
+        setLoading(true);
+
+        var url = searchUrl + (term !== '' ? ('?q=' + encodeURIComponent(term)) : '');
+        fetch(url, {
+            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' },
+            signal: activeController.signal
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                tableBody.innerHTML = data.html || '';
+                updateCounter(data.filtered || 0, data.total || 0);
+            })
+            .catch(function (err) {
+                if (err && err.name === 'AbortError') return;
+            })
+            .finally(function () {
+                setLoading(false);
+            });
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(runSearch, 250);
+        });
+    }
+
+    if (searchClear) {
+        searchClear.addEventListener('click', function () {
+            searchInput.value = '';
+            searchClear.classList.add('d-none');
+            runSearch();
+            searchInput.focus();
+        });
+    }
+
+    document.addEventListener('click', function (event) {
+        var btn = event.target.closest('.js-map-preview');
+        if (!btn) return;
+
+        var slug = btn.getAttribute('data-slug');
         var out = document.getElementById('mapPreviewOutput');
-        fetch(@json(route('admin.maps.preview', ['slug' => '__SLUG__'])).replace('__SLUG__', encodeURIComponent(slug)), {
+        fetch(previewUrlTemplate.replace('__SLUG__', encodeURIComponent(slug)), {
             headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
         }).then(function (r) { return r.json(); }).then(function (json) {
             out.classList.remove('d-none');
@@ -419,6 +525,6 @@ document.querySelectorAll('.js-map-preview').forEach(function (btn) {
             out.textContent = 'Preview failed.';
         });
     });
-});
+})();
 </script>
 @endsection
