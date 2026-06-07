@@ -873,6 +873,10 @@
                                 <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm btn-outline-secondary">
                                     <i class="fa fa-info-circle"></i> Details
                                 </a>
+                                @include('forums.partials.khub_ai_thread_button', [
+                                    'forum' => $forum,
+                                    'redirectUrl' => url('forums'),
+                                ])
                                 @auth
                                     @if(in_array($forum->id, $my_forums))
                                         <a href="{{ forum_thread_url($forum)}}" class="btn btn-sm theme-bg text-white">

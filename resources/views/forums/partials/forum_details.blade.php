@@ -141,17 +141,11 @@
             <i class="fa fa-comment"></i>
             <span>{{ count($forum->comments) }} {{ count($forum->comments) == 1 ? 'Comment' : 'Comments' }}</span>
         </div>
-        @auth
-        <button type="button" class="forum-action-btn js-open-forum-assistant" data-forum-id="{{ $forum->id }}" data-thread-title="{{ e(Str::limit(strip_tags($forum->forum_title ?? ''), 140)) }}" style="cursor: pointer; border: none; background: none; padding: 0.5rem;">
-            <i class="fa fa-robot"></i>
-            <span>Khub AI</span>
-        </button>
-        @else
-        <a href="{{ route('login') }}" class="forum-action-btn" title="Log in to use Khub AI">
-            <i class="fa fa-robot"></i>
-            <span>Khub AI</span>
-        </a>
-        @endauth
+        @include('forums.partials.khub_ai_thread_button', [
+            'forum' => $forum,
+            'btnClass' => 'forum-action-btn',
+            'redirectUrl' => forum_thread_url($forum),
+        ])
         @include('forums.partials.share_buttons', ['forum' => $forum])
     </div>
     </div>
