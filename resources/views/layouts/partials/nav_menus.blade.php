@@ -17,11 +17,16 @@
                 </li>
 
                 @foreach ($data_categories as $category)
+                    @php
+                        $categoryI18nKey = 'frontend_nav.' . \App\Support\UiLocaleLabels::navCategoryTranslationKey((string) ($category->slug ?? ''));
+                        $categoryLabel = \App\Support\UiLocaleLabels::navCategoryLabel($category);
+                    @endphp
                     @if ($category->is_special)
                         @auth
                             <li>
-                                <a
-                                    href="{{ url($category->url_path) }}?slug={{ $category->slug }}">{{ $category->category_name }}</a>
+                                <a href="{{ url($category->url_path) }}?slug={{ $category->slug }}">
+                                    <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                                </a>
                             </li>
                         @endauth
                     @else
@@ -29,15 +34,17 @@
                             @auth
                                 @can($category->required_permission)
                                     <li>
-                                        <a
-                                            href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a>
+                                        <a href="{{ url('/records') }}?category={{ $category->id }}">
+                                            <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                                        </a>
                                     </li>
                                 @endcan
                             @endauth
                         @else
                             <li>
-                                <a
-                                    href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a>
+                                <a href="{{ url('/records') }}?category={{ $category->id }}">
+                                    <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                                </a>
                             </li>
                         @endif
                     @endif
@@ -87,7 +94,15 @@
 
                 @if(isset($staticLinks) && count($staticLinks))
                     @foreach($staticLinks as $link)
-                        <li><a href="{{ $link->link }}" @if($link->open_in_new_tab) target="_blank" @endif>{{ $link->title }}</a></li>
+                        @php
+                            $linkI18nKey = 'frontend_nav.' . \App\Support\UiLocaleLabels::navStaticLinkTranslationKey((int) $link->id);
+                            $linkLabel = \App\Support\UiLocaleLabels::navStaticLinkLabel($link);
+                        @endphp
+                        <li>
+                            <a href="{{ $link->link }}" @if($link->open_in_new_tab) target="_blank" @endif>
+                                <span class="khub-i18n-text" data-khub-i18n="{{ $linkI18nKey }}">{{ $linkLabel }}</span>
+                            </a>
+                        </li>
                     @endforeach
                 @endif
                 <li><a href="{{ url('tools') }}">{{ __('frontend_nav.tools') }}</a></li>

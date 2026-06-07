@@ -33,19 +33,35 @@
         <ul class="dropdown-menu dropdown-menu-lg">
             <li><a class="dropdown-item" href="{{ url('/health-topics') }}">{{ __('frontend_nav.health_topics') }}</a></li>
             @foreach ($data_categories ?? [] as $category)
+                @php
+                    $categoryI18nKey = 'frontend_nav.' . \App\Support\UiLocaleLabels::navCategoryTranslationKey((string) ($category->slug ?? ''));
+                    $categoryLabel = \App\Support\UiLocaleLabels::navCategoryLabel($category);
+                @endphp
                 @if($category->is_special ?? false)
                     @auth
-                        <li><a class="dropdown-item" href="{{ url($category->url_path ?? '') }}?slug={{ $category->slug }}">{{ $category->category_name }}</a></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url($category->url_path ?? '') }}?slug={{ $category->slug }}">
+                                <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                            </a>
+                        </li>
                     @endauth
                 @else
                     @if(strlen($category->required_permission ?? '') > 0)
                         @auth
                             @can($category->required_permission)
-                                <li><a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a></li>
+                                <li>
+                                    <a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">
+                                        <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                                    </a>
+                                </li>
                             @endcan
                         @endauth
                     @else
-                        <li><a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">{{ $category->category_name }}</a></li>
+                        <li>
+                            <a class="dropdown-item" href="{{ url('/records') }}?category={{ $category->id }}">
+                                <span class="khub-i18n-text" data-khub-i18n="{{ $categoryI18nKey }}">{{ $categoryLabel }}</span>
+                            </a>
+                        </li>
                     @endif
                 @endif
             @endforeach
@@ -98,7 +114,15 @@
                 <li><hr class="dropdown-divider"></li>
                 <li><h6 class="dropdown-header">{{ __('frontend_nav.key_links') }}</h6></li>
                 @foreach($staticLinks as $link)
-                    <li><a class="dropdown-item" href="{{ $link->link }}" @if($link->open_in_new_tab ?? false) target="_blank" rel="noopener" @endif>{{ $link->title }}</a></li>
+                    @php
+                        $linkI18nKey = 'frontend_nav.' . \App\Support\UiLocaleLabels::navStaticLinkTranslationKey((int) $link->id);
+                        $linkLabel = \App\Support\UiLocaleLabels::navStaticLinkLabel($link);
+                    @endphp
+                    <li>
+                        <a class="dropdown-item" href="{{ $link->link }}" @if($link->open_in_new_tab ?? false) target="_blank" rel="noopener" @endif>
+                            <span class="khub-i18n-text" data-khub-i18n="{{ $linkI18nKey }}">{{ $linkLabel }}</span>
+                        </a>
+                    </li>
                 @endforeach
             @endif
             <li><a class="dropdown-item" href="{{ url('tools') }}">{{ __('frontend_nav.tools') }}</a></li>

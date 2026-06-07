@@ -68,7 +68,9 @@
     }
 </style>
 <div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }} --spotlight-overlay-bg: {{ !empty($bannerImage) ? $overlayGradient : 'transparent' }};">
-    <h1 class="sr-only">{{ settings()->site_name ?? settings()->title ?? 'Africa Health Knowledge Hub' }}@if(!empty(settings()->slogan)) — {{ settings()->slogan }}@endif</h1>
+    <h1 class="sr-only notranslate">
+        <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
+    </h1>
     <div class="search-container" style="max-width: 1200px; margin: 0 auto; width: 100%; padding: 0 15px; box-sizing: border-box;">
         <form action="{{ url('records/search') }}" class="filters" role="search" aria-label="Search records">
         <div class="row no-gutters bg-white rounded search-form" id="simple_search" style="border-radius: 0.375rem !important;">

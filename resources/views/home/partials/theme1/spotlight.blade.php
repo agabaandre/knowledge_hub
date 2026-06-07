@@ -212,7 +212,9 @@
 }
 </style>
 <div class="theme1-spotlight" style="{{ $bannerUrl ? 'background-image: url(' . e($bannerUrl) . ');' : '' }}">
-    <h1 class="visually-hidden">{{ settings()->site_name ?? settings()->title ?? 'Africa Health Knowledge Hub' }}@if(!empty(settings()->slogan)) — {{ settings()->slogan }}@endif</h1>
+    <h1 class="visually-hidden notranslate">
+        <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
+    </h1>
     <div class="container theme1-spotlight-inner">
         <div class="row align-items-start justify-content-center g-3">
             <div class="col-12 col-lg-7 col-xl-7">

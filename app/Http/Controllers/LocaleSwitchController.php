@@ -41,6 +41,7 @@ class LocaleSwitchController extends Controller
             'khub-footer-bottom-i18n' => view('layouts.partials.footer_i18n_bottom', $shared)->render(),
             'khub-login-i18n' => view('layouts.partials.login_i18n', $shared)->render(),
             'khub-cookie-i18n' => view('layouts.partials.cookie_i18n', $shared)->render(),
+            'khub-site-branding' => view('layouts.partials.site_branding')->render(),
         ];
 
         if ($user !== null) {

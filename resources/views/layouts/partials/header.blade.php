@@ -522,10 +522,7 @@
                     </div>
                 </div>
                 <div class="col-lg-5 col-md-5 col-12 text-center">
-                    <h3 style="color:black !important; font-weight:bold; margin-bottom: 7px;" class="notranslate">
-                        {{ settings()->site_name }}</h3>
-                    <h6 class="slogan fw-bold" style="font-size: 14px; margin-bottom: 7px; margin-left: 0;">
-                        {{ settings()->slogan }}</h6>
+                    @include('layouts.partials.site_branding')
                 </div>
                 <div class="col-lg-4 col-md-4 d-none d-md-block" style="padding-right: 10px; display: flex; align-items: center; justify-content: flex-end;">
                     @include('layouts.partials.langselect')

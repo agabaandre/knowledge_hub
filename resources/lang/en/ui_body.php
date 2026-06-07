@@ -17,6 +17,10 @@ return [
     'log_in' => 'Log in',
     'sign_up' => 'Sign up',
 
+    // Site branding (defaults synced from Admin settings; translate per locale)
+    'site_title' => 'Africa Health Knowledge Hub',
+    'site_tagline' => 'Informing Health Decisions and Actions',
+
     'footer_address' => 'Address',
     'footer_navigate' => 'Navigate',
     'footer_about_portal' => 'About This Portal',

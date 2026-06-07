@@ -2,6 +2,7 @@
 
 namespace App\Translation;
 
+use App\Services\UiTranslationService;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Translation\FileLoader;
 
@@ -40,6 +41,8 @@ class MergingTranslationLoader extends FileLoader
         if (! is_array($base)) {
             $base = [];
         }
+
+        $base = array_merge($base, app(UiTranslationService::class)->dynamicGroupKeys($group));
 
         $overrideFile = $this->overrideBasePath.'/'.$locale.'/'.$group.'.php';
         if ($this->files->exists($overrideFile)) {

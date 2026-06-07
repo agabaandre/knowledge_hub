@@ -27,9 +27,9 @@ return [
     |--------------------------------------------------------------------------
     */
     'ui_groups' => [
-        'frontend_nav' => 'Frontend navigation (main menu)',
+        'frontend_nav' => 'Frontend navigation (main menu, browse categories & key links)',
         'admin_nav' => 'Admin sidebar menu',
-        'ui_body' => 'Account menu, footer & static body chrome',
+        'ui_body' => 'Account menu, site title/tagline, footer & static body chrome',
         'home_sections' => 'Homepage sections, search & filters',
     ],
 

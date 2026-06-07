@@ -2,8 +2,12 @@
 
 namespace App\Services;
 
+use App\Models\DataCategory;
 use App\Models\SiteLanguage;
+use App\Models\StaticLink;
+use App\Support\UiLocaleLabels;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 
 class UiTranslationService
 {
@@ -52,8 +56,74 @@ class UiTranslationService
         }
 
         $data = require $path;
+        $data = is_array($data) ? $data : [];
 
-        return is_array($data) ? $data : [];
+        return array_merge($data, $this->dynamicGroupKeys($group));
+    }
+
+    /**
+     * Keys discovered from the database (browse categories, key links, site branding).
+     *
+     * @return array<string, string>
+     */
+    public function dynamicGroupKeys(string $group): array
+    {
+        return match ($group) {
+            'frontend_nav' => $this->dynamicFrontendNavKeys(),
+            'ui_body' => $this->dynamicSiteBrandingKeys(),
+            default => [],
+        };
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function dynamicFrontendNavKeys(): array
+    {
+        $out = [];
+
+        try {
+            if (Schema::hasTable('data_categories')) {
+                foreach (DataCategory::query()->orderBy('id')->get(['slug', 'category_name']) as $category) {
+                    $slug = (string) ($category->slug ?? '');
+                    if ($slug === '') {
+                        continue;
+                    }
+                    $out[UiLocaleLabels::navCategoryTranslationKey($slug)] = (string) ($category->category_name ?? '');
+                }
+            }
+
+            if (Schema::hasTable('static_links')) {
+                foreach (StaticLink::query()->orderBy('order')->get(['id', 'title']) as $link) {
+                    $out[UiLocaleLabels::navStaticLinkTranslationKey((int) $link->id)] = (string) ($link->title ?? '');
+                }
+            }
+        } catch (\Throwable $e) {
+            // Database may be unavailable during install or early bootstrap.
+        }
+
+        return $out;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private function dynamicSiteBrandingKeys(): array
+    {
+        try {
+            $settings = settings();
+
+            return array_filter([
+                'site_title' => is_string($settings->site_name ?? null) && $settings->site_name !== ''
+                    ? $settings->site_name
+                    : (is_string($settings->title ?? null) ? $settings->title : null),
+                'site_tagline' => is_string($settings->slogan ?? null) && $settings->slogan !== ''
+                    ? $settings->slogan
+                    : null,
+            ], static fn ($value) => is_string($value) && $value !== '');
+        } catch (\Throwable $e) {
+            return [];
+        }
     }
 
     /**
