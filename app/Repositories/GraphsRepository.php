@@ -675,7 +675,7 @@ class GraphsRepository extends SharedRepo{
             $countryQuery->where('region_id', $regionId);
         }
 
-        $countriesById = $countryQuery->get(['id', 'name', 'iso_code', 'slug', 'region_id'])->keyBy('id');
+        $countriesById = $countryQuery->get(['id', 'name', 'iso_code', 'iso3_code', 'slug', 'region_id'])->keyBy('id');
         $rowsByCountry = collect($rows)->map(fn ($row) => (object) $row)->keyBy('country_id');
 
         $points = [];
@@ -691,8 +691,7 @@ class GraphsRepository extends SharedRepo{
             $numericValues[] = $value;
             $display = kpi_indicator_display($value, $row->unit_label ?? $unitLabel, $row->kpi_name ?? $kpiName);
 
-            $points[] = [
-                'hc-key' => strtolower((string) $country->iso_code),
+            $points[] = map_point_from_country($country, [
                 'country_id' => (int) $countryId,
                 'name' => $country->name,
                 'value' => $value,
@@ -700,7 +699,7 @@ class GraphsRepository extends SharedRepo{
                 'unit_plain' => $display['unit_plain'],
                 'period' => substr((string) ($row->period ?? ''), 0, 4),
                 'detail_url' => country_detail_url($country),
-            ];
+            ], 'frontend_countries');
         }
 
         $aggregation = kpi_aggregate_method($kpiName, $unitLabel);

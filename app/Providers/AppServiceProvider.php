@@ -86,5 +86,10 @@ class AppServiceProvider extends ServiceProvider
         } catch (\Throwable $e) {
             // Ignore during install / missing DB.
         }
+
+        View::composer(
+            ['admin.adminunits.*', 'adminunits.*'],
+            \App\View\Composers\AdminUnitsViewComposer::class
+        );
     }
 }

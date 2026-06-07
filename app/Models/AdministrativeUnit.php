@@ -18,4 +18,9 @@ class AdministrativeUnit extends Model
     {
         return $this->belongsTo(Country::class, 'country_id', 'id');
     }
+
+    public function localities()
+    {
+        return $this->hasMany(Locality::class, 'administrative_unit_id', 'id');
+    }
 }

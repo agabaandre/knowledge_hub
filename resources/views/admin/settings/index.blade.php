@@ -2332,6 +2332,21 @@
                         </div>
                         @endif
 
+                        @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'africa_map_version'))
+                        <div class="col-lg-12">
+                            <div class="settings-group-card">
+                                <div class="settings-group-title">
+                                    <i class="fa fa-map"></i>
+                                    Choropleth maps
+                                </div>
+                                <p class="text-muted small mb-0">
+                                    Map definitions, topology presets, provider settings, and view assignments are managed in
+                                    <a href="{{ route('admin.maps.index') }}">Maps Management</a>.
+                                </p>
+                            </div>
+                        </div>
+                        @endif
+
                         @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'auto_profile_completion_reminder'))
                         <div class="col-lg-6">
                             <div class="settings-group-card">

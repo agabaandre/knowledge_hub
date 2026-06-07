@@ -1,4 +1,6 @@
 {{-- Defines window.renderMetricsCharts(chartData) for dashboard AJAX. Highcharts core is loaded in admin header. --}}
+@include('partials.maps.africa_map_config', ['mapContext' => 'admin_metrics'])
+@include('partials.maps.africa_map_loader')
 <script>
 (function() {
     var auColors = {
@@ -11,9 +13,6 @@
         white: '{{ settings()->au_white ?? "#FFFFFF" }}'
     };
 
-    var HIGHCHARTS_MAP_TOPOLOGY = @json(config('maps.africa_topology_url'));
-    var mapTopologyCache = null;
-    var mapTopologyPromise = null;
     var mapModulePromise = null;
     var visitsTimelineChart = null;
     var signupsTimelineChart = null;
@@ -86,29 +85,6 @@
             console.error('Highcharts map module failed to load', err);
             callback();
         });
-    }
-
-    function loadMapTopology() {
-        if (mapTopologyCache) {
-            return Promise.resolve(mapTopologyCache);
-        }
-        if (mapTopologyPromise) {
-            return mapTopologyPromise;
-        }
-        mapTopologyPromise = fetch(HIGHCHARTS_MAP_TOPOLOGY, { mode: 'cors' })
-            .then(function(r) {
-                if (!r.ok) throw new Error('Map topology unavailable');
-                return r.json();
-            })
-            .then(function(topology) {
-                mapTopologyCache = topology;
-                return topology;
-            })
-            .catch(function(err) {
-                mapTopologyPromise = null;
-                throw err;
-            });
-        return mapTopologyPromise;
     }
 
     function timelineChartOptions(title, color, data) {
@@ -256,30 +232,35 @@
         if (el) el.innerHTML = html || '';
     }
 
-    function africaMapChartOptions(topology, mapData, config) {
+    function africaMapChartOptions(mapAsset, mapData, config) {
         config = config || {};
+        var joinBy = (window.KhAfricaMap && KhAfricaMap.joinKey()) || 'iso-a3';
         return {
-            chart: { map: topology, backgroundColor: 'transparent', height: 480, style: { fontFamily: 'inherit' } },
+            chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 480, style: { fontFamily: 'inherit' } },
             title: { text: null },
-            credits: { enabled: true, text: config.credits || 'Map © Natural Earth (Highcharts {{ config('maps.africa_topology_version') }})', style: { fontSize: '10px', color: '#94a3b8' } },
+            credits: { enabled: true, text: config.credits || KhAfricaMap.creditsPrefix(), style: { fontSize: '10px', color: '#94a3b8' } },
             mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
-            mapView: { projection: { name: 'WebMercator' } },
             colorAxis: { min: config.min, max: config.max, minColor: '#f0f7f4', maxColor: auColors.corporateGreen },
             legend: { enabled: false },
             plotOptions: {
                 map: {
-                    nullColor: '#f1f5f9', borderColor: '#cbd5e1', borderWidth: 0.6,
+                    nullColor: '#f1f5f9', borderColor: '#ffffff', borderWidth: 0.5,
                     states: { hover: { color: auColors.gold, borderColor: auColors.red, borderWidth: 1.1 } }
                 }
             },
             series: [{
-                type: 'map', name: config.seriesName || 'Value', data: mapData, joinBy: 'hc-key', dataLabels: { enabled: false },
+                type: 'map',
+                name: config.seriesName || 'Value',
+                mapData: KhAfricaMap.seriesMapData(mapAsset),
+                data: mapData,
+                joinBy: joinBy,
+                dataLabels: KhAfricaMap.dataLabels(),
                 tooltip: config.tooltip || { pointFormat: '<b>{point.name}</b><br/>{point.value}' }
             }]
         };
     }
 
-    function renderAdminAfricaMap(topology, mapData, config) {
+    function renderAdminAfricaMap(mapAsset, mapData, config) {
         var mapContainer = document.getElementById('admin-africa-map');
         if (!mapContainer || typeof Highcharts === 'undefined') return;
         if (typeof Highcharts.mapChart !== 'function') {
@@ -288,7 +269,7 @@
         }
         mapContainer.innerHTML = '';
         destroyAdminMap();
-        adminMapChart = Highcharts.mapChart('admin-africa-map', africaMapChartOptions(topology, mapData, config));
+        adminMapChart = Highcharts.mapChart('admin-africa-map', africaMapChartOptions(mapAsset, mapData, config));
     }
 
     function updateVisitsMapStats(data) {
@@ -333,16 +314,21 @@
         updateAdminMapLegend('Visits by country', min, max, function (v) { return Number(v).toLocaleString() + ' visits'; });
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
-            loadMapTopology().then(function(topology) {
-                var mapData = data.iso2.map(function(code, i) {
-                    return { 'hc-key': code, value: data.values[i], name: (data.labels && data.labels[i]) ? data.labels[i] : code.toUpperCase() };
+            KhAfricaMap.load().then(function(mapAsset) {
+                var joinBy = KhAfricaMap.joinKey();
+                var iso3Codes = data.iso3 || [];
+                var iso2Codes = data.iso2 || [];
+                var mapData = (joinBy === 'hc-key' ? iso2Codes : iso3Codes).map(function(code, i) {
+                    var point = { value: data.values[i], name: (data.labels && data.labels[i]) ? data.labels[i] : code.toUpperCase() };
+                    point[joinBy] = code;
+                    return point;
                 });
-                renderAdminAfricaMap(topology, mapData, {
+                renderAdminAfricaMap(mapAsset, mapData, {
                     min: 0, max: max, seriesName: 'Visits', credits: 'Map © Natural Earth · Portal access logs',
                     tooltip: { useHTML: true, pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits' }
                 });
             }).catch(function() {
-                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Check network access to Highcharts map data.</div>';
+                mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Please refresh and try again.</div>';
             });
         });
     }
@@ -375,18 +361,18 @@
         });
         mapContainer.innerHTML = '<div class="text-muted text-center p-4"><i class="fa fa-spinner fa-spin"></i> Loading map…</div>';
         ensureHighchartsMapsLoaded(function() {
-            loadMapTopology().then(function(topology) {
+            KhAfricaMap.load().then(function(mapAsset) {
                 var mapData = mapPayload.points.map(function (p) {
-                    return { 'hc-key': p['hc-key'], value: p.value, name: p.name, display_value: p.display_value, period: p.period };
+                    return KhAfricaMap.mapPoint(p);
                 });
-                renderAdminAfricaMap(topology, mapData, {
+                renderAdminAfricaMap(mapAsset, mapData, {
                     min: mapPayload.min, max: mapPayload.max, seriesName: mapPayload.kpi_name,
-                    credits: 'Map © Natural Earth · Data: Our World in Data (CC BY 4.0)',
+                    credits: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
                     tooltip: {
                         useHTML: true,
                         formatter: function () {
                             var p = this.point;
-                            return '<b>' + (p.name || '') + '</b><br/>' + (p.display_value || p.value) + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>';
+                            return '<b>' + (p.country_name || p.name || '') + '</b><br/>' + (p.display_value || p.value) + '<br/><span style="color:#64748b">Period: ' + (p.period || '—') + '</span>';
                         }
                     }
                 });

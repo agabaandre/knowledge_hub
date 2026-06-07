@@ -2,18 +2,17 @@
 namespace App\View\Composers;
 
 use App\Models\AdministrativeUnit;
-use App\Models\Author;
 use App\Models\Country;
 use Illuminate\View\View;
 
-class AdminUnitsViewComposer{
+class AdminUnitsViewComposer
+{
+    public function compose(View $view)
+    {
+        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES', 60 * 24);
 
-    public function compose(View $view){
-
-        $minutes = env('CACHE_EXPIRY_DURATION_MINUTES',60*24);
-
-        $adminunits = cache()->remember('adminunits',$minutes, function () {
-            return  AdministrativeUnit::all();
+        $adminunits = cache()->remember('adminunits', $minutes, function () {
+            return AdministrativeUnit::all();
         });
 
         $countries = cache()->remember('admin_unit_countries', $minutes, function () {
@@ -24,11 +23,8 @@ class AdminUnitsViewComposer{
                 ->orderBy('name')
                 ->get(['id', 'name', 'iso_code', 'iso3_code']);
         });
-    
-        $view->with('adminunits',$adminunits);
+
+        $view->with('adminunits', $adminunits);
         $view->with('hubCountries', $countries);
     }
-
 }
-
-?>

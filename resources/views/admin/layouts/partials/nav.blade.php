@@ -283,6 +283,7 @@
                         class="fe fe-chevron-down horizontal-icon"></i></a>
                 <ul class="sub-menu">
                     <li class=""><a href="{{ route('admin.storage.index') }}" class="">{{ __('admin_nav.storage_management') }}</a></li>
+                    <li class=""><a href="{{ route('admin.maps.index') }}" class="">{{ __('admin_nav.maps_management') }}</a></li>
                     <li class=""><a href="{{ route('admin.federation.index') }}" class="">{{ __('admin_nav.federated_hubs') }}</a></li>
                     <li class=""><a href="{{ url('admin/configure') }}" class="">{{ __('admin_nav.system_configurations') }}</a></li>
                     <li class=""><a href="{{ route('admin.site-languages.index') }}" class="">{{ __('admin_nav.site_languages') }}</a></li>

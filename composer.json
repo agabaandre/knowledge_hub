@@ -62,7 +62,8 @@
             "app/Helpers/UtilsHelper.php",
             "app/Helpers/MenuCacheHelper.php",
             "app/Helpers/SeoUrlHelper.php",
-            "app/Helpers/OwidAttributionHelper.php"
+            "app/Helpers/OwidAttributionHelper.php",
+            "app/Helpers/MapHelper.php"
         ]
     },
     "autoload-dev": {

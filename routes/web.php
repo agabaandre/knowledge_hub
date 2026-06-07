@@ -32,6 +32,7 @@ use App\Http\Controllers\Admin\ForumsAdminController;
 use App\Http\Controllers\Admin\HealthThemesController;
 use App\Http\Controllers\Admin\LogsController;
 use App\Http\Controllers\Admin\SearchLogAdminController;
+use App\Http\Controllers\Admin\MapsController;
 use App\Http\Controllers\Admin\MetricsController;
 use App\Http\Controllers\Admin\PrivacyAdminController;
 use App\Http\Controllers\Admin\QuizController;
@@ -157,6 +158,7 @@ if(states_enabled()):
 else:
     Route::group(["prefix" => "adminunits"], function () {
         Route::get('/', [AdminUnitFrontEndController::class, 'index'])->name('adminunits');
+        Route::get('/map-data', [AdminUnitFrontEndController::class, 'mapData'])->name('adminunits.map-data');
         Route::get('/details', [AdminUnitFrontEndController::class, 'show']);
     });
 
@@ -304,6 +306,14 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::post('/storage-management/purge-legacy', [StorageManagementController::class, 'purgeLegacy'])->name('admin.storage.purge-legacy');
     Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
     Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
+
+    Route::get('/maps', [MapsController::class, 'index'])->name('admin.maps.index');
+    Route::get('/maps/create', [MapsController::class, 'create'])->name('admin.maps.create');
+    Route::get('/maps/preview/{slug?}', [MapsController::class, 'preview'])->name('admin.maps.preview');
+    Route::get('/maps/{id}/edit', [MapsController::class, 'edit'])->name('admin.maps.edit')->where('id', '[0-9]+');
+    Route::post('/maps', [MapsController::class, 'store'])->name('admin.maps.store');
+    Route::post('/maps/assignments', [MapsController::class, 'saveAssignments'])->name('admin.maps.assignments');
+    Route::delete('/maps/{id}', [MapsController::class, 'destroy'])->name('admin.maps.destroy')->where('id', '[0-9]+');
 
     Route::get('/federated-hubs', [FederatedHubsController::class, 'index'])->name('admin.federation.index');
     Route::post('/federated-hubs', [FederatedHubsController::class, 'store'])->name('admin.federation.store');

@@ -290,7 +290,6 @@
 <script>
     window.__rccDataUrl = @json(route('admin.rccdashboards.data'));
     window.__rccMapModuleUrl = @json(asset('assets/plugins/highcharts/modules/map.js'));
-    window.__rccMapTopologyUrl = @json(config('maps.africa_topology_url'));
     window.__rccInitialPayload = @json($initial_payload);
     window.__rccRegions = @json($regions_json);
     window.__rccColors = {

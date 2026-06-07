@@ -91,6 +91,73 @@ class AdminUnitsRepository{
         return AdministrativeUnit::where('parent_id',$id)->get();
     }
 
+    /**
+     * Choropleth points for the hub owner's admin-unit map (joined by ISO alpha-3).
+     */
+    public function get_map_values(): array
+    {
+        $units = AdministrativeUnit::query()
+            ->whereNotNull('iso3_code')
+            ->where('iso3_code', '!=', '')
+            ->orderBy('name')
+            ->get(['id', 'name', 'iso3_code', 'iso_code']);
+
+        if ($units->isEmpty()) {
+            return [
+                'unit_count' => 0,
+                'points' => [],
+                'min' => null,
+                'max' => null,
+            ];
+        }
+
+        $userCounts = \Illuminate\Support\Facades\DB::table('users')
+            ->whereNotNull('administrative_unit_id')
+            ->groupBy('administrative_unit_id')
+            ->selectRaw('administrative_unit_id, count(*) as total')
+            ->pluck('total', 'administrative_unit_id');
+
+        $localityCounts = collect();
+        if (\Illuminate\Support\Facades\Schema::hasTable('localities')) {
+            $localityCounts = \Illuminate\Support\Facades\DB::table('localities')
+                ->groupBy('administrative_unit_id')
+                ->selectRaw('administrative_unit_id, count(*) as total')
+                ->pluck('total', 'administrative_unit_id');
+        }
+
+        $points = [];
+        $numericValues = [];
+
+        foreach ($units as $unit) {
+            $iso3 = strtoupper(trim((string) $unit->iso3_code));
+            if ($iso3 === '') {
+                continue;
+            }
+
+            $members = (int) ($userCounts[$unit->id] ?? 0);
+            $localities = (int) ($localityCounts[$unit->id] ?? 0);
+            $value = $members + $localities;
+            $numericValues[] = $value;
+
+            $points[] = [
+                'iso-a3' => $iso3,
+                'hc-key' => strtolower((string) ($unit->iso_code ?? '')),
+                'unit_id' => (int) $unit->id,
+                'name' => $unit->name,
+                'value' => $value,
+                'display_value' => $value.' members/localities',
+                'detail_url' => url('adminunits/details?id='.$unit->id),
+            ];
+        }
+
+        return [
+            'unit_count' => count($points),
+            'points' => $points,
+            'min' => $numericValues === [] ? null : min($numericValues),
+            'max' => $numericValues === [] ? null : max($numericValues),
+        ];
+    }
+
     public function delete($id){
 
         return AdministrativeUnit::find($id)->delete();

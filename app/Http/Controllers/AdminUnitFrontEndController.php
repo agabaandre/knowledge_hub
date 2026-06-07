@@ -20,7 +20,19 @@ class AdminUnitFrontEndController extends Controller
     public function index(Request $request){
 
         $data['adminunits'] = $this->adminUnitsRepository->get($request);
+        $data['show_admin_units_map'] = admin_units_map_enabled();
+        $data['admin_units_map_settings'] = admin_units_map_settings_for_js();
+
         return view('adminunits.index',$data);
+    }
+
+    public function mapData(Request $request)
+    {
+        if (! admin_units_map_enabled()) {
+            return response()->json(['points' => [], 'unit_count' => 0], 403);
+        }
+
+        return response()->json($this->adminUnitsRepository->get_map_values());
     }
 
 

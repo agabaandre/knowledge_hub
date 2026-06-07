@@ -58,6 +58,7 @@ return [
     'privacy_policy' => 'Privacy Policy',
     'settings' => 'Settings',
     'storage_management' => 'Storage Management',
+    'maps_management' => 'Maps Management',
     'federated_hubs' => 'Federated Knowledge Hubs',
     'federated_content_pending' => 'Federated content (pending)',
     'system_configurations' => 'System Configurations',

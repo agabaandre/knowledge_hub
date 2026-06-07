@@ -1,10 +1,11 @@
+@include('partials.maps.africa_map_config', ['mapContext' => 'admin_rcc'])
+@include('partials.maps.africa_map_loader')
 <script>
 (function () {
     var colors = window.__rccColors || {};
     var mapChart = null;
     var mainChart = null;
     var subjectCharts = [];
-    var topologyCache = null;
     var debounceTimer = null;
     var lastPayload = null;
     var chartsTabRendered = false;
@@ -27,11 +28,52 @@
         });
     }
 
-    function loadTopology() {
-        if (topologyCache) return Promise.resolve(topologyCache);
-        return fetch(window.__rccMapTopologyUrl, { mode: 'cors' })
-            .then(function (r) { return r.json(); })
-            .then(function (t) { topologyCache = t; return t; });
+    function renderMap(mapPayload) {
+        var container = document.getElementById('rccMapChart');
+        if (!container || !mapPayload || !mapPayload.points || !mapPayload.points.length) {
+            if (container) container.innerHTML = '<div class="rcc-empty">No map data for this selection.</div>';
+            return;
+        }
+        if (!window.KhAfricaMap) {
+            container.innerHTML = '<div class="rcc-empty">Map loader unavailable.</div>';
+            return;
+        }
+        container.innerHTML = '';
+        ensureMapModule().then(function () {
+            return KhAfricaMap.load();
+        }).then(function (mapAsset) {
+            if (mapChart) { mapChart.destroy(); mapChart = null; }
+            var joinBy = KhAfricaMap.joinKey();
+            var mapData = mapPayload.points.map(function (p) {
+                return KhAfricaMap.mapPoint(p);
+            });
+            var mapSeriesName = mapPayload.kpi_name || 'Indicator value';
+            mapChart = Highcharts.mapChart('rccMapChart', {
+                chart: { map: KhAfricaMap.chartMapOption(mapAsset), backgroundColor: '#f8f9fa', height: 460 },
+                title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
+                credits: { enabled: true, text: KhAfricaMap.creditsPrefix() + ' · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
+                mapNavigation: { enabled: true },
+                colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
+                legend: { enabled: false },
+                series: [{
+                    name: mapSeriesName,
+                    type: 'map',
+                    mapData: KhAfricaMap.seriesMapData(mapAsset),
+                    data: mapData,
+                    joinBy: joinBy,
+                    dataLabels: KhAfricaMap.dataLabels(),
+                    tooltip: {
+                        useHTML: true,
+                        formatter: function () {
+                            var p = this.point;
+                            return '<b>' + escapeHtml(p.country_name || p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
+                        }
+                    }
+                }]
+            });
+        }).catch(function () {
+            container.innerHTML = '<div class="rcc-empty">Map could not be loaded.</div>';
+        });
     }
 
     function filterParams() {
@@ -210,48 +252,6 @@
             html += '</div>';
         });
         el.innerHTML = html;
-    }
-
-    function renderMap(mapPayload) {
-        var container = document.getElementById('rccMapChart');
-        if (!container || !mapPayload || !mapPayload.points || !mapPayload.points.length) {
-            if (container) container.innerHTML = '<div class="rcc-empty">No map data for this selection.</div>';
-            return;
-        }
-        container.innerHTML = '';
-        ensureMapModule().then(function () {
-            return loadTopology();
-        }).then(function (topology) {
-            if (mapChart) { mapChart.destroy(); mapChart = null; }
-            var mapData = mapPayload.points.map(function (p) {
-                return { 'hc-key': p['hc-key'], value: p.value, name: p.name, display_value: p.display_value, period: p.period };
-            });
-            var mapSeriesName = mapPayload.kpi_name || 'Indicator value';
-            mapChart = Highcharts.mapChart('rccMapChart', {
-                chart: { map: topology, backgroundColor: 'transparent', height: 460 },
-                title: { text: mapSeriesName, style: { fontSize: '14px', color: '#64748b' } },
-                credits: { enabled: true, text: 'Map © Natural Earth · OWID (CC BY 4.0)', style: { fontSize: '10px', color: '#94a3b8' } },
-                mapNavigation: { enabled: true },
-                mapView: { projection: { name: 'WebMercator' } },
-                colorAxis: { min: mapPayload.min, max: mapPayload.max, minColor: '#f0f7f4', maxColor: colors.green },
-                legend: { enabled: false },
-                series: [{
-                    name: mapSeriesName,
-                    type: 'map',
-                    data: mapData,
-                    joinBy: 'hc-key',
-                    tooltip: {
-                        useHTML: true,
-                        formatter: function () {
-                            var p = this.point;
-                            return '<b>' + escapeHtml(p.name) + '</b><br/>' + escapeHtml(p.display_value || p.value);
-                        }
-                    }
-                }]
-            });
-        }).catch(function () {
-            container.innerHTML = '<div class="rcc-empty">Map could not be loaded.</div>';
-        });
     }
 
     function buildChartSeries(chartPayload) {
