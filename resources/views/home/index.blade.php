@@ -152,7 +152,7 @@
             <div class="row justify-content-center">
                 <div class="col-lg-8 col-md-10">
                     <div class="sec_title text-center">
-                        <h2 style="margin-top: 2px;">Events</h2>
+                        <h2 class="notranslate" style="margin-top: 2px;" data-khub-i18n="home_sections.events">{{ __('home_sections.events') }}</h2>
                     </div>
                 </div>
             </div>

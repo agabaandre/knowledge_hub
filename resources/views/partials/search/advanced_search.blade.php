@@ -36,8 +36,8 @@
     <a data-toggle="collapse" data-bs-toggle="collapse" data-bs-target="#collapseExample" href="#collapseExample" role="button" id="advanced_search"
         aria-expanded="false" aria-controls="collapseExample" class="advanced col-12 {{ $useThemeHeaderStyle ? 'advanced-search-theme-header-style' : '' }}"
         style="{{ $inlineStyle }}">
-        <span class="filter text-bold" style="{{ $spanStyle }}"> 
-            <i class="fa fa-sliders-h me-2"></i>Advance your Search With Filters
+        <span class="filter text-bold notranslate" style="{{ $spanStyle }}" data-khub-i18n="home_sections.advance_search_filters">
+            <i class="fa fa-sliders-h me-2"></i><span class="khub-i18n-text">{{ __('home_sections.advance_search_filters') }}</span>
         </span> 
         <i class="fa fa-angle-down ms-2" style="{{ $iconStyle }}"></i>
     </a>

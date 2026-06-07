@@ -65,7 +65,7 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10">
                 <div class="sec_title text-center">
-                    <h2>Explore Key Sections</h2>
+                    <h2 class="notranslate" data-khub-i18n="home_sections.explore_key_sections">{{ __('home_sections.explore_key_sections') }}</h2>
                 </div>
             </div>
         </div>

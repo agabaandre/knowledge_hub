@@ -24,7 +24,7 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="rcc"><small>Region</small></label>
+            <label class="form-label-sm notranslate" for="rcc"><small data-khub-i18n="home_sections.region">{{ __('home_sections.region') }}</small></label>
             @include('partials.regions.dropdown', [
                 'class' => 'rcc select2 form-control',
                 'selected' => @$search->rcc,
@@ -34,7 +34,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="country_id"><small>Member State</small></label>
+            <label class="form-label-sm notranslate" for="country_id"><small data-khub-i18n="home_sections.member_state">{{ __('home_sections.member_state') }}</small></label>
             @include('partials.countries.dropdown', [
                 'class' => 'country select2 form-control',
                 'selected' => @$search->country_id,
@@ -44,7 +44,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="thematic_area_id"><small>Thematic Area</small></label>
+            <label class="form-label-sm notranslate" for="thematic_area_id"><small data-khub-i18n="home_sections.thematic_area">{{ __('home_sections.thematic_area') }}</small></label>
             @include('partials.publications.theme_dropdown', [
                 'class' => 'theme select2 form-control',
                 'selected' => @$search->thematic_area_id,
@@ -54,7 +54,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="sub_thematic_area_id"><small>Sub-Thematic Area</small></label>
+            <label class="form-label-sm notranslate" for="sub_thematic_area_id"><small data-khub-i18n="home_sections.sub_thematic_area">{{ __('home_sections.sub_thematic_area') }}</small></label>
             @include('partials.publications.subtheme_dropdown', [
                 'class' => 'subtheme select2 form-control',
                 'selected' => @$search->sub_thematic_area_id ?? @$search->subtheme,
@@ -66,7 +66,7 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="file_category_id"><small>Sub Category</small></label>
+            <label class="form-label-sm notranslate" for="file_category_id"><small data-khub-i18n="home_sections.sub_category">{{ __('home_sections.sub_category') }}</small></label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
                 'id' => 'file_category_id',
@@ -78,7 +78,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="data_category_id"><small>Category</small></label>
+            <label class="form-label-sm notranslate" for="data_category_id"><small data-khub-i18n="home_sections.category">{{ __('home_sections.category') }}</small></label>
             @include('partials.datarecords.categories_dropdown', [
                 'class' => 'category select2 form-control',
                 'field' => 'data_category_id',
@@ -91,7 +91,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="author_id"><small>Source</small></label>
+            <label class="form-label-sm notranslate" for="author_id"><small data-khub-i18n="home_sections.source">{{ __('home_sections.source') }}</small></label>
             @include('partials.authors.dropdown', [
                 'class' => 'author select2 form-control',
                 'selected' => @$search->author_id ?? @$search->author,
@@ -101,7 +101,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="file_type_id"><small>File type</small></label>
+            <label class="form-label-sm notranslate" for="file_type_id"><small data-khub-i18n="home_sections.file_type">{{ __('home_sections.file_type') }}</small></label>
             @include('partials.publications.filetype_dropdown', [
                 'field' => 'file_type_id',
                 'class' => 'select2 form-control',
@@ -115,7 +115,7 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="thematic_area_id"><small>Thematic Area</small></label>
+            <label class="form-label-sm notranslate" for="thematic_area_id"><small data-khub-i18n="home_sections.thematic_area">{{ __('home_sections.thematic_area') }}</small></label>
             @include('partials.publications.theme_dropdown', [
                 'class' => 'theme select2 form-control',
                 'selected' => @$search->thematic_area_id,
@@ -125,7 +125,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="sub_thematic_area_id"><small>Sub-Thematic Area</small></label>
+            <label class="form-label-sm notranslate" for="sub_thematic_area_id"><small data-khub-i18n="home_sections.sub_thematic_area">{{ __('home_sections.sub_thematic_area') }}</small></label>
             @include('partials.publications.subtheme_dropdown', [
                 'class' => 'subtheme select2 form-control',
                 'selected' => @$search->sub_thematic_area_id ?? @$search->subtheme,
@@ -135,7 +135,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="file_category_id"><small>Sub Category</small></label>
+            <label class="form-label-sm notranslate" for="file_category_id"><small data-khub-i18n="home_sections.sub_category">{{ __('home_sections.sub_category') }}</small></label>
             @include('partials.publications.filecategory_dropdown', [
                 'field' => 'file_category_id',
                 'id' => 'file_category_id',
@@ -147,7 +147,7 @@
     </div>
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="data_category_id"><small>Category</small></label>
+            <label class="form-label-sm notranslate" for="data_category_id"><small data-khub-i18n="home_sections.category">{{ __('home_sections.category') }}</small></label>
             @include('partials.datarecords.categories_dropdown', [
                 'class' => 'category select2 form-control',
                 'field' => 'data_category_id',
@@ -162,7 +162,7 @@
 <div class="row">
     <div class="{{ $advCol }}">
         <div class="form-group">
-            <label class="form-label-sm" for="file_type_id"><small>File type</small></label>
+            <label class="form-label-sm notranslate" for="file_type_id"><small data-khub-i18n="home_sections.file_type">{{ __('home_sections.file_type') }}</small></label>
             @include('partials.publications.filetype_dropdown', [
                 'field' => 'file_type_id',
                 'class' => 'select2 form-control',
@@ -177,7 +177,7 @@
 <div class="row">
     <div class="col-md-6 offset-md-6 d-none">
         <input type="submit" class="btn theme-bg text-white ft-medium apply-btn fs-sm rounded mt-3"
-            value="Apply Filters">
+            value="{{ __('home_sections.apply_filters') }}" data-khub-i18n="home_sections.apply_filters">
     </div>
 </div>
 

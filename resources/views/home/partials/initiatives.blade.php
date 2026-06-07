@@ -41,7 +41,7 @@
     <div class="container">
     <div class="initiatives-strip">
         <div class="sec_title position-relative text-center py-3 mb-0" style="margin-bottom: 0 !important;">
-            <h2 class="ft-bold mb-0" style="color: #1e293b;">{{ settings()->section_title_flagship_initiatives ?? 'Flagship Initiatives' }}</h2>
+            <h2 class="ft-bold mb-0 notranslate" style="color: #1e293b;" data-khub-i18n="home_sections.flagship_initiatives">{{ \App\Support\UiLocaleLabels::homeSection('flagship_initiatives') }}</h2>
         </div>
         <button class="initiatives-nav prev" onclick="initSlide(-1)" aria-label="Previous initiatives">
             <i class="fa fa-chevron-left"></i>
@@ -70,9 +70,9 @@
                         <a href="{{ $detailsUrl }}" class="text-decoration-none text-reset">{{ Str::limit(strip_tags(clean_unicode($row->title)),70) }}</a>
                     </h3>
                     <div class="initiative-meta">
-                        <span><i class="fa fa-user"></i> {{ clean_unicode($authorName) }}</span>
+                        <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ clean_unicode($authorName) }}</span>
                         @if($publicationUrl)
-                        <span><i class="fa fa-link"></i> <a href="{{ $publicationUrl }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color: inherit; text-decoration: underline;">Source</a></span>
+                        <span><i class="fa fa-link"></i> <a href="{{ $publicationUrl }}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation();" style="color: inherit; text-decoration: underline;" class="notranslate" data-khub-i18n="home_sections.source">{{ __('home_sections.source') }}</a></span>
                         @endif
                         @if($theme)
                         <span><i class="fa fa-briefcase"></i> {{ Str::limit($theme, 20) }}</span>

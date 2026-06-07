@@ -65,7 +65,7 @@
            <div class="row justify-content-center" data-aos="fade-in">
               <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                   <div class="sec_title position-relative text-center mb-3" style="margin-bottom: 1rem !important;">
-                       <h2 class="ft-bold">{{ settings()->section_title_top_searches ?? 'Top Searches' }}</h2>
+                       <h2 class="ft-bold notranslate" data-khub-i18n="home_sections.top_searches">{{ \App\Support\UiLocaleLabels::homeSection('top_searches') }}</h2>
                    </div>
                </div>
            </div>
@@ -112,7 +112,7 @@
                                            <!-- <p class="text-nothern p-0"><a href="{{ publication_url($row)}}">{!! htmlspecialchars_decode(stripslashes(truncate($row->description, 60))) !!}</a></p> -->
                                            <span class="text-muted medium" style="display: block;">
                                                Source: <i
-                                                   class="fa fa-bank mr-1"></i>{{ truncate($row->author->name ?? '', 40) }}</span>
+                                                   class="fa fa-bank mr-1"></i><span class="notranslate" translate="no">{{ truncate($row->author->name ?? '', 40) }}</span></span>
 
                                            <span class="muted medium ml-2 theme-cl"><br>
                                                <i class="lni lni-briefcase mr-1"></i>Theme:
@@ -126,7 +126,7 @@
                                                {{ @$row->data_category->category_name }}</span>
                                            @if(!empty($row->associated_authors))
                                            <span class="muted medium ml-2 theme-cl"><br>
-                                               <i class="fa fa-users mr-1"></i>Associated Authors: {{ truncate($row->associated_authors, 30) }}</span>
+                                               <i class="fa fa-users mr-1"></i>Associated Authors: <span class="notranslate" translate="no">{{ truncate($row->associated_authors, 30) }}</span></span>
                                            @endif
                                            @if ($likes > 0)
                                                <br><span><i class="lni lni-heart theme-text mr-1"></i>
@@ -198,7 +198,7 @@
                <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12">
                    <div class="position-relative text-center">
                        <a id="explore" href="{{ url('records') }}"
-                           class="btn btn-md theme-bg rounded text-light hover-theme">Explore More Resources<i
+                           class="btn btn-md theme-bg rounded text-light hover-theme notranslate" data-khub-i18n="home_sections.explore_more_resources">{{ __('home_sections.explore_more_resources') }}<i
                                class="lni lni-arrow-right-circle ml-2"></i></a>
                    </div>
                </div>

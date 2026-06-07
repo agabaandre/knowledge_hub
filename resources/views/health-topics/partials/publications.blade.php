@@ -82,7 +82,7 @@
             @if($row->author && $row->author->name)
             <p class="mb-1" style="font-size: 0.875rem; color: #64748b; text-align: justify; clear: left; overflow-wrap: break-word;">
                 <i class="fa fa-user me-1" style="color: var(--theme-color-primary, #119A48);"></i>
-                <strong>Author:</strong> {{ clean_unicode($row->author->name) }}
+                <strong>Author:</strong> <span class="notranslate" translate="no">{{ clean_unicode($row->author->name) }}</span>
             </p>
             @endif
             

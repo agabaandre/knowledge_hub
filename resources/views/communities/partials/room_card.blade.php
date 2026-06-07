@@ -34,7 +34,7 @@
                 <span class="community-room-card__pin" title="Recommended for you"><i class="fa fa-thumb-tack" aria-hidden="true"></i></span>
             @endif
             <h2 class="community-room-card__title">
-                <a href="{{ $detailUrl }}" class="community-room-card__title-link" onclick="event.stopPropagation();">{{ $community->community_name }}</a>
+                <a href="{{ $detailUrl }}" class="community-room-card__title-link notranslate" translate="no" onclick="event.stopPropagation();">{{ $community->community_name }}</a>
             </h2>
             <span class="community-room-card__star" title="Community"><i class="fa fa-star-o" aria-hidden="true"></i></span>
         </div>
@@ -67,7 +67,7 @@
         }
     @endphp
     @if(count($coverageBits))
-        <p class="community-room-card__coverage"><i class="fa fa-globe"></i> {{ $coverageBits[0] }}</p>
+        <p class="community-room-card__coverage notranslate" translate="no"><i class="fa fa-globe"></i> {{ $coverageBits[0] }}</p>
     @endif
 
     @if($faces->isNotEmpty() || $moreMembers > 0)
@@ -96,13 +96,13 @@
                             ? 'href="' . e($profileUrl) . '" title="' . e($hoverTip) . '" aria-label="' . e('View profile: ' . $u->name) . '"'
                             : 'title="' . e($hoverTip) . '"';
                     @endphp
-                    <{{ $avatarTag }} {!! $avatarAttrs !!} class="community-room-card__avatar-wrap {{ $profileUrl ? 'community-room-card__avatar-wrap--linked' : '' }} {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}">
+                    <{{ $avatarTag }} {!! $avatarAttrs !!} class="community-room-card__avatar-wrap notranslate {{ $profileUrl ? 'community-room-card__avatar-wrap--linked' : '' }} {{ !empty($face['online']) ? 'community-room-card__avatar-wrap--online' : '' }}" translate="no">
                         @if($showImg)
                             <img src="{{ $u->photo }}" alt="" class="community-room-card__avatar" loading="lazy" width="32" height="32" decoding="async"
                                 onerror="this.style.display='none';var el=this.nextElementSibling;if(el){el.style.display='flex';}">
-                            <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback" style="display:none" aria-hidden="true">{{ community_user_initials($u->name) }}</span>
+                            <span class="community-room-card__avatar-initials community-room-card__avatar-initials--fallback notranslate" style="display:none" aria-hidden="true" translate="no">{{ community_user_initials($u->name) }}</span>
                         @else
-                            <span class="community-room-card__avatar-initials">{{ community_user_initials($u->name) }}</span>
+                            <span class="community-room-card__avatar-initials notranslate" translate="no">{{ community_user_initials($u->name) }}</span>
                         @endif
                     </{{ $avatarTag }}>
                 @endforeach

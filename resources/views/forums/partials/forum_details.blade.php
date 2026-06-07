@@ -81,7 +81,7 @@
                         <i class="fa fa-user" aria-hidden="true"></i>
         </div>
                 @endif
-                <span class="forum-author-name">{{ $forum->user->name ?? 'Unknown' }}</span>
+                <span class="forum-author-name notranslate" translate="no">{{ $forum->user->name ?? 'Unknown' }}</span>
                 <span class="forum-post-time" style="margin-left: 4px; color: #64748b; font-size: 0.875rem;">
                     <i class="fa fa-clock me-1"></i>{{ time_ago($forum->created_at) }}
                 </span>
@@ -287,7 +287,7 @@
                 </div>
                 <div class="comment-content">
                     <div class="comment-header">
-                        <span class="comment-author">
+                        <span class="comment-author notranslate" translate="no">
                             {{ @current_user() && @current_user()->id == $comment->created_by ? 'You' : ($comment->user->name ?? 'Unknown') }}
                         </span>
                         <span class="comment-time">· {{ time_ago($comment->created_at) }}</span>
@@ -478,7 +478,7 @@
                         </div>
                         <div class="comment-content">
                             <div class="comment-header">
-                                <span class="comment-author">
+                                <span class="comment-author notranslate" translate="no">
                                     {{ @current_user() && @current_user()->id == $reply->created_by ? 'You' : ($reply->user->name ?? 'Unknown') }}
                                 </span>
                                 <span class="comment-time">· {{ time_ago($reply->created_at) }}</span>

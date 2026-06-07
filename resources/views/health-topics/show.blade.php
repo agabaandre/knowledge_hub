@@ -241,7 +241,7 @@
                         </div>
                         <div class="forum-item-meta">
                             @if($forum->user)
-                            <span><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
+                            <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
                             @endif
                             <span><i class="fa fa-comments"></i> {{ $forum->total_comments ?? 0 }} {{ ($forum->total_comments ?? 0) == 1 ? 'comment' : 'comments' }}</span>
                             @if($forum->created_at)

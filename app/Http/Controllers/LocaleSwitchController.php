@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SiteLanguage;
 use App\Models\StaticLink;
+use App\Support\UiLocaleLabels;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -49,6 +50,7 @@ class LocaleSwitchController extends Controller
             'locale' => $locale,
             'google_code' => $googleCode,
             'fragments' => $fragments,
+            'labels' => UiLocaleLabels::exportForCurrentLocale(),
         ]);
 
         $response->cookie($cookieName, $locale, $cookieMinutes, $cookiePath, null, false, false);

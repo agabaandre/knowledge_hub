@@ -324,9 +324,9 @@
             </div>
             <div class="contributor-hero-body">
                 <div class="contributor-kicker">{{ $profileKicker }}</div>
-                <h1 class="contributor-name">
+                <h1 class="contributor-name notranslate" translate="no">
                     @if(!empty($author->orcid))
-                        <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile">
+                        <a href="https://orcid.org/{{ $author->orcid }}" target="_blank" rel="noopener noreferrer" title="View ORCID profile" class="notranslate" translate="no">
                             {{ $author->name }}
                             <i class="fa fa-external-link-alt" style="font-size: 0.55em; margin-left: 0.35rem;"></i>
                         </a>
@@ -335,17 +335,17 @@
                     @endif
                 </h1>
                 @if($jobTitle)
-                    <div class="contributor-title">{{ $jobTitle }}</div>
+                    <div class="contributor-title notranslate" translate="no">{{ $jobTitle }}</div>
                 @endif
                 @if($organization)
                     <div class="contributor-org-block">
                         <span class="contributor-org-label">Organization / Institution</span>
-                        <div class="contributor-org-value"><i class="fa fa-building mr-1" style="color: {{ $primary }};"></i>{{ $organization }}</div>
+                        <div class="contributor-org-value notranslate" translate="no"><i class="fa fa-building mr-1" style="color: {{ $primary }};"></i>{{ $organization }}</div>
                     </div>
                 @endif
                 <div class="contributor-meta-line">
                     @if($countryName)
-                        <span><i class="fa fa-map-marker-alt"></i>{{ $countryName }}</span>
+                        <span class="notranslate" translate="no"><i class="fa fa-map-marker-alt"></i>{{ $countryName }}</span>
                     @endif
                     @if(!empty($author->email))
                         <span><i class="fa fa-envelope"></i>{{ $author->email }}</span>

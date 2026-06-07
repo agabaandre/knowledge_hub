@@ -36,7 +36,7 @@
     </div>
     <div class="comment-content">
         <div class="comment-header">
-            <span class="comment-author">
+            <span class="comment-author notranslate" translate="no">
                 {{ @current_user() && @current_user()->id == $comment->created_by ? 'You' : ($comment->user->name ?? 'Unknown') }}
             </span>
             <span class="comment-time">· {{ time_ago($comment->created_at) }}</span>

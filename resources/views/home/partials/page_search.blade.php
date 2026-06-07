@@ -61,8 +61,8 @@
                          action="{{ $searchAction }}"
                          class="sidebar-search-form px-0 py-0 filter">
                          <div class="search-buttons-container" style="display: flex; align-items: stretch; width: 100%;">
-                             <input class="px-3 py-0 main_search" style="font-size: 12pt; flex: {{ $aiSearchEnabled ? '1' : '2' }}; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
-                                 type="search" name="term" placeholder="What are you looking for?">
+                             <input class="px-3 py-0 main_search notranslate" style="font-size: 12pt; flex: {{ $aiSearchEnabled ? '1' : '2' }}; border-radius: 0; min-height: 60px; border: none; outline: none; margin: 0;" value="{{ @$search->term }}"
+                                 type="search" name="term" placeholder="{{ __('home_sections.search_placeholder') }}" data-khub-i18n="home_sections.search_placeholder">
 
                              <button type="submit" class="search-btn-primary bg-show" style="
                                  background: {{ $primaryColor }};
@@ -78,7 +78,7 @@
                                  justify-content: center;
                                  gap: 0.5rem;
                                  color: white;
-                             "><i class="ti-search"></i> Search</button>
+                             "><i class="ti-search"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span></button>
                              
                              @if($aiSearchEnabled)
                                  <button type="button" class="ai-search-btn bg-show" style="
@@ -94,7 +94,7 @@
                                      justify-content: center;
                                      gap: 0.5rem;
                                      color: white;
-                                 "><i class="fa fa-robot"></i> AI Search</button>
+                                 "><i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span></button>
                              @endif
                          </div>
 
@@ -104,7 +104,7 @@
 
                          <div class="row sm-show ">
                              <div class="col-lg-12 col-md-12 mt-1">
-                                 <input class="btn btn-warning text-white full-width" type="submit" value="Explore" />
+                                 <input class="btn btn-warning text-white full-width notranslate" type="submit" value="{{ __('home_sections.explore') }}" data-khub-i18n="home_sections.explore" />
                              </div>
                          </div>
 

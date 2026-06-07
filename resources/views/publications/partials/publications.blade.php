@@ -265,7 +265,7 @@
                          <i class="lni lni-archive mr-1"></i>Sub Theme: {!! clean_unicode($row->sub_theme->description ?? '') !!}</span>
                      @if(!empty($row->associated_authors))
                      <span class="muted medium ml-1 theme-cl"><br>
-                         <i class="fa fa-users mr-1"></i>Associated Authors: {{ clean_unicode($row->associated_authors) }}</span>
+                         <i class="fa fa-users mr-1"></i>Associated Authors: <span class="notranslate" translate="no">{{ clean_unicode($row->associated_authors) }}</span></span>
                      @endif
                      @if ($likes > 0)
                          <span><i class="lni lni-heart mr-1"></i> {{ $likes }} Like{{ $likes > 1 ? 's' : '' }}

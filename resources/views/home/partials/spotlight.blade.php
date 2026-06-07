@@ -74,9 +74,9 @@
         <div class="row no-gutters bg-white rounded search-form" id="simple_search" style="border-radius: 0.375rem !important;">
             <div class="col-xl-8 col-lg-8 col-md-8 col-sm-12 col-12">
                 <div class="form-group mb-0 position-relative main_search">
-                    <label for="main-search" class="sr-only">Search Keywords</label>
-                    <input type="text" id="main-search" class="form-control left-ico autocomplete term main-search"
-                           name="term" value="{{ old('term') }}" placeholder="Type Keywords" />
+                    <label for="main-search" class="sr-only notranslate" data-khub-i18n="home_sections.search_keywords_label">{{ __('home_sections.search_keywords_label') }}</label>
+                    <input type="text" id="main-search" class="form-control left-ico autocomplete term main-search notranslate"
+                           name="term" value="{{ old('term') }}" placeholder="{{ __('home_sections.search_placeholder_keywords') }}" data-khub-i18n="home_sections.search_placeholder_keywords" />
                 </div>
             </div>
             <div class="{{ $aiSearchEnabled ? 'col-xl-2' : 'col-xl-4' }} col-lg-{{ $aiSearchEnabled ? '2' : '4' }} col-md-{{ $aiSearchEnabled ? '2' : '4' }} col-sm-12 col-12 bg-show">
@@ -93,7 +93,7 @@
                         justify-content: center;
                         gap: 0.5rem;
                     ">
-                        <i class="fa fa-magnifying-glass"></i> Search
+                        <i class="fa fa-magnifying-glass"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
                     </button>
                 </div>
             </div>
@@ -112,7 +112,7 @@
                         justify-content: center;
                         gap: 0.5rem;
                     ">
-                        <i class="fa fa-robot"></i> AI Search
+                        <i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span>
                     </button>
                 </div>
             </div>
@@ -121,13 +121,13 @@
         @include('partials.search.advanced_search')
         <div class="{{ $aiSearchEnabled ? 'col-md-6' : 'col-md-12' }} sm-show mt-1 d-md-none">
             <button class="btn full-width text-white fs-md py-3 ai-search-btn-primary" type="submit" style="background: {{ $primaryColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <i class="fa fa-magnifying-glass"></i> Search
+                <i class="fa fa-magnifying-glass"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</span>
             </button>
         </div>
         @if($aiSearchEnabled)
         <div class="col-md-6 sm-show mt-1 d-md-none">
             <button type="button" class="btn full-width text-white fs-md py-3 ai-search-btn-home" style="background: {{ $aiSearchColor }}; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
-                <i class="fa fa-robot"></i> AI Search
+                <i class="fa fa-robot"></i> <span class="khub-i18n-text notranslate" data-khub-i18n="home_sections.ai_search">{{ __('home_sections.ai_search') }}</span>
             </button>
         </div>
         @endif

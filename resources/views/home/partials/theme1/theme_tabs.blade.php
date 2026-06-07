@@ -1,6 +1,6 @@
 @php
     $primary = settings()->primary_color ?? '#119A48';
-    $healthThemesTitle = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
+    $healthThemesTitle = \App\Support\UiLocaleLabels::homeSection('health_themes');
     $themeCardOpacity = settings()->theme_card_opacity ?? '1';
     $themeCardOpacity = is_numeric($themeCardOpacity) ? max(0.5, min(1, (float)$themeCardOpacity)) : 1;
     $themeCardsPerRow = (int) (settings()->theme_cards_per_row ?? 4);
@@ -85,7 +85,7 @@
 </style>
 <section class="theme1-themes-section" id="themes">
     <div class="container">
-        <h3 class="theme1-themes-title">{{ $healthThemesTitle }}</h3>
+        <h3 class="theme1-themes-title notranslate" data-khub-i18n="home_sections.health_themes">{{ $healthThemesTitle }}</h3>
         <div class="theme1-themes-grid">
             @foreach ($themes as $theme)
                 <a href="{{ url('records/subtheme') }}?subtheme={{ $theme->id }}" class="theme1-theme-card" title="{{ $theme->description }}">

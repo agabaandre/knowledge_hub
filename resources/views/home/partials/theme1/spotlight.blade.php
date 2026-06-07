@@ -223,11 +223,12 @@
                                 <input type="search"
                                        name="term"
                                        id="autocomplete-input"
-                                       class="form-control"
-                                       placeholder="Type keyword to search resources..."
+                                       class="form-control notranslate"
+                                       placeholder="{{ __('home_sections.search_placeholder_resources') }}"
                                        value="{{ request('term') }}"
-                                       aria-label="Search resources">
-                                <button class="btn btn-search" type="submit">Search</button>
+                                       aria-label="{{ __('home_sections.search_resources_label') }}"
+                                       data-khub-i18n="home_sections.search_placeholder_resources">
+                                <button class="btn btn-search notranslate" type="submit" data-khub-i18n="home_sections.search">{{ __('home_sections.search') }}</button>
                             </div>
                         </div>
                         @include('partials.search.advanced_search', ['text_color' => null, 'use_theme_header_style' => true])

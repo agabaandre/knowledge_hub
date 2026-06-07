@@ -672,20 +672,20 @@
                                 @if(!empty($publication->associated_authors))
                                 <div class="mb-2">
                                     <strong style="color: #5F5F5F;">Associated Authors:</strong>
-                                    <span style="color: #0f172a;">{{ clean_unicode($publication->associated_authors) }}</span>
+                                    <span class="notranslate" translate="no" style="color: #0f172a;">{{ clean_unicode($publication->associated_authors) }}</span>
                                 </div>
                                 @endif
                                 @if($authorAffiliation !== '')
                                 <div class="mb-2">
                                     <strong style="color: #5F5F5F;">Author Affiliation/Institution:</strong>
-                                    <span style="color: #0f172a;">{{ $authorAffiliation }}</span>
+                                    <span class="notranslate" translate="no" style="color: #0f172a;">{{ $authorAffiliation }}</span>
                                 </div>
                                 @endif
                                 @if($publication->author)
                                 <div class="mb-2">
                                     <strong style="color: #5F5F5F;">Affiliation/Source:</strong>
                                     <span style="color: #0f172a;">
-                                        <a href="{{ author_publications_url($publication->author) }}" title="View contributor profile for {{ clean_unicode($publication->author->name) }}" style="color: #0f172a; text-decoration: none;">
+                                        <a href="{{ author_publications_url($publication->author) }}" title="View contributor profile for {{ clean_unicode($publication->author->name) }}" class="notranslate" translate="no" style="color: #0f172a; text-decoration: none;">
                                             {{ clean_unicode($publication->author->name) }}
                                         </a>
                                         @if(!empty($publication->author->orcid))
@@ -947,12 +947,12 @@
                                 <div class="related-resource-meta">
                                     <i class="fa fa-user mr-1"></i>
                                     @if(!empty($relatedPub->author->orcid))
-                                        <a href="https://orcid.org/{{ $relatedPub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $relatedPub->author->name }}'s ORCID profile" style="color: inherit; text-decoration: none;" onclick="event.stopPropagation();">
+                                        <a href="https://orcid.org/{{ $relatedPub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $relatedPub->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;" onclick="event.stopPropagation();">
                                             {{ Str::limit($relatedPub->author->name, 40) }}
                                             <i class="fa fa-external-link-alt" style="font-size: 0.65rem; margin-left: 2px;"></i>
                                         </a>
                                     @else
-                                        {{ Str::limit($relatedPub->author->name, 40) }}
+                                        <span class="notranslate" translate="no">{{ Str::limit($relatedPub->author->name, 40) }}</span>
                         @endif
                                 </div>
                                 @endif
@@ -1143,7 +1143,7 @@
                     <div>
                         <label class="meta-label">Theme</label><span class="meta-value">{!! $publication->theme->description ?? '' !!}</span>
                         <label class="meta-label">Sub-Theme</label><span class="meta-value">{!! nl2br($publication->sub_theme->description ?? '') !!}</span>
-                        <label class="meta-label">Associated Authors</label><span class="meta-value">{{ $publication->associated_authors ?? 'N/A' }}</span>
+                        <label class="meta-label">Associated Authors</label><span class="meta-value notranslate" translate="no">{{ $publication->associated_authors ?? 'N/A' }}</span>
                         
                         {{-- Tags --}}
                         @if($publication->tags && $publication->tags->count() > 0)
@@ -1273,7 +1273,7 @@
                     <div id="commentsList">
                         @foreach ($publication->comments as $comment)
                             <div class="comment-box">
-                                <strong>{{ $comment->user->name ?? 'Anonymous' }}</strong>
+                                <strong class="notranslate" translate="no">{{ $comment->user->name ?? 'Anonymous' }}</strong>
                                 <small class="text-muted d-block">{{ time_ago($comment->created_at) }}</small>
                                 @php
                                     $rawComment = (string) ($comment->comment ?? '');
@@ -1294,7 +1294,7 @@
                                 @if ($comment->is_approved == 1)
                                     <li class="list-group-item">
                                         <a href="{{ url('records/shortened') }}?id={{ $summary->id }}">
-                                            {{ truncate($summary->title, 100) }} by {{ $summary->author->name ?? '' }}
+                                            {{ truncate($summary->title, 100) }} by <span class="notranslate" translate="no">{{ $summary->author->name ?? '' }}</span>
                                         </a>
                                     </li>
                                 @endif

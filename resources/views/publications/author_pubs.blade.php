@@ -44,7 +44,7 @@
             <ol class="breadcrumb mb-0" style="background: transparent; padding: 0; font-size: 0.875rem;">
                 <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                 <li class="breadcrumb-item"><a href="{{ route('browse.authors') }}">Contributors</a></li>
-                <li class="breadcrumb-item active" aria-current="page">{{ $author->name }}</li>
+                <li class="breadcrumb-item active notranslate" aria-current="page" translate="no">{{ $author->name }}</li>
             </ol>
         </nav>
 

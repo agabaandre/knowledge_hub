@@ -30,6 +30,26 @@ return [
         'frontend_nav' => 'Frontend navigation (main menu)',
         'admin_nav' => 'Admin sidebar menu',
         'ui_body' => 'Account menu, footer & static body chrome',
+        'home_sections' => 'Homepage sections, search & filters',
+    ],
+
+    /*
+    | Groups refreshed via AJAX when the user changes language (not Google Translate).
+    */
+    'ui_native_groups' => [
+        'frontend_nav',
+        'ui_body',
+        'home_sections',
+    ],
+
+    /*
+    | Optional admin setting fields used as fallback when a home_sections key has no translation.
+    */
+    'home_section_settings' => [
+        'recommended' => 'section_title_recommended',
+        'top_searches' => 'section_title_top_searches',
+        'flagship_initiatives' => 'section_title_flagship_initiatives',
+        'health_themes' => 'section_title_health_themes',
     ],
 
     /*

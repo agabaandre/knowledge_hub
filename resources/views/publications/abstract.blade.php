@@ -83,12 +83,12 @@
                                         <label class="text-muted">Source</label>
                                         <span class="text-dark">
                                             @if(!empty($publication->author->orcid))
-                                                <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $publication->author->name }}'s ORCID profile" style="color: inherit; text-decoration: none;">
+                                                <a href="https://orcid.org/{{ $publication->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $publication->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;">
                                                     {{ $publication->author->name }}
                                                     <i class="fa fa-external-link-alt" style="font-size: 0.75rem; margin-left: 3px;"></i>
                                                 </a>
                                             @else
-                                                {{ $publication->author->name }}
+                                                <span class="notranslate" translate="no">{{ $publication->author->name }}</span>
                                             @endif
                                         </span>
                                     </div>
@@ -140,7 +140,7 @@
                                                 {{ truncate($summary->title, 100) }} <b>by You</b>
                                             @else
                                                 <a href="{{ url('records/summaries') }}?id={{ $summary->id }}">
-                                                    {{ truncate($summary->title, 100) }} by {{ $summary->author->name }}
+                                                    {{ truncate($summary->title, 100) }} by <span class="notranslate" translate="no">{{ $summary->author->name }}</span>
                                                 </a>
                                             @endif
                                         </h6>

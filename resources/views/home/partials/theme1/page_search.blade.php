@@ -43,8 +43,8 @@
                      <form
                          action="{{ $searchAction }}"
                          class="sidebar-search-form px-0 py-0 filter">
-                         <input class="px-3 py-0 main_search" style="font-size: 12pt;" value="{{ @$search->term }}"
-                             type="search" name="term" placeholder="What are you looking for?">
+                         <input class="px-3 py-0 main_search notranslate" style="font-size: 12pt;" value="{{ @$search->term }}"
+                             type="search" name="term" placeholder="{{ __('home_sections.search_placeholder') }}" data-khub-i18n="home_sections.search_placeholder">
 
                          <button type="submit" class="bg-show"><i class="ti-search"></i></button>
 
@@ -54,7 +54,7 @@
 
                          <div class="row sm-show d-lg-none">
                              <div class="col-lg-12 col-md-12 mt-1">
-                                 <input class="btn btn-warning text-white full-width" type="submit" value="Explore" />
+                                 <input class="btn btn-warning text-white full-width notranslate" type="submit" value="{{ __('home_sections.explore') }}" data-khub-i18n="home_sections.explore" />
                              </div>
                          </div>
 

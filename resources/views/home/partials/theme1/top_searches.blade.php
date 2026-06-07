@@ -106,7 +106,7 @@
         <div class="row justify-content-center mb-4">
             <div class="col-12">
                 <div class="sec_title position-relative text-center">
-                    <h2 class="ft-bold mb-0" style="color: #1e293b;">{{ settings()->section_title_top_searches ?? 'Top Searches' }}</h2>
+                    <h2 class="ft-bold mb-0 notranslate" style="color: #1e293b;" data-khub-i18n="home_sections.top_searches">{{ \App\Support\UiLocaleLabels::homeSection('top_searches') }}</h2>
                 </div>
             </div>
         </div>
@@ -121,7 +121,7 @@
                         @include('partials.publications.file_type_corner_badge', ['row' => $row])
                         <div class="forum-header">
                             <div class="forum-author-name-container">
-                                <span class="forum-author-name">{{ $row->author->name ?? '—' }}</span>
+                                <span class="forum-author-name notranslate" translate="no">{{ $row->author->name ?? '—' }}</span>
                                 <span class="forum-post-time">
                                     <i class="fa fa-clock me-1"></i>Updated {{ publication_content_updated_ago($row) }}
                                     @if(publication_last_visited_at($row))

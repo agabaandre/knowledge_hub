@@ -606,6 +606,39 @@
         });
     }
 
+    function khubApplyNativeLabels(labels) {
+        if (!labels || typeof labels !== 'object') return;
+
+        Object.keys(labels).forEach(function(fullKey) {
+            var value = labels[fullKey];
+            if (value == null || value === '') return;
+
+            document.querySelectorAll('[data-khub-i18n="' + fullKey + '"]').forEach(function(el) {
+                if (el.tagName === 'INPUT') {
+                    if (el.type === 'submit' || el.type === 'button') {
+                        el.value = value;
+                    } else {
+                        el.placeholder = value;
+                    }
+                    return;
+                }
+
+                var textTarget = el.querySelector('.khub-i18n-text');
+                if (textTarget) {
+                    textTarget.textContent = value;
+                    return;
+                }
+
+                if (el.tagName === 'OPTION') {
+                    el.textContent = value;
+                    return;
+                }
+
+                el.textContent = value;
+            });
+        });
+    }
+
     function khubReinitNavigation() {
         if (typeof window.jQuery === 'undefined' || !window.jQuery) return;
         var $nav = window.jQuery('#navigation');
@@ -643,12 +676,13 @@
         }
     }
 
-    function khubAfterLocaleSwap(googleCode) {
+    function khubAfterLocaleSwap(googleCode, labels) {
         if (typeof window.khubInitMegaMenus === 'function') {
             window.khubInitMegaMenus();
         }
         khubReinitNavigation();
         khubRebindCookieButtons();
+        khubApplyNativeLabels(labels);
         if (typeof window.jQuery !== 'undefined' && window.jQuery) {
             window.jQuery('[data-toggle="tooltip"]').tooltip();
         }
@@ -701,7 +735,7 @@
         })
         .then(function(data) {
             swapLocaleFragments(data.fragments);
-            khubAfterLocaleSwap(data.google_code || googleCode);
+            khubAfterLocaleSwap(data.google_code || googleCode, data.labels);
         })
         .catch(function() {
             khubFallbackLocaleRedirect(localeCode);

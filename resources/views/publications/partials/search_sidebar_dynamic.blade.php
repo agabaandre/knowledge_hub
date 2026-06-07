@@ -12,12 +12,12 @@
       @if($pub->author)
       <span class="mr-2"><i class="fa fa-user mr-1"></i>
         @if(!empty($pub->author->orcid))
-            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" style="color: inherit; text-decoration: none;">
+            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;">
                 {{ $pub->author->name }}
                 <i class="fa fa-external-link-alt" style="font-size: 0.65rem; margin-left: 2px;"></i>
             </a>
         @else
-            {{ $pub->author->name }}
+            <span class="notranslate" translate="no">{{ $pub->author->name }}</span>
         @endif
       </span>
       @endif
@@ -42,12 +42,12 @@
       @if($pub->author)
       <span class="mr-2"><i class="fa fa-user mr-1"></i>
         @if(!empty($pub->author->orcid))
-            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" style="color: inherit; text-decoration: none;">
+            <a href="https://orcid.org/{{ $pub->author->orcid }}" target="_blank" rel="noopener noreferrer" title="View {{ $pub->author->name }}'s ORCID profile" class="notranslate" translate="no" style="color: inherit; text-decoration: none;">
                 {{ $pub->author->name }}
                 <i class="fa fa-external-link-alt" style="font-size: 0.65rem; margin-left: 2px;"></i>
             </a>
         @else
-            {{ $pub->author->name }}
+            <span class="notranslate" translate="no">{{ $pub->author->name }}</span>
         @endif
       </span>
       @endif

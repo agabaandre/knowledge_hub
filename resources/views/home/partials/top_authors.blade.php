@@ -25,7 +25,7 @@
 										<!-- <img src="{{ asset('assets/img/categories/author.png')}}" style="max-width:25px;"/> -->
 									</div>
 									<div class="cats-box-caption">
-										<h4 class="fs-md mb-0 ft-medium m-catrio">{{truncate($author->name,30)}}</h4>
+										<h4 class="fs-md mb-0 ft-medium m-catrio notranslate" translate="no">{{truncate($author->name,30)}}</h4>
 										<span class="text-muted">{{count($author->publications)}} Resources</span>
 									</div>
 								</a>

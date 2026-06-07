@@ -232,7 +232,7 @@
             <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags($pub->description ?? ''), 100) }}</p>
             <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
               @if($pub->author)
-              <span class="mr-2"><i class="fa fa-user mr-1"></i>{{ $pub->author->name }}</span>
+              <span class="mr-2 notranslate" translate="no"><i class="fa fa-user mr-1"></i>{{ $pub->author->name }}</span>
               @endif
               <span><i class="fa fa-calendar mr-1"></i>{{ $pub->created_at->format('M Y') }}</span>
             </div>
@@ -254,7 +254,7 @@
             <p class="mb-1" style="font-size:0.8rem;color:#64748b;">{{ Str::limit(strip_tags($pub->description ?? ''), 100) }}</p>
             <div class="d-flex align-items-center" style="font-size:0.75rem;color:#94a3b8;">
               @if($pub->author)
-              <span class="mr-2"><i class="fa fa-user mr-1"></i>{{ $pub->author->name }}</span>
+              <span class="mr-2 notranslate" translate="no"><i class="fa fa-user mr-1"></i>{{ $pub->author->name }}</span>
               @endif
               <span><i class="fa fa-calendar mr-1"></i>{{ $pub->created_at->format('M Y') }}</span>
             </div>

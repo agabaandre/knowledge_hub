@@ -216,7 +216,7 @@
             </h1>
             <p class="authors-lead">
                 @if(!empty($authorsSearchTerm))
-                    Showing contributors matching <strong>{{ $authorsSearchTerm }}</strong>.
+                    Showing contributors matching <strong class="notranslate">{{ $authorsSearchTerm }}</strong>.
                 @else
                     Discover researchers, clinicians, ministries, and institutions sharing verified public health publications, resources, and forum expertise across Africa.
                 @endif
@@ -247,10 +247,10 @@
                             @endif
                         </div>
                         <div class="author-info">
-                            <h2 class="author-name" id="{{ $cardId }}">
-                                <a href="{{ author_publications_url($author) }}" title="View profile and publications for {{ $author->name }}">
+                            <h2 class="author-name notranslate" id="{{ $cardId }}" translate="no">
+                                <a href="{{ author_publications_url($author) }}" title="View profile and publications for {{ $author->name }}" class="notranslate" translate="no">
                                     @if(!empty($author->orcid))
-                                        <span title="View {{ $author->name }}'s ORCID profile">
+                                        <span title="View {{ $author->name }}'s ORCID profile" class="notranslate" translate="no">
                                             {{ truncate($author->name, 25) }}
                                             <i class="fa fa-external-link-alt" style="font-size: 0.7em; margin-left: 3px;"></i>
                                         </span>
@@ -260,19 +260,19 @@
                                 </a>
                             </h2>
                             @if($author->user && $author->user->job_title)
-                            <div class="author-title">
+                            <div class="author-title notranslate" translate="no">
                                 <i class="fa fa-briefcase me-1" style="font-size: 0.8em;"></i>
                                 {{ truncate($author->user->job_title, 30) }}
                             </div>
                             @endif
                             @if($author->user && $author->user->organization_name)
-                            <div class="author-organization">
+                            <div class="author-organization notranslate" translate="no">
                                 <i class="fa fa-building me-1" style="font-size: 0.8em;"></i>
                                 {{ truncate($author->user->organization_name, 30) }}
                             </div>
                             @endif
                             @if($author->user && $author->user->country && $author->user->country->name)
-                            <div class="author-organization">
+                            <div class="author-organization notranslate" translate="no">
                                 <i class="fa fa-map-marker-alt me-1" style="font-size: 0.8em;"></i>
                                 {{ $author->user->country->name }}
                             </div>

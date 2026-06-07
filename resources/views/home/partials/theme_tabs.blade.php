@@ -1,5 +1,5 @@
 @php
-    $healthThemesTitleDefault = settings()->section_title_health_themes ?? 'Choose a Health Theme to Explore';
+    $healthThemesTitleDefault = \App\Support\UiLocaleLabels::homeSection('health_themes');
     $themeCardOpacityDefault = settings()->theme_card_opacity ?? '1';
     $themeCardOpacityDefault = is_numeric($themeCardOpacityDefault) ? max(0.5, min(1, (float)$themeCardOpacityDefault)) : 1;
     $themeCardsPerRow = (int) (settings()->theme_cards_per_row ?? 4);
@@ -205,7 +205,7 @@
 
 <section class="theme-grid">
     <div class="themes-container">
-        <h3 class="themes-section-title">
+        <h3 class="themes-section-title notranslate" data-khub-i18n="home_sections.health_themes">
             {{ $healthThemesTitleDefault }}
         </h3>
         

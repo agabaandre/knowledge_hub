@@ -363,7 +363,7 @@
         <div class="row justify-content-center">
             <div class="col-xl-12 col-lg-12 col-md-12 col-sm-12 col-12">
                 <div style="text-align: center; padding: 2rem 0;">
-                    <h1 style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;" itemprop="name">
+                    <h1 class="notranslate" translate="no" style="font-size: 2rem; font-weight: 700; margin: 0 0 0.5rem 0; color: white;" itemprop="name">
                         {{ $community->community_name }}
                     </h1>
                     <p style="margin: 0 0 1rem 0; color: rgba(255, 255, 255, 0.95); font-size: 1rem;">
@@ -431,8 +431,8 @@
                 </div>
                 @if($community->organisation || $community->department)
                     <p class="text-muted small mt-3 mb-0">
-                        @if($community->organisation)<span class="mr-3"><i class="fa fa-building mr-1"></i>{{ $community->organisation }}</span>@endif
-                        @if($community->department)<span><i class="fa fa-sitemap mr-1"></i>{{ $community->department }}</span>@endif
+                        @if($community->organisation)<span class="mr-3 notranslate" translate="no"><i class="fa fa-building mr-1"></i>{{ $community->organisation }}</span>@endif
+                        @if($community->department)<span class="notranslate" translate="no"><i class="fa fa-sitemap mr-1"></i>{{ $community->department }}</span>@endif
                     </p>
                 @endif
                 @if(communities_listing_show_participants() && collect($community->listing_contributor_faces ?? [])->isNotEmpty())
@@ -460,9 +460,9 @@
                                 <div>
                                     <h6 class="mb-1 font-weight-bold">{{ $cr->subject }}</h6>
                                     <div class="small text-muted">
-                                        @if($cr->country)<span class="mr-2"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
+                                        @if($cr->country)<span class="mr-2 notranslate" translate="no"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
                                         @if($cr->referred_at)<span><i class="fa fa-share mr-1"></i>Referred {{ $cr->referred_at->format('M j, Y') }}</span>@endif
-                                        @if($cr->referredByUser)<span class="ml-2">by {{ $cr->referredByUser->name }}</span>@endif
+                                        @if($cr->referredByUser)<span class="ml-2 notranslate" translate="no">by {{ $cr->referredByUser->name }}</span>@endif
                                     </div>
                                 </div>
                                 <div class="d-flex flex-wrap shrink-0" style="gap: 6px;">
@@ -523,7 +523,7 @@
                                     </h5>
                                 <div class="community-featured-meta">
                                     @if($publication->author)
-                                        <span><i class="fa fa-user mr-1"></i>{{ $publication->author->name ?? 'Unknown' }}</span>
+                                        <span class="notranslate" translate="no"><i class="fa fa-user mr-1"></i>{{ $publication->author->name ?? 'Unknown' }}</span>
                                     @endif
                                     <span class="ml-2"><i class="fa fa-clock-o mr-1"></i>Updated {{ publication_content_updated_ago($publication) }}</span>
                                     @if(publication_last_visited_at($publication))
@@ -562,9 +562,9 @@
                                     <div>
                                         <h5 class="community-featured-title mb-1">{{ $cr->subject }}</h5>
                                         <div class="community-featured-meta">
-                                            @if($cr->country)<span class="mr-2"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
+                                            @if($cr->country)<span class="mr-2 notranslate" translate="no"><i class="fa fa-globe mr-1"></i>{{ $cr->country->name }}</span>@endif
                                             <span><i class="fa fa-check mr-1"></i>Processed {{ $cr->processed_at ? $cr->processed_at->format('M j, Y') : '—' }}</span>
-                                            @if($cr->processedBy)<span class="ml-2"><i class="fa fa-user mr-1"></i>{{ $cr->processedBy->name }}</span>@endif
+                                            @if($cr->processedBy)<span class="ml-2 notranslate" translate="no"><i class="fa fa-user mr-1"></i>{{ $cr->processedBy->name }}</span>@endif
                                         </div>
                                     </div>
                                     <a href="{{ $cr->discussionUrlForCommunity($community->id) }}" class="btn btn-sm btn-outline-primary shrink-0">
@@ -605,7 +605,7 @@
                                     - {{ \Carbon\Carbon::parse($event->enddate)->format('M d, Y H:i') }}
                                 @endif
                             </div>
-                            @if($event->venue)<div class="small"><i class="fa fa-map-marker mr-1"></i>{{ $event->venue }}</div>@endif
+                            @if($event->venue)<div class="small notranslate" translate="no"><i class="fa fa-map-marker mr-1"></i>{{ $event->venue }}</div>@endif
                             @if($event->event_link)<div class="small"><a href="{{ $event->event_link }}" target="_blank" rel="noopener">Open event link</a></div>@endif
                         </div>
                     @endforeach
@@ -628,7 +628,7 @@
                                 </a>
                             </h6>
                             <p class="text-muted small mb-0">
-                                <i class="fa fa-user mr-1"></i>{{ $forum->user->name ?? 'Unknown' }}
+                                <i class="fa fa-user mr-1"></i><span class="notranslate" translate="no">{{ $forum->user->name ?? 'Unknown' }}</span>
                             </p>
                         </div>
                     @endforeach
@@ -649,7 +649,7 @@
                     @foreach($otherCommunities as $otherCommunity)
                         <div class="community-summary">
                             <h6>
-                                <a href="{{ community_detail_url($otherCommunity) }}">
+                                <a href="{{ community_detail_url($otherCommunity) }}" class="notranslate" translate="no">
                                     {{ $otherCommunity->community_name }}
                                 </a>
                             </h6>
@@ -784,7 +784,7 @@
                 <h5 class="modal-title">Join community</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
             </div>
-            <div class="modal-body">Request to join <strong>{{ $community->community_name }}</strong>? An administrator may need to approve your membership.</div>
+            <div class="modal-body">Request to join <strong class="notranslate" translate="no">{{ $community->community_name }}</strong>? An administrator may need to approve your membership.</div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="confirmJoinCommunityDetail">Join</button>
@@ -837,15 +837,15 @@
                 ? '<a href="' + escapeHtml(item.profile_url) + '" class="member-item-avatar mr-3" title="View profile: ' + escapeHtml(item.name) + '" aria-label="View profile: ' + escapeHtml(item.name) + '">' + avatarInner + '</a>'
                 : '<span class="member-item-avatar mr-3" aria-hidden="true">' + avatarInner + '</span>';
             var nameHtml = item.profile_url
-                ? '<a href="' + escapeHtml(item.profile_url) + '" class="member-name-link">' + escapeHtml(item.name) + '</a>'
-                : escapeHtml(item.name);
+                ? '<a href="' + escapeHtml(item.profile_url) + '" class="member-name-link notranslate" translate="no">' + escapeHtml(item.name) + '</a>'
+                : '<span class="notranslate" translate="no">' + escapeHtml(item.name) + '</span>';
             return '' +
                 '<li class="member-item">' +
                 '  <div class="d-flex align-items-start">' +
                 avatarHtml +
                 '    <div class="flex-grow-1 min-width-0">' +
-                '      <div class="member-name"><span class="badge badge-secondary mr-1">' + item.rank + '</span>' + nameHtml + '</div>' +
-                '      <div class="member-title"><i class="fa fa-briefcase mr-1"></i>' + escapeHtml(item.job_title || 'Not specified') + '</div>' +
+                '      <div class="member-name notranslate" translate="no"><span class="badge badge-secondary mr-1">' + item.rank + '</span>' + nameHtml + '</div>' +
+                '      <div class="member-title notranslate" translate="no"><i class="fa fa-briefcase mr-1"></i>' + escapeHtml(item.job_title || 'Not specified') + '</div>' +
                 '      <div class="small text-muted mt-1"><i class="fa fa-envelope mr-1"></i>' + escapeHtml(item.email) + '</div>' +
                 '      <div class="mt-1">' + adminBadge + ' ' + activeBadge + ' <span class="badge badge-info">' + parseInt(item.publication_count, 10) + ' Publications</span></div>' +
                 actionHtml +

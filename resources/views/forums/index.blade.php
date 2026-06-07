@@ -738,9 +738,9 @@
                             <div class="forum-meta">
                                 <div class="meta-item forum-meta-author-text">
                                     <div>
-                                        <span class="forum-meta-author-name">{{ $forum->user->name ?? 'Unknown' }}</span>
+                                        <span class="forum-meta-author-name notranslate" translate="no">{{ $forum->user->name ?? 'Unknown' }}</span>
                                         @if($forum->user && trim((string) ($forum->user->job_title ?? '')) !== '')
-                                            <span class="forum-meta-author-title">{{ $forum->user->job_title }}</span>
+                                            <span class="forum-meta-author-title notranslate" translate="no">{{ $forum->user->job_title }}</span>
                                         @endif
                                     </div>
                                 </div>
@@ -844,7 +844,7 @@
                                                     @endif
                                                 </div>
                                                 <div class="comment-content-mini">
-                                                    <div class="comment-author-mini">{{ $comment->user->name ?? 'Unknown' }}</div>
+                                                    <div class="comment-author-mini notranslate" translate="no">{{ $comment->user->name ?? 'Unknown' }}</div>
                                                     <div class="comment-text-mini">{!! Str::limit(strip_tags($comment->comment ?? ''), 150) !!}</div>
                                                     <div class="comment-time-mini">
                                                         <i class="fa fa-clock me-1"></i>{{ time_ago($comment->created_at ?? now()) }}
@@ -971,7 +971,7 @@
                         </div>
                         <div class="sidebar-item-meta">
                             @if($forum->user)
-                            <span><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
+                            <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $forum->user->name ?? 'Anonymous' }}</span>
                             @endif
                             <span><i class="fa fa-comments"></i> {{ $forum->total_comments ?? 0 }} {{ ($forum->total_comments ?? 0) == 1 ? 'comment' : 'comments' }}</span>
                             @if($forum->created_at)
@@ -999,7 +999,7 @@
                         </div>
                         <div class="sidebar-item-meta">
                             @if($publication->author)
-                            <span><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
+                            <span class="notranslate" translate="no"><i class="fa fa-user"></i> {{ $publication->author->name ?? 'Unknown' }}</span>
                             @endif
                             <span><i class="fa fa-eye"></i> {{ $publication->visits ?? 0 }} {{ ($publication->visits ?? 0) == 1 ? 'view' : 'views' }}</span>
                             @if(publication_content_updated_at($publication))
