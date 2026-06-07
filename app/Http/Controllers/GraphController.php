@@ -127,7 +127,7 @@ class GraphController extends Controller
 	{
 		$normalized = [];
 		foreach (['region_id', 'country_id', 'subject_area', 'kpi_id', 'period_year'] as $key) {
-			if (! empty($filter[$key])) {
+			if (array_key_exists($key, $filter) && $filter[$key] !== '' && $filter[$key] !== null) {
 				$normalized[$key] = (int) $filter[$key];
 			}
 		}
@@ -148,7 +148,7 @@ class GraphController extends Controller
 	private function rccDashboardPayload(array $filter): array
 	{
 		$normalized = $this->normalizedRccFilter($filter);
-		$cacheKey = 'rcc_dashboard_v2_'.md5(json_encode($normalized));
+		$cacheKey = 'rcc_dashboard_v3_'.md5(json_encode($normalized));
 
 		return MetricsCache::store()->remember(
 			$cacheKey,

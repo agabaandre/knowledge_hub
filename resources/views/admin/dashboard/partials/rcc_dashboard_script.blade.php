@@ -17,8 +17,18 @@
         return KhAfricaMap.ensureMapModule(window.__rccMapModuleUrl);
     }
 
+    function isPublicationsMode(payload) {
+        if (!payload) return false;
+        var meta = payload.meta || {};
+        var map = payload.map || {};
+        return meta.is_publications === true
+            || parseInt(meta.kpi_id, 10) === 0
+            || parseInt(meta.map_kpi_id, 10) === 0
+            || parseInt(map.kpi_id, 10) === 0;
+    }
+
     function isPublicationsMap(payload) {
-        return !payload || parseInt(payload.kpi_id, 10) === 0;
+        return isPublicationsMode({ map: payload });
     }
 
     function renderMap(mapPayload) {
@@ -219,10 +229,15 @@
         });
     }
 
-    function renderKpiCards(groups, year) {
+    function renderKpiCards(groups, year, payload) {
         var el = document.getElementById('rccKpiCards');
         if (!el) return;
+        var publicationsMode = isPublicationsMode(payload);
         if (!groups || !groups.length) {
+            if (publicationsMode) {
+                el.innerHTML = '';
+                return;
+            }
             el.innerHTML = '<div class="rcc-empty"><i class="fa fa-info-circle me-1"></i> No published indicator data for the current filters.</div>';
             return;
         }
@@ -232,11 +247,12 @@
             (group.items || []).slice(0, 12).forEach(function (item) {
                 var d = item.display || {};
                 var prev = item.prev_display || {};
+                var showYoY = !publicationsMode && parseInt(item.kpi_id, 10) !== 0;
                 html += '<div class="rcc-kpi-card">'
                     + '<div class="rcc-kpi-card__name">' + escapeHtml(item.kpi_name) + '</div>'
                     + '<div class="rcc-kpi-card__value">' + escapeHtml(d.value_with_unit || d.value || '—') + '</div>'
-                    + (d.unit_plain ? '<div class="rcc-kpi-card__unit">' + escapeHtml(d.unit_plain) + '</div>' : '')
-                    + '<div class="rcc-kpi-card__yoy">vs ' + (year - 1) + ': ' + escapeHtml(prev.value_with_unit || prev.value || '—') + '</div>'
+                    + (d.unit_plain && !publicationsMode ? '<div class="rcc-kpi-card__unit">' + escapeHtml(d.unit_plain) + '</div>' : '')
+                    + (showYoY ? '<div class="rcc-kpi-card__yoy">vs ' + (year - 1) + ': ' + escapeHtml(prev.value_with_unit || prev.value || '—') + '</div>' : '')
                     + '</div>';
             });
             html += '</div>';
@@ -389,7 +405,7 @@
         syncFilterUrl();
         renderScopeBanner(payload);
         renderSummaryChips(payload.indicator_summaries);
-        renderKpiCards(payload.subject_groups, payload.meta?.period_year || new Date().getFullYear());
+        renderKpiCards(payload.subject_groups, payload.meta?.period_year || new Date().getFullYear(), payload);
         renderMap(payload.map);
         renderChartsTab(payload, isChartsTabActive() || chartsTabRendered);
         renderTable(payload.table);

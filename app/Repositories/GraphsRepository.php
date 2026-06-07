@@ -828,10 +828,16 @@ class GraphsRepository extends SharedRepo{
         $regionId = ! empty($filter['region_id']) ? (int) $filter['region_id'] : null;
         $countryId = ! empty($filter['country_id']) ? (int) $filter['country_id'] : null;
         $subjectAreaId = ! empty($filter['subject_area']) ? (int) $filter['subject_area'] : null;
-        $kpiId = ! empty($filter['kpi_id']) ? (int) $filter['kpi_id'] : null;
+        $kpiId = array_key_exists('kpi_id', $filter) && $filter['kpi_id'] !== '' && $filter['kpi_id'] !== null
+            ? (int) $filter['kpi_id']
+            : null;
         $periodYear = ! empty($filter['period_year'])
             ? (int) $filter['period_year']
             : $this->get_latest_period_year(true);
+
+        if ($kpiId === 0) {
+            return $this->build_rcc_publications_payload($regionId, $countryId, $periodYear);
+        }
 
         $kpiFilter = array_filter([
             'region_id' => $regionId,
@@ -933,6 +939,143 @@ class GraphsRepository extends SharedRepo{
                 'row_count' => count($tableRows),
             ],
         ];
+    }
+
+    private function build_rcc_publications_payload(?int $regionId, ?int $countryId, int $periodYear): array
+    {
+        $map = $this->get_member_state_map_values(0, $regionId, 'admin_rcc');
+        if ($countryId) {
+            $map = $this->filter_rcc_map_by_country($map, $countryId);
+        }
+
+        $points = collect($map['points'] ?? [])
+            ->sortByDesc(fn ($point) => (int) ($point['value'] ?? 0))
+            ->values();
+
+        $chartLabels = [];
+        $chartValues = [];
+        foreach ($points as $point) {
+            $value = (int) ($point['value'] ?? 0);
+            if ($value <= 0) {
+                continue;
+            }
+            $chartLabels[] = (string) ($point['country_name'] ?? $point['name'] ?? '');
+            $chartValues[] = $value;
+        }
+
+        $chart = [
+            'labels' => $chartLabels,
+            'data' => [[
+                'name' => 'Publications by country',
+                'kpi_id' => 0,
+                'data' => $chartValues,
+            ]],
+            'mode' => 'countries',
+            'title' => $countryId
+                ? 'Publications for selected member state'
+                : 'Publications by country',
+            'y_axis_title' => 'Publications',
+        ];
+
+        $tableRows = $points
+            ->filter(fn ($point) => (int) ($point['value'] ?? 0) > 0)
+            ->map(function ($point) use ($periodYear) {
+                $value = (int) ($point['value'] ?? 0);
+
+                return [
+                    'country_id' => (int) ($point['country_id'] ?? 0),
+                    'country_name' => (string) ($point['country_name'] ?? $point['name'] ?? '—'),
+                    'kpi_id' => 0,
+                    'kpi_name' => 'Publications',
+                    'period' => (string) $periodYear,
+                    'value' => (float) $value,
+                    'display_value' => number_format($value).' publication'.($value === 1 ? '' : 's'),
+                    'unit_plain' => 'publications',
+                ];
+            })
+            ->sortBy('country_name')
+            ->values()
+            ->all();
+
+        $subjectGroups = [[
+            'subject_area_id' => 0,
+            'subject_area_name' => 'Knowledge Hub publications',
+            'items' => $points
+                ->take(12)
+                ->map(function ($point) {
+                    $value = (int) ($point['value'] ?? 0);
+                    $name = (string) ($point['country_name'] ?? $point['name'] ?? 'Member state');
+
+                    return [
+                        'kpi_id' => 0,
+                        'kpi_name' => $name,
+                        'kpi_value' => (float) $value,
+                        'previous_year' => 0.0,
+                        'period' => '',
+                        'display' => [
+                            'value' => number_format($value),
+                            'value_with_unit' => number_format($value).' publication'.($value === 1 ? '' : 's'),
+                            'unit_plain' => 'publications',
+                            'type' => 'count',
+                        ],
+                        'prev_display' => [
+                            'value' => '—',
+                            'value_with_unit' => '—',
+                            'unit_plain' => '',
+                            'type' => 'count',
+                        ],
+                    ];
+                })
+                ->values()
+                ->all(),
+        ]];
+
+        $regionName = $regionId ? Region::query()->whereKey($regionId)->value('region_name') : null;
+        $countryName = $countryId ? Country::query()->whereKey($countryId)->value('name') : null;
+
+        return [
+            'map' => $map,
+            'indicator_summaries' => [],
+            'chart' => $chart,
+            'subject_charts' => $this->build_rcc_subject_charts($subjectGroups, $periodYear),
+            'table' => $tableRows,
+            'subject_groups' => $subjectGroups,
+            'meta' => [
+                'period_year' => $periodYear,
+                'region_id' => $regionId,
+                'region_name' => $regionName,
+                'country_id' => $countryId,
+                'country_name' => $countryName,
+                'subject_area_id' => null,
+                'kpi_id' => 0,
+                'map_kpi_id' => 0,
+                'row_count' => count($tableRows),
+                'is_publications' => true,
+            ],
+        ];
+    }
+
+    private function filter_rcc_map_by_country(array $map, int $countryId): array
+    {
+        $points = array_values(array_filter(
+            $map['points'] ?? [],
+            fn ($point) => (int) ($point['country_id'] ?? 0) === $countryId
+        ));
+        $numericValues = array_map(fn ($point) => (int) ($point['value'] ?? 0), $points);
+        $aggregateValue = array_sum($numericValues);
+
+        $map['points'] = map_expand_choropleth_points($points);
+        $map['country_count'] = count(array_filter($numericValues, fn ($value) => $value > 0));
+        $map['min'] = $numericValues === [] ? null : min($numericValues);
+        $map['max'] = $numericValues === [] ? null : max($numericValues);
+        $map['aggregate'] = [
+            'value' => number_format($aggregateValue),
+            'unit_plain' => 'publications',
+            'type' => 'count',
+            'value_with_unit' => number_format($aggregateValue).' publications',
+        ];
+
+        return $map;
     }
 
     private function serialize_rcc_subject_groups(array $groups, int $periodYear): array
