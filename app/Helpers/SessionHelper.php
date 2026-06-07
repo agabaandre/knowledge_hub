@@ -90,10 +90,28 @@ if (! function_exists('site_favicon_mime')) {
 	}
 }
 
+if(!function_exists('clear_settings_cache')){
+    function clear_settings_cache(): void
+    {
+        cache()->forget('settings');
+        if (\Illuminate\Support\Facades\Schema::hasTable('theme_settings')) {
+            $themes = \Illuminate\Support\Facades\DB::table('theme_settings')
+                ->distinct()
+                ->pluck('theme');
+            foreach ($themes as $themeKey) {
+                cache()->forget('theme_settings_'.$themeKey);
+            }
+        }
+    }
+}
+
 if(!function_exists('settings')){
-	 function settings()
+	 function settings($refresh = false)
 	 {
         static $resolved = null;
+        if ($refresh) {
+            $resolved = null;
+        }
         if ($resolved !== null) {
             return $resolved;
         }
