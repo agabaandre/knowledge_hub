@@ -1,4 +1,4 @@
-<ul class="nav nav-tabs mb-3">
+<ul class="nav nav-tabs learning-subnav mb-4">
     <li class="nav-item">
         <a class="nav-link {{ ($learningNav ?? 'courses') === 'courses' ? 'active' : '' }}" href="{{ route('admin.courses.index') }}">
             <i class="fa fa-list me-1"></i>{{ __('admin_nav.courses') }}

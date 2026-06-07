@@ -1,4 +1,4 @@
-<div class="ai-integration-row">
+<div class="integration-row">
     <button type="button" class="btn btn-sm btn-outline-danger btn-remove-integration btn-remove" title="Remove">
         <i class="fa fa-times"></i>
     </button>

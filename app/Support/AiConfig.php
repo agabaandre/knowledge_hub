@@ -190,13 +190,98 @@ class AiConfig
             return false;
         }
 
+        $defaultEnabled = (bool) config('ai.providers.'.$provider.'.default_enabled', false);
         $db = self::dbSettings();
         $column = 'ai_'.$provider.'_enabled';
-        if ($db && Schema::hasColumn('setting', $column) && $db->{$column} !== null) {
-            return (bool) $db->{$column};
+        if (! $db || ! Schema::hasColumn('setting', $column)) {
+            return $defaultEnabled;
         }
 
-        return (bool) config('ai.providers.'.$provider.'.default_enabled', false);
+        if ($db->{$column} === null) {
+            return $defaultEnabled;
+        }
+
+        if ((bool) $db->{$column}) {
+            return true;
+        }
+
+        // Migration seeded enabled=0; until admin saves AI config, honor defaults when only .env has credentials.
+        if ($defaultEnabled && self::providerHasEnvCredentialsOnly($provider) && ! self::adminAiConfigSaved()) {
+            return true;
+        }
+
+        return false;
+    }
+
+    public static function adminAiConfigSaved(): bool
+    {
+        $db = self::dbSettings();
+        if (! $db) {
+            return false;
+        }
+
+        if (Schema::hasColumn('setting', 'ai_feature_routing') && ! empty($db->ai_feature_routing)) {
+            return true;
+        }
+
+        if (Schema::hasColumn('setting', 'ai_custom_integrations') && ! empty($db->ai_custom_integrations)) {
+            return true;
+        }
+
+        return self::hasDbStoredAiSecrets();
+    }
+
+    public static function hasDbStoredAiSecrets(): bool
+    {
+        $db = self::dbSettings();
+        if (! $db) {
+            return false;
+        }
+
+        foreach ([
+            'ai_openai_api_key',
+            'ai_chatpdf_api_key',
+            'ai_gemini_api_key',
+            'ai_deepseek_api_key',
+            'ai_custom_api_key',
+        ] as $column) {
+            if (Schema::hasColumn('setting', $column) && ! empty($db->{$column})) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function providerHasEnvCredentialsOnly(string $provider): bool
+    {
+        $db = self::dbSettings();
+        $map = [
+            'openai' => ['env' => 'OPEN_API_KEY', 'db' => 'ai_openai_api_key'],
+            'chatpdf' => ['env' => 'CHAT_PDF_API_KEY', 'db' => 'ai_chatpdf_api_key'],
+            'gemini' => ['env' => 'GEMINI_API_KEY', 'db' => 'ai_gemini_api_key'],
+            'deepseek' => ['env' => 'DEEPSEEK_API_KEY', 'db' => 'ai_deepseek_api_key'],
+            'custom' => ['env' => 'AI_CUSTOM_API_KEY', 'db' => 'ai_custom_api_key'],
+        ];
+
+        if (! isset($map[$provider])) {
+            return false;
+        }
+
+        $meta = $map[$provider];
+        $envValue = env($meta['env']);
+        $hasEnv = $envValue !== null && $envValue !== '';
+        if (! $hasEnv) {
+            return false;
+        }
+
+        if (! $db || ! Schema::hasColumn('setting', $meta['db'])) {
+            return true;
+        }
+
+        $dbValue = $db->{$meta['db']} ?? null;
+
+        return $dbValue === null || $dbValue === '';
     }
 
     public static function providerConfigured(string $provider): bool
@@ -427,11 +512,24 @@ class AiConfig
 
     public static function providerStatus(string $providerId): string
     {
-        if (! self::providerEnabled($providerId)) {
+        return self::featureStatus($providerId);
+    }
+
+    public static function featureStatus(string $providerId): string
+    {
+        if (self::providerAvailable($providerId)) {
+            return 'ready';
+        }
+
+        if (self::providerEnabled($providerId) && ! self::providerConfigured($providerId)) {
+            return 'incomplete';
+        }
+
+        if (! self::providerEnabled($providerId) && self::providerConfigured($providerId)) {
             return 'disabled';
         }
 
-        return self::providerConfigured($providerId) ? 'ready' : 'incomplete';
+        return 'unavailable';
     }
 
     public static function applyRuntimeConfig(): void
@@ -552,7 +650,7 @@ class AiConfig
                 'assigned_provider' => $assigned,
                 'assigned_label' => $providerLabels[$assigned] ?? $assigned,
                 'provider_options' => self::providerOptionsForFeature($key),
-                'status' => self::providerAvailable($assigned) ? 'ready' : 'unavailable',
+                'status' => self::featureStatus($assigned),
             ];
         }
 
@@ -579,7 +677,7 @@ class AiConfig
             'stats' => [
                 'ready_providers' => $readyCount,
                 'total_features' => count($features),
-                'features_ready' => count(array_filter($features, fn ($f) => $f['status'] === 'ready')),
+                'features_ready' => count(array_filter($features, fn ($f) => ($f['status'] ?? '') === 'ready')),
                 'primary_chat' => self::primaryChatProvider(),
                 'primary_chat_label' => $providerLabels[self::primaryChatProvider() ?? ''] ?? 'Not configured',
             ],

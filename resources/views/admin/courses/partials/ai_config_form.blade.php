@@ -1,27 +1,32 @@
 @php
     $fields = $aiPage['fields'] ?? [];
+    $statusLabels = [
+        'ready' => __('admin_nav.ai_status_ready'),
+        'incomplete' => __('admin_nav.ai_status_incomplete'),
+        'disabled' => __('admin_nav.ai_status_disabled'),
+        'unavailable' => __('admin_nav.ai_status_unavailable'),
+    ];
 @endphp
 <input type="hidden" name="custom_integrations_submitted" value="1">
 
 <div class="alert alert-light border mb-4">
-    <i class="fa fa-info-circle text-primary me-2"></i>
+    <i class="fa fa-info-circle me-2" style="color: var(--la-primary);"></i>
     <strong>{{ __('admin_nav.ai_defaults_title') }}</strong>
     {{ __('admin_nav.ai_defaults_body') }}
     {{ __('admin_nav.ai_env_override_note') }}
 </div>
 
-{{-- Feature routing --}}
-<div class="ai-section">
-    <div class="ai-section-header">
-        <h2><i class="fa fa-route me-2 text-primary"></i>{{ __('admin_nav.ai_feature_routing') }}</h2>
+<div class="learning-section-card">
+    <div class="section-head">
+        <h4><i class="fa fa-route me-2" style="color: var(--la-primary);"></i>{{ __('admin_nav.ai_feature_routing') }}</h4>
         <p>{{ __('admin_nav.ai_feature_routing_intro') }}</p>
     </div>
-    <div class="ai-section-body">
+    <div class="section-body">
         @foreach($aiPage['features'] as $feature)
-            <div class="ai-feature-row">
+            <div class="feature-row">
                 <div>
-                    <div class="ai-feature-title">{{ $feature['label'] }}</div>
-                    <p class="ai-feature-desc">{{ $feature['description'] }}</p>
+                    <div class="feature-title">{{ $feature['label'] }}</div>
+                    <p class="feature-desc">{{ $feature['description'] }}</p>
                 </div>
                 <div>
                     <select name="ai_feature_routing[{{ $feature['key'] }}]" class="form-select form-select-sm">
@@ -33,8 +38,8 @@
                     </select>
                 </div>
                 <div>
-                    <span class="ai-status-pill {{ $feature['status'] === 'ready' ? 'ready' : 'unavailable' }}">
-                        {{ $feature['status'] === 'ready' ? __('admin_nav.ai_status_ready') : __('admin_nav.ai_status_unavailable') }}
+                    <span class="status-pill {{ $feature['status'] }}">
+                        {{ $statusLabels[$feature['status']] ?? $feature['status'] }}
                     </span>
                 </div>
             </div>
@@ -42,52 +47,45 @@
     </div>
 </div>
 
-{{-- Built-in providers --}}
-<div class="ai-section">
-    <div class="ai-section-header">
-        <h2><i class="fa fa-plug me-2 text-primary"></i>{{ __('admin_nav.ai_builtin_providers') }}</h2>
+<div class="learning-section-card">
+    <div class="section-head">
+        <h4><i class="fa fa-plug me-2" style="color: var(--la-primary);"></i>{{ __('admin_nav.ai_builtin_providers') }}</h4>
         <p>{{ __('admin_nav.ai_builtin_providers_intro') }}</p>
     </div>
-    <div class="ai-section-body">
+    <div class="section-body">
         @foreach($aiPage['builtin_providers'] as $provider)
-            <div class="ai-provider-card">
-                <div class="ai-provider-head">
-                    <div class="ai-provider-brand">
-                        <div class="ai-provider-icon" style="background: {{ $provider['color'] }};">
+            <div class="platform-card">
+                <div class="platform-card-head">
+                    <div class="d-flex align-items-start">
+                        <div class="provider-icon" style="background: {{ $provider['color'] }};">
                             <i class="fa {{ $provider['icon'] }}"></i>
                         </div>
                         <div>
-                            <div class="ai-provider-name">{{ $provider['label'] }}</div>
-                            <p class="ai-provider-desc">{{ $provider['description'] }}</p>
+                            <h5>{{ $provider['label'] }}</h5>
+                            <p class="text-muted small mb-0">{{ $provider['description'] }}</p>
                             @if(!empty($provider['capabilities']))
-                                <div class="ai-cap-tags">
+                                <div class="d-flex flex-wrap gap-1 mt-2">
                                     @foreach($provider['capabilities'] as $cap)
                                         @php $capMeta = config('ai.features.'.$cap); @endphp
-                                        <span class="ai-cap-tag">{{ $capMeta['label'] ?? $cap }}</span>
+                                        <span class="cap-tag">{{ $capMeta['label'] ?? $cap }}</span>
                                     @endforeach
                                 </div>
                             @endif
                         </div>
                     </div>
                     <div class="d-flex align-items-center gap-3">
-                        <span class="ai-status-pill {{ $provider['status'] }}">
-                            @if($provider['status'] === 'ready')
-                                {{ __('admin_nav.ai_status_ready') }}
-                            @elseif($provider['status'] === 'incomplete')
-                                {{ __('admin_nav.ai_status_incomplete') }}
-                            @else
-                                {{ __('admin_nav.ai_status_disabled') }}
-                            @endif
+                        <span class="status-pill {{ $provider['status'] }}">
+                            {{ $statusLabels[$provider['status']] ?? $provider['status'] }}
                         </span>
                         <div class="form-check form-switch mb-0">
                             <input type="hidden" name="ai_{{ $provider['id'] }}_enabled" value="0">
                             <input type="checkbox" class="form-check-input" id="ai_{{ $provider['id'] }}_enabled"
                                    name="ai_{{ $provider['id'] }}_enabled" value="1"
-                                   @checked($fields['ai_'.$provider['id'].'_enabled']['form_value'] ?? ($provider['id'] === 'openai' || $provider['id'] === 'chatpdf'))>
+                                   @checked(\App\Support\AiConfig::providerEnabled($provider['id']))>
                         </div>
                     </div>
                 </div>
-                <div class="card-body border-top-0 pt-0 pb-3 px-3">
+                <div class="px-3 pb-3">
                     @if($provider['id'] === 'openai')
                         <div class="row g-3">
                             <div class="col-md-6">
@@ -163,18 +161,17 @@
     </div>
 </div>
 
-{{-- Custom integrations --}}
-<div class="ai-section">
-    <div class="ai-section-header d-flex justify-content-between align-items-start flex-wrap gap-2">
+<div class="learning-section-card">
+    <div class="section-head d-flex justify-content-between align-items-start flex-wrap gap-2">
         <div>
-            <h2><i class="fa fa-plus-circle me-2 text-primary"></i>{{ __('admin_nav.ai_custom_integrations') }}</h2>
+            <h4><i class="fa fa-plus-circle me-2" style="color: var(--la-primary);"></i>{{ __('admin_nav.ai_custom_integrations') }}</h4>
             <p class="mb-0">{{ __('admin_nav.ai_custom_integrations_intro') }}</p>
         </div>
         <button type="button" class="btn btn-sm btn-outline-primary" id="add-custom-integration">
             <i class="fa fa-plus me-1"></i>{{ __('admin_nav.ai_add_integration') }}
         </button>
     </div>
-    <div class="ai-section-body">
+    <div class="section-body">
         <div id="custom-integrations-list">
             @forelse($aiPage['custom_integrations'] as $idx => $integration)
                 @include('admin.courses.partials.ai_custom_integration_row', ['integration' => $integration, 'index' => $idx])
