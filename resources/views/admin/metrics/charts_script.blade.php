@@ -10,11 +10,41 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
         red: '{{ settings()->au_red ?? "#9F2241" }}',
         gold: '{{ settings()->au_gold ?? "#B4A269" }}',
         corporateGreen: '{{ settings()->au_corporate_green ?? "#1A5632" }}',
-        green: '{{ settings()->au_green ?? "#1A5632" }}',
+        green: '{{ settings()->au_corporate_green ?? "#1A5632" }}',
         plum: '{{ settings()->au_plum ?? "#522B39" }}',
         greyText: '{{ settings()->au_grey_text ?? "#58595B" }}',
-        white: '{{ settings()->au_white ?? "#FFFFFF" }}'
+        white: '{{ settings()->au_white ?? "#FFFFFF" }}',
+        light: '#f0f7f4',
+        mapBorder: '{{ settings()->au_grey_text ?? "#58595B" }}'
     };
+
+    function themeMapColorAxis(min, max) {
+        return {
+            min: min,
+            max: max,
+            minColor: auColors.light,
+            maxColor: auColors.green,
+            labels: { style: { color: '#475569', fontSize: '10px' } }
+        };
+    }
+
+    function themeMapPlotOptions() {
+        return {
+            map: {
+                nullColor: '#f1f5f9',
+                borderColor: auColors.mapBorder,
+                borderWidth: 1,
+                allAreas: true,
+                states: {
+                    hover: {
+                        color: auColors.gold,
+                        borderColor: auColors.red,
+                        borderWidth: 1.5
+                    }
+                }
+            }
+        };
+    }
 
     var mapModulePromise = null;
     var visitsTimelineChart = null;
@@ -284,7 +314,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 height: config.height || 504,
                 style: { fontFamily: 'inherit' }
             },
-            title: { text: null },
+            title: {
+                text: config.title || 'Visits by country',
+                style: { fontSize: '14px', color: '#64748b', fontWeight: '600' }
+            },
             credits: {
                 enabled: true,
                 text: config.credits || 'Map © Natural Earth · Portal access logs',
@@ -294,36 +327,24 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 enabled: true,
                 buttonOptions: { verticalAlign: 'bottom', align: 'right' }
             },
-            colorAxis: {
-                min: config.min,
-                max: config.max,
-                minColor: '#f0f7f4',
-                maxColor: auColors.corporateGreen
-            },
+            colorAxis: themeMapColorAxis(config.min, config.max),
             legend: { enabled: false },
-            plotOptions: {
-                map: {
-                    nullColor: '#f1f5f9',
-                    borderColor: '#ffffff',
-                    borderWidth: 0.5,
-                    states: {
-                        hover: {
-                            color: auColors.gold,
-                            borderColor: auColors.red,
-                            borderWidth: 1.1
-                        }
-                    }
-                }
-            },
+            plotOptions: themeMapPlotOptions(),
             series: [{
                 type: 'map',
-                name: config.seriesName || 'Visits',
+                name: config.seriesName || 'Visits by country',
                 joinBy: ['hc-key', 'hc-key'],
+                borderColor: auColors.mapBorder,
+                borderWidth: 1,
                 data: mapData,
                 dataLabels: { enabled: false },
                 tooltip: config.tooltip || {
                     useHTML: true,
-                    pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits'
+                    formatter: function () {
+                        var p = this.point;
+                        return '<b>' + (p.name || '') + '</b><br/><strong>'
+                            + Number(p.value || 0).toLocaleString() + '</strong> visits';
+                    }
                 }
             }]
         });
@@ -370,23 +391,25 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                 height: config.height || 480,
                 style: { fontFamily: 'inherit' }
             },
-            title: { text: null },
+            title: config.title === null
+                ? { text: null }
+                : {
+                    text: config.title || config.seriesName || 'Indicator value',
+                    style: { fontSize: '14px', color: '#64748b', fontWeight: '600' }
+                },
             credits: { enabled: true, text: config.credits || KhAfricaMap.creditsPrefix(), style: { fontSize: '10px', color: '#94a3b8' } },
             mapNavigation: { enabled: true, buttonOptions: { verticalAlign: 'bottom', align: 'right' } },
-            colorAxis: { min: config.min, max: config.max, minColor: '#f0f7f4', maxColor: auColors.corporateGreen },
+            colorAxis: themeMapColorAxis(config.min, config.max),
             legend: { enabled: false },
-            plotOptions: {
-                map: {
-                    nullColor: '#f1f5f9', borderColor: '#ffffff', borderWidth: 0.5,
-                    states: { hover: { color: auColors.gold, borderColor: auColors.red, borderWidth: 1.1 } }
-                }
-            },
+            plotOptions: themeMapPlotOptions(),
             series: [{
                 type: 'map',
-                name: config.seriesName || 'Value',
+                name: config.seriesName || 'Indicator value',
                 mapData: KhAfricaMap.seriesMapData(mapAsset),
                 data: mapData,
                 joinBy: joinBy,
+                borderColor: auColors.mapBorder,
+                borderWidth: 1,
                 dataLabels: config.dataLabels !== undefined ? config.dataLabels : KhAfricaMap.dataLabels(),
                 tooltip: config.tooltip || { pointFormat: '<b>{point.name}</b><br/>{point.value}' }
             }]
@@ -454,12 +477,11 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                     min: 0,
                     max: max,
                     height: 504,
-                    seriesName: 'Visits',
-                    credits: 'Map © Natural Earth (Highcharts v2.3.3) · Portal access logs',
-                    tooltip: {
-                        useHTML: true,
-                        pointFormat: '<b>{point.name}</b><br/><strong>{point.value:,.0f}</strong> visits'
-                    }
+                    title: 'Visits by country',
+                    seriesName: 'Visits by country',
+                    credits: KhAfricaMap && KhAfricaMap.creditsPrefix
+                        ? KhAfricaMap.creditsPrefix() + ' · Portal access logs'
+                        : 'Map © Natural Earth · Portal access logs'
                 });
             }).catch(function () {
                 mapContainer.innerHTML = '<div class="text-muted text-center p-4">Map unavailable. Please refresh and try again.</div>';
@@ -501,7 +523,10 @@ window.__khWorldMapSettings = @json(map_settings_for_js('admin_visits'));
                     return KhAfricaMap.mapPoint(p);
                 });
                 renderAdminAfricaMap(mapAsset, mapData, {
-                    min: mapPayload.min, max: mapPayload.max, seriesName: mapPayload.kpi_name,
+                    min: mapPayload.min,
+                    max: mapPayload.max,
+                    title: mapPayload.kpi_name || 'Indicator value',
+                    seriesName: mapPayload.kpi_name || 'Indicator value',
                     credits: KhAfricaMap.creditsPrefix() + ' · Data: Our World in Data (CC BY 4.0)',
                     tooltip: {
                         useHTML: true,
