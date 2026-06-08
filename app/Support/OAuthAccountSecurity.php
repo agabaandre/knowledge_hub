@@ -138,7 +138,8 @@ final class OAuthAccountSecurity
 
     /**
      * If the account must not accept this OAuth provider, return a user-safe message; otherwise null.
-     * Social accounts with no stored provider yet are allowed (backfilled on successful login).
+     * Same email may sign in with any configured OAuth provider (Google, Microsoft, LinkedIn).
+     * Password-only accounts are allowed when admin setting permits linking social login.
      */
     public static function oauthLoginDeniedMessage(?User $user, string $attemptedCanonicalProvider): ?string
     {
@@ -146,25 +147,19 @@ final class OAuthAccountSecurity
             return null;
         }
 
-        $attempted = self::canonicalOAuthProvider($attemptedCanonicalProvider);
-
         if (! $user->is_social_login) {
             if (self::allowPasswordAccountsToUseSocialLogin()) {
                 return null;
             }
+
             return 'This email is registered with email and password. Please sign in using your password instead of social sign-in.';
         }
 
-        $storedRaw = $user->social_provider;
-        if ($storedRaw === null || $storedRaw === '') {
-            return null;
-        }
-
-        $stored = self::canonicalOAuthProvider((string) $storedRaw);
-        if (strcasecmp($stored, $attempted) !== 0) {
-            return 'This account was registered with '.self::providerDisplayName($stored).'. Please use that sign-in option.';
-        }
-
         return null;
+    }
+
+    public static function allowsSameEmailCrossProviderLogin(): bool
+    {
+        return true;
     }
 }
