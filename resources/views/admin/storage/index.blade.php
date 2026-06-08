@@ -889,9 +889,23 @@
                     <div class="storage-metric-main" id="liveQueuePending">{{ $queueHealth['pending_jobs'] ?? '—' }} <span class="fs-6 fw-normal text-muted">pending</span></div>
                     <div class="storage-metric-sub" id="liveQueueMeta">
                         <code>{{ $queueHealth['driver'] ?? '—' }}</code>
-                        · {{ $queueHealth['failed_jobs'] ?? 0 }} failed job(s)
+                        · <span id="liveQueueFailedCount">{{ number_format((int) ($queueHealth['failed_jobs'] ?? 0)) }}</span> failed job(s)
                     </div>
-                    <div class="storage-metric-footer"><span>{{ Str::limit($queueHealth['worker_hint'] ?? '', 72) }}</span></div>
+                    <div class="storage-metric-footer d-flex flex-wrap align-items-center justify-content-between gap-2">
+                        <span>{{ Str::limit($queueHealth['worker_hint'] ?? '', 72) }}</span>
+                        @if((int) ($queueHealth['failed_jobs'] ?? 0) > 0)
+                            <form method="post"
+                                  action="{{ route('admin.storage.retry-failed-jobs') }}"
+                                  class="mb-0"
+                                  id="retryFailedJobsForm"
+                                  onsubmit="return confirm('Retry all {{ number_format((int) ($queueHealth['failed_jobs'] ?? 0)) }} failed job(s)? They will be pushed back onto the queue for workers to process.');">
+                                @csrf
+                                <button type="submit" class="btn btn-sm btn-outline-warning" id="retryFailedJobsBtn">
+                                    <i class="fa fa-refresh"></i> Retry all failed
+                                </button>
+                            </form>
+                        @endif
+                    </div>
                 </div>
 
                 <div class="storage-metric-card">
@@ -1919,7 +1933,16 @@
         }
         var queueMeta = document.getElementById('liveQueueMeta');
         if (queueMeta) {
-            queueMeta.innerHTML = '<code>' + (queue.driver || '—') + '</code> · ' + (queue.failed_jobs || 0) + ' failed job(s)';
+            var failedCount = queue.failed_jobs || 0;
+            queueMeta.innerHTML = '<code>' + (queue.driver || '—') + '</code> · <span id="liveQueueFailedCount">' + Number(failedCount).toLocaleString() + '</span> failed job(s)';
+        }
+        var retryForm = document.getElementById('retryFailedJobsForm');
+        if (retryForm) {
+            if ((queue.failed_jobs || 0) > 0) {
+                retryForm.style.display = '';
+            } else {
+                retryForm.style.display = 'none';
+            }
         }
 
         var load = data.load;

@@ -52,7 +52,7 @@
         <div class="row justify-content-center">
             @foreach ($themes as $theme)
                 <div class="col-xl-3 col-lg-3 col-md-4 col-sm-6 mb-4 d-flex justify-content-center">
-                    <a href="{{ url('records') }}?theme={{ $theme->id }}" class="w-100 text-decoration-none">
+                    <a href="{{ thematic_area_records_url($theme) }}" class="w-100 text-decoration-none">
                         <div class="theme-card">
                             <div class="theme-icon">
                                 <i class="fa {{ $theme->icon }}"></i>

@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Models\Tag;
+use App\Models\SubThemeticArea;
+use App\Models\ThemeticArea;
 use App\Support\ContributorsSeo;
 use App\Support\PublicationSeo;
 use App\Support\RecordsSearchSeo;
@@ -151,6 +153,13 @@ class PublicationsController extends Controller
 
     public function search(Request $request)
     {
+        if (seo_friendly_urls_enabled()) {
+            $legacyRedirect = $this->legacyRecordsFilterRedirect($request);
+            if ($legacyRedirect) {
+                return $legacyRedirect;
+            }
+        }
+
         if ($request->filled('tag') && seo_friendly_urls_enabled()) {
             $tagModel = Tag::find((int) $request->tag);
             if ($tagModel && ! empty($tagModel->slug)) {
@@ -175,6 +184,63 @@ class PublicationsController extends Controller
         $request->merge(['tag' => $tag->id]);
 
         return $this->searchWithoutLegacyTagRedirect($request);
+    }
+
+    public function searchByThematicArea(Request $request, string $slug)
+    {
+        $theme = ThemeticArea::query()->where('slug', $slug)->first();
+        if (! $theme) {
+            abort(404);
+        }
+
+        $request->merge(['thematic_area_id' => $theme->id]);
+
+        return $this->searchWithoutLegacyTagRedirect($request);
+    }
+
+    public function searchBySubThematicArea(Request $request, string $slug)
+    {
+        $subTheme = SubThemeticArea::query()->where('slug', $slug)->first();
+        if (! $subTheme) {
+            abort(404);
+        }
+
+        $request->merge(['sub_thematic_area_id' => $subTheme->id]);
+
+        return $this->searchWithoutLegacyTagRedirect($request);
+    }
+
+    protected function legacyRecordsFilterRedirect(Request $request): ?\Illuminate\Http\RedirectResponse
+    {
+        $subThemeId = $request->input('sub_thematic_area_id') ?: $request->input('subtheme');
+        if ($subThemeId) {
+            $subTheme = SubThemeticArea::find((int) $subThemeId);
+            if ($subTheme && ! empty($subTheme->slug)) {
+                $query = $request->query();
+                unset($query['sub_thematic_area_id'], $query['subtheme'], $query['theme'], $query['thematic_area_id']);
+                $target = sub_thematic_area_records_url($subTheme, true, $query);
+
+                if ($target !== $request->fullUrl()) {
+                    return redirect()->to($target, 301);
+                }
+            }
+        }
+
+        $themeId = $request->input('theme') ?: $request->input('thematic_area_id');
+        if ($themeId) {
+            $theme = ThemeticArea::find((int) $themeId);
+            if ($theme && ! empty($theme->slug)) {
+                $query = $request->query();
+                unset($query['theme'], $query['thematic_area_id']);
+                $target = thematic_area_records_url($theme, true, $query);
+
+                if ($target !== $request->fullUrl()) {
+                    return redirect()->to($target, 301);
+                }
+            }
+        }
+
+        return null;
     }
 
     protected function searchWithoutLegacyTagRedirect(Request $request)
@@ -244,6 +310,7 @@ class PublicationsController extends Controller
         $request->validate([
             'term' => 'nullable|string|max:255',
             'thematic_area_id' => 'nullable|integer',
+            'theme' => 'nullable|integer',
             'subtheme' => 'nullable|integer',
             'sub_thematic_area_id' => 'nullable|integer',
             'author' => 'nullable|integer',

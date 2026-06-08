@@ -5,7 +5,9 @@ use App\Models\CommunityOfPractice;
 use App\Models\Country;
 use App\Models\Forum;
 use App\Models\Publication;
+use App\Models\SubThemeticArea;
 use App\Models\Tag;
+use App\Models\ThemeticArea;
 
 if (! function_exists('seo_friendly_urls_enabled')) {
     function seo_friendly_urls_enabled(): bool
@@ -106,6 +108,122 @@ if (! function_exists('publication_url')) {
             }
         } else {
             $path = 'records/resource?id='.$id;
+            if ($query) {
+                $path .= '&'.http_build_query($query);
+            }
+        }
+
+        return $absolute ? url($path) : $path;
+    }
+}
+
+if (! function_exists('resolve_thematic_area_for_url')) {
+    /**
+     * @param  ThemeticArea|object|int|string|null  $theme
+     * @return array{id: ?int, slug: ?string}
+     */
+    function resolve_thematic_area_for_url($theme): array
+    {
+        $id = null;
+        $slug = null;
+
+        if ($theme instanceof ThemeticArea) {
+            $id = (int) $theme->id;
+            $slug = $theme->slug ?? null;
+        } elseif (is_object($theme) && isset($theme->id)) {
+            $id = (int) $theme->id;
+            $slug = $theme->slug ?? null;
+        } elseif (is_numeric($theme)) {
+            $id = (int) $theme;
+            $slug = ThemeticArea::query()->whereKey($id)->value('slug');
+        }
+
+        return ['id' => $id, 'slug' => $slug];
+    }
+}
+
+if (! function_exists('resolve_sub_thematic_area_for_url')) {
+    /**
+     * @param  SubThemeticArea|object|int|string|null  $subTheme
+     * @return array{id: ?int, slug: ?string}
+     */
+    function resolve_sub_thematic_area_for_url($subTheme): array
+    {
+        $id = null;
+        $slug = null;
+
+        if ($subTheme instanceof SubThemeticArea) {
+            $id = (int) $subTheme->id;
+            $slug = $subTheme->slug ?? null;
+        } elseif (is_object($subTheme) && isset($subTheme->id)) {
+            $id = (int) $subTheme->id;
+            $slug = $subTheme->slug ?? null;
+        } elseif (is_numeric($subTheme)) {
+            $id = (int) $subTheme;
+            $slug = SubThemeticArea::query()->whereKey($id)->value('slug');
+        }
+
+        return ['id' => $id, 'slug' => $slug];
+    }
+}
+
+if (! function_exists('thematic_area_records_url')) {
+    /**
+     * @param  ThemeticArea|object|int|string|null  $theme
+     */
+    function thematic_area_records_url($theme, bool $absolute = true, array $query = []): string
+    {
+        ['id' => $id, 'slug' => $slug] = resolve_thematic_area_for_url($theme);
+
+        if (! $id) {
+            $path = 'records/search';
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+
+            return $absolute ? url($path) : $path;
+        }
+
+        if (seo_friendly_urls_enabled() && ! empty($slug)) {
+            $path = 'records/theme/'.$slug;
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+        } else {
+            $path = 'records/search?theme='.$id;
+            if ($query) {
+                $path .= '&'.http_build_query($query);
+            }
+        }
+
+        return $absolute ? url($path) : $path;
+    }
+}
+
+if (! function_exists('sub_thematic_area_records_url')) {
+    /**
+     * @param  SubThemeticArea|object|int|string|null  $subTheme
+     */
+    function sub_thematic_area_records_url($subTheme, bool $absolute = true, array $query = []): string
+    {
+        ['id' => $id, 'slug' => $slug] = resolve_sub_thematic_area_for_url($subTheme);
+
+        if (! $id) {
+            $path = 'records/search';
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+
+            return $absolute ? url($path) : $path;
+        }
+
+        if (seo_friendly_urls_enabled() && ! empty($slug)) {
+            $path = 'records/sub-theme/'.$slug;
+            if ($query) {
+                $path .= '?'.http_build_query($query);
+            }
+        } else {
+            $path = 'records/search?sub_thematic_area_id='.$id;
             if ($query) {
                 $path .= '&'.http_build_query($query);
             }

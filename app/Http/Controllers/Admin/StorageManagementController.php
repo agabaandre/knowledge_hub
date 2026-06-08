@@ -12,7 +12,9 @@ use App\Services\HubOffsiteBackupService;
 use App\Services\HubStorageMetricsService;
 use App\Services\HubStoragePublicationIndexService;
 use App\Services\HubStorageService;
+use App\Support\QueueHealth;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
@@ -457,6 +459,25 @@ class StorageManagementController extends Controller
     public function systemMetrics(HubStorageService $storage, HubStorageMetricsService $metrics)
     {
         return response()->json($metrics->snapshot($storage, request()->boolean('fresh')));
+    }
+
+    public function retryFailedJobs(HubStorageService $storage)
+    {
+        $result = QueueHealth::retryAllFailed();
+
+        Cache::forget('hub_storage_metrics_'.$storage->siteStorageId());
+
+        if (($result['status'] ?? '') === 'ok') {
+            return redirect()
+                ->route('admin.storage.index', [], 303)
+                ->with('alert-success', $result['message'])
+                ->withFragment('storage-overview');
+        }
+
+        return redirect()
+            ->route('admin.storage.index', [], 303)
+            ->with('alert-danger', $result['message'] ?? 'Could not retry failed jobs.')
+            ->withFragment('storage-overview');
     }
 
     /**

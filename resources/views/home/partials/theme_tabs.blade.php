@@ -212,7 +212,7 @@
         <div class="themes-grid">
             @foreach ($themes as $index => $theme)
                 <div class="theme-item">
-                    <a href="{{ url('records') }}?theme={{ $theme->id }}" class="theme-link">
+                    <a href="{{ thematic_area_records_url($theme) }}" class="theme-link">
                         <div class="theme-card">
                             <i class="fa {{ $theme->icon }} theme-icon" aria-hidden="true"></i>
                             <p class="theme-title" title="{{ $theme->description }}">

@@ -2,6 +2,7 @@
 
 namespace App\Support;
 
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Schema;
@@ -58,6 +59,47 @@ class QueueHealth
             'failed_jobs' => $failed,
             'worker_hint' => $workerHint,
             'error' => $error,
+        ];
+    }
+
+    /**
+     * Push every row in failed_jobs back onto the queue (same as `php artisan queue:retry all`).
+     *
+     * @return array{status: string, message: string, retried: int}
+     */
+    public static function retryAllFailed(): array
+    {
+        if (! Schema::hasTable('failed_jobs')) {
+            return [
+                'status' => 'error',
+                'message' => 'The failed_jobs table is not available.',
+                'retried' => 0,
+            ];
+        }
+
+        $count = (int) DB::table('failed_jobs')->count();
+        if ($count === 0) {
+            return [
+                'status' => 'ok',
+                'message' => 'No failed jobs to retry.',
+                'retried' => 0,
+            ];
+        }
+
+        try {
+            Artisan::call('queue:retry', ['id' => ['all']]);
+        } catch (\Throwable $e) {
+            return [
+                'status' => 'error',
+                'message' => 'Could not retry failed jobs: '.$e->getMessage(),
+                'retried' => 0,
+            ];
+        }
+
+        return [
+            'status' => 'ok',
+            'message' => number_format($count).' failed job(s) queued for retry.',
+            'retried' => $count,
         ];
     }
 }

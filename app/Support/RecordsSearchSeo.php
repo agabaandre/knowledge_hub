@@ -40,6 +40,18 @@ class RecordsSearchSeo
             $tagModel = Tag::find((int) $request->tag);
         }
 
+        $themeModel = null;
+        $themeId = $request->input('thematic_area_id') ?: $request->input('theme');
+        if ($themeId) {
+            $themeModel = ThemeticArea::find((int) $themeId);
+        }
+
+        $subThemeModel = null;
+        $subThemeId = $request->input('sub_thematic_area_id') ?: $request->input('subtheme');
+        if ($subThemeId) {
+            $subThemeModel = SubThemeticArea::find((int) $subThemeId);
+        }
+
         $pubTotal = method_exists($publications, 'total') ? (int) $publications->total() : 0;
 
         if ($tagModel) {
@@ -91,8 +103,16 @@ class RecordsSearchSeo
             $pageKeywords = 'browse, publications, resources, public health, Africa CDC, forums, '.(settings()->seo_keywords ?? 'knowledge hub');
         }
 
-        $canonicalQuery = self::canonicalQuery($request, $tagModel);
-        if ($tagModel && seo_friendly_urls_enabled() && ! empty($tagModel->slug)) {
+        $canonicalQuery = self::canonicalQuery($request, $tagModel, $themeModel, $subThemeModel);
+        if ($subThemeModel && seo_friendly_urls_enabled() && ! empty($subThemeModel->slug)) {
+            $slugQuery = $canonicalQuery;
+            unset($slugQuery['sub_thematic_area_id'], $slugQuery['subtheme'], $slugQuery['theme'], $slugQuery['thematic_area_id']);
+            $canonicalUrl = sub_thematic_area_records_url($subThemeModel, true, $slugQuery);
+        } elseif ($themeModel && seo_friendly_urls_enabled() && ! empty($themeModel->slug)) {
+            $slugQuery = $canonicalQuery;
+            unset($slugQuery['theme'], $slugQuery['thematic_area_id']);
+            $canonicalUrl = thematic_area_records_url($themeModel, true, $slugQuery);
+        } elseif ($tagModel && seo_friendly_urls_enabled() && ! empty($tagModel->slug)) {
             $tagQuery = $canonicalQuery;
             unset($tagQuery['tag']);
             $canonicalUrl = tag_records_url($tagModel, true, $tagQuery);
@@ -134,12 +154,12 @@ class RecordsSearchSeo
     /**
      * @return array<string, mixed>
      */
-    public static function canonicalQuery(Request $request, ?Tag $tagModel = null): array
+    public static function canonicalQuery(Request $request, ?Tag $tagModel = null, ?ThemeticArea $themeModel = null, ?SubThemeticArea $subThemeModel = null): array
     {
         $raw = $request->only([
             'term', 'rcc', 'country_id', 'author_id', 'author', 'thematic_area_id',
             'sub_thematic_area_id', 'subtheme', 'data_category_id', 'category',
-            'file_category_id', 'file_type_id', 'file_type', 'tag', 'page',
+            'file_category_id', 'file_type_id', 'file_type', 'tag', 'page', 'theme',
         ]);
 
         $filtered = [];
@@ -163,6 +183,12 @@ class RecordsSearchSeo
             unset($filtered['tag']);
         }
 
+        if ($subThemeModel && seo_friendly_urls_enabled() && ! empty($subThemeModel->slug)) {
+            unset($filtered['sub_thematic_area_id'], $filtered['subtheme'], $filtered['theme'], $filtered['thematic_area_id']);
+        } elseif ($themeModel && seo_friendly_urls_enabled() && ! empty($themeModel->slug)) {
+            unset($filtered['theme'], $filtered['thematic_area_id']);
+        }
+
         return $filtered;
     }
 
@@ -173,8 +199,9 @@ class RecordsSearchSeo
     {
         $parts = [];
 
-        if ($request->filled('thematic_area_id')) {
-            $name = ThemeticArea::query()->whereKey((int) $request->thematic_area_id)->value('description');
+        $themeId = $request->input('thematic_area_id') ?: $request->input('theme');
+        if ($themeId && ! $request->filled('sub_thematic_area_id') && ! $request->filled('subtheme')) {
+            $name = ThemeticArea::query()->whereKey((int) $themeId)->value('description');
             if ($name) {
                 $parts[] = clean_unicode($name);
             }

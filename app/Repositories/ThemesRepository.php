@@ -4,6 +4,7 @@ namespace App\Repositories;
 use App\Models\SubThemeticArea;
 use App\Models\ThemeticArea;
 use App\Models\Publication;
+use App\Support\SeoSlugger;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
@@ -85,6 +86,12 @@ class ThemesRepository
             : null;
         $theme->icon = $request->icon;
         $theme->display_order = (int) ($request->display_order ?? 0);
+        if (Schema::hasColumn('thematic_area', 'slug') && empty($theme->slug)) {
+            $theme->slug = SeoSlugger::forThematicArea(
+                (string) ($theme->description ?? ''),
+                $theme->id ? (int) $theme->id : null
+            );
+        }
 
         // Save the record
         $theme->save();
@@ -198,6 +205,12 @@ class ThemesRepository
             : null;
         $theme->icon = $request->icon;
         $theme->thematic_area_id = $request->thematic_area_id;
+        if (Schema::hasColumn('sub_thematic_area', 'slug') && empty($theme->slug)) {
+            $theme->slug = SeoSlugger::forSubThematicArea(
+                (string) ($theme->description ?? ''),
+                $theme->id ? (int) $theme->id : null
+            );
+        }
 
         // Save changes
         $theme->save();

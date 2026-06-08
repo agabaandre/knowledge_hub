@@ -191,6 +191,8 @@ Route::get('/federated', [FederatedBrowseController::class, 'index'])->name('fed
 Route::group(["prefix" => "records"], function () {
 
     Route::get("/tag/{slug}", [PublicationsController::class, 'searchByTag'])->where('slug', '[\w\-]+')->name('records.tag');
+    Route::get("/theme/{slug}", [PublicationsController::class, 'searchByThematicArea'])->where('slug', '[\w\-]+')->name('records.theme');
+    Route::get("/sub-theme/{slug}", [PublicationsController::class, 'searchBySubThematicArea'])->where('slug', '[\w\-]+')->name('records.sub-theme');
     Route::get("/", [PublicationsController::class, 'search']);
     Route::get("/resource/{slug}", [PublicationsController::class, 'show'])->where('slug', '[\w\-]+');
     Route::get("/resource", [PublicationsController::class, 'show']);
@@ -316,6 +318,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
     Route::post('/storage-management/purge-legacy', [StorageManagementController::class, 'purgeLegacy'])->name('admin.storage.purge-legacy');
     Route::get('/storage-management/migration-status', [StorageManagementController::class, 'migrationStatus'])->name('admin.storage.migration-status');
     Route::get('/storage-management/system-metrics', [StorageManagementController::class, 'systemMetrics'])->name('admin.storage.system-metrics');
+    Route::post('/storage-management/retry-failed-jobs', [StorageManagementController::class, 'retryFailedJobs'])->name('admin.storage.retry-failed-jobs');
 
     Route::get('/maps', [MapsController::class, 'index'])->name('admin.maps.index');
     Route::get('/maps/topology/status', [MapsController::class, 'topologyVersionStatus'])->name('admin.maps.topology.status');

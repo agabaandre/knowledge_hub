@@ -37,6 +37,16 @@ class SeoSlugger
         return self::uniqueSlug('author', self::baseSlug($name, 'contributor'), $excludeId);
     }
 
+    public static function forThematicArea(string $name, ?int $excludeId = null): string
+    {
+        return self::uniqueSlug('thematic_area', self::baseSlug($name, 'theme'), $excludeId);
+    }
+
+    public static function forSubThematicArea(string $name, ?int $excludeId = null): string
+    {
+        return self::uniqueSlug('sub_thematic_area', self::baseSlug($name, 'sub-theme'), $excludeId);
+    }
+
     public static function baseSlug(string $title, string $fallback): string
     {
         $slug = Str::slug(Str::limit(trim($title), 120, ''));
