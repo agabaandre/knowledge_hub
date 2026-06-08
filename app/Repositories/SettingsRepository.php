@@ -506,8 +506,8 @@ class SettingsRepository
         }
 
         $this->applySsoSettings($settings, $request);
-        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
-            $settings->sso_use_database_credentials = true;
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials') && $request->has('sso_use_database_credentials')) {
+            $settings->sso_use_database_credentials = self::parseSubmittedBoolean($request, 'sso_use_database_credentials');
         }
         $settings->save();
 

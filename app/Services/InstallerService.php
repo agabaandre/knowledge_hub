@@ -477,7 +477,9 @@ class InstallerService
         ];
 
         if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
-            $payload['sso_use_database_credentials'] = true;
+            $payload['sso_use_database_credentials'] = ! empty($sso['microsoft_client_secret'])
+                || ! empty($sso['google_client_secret'])
+                || ! empty($sso['linkedin_client_secret']);
         }
 
         if (! empty($sso['microsoft_client_secret'])) {

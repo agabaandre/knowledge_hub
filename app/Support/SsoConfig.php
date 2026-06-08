@@ -75,19 +75,40 @@ class SsoConfig
      */
     public static function resolveFromEnv(string $envKey, $default = null)
     {
-        $envValue = env($envKey);
-        if ($envValue !== null && $envValue !== '') {
+        $envValue = self::envValue($envKey);
+        if ($envValue !== '') {
             return $envValue;
         }
 
-        if ($envKey === 'MICROSOFT_CLIENT_ID' && env('EXCHANGE_CLIENT_ID')) {
-            return env('EXCHANGE_CLIENT_ID');
+        if ($envKey === 'MICROSOFT_CLIENT_ID') {
+            $exchange = self::envValue('EXCHANGE_CLIENT_ID');
+            if ($exchange !== '') {
+                return $exchange;
+            }
+            $configExchange = trim((string) config('exchange-email.client_id', ''));
+            if ($configExchange !== '') {
+                return $configExchange;
+            }
         }
-        if ($envKey === 'MICROSOFT_CLIENT_SECRET' && env('EXCHANGE_CLIENT_SECRET')) {
-            return env('EXCHANGE_CLIENT_SECRET');
+        if ($envKey === 'MICROSOFT_CLIENT_SECRET') {
+            $exchange = self::envValue('EXCHANGE_CLIENT_SECRET');
+            if ($exchange !== '') {
+                return $exchange;
+            }
+            $configExchange = trim((string) config('exchange-email.client_secret', ''));
+            if ($configExchange !== '') {
+                return $configExchange;
+            }
         }
-        if ($envKey === 'MICROSOFT_TENANT_ID' && env('EXCHANGE_TENANT_ID')) {
-            return env('EXCHANGE_TENANT_ID');
+        if ($envKey === 'MICROSOFT_TENANT_ID') {
+            $exchange = self::envValue('EXCHANGE_TENANT_ID');
+            if ($exchange !== '') {
+                return $exchange;
+            }
+            $configExchange = trim((string) config('exchange-email.tenant_id', ''));
+            if ($configExchange !== '') {
+                return $configExchange;
+            }
         }
 
         $configKey = self::configKeyForEnv($envKey);
@@ -99,6 +120,21 @@ class SsoConfig
         }
 
         return $default;
+    }
+
+    private static function envValue(string $key): string
+    {
+        $value = env($key);
+        if ($value !== null && $value !== '') {
+            return trim((string) $value);
+        }
+
+        $getenv = getenv($key);
+        if ($getenv !== false && $getenv !== '') {
+            return trim((string) $getenv);
+        }
+
+        return '';
     }
 
     private static function configKeyForEnv(string $envKey): ?string
@@ -161,22 +197,70 @@ class SsoConfig
 
     public static function providerConfigured(string $provider): bool
     {
+        if (! self::usesDatabaseCredentials()) {
+            return self::providerConfiguredFromConfig($provider);
+        }
+
         return match ($provider) {
-            'microsoft' => (string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', '') !== ''
-                && (string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', '') !== '',
-            'google' => (string) self::resolve('GOOGLE_CLIENT_ID', 'google_client_id', '') !== ''
-                && (string) self::resolve('GOOGLE_CLIENT_SECRET', 'google_client_secret', '') !== '',
-            'linkedin' => (string) self::resolve('LINKEDIN_CLIENT_ID', 'linkedin_client_id', '') !== ''
-                && (string) self::resolve('LINKEDIN_CLIENT_SECRET', 'linkedin_client_secret', '') !== '',
+            'microsoft' => trim((string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', '')) !== ''
+                && trim((string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', '')) !== '',
+            'google' => trim((string) self::resolve('GOOGLE_CLIENT_ID', 'google_client_id', '')) !== ''
+                && trim((string) self::resolve('GOOGLE_CLIENT_SECRET', 'google_client_secret', '')) !== '',
+            'linkedin' => trim((string) self::resolve('LINKEDIN_CLIENT_ID', 'linkedin_client_id', '')) !== ''
+                && trim((string) self::resolve('LINKEDIN_CLIENT_SECRET', 'linkedin_client_secret', '')) !== '',
             default => false,
         };
     }
 
+    private static function providerConfiguredFromConfig(string $provider): bool
+    {
+        $keys = match ($provider) {
+            'microsoft' => [
+                'id' => ['config' => 'services.microsoft.client_id', 'env' => 'MICROSOFT_CLIENT_ID'],
+                'secret' => ['config' => 'services.microsoft.client_secret', 'env' => 'MICROSOFT_CLIENT_SECRET'],
+            ],
+            'google' => [
+                'id' => ['config' => 'services.google.client_id', 'env' => 'GOOGLE_CLIENT_ID'],
+                'secret' => ['config' => 'services.google.client_secret', 'env' => 'GOOGLE_CLIENT_SECRET'],
+            ],
+            'linkedin' => [
+                'id' => ['config' => 'services.linkedin.client_id', 'env' => 'LINKEDIN_CLIENT_ID'],
+                'secret' => ['config' => 'services.linkedin.client_secret', 'env' => 'LINKEDIN_CLIENT_SECRET'],
+            ],
+            default => null,
+        };
+
+        if ($keys === null) {
+            return false;
+        }
+
+        $id = self::configuredCredentialValue($keys['id']['config'], $keys['id']['env']);
+        $secret = self::configuredCredentialValue($keys['secret']['config'], $keys['secret']['env']);
+
+        return $id !== '' && $secret !== '';
+    }
+
+    private static function configuredCredentialValue(string $configKey, string $envKey): string
+    {
+        $value = trim((string) config($configKey, ''));
+        if ($value !== '') {
+            return $value;
+        }
+
+        return trim((string) self::resolveFromEnv($envKey, ''));
+    }
+
     public static function applyRuntimeConfig(): void
     {
+        if (! self::usesDatabaseCredentials()) {
+            self::applyEnvModeRuntimeConfig();
+
+            return;
+        }
+
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
-        $overrides = [
+        config([
             'services.microsoft.client_id' => (string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', ''),
             'services.microsoft.client_secret' => (string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', ''),
             'services.microsoft.redirect' => (string) self::resolve(
@@ -210,17 +294,36 @@ class SsoConfig
                 'linkedin_redirect_uri',
                 $appUrl.'/auth/linkedin/callback'
             ),
-        ];
+        ]);
+    }
 
-        if (! self::usesDatabaseCredentials()) {
-            foreach (array_keys($overrides) as $key) {
-                if ($overrides[$key] === '' && config($key)) {
-                    $overrides[$key] = config($key);
-                }
+    private static function applyEnvModeRuntimeConfig(): void
+    {
+        $appUrl = rtrim((string) config('app.url', ''), '/');
+        $patches = [];
+
+        foreach ([
+            'services.microsoft.redirect' => ['env' => 'MICROSOFT_REDIRECT_URI', 'default' => $appUrl.'/auth/microsoft/callback'],
+            'services.google.redirect' => ['env' => 'GOOGLE_REDIRECT_URI', 'default' => $appUrl.'/auth/google/callback'],
+            'services.linkedin.redirect' => ['env' => 'LINKEDIN_REDIRECT_URI', 'default' => $appUrl.'/auth/linkedin/callback'],
+            'services.linkedin-openid.redirect' => ['env' => 'LINKEDIN_REDIRECT_URI', 'default' => $appUrl.'/auth/linkedin/callback'],
+        ] as $configKey => $meta) {
+            if (trim((string) config($configKey, '')) === '') {
+                $patches[$configKey] = (string) self::resolveFromEnv($meta['env'], $meta['default']);
             }
         }
 
-        config($overrides);
+        foreach (['client_id', 'client_secret'] as $field) {
+            $linkedInKey = "services.linkedin.{$field}";
+            $openIdKey = "services.linkedin-openid.{$field}";
+            if (trim((string) config($openIdKey, '')) === '' && trim((string) config($linkedInKey, '')) !== '') {
+                $patches[$openIdKey] = config($linkedInKey);
+            }
+        }
+
+        if ($patches !== []) {
+            config($patches);
+        }
     }
 
     /**
