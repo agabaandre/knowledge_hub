@@ -144,6 +144,9 @@ if(!function_exists('settings')){
 			});
 			$settings = clone $base;
 			foreach ($overlay as $key => $value) {
+				if (in_array($key, ['logo', 'favicon', 'spotlight_banner'], true) && ($value === null || $value === '')) {
+					continue;
+				}
 				$settings->{$key} = $value;
 			}
 			// Re-apply image URLs (values from theme_settings are filenames)

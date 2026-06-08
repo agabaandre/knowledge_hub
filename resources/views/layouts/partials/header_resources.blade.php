@@ -143,7 +143,9 @@
     /* Search/Spotlight area — gradient, or banner image blended with gradient overlay */
     .spotlight.custom-bg,
     .custom-bg.spotlight,
-    .custom-bg {
+    .custom-bg,
+    .home-spotlight,
+    .theme1-spotlight {
         {!! \App\Support\SpotlightBackground::cssBackgroundRule() !!}
     }
     

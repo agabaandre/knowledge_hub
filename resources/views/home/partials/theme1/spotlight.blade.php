@@ -30,6 +30,9 @@
     pointer-events: none;
     z-index: 0;
 }
+.theme1-spotlight.theme1-spotlight--has-banner {
+    background-color: transparent !important;
+}
 .theme1-spotlight.theme1-spotlight--has-banner::before {
     display: none;
 }
@@ -205,7 +208,7 @@
     }
 }
 </style>
-<div class="theme1-spotlight{{ $spotlightBg['has_banner'] ? ' theme1-spotlight--has-banner' : '' }}" style="{{ $spotlightBg['inline_style'] }}">
+<div class="theme1-spotlight{{ $spotlightBg['has_banner'] ? ' theme1-spotlight--has-banner' : '' }}" style="{!! $spotlightBg['inline_style'] !!}">
     <h1 class="visually-hidden notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

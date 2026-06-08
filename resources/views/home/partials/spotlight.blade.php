@@ -11,6 +11,9 @@
         background-position: center !important;
         background-repeat: no-repeat !important;
     }
+    .home-spotlight.home-spotlight--has-banner {
+        background-color: transparent !important;
+    }
     .home-spotlight > * {
         position: relative;
         z-index: 1;
@@ -20,7 +23,7 @@
         filter: brightness(0.96);
     }
 </style>
-<div class="spotlight home-spotlight px-3 py-3" style="{{ $spotlightBg['inline_style'] }}">
+<div class="spotlight home-spotlight{{ $spotlightBg['has_banner'] ? ' home-spotlight--has-banner' : '' }} px-3 py-3" style="{!! $spotlightBg['inline_style'] !!}">
     <h1 class="sr-only notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

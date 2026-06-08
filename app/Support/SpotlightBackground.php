@@ -24,11 +24,12 @@ final class SpotlightBackground
             $overlayOpacity = self::overlayOpacity($settings);
             $startRgba = self::hexToRgba($gradientStart, $overlayOpacity);
             $endRgba = self::hexToRgba($gradientEnd, $overlayOpacity);
+            $escapedUrl = self::escapeCssUrl($bannerUrl);
             $inlineStyle = sprintf(
-                "background-image: linear-gradient(135deg, %s 0%%, %s 100%%), url('%s'); background-size: cover; background-position: center; background-repeat: no-repeat;",
+                'background-color: transparent !important; background-image: linear-gradient(135deg, %s 0%%, %s 100%%), url(%s) !important; background-size: cover !important; background-position: center !important; background-repeat: no-repeat !important;',
                 $startRgba,
                 $endRgba,
-                self::escapeCssUrl($bannerUrl)
+                self::cssUrl($escapedUrl)
             );
         } else {
             $inlineStyle = sprintf(
@@ -63,6 +64,12 @@ final class SpotlightBackground
         $raw = trim((string) $settings->spotlight_banner);
         if ($raw === '') {
             return null;
+        }
+
+        if (function_exists('branding_image_url')) {
+            $resolved = branding_image_url($raw);
+
+            return $resolved !== '' ? $resolved : null;
         }
 
         if (str_starts_with($raw, 'http') || str_starts_with($raw, '//')) {
@@ -102,6 +109,11 @@ final class SpotlightBackground
 
     private static function escapeCssUrl(string $url): string
     {
-        return str_replace("'", "\\'", $url);
+        return str_replace(['\\', '"'], ['\\\\', '\\"'], $url);
+    }
+
+    private static function cssUrl(string $escapedUrl): string
+    {
+        return '"'.$escapedUrl.'"';
     }
 }

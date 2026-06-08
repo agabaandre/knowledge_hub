@@ -439,9 +439,7 @@ class SettingsRepository
             }
             if ($request->hasFile('spotlight_banner')) {
                 $banner_filepath = $this->save_attachments($request->file('spotlight_banner'));
-                if (!$hasThemeOverlay) {
                 $settings->spotlight_banner = $banner_filepath;
-                }
                 if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
                     $this->upsertThemeSetting($themeKey, 'spotlight_banner', $banner_filepath);
                 }
@@ -464,9 +462,7 @@ class SettingsRepository
             }
         }
         if ($request->filled('spotlight_banner_existing')) {
-            if (!$hasThemeOverlay) {
-                $settings->spotlight_banner = $request->spotlight_banner_existing;
-            }
+            $settings->spotlight_banner = $request->spotlight_banner_existing;
             if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
                 $this->upsertThemeSetting($themeKey, 'spotlight_banner', $request->spotlight_banner_existing);
             }
