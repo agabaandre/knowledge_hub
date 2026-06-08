@@ -3,7 +3,7 @@
     $textColor = settings()->links_active_color ?? settings()->primary_text_color ?? $primary;
     $siteName = settings()->site_name ?? 'Africa CDC Knowledge Hub';
     $pageTitle = clean_unicode($tag->tag_text).' — Health Topics — '.$siteName;
-    $overviewPlain = trim(preg_replace('/\s+/u', ' ', strip_tags(clean_unicode($tag->overview ?? ''))));
+    $overviewPlain = plain_text_excerpt_from_html(clean_unicode($tag->overview ?? ''), 10000);
     $pageDescription = $overviewPlain !== ''
         ? Str::limit($overviewPlain, 160)
         : Str::limit('Resources, publications, and discussions for '.clean_unicode($tag->tag_text).' on '.$siteName.'.', 160);
@@ -120,7 +120,7 @@
                                 </span>
                             </div>
                             <div class="overview-text-container" style="font-size: 1rem; line-height: 1.7; color: #4a5568; word-wrap: break-word; overflow-wrap: break-word; overflow-x: hidden; max-width: 100%;">
-                                {!! detect_and_embed_video_links($tag->overview, 180, 180) !!}
+                                {!! detect_and_embed_video_links(sanitize_rich_text_for_display(clean_unicode($tag->overview ?? '')), 180, 180) !!}
                             </div>
                 </div>
             @endif

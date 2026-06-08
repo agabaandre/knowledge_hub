@@ -719,6 +719,16 @@ class SettingsRepository
             $settings->ai_source_priority = $priorities !== [] ? json_encode($priorities) : null;
         }
 
+        if (Schema::hasColumn('setting', 'ai_search_allowed_sites') && $request->has('ai_search_allowed_sites_submitted')) {
+            $existing = \App\Support\AiConfig::aiSearchAllowedSites();
+            $submitted = $request->input('ai_search_allowed_sites', []);
+            $normalized = \App\Support\AiConfig::normalizeAiSearchAllowedSitesInput(
+                is_array($submitted) ? $submitted : [],
+                $existing
+            );
+            $settings->ai_search_allowed_sites = json_encode($normalized);
+        }
+
         if (Schema::hasColumn('setting', 'ai_settings_saved_at')) {
             $settings->ai_settings_saved_at = now();
         }

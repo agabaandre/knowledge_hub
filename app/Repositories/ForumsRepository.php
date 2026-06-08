@@ -210,9 +210,22 @@ class ForumsRepository extends SharedRepo{
             ->where('is_approved', 1)
             ->orderBy('created_at', 'desc');
 
-        if ($request->filled('term') && strlen(trim($request->term)) > 0) {
-            $this->applyForumTermSearch($forums, trim($request->term));
-        } else {
+        $hasTerm = $request->filled('term') && strlen(trim((string) $request->term)) > 0;
+        $tagText = $this->resolveForumTagText($request);
+
+        if ($hasTerm) {
+            $this->applyForumTermSearch($forums, trim((string) $request->term));
+        }
+
+        if ($tagText !== null) {
+            $taggedForumIds = ForumTag::where('tag', $tagText)->pluck('forum_id');
+            if ($taggedForumIds->isEmpty()) {
+                return collect();
+            }
+            $forums->whereIn('id', $taggedForumIds);
+        }
+
+        if (! $hasTerm && $tagText === null) {
             return collect();
         }
 
@@ -246,6 +259,24 @@ class ForumsRepository extends SharedRepo{
         }
 
         return $forums->limit($limit)->get();
+    }
+
+    private function resolveForumTagText(Request $request): ?string
+    {
+        if (! $request->filled('tag')) {
+            return null;
+        }
+
+        $raw = $request->tag;
+        if (is_numeric($raw)) {
+            $tag = Tag::find((int) $raw);
+
+            return $tag ? trim((string) $tag->tag_text) : null;
+        }
+
+        $text = trim((string) $raw);
+
+        return $text !== '' ? $text : null;
     }
 
     public function getByUser($userId, Request $request, $approved=1){

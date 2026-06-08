@@ -74,7 +74,7 @@
                                             <h3 class="topic-title">{{ $tag->tag_text }}</h3>
                                             @if($tag->overview)
                                                 <p class="topic-description">
-                                                    {!! Str::limit(strip_tags($tag->overview), 100) !!}
+                                                    {{ plain_text_excerpt_from_html($tag->overview, 100) }}
                                                 </p>
                                             @else
                                                 <p class="topic-description text-muted">

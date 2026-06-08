@@ -10,7 +10,7 @@ use Illuminate\Support\Str;
 class AiInternetSearchService
 {
     /**
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
     public function search(string $query, int $limit = 3): array
     {
@@ -19,24 +19,63 @@ class AiInternetSearchService
             return [];
         }
 
+        $sites = AiConfig::enabledAiSearchSites();
+        if ($sites === []) {
+            return [];
+        }
+
         $results = [];
 
         if (AiConfig::serperAvailable()) {
             $apiKey = AiConfig::serperApiKey();
-            $results = array_merge($results, $this->searchViaSerperScholar($query, min(2, $limit), $apiKey));
-            if (count($results) < $limit) {
+
+            foreach ($sites as $site) {
+                if (count($results) >= $limit) {
+                    break;
+                }
+                if (($site['serper_mode'] ?? '') !== 'scholar') {
+                    continue;
+                }
                 $results = array_merge(
                     $results,
-                    $this->searchViaSerperWeb($query, $limit - count($results), $apiKey, 'site:pubmed.ncbi.nlm.nih.gov')
+                    $this->searchViaSerperScholar($query, min(2, $limit - count($results)), $apiKey)
+                );
+            }
+
+            foreach ($sites as $site) {
+                if (count($results) >= $limit) {
+                    break;
+                }
+                if (($site['serper_mode'] ?? '') !== 'web' || trim((string) ($site['site_search'] ?? '')) === '') {
+                    continue;
+                }
+                $results = array_merge(
+                    $results,
+                    $this->searchViaSerperWeb(
+                        $query,
+                        $limit - count($results),
+                        $apiKey,
+                        (string) $site['site_search'],
+                        $site
+                    )
                 );
             }
         }
 
         if (count($results) < $limit) {
-            $results = array_merge(
-                $results,
-                $this->searchViaDuckDuckGo($query.' site:pubmed.ncbi.nlm.nih.gov', $limit - count($results))
-            );
+            foreach ($sites as $site) {
+                if (count($results) >= $limit) {
+                    break;
+                }
+                $siteSearch = trim((string) ($site['site_search'] ?? ''));
+                if (($site['serper_mode'] ?? '') !== 'web' || $siteSearch === '') {
+                    continue;
+                }
+                $results = array_merge(
+                    $results,
+                    $this->searchViaDuckDuckGo(trim($query.' '.$siteSearch), $limit - count($results), $site)
+                );
+            }
         }
 
         $results = $this->uniqueResults($results);
@@ -45,7 +84,7 @@ class AiInternetSearchService
             return array_slice($results, 0, $limit);
         }
 
-        foreach ($this->scholarlyFallbackResults($query, $limit) as $fallback) {
+        foreach ($this->fallbackResults($query, $sites, $limit) as $fallback) {
             $results[] = $fallback;
             $results = $this->uniqueResults($results);
             if (count($results) >= $limit) {
@@ -57,7 +96,7 @@ class AiInternetSearchService
     }
 
     /**
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
     private function searchViaSerperScholar(string $query, int $limit, string $apiKey): array
     {
@@ -86,10 +125,9 @@ class AiInternetSearchService
                 $normalized = $this->normalizeResult(
                     (string) ($row['title'] ?? ''),
                     (string) ($row['link'] ?? ''),
-                    (string) ($row['snippet'] ?? ($row['publicationInfo'] ?? '')),
-                    'google_scholar'
+                    (string) ($row['snippet'] ?? ($row['publicationInfo'] ?? ''))
                 );
-                if ($normalized !== null && $this->isScholarlyUrl($normalized['url'])) {
+                if ($normalized !== null) {
                     $results[] = $normalized;
                 }
                 if (count($results) >= $limit) {
@@ -106,16 +144,17 @@ class AiInternetSearchService
     }
 
     /**
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @param  array<string, mixed>  $site
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
-    private function searchViaSerperWeb(string $query, int $limit, string $apiKey, ?string $queryPrefix = null): array
+    private function searchViaSerperWeb(string $query, int $limit, string $apiKey, string $queryPrefix, array $site): array
     {
         if ($limit < 1) {
             return [];
         }
 
         try {
-            $searchQuery = $queryPrefix ? trim($queryPrefix.' '.$query) : $query;
+            $searchQuery = trim($queryPrefix.' '.$query);
             $response = Http::timeout(12)
                 ->withHeaders(['X-API-KEY' => $apiKey])
                 ->post('https://google.serper.dev/search', [
@@ -133,15 +172,13 @@ class AiInternetSearchService
                 if (! is_array($row)) {
                     continue;
                 }
-                $url = (string) ($row['link'] ?? '');
-                $source = str_contains(strtolower($url), 'pubmed') ? 'pubmed' : 'google_scholar';
                 $normalized = $this->normalizeResult(
                     (string) ($row['title'] ?? ''),
-                    $url,
+                    (string) ($row['link'] ?? ''),
                     (string) ($row['snippet'] ?? ''),
-                    $source
+                    $site
                 );
-                if ($normalized !== null && $this->isScholarlyUrl($normalized['url'])) {
+                if ($normalized !== null) {
                     $results[] = $normalized;
                 }
                 if (count($results) >= $limit) {
@@ -158,9 +195,10 @@ class AiInternetSearchService
     }
 
     /**
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @param  array<string, mixed>  $site
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
-    private function searchViaDuckDuckGo(string $query, int $limit): array
+    private function searchViaDuckDuckGo(string $query, int $limit, array $site): array
     {
         if ($limit < 1) {
             return [];
@@ -191,12 +229,11 @@ class AiInternetSearchService
             )) {
                 foreach ($matches as $match) {
                     $url = $this->resolveDuckDuckGoRedirectUrl(html_entity_decode($match[1], ENT_QUOTES | ENT_HTML5, 'UTF-8'));
-                    if (! $this->isScholarlyUrl($url)) {
+                    if (! AiConfig::urlMatchesAllowedSearchSite($url)) {
                         continue;
                     }
                     $title = $this->cleanHtmlFragment($match[2]);
-                    $source = str_contains(strtolower($url), 'pubmed') ? 'pubmed' : 'google_scholar';
-                    $normalized = $this->normalizeResult($title, $url, '', $source);
+                    $normalized = $this->normalizeResult($title, $url, '', $site);
                     if ($normalized !== null) {
                         $results[] = $normalized;
                     }
@@ -215,33 +252,37 @@ class AiInternetSearchService
     }
 
     /**
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @param  list<array<string, mixed>>  $sites
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
-    private function scholarlyFallbackResults(string $query, int $limit): array
+    private function fallbackResults(string $query, array $sites, int $limit): array
     {
         $encoded = rawurlencode($query);
+        $candidates = [];
 
-        $candidates = [
-            [
-                'title' => 'Google Scholar — '.$query,
-                'url' => 'https://scholar.google.com/scholar?q='.$encoded,
-                'snippet' => 'Peer-reviewed articles, theses, books, and conference papers.',
-                'source' => 'google_scholar',
-            ],
-            [
-                'title' => 'PubMed — '.$query,
-                'url' => 'https://pubmed.ncbi.nlm.nih.gov/?term='.$encoded,
-                'snippet' => 'Biomedical and life sciences literature from MEDLINE and related databases.',
-                'source' => 'pubmed',
-            ],
-        ];
+        foreach ($sites as $site) {
+            $searchUrl = str_replace('{query}', $encoded, (string) ($site['search_url'] ?? ''));
+            if ($searchUrl === '' || ! preg_match('#^https?://#i', $searchUrl)) {
+                continue;
+            }
+
+            $label = trim((string) ($site['label'] ?? 'Resource'));
+            $candidates[] = [
+                'title' => $label.' — '.$query,
+                'url' => $searchUrl,
+                'snippet' => trim((string) ($site['snippet'] ?? '')),
+                'source' => (string) ($site['id'] ?? 'external'),
+                'label' => $label,
+                'icon' => trim((string) ($site['icon'] ?? 'fa-link')) ?: 'fa-link',
+            ];
+        }
 
         return array_slice($candidates, 0, max(1, $limit));
     }
 
     /**
-     * @param  list<array{title: string, url: string, snippet: string, source: string}>  $results
-     * @return list<array{title: string, url: string, snippet: string, source: string}>
+     * @param  list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>  $results
+     * @return list<array{title: string, url: string, snippet: string, source: string, label: string, icon: string}>
      */
     private function uniqueResults(array $results): array
     {
@@ -259,28 +300,29 @@ class AiInternetSearchService
         return $unique;
     }
 
-    private function isScholarlyUrl(string $url): bool
-    {
-        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
-
-        return str_contains($host, 'scholar.google')
-            || str_contains($host, 'pubmed.ncbi.nlm.nih.gov')
-            || str_contains($host, 'ncbi.nlm.nih.gov');
-    }
-
     /**
-     * @return array{title: string, url: string, snippet: string, source: string}|null
+     * @param  array<string, mixed>|null  $site
+     * @return array{title: string, url: string, snippet: string, source: string, label: string, icon: string}|null
      */
-    private function normalizeResult(string $title, string $url, string $snippet, string $source): ?array
+    private function normalizeResult(string $title, string $url, string $snippet, ?array $site = null): ?array
     {
         $url = trim($url);
         if ($url === '' || ! preg_match('#^https?://#i', $url)) {
             return null;
         }
 
+        if (! AiConfig::urlMatchesAllowedSearchSite($url)) {
+            return null;
+        }
+
+        $resolvedSite = $site ?? AiConfig::resolveSiteForUrl($url);
+        $label = trim((string) ($resolvedSite['label'] ?? 'Resource'));
+        $source = (string) ($resolvedSite['id'] ?? 'external');
+        $icon = trim((string) ($resolvedSite['icon'] ?? 'fa-link')) ?: 'fa-link';
+
         $title = Str::limit(trim($this->cleanHtmlFragment($title)), 120);
         if ($title === '') {
-            $title = $source === 'pubmed' ? 'PubMed' : 'Google Scholar';
+            $title = $label;
         }
 
         return [
@@ -288,6 +330,8 @@ class AiInternetSearchService
             'url' => $url,
             'snippet' => Str::limit(trim(strip_tags($snippet)), 200),
             'source' => $source,
+            'label' => $label,
+            'icon' => $icon,
         ];
     }
 

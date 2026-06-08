@@ -87,6 +87,42 @@
         var row = btn.closest('.integration-row');
         if (row) row.remove();
     });
+
+    var sitesContainer = document.getElementById('allowed-sites-list');
+    var addSiteBtn = document.getElementById('add-allowed-site');
+    var siteTemplate = document.getElementById('allowed-site-template');
+    if (sitesContainer && addSiteBtn && siteTemplate) {
+        var siteIndex = sitesContainer.querySelectorAll('.allowed-site-row').length;
+
+        function reindexSiteNames(row, idx) {
+            row.querySelectorAll('[name]').forEach(function (el) {
+                el.name = el.name.replace(/ai_search_allowed_sites\[\d+\]/, 'ai_search_allowed_sites[' + idx + ']');
+            });
+            var enabled = row.querySelector('[id^="allowed_site_enabled_"]');
+            if (enabled) {
+                enabled.id = 'allowed_site_enabled_' + idx;
+                var label = row.querySelector('label[for^="allowed_site_enabled_"]');
+                if (label) label.setAttribute('for', 'allowed_site_enabled_' + idx);
+            }
+        }
+
+        addSiteBtn.addEventListener('click', function () {
+            var emptyMsg = document.getElementById('no-allowed-sites-msg');
+            if (emptyMsg) emptyMsg.remove();
+            var clone = siteTemplate.content.cloneNode(true);
+            var row = clone.querySelector('.allowed-site-row');
+            reindexSiteNames(row, siteIndex);
+            sitesContainer.appendChild(clone);
+            siteIndex++;
+        });
+
+        sitesContainer.addEventListener('click', function (e) {
+            var btn = e.target.closest('.btn-remove-allowed-site');
+            if (!btn) return;
+            var row = btn.closest('.allowed-site-row');
+            if (row) row.remove();
+        });
+    }
 })();
 </script>
 @endif

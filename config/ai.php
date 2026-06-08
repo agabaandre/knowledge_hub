@@ -158,4 +158,33 @@ return [
         'ai_search' => 'openai',
     ],
 
+    /*
+    | Sites allowed for AI search web results and external resource links.
+    | Admins can add more in Learning → AI config → Web search.
+    */
+    'default_ai_search_sites' => [
+        [
+            'id' => 'google_scholar',
+            'label' => 'Google Scholar',
+            'hosts' => ['scholar.google'],
+            'search_url' => 'https://scholar.google.com/scholar?q={query}',
+            'site_search' => '',
+            'serper_mode' => 'scholar',
+            'icon' => 'fa-graduation-cap',
+            'snippet' => 'Peer-reviewed articles, theses, books, and conference papers.',
+            'enabled' => true,
+        ],
+        [
+            'id' => 'pubmed',
+            'label' => 'PubMed',
+            'hosts' => ['pubmed.ncbi.nlm.nih.gov', 'ncbi.nlm.nih.gov'],
+            'search_url' => 'https://pubmed.ncbi.nlm.nih.gov/?term={query}',
+            'site_search' => 'site:pubmed.ncbi.nlm.nih.gov',
+            'serper_mode' => 'web',
+            'icon' => 'fa-book-medical',
+            'snippet' => 'Biomedical and life sciences literature from MEDLINE and related databases.',
+            'enabled' => true,
+        ],
+    ],
+
 ];

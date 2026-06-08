@@ -1645,7 +1645,14 @@ if (!function_exists('sanitize_rich_text_for_display')) {
             return '';
         }
 
-        $decoded = html_entity_decode($html, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        $decoded = $html;
+        for ($i = 0; $i < 3; $i++) {
+            $prev = $decoded;
+            $decoded = html_entity_decode($decoded, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            if ($decoded === $prev) {
+                break;
+            }
+        }
 
     libxml_use_internal_errors(true);
         $dom = new \DOMDocument('1.0', 'UTF-8');

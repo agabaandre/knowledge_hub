@@ -342,13 +342,7 @@ class PublicationsController extends Controller
             + $data['federatedPublications']->count()
             + $data['federatedForums']->count();
 
-        $latestRequest = clone $request;
-        $latestRequest->merge(['rows' => 5]);
-        $data['latestPublications'] = $this->publicationsRepo->get($latestRequest);
-
-        $relatedRequest = clone $request;
-        $relatedRequest->merge(['rows' => 5]);
-        $data['relatedPublications'] = $this->publicationsRepo->get($relatedRequest);
+        $data['latestPublications'] = $this->publicationsRepo->get(new Request(['rows' => 5]));
 
         $data['tags'] = Tag::popularByEngagement(20);
 

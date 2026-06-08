@@ -1,13 +1,20 @@
 @php
-    $discussionsUrl = url('forums') . (request()->filled('term') ? '?term=' . urlencode(request('term')) : '');
+    $forumsUrl = url('forums');
+    if (request()->filled('term')) {
+        $forumsUrl .= '?term=' . urlencode(request('term'));
+    } elseif (request()->filled('tag')) {
+        $tagModel = \App\Models\Tag::find((int) request('tag'));
+        if ($tagModel) {
+            $forumsUrl .= '?term=' . urlencode($tagModel->tag_text);
+        }
+    }
 @endphp
 
-{{-- Related Discussions (sidebar, before Related Resources) --}}
 @if(isset($searchForums) && $searchForums->count() > 0)
 <div class="contributor-sidebar-panel search-sidebar-panel mb-4">
     <div class="contributor-sidebar-panel__header">
         <i class="fa fa-comments contributor-sidebar-panel__icon" aria-hidden="true"></i>
-        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_discussions') }}</h3>
+        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_forums') }}</h3>
     </div>
     <ul class="search-sidebar-list list-unstyled mb-0">
         @foreach($searchForums as $forum)
@@ -29,41 +36,7 @@
         </li>
         @endforeach
     </ul>
-    <a href="{{ $discussionsUrl }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_discussions') }}</a>
-</div>
-@endif
-
-{{-- Related Resources + Latest (refreshed with AJAX when filters change) --}}
-@if(isset($relatedPublications) && $relatedPublications->count() > 0)
-<div class="contributor-sidebar-panel search-sidebar-panel mb-4">
-    <div class="contributor-sidebar-panel__header">
-        <i class="fa fa-file-lines contributor-sidebar-panel__icon" aria-hidden="true"></i>
-        <h3 class="contributor-sidebar-panel__title">{{ __('publications.search.related_resources') }}</h3>
-    </div>
-    <ul class="search-sidebar-list list-unstyled mb-0">
-        @foreach($relatedPublications->take(5) as $pub)
-        <li class="search-sidebar-list__item">
-            <a href="{{ publication_url($pub) }}" class="search-sidebar-list__link">
-                <span class="search-sidebar-list__title">{{ Str::limit(strip_tags($pub->title), 90) }}</span>
-                <span class="search-sidebar-list__excerpt">{{ Str::limit(strip_tags(clean_unicode(publication_description_for_list($pub->description ?? ''))), 100) }}</span>
-                <span class="search-sidebar-list__meta">
-                    @if($pub->author)
-                    <span class="notranslate" translate="no">
-                        <i class="fa fa-user" aria-hidden="true"></i>
-                        @if(!empty($pub->author->orcid))
-                            {{ $pub->author->name }}
-                        @else
-                            {{ $pub->author->name }}
-                        @endif
-                    </span>
-                    @endif
-                    <span><i class="fa fa-calendar" aria-hidden="true"></i> {{ $pub->created_at->format('M Y') }}</span>
-                </span>
-            </a>
-        </li>
-        @endforeach
-    </ul>
-    <a href="{{ url('records') }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_resources') }}</a>
+    <a href="{{ $forumsUrl }}" class="search-sidebar-view-all">{{ __('publications.search.view_all_forums') }}</a>
 </div>
 @endif
 

@@ -8,6 +8,7 @@
     ];
 @endphp
 <input type="hidden" name="custom_integrations_submitted" value="1">
+<input type="hidden" name="ai_search_allowed_sites_submitted" value="1">
 
 <div class="alert alert-light border mb-4">
     <i class="fa fa-info-circle me-2" style="color: var(--la-primary);"></i>
@@ -238,6 +239,25 @@
                 </div>
             </div>
         @endforeach
+
+        <div class="mt-4 pt-3 border-top">
+            <div class="d-flex justify-content-between align-items-start flex-wrap gap-2 mb-3">
+                <div>
+                    <h5 class="mb-1">{{ __('admin_nav.ai_allowed_sites') }}</h5>
+                    <p class="text-muted small mb-0">{{ __('admin_nav.ai_allowed_sites_intro') }}</p>
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" id="add-allowed-site">
+                    <i class="fa fa-plus me-1"></i>{{ __('admin_nav.ai_add_allowed_site') }}
+                </button>
+            </div>
+            <div id="allowed-sites-list">
+                @forelse($aiPage['ai_search_allowed_sites'] ?? [] as $idx => $site)
+                    @include('admin.courses.partials.ai_search_allowed_site_row', ['site' => $site, 'index' => $idx])
+                @empty
+                    <p class="text-muted small mb-0" id="no-allowed-sites-msg">{{ __('admin_nav.ai_no_allowed_sites') }}</p>
+                @endforelse
+            </div>
+        </div>
     </div>
 </div>
 @endif
@@ -274,6 +294,23 @@
             'model' => '',
             'enabled' => true,
             'has_stored_key' => false,
+        ],
+        'index' => '__INDEX__',
+    ])
+</template>
+
+<template id="allowed-site-template">
+    @include('admin.courses.partials.ai_search_allowed_site_row', [
+        'site' => [
+            'id' => '',
+            'label' => '',
+            'hosts' => '',
+            'search_url' => '',
+            'site_search' => '',
+            'serper_mode' => 'web',
+            'icon' => 'fa-link',
+            'snippet' => '',
+            'enabled' => true,
         ],
         'index' => '__INDEX__',
     ])

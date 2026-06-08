@@ -814,6 +814,7 @@ class AiConfig
             'ai.feature_routing' => self::featureRouting(),
             'ai.custom_integrations' => self::customIntegrations(),
             'ai.source_priority' => self::sourcePriorities(),
+            'ai.search_allowed_sites' => self::aiSearchAllowedSites(),
         ]);
     }
 
@@ -959,6 +960,7 @@ class AiConfig
             'features' => $features,
             'builtin_providers' => $builtin,
             'web_search_providers' => $webSearch,
+            'ai_search_allowed_sites' => self::aiSearchAllowedSites(),
             'custom_integrations' => array_map(function (array $integration) {
                 $pid = self::integrationProviderId($integration['id']);
 
@@ -976,6 +978,183 @@ class AiConfig
                 'primary_chat_label' => $providerLabels[self::primaryChatProvider() ?? ''] ?? 'Not configured',
             ],
         ];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function defaultAiSearchSites(): array
+    {
+        $defaults = config('ai.default_ai_search_sites', []);
+
+        return is_array($defaults) ? $defaults : [];
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function aiSearchAllowedSites(): array
+    {
+        $db = self::dbSettings();
+
+        if ($db && Schema::hasColumn('setting', 'ai_search_allowed_sites') && ! empty($db->ai_search_allowed_sites)) {
+            $stored = json_decode((string) $db->ai_search_allowed_sites, true);
+            if (is_array($stored) && $stored !== []) {
+                return self::normalizeAiSearchAllowedSitesInput($stored);
+            }
+        }
+
+        return self::normalizeAiSearchAllowedSitesInput(self::defaultAiSearchSites());
+    }
+
+    /**
+     * @return list<array<string, mixed>>
+     */
+    public static function enabledAiSearchSites(): array
+    {
+        return array_values(array_filter(
+            self::aiSearchAllowedSites(),
+            fn (array $site) => (bool) ($site['enabled'] ?? true)
+        ));
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    public static function resolveSiteForUrl(string $url): ?array
+    {
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        if ($host === '') {
+            return null;
+        }
+
+        foreach (self::enabledAiSearchSites() as $site) {
+            foreach ((array) ($site['hosts'] ?? []) as $pattern) {
+                $pattern = strtolower(trim((string) $pattern));
+                if ($pattern !== '' && str_contains($host, $pattern)) {
+                    return $site;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public static function urlMatchesAllowedSearchSite(string $url): bool
+    {
+        return self::resolveSiteForUrl($url) !== null;
+    }
+
+    public static function allowedSearchSiteLabels(): string
+    {
+        $labels = array_values(array_filter(array_map(
+            fn (array $site) => trim((string) ($site['label'] ?? '')),
+            self::enabledAiSearchSites()
+        )));
+
+        if ($labels === []) {
+            return 'configured scholarly sites';
+        }
+
+        if (count($labels) === 1) {
+            return $labels[0];
+        }
+
+        $last = array_pop($labels);
+
+        return implode(', ', $labels).' and '.$last;
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $submitted
+     * @param  list<array<string, mixed>>  $existing
+     * @return list<array<string, mixed>>
+     */
+    public static function normalizeAiSearchAllowedSitesInput(array $submitted, array $existing = []): array
+    {
+        $existingById = [];
+        foreach ($existing as $row) {
+            if (is_array($row) && ! empty($row['id'])) {
+                $existingById[(string) $row['id']] = $row;
+            }
+        }
+
+        $normalized = [];
+        $usedIds = [];
+
+        foreach ($submitted as $row) {
+            if (! is_array($row)) {
+                continue;
+            }
+
+            $label = trim((string) ($row['label'] ?? ''));
+            if ($label === '') {
+                continue;
+            }
+
+            $id = trim((string) ($row['id'] ?? ''));
+            if ($id === '') {
+                $id = Str::slug($label);
+            }
+            $baseId = $id;
+            $suffix = 2;
+            while (in_array($id, $usedIds, true)) {
+                $id = $baseId.'-'.$suffix;
+                $suffix++;
+            }
+            $usedIds[] = $id;
+
+            $hosts = [];
+            $hostsRaw = $row['hosts'] ?? '';
+            if (is_array($hostsRaw)) {
+                foreach ($hostsRaw as $host) {
+                    $host = strtolower(trim((string) $host));
+                    if ($host !== '') {
+                        $hosts[] = $host;
+                    }
+                }
+            } else {
+                foreach (preg_split('/[\r\n,]+/', (string) $hostsRaw) ?: [] as $host) {
+                    $host = strtolower(trim($host));
+                    if ($host !== '') {
+                        $hosts[] = $host;
+                    }
+                }
+            }
+            if ($hosts === [] && isset($existingById[$id])) {
+                $hosts = (array) ($existingById[$id]['hosts'] ?? []);
+            }
+            if ($hosts === []) {
+                continue;
+            }
+
+            $searchUrl = trim((string) ($row['search_url'] ?? ''));
+            if ($searchUrl === '' && isset($existingById[$id])) {
+                $searchUrl = (string) ($existingById[$id]['search_url'] ?? '');
+            }
+            if ($searchUrl === '' || ! str_contains($searchUrl, '{query}')) {
+                continue;
+            }
+
+            $serperMode = trim((string) ($row['serper_mode'] ?? 'web'));
+            if (! in_array($serperMode, ['scholar', 'web', 'none'], true)) {
+                $serperMode = 'web';
+            }
+
+            $normalized[] = [
+                'id' => $id,
+                'label' => $label,
+                'hosts' => array_values(array_unique($hosts)),
+                'search_url' => $searchUrl,
+                'site_search' => trim((string) ($row['site_search'] ?? '')),
+                'serper_mode' => $serperMode,
+                'icon' => trim((string) ($row['icon'] ?? 'fa-link')) ?: 'fa-link',
+                'snippet' => trim((string) ($row['snippet'] ?? '')),
+                'enabled' => filter_var($row['enabled'] ?? false, FILTER_VALIDATE_BOOLEAN),
+            ];
+        }
+
+        return $normalized !== [] ? $normalized : self::defaultAiSearchSites();
     }
 
     /**
