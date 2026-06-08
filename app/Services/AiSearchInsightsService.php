@@ -45,7 +45,7 @@ class AiSearchInsightsService
             return null;
         }
 
-        $cacheKey = 'ai_search_insights:v6:'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheKey = 'ai_search_insights:v5:'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
             $cached = Cache::get($cacheKey);
@@ -87,7 +87,7 @@ class AiSearchInsightsService
         }
 
         foreach ([
-            'overview', 'key_takeaways', 'key_points', 'publications', 'forums', 'communities',
+            'overview', 'key_points', 'publications', 'forums', 'communities',
             'health_topics', 'scholarly_sources', 'internet_results', 'external_resources',
             'thematic_areas', 'sub_thematic_areas', 'contributors',
         ] as $key) {
@@ -150,14 +150,12 @@ class AiSearchInsightsService
             .'Never include private contact details (emails, phone numbers, postal addresses). '
             .'overview: exactly 2 sentences, max 65 words. Sentence 1 defines the topic in public-health terms (Africa context when appropriate). '
             .'Sentence 2 states what Khub holds for this query using total_publications_matching when > 0; do not list individual resource titles. '
-            .'key_points: exactly 3 objects {text, source_url}. text: 8-14 words, strong keyword first. '
-            .'source_url: pick the best matching URL from internet_results for that point; required when the point cites external evidence. '
-            .'Do not repeat the same source_url across key_points when alternatives exist. '
-            .'Leave external_resources empty—internet_results already lists scholarly sources. '
+            .'key_points: exactly 3 objects {text, source_url}. text: 8-14 words, directly about the search query only (no unrelated diseases). '
+            .'source_url: copy exactly one URL from internet_results when the takeaway is supported by that source; otherwise null. Use each source at most once. '
             .'Return strict JSON with keys: overview (string), key_points (array of 3 {text, source_url}), '
             .'featured_publication_ids (array of int, max 3 from catalog), featured_forum_ids (array of int, max 2), '
             .'featured_community_ids (array of int, max 2), featured_health_topic_ids (array of int, max 3), '
-            .'external_resources (array, usually empty).';
+            .'external_resources (array of {title, url, note} max 3).';
 
         $userPayload = [
             'query' => $term,
@@ -671,6 +669,8 @@ class AiSearchInsightsService
             || $subThemeCatalog !== []
             || $authorCatalog !== [];
 
+        $keyPoints = $this->normalizeKeyPoints((array) ($decoded['key_points'] ?? []), $scholarlySources);
+
         if (trim($overview) === '' && $hasDisplayableContent) {
             $overview = $this->composeFallbackOverview(
                 $term,
@@ -681,10 +681,8 @@ class AiSearchInsightsService
             );
         }
 
-        $keyTakeaways = $this->buildKeyTakeaways((array) ($decoded['key_points'] ?? []), $scholarlySources);
-
-        if ($keyTakeaways === [] && $hasDisplayableContent) {
-            $keyTakeaways = $this->composeFallbackKeyTakeaways(
+        if ($keyPoints === [] && $hasDisplayableContent) {
+            $keyPoints = $this->composeFallbackKeyPoints(
                 $term,
                 $totalPublications,
                 $pickHealthTopics,
@@ -695,9 +693,13 @@ class AiSearchInsightsService
             );
         }
 
-        $keyPoints = array_values(array_map(
-            fn (array $takeaway) => (string) ($takeaway['text'] ?? ''),
-            $keyTakeaways
+        $linkedSourceUrls = array_flip(array_filter(array_map(
+            fn (array $point) => (string) ($point['url'] ?? ''),
+            $keyPoints
+        )));
+        $extraScholarlySources = array_values(array_filter(
+            $scholarlySources,
+            fn (array $source) => ! isset($linkedSourceUrls[(string) ($source['url'] ?? '')])
         ));
 
         $healthTopics = array_map(function (array $topic): array {
@@ -712,17 +714,16 @@ class AiSearchInsightsService
             'query' => $term,
             'hub_matches' => $totalPublications,
             'overview' => $overview,
-            'key_takeaways' => array_slice($keyTakeaways, 0, 3),
             'key_points' => array_slice($keyPoints, 0, 3),
-            'publications' => array_slice($pickPublications, 0, 2),
-            'forums' => array_slice($pickForums, 0, 1),
-            'communities' => array_slice($pickCommunities, 0, 1),
-            'health_topics' => array_slice($healthTopics, 0, 2),
-            'scholarly_sources' => array_slice($scholarlySources, 0, 3),
-            'internet_results' => array_slice($scholarlySources, 0, 3),
-            'thematic_areas' => array_slice($themeCatalog, 0, 4),
-            'sub_thematic_areas' => array_slice($subThemeCatalog, 0, 4),
-            'contributors' => array_slice($authorCatalog, 0, 4),
+            'publications' => array_slice($pickPublications, 0, 3),
+            'forums' => array_slice($pickForums, 0, 2),
+            'communities' => array_slice($pickCommunities, 0, 2),
+            'health_topics' => $healthTopics,
+            'scholarly_sources' => array_slice($extraScholarlySources, 0, 3),
+            'internet_results' => array_slice($extraScholarlySources, 0, 3),
+            'thematic_areas' => array_slice($themeCatalog, 0, 6),
+            'sub_thematic_areas' => array_slice($subThemeCatalog, 0, 8),
+            'contributors' => array_slice($authorCatalog, 0, 6),
             'external_resources' => [],
         ];
     }
@@ -730,27 +731,15 @@ class AiSearchInsightsService
     /**
      * @param  list<array<string, mixed>>  $internetResults
      * @param  list<array<string, mixed>>  $external
-     * @return list<array{text: string, url: string, label: string, icon: string, snippet: string}>
+     * @return list<array<string, mixed>>
      */
     private function mergeScholarlySources(array $internetResults, array $external): array
     {
         $merged = [];
         $seenUrls = [];
-        $seenSourceIds = [];
+        $seenTitles = [];
 
-        $candidates = $internetResults;
-        foreach ($external as $row) {
-            $candidates[] = [
-                'title' => (string) ($row['title'] ?? 'Resource'),
-                'url' => (string) ($row['url'] ?? ''),
-                'snippet' => (string) ($row['note'] ?? ''),
-                'source' => 'external',
-                'label' => (string) ($row['title'] ?? 'External resource'),
-                'icon' => 'fa-arrow-up-right-from-square',
-            ];
-        }
-
-        foreach ($candidates as $row) {
+        foreach (array_merge($internetResults, $external) as $row) {
             if (! is_array($row)) {
                 continue;
             }
@@ -760,119 +749,156 @@ class AiSearchInsightsService
                 continue;
             }
 
-            $urlKey = strtolower(rtrim($url, '/'));
-            if (isset($seenUrls[$urlKey])) {
-                continue;
-            }
-
-            $sourceId = strtolower(trim((string) ($row['source'] ?? '')));
-            if ($sourceId !== '' && $sourceId !== 'external' && isset($seenSourceIds[$sourceId])) {
+            $urlKey = $this->normalizeSourceUrlKey($url);
+            $titleKey = mb_strtolower(trim((string) ($row['title'] ?? '')));
+            if (isset($seenUrls[$urlKey]) || ($titleKey !== '' && isset($seenTitles[$titleKey]))) {
                 continue;
             }
 
             $seenUrls[$urlKey] = true;
-            if ($sourceId !== '' && $sourceId !== 'external') {
-                $seenSourceIds[$sourceId] = true;
+            if ($titleKey !== '') {
+                $seenTitles[$titleKey] = true;
             }
 
             $merged[] = [
-                'title' => Str::limit(trim((string) ($row['title'] ?? '')), 120),
+                'title' => Str::limit(trim((string) ($row['title'] ?? 'Resource')), 120),
                 'url' => $url,
-                'label' => Str::limit(trim((string) ($row['label'] ?? $row['title'] ?? 'Scholarly source')), 80),
-                'icon' => (string) ($row['icon'] ?? 'fa-graduation-cap'),
-                'snippet' => Str::limit(trim((string) ($row['snippet'] ?? '')), 160),
+                'snippet' => Str::limit(trim((string) ($row['snippet'] ?? $row['note'] ?? '')), 180),
+                'label' => trim((string) ($row['label'] ?? 'Resource')),
+                'icon' => trim((string) ($row['icon'] ?? 'fa-graduation-cap')) ?: 'fa-graduation-cap',
+                'source' => trim((string) ($row['source'] ?? 'external')),
+                'is_portal' => $this->isPortalSearchUrl($url),
             ];
         }
 
-        return array_slice($merged, 0, 4);
+        $articles = [];
+        $portals = [];
+        $hostsWithArticles = [];
+
+        foreach ($merged as $item) {
+            if ($item['is_portal']) {
+                $portals[] = $item;
+
+                continue;
+            }
+
+            $articles[] = $item;
+            $hostsWithArticles[$this->sourceHost($item['url'])] = true;
+        }
+
+        $filtered = $articles;
+        foreach ($portals as $portal) {
+            if (! isset($hostsWithArticles[$this->sourceHost($portal['url'])])) {
+                $filtered[] = $portal;
+            }
+        }
+
+        return array_slice($filtered, 0, 6);
     }
 
     /**
-     * @param  list<mixed>  $rawPoints
-     * @param  list<array<string, mixed>>  $scholarlySources
-     * @return list<array{text: string, url: string, label: string}>
+     * @param  list<mixed>  $raw
+     * @param  list<array<string, mixed>>  $sources
+     * @return list<array{text: string, url: string|null, label: string|null, icon: string|null}>
      */
-    private function buildKeyTakeaways(array $rawPoints, array $scholarlySources): array
+    private function normalizeKeyPoints(array $raw, array $sources): array
     {
-        $takeaways = [];
+        $points = [];
         $usedUrls = [];
 
-        foreach ($rawPoints as $point) {
+        foreach ($raw as $item) {
             $text = '';
-            $url = '';
+            $sourceUrl = '';
 
-            if (is_array($point)) {
-                $text = $this->cleanKeyPointText((string) ($point['text'] ?? $point['title'] ?? ''));
-                $url = trim((string) ($point['source_url'] ?? $point['url'] ?? ''));
-            } else {
-                $text = $this->cleanKeyPointText((string) $point);
+            if (is_string($item)) {
+                $text = $this->cleanKeyPointText($item);
+            } elseif (is_array($item)) {
+                $text = $this->cleanKeyPointText((string) ($item['text'] ?? $item['point'] ?? ''));
+                $sourceUrl = trim((string) ($item['source_url'] ?? $item['url'] ?? ''));
             }
 
             if ($text === '') {
                 continue;
             }
 
-            $linked = $this->resolveScholarlyLink($url, $scholarlySources, $usedUrls);
-            if ($linked !== null) {
-                $usedUrls[$linked['url_key']] = true;
+            $source = $this->findScholarlySource($sources, $sourceUrl, $usedUrls);
+            if ($source !== null) {
+                $usedUrls[(string) $source['url']] = true;
             }
 
-            $takeaways[] = [
+            $points[] = [
                 'text' => Str::limit($text, 160),
-                'url' => $linked['url'] ?? '',
-                'label' => $linked['label'] ?? '',
+                'url' => $source['url'] ?? null,
+                'label' => $source['label'] ?? null,
+                'icon' => $source['icon'] ?? null,
             ];
-        }
 
-        $sourceIndex = 0;
-        foreach ($takeaways as &$takeaway) {
-            if (($takeaway['url'] ?? '') !== '' || $scholarlySources === []) {
-                continue;
-            }
-
-            while ($sourceIndex < count($scholarlySources)) {
-                $candidate = $scholarlySources[$sourceIndex];
-                $sourceIndex++;
-                $urlKey = strtolower(rtrim((string) ($candidate['url'] ?? ''), '/'));
-                if ($urlKey === '' || isset($usedUrls[$urlKey])) {
-                    continue;
-                }
-                $usedUrls[$urlKey] = true;
-                $takeaway['url'] = (string) $candidate['url'];
-                $takeaway['label'] = (string) ($candidate['label'] ?? '');
+            if (count($points) >= 3) {
                 break;
             }
         }
-        unset($takeaway);
 
-        return $takeaways;
+        return $points;
     }
 
     /**
-     * @param  list<array<string, mixed>>  $scholarlySources
+     * @param  list<array<string, mixed>>  $sources
      * @param  array<string, bool>  $usedUrls
-     * @return array{url: string, label: string, url_key: string}|null
+     * @return array<string, mixed>|null
      */
-    private function resolveScholarlyLink(string $url, array $scholarlySources, array $usedUrls): ?array
+    private function findScholarlySource(array $sources, string $preferredUrl, array $usedUrls): ?array
     {
-        if ($url !== '' && preg_match('#^https?://#i', $url) && $this->isAllowedExternalUrl($url)) {
-            $urlKey = strtolower(rtrim($url, '/'));
-            if (! isset($usedUrls[$urlKey])) {
-                foreach ($scholarlySources as $source) {
-                    if (strtolower(rtrim((string) ($source['url'] ?? ''), '/')) === $urlKey) {
-                        return [
-                            'url' => $url,
-                            'label' => (string) ($source['label'] ?? ''),
-                            'url_key' => $urlKey,
-                        ];
-                    }
+        if ($preferredUrl !== '') {
+            foreach ($sources as $source) {
+                if ($this->normalizeSourceUrlKey((string) ($source['url'] ?? '')) === $this->normalizeSourceUrlKey($preferredUrl)) {
+                    return $source;
                 }
+            }
+        }
 
-                return ['url' => $url, 'label' => '', 'url_key' => $urlKey];
+        foreach ($sources as $source) {
+            $url = (string) ($source['url'] ?? '');
+            if ($url === '' || isset($usedUrls[$url]) || ($source['is_portal'] ?? false)) {
+                continue;
+            }
+
+            return $source;
+        }
+
+        foreach ($sources as $source) {
+            $url = (string) ($source['url'] ?? '');
+            if ($url !== '' && ! isset($usedUrls[$url])) {
+                return $source;
             }
         }
 
         return null;
+    }
+
+    private function normalizeSourceUrlKey(string $url): string
+    {
+        $url = trim(strtolower($url));
+        $url = rtrim($url, '/');
+        $url = (string) preg_replace('/#.*$/', '', $url);
+        $url = (string) preg_replace('/[?&](utm_[^=&]+|ref|source)=[^&]*/', '', $url);
+
+        return rtrim($url, '?&');
+    }
+
+    private function sourceHost(string $url): string
+    {
+        return strtolower((string) parse_url($url, PHP_URL_HOST));
+    }
+
+    private function isPortalSearchUrl(string $url): bool
+    {
+        $path = strtolower((string) parse_url($url, PHP_URL_PATH));
+        $query = strtolower((string) parse_url($url, PHP_URL_QUERY));
+
+        return str_contains($path, '/search')
+            || str_contains($query, 'term=')
+            || str_contains($query, 'simplequery=')
+            || str_contains($query, 'q=');
     }
 
     /**
@@ -963,9 +989,9 @@ class AiSearchInsightsService
      * @param  list<array<string, mixed>>  $forums
      * @param  list<array<string, mixed>>  $communities
      * @param  list<array<string, mixed>>  $scholarlySources
-     * @return list<array{text: string, url: string, label: string}>
+     * @return list<array{text: string, url: string|null, label: string|null, icon: string|null}>
      */
-    private function composeFallbackKeyTakeaways(
+    private function composeFallbackKeyPoints(
         string $term,
         int $totalPublications,
         array $healthTopics,
@@ -974,72 +1000,48 @@ class AiSearchInsightsService
         array $communities,
         array $scholarlySources
     ): array {
-        $takeaways = [];
+        $texts = [];
 
         foreach ($scholarlySources as $source) {
-            $snippet = trim((string) ($source['snippet'] ?? ''));
-            $text = $snippet !== ''
-                ? Str::limit($snippet, 120)
-                : Str::limit((string) ($source['title'] ?? __('publications.search.ai_fallback_point_scholarly')), 120);
-
-            $takeaways[] = [
-                'text' => $text,
-                'url' => (string) ($source['url'] ?? ''),
-                'label' => (string) ($source['label'] ?? ''),
-            ];
-
-            if (count($takeaways) >= 3) {
-                return $takeaways;
+            $title = trim((string) ($source['title'] ?? ''));
+            if ($title !== '' && ! ($source['is_portal'] ?? false)) {
+                $texts[] = Str::limit($title, 100);
+            }
+            if (count($texts) >= 3) {
+                break;
             }
         }
 
         foreach (collect($healthTopics)->pluck('name')->filter()->take(2) as $name) {
-            $takeaways[] = [
-                'text' => __('publications.search.ai_fallback_point_topic', ['topic' => $name]),
-                'url' => '',
-                'label' => '',
-            ];
+            if (count($texts) >= 3) {
+                break;
+            }
+            $texts[] = __('publications.search.ai_fallback_point_topic', ['topic' => $name]);
         }
 
-        if ($totalPublications > 0 && count($takeaways) < 3) {
-            $takeaways[] = [
-                'text' => __('publications.search.ai_fallback_point_publications', [
-                    'count' => number_format($totalPublications),
-                ]),
-                'url' => '',
-                'label' => '',
-            ];
+        if ($totalPublications > 0 && count($texts) < 3) {
+            $texts[] = __('publications.search.ai_fallback_point_publications', [
+                'count' => number_format($totalPublications),
+            ]);
         }
 
-        if ($forums !== [] && count($takeaways) < 3) {
-            $takeaways[] = [
-                'text' => __('publications.search.ai_fallback_point_forums', [
-                    'count' => count($forums),
-                ]),
-                'url' => '',
-                'label' => '',
-            ];
+        if ($forums !== [] && count($texts) < 3) {
+            $texts[] = __('publications.search.ai_fallback_point_forums', [
+                'count' => count($forums),
+            ]);
         }
 
-        if ($communities !== [] && count($takeaways) < 3) {
-            $takeaways[] = [
-                'text' => __('publications.search.ai_fallback_point_communities', [
-                    'count' => count($communities),
-                ]),
-                'url' => '',
-                'label' => '',
-            ];
+        if ($communities !== [] && count($texts) < 3) {
+            $texts[] = __('publications.search.ai_fallback_point_communities', [
+                'count' => count($communities),
+            ]);
         }
 
-        if ($takeaways === [] && $term !== '') {
-            $takeaways[] = [
-                'text' => __('publications.search.ai_fallback_point_explore', ['term' => $term]),
-                'url' => '',
-                'label' => '',
-            ];
+        if ($texts === [] && $term !== '') {
+            $texts[] = __('publications.search.ai_fallback_point_explore', ['term' => $term]);
         }
 
-        return array_slice($takeaways, 0, 3);
+        return $this->normalizeKeyPoints($texts, $scholarlySources);
     }
 
     private function isAllowedExternalUrl(string $url): bool

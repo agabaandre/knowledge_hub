@@ -4,7 +4,7 @@
 @endphp
 <style>
     .home-health-emergencies {
-        padding: 1.25rem 0 0.5rem;
+        padding: 0.5rem 0 0.25rem;
     }
     .home-health-emergencies h2 {
         font-size: 1.125rem;

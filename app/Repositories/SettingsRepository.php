@@ -239,7 +239,7 @@ class SettingsRepository
         $settings->show_quotes = (bool)$request->boolean('show_quotes', false);
         $settings->show_quiz = (bool)$request->boolean('show_quiz', false);
         if (Schema::hasColumn('setting', 'show_health_themes')) {
-            $settings->show_health_themes = (bool)$request->boolean('show_health_themes', true);
+            $settings->show_health_themes = (bool) $request->boolean('show_health_themes', false);
         }
         if (Schema::hasColumn('setting', 'section_title_health_themes')) {
             $settings->section_title_health_themes = $request->input('section_title_health_themes');
@@ -807,7 +807,7 @@ class SettingsRepository
             'front_body_font_size' => $request->input('front_body_font_size') !== null && $request->input('front_body_font_size') !== '' ? (string) $request->input('front_body_font_size') : '14',
             'admin_body_font_size' => $request->input('admin_body_font_size') !== null && $request->input('admin_body_font_size') !== '' ? (string) $request->input('admin_body_font_size') : '14',
             'nav_font_size' => (string) max(9, min(16, (int) ($request->input('nav_font_size') ?: 11))),
-            'show_health_themes' => $request->boolean('show_health_themes', true) ? '1' : '0',
+            'show_health_themes' => $request->boolean('show_health_themes', false) ? '1' : '0',
             'section_title_health_themes' => $request->input('section_title_health_themes'),
             'section_title_top_searches' => $request->input('section_title_top_searches'),
             'section_title_recommended' => $request->input('section_title_recommended'),

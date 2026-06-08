@@ -7,7 +7,7 @@
 @endphp
 <style>
     .theme-grid {
-        padding: 1.5rem 0 1.5rem 0;
+        padding: 0.65rem 0 0.35rem;
         display: flex;
         align-items: center;
         min-width: 100%;
@@ -15,10 +15,10 @@
     }
 
     .themes-section-title {
-        font-size: 1.75rem;
+        font-size: 1.2rem;
         font-weight: 700;
         color: #ffffff;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.65rem;
         margin-top: 0;
         text-align: center;
         position: relative;

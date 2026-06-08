@@ -38,6 +38,7 @@ return [
         'key_takeaways' => 'Key takeaways',
         'on_this_hub' => 'On this hub',
         'scholarly_sources' => 'Scholarly sources',
+        'more_scholarly_sources' => 'More scholarly sources',
         'ai_overview_fallback' => 'Here is a quick summary of matching hub content and trusted web resources for your search.',
         'ai_fallback_with_topics' => 'Khub maintains dedicated health topic pages for :topics.',
         'ai_fallback_topic_joiner' => ' and ',

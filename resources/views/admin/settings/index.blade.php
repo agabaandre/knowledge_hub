@@ -1306,8 +1306,9 @@
                                 </div>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="show_health_themes" name="show_health_themes" value="1" @if($settings->show_health_themes ?? true) checked @endif>
-                                    <label class="form-check-label" for="show_health_themes">Show &quot;Choose a Health Theme to Explore&quot; section</label>
+                                    <label class="form-check-label" for="show_health_themes">Show health theme tiles below search</label>
                                 </div>
+                                <small class="info-text d-block mb-2">Uncheck to hide the thematic area tiles in the homepage spotlight (under the search box).</small>
                                 <div class="form-check">
                                     <input type="checkbox" class="form-check-input" id="show_quiz" name="show_quiz" value="1" @if(!empty($settings->show_quiz)) checked @endif>
                                     <label class="form-check-label" for="show_quiz">Show Quiz button on search results</label>

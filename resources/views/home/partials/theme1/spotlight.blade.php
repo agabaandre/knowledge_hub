@@ -17,7 +17,7 @@
 <style>
 .theme1-spotlight {
     position: relative;
-    padding: 6rem 0 3rem;
+    padding: 2.5rem 0 1rem;
     min-height: 200px;
     scroll-margin-top: 72px;
     margin-top: 1.25rem;

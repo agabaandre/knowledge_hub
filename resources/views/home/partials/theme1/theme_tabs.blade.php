@@ -8,14 +8,14 @@
 @endphp
 <style>
 .theme1-themes-section {
-    padding: 1.5rem 0 2rem;
+    padding: 0.5rem 0 0.75rem;
     width: 100%;
 }
 .theme1-themes-section .theme1-themes-title {
     font-size: 1.125rem;
     font-weight: 600;
     color: var(--text-color-primary, #1e293b);
-    margin: 0 0 1.25rem;
+    margin: 0 0 0.65rem;
     text-align: center;
     letter-spacing: -0.01em;
 }

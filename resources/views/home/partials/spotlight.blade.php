@@ -105,5 +105,9 @@
             </div>
         </div>
         @endif
+
+        @if(settings()->show_health_themes ?? true)
+            @include('home.partials.theme_tabs')
+        @endif
     </div>
 </div>
