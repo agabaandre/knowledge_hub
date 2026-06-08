@@ -1462,7 +1462,7 @@
                         <label>Spotlight Banner Image</label>
                         <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
                         <select name="spotlight_banner_existing" id="spotlight_banner_existing" class="form-control mb-2">
-                            <option value="">— Keep current / upload new —</option>
+                            <option value="" @if(!$currentBannerFile) selected @endif>— Keep current / upload new —</option>
                             @php $currentBannerFile = settings()->spotlight_banner ? basename(parse_url(settings()->spotlight_banner, PHP_URL_PATH)) : ''; @endphp
                             @foreach($configGalleryImages ?? [] as $f)
                                 <option value="{{ $f }}" @if($f === $currentBannerFile) selected @endif>{{ $f }}</option>
@@ -2231,7 +2231,9 @@
                                     </div>
                                     <small class="info-text d-block">When enabled, users who originally registered with email/password can use social login if the email matches. A successful social login verifies unverified accounts and updates sign-in method to social.</small>
                                 </div>
-                                @include('admin.settings.partials.sso_credentials_form', ['ssoFields' => $ssoFields ?? []])
+                                <p class="text-muted small mb-0">
+                                    Microsoft, Google, and LinkedIn credentials are saved in the <strong>Social Login</strong> section below the tabs. Saving general settings no longer changes sign-in provider toggles.
+                                </p>
                                 @if(\Illuminate\Support\Facades\Schema::hasColumn('setting', 'block_disposable_email_registration'))
                                 <hr class="my-3">
                                 <div class="form-group mb-2">
@@ -2504,6 +2506,18 @@
                 </div>
                 </div>
     </form>
+
+    @if(!empty($ssoFields))
+        <div class="settings-container mt-4 {{ (settings()->site_theme ?? '') === 'theme1.' ? 'settings-theme1' : '' }}" id="social-login-settings">
+            <div class="settings-header">
+                <h2><i class="fa fa-sign-in-alt me-2"></i>Social Login</h2>
+                <p>Configure Microsoft, Google, and LinkedIn sign-in separately from general settings.</p>
+            </div>
+            <div class="p-4">
+                @include('admin.settings.partials.sso_credentials_form', ['ssoFields' => $ssoFields, 'standalone' => true])
+            </div>
+        </div>
+    @endif
 
             <div class="settings-action-bar">
                 <div class="settings-action-bar__inner">
@@ -2938,6 +2952,7 @@
             $('#spotlight_banner').on('change', function(e) {
                 var file = e.target.files[0];
                 if (file) {
+                    $('#spotlight_banner_existing').val('');
                     var reader = new FileReader();
                     var $input = $(this);
                     reader.onload = function(e) {

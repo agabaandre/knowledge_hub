@@ -23,5 +23,10 @@ COPY docker/php/www.conf /usr/local/etc/php-fpm.d/zz-khub.conf
 COPY docker/entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
+COPY . /var/www/html
+
+ENV APP_KEY=base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+RUN composer install --no-interaction --prefer-dist --optimize-autoloader
+
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["php-fpm"]

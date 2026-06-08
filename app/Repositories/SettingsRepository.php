@@ -287,10 +287,6 @@ class SettingsRepository
             $settings->show_publication_card_file_type_badge = $request->boolean('show_publication_card_file_type_badge');
         }
 
-        // Social login toggles are only updated when the SSO section is submitted (see applySsoSettings).
-        if (Schema::hasColumn('setting', 'microsoft_client_id') && $request->has('sso_settings_submitted')) {
-            $this->applySsoSettings($settings, $request);
-        }
         if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
             $settings->allow_email_password_accounts_social_login = (bool)$request->boolean('allow_email_password_accounts_social_login', true);
         }
@@ -386,34 +382,15 @@ class SettingsRepository
         }
 
         // Save cover / images: upload new or use existing from gallery (per-theme: default → main row, themed → theme_settings)
-        if ($request->hasFile('logo') || $request->hasFile('favicon') || $request->hasFile('spotlight_banner')) {
-            if ($request->hasFile('logo')) {
-                $logo_filepath = $this->save_attachments($request->file('logo'));
-                if (!$hasThemeOverlay) {
-                    $settings->logo = $logo_filepath;
-                }
-                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting($themeKey, 'logo', $logo_filepath);
-                }
+        if ($request->hasFile('logo')) {
+            $logo_filepath = $this->save_attachments($request->file('logo'));
+            if (!$hasThemeOverlay) {
+                $settings->logo = $logo_filepath;
             }
-            if ($request->hasFile('favicon')) {
-                $favicon_filepath = $this->save_attachments($request->file('favicon'));
-                if (!$hasThemeOverlay) {
-                    $settings->favicon = $favicon_filepath;
-                }
-                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting($themeKey, 'favicon', $favicon_filepath);
-                }
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'logo', $logo_filepath);
             }
-            if ($request->hasFile('spotlight_banner')) {
-                $banner_filepath = $this->save_attachments($request->file('spotlight_banner'));
-                $settings->spotlight_banner = $banner_filepath;
-                if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
-                    $this->upsertThemeSetting($themeKey, 'spotlight_banner', $banner_filepath);
-                }
-            }
-        }
-        if ($request->filled('logo_existing')) {
+        } elseif ($request->filled('logo_existing')) {
             if (!$hasThemeOverlay) {
                 $settings->logo = $request->logo_existing;
             }
@@ -421,7 +398,16 @@ class SettingsRepository
                 $this->upsertThemeSetting($themeKey, 'logo', $request->logo_existing);
             }
         }
-        if ($request->filled('favicon_existing')) {
+
+        if ($request->hasFile('favicon')) {
+            $favicon_filepath = $this->save_attachments($request->file('favicon'));
+            if (!$hasThemeOverlay) {
+                $settings->favicon = $favicon_filepath;
+            }
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'favicon', $favicon_filepath);
+            }
+        } elseif ($request->filled('favicon_existing')) {
             if (!$hasThemeOverlay) {
                 $settings->favicon = $request->favicon_existing;
             }
@@ -429,7 +415,14 @@ class SettingsRepository
                 $this->upsertThemeSetting($themeKey, 'favicon', $request->favicon_existing);
             }
         }
-        if ($request->filled('spotlight_banner_existing')) {
+
+        if ($request->hasFile('spotlight_banner')) {
+            $banner_filepath = $this->save_attachments($request->file('spotlight_banner'));
+            $settings->spotlight_banner = $banner_filepath;
+            if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
+                $this->upsertThemeSetting($themeKey, 'spotlight_banner', $banner_filepath);
+            }
+        } elseif ($request->filled('spotlight_banner_existing')) {
             $settings->spotlight_banner = $request->spotlight_banner_existing;
             if ($hasThemeOverlay && Schema::hasTable('theme_settings')) {
                 $this->upsertThemeSetting($themeKey, 'spotlight_banner', $request->spotlight_banner_existing);
@@ -465,7 +458,7 @@ class SettingsRepository
             return null;
         }
 
-        $this->applySsoSettings($settings, $request);
+        $this->applySsoSettings($settings, $request, true);
         $settings->save();
 
         \App\Support\SsoConfig::clearCache();
@@ -599,9 +592,9 @@ class SettingsRepository
         }
     }
 
-    private function applySsoSettings(Setting $settings, Request $request): void
+    private function applySsoSettings(Setting $settings, Request $request, bool $force = false): void
     {
-        if (! $request->has('sso_settings_submitted')) {
+        if (! $force && ! $request->has('sso_settings_submitted')) {
             return;
         }
 

@@ -116,6 +116,23 @@ class SettingsController extends Controller
         return back()->with($data);
     }
 
+    public function storeSso(Request $request)
+    {
+        $saved = $this->settingsRepo->saveSsoIntegrations($request);
+
+        if ($saved) {
+            $data = ['alert-success' => 'Social login settings saved successfully', 'status' => 'success'];
+        } else {
+            $data = ['alert-danger' => 'Social login settings could not be saved', 'status' => 'failure'];
+        }
+
+        if ($request->ajax()) {
+            return response($data, $saved ? 200 : 422);
+        }
+
+        return back()->with($data);
+    }
+
     public function sendProfileReminders(Request $request)
     {
         try {

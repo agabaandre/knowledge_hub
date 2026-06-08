@@ -344,6 +344,7 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
 
     Route::get("/configure", [SettingsController::class, 'index'])->name('admin.configure');
     Route::post("/configure", [SettingsController::class, 'store'])->name('admin.config.save');
+    Route::post("/configure/sso", [SettingsController::class, 'storeSso'])->name('admin.config.sso.save');
     Route::post("/configure/clear-cache", [SettingsController::class, 'clearCache'])->name('admin.config.clear-cache');
     Route::post("/configure/send-profile-reminders", [SettingsController::class, 'sendProfileReminders'])->name('admin.config.send-profile-reminders');
     Route::post("/configure/custom-font", [SettingsController::class, 'storeCustomFont'])->name('admin.config.custom-font.store');

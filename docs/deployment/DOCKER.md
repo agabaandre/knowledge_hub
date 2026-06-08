@@ -11,6 +11,31 @@ cp .env.docker.example .env
 docker compose up -d --build
 ```
 
+**Do not use `sudo docker compose`** on macOS with Docker Desktop. The daemon runs under your user account; `sudo` does not grant access to paths Docker is allowed to mount and can cause permission mismatches.
+
+### macOS: “Mounts denied” / path not shared
+
+If you see:
+
+```text
+The path /opt/homebrew/var/www/knowledge_hub/... is not shared from the host and is not known to Docker.
+```
+
+Docker Desktop only mounts directories you allow in **Settings → Resources → File Sharing**. Paths under `/opt/homebrew/...` are **not** shared by default.
+
+Fix (pick one):
+
+1. **Add the path in Docker Desktop** — open Docker Desktop → **Settings** → **Resources** → **File Sharing**, add `/opt/homebrew/var/www` (or `/opt/homebrew`), click **Apply & Restart**, then run `docker compose up` again **without** `sudo`.
+
+2. **Move or clone the project under your home folder**, e.g. `~/www/knowledge_hub`, which is already shared (`/Users/...`).
+
+After fixing file sharing, run:
+
+```bash
+cd /path/to/knowledge_hub
+docker compose up -d --build
+```
+
 Open **http://localhost:8080/install** and complete all **six steps**:
 
 | Step | Topic |

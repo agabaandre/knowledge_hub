@@ -1,14 +1,23 @@
 @php
     $ssoFields = $ssoFields ?? [];
     $compact = !empty($compact);
+    $standalone = !empty($standalone);
 @endphp
 
 @if(!empty($ssoFields))
+    @if($standalone)
+        <form action="{{ route('admin.config.sso.save') }}" method="post" id="settings-sso-form" class="settings-sso-form">
+            @csrf
+    @endif
+
     <input type="hidden" name="sso_settings_submitted" value="1">
     @if(!$compact)
         <hr class="my-3">
         <p class="text-muted small mb-3">
             Social login credentials are read from <code>.env</code> by default. Values are saved to the database only when you change a field from what is in <code>.env</code>.
+            @if($standalone)
+                Use <strong>Save social login settings</strong> below — this is separate from <strong>Save All Changes</strong> so general settings saves do not affect sign-in options.
+            @endif
         </p>
     @endif
 
@@ -121,4 +130,13 @@
             </div>
         </div>
     </div>
+
+    @if($standalone)
+        <div class="d-flex justify-content-end">
+            <button type="submit" class="btn btn-primary">
+                <i class="fa fa-save me-2"></i>Save social login settings
+            </button>
+        </div>
+        </form>
+    @endif
 @endif
