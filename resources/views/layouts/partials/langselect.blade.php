@@ -720,13 +720,16 @@
     function khubApplyGoogleTranslateWhenReady(googleCode, attempt) {
         attempt = attempt || 0;
         if (typeof window.khubApplyGoogleTranslate === 'function') {
-            window.khubApplyGoogleTranslate(googleCode);
-            return;
+            if (window.khubGoogleTranslateReady) {
+                window.khubApplyGoogleTranslate(googleCode);
+                return;
+            }
+            window.khubPendingGoogleTranslate = googleCode;
         }
-        if (attempt < 25) {
+        if (attempt < 40) {
             setTimeout(function() {
                 khubApplyGoogleTranslateWhenReady(googleCode, attempt + 1);
-            }, 200);
+            }, 250);
         }
     }
 

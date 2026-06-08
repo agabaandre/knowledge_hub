@@ -9,9 +9,6 @@
 <!-- Back-to-top -->
 <a href="#top" id="back-to-top"><i class="las la-angle-double-up"></i></a>
 
-
-<script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit" type="text/javascript"></script>
-
 <!-- Popper js -->
 <script src="{{  asset('assets/plugins/popper/popper.min.js') }}"></script>
 

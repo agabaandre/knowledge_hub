@@ -40,8 +40,6 @@
 @include('partials.theming.colors')
 @include('layouts.partials.rtl_stylesheet')
 <script src="{{ asset('frontend/js/jquery.min.js') }}"></script>
-<script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
-</script>
 
 <style>
     .VIpgJd-ZVi9od-vH1Gmf-ibnC6b div,
