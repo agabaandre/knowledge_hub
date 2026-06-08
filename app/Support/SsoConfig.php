@@ -3,10 +3,14 @@
 namespace App\Support;
 
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class SsoConfig
 {
     private static ?object $dbSettings = null;
+
+    /** @var array<string, string>|null */
+    private static ?array $envFileCache = null;
 
     public static function clearCache(): void
     {
@@ -90,9 +94,15 @@ class SsoConfig
         }
 
         if ($envKey === 'MICROSOFT_CLIENT_ID') {
-            $exchange = self::envValue('EXCHANGE_CLIENT_ID');
-            if ($exchange !== '') {
-                return $exchange;
+            foreach (['EXCHANGE_CLIENT_ID'] as $exchangeKey) {
+                $exchange = self::envValue($exchangeKey);
+                if ($exchange !== '') {
+                    return $exchange;
+                }
+                $fileExchange = self::envFileValue($exchangeKey);
+                if ($fileExchange !== '') {
+                    return $fileExchange;
+                }
             }
             $configExchange = trim((string) config('exchange-email.client_id', ''));
             if ($configExchange !== '') {
@@ -100,9 +110,15 @@ class SsoConfig
             }
         }
         if ($envKey === 'MICROSOFT_CLIENT_SECRET') {
-            $exchange = self::envValue('EXCHANGE_CLIENT_SECRET');
-            if ($exchange !== '') {
-                return $exchange;
+            foreach (['EXCHANGE_CLIENT_SECRET'] as $exchangeKey) {
+                $exchange = self::envValue($exchangeKey);
+                if ($exchange !== '') {
+                    return $exchange;
+                }
+                $fileExchange = self::envFileValue($exchangeKey);
+                if ($fileExchange !== '') {
+                    return $fileExchange;
+                }
             }
             $configExchange = trim((string) config('exchange-email.client_secret', ''));
             if ($configExchange !== '') {
@@ -110,9 +126,15 @@ class SsoConfig
             }
         }
         if ($envKey === 'MICROSOFT_TENANT_ID') {
-            $exchange = self::envValue('EXCHANGE_TENANT_ID');
-            if ($exchange !== '') {
-                return $exchange;
+            foreach (['EXCHANGE_TENANT_ID'] as $exchangeKey) {
+                $exchange = self::envValue($exchangeKey);
+                if ($exchange !== '') {
+                    return $exchange;
+                }
+                $fileExchange = self::envFileValue($exchangeKey);
+                if ($fileExchange !== '') {
+                    return $fileExchange;
+                }
             }
             $configExchange = trim((string) config('exchange-email.tenant_id', ''));
             if ($configExchange !== '') {
@@ -128,7 +150,153 @@ class SsoConfig
             }
         }
 
+        $fileValue = self::envFileValue($envKey);
+        if ($fileValue !== '') {
+            return $fileValue;
+        }
+
         return $default;
+    }
+
+    /**
+     * Copy SSO credentials from .env into the setting table (installer-managed source of truth).
+     *
+     * @return array{updated: int, providers: array<string, bool>, redirects: array<string, string>}
+     */
+    public static function syncCredentialsFromEnvToDatabase(?string $envPath = null): array
+    {
+        if (! Schema::hasTable('setting')) {
+            return ['updated' => 0, 'providers' => [], 'redirects' => []];
+        }
+
+        $env = self::readEnvFile($envPath ?? base_path('.env'));
+        $appUrl = rtrim((string) ($env['APP_URL'] ?? config('app.url', '')), '/');
+
+        $payload = [
+            'microsoft_client_id' => trim((string) ($env['MICROSOFT_CLIENT_ID'] ?? $env['EXCHANGE_CLIENT_ID'] ?? '')),
+            'microsoft_client_secret' => trim((string) ($env['MICROSOFT_CLIENT_SECRET'] ?? $env['EXCHANGE_CLIENT_SECRET'] ?? '')),
+            'microsoft_tenant_id' => trim((string) ($env['MICROSOFT_TENANT_ID'] ?? $env['EXCHANGE_TENANT_ID'] ?? 'common')) ?: 'common',
+            'google_client_id' => trim((string) ($env['GOOGLE_CLIENT_ID'] ?? '')),
+            'google_client_secret' => trim((string) ($env['GOOGLE_CLIENT_SECRET'] ?? '')),
+            'linkedin_client_id' => trim((string) ($env['LINKEDIN_CLIENT_ID'] ?? '')),
+            'linkedin_client_secret' => trim((string) ($env['LINKEDIN_CLIENT_SECRET'] ?? '')),
+            'microsoft_redirect_uri' => self::resolveRedirectUriForSync($env, 'MICROSOFT_REDIRECT_URI', 'microsoft', $appUrl),
+            'google_redirect_uri' => self::resolveRedirectUriForSync($env, 'GOOGLE_REDIRECT_URI', 'google', $appUrl),
+            'linkedin_redirect_uri' => self::resolveRedirectUriForSync($env, 'LINKEDIN_REDIRECT_URI', 'linkedin', $appUrl),
+            'enable_microsoft_login' => true,
+            'enable_google_login' => true,
+            'enable_linkedin_login' => true,
+        ];
+
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
+            $payload['sso_use_database_credentials'] = true;
+        }
+
+        $filtered = [];
+        foreach ($payload as $column => $value) {
+            if (Schema::hasColumn('setting', $column)) {
+                $filtered[$column] = $value;
+            }
+        }
+
+        $updated = DB::table('setting')->where('status', 'active')->update($filtered);
+        if ($updated === 0) {
+            $updated = DB::table('setting')->limit(1)->update($filtered);
+        }
+
+        self::clearCache();
+        self::applyRuntimeConfig();
+
+        return [
+            'updated' => (int) $updated,
+            'providers' => [
+                'microsoft' => self::providerConfigured('microsoft'),
+                'google' => self::providerConfigured('google'),
+                'linkedin' => self::providerConfigured('linkedin'),
+            ],
+            'redirects' => [
+                'microsoft' => (string) config('services.microsoft.redirect', ''),
+                'google' => (string) config('services.google.redirect', ''),
+                'linkedin' => (string) config('services.linkedin.redirect', ''),
+            ],
+        ];
+    }
+
+    /**
+     * @param  array<string, string>  $env
+     */
+    private static function resolveRedirectUriForSync(array $env, string $envKey, string $provider, string $appUrl): string
+    {
+        $default = $appUrl !== '' ? $appUrl.'/auth/'.$provider.'/callback' : '';
+        $fromEnv = trim((string) ($env[$envKey] ?? ''));
+
+        if ($fromEnv === '') {
+            return $default;
+        }
+
+        if ($appUrl !== '' && self::isLocalHostUrl($fromEnv) && ! self::isLocalHostUrl($appUrl)) {
+            return $default;
+        }
+
+        return $fromEnv;
+    }
+
+    private static function isLocalHostUrl(string $url): bool
+    {
+        $host = parse_url($url, PHP_URL_HOST);
+        if (! is_string($host) || $host === '') {
+            return false;
+        }
+
+        $host = strtolower($host);
+
+        return in_array($host, ['localhost', '127.0.0.1', '::1'], true)
+            || str_ends_with($host, '.local')
+            || str_ends_with($host, '.test');
+    }
+
+    private static function envFileValue(string $key): string
+    {
+        return trim((string) (self::readEnvFile(base_path('.env'))[$key] ?? ''));
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function readEnvFile(string $path): array
+    {
+        if (self::$envFileCache !== null && $path === base_path('.env')) {
+            return self::$envFileCache;
+        }
+
+        $values = [];
+        if (! is_readable($path)) {
+            return $values;
+        }
+
+        foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
+            $line = trim($line);
+            if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
+                continue;
+            }
+
+            [$key, $value] = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+
+            if ($value !== '' && (($value[0] === '"' && str_ends_with($value, '"'))
+                || ($value[0] === "'" && str_ends_with($value, "'")))) {
+                $value = substr($value, 1, -1);
+            }
+
+            $values[$key] = $value;
+        }
+
+        if ($path === base_path('.env')) {
+            self::$envFileCache = $values;
+        }
+
+        return $values;
     }
 
     private static function envValue(string $key): string
