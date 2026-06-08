@@ -92,6 +92,15 @@ class Kernel extends ConsoleKernel
                     return false;
                 }
             });
+
+        // Keep Meilisearch publication index aligned with the database (Scout also queues per save).
+        $schedule->command('scout:import "App\Models\Publication"')
+            ->dailyAt('03:45')
+            ->when(fn () => (string) config('scout.driver') === 'meilisearch');
+
+        $schedule->command('scout:sync-index-settings')
+            ->weeklyOn(0, '04:15')
+            ->when(fn () => (string) config('scout.driver') === 'meilisearch');
     }
 
     /**

@@ -98,13 +98,18 @@ public function get(Request $request, $return_array = false, $featured = false,$
         $pubs->where('is_featured', 1);
     }
 
-    // Random order for general browsing; skip when we need a stable ranking (e.g. homepage Top Searches by visits).
-    if (!$featured && !$request->boolean('skip_random_order')) {
+    if (!$featured && !$request->boolean('skip_random_order') && ! $request->filled('restrict_publication_ids')) {
         $pubs->inRandomOrder();
     }
 
     if (!$featured) {
         $this->applyFilters($pubs, $request);
+    }
+
+    $restrictIds = $this->normalizeRestrictPublicationIds($request);
+    if ($restrictIds !== null) {
+        $pubs->whereIn('id', $restrictIds);
+        $pubs->orderByRaw('FIELD(id, '.implode(',', $restrictIds).')');
     }
 
     $pubs->when(!is_admin(), function ($query) use ($request) {
@@ -1840,6 +1845,23 @@ public function import(Request $request){
 
     endif;
 
+}
+
+/**
+ * @return list<int>|null
+ */
+private function normalizeRestrictPublicationIds($request): ?array
+{
+    $raw = $request->input('restrict_publication_ids');
+    if ($raw === null || $raw === '' || $raw === []) {
+        return null;
+    }
+    if (! is_array($raw)) {
+        $raw = [$raw];
+    }
+    $ids = array_values(array_unique(array_filter(array_map('intval', $raw), fn (int $id) => $id > 0)));
+
+    return $ids === [] ? null : $ids;
 }
 
 /**

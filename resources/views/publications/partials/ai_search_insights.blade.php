@@ -241,6 +241,28 @@
             </ul>
         @endif
 
+        @if(!empty($insights['indicators']))
+            <p class="ai-brief__label">{{ __('publications.search.member_state_indicators') }}</p>
+            <ul class="ai-brief__highlights">
+                @foreach($insights['indicators'] as $indicator)
+                    @if(!empty($indicator['url']))
+                        <li>
+                            <a href="{{ $indicator['url'] }}" class="ai-brief__highlight-link">
+                                <span class="ai-brief__highlight-icon"><i class="fa fa-chart-column" aria-hidden="true"></i></span>
+                                <span class="ai-brief__highlight-text">
+                                    {{ $indicator['name'] ?? '' }}
+                                    @if(!empty($indicator['subject_area']))
+                                        <span style="color:#94a3b8;font-weight:400;"> · {{ $indicator['subject_area'] }}</span>
+                                    @endif
+                                </span>
+                                <span class="ai-brief__highlight-type">{{ __('publications.search.view_on_map') }}</span>
+                            </a>
+                        </li>
+                    @endif
+                @endforeach
+            </ul>
+        @endif
+
         @if(!empty($scholarlySources))
             <p class="ai-brief__label">{{ __('publications.search.scholarly_sources') }}</p>
             <ul class="ai-brief__scholarly">

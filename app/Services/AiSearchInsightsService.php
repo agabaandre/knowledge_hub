@@ -5,12 +5,15 @@ namespace App\Services;
 use App\Models\Author;
 use App\Models\CommunityOfPractice;
 use App\Models\Forum;
+use App\Models\Kpi;
 use App\Models\Publication;
 use App\Models\SubThemeticArea;
 use App\Models\Tag;
 use App\Models\ThemeticArea;
+use App\Repositories\GraphsRepository;
 use App\Repositories\PublicationsRepository;
 use App\Support\AiConfig;
+use App\Support\SearchCache;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
@@ -22,6 +25,8 @@ class AiSearchInsightsService
 {
     public function __construct(
         private PublicationsRepository $publicationsRepo,
+        private HybridRecordsSearchService $hybridRecordsSearch,
+        private GraphsRepository $graphsRepo,
         private AiInternetSearchService $internetSearch
     ) {
     }
@@ -45,7 +50,7 @@ class AiSearchInsightsService
             return null;
         }
 
-        $cacheKey = 'ai_search_insights:v6:'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheKey = 'ai_search_insights:v'.SearchCache::aiInsightsVersion().':'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
             $cached = Cache::get($cacheKey);
@@ -88,7 +93,7 @@ class AiSearchInsightsService
 
         foreach ([
             'overview', 'key_points', 'publications', 'forums', 'communities',
-            'health_topics', 'scholarly_sources', 'internet_results', 'external_resources',
+            'health_topics', 'indicators', 'scholarly_sources', 'internet_results', 'external_resources',
             'thematic_areas', 'sub_thematic_areas', 'contributors',
         ] as $key) {
             if (! empty($insights[$key])) {
@@ -115,6 +120,7 @@ class AiSearchInsightsService
         $communityCatalog = $this->communityCatalog($searchCommunities);
         $federatedCatalog = $this->federatedPublicationCatalog($federatedPublications);
         $healthTopicCatalog = $this->healthTopicCatalog($term);
+        $indicatorCatalog = $this->indicatorCatalogForAi($term);
         $themeCatalog = $this->themeCatalog($term);
         $subThemeCatalog = $this->subThemeCatalog($term);
         $authorCatalog = $this->authorCatalog($term, $publicationCatalog);
@@ -129,7 +135,8 @@ class AiSearchInsightsService
             $internetResults,
             $themeCatalog,
             $subThemeCatalog,
-            $authorCatalog
+            $authorCatalog,
+            $indicatorCatalog
         )) {
             return null;
         }
@@ -151,10 +158,11 @@ class AiSearchInsightsService
             .'overview: exactly 2 sentences, max 65 words. Sentence 1 defines the topic in public-health terms (Africa context when appropriate). '
             .'Sentence 2 states what Khub holds for this query using total_publications_matching when > 0; do not list individual resource titles. '
             .'key_points: exactly 3 objects {text, hub_url}. text: 8-14 words, directly about the search query. '
-            .'hub_url: MUST be copied exactly from publications[].url, forums[].url, health_topics[].url, or communities[].url in the catalog. Never use internet_results or external URLs. Use each hub URL at most once. '
+            .'hub_url: MUST be copied exactly from publications[].url, forums[].url, health_topics[].url, communities[].url, or member_state_indicators[].url in the catalog. Never use internet_results or external URLs. Use each hub URL at most once. '
             .'Return strict JSON with keys: overview (string), key_points (array of 3 {text, hub_url}), '
             .'featured_publication_ids (array of int, max 3 from catalog), featured_forum_ids (array of int, max 2), '
             .'featured_community_ids (array of int, max 2), featured_health_topic_ids (array of int, max 3), '
+            .'featured_indicator_ids (array of int, max 3 from member_state_indicators), '
             .'external_resources (array of {title, url, note} max 3).';
 
         $userPayload = [
@@ -165,6 +173,7 @@ class AiSearchInsightsService
             'communities' => $communityCatalog,
             'partner_hub_publications' => $federatedCatalog,
             'health_topics' => $healthTopicCatalog,
+            'member_state_indicators' => $indicatorCatalog,
             'thematic_areas' => $themeCatalog,
             'sub_thematic_areas' => $subThemeCatalog,
             'contributors' => $authorCatalog,
@@ -192,7 +201,8 @@ class AiSearchInsightsService
                         $subThemeCatalog,
                         $authorCatalog,
                         $term,
-                        $totalPublications
+                        $totalPublications,
+                        $indicatorCatalog
                     );
 
                     if (self::isDisplayable($normalized)) {
@@ -219,7 +229,8 @@ class AiSearchInsightsService
             $communityCatalog,
             $themeCatalog,
             $subThemeCatalog,
-            $authorCatalog
+            $authorCatalog,
+            $indicatorCatalog
         );
     }
 
@@ -250,6 +261,7 @@ class AiSearchInsightsService
      * @param  list<array<string, mixed>>  $themeCatalog
      * @param  list<array<string, mixed>>  $subThemeCatalog
      * @param  list<array<string, mixed>>  $authorCatalog
+     * @param  list<array<string, mixed>>  $indicatorCatalog
      */
     private function hasSourceContent(
         array $publicationCatalog,
@@ -260,7 +272,8 @@ class AiSearchInsightsService
         array $internetResults,
         array $themeCatalog = [],
         array $subThemeCatalog = [],
-        array $authorCatalog = []
+        array $authorCatalog = [],
+        array $indicatorCatalog = []
     ): bool {
         return $publicationCatalog !== []
             || $forumCatalog !== []
@@ -270,7 +283,8 @@ class AiSearchInsightsService
             || $internetResults !== []
             || $themeCatalog !== []
             || $subThemeCatalog !== []
-            || $authorCatalog !== [];
+            || $authorCatalog !== []
+            || $indicatorCatalog !== [];
     }
 
     /**
@@ -291,7 +305,8 @@ class AiSearchInsightsService
         array $communityCatalog,
         array $themeCatalog = [],
         array $subThemeCatalog = [],
-        array $authorCatalog = []
+        array $authorCatalog = [],
+        array $indicatorCatalog = []
     ): ?array {
         if (! $this->hasSourceContent(
             $publicationCatalog,
@@ -302,13 +317,14 @@ class AiSearchInsightsService
             $internetResults,
             $themeCatalog,
             $subThemeCatalog,
-            $authorCatalog
+            $authorCatalog,
+            $indicatorCatalog
         )) {
             return null;
         }
 
         $normalized = $this->normalizeInsights(
-            ['overview' => '', 'key_points' => [], 'featured_publication_ids' => [], 'featured_forum_ids' => [], 'featured_community_ids' => [], 'featured_health_topic_ids' => [], 'external_resources' => []],
+            ['overview' => '', 'key_points' => [], 'featured_publication_ids' => [], 'featured_forum_ids' => [], 'featured_community_ids' => [], 'featured_health_topic_ids' => [], 'featured_indicator_ids' => [], 'external_resources' => []],
             $publicationCatalog,
             $forumCatalog,
             $communityCatalog,
@@ -318,7 +334,8 @@ class AiSearchInsightsService
             $subThemeCatalog,
             $authorCatalog,
             $term,
-            $totalPublications
+            $totalPublications,
+            $indicatorCatalog
         );
 
         return self::isDisplayable($normalized) ? $normalized : null;
@@ -329,11 +346,7 @@ class AiSearchInsightsService
      */
     private function publicationCatalogForAi(Request $request, int $limit): array
     {
-        $aiRequest = clone $request;
-        $aiRequest->merge(['rows' => $limit, 'page' => 1]);
-
-        $rows = $this->publicationsRepo->get($aiRequest);
-        $collection = method_exists($rows, 'getCollection') ? $rows->getCollection() : collect($rows);
+        $collection = $this->hybridRecordsSearch->publicationsForAi($request, $limit);
 
         $catalog = [];
         foreach ($collection as $pub) {
@@ -354,6 +367,60 @@ class AiSearchInsightsService
                 'author_id' => $author ? (int) $author->id : null,
                 'author_name' => $author ? Str::limit((string) $author->name, 80) : null,
                 'url' => publication_url($pub),
+            ];
+        }
+
+        return $catalog;
+    }
+
+    /**
+     * Published member-state indicators (OWID KPIs) matching the search term.
+     *
+     * @return list<array<string, mixed>>
+     */
+    private function indicatorCatalogForAi(string $term, int $limit = 8): array
+    {
+        $term = trim($term);
+        if ($term === '' || mb_strlen($term) < 2) {
+            return [];
+        }
+
+        $publishedIds = $this->graphsRepo->get_published_map_indicators()->pluck('id')->map(fn ($id) => (int) $id)->all();
+        if ($publishedIds === []) {
+            return [];
+        }
+
+        $like = '%'.$term.'%';
+        $rows = Kpi::query()
+            ->with('subjectArea:id,name')
+            ->where('status', 'published')
+            ->whereIn('id', $publishedIds)
+            ->where(function ($q) use ($like) {
+                $q->where('name', 'like', $like)
+                    ->orWhere('description', 'like', $like)
+                    ->orWhereHas('subjectArea', function ($subjectQuery) use ($like) {
+                        $subjectQuery->where('name', 'like', $like);
+                    });
+            })
+            ->orderBy('name')
+            ->limit($limit)
+            ->get();
+
+        $catalog = [];
+        foreach ($rows as $kpi) {
+            if (! $kpi instanceof Kpi) {
+                continue;
+            }
+
+            $desc = strip_tags((string) ($kpi->description ?? ''));
+            $desc = html_entity_decode($desc, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+            $catalog[] = [
+                'id' => (int) $kpi->id,
+                'name' => Str::limit(strip_tags((string) ($kpi->name ?? '')), 140),
+                'excerpt' => Str::limit(trim($desc), 180),
+                'subject_area' => Str::limit((string) optional($kpi->subjectArea)->name, 80),
+                'unit_label' => Str::limit((string) ($kpi->unit_label ?? ''), 60),
+                'url' => route('countries').'?kpi_id='.(int) $kpi->id,
             ];
         }
 
@@ -576,6 +643,7 @@ class AiSearchInsightsService
      * @param  list<array<string, mixed>>  $themeCatalog
      * @param  list<array<string, mixed>>  $subThemeCatalog
      * @param  list<array<string, mixed>>  $authorCatalog
+     * @param  list<array<string, mixed>>  $indicatorCatalog
      * @return array<string, mixed>
      */
     private function normalizeInsights(
@@ -589,12 +657,14 @@ class AiSearchInsightsService
         array $subThemeCatalog,
         array $authorCatalog,
         string $term = '',
-        int $totalPublications = 0
+        int $totalPublications = 0,
+        array $indicatorCatalog = []
     ): array {
         $pubById = collect($publicationCatalog)->keyBy('id');
         $forumById = collect($forumCatalog)->keyBy('id');
         $communityById = collect($communityCatalog)->keyBy('id');
         $healthTopicById = collect($healthTopicCatalog)->keyBy('id');
+        $indicatorById = collect($indicatorCatalog)->keyBy('id');
 
         $pickPublications = [];
         foreach ((array) ($decoded['featured_publication_ids'] ?? []) as $id) {
@@ -640,6 +710,17 @@ class AiSearchInsightsService
             $pickHealthTopics = array_slice($healthTopicCatalog, 0, 3);
         }
 
+        $pickIndicators = [];
+        foreach ((array) ($decoded['featured_indicator_ids'] ?? []) as $id) {
+            $id = (int) $id;
+            if ($indicatorById->has($id)) {
+                $pickIndicators[] = $indicatorById->get($id);
+            }
+        }
+        if ($pickIndicators === [] && $indicatorCatalog !== []) {
+            $pickIndicators = array_slice($indicatorCatalog, 0, 3);
+        }
+
         $external = [];
         foreach ((array) ($decoded['external_resources'] ?? []) as $row) {
             if (! is_array($row)) {
@@ -662,7 +743,8 @@ class AiSearchInsightsService
         $hasHubContent = $pickHealthTopics !== []
             || $pickPublications !== []
             || $pickForums !== []
-            || $pickCommunities !== [];
+            || $pickCommunities !== []
+            || $pickIndicators !== [];
         $hasDisplayableContent = $hasHubContent
             || $scholarlySources !== []
             || $themeCatalog !== []
@@ -673,7 +755,8 @@ class AiSearchInsightsService
             array_slice($pickHealthTopics, 0, 3),
             array_slice($pickPublications, 0, 3),
             array_slice($pickForums, 0, 2),
-            array_slice($pickCommunities, 0, 2)
+            array_slice($pickCommunities, 0, 2),
+            array_slice($pickIndicators, 0, 3)
         );
 
         $keyPoints = $this->normalizeKeyPoints((array) ($decoded['key_points'] ?? []), $hubLinkCatalog);
@@ -709,6 +792,7 @@ class AiSearchInsightsService
             'forums' => array_slice($pickForums, 0, 2),
             'communities' => array_slice($pickCommunities, 0, 2),
             'health_topics' => $healthTopics,
+            'indicators' => array_slice($pickIndicators, 0, 4),
             'scholarly_sources' => array_slice($scholarlySources, 0, 4),
             'internet_results' => array_slice($scholarlySources, 0, 4),
             'thematic_areas' => array_slice($themeCatalog, 0, 6),
@@ -791,13 +875,15 @@ class AiSearchInsightsService
      * @param  list<array<string, mixed>>  $publications
      * @param  list<array<string, mixed>>  $forums
      * @param  list<array<string, mixed>>  $communities
+     * @param  list<array<string, mixed>>  $indicators
      * @return list<array{url: string, title: string, label: string, icon: string}>
      */
     private function buildHubLinkCatalog(
         array $healthTopics,
         array $publications,
         array $forums,
-        array $communities
+        array $communities,
+        array $indicators = []
     ): array {
         $catalog = [];
 
@@ -850,6 +936,19 @@ class AiSearchInsightsService
                 'title' => Str::limit(trim((string) ($community['name'] ?? '')), 120),
                 'label' => __('publications.search.community'),
                 'icon' => 'fa-users',
+            ];
+        }
+
+        foreach ($indicators as $indicator) {
+            $url = trim((string) ($indicator['url'] ?? ''));
+            if ($url === '') {
+                continue;
+            }
+            $catalog[] = [
+                'url' => $url,
+                'title' => Str::limit(trim((string) ($indicator['name'] ?? '')), 120),
+                'label' => __('publications.search.member_state_indicator'),
+                'icon' => 'fa-chart-column',
             ];
         }
 

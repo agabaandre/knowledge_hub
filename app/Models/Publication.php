@@ -4,8 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Laravel\Scout\Searchable;
 use Illuminate\Support\Facades\DB;
+use Laravel\Scout\Searchable;
 
 class Publication extends Model
 {
@@ -26,10 +26,37 @@ class Publication extends Model
         return [
             'title' => $this->title,
             'description' => $this->description,
+            'associated_authors' => $this->associated_authors,
             'sub_thematic_area_id' => $this->sub_thematic_area_id,
             'publication_catgory_id' => $this->publication_catgory_id,
-            'data_category_id' => $this->data_category_id
+            'data_category_id' => $this->data_category_id,
         ];
+    }
+
+    public function searchableAs(): string
+    {
+        return 'publications';
+    }
+
+    public function shouldBeSearchable(): bool
+    {
+        if ((int) ($this->is_admin_only_access ?? 0) === 1) {
+            return false;
+        }
+
+        if ((string) ($this->is_active ?? '') !== 'Active') {
+            return false;
+        }
+
+        if ((int) ($this->is_approved ?? 0) !== 1) {
+            return false;
+        }
+
+        if ((int) ($this->is_rejected ?? 0) === 1) {
+            return false;
+        }
+
+        return true;
     }
 
     public function file_type(){
@@ -401,11 +428,13 @@ class Publication extends Model
 
     protected static function booted()
     {
-        static::created(function ($publication) {
-            \Illuminate\Support\Facades\Cache::flush();
+        static::saved(function (Publication $publication) {
+            \App\Jobs\RefreshSearchIndexCachesJob::dispatch((int) $publication->id)
+                ->delay(now()->addSeconds(15));
         });
-        static::updated(function ($publication) {
-            \Illuminate\Support\Facades\Cache::flush();
+
+        static::deleted(function (Publication $publication) {
+            \App\Jobs\RefreshSearchIndexCachesJob::dispatch(null);
         });
     }
 
