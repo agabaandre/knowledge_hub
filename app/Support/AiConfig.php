@@ -104,8 +104,8 @@ class AiConfig
         $dbValue = null;
         if ($db && Schema::hasColumn('setting', $dbColumn) && property_exists($db, $dbColumn)) {
             $raw = $db->{$dbColumn};
-            if ($raw !== null && $raw !== '') {
-                $dbValue = $raw;
+            if ($raw !== null && trim((string) $raw) !== '') {
+                $dbValue = is_string($raw) ? trim($raw) : $raw;
             }
         }
 
@@ -137,8 +137,7 @@ class AiConfig
         $hasDb = $db
             && Schema::hasColumn('setting', $dbColumn)
             && property_exists($db, $dbColumn)
-            && $db->{$dbColumn} !== null
-            && $db->{$dbColumn} !== '';
+            && trim((string) ($db->{$dbColumn} ?? '')) !== '';
 
         $envValue = env($envKey);
         $hasEnv = $envValue !== null && $envValue !== '';
@@ -357,7 +356,77 @@ class AiConfig
             return false;
         }
 
-        return ! (bool) $db->{$column};
+        if ((bool) $db->{$column}) {
+            return false;
+        }
+
+        // Migration/default off + env-only credentials should not block providers after unrelated AI saves.
+        if (self::providerConfigured($provider) && ! self::providerHasDbCredentials($provider)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public static function providerHasDbCredentials(string $provider): bool
+    {
+        if (self::isIntegrationProvider($provider)) {
+            $integration = self::customIntegrationById((string) self::integrationIdFromProvider($provider));
+
+            return $integration !== null;
+        }
+
+        $db = self::dbSettings();
+        if (! $db) {
+            return false;
+        }
+
+        $columns = match ($provider) {
+            'openai' => ['ai_openai_api_key'],
+            'chatpdf' => ['ai_chatpdf_api_key'],
+            'gemini' => ['ai_gemini_api_key'],
+            'deepseek' => ['ai_deepseek_api_key'],
+            'custom' => ['ai_custom_api_key', 'ai_custom_base_url'],
+            'serper' => ['ai_serper_api_key'],
+            default => [],
+        };
+
+        foreach ($columns as $column) {
+            if (Schema::hasColumn('setting', $column) && trim((string) ($db->{$column} ?? '')) !== '') {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public static function isChatCompletionProvider(string $provider): bool
+    {
+        if (self::isIntegrationProvider($provider)) {
+            return true;
+        }
+
+        return in_array($provider, self::chatProviderIds(), true);
+    }
+
+    /**
+     * Whether credentials are complete enough for chat completion / streaming.
+     */
+    public static function providerTransportReady(string $provider): bool
+    {
+        $creds = self::providerCredentials($provider);
+        if ($creds === null) {
+            return false;
+        }
+
+        if (($creds['driver'] ?? '') === 'gemini') {
+            return trim((string) ($creds['api_key'] ?? '')) !== ''
+                && trim((string) ($creds['model'] ?? '')) !== '';
+        }
+
+        return trim((string) ($creds['base_url'] ?? '')) !== ''
+            && trim((string) ($creds['api_key'] ?? '')) !== ''
+            && trim((string) ($creds['model'] ?? '')) !== '';
     }
 
     public static function aiIntegrationsFormSaved(): bool
@@ -484,7 +553,9 @@ class AiConfig
 
     public static function providerAvailable(string $provider): bool
     {
-        return self::providerEnabled($provider) && self::providerConfigured($provider);
+        return self::providerEnabled($provider)
+            && self::providerConfigured($provider)
+            && (! self::isChatCompletionProvider($provider) || self::providerTransportReady($provider));
     }
 
     /**
@@ -510,16 +581,20 @@ class AiConfig
      */
     public static function resolveChatProviderForFeature(string $feature): ?string
     {
-        $preferred = self::featureProvider($feature);
-        if (self::providerAvailable($preferred)) {
-            return $preferred;
-        }
+        $candidates = [self::featureProvider($feature), 'openai'];
+        $candidates = array_merge($candidates, self::chatProviderIds());
 
-        if (self::providerAvailable('openai')) {
-            return 'openai';
-        }
+        $seen = [];
+        foreach ($candidates as $provider) {
+            if (! is_string($provider) || $provider === '' || isset($seen[$provider])) {
+                continue;
+            }
+            $seen[$provider] = true;
 
-        foreach (self::chatProviderIds() as $provider) {
+            if (! self::isChatCompletionProvider($provider)) {
+                continue;
+            }
+
             if (self::providerAvailable($provider)) {
                 return $provider;
             }
@@ -678,14 +753,14 @@ class AiConfig
             'openai' => [
                 'driver' => 'openai_compatible',
                 'api_key' => self::openaiApiKey(),
-                'model' => self::openaiModel(),
+                'model' => trim((string) self::openaiModel()) !== '' ? self::openaiModel() : 'gpt-3.5-turbo',
                 'base_url' => 'https://api.openai.com/v1',
                 'label' => 'OpenAI',
             ],
             'deepseek' => [
                 'driver' => 'openai_compatible',
                 'api_key' => self::deepseekApiKey(),
-                'model' => self::deepseekModel(),
+                'model' => trim((string) self::deepseekModel()) !== '' ? self::deepseekModel() : 'deepseek-chat',
                 'base_url' => 'https://api.deepseek.com/v1',
                 'label' => 'DeepSeek',
             ],
@@ -699,7 +774,7 @@ class AiConfig
             'gemini' => [
                 'driver' => 'gemini',
                 'api_key' => self::geminiApiKey(),
-                'model' => self::geminiModel(),
+                'model' => trim((string) self::geminiModel()) !== '' ? self::geminiModel() : 'gemini-1.5-flash',
                 'base_url' => '',
                 'label' => 'Google Gemini',
             ],
