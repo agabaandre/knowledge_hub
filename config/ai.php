@@ -185,6 +185,17 @@ return [
             'snippet' => 'Biomedical and life sciences literature from MEDLINE and related databases.',
             'enabled' => true,
         ],
+        [
+            'id' => 'jphia',
+            'label' => 'Journal of Public Health in Africa',
+            'hosts' => ['publichealthinafrica.org'],
+            'search_url' => 'https://publichealthinafrica.org/index.php/jphia/search/search?simpleQuery={query}&searchField=query',
+            'site_search' => 'site:publichealthinafrica.org',
+            'serper_mode' => 'web',
+            'icon' => 'fa-book-open',
+            'snippet' => 'Open-access public health research and evidence from the African continent.',
+            'enabled' => true,
+        ],
     ],
 
 ];

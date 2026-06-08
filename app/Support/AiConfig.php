@@ -1070,16 +1070,45 @@ class AiConfig
      */
     public static function aiSearchAllowedSites(): array
     {
+        $defaults = self::normalizeAiSearchAllowedSitesInput(self::defaultAiSearchSites());
         $db = self::dbSettings();
 
         if ($db && Schema::hasColumn('setting', 'ai_search_allowed_sites') && ! empty($db->ai_search_allowed_sites)) {
             $stored = json_decode((string) $db->ai_search_allowed_sites, true);
             if (is_array($stored) && $stored !== []) {
-                return self::normalizeAiSearchAllowedSitesInput($stored);
+                $normalized = self::normalizeAiSearchAllowedSitesInput($stored);
+
+                return self::mergeMissingDefaultAiSearchSites($normalized, $defaults);
             }
         }
 
-        return self::normalizeAiSearchAllowedSitesInput(self::defaultAiSearchSites());
+        return $defaults;
+    }
+
+    /**
+     * Append built-in default sites that are not yet present in stored admin config.
+     *
+     * @param  list<array<string, mixed>>  $sites
+     * @param  list<array<string, mixed>>  $defaults
+     * @return list<array<string, mixed>>
+     */
+    private static function mergeMissingDefaultAiSearchSites(array $sites, array $defaults): array
+    {
+        $existingIds = array_flip(array_map(
+            fn (array $site) => (string) ($site['id'] ?? ''),
+            $sites
+        ));
+
+        foreach ($defaults as $defaultSite) {
+            $id = (string) ($defaultSite['id'] ?? '');
+            if ($id === '' || isset($existingIds[$id])) {
+                continue;
+            }
+            $sites[] = $defaultSite;
+            $existingIds[$id] = true;
+        }
+
+        return $sites;
     }
 
     /**

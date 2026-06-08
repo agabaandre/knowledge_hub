@@ -36,6 +36,7 @@ return [
         'internet_results' => 'Scholarly web results',
         'google_scholar' => 'Google Scholar',
         'pubmed' => 'PubMed',
+        'jphia' => 'Journal of Public Health in Africa',
         'thematic_areas' => 'Thematic areas',
         'sub_thematic_areas' => 'Sub-thematic areas',
         'contributors' => 'Contributors',
