@@ -287,18 +287,8 @@ class SettingsRepository
             $settings->show_publication_card_file_type_badge = $request->boolean('show_publication_card_file_type_badge');
         }
 
-        // Social login toggles (default false when unchecked)
-        // Only set if columns exist to avoid errors on production
-        if (Schema::hasColumn('setting', 'enable_microsoft_login') && $request->has('enable_microsoft_login')) {
-            $settings->enable_microsoft_login = self::parseSubmittedBoolean($request, 'enable_microsoft_login');
-        }
-        if (Schema::hasColumn('setting', 'enable_google_login') && $request->has('enable_google_login')) {
-            $settings->enable_google_login = self::parseSubmittedBoolean($request, 'enable_google_login');
-        }
-        if (Schema::hasColumn('setting', 'enable_linkedin_login') && $request->has('enable_linkedin_login')) {
-            $settings->enable_linkedin_login = self::parseSubmittedBoolean($request, 'enable_linkedin_login');
-        }
-        if (Schema::hasColumn('setting', 'microsoft_client_id')) {
+        // Social login toggles are only updated when the SSO section is submitted (see applySsoSettings).
+        if (Schema::hasColumn('setting', 'microsoft_client_id') && $request->has('sso_settings_submitted')) {
             $this->applySsoSettings($settings, $request);
         }
         if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
@@ -611,6 +601,10 @@ class SettingsRepository
 
     private function applySsoSettings(Setting $settings, Request $request): void
     {
+        if (! $request->has('sso_settings_submitted')) {
+            return;
+        }
+
         if ($request->has('microsoft_client_id')) {
             \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
                 $settings, $request, 'microsoft_client_id', 'microsoft_client_id',

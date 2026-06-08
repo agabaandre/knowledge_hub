@@ -4,6 +4,7 @@
 @endphp
 
 @if(!empty($ssoFields))
+    <input type="hidden" name="sso_settings_submitted" value="1">
     @if(!$compact)
         <hr class="my-3">
         <p class="text-muted small mb-3">

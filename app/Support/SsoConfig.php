@@ -231,11 +231,11 @@ class SsoConfig
         }
 
         $db = self::dbSettings();
-        if ($db && property_exists($db, $column) && $db->{$column} !== null && $db->{$column} !== '') {
-            return filter_var($db->{$column}, FILTER_VALIDATE_BOOLEAN);
+        if (! $db || ! property_exists($db, $column) || $db->{$column} === null || $db->{$column} === '') {
+            return true;
         }
 
-        return true;
+        return filter_var($db->{$column}, FILTER_VALIDATE_BOOLEAN);
     }
 
     public static function providerConfigured(string $provider): bool
