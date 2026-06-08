@@ -19,4 +19,4 @@
 
 <body onload="">
 <div class="preloader"></div>
-<div id="main-wrapper">
+<div id="main-wrapper" class="khub-gt-content">

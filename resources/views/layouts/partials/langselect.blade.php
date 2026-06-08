@@ -583,6 +583,7 @@
         if (window.khubInitialNativeLabels) {
             khubApplyNativeLabels(window.khubInitialNativeLabels);
         }
+        khubMarkNativeI18nElements();
     }
     
     // Update immediately if DOM is ready
@@ -624,6 +625,9 @@
             if (value == null || value === '') return;
 
             document.querySelectorAll('[data-khub-i18n="' + fullKey + '"]').forEach(function(el) {
+                el.classList.add('notranslate');
+                el.setAttribute('translate', 'no');
+
                 if (el.tagName === 'INPUT') {
                     if (el.type === 'submit' || el.type === 'button') {
                         el.value = value;
@@ -679,18 +683,90 @@
         });
     }
 
-    function khubApplyGoogleTranslateWhenReady(googleCode, attempt) {
+    function khubGoogleCodeForLocale(localeCode) {
+        var meta = window.khubLangMeta && window.khubLangMeta[localeCode];
+        if (meta && meta.google_code) {
+            return meta.google_code;
+        }
+
+        return localeCode || 'en';
+    }
+
+    window.khubGoogleCodeForLocale = khubGoogleCodeForLocale;
+
+    function khubMarkNativeI18nElements() {
+        var selectors = [
+            '[data-khub-i18n]',
+            '#khub-nav-menus',
+            '#khub-theme1-nav',
+            '#khub-footer-i18n',
+            '#khub-footer-bottom-i18n',
+            '#khub-login-i18n',
+            '#khub-cookie-i18n',
+            '#khub-site-branding',
+            '#khub-account-dropdown-menu',
+            '#khub-secondary-nav',
+            '.notranslate'
+        ];
+
+        selectors.forEach(function(selector) {
+            document.querySelectorAll(selector).forEach(function(el) {
+                el.classList.add('notranslate');
+                el.setAttribute('translate', 'no');
+            });
+        });
+    }
+
+    window.khubMarkNativeI18nElements = khubMarkNativeI18nElements;
+
+    function khubRefreshGoogleTranslate(googleCode, attempt) {
         attempt = attempt || 0;
-        if (typeof window.khubApplyGoogleTranslate === 'function') {
-            window.khubApplyGoogleTranslate(googleCode);
+        googleCode = googleCode || 'en';
+
+        if (typeof window.khubApplyGoogleTranslate !== 'function') {
+            if (attempt < 25) {
+                setTimeout(function() {
+                    khubRefreshGoogleTranslate(googleCode, attempt + 1);
+                }, 200);
+            }
+
             return;
         }
-        if (attempt < 25) {
-            setTimeout(function() {
-                khubApplyGoogleTranslateWhenReady(googleCode, attempt + 1);
-            }, 200);
+
+        if (attempt === 0) {
+            khubMarkNativeI18nElements();
         }
+
+        window.khubApplyGoogleTranslate(googleCode);
+
+        if (googleCode === 'en' || attempt >= 3) {
+            return;
+        }
+
+        setTimeout(function() {
+            khubMarkNativeI18nElements();
+            khubRefreshGoogleTranslate(googleCode, attempt + 1);
+        }, [500, 1200, 2200][attempt] || 2200);
     }
+
+    window.khubRefreshGoogleTranslate = khubRefreshGoogleTranslate;
+
+    function khubSyncPageTranslation(localeCode, googleCode, labels) {
+        localeCode = localeCode || getCurrentLang() || 'en';
+        googleCode = googleCode || khubGoogleCodeForLocale(localeCode);
+        labels = labels || window.khubInitialNativeLabels;
+
+        khubApplyDocumentDirection(localeCode, googleCode);
+
+        if (labels) {
+            khubApplyNativeLabels(labels);
+        }
+
+        khubMarkNativeI18nElements();
+        khubRefreshGoogleTranslate(localeCode === 'en' ? 'en' : googleCode);
+    }
+
+    window.khubSyncPageTranslation = khubSyncPageTranslation;
 
     function khubIsRtlLocale(localeCode) {
         var meta = window.khubLangMeta && window.khubLangMeta[localeCode];
@@ -727,8 +803,7 @@
         }
         khubReinitNavigation();
         khubRebindCookieButtons();
-        khubApplyNativeLabels(labels);
-        window.khubInitialNativeLabels = labels;
+        window.khubInitialNativeLabels = labels || window.khubInitialNativeLabels;
         if (typeof window.bootstrap !== 'undefined' && window.bootstrap.Dropdown) {
             document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(toggle) {
                 window.bootstrap.Dropdown.getOrCreateInstance(toggle);
@@ -737,8 +812,7 @@
         if (typeof window.jQuery !== 'undefined' && window.jQuery) {
             window.jQuery('[data-toggle="tooltip"]').tooltip();
         }
-        khubApplyGoogleTranslateWhenReady(googleCode);
-        khubApplyDocumentDirection(localeCode || getCurrentLang(), googleCode);
+        khubSyncPageTranslation(localeCode || getCurrentLang(), googleCode, labels);
     }
 
     function khubFallbackLocaleRedirect(localeCode) {
@@ -794,7 +868,5 @@
 
         return false;
     };
-
-    khubApplyDocumentDirection(getCurrentLang());
 })();
 </script>

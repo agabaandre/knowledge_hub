@@ -263,8 +263,16 @@
     padding-right: 0 !important;
 }
 
-/* Google Translate: keep our document direction authoritative */
-[dir="rtl"] body.translated-rtl,
-[dir="ltr"] body:not(.translated-rtl) {
-    direction: inherit;
+/* Google Translate: native chrome is notranslate; page body keeps GT direction on text nodes */
+[dir="rtl"] #main-wrapper,
+[dir="rtl"] #content,
+[dir="rtl"] .khub-gt-content {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="ltr"] #main-wrapper,
+[dir="ltr"] #content,
+[dir="ltr"] .khub-gt-content {
+    direction: ltr;
 }

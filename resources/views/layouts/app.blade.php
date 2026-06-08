@@ -17,7 +17,7 @@
 @include('layouts.' . $theme . 'partials.alerts')
 
 @if ($theme === 'theme1.')
-<div id="content" class="content front-bg"><div class="content__boxed"><div class="content__wrap">
+<div id="content" class="content front-bg khub-gt-content"><div class="content__boxed"><div class="content__wrap">
 @endif
 @yield('content')
 @if ($theme === 'theme1.')

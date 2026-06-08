@@ -56,6 +56,7 @@
         var cookieLang = GTranslateGetCurrentLang();
         var userLang = '{{ $langauge }}';
         var googleLang = khubGoogleCodeForLocale(userLang);
+        var activeLocale = userLang;
 
         if (userLang && userLang !== 'en') {
           if (cookieLang !== googleLang) {
@@ -63,11 +64,28 @@
             date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000));
             document.cookie = "googtrans=/auto/" + googleLang + "; expires=" + date.toUTCString() + "; path={{ $localeCookiePath }}";
           }
-          doGTranslate(googleLang);
         } else if (!cookieLang || cookieLang === 'en') {
           var clearDate = new Date();
           clearDate.setTime(clearDate.getTime() - 1);
           document.cookie = "googtrans=; expires=" + clearDate.toUTCString() + "; path={{ $localeCookiePath }}";
+        } else if (cookieLang && cookieLang !== 'en') {
+          googleLang = cookieLang;
+          if (window.khubLangMeta) {
+            for (var loc in window.khubLangMeta) {
+              if (!Object.prototype.hasOwnProperty.call(window.khubLangMeta, loc)) continue;
+              var gc = window.khubLangMeta[loc].google_code || loc;
+              if (gc === cookieLang || loc === cookieLang) {
+                activeLocale = loc;
+                break;
+              }
+            }
+          }
+        }
+
+        if (typeof window.khubSyncPageTranslation === 'function') {
+          window.khubSyncPageTranslation(activeLocale, googleLang);
+        } else if (userLang && userLang !== 'en') {
+          doGTranslate(googleLang);
         } else if (cookieLang && cookieLang !== 'en') {
           doGTranslate(cookieLang);
         }
@@ -153,6 +171,10 @@
           }
         }
         window.khubApplyDocumentDirection(localeFromGoogle || lang, lang);
+      }
+
+      if (typeof window.khubMarkNativeI18nElements === 'function') {
+        window.khubMarkNativeI18nElements();
       }
     }
     $(function () {
