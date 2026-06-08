@@ -86,6 +86,8 @@ use App\Http\Controllers\EventsController as PublicEventsController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\DocsController;
+use App\Http\Controllers\RobotsController;
+use App\Http\Controllers\SitemapController;
 
 
 /*
@@ -137,6 +139,9 @@ Route::post('password/reset', [ResetPasswordController::class, 'reset'])->name('
 
 //Route::get('/test', [TestController::class, 'chat'])->name('test');
 Route::get('/favicon.ico', [CommonController::class, 'favicon'])->name('favicon');
+Route::get('/robots.txt', [RobotsController::class, 'show'])->name('robots');
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap.index');
+Route::get('/sitemaps/{name}.xml', [SitemapController::class, 'section'])->where('name', '[a-z0-9\-]+')->name('sitemap.section');
 Route::post('/locale/apply', [LocaleSwitchController::class, 'apply'])->name('locale.apply');
 Route::get('/locale/{locale}', [LocaleSwitchController::class, 'switch'])->where('locale', '[a-z]{2}')->name('locale.switch');
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -733,6 +738,8 @@ Route::group(["prefix" => "admin", 'middleware' => ['auth', 'web']], function ()
         Route::post('/integrations', [AdminCoursesController::class, 'saveIntegrations'])->name('admin.courses.integrations.save');
         Route::get('/ai-config', [AdminCoursesController::class, 'aiConfig'])->name('admin.courses.ai-config');
         Route::post('/ai-config', [AdminCoursesController::class, 'saveAiConfig'])->name('admin.courses.ai-config.save');
+        Route::get('/sitemap', [AdminCoursesController::class, 'sitemap'])->name('admin.courses.sitemap');
+        Route::post('/sitemap/generate', [AdminCoursesController::class, 'generateSitemap'])->name('admin.courses.sitemap.generate');
         Route::post("/store", [AdminCoursesController::class, 'store']);
         Route::post("/import", [AdminCoursesController::class, 'import']);
         Route::get("/delete", [AdminCoursesController::class, 'destroy']);

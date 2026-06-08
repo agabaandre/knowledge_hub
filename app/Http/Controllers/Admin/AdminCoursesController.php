@@ -10,6 +10,8 @@ use App\Support\AiConfig;
 use App\Support\FrappeConfig;
 use App\Support\MoodleConfig;
 use App\Support\OpenEdxConfig;
+use App\Services\SitemapService;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Schema;
 use Maatwebsite\Excel\Facades\Excel;
 
@@ -170,6 +172,34 @@ class AdminCoursesController extends Controller
             ->route('admin.courses.ai-config')
             ->with('message', __('admin_nav.ai_config_saved_failure'))
             ->with('status', 'failure');
+    }
+
+    public function sitemap(SitemapService $sitemapService)
+    {
+        return view('admin.courses.sitemap', [
+            'sitemapPage' => $sitemapService->adminSummary(),
+        ]);
+    }
+
+    public function generateSitemap()
+    {
+        try {
+            Artisan::call('sitemap:generate', ['--warm-cache' => true]);
+
+            return redirect()
+                ->route('admin.courses.sitemap')
+                ->with('message', __('admin_nav.sitemap_generated_success'))
+                ->with('status', 'success');
+        } catch (\Throwable $e) {
+            \Log::error('admin.sitemap.generate_failed', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return redirect()
+                ->route('admin.courses.sitemap')
+                ->with('message', __('admin_nav.sitemap_generated_failure', ['error' => $e->getMessage()]))
+                ->with('status', 'failure');
+        }
     }
 
     /**

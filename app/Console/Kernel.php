@@ -101,6 +101,8 @@ class Kernel extends ConsoleKernel
         $schedule->command('scout:sync-index-settings')
             ->weeklyOn(0, '04:15')
             ->when(fn () => (string) config('scout.driver') === 'meilisearch');
+
+        $schedule->command('sitemap:generate --warm-cache')->dailyAt('04:00');
     }
 
     /**

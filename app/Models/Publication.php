@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Laravel\Scout\Searchable;
 
@@ -431,10 +432,14 @@ class Publication extends Model
         static::saved(function (Publication $publication) {
             \App\Jobs\RefreshSearchIndexCachesJob::dispatch((int) $publication->id)
                 ->delay(now()->addSeconds(15));
+
+            Cache::forget('sitemap:index:v1');
         });
 
         static::deleted(function (Publication $publication) {
             \App\Jobs\RefreshSearchIndexCachesJob::dispatch(null);
+
+            Cache::forget('sitemap:index:v1');
         });
     }
 

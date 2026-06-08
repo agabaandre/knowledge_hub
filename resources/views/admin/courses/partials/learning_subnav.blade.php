@@ -14,4 +14,9 @@
             <i class="fa fa-robot me-1"></i>{{ __('admin_nav.ai_config') }}
         </a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ ($learningNav ?? 'courses') === 'sitemap' ? 'active' : '' }}" href="{{ route('admin.courses.sitemap') }}">
+            <i class="fa fa-sitemap me-1"></i>{{ __('admin_nav.sitemap') }}
+        </a>
+    </li>
 </ul>
