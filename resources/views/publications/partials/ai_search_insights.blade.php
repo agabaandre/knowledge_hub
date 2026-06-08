@@ -10,7 +10,7 @@
     $scholarlySources = $insights['scholarly_sources'] ?? $insights['internet_results'] ?? [];
     $hasHubPicks = !empty($insights['publications']) || !empty($insights['forums']) || !empty($insights['communities']) || !empty($insights['health_topics']);
     $hasEvidence = !empty($keyTakeaways) || !empty($scholarlySources);
-    $hasTaxonomy = !empty($insights['thematic_areas']) || !empty($insights['sub_thematic_areas']) || !empty($insights['contributors']);
+    $hasTaxonomy = !empty($insights['contributors']);
     $showSplit = $hasHubPicks && $hasEvidence;
 @endphp
 <style>
@@ -25,8 +25,8 @@
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 0.75rem;
-        padding: 0.7rem 0.95rem;
+        gap: 0.6rem;
+        padding: 0.55rem 0.85rem;
         border-bottom: 1px solid #e2e8f0;
         background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
     }
@@ -85,21 +85,19 @@
         background: color-mix(in srgb, var(--theme-color-primary, #119A48) 6%, #fff);
     }
     .ai-insights-body {
-        padding: 0.7rem 0.95rem 0.25rem;
+        padding: 0.55rem 0.85rem 0.15rem;
     }
     .ai-insights-summary {
-        margin: 0 0 0.55rem;
-        padding: 0.6rem 0.75rem;
-        border-left: 3px solid var(--theme-color-primary, #119A48);
-        background: #f8fafc;
+        margin: 0 0 0.35rem;
+        padding: 0;
         color: #334155;
-        font-size: 0.88rem;
-        line-height: 1.5;
+        font-size: 0.86rem;
+        line-height: 1.45;
     }
     .ai-insights-layout {
         display: grid;
         grid-template-columns: 1fr;
-        gap: 0.55rem;
+        gap: 0.4rem;
         align-items: start;
     }
     .ai-insights-layout--split {
@@ -111,9 +109,9 @@
     .ai-insights-section__title {
         display: flex;
         align-items: center;
-        gap: 0.35rem;
-        margin: 0 0 0.35rem;
-        font-size: 0.72rem;
+        gap: 0.3rem;
+        margin: 0 0 0.25rem;
+        font-size: 0.7rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
@@ -126,13 +124,13 @@
     .ai-insights-card-list {
         display: flex;
         flex-direction: column;
-        gap: 0.35rem;
+        gap: 0.25rem;
     }
     .ai-insights-card {
         display: flex;
         align-items: flex-start;
-        gap: 0.5rem;
-        padding: 0.5rem 0.6rem;
+        gap: 0.45rem;
+        padding: 0.4rem 0.5rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.25rem;
         background: #fff;
@@ -159,24 +157,20 @@
         display: block;
         font-weight: 600;
         color: #0f172a;
-        font-size: 0.84rem;
-        line-height: 1.35;
+        font-size: 0.8rem;
+        line-height: 1.3;
     }
     .ai-insights-card__label {
         display: block;
-        font-size: 0.68rem;
+        font-size: 0.65rem;
         font-weight: 600;
         text-transform: uppercase;
         letter-spacing: 0.03em;
         color: var(--theme-color-primary, #119A48);
-        margin-top: 0.05rem;
+        margin-top: 0;
     }
     .ai-insights-card__excerpt {
-        display: block;
-        font-size: 0.76rem;
-        color: #64748b;
-        line-height: 1.4;
-        margin-top: 0.15rem;
+        display: none;
     }
     .ai-insights-takeaways {
         list-style: none;
@@ -184,7 +178,7 @@
         padding: 0;
         display: flex;
         flex-direction: column;
-        gap: 0.3rem;
+        gap: 0.22rem;
     }
     .ai-insights-takeaways li {
         margin: 0;
@@ -192,14 +186,14 @@
     .ai-insights-takeaway {
         display: flex;
         align-items: flex-start;
-        gap: 0.45rem;
-        padding: 0.45rem 0.55rem;
+        gap: 0.4rem;
+        padding: 0.35rem 0.45rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.25rem;
         background: #fff;
         color: #334155;
-        font-size: 0.82rem;
-        line-height: 1.4;
+        font-size: 0.78rem;
+        line-height: 1.35;
         text-decoration: none;
         transition: border-color 0.15s ease, background 0.15s ease;
     }
@@ -228,8 +222,8 @@
     }
     .ai-insights-takeaway__source {
         display: block;
-        margin-top: 0.12rem;
-        font-size: 0.68rem;
+        margin-top: 0.08rem;
+        font-size: 0.64rem;
         font-weight: 600;
         color: #64748b;
         text-transform: uppercase;
@@ -238,8 +232,8 @@
     .ai-insights-source-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem;
-        margin-top: 0.4rem;
+        gap: 0.25rem;
+        margin-top: 0.3rem;
     }
     .ai-insights-source-chip {
         display: inline-flex;
@@ -259,15 +253,21 @@
         background: #fff;
     }
     .ai-insights-taxonomy {
-        margin-top: 0.5rem;
-        padding-top: 0.5rem;
+        margin-top: 0.35rem;
+        padding-top: 0.35rem;
         border-top: 1px solid #e2e8f0;
+    }
+    .ai-insights-taxonomy .ai-insights-section__title {
+        margin-top: 0.15rem;
+    }
+    .ai-insights-taxonomy .ai-insights-section__title:first-child {
+        margin-top: 0;
     }
     .ai-insights-pill-row {
         display: flex;
         flex-wrap: wrap;
-        gap: 0.3rem;
-        margin-bottom: 0.35rem;
+        gap: 0.25rem;
+        margin-bottom: 0.25rem;
     }
     .ai-insights-pill-row:last-child {
         margin-bottom: 0;
@@ -290,11 +290,11 @@
         text-decoration: underline;
     }
     .ai-insights-footer {
-        padding: 0.45rem 0.95rem 0.55rem;
+        padding: 0.35rem 0.85rem 0.45rem;
         border-top: 1px solid #e2e8f0;
-        font-size: 0.7rem;
+        font-size: 0.68rem;
         color: #94a3b8;
-        line-height: 1.35;
+        line-height: 1.3;
     }
     @media (max-width: 991.98px) {
         .ai-insights-layout--split {
@@ -351,61 +351,49 @@
                         {{ __('publications.search.on_this_hub') }}
                     </h3>
                     <div class="ai-insights-card-list">
-                        @foreach($insights['health_topics'] ?? [] as $topic)
+                        @foreach(collect($insights['health_topics'] ?? [])->take(2) as $topic)
                             @if(!empty($topic['url']))
                                 <a href="{{ $topic['url'] }}" class="ai-insights-card">
                                     <span class="ai-insights-card__icon"><i class="fa fa-heart-pulse" aria-hidden="true"></i></span>
                                     <span>
-                                        <span class="ai-insights-card__title">{{ $topic['name'] ?? __('publications.search.health_topics') }}</span>
+                                        <span class="ai-insights-card__title">{{ Str::limit($topic['name'] ?? __('publications.search.health_topics'), 70) }}</span>
                                         <span class="ai-insights-card__label">{{ __('publications.search.health_topics') }}</span>
-                                        @if(!empty($topic['overview']))
-                                            <span class="ai-insights-card__excerpt">{{ plain_text_excerpt_from_html($topic['overview'], 120) }}</span>
-                                        @endif
                                     </span>
                                 </a>
                             @endif
                         @endforeach
 
-                        @foreach($insights['publications'] ?? [] as $pick)
+                        @foreach(collect($insights['publications'] ?? [])->take(2) as $pick)
                             @if(!empty($pick['url']))
                                 <a href="{{ $pick['url'] }}" class="ai-insights-card">
                                     <span class="ai-insights-card__icon"><i class="fa fa-file-lines" aria-hidden="true"></i></span>
                                     <span>
-                                        <span class="ai-insights-card__title">{{ $pick['title'] ?? __('publications.publication') }}</span>
+                                        <span class="ai-insights-card__title">{{ Str::limit($pick['title'] ?? __('publications.publication'), 85) }}</span>
                                         <span class="ai-insights-card__label">{{ __('publications.publication') }}</span>
-                                        @if(!empty($pick['excerpt']))
-                                            <span class="ai-insights-card__excerpt">{{ $pick['excerpt'] }}</span>
-                                        @endif
                                     </span>
                                 </a>
                             @endif
                         @endforeach
 
-                        @foreach($insights['forums'] ?? [] as $pick)
+                        @foreach(collect($insights['forums'] ?? [])->take(1) as $pick)
                             @if(!empty($pick['url']))
                                 <a href="{{ $pick['url'] }}" class="ai-insights-card">
                                     <span class="ai-insights-card__icon"><i class="fa fa-comments" aria-hidden="true"></i></span>
                                     <span>
-                                        <span class="ai-insights-card__title">{{ $pick['title'] ?? __('publications.search.forum_discussion') }}</span>
+                                        <span class="ai-insights-card__title">{{ Str::limit($pick['title'] ?? __('publications.search.forum_discussion'), 85) }}</span>
                                         <span class="ai-insights-card__label">{{ __('publications.search.forum_discussion') }}</span>
-                                        @if(!empty($pick['excerpt']))
-                                            <span class="ai-insights-card__excerpt">{{ $pick['excerpt'] }}</span>
-                                        @endif
                                     </span>
                                 </a>
                             @endif
                         @endforeach
 
-                        @foreach($insights['communities'] ?? [] as $pick)
+                        @foreach(collect($insights['communities'] ?? [])->take(1) as $pick)
                             @if(!empty($pick['url']))
                                 <a href="{{ $pick['url'] }}" class="ai-insights-card">
                                     <span class="ai-insights-card__icon"><i class="fa fa-users" aria-hidden="true"></i></span>
                                     <span>
-                                        <span class="ai-insights-card__title">{{ $pick['name'] ?? __('publications.search.community') }}</span>
+                                        <span class="ai-insights-card__title">{{ Str::limit($pick['name'] ?? __('publications.search.community'), 85) }}</span>
                                         <span class="ai-insights-card__label">{{ __('publications.search.community') }}</span>
-                                        @if(!empty($pick['excerpt']))
-                                            <span class="ai-insights-card__excerpt">{{ $pick['excerpt'] }}</span>
-                                        @endif
                                     </span>
                                 </a>
                             @endif
@@ -470,49 +458,19 @@
 
         @if($hasTaxonomy)
             <div class="ai-insights-taxonomy">
-                @if(!empty($insights['thematic_areas']))
-                    <h3 class="ai-insights-section__title">
-                        <i class="fa fa-layer-group" aria-hidden="true"></i>
-                        {{ __('publications.search.thematic_areas') }}
-                    </h3>
-                    <div class="ai-insights-pill-row">
-                        @foreach($insights['thematic_areas'] as $theme)
-                            @if(!empty($theme['name']))
-                                <span class="ai-insights-pill">{{ $theme['name'] }}</span>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
-
-                @if(!empty($insights['sub_thematic_areas']))
-                    <h3 class="ai-insights-section__title">
-                        <i class="fa fa-sitemap" aria-hidden="true"></i>
-                        {{ __('publications.search.sub_thematic_areas') }}
-                    </h3>
-                    <div class="ai-insights-pill-row">
-                        @foreach(collect($insights['sub_thematic_areas'])->take(6) as $subTheme)
-                            @if(!empty($subTheme['name']))
-                                <span class="ai-insights-pill">{{ $subTheme['name'] }}</span>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
-
-                @if(!empty($insights['contributors']))
-                    <h3 class="ai-insights-section__title">
-                        <i class="fa fa-user-pen" aria-hidden="true"></i>
-                        {{ __('publications.search.contributors') }}
-                    </h3>
-                    <div class="ai-insights-pill-row">
-                        @foreach($insights['contributors'] as $contributor)
-                            @if(!empty($contributor['url']))
-                                <span class="ai-insights-pill">
-                                    <a href="{{ $contributor['url'] }}">{{ $contributor['name'] }}</a>
-                                </span>
-                            @endif
-                        @endforeach
-                    </div>
-                @endif
+                <h3 class="ai-insights-section__title">
+                    <i class="fa fa-user-pen" aria-hidden="true"></i>
+                    {{ __('publications.search.contributors') }}
+                </h3>
+                <div class="ai-insights-pill-row">
+                    @foreach(collect($insights['contributors'])->take(4) as $contributor)
+                        @if(!empty($contributor['url']))
+                            <span class="ai-insights-pill">
+                                <a href="{{ $contributor['url'] }}">{{ $contributor['name'] }}</a>
+                            </span>
+                        @endif
+                    @endforeach
+                </div>
             </div>
         @endif
     </div>

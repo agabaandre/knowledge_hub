@@ -45,7 +45,7 @@ class AiSearchInsightsService
             return null;
         }
 
-        $cacheKey = 'ai_search_insights:v5:'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheKey = 'ai_search_insights:v6:'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
             $cached = Cache::get($cacheKey);
@@ -714,15 +714,15 @@ class AiSearchInsightsService
             'overview' => $overview,
             'key_takeaways' => array_slice($keyTakeaways, 0, 3),
             'key_points' => array_slice($keyPoints, 0, 3),
-            'publications' => array_slice($pickPublications, 0, 3),
-            'forums' => array_slice($pickForums, 0, 2),
-            'communities' => array_slice($pickCommunities, 0, 2),
-            'health_topics' => $healthTopics,
-            'scholarly_sources' => $scholarlySources,
-            'internet_results' => $scholarlySources,
-            'thematic_areas' => array_slice($themeCatalog, 0, 6),
-            'sub_thematic_areas' => array_slice($subThemeCatalog, 0, 8),
-            'contributors' => array_slice($authorCatalog, 0, 6),
+            'publications' => array_slice($pickPublications, 0, 2),
+            'forums' => array_slice($pickForums, 0, 1),
+            'communities' => array_slice($pickCommunities, 0, 1),
+            'health_topics' => array_slice($healthTopics, 0, 2),
+            'scholarly_sources' => array_slice($scholarlySources, 0, 3),
+            'internet_results' => array_slice($scholarlySources, 0, 3),
+            'thematic_areas' => array_slice($themeCatalog, 0, 4),
+            'sub_thematic_areas' => array_slice($subThemeCatalog, 0, 4),
+            'contributors' => array_slice($authorCatalog, 0, 4),
             'external_resources' => [],
         ];
     }
