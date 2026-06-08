@@ -1,11 +1,18 @@
 /**
- * Knowledge Hub RTL overrides — active when <html dir="rtl">.
- * Bootstrap 5.3+ (Theme1) mirrors most utilities automatically; this file
- * covers custom navigation, mega menus, language selector, and legacy admin UI.
+ * Knowledge Hub RTL layout overrides for Default + Theme1.
+ * Works alongside Google Translate: notranslate / translate="no" regions are untouched by GT.
+ * Layout direction follows html[dir]; Latin proper names stay LTR via translate="no" islands.
  */
 
 [dir="rtl"] body {
     text-align: right;
+}
+
+[dir="rtl"] .notranslate[translate="no"],
+[dir="rtl"] [translate="no"] {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: left;
 }
 
 /* Language selector */
@@ -23,208 +30,66 @@
     left: 0;
 }
 
-[dir="rtl"] .language-dropdown-link {
-    flex-direction: row-reverse;
-    text-align: right;
-}
-
-/* Default theme header row */
-[dir="rtl"] #langauge-container .col-lg-4[style*="justify-content: flex-end"] {
-    justify-content: flex-start !important;
-    padding-right: 0 !important;
-    padding-left: 10px !important;
-}
-
-/* Mega menu */
-[dir="rtl"] .mega-menu {
-    left: auto;
-    right: 0;
-}
-
-[dir="rtl"] .mega-menu-sidebar {
-    padding-right: 0;
-    padding-left: 24px;
-    border-right: none;
-    border-left: 1px solid #e8ecef;
-}
-
-[dir="rtl"] .mega-sidebar-btn,
-[dir="rtl"] .mega-sidebar-link,
-[dir="rtl"] .mega-view-all {
-    text-align: right;
-}
-
-[dir="rtl"] .mega-sidebar-item {
-    flex-direction: row-reverse;
-}
-
-[dir="rtl"] .mega-menu-grid {
-    flex-direction: row-reverse;
-}
-
-[dir="rtl"] .mega-menu-content {
-    padding-left: 0;
-    padding-right: 24px;
-}
-
-/* Default navigation plugin */
-[dir="rtl"] .navigation-portrait .nav-menus-wrapper {
-    left: auto;
-    right: 0;
-    transform: translateX(100%);
-}
-
-[dir="rtl"] .navigation-portrait .nav-menus-wrapper.nav-menus-wrapper-open {
-    transform: translateX(0);
-}
-
-[dir="rtl"] .navigation-portrait .nav-menus-wrapper.nav-menus-wrapper-right {
-    left: 0;
-    right: auto;
-    transform: translateX(-100%);
-}
-
-[dir="rtl"] .navigation-portrait .nav-menus-wrapper.nav-menus-wrapper-right.nav-menus-wrapper-open {
-    transform: translateX(0);
-}
-
-[dir="rtl"] .nav-menu > li > a,
-[dir="rtl"] .nav-dropdown > li > a {
+/* Default theme navigation */
+[dir="rtl"] .navigation,
+[dir="rtl"] .navigation-wrapper,
+[dir="rtl"] .nav-menu,
+[dir="rtl"] .nav-menus-wrapper {
+    direction: rtl;
     text-align: right;
 }
 
 [dir="rtl"] .nav-dropdown {
-    left: auto;
-    right: 0;
     text-align: right;
 }
 
-[dir="rtl"] .nav-menus-wrapper-close-button {
-    left: 15px;
-    right: auto;
+[dir="rtl"] .mega-menu-panel,
+[dir="rtl"] .mega-sidebar,
+[dir="rtl"] .mega-main {
+    direction: rtl;
+    text-align: right;
 }
 
-/* Theme1 nav badges & dropdowns */
+/* Theme1 header / nav */
+[dir="rtl"] .kh-linkedin-nav {
+    direction: rtl;
+}
+
 [dir="rtl"] .kh-linkedin-nav .kh-nav-badge {
     right: auto;
     left: 0.35rem;
 }
 
-[dir="rtl"] .dropdown-menu-end {
-    --bs-position: start;
+[dir="rtl"] #header .navbar-nav {
+    direction: rtl;
+}
+
+[dir="rtl"] .dropdown-menu {
+    text-align: right;
 }
 
 /* Secondary account nav */
 [dir="rtl"] .secondary-nav-container {
-    justify-content: flex-start;
+    direction: rtl;
+    justify-content: flex-end;
 }
 
-[dir="rtl"] .secondary-nav-link i {
-    margin-right: 0;
-    margin-left: 0.35rem;
+/* Breadcrumbs & pagination */
+[dir="rtl"] .breadcrumb {
+    direction: rtl;
 }
 
-/* Breadcrumbs, lists, cards */
 [dir="rtl"] .breadcrumb-item + .breadcrumb-item::before {
     float: right;
     padding-right: 0;
     padding-left: 0.5rem;
 }
 
-[dir="rtl"] .list-unstyled,
-[dir="rtl"] .sidebar-content,
-[dir="rtl"] .card-body {
-    text-align: right;
-}
-
-/* Forms & filters */
-[dir="rtl"] .form-check {
-    padding-left: 0;
-    padding-right: 1.5em;
-}
-
-[dir="rtl"] .form-check .form-check-input {
-    float: right;
-    margin-left: 0;
-    margin-right: -1.5em;
-}
-
-[dir="rtl"] .input-group > :not(:first-child):not(.dropdown-menu):not(.valid-tooltip):not(.valid-feedback):not(.invalid-tooltip):not(.invalid-feedback) {
-    margin-left: 0;
-    margin-right: calc(var(--bs-border-width) * -1);
-    border-top-left-radius: var(--bs-border-radius);
-    border-bottom-left-radius: var(--bs-border-radius);
-    border-top-right-radius: 0;
-    border-bottom-right-radius: 0;
-}
-
-[dir="rtl"] .input-group:not(.has-validation) > :not(:last-child):not(.dropdown-toggle):not(.dropdown-menu):not(.form-floating) {
-    border-top-right-radius: var(--bs-border-radius);
-    border-bottom-right-radius: var(--bs-border-radius);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
-}
-
-/* Select2 */
-[dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__arrow {
-    left: 1px;
-    right: auto;
-}
-
-[dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__rendered {
-    text-align: right;
-    padding-right: 8px;
-    padding-left: 20px;
-}
-
-/* Publication / search layout helpers */
-[dir="rtl"] .search-sidebar-list__link,
-[dir="rtl"] .publication-list-card,
-[dir="rtl"] .records-search-main {
-    text-align: right;
-}
-
 [dir="rtl"] .pagination {
-    justify-content: flex-start;
-}
-
-/* Footer columns */
-[dir="rtl"] footer .text-md-end,
-[dir="rtl"] footer .text-end {
-    text-align: left !important;
-}
-
-[dir="rtl"] footer .text-md-start,
-[dir="rtl"] footer .text-start {
-    text-align: right !important;
-}
-
-/* Admin horizontal menu (legacy Bootstrap 4 admin) */
-[dir="rtl"] .horizontal-main {
     direction: rtl;
 }
 
-[dir="rtl"] .horizontalMenu > .horizontalMenu-list > li {
-    float: right;
-}
-
-[dir="rtl"] .horizontalMenu > .horizontalMenu-list > li > ul.sub-menu {
-    left: auto;
-    right: 0;
-    text-align: right;
-}
-
-[dir="rtl"] .side-menu .side-menu__icon {
-    margin-right: 0;
-    margin-left: 10px;
-}
-
-[dir="rtl"] .main-content {
-    direction: rtl;
-    text-align: right;
-}
-
-/* Utility overrides for legacy templates */
+/* Bootstrap 4 physical utilities used across templates */
 [dir="rtl"] .text-left {
     text-align: right !important;
 }
@@ -233,46 +98,109 @@
     text-align: left !important;
 }
 
-[dir="rtl"] .float-left,
-[dir="rtl"] .pull-left {
+[dir="rtl"] .float-left {
     float: right !important;
 }
 
-[dir="rtl"] .float-right,
-[dir="rtl"] .pull-right {
+[dir="rtl"] .float-right {
     float: left !important;
 }
 
-[dir="rtl"] .ml-auto,
-[dir="rtl"] .mx-auto.ml-auto {
-    margin-left: 0 !important;
-    margin-right: auto !important;
+[dir="rtl"] .mr-1 { margin-right: 0 !important; margin-left: 0.25rem !important; }
+[dir="rtl"] .mr-2 { margin-right: 0 !important; margin-left: 0.5rem !important; }
+[dir="rtl"] .mr-3 { margin-right: 0 !important; margin-left: 1rem !important; }
+[dir="rtl"] .mr-4 { margin-right: 0 !important; margin-left: 1.5rem !important; }
+[dir="rtl"] .mr-5 { margin-right: 0 !important; margin-left: 3rem !important; }
+[dir="rtl"] .ml-1 { margin-left: 0 !important; margin-right: 0.25rem !important; }
+[dir="rtl"] .ml-2 { margin-left: 0 !important; margin-right: 0.5rem !important; }
+[dir="rtl"] .ml-3 { margin-left: 0 !important; margin-right: 1rem !important; }
+[dir="rtl"] .ml-4 { margin-left: 0 !important; margin-right: 1.5rem !important; }
+[dir="rtl"] .ml-5 { margin-left: 0 !important; margin-right: 3rem !important; }
+[dir="rtl"] .pr-1 { padding-right: 0 !important; padding-left: 0.25rem !important; }
+[dir="rtl"] .pr-2 { padding-right: 0 !important; padding-left: 0.5rem !important; }
+[dir="rtl"] .pr-3 { padding-right: 0 !important; padding-left: 1rem !important; }
+[dir="rtl"] .pl-1 { padding-left: 0 !important; padding-right: 0.25rem !important; }
+[dir="rtl"] .pl-2 { padding-left: 0 !important; padding-right: 0.5rem !important; }
+[dir="rtl"] .pl-3 { padding-left: 0 !important; padding-right: 1rem !important; }
+
+/* Search inputs with left icon */
+[dir="rtl"] .left-ico,
+[dir="rtl"] input.left-ico,
+[dir="rtl"] .main-search.left-ico {
+    padding-left: 12px !important;
+    padding-right: 42px !important;
+    background-position: right 12px center !important;
 }
 
-[dir="rtl"] .mr-auto {
-    margin-right: 0 !important;
-    margin-left: auto !important;
-}
-
-[dir="rtl"] .pl-3,
-[dir="rtl"] .px-3:first-child {
-    padding-left: 0 !important;
-}
-
-[dir="rtl"] .pr-3 {
-    padding-right: 0 !important;
-}
-
-/* Google Translate: native chrome is notranslate; page body keeps GT direction on text nodes */
-[dir="rtl"] #main-wrapper,
-[dir="rtl"] #content,
-[dir="rtl"] .khub-gt-content {
+[dir="rtl"] .main_search,
+[dir="rtl"] .main-search {
     direction: rtl;
     text-align: right;
 }
 
-[dir="ltr"] #main-wrapper,
-[dir="ltr"] #content,
-[dir="ltr"] .khub-gt-content {
+/* Forms & tables */
+[dir="rtl"] .form-control,
+[dir="rtl"] .form-select,
+[dir="rtl"] select.form-control,
+[dir="rtl"] textarea.form-control {
+    text-align: right;
+}
+
+[dir="rtl"] .select2-container {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .select2-container--default .select2-selection--single .select2-selection__arrow {
+    right: auto;
+    left: 1px;
+}
+
+[dir="rtl"] table th,
+[dir="rtl"] table td {
+    text-align: right;
+}
+
+/* Cards / publication lists */
+[dir="rtl"] .publication-list-card,
+[dir="rtl"] .forum-item,
+[dir="rtl"] .sidebar-content {
+    direction: rtl;
+    text-align: right;
+}
+
+[dir="rtl"] .sidebar-tag-pill,
+[dir="rtl"] .badge {
+    direction: rtl;
+}
+
+/* Footer */
+[dir="rtl"] footer,
+[dir="rtl"] .footer,
+[dir="rtl"] .footer-widget {
+    direction: rtl;
+    text-align: right;
+}
+
+/* Theme1 mobile nav */
+@media (max-width: 991.98px) {
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-item {
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+    }
+
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-icon {
+        margin: 0 0 0 0.55rem;
+    }
+
+    [dir="rtl"] .kh-linkedin-nav .kh-nav-badge {
+        margin-left: 0;
+        margin-right: 0.35rem;
+    }
+}
+
+/* Keep Google Translate widget out of layout flow (existing behaviour) */
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget {
     direction: ltr;
 }

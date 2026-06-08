@@ -2206,35 +2206,24 @@ if (! function_exists('hub_storage_path')) {
     }
 }
 
-if (! function_exists('is_rtl_locale')) {
-    function is_rtl_locale(?string $locale = null): bool
+if (! function_exists('active_ui_locale')) {
+    function active_ui_locale(): string
     {
-        return \App\Support\LocaleDirection::isRtl($locale);
+        return \App\Support\LocaleDirection::activeLocale();
     }
 }
 
-if (! function_exists('html_dir_for_locale')) {
-    function html_dir_for_locale(?string $locale = null): string
+if (! function_exists('locale_is_rtl')) {
+    function locale_is_rtl(?string $locale = null): bool
     {
-        return \App\Support\LocaleDirection::htmlDir($locale);
+        return \App\Support\LocaleDirection::isRtl($locale ?? active_ui_locale());
     }
 }
 
-if (! function_exists('ui_document_direction')) {
-    /**
-     * @return array{locale: string, lang: string, dir: string, is_rtl: bool}
-     */
-    function ui_document_direction(?string $locale = null): array
+if (! function_exists('locale_direction')) {
+    function locale_direction(?string $locale = null): string
     {
-        $locale = (string) ($locale ?? app()->getLocale());
-        $dir = html_dir_for_locale($locale);
-
-        return [
-            'locale' => $locale,
-            'lang' => str_replace('_', '-', $locale),
-            'dir' => $dir,
-            'is_rtl' => $dir === 'rtl',
-        ];
+        return \App\Support\LocaleDirection::direction($locale ?? active_ui_locale());
     }
 }
 

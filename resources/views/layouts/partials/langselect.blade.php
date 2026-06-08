@@ -15,11 +15,6 @@
         $first = reset($languages);
         $currentLanguage = is_array($first) ? $first : ['name' => 'English', 'flag' => '', 'code' => 'en', 'google_code' => 'en'];
     }
-    $languagesForJs = collect($languages)->map(function ($row, $code) {
-        $row['rtl'] = is_rtl_locale((string) $code);
-
-        return $row;
-    })->all();
 @endphp
 
 <style>
@@ -480,8 +475,8 @@
 (function() {
     'use strict';
 
-    window.khubLangMeta = @json($languagesForJs);
-    window.khubRtlGoogleCodes = @json(\App\Support\LocaleDirection::rtlGoogleCodes());
+    window.khubLangMeta = @json($languages);
+    window.khubRtlLocales = @json(config('supported_locales.rtl_locales', ['ar']));
     window.khubInitialNativeLabels = @json(\App\Support\UiLocaleLabels::exportForCurrentLocale());
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
     @php
@@ -495,6 +490,48 @@
     var khubLocaleMaxAgeSec = {{ (int) config('supported_locales.locale_cookie_minutes', 525600) * 60 }};
     var khubLocaleApplyUrl = @json(route('locale.apply'));
     var khubLocaleSwitchTemplate = @json(route('locale.switch', ['locale' => '__LOCALE__']));
+
+    function khubLocaleIsRtl(localeCode) {
+        if (!localeCode) {
+            return false;
+        }
+        var rtl = window.khubRtlLocales || ['ar'];
+        return rtl.indexOf(localeCode) !== -1;
+    }
+
+    /**
+     * Set document reading direction for native layout RTL.
+     * Does not remove Google Translate classes/styles (handled separately on English revert).
+     */
+    window.khubApplyDocumentDirection = function(localeCode) {
+        var locale = localeCode || 'en';
+        var dir = khubLocaleIsRtl(locale) ? 'rtl' : 'ltr';
+        document.documentElement.setAttribute('dir', dir);
+        document.documentElement.setAttribute('lang', locale.replace('_', '-'));
+    };
+
+    window.khubClearGoogleTranslationState = function() {
+        if (typeof window.jQuery !== 'undefined' && window.jQuery) {
+            window.jQuery('body').removeClass('translated-rtl');
+            window.jQuery('html').removeClass('translated-rtl');
+        } else {
+            document.body.classList.remove('translated-rtl');
+            document.documentElement.classList.remove('translated-rtl');
+        }
+
+        document.querySelectorAll('head link[href*="translate.googleapis.com"]').forEach(function(link) {
+            link.remove();
+        });
+
+        document.querySelectorAll('[style*="direction"]').forEach(function(el) {
+            if (el.classList.contains('notranslate') || el.getAttribute('translate') === 'no') {
+                return;
+            }
+            if (el.style && el.style.direction) {
+                el.style.direction = '';
+            }
+        });
+    };
 
     function writeAppCookie(name, value, maxAgeSec) {
         var parts = [
@@ -580,10 +617,10 @@
     function initializeLanguageUI() {
         var currentLang = getCurrentLang();
         updateLanguageUI(currentLang);
+        khubApplyDocumentDirection(currentLang);
         if (window.khubInitialNativeLabels) {
             khubApplyNativeLabels(window.khubInitialNativeLabels);
         }
-        khubMarkNativeI18nElements();
     }
     
     // Update immediately if DOM is ready
@@ -625,9 +662,6 @@
             if (value == null || value === '') return;
 
             document.querySelectorAll('[data-khub-i18n="' + fullKey + '"]').forEach(function(el) {
-                el.classList.add('notranslate');
-                el.setAttribute('translate', 'no');
-
                 if (el.tagName === 'INPUT') {
                     if (el.type === 'submit' || el.type === 'button') {
                         el.value = value;
@@ -683,119 +717,18 @@
         });
     }
 
-    function khubGoogleCodeForLocale(localeCode) {
-        var meta = window.khubLangMeta && window.khubLangMeta[localeCode];
-        if (meta && meta.google_code) {
-            return meta.google_code;
-        }
-
-        return localeCode || 'en';
-    }
-
-    window.khubGoogleCodeForLocale = khubGoogleCodeForLocale;
-
-    function khubMarkNativeI18nElements() {
-        var selectors = [
-            '[data-khub-i18n]',
-            '#khub-nav-menus',
-            '#khub-theme1-nav',
-            '#khub-footer-i18n',
-            '#khub-footer-bottom-i18n',
-            '#khub-login-i18n',
-            '#khub-cookie-i18n',
-            '#khub-site-branding',
-            '#khub-account-dropdown-menu',
-            '#khub-secondary-nav',
-            '.notranslate'
-        ];
-
-        selectors.forEach(function(selector) {
-            document.querySelectorAll(selector).forEach(function(el) {
-                el.classList.add('notranslate');
-                el.setAttribute('translate', 'no');
-            });
-        });
-    }
-
-    window.khubMarkNativeI18nElements = khubMarkNativeI18nElements;
-
-    function khubRefreshGoogleTranslate(googleCode, attempt) {
+    function khubApplyGoogleTranslateWhenReady(googleCode, attempt) {
         attempt = attempt || 0;
-        googleCode = googleCode || 'en';
-
-        if (typeof window.khubApplyGoogleTranslate !== 'function') {
-            if (attempt < 25) {
-                setTimeout(function() {
-                    khubRefreshGoogleTranslate(googleCode, attempt + 1);
-                }, 200);
-            }
-
+        if (typeof window.khubApplyGoogleTranslate === 'function') {
+            window.khubApplyGoogleTranslate(googleCode);
             return;
         }
-
-        if (attempt === 0) {
-            khubMarkNativeI18nElements();
+        if (attempt < 25) {
+            setTimeout(function() {
+                khubApplyGoogleTranslateWhenReady(googleCode, attempt + 1);
+            }, 200);
         }
-
-        window.khubApplyGoogleTranslate(googleCode);
-
-        if (googleCode === 'en' || attempt >= 3) {
-            return;
-        }
-
-        setTimeout(function() {
-            khubMarkNativeI18nElements();
-            khubRefreshGoogleTranslate(googleCode, attempt + 1);
-        }, [500, 1200, 2200][attempt] || 2200);
     }
-
-    window.khubRefreshGoogleTranslate = khubRefreshGoogleTranslate;
-
-    function khubSyncPageTranslation(localeCode, googleCode, labels) {
-        localeCode = localeCode || getCurrentLang() || 'en';
-        googleCode = googleCode || khubGoogleCodeForLocale(localeCode);
-        labels = labels || window.khubInitialNativeLabels;
-
-        khubApplyDocumentDirection(localeCode, googleCode);
-
-        if (labels) {
-            khubApplyNativeLabels(labels);
-        }
-
-        khubMarkNativeI18nElements();
-        khubRefreshGoogleTranslate(localeCode === 'en' ? 'en' : googleCode);
-    }
-
-    window.khubSyncPageTranslation = khubSyncPageTranslation;
-
-    function khubIsRtlLocale(localeCode) {
-        var meta = window.khubLangMeta && window.khubLangMeta[localeCode];
-        if (meta && typeof meta.rtl === 'boolean') {
-            return meta.rtl;
-        }
-
-        return false;
-    }
-
-    function khubIsRtlGoogleCode(googleCode) {
-        var codes = window.khubRtlGoogleCodes || [];
-        googleCode = (googleCode || '').toString().toLowerCase();
-
-        return googleCode !== '' && codes.indexOf(googleCode) !== -1;
-    }
-
-    function khubApplyDocumentDirection(localeCode, googleCode) {
-        var rtl = khubIsRtlLocale(localeCode) || khubIsRtlGoogleCode(googleCode);
-        var dir = rtl ? 'rtl' : 'ltr';
-        var lang = (localeCode || googleCode || 'en').toString().replace('_', '-');
-
-        document.documentElement.setAttribute('dir', dir);
-        document.documentElement.setAttribute('lang', lang);
-        document.body.classList.toggle('khub-rtl', rtl);
-        document.body.classList.toggle('khub-ltr', !rtl);
-    }
-
-    window.khubApplyDocumentDirection = khubApplyDocumentDirection;
 
     function khubAfterLocaleSwap(googleCode, labels, localeCode) {
         if (typeof window.khubInitMegaMenus === 'function') {
@@ -803,7 +736,8 @@
         }
         khubReinitNavigation();
         khubRebindCookieButtons();
-        window.khubInitialNativeLabels = labels || window.khubInitialNativeLabels;
+        khubApplyNativeLabels(labels);
+        window.khubInitialNativeLabels = labels;
         if (typeof window.bootstrap !== 'undefined' && window.bootstrap.Dropdown) {
             document.querySelectorAll('[data-bs-toggle="dropdown"]').forEach(function(toggle) {
                 window.bootstrap.Dropdown.getOrCreateInstance(toggle);
@@ -812,7 +746,10 @@
         if (typeof window.jQuery !== 'undefined' && window.jQuery) {
             window.jQuery('[data-toggle="tooltip"]').tooltip();
         }
-        khubSyncPageTranslation(localeCode || getCurrentLang(), googleCode, labels);
+        if (localeCode) {
+            khubApplyDocumentDirection(localeCode);
+        }
+        khubApplyGoogleTranslateWhenReady(googleCode);
     }
 
     function khubFallbackLocaleRedirect(localeCode) {

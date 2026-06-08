@@ -1,6 +1,5 @@
-@php($docDir = ui_document_direction())
 <!DOCTYPE html>
-<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" data-bs-theme="light" data-scheme="navy" class="{{ (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled' }}{{ $docDir['is_rtl'] ? ' khub-rtl-document' : '' }}">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="light" data-scheme="navy" class="{{ (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled' }}">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
@@ -16,7 +15,6 @@
 
    <link rel="stylesheet" href="{{ asset('theme1/assets/css/bootstrap.min.css') }}">
    <link rel="stylesheet" href="{{ asset('theme1/assets/css/nifty.min.css') }}">
-   <link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
    <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-icons.min.css') }}">
    <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-settings.min.css') }}">
    <link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">

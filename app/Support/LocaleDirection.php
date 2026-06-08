@@ -2,59 +2,55 @@
 
 namespace App\Support;
 
+use App\Models\SiteLanguage;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
+
 class LocaleDirection
 {
     /**
      * @return list<string>
      */
-    public static function rtlLocaleCodes(): array
+    public static function rtlLocales(): array
     {
         $configured = config('supported_locales.rtl_locales', ['ar']);
 
-        return array_values(array_unique(array_filter(array_map(
-            static fn ($code) => is_string($code) ? strtolower(trim($code)) : '',
-            is_array($configured) ? $configured : ['ar']
-        ))));
+        return array_values(array_unique(array_filter(
+            is_array($configured) ? $configured : ['ar'],
+            static fn ($code) => is_string($code) && $code !== ''
+        )));
     }
 
-    public static function isRtl(?string $locale = null): bool
+    public static function isRtl(?string $locale): bool
     {
-        $locale = strtolower(trim((string) ($locale ?? app()->getLocale())));
-
-        if ($locale === '') {
+        if ($locale === null || $locale === '') {
             return false;
         }
 
-        return in_array($locale, self::rtlLocaleCodes(), true);
+        return in_array(strtolower($locale), array_map('strtolower', self::rtlLocales()), true);
     }
 
-    public static function htmlDir(?string $locale = null): string
+    public static function direction(?string $locale): string
     {
         return self::isRtl($locale) ? 'rtl' : 'ltr';
     }
 
-    /**
-     * Google Translate language codes that should use RTL layout.
-     *
-     * @return list<string>
-     */
-    public static function rtlGoogleCodes(): array
+    public static function activeLocale(?Request $request = null): string
     {
-        $map = config('supported_locales.rtl_google_codes');
-        if (is_array($map) && $map !== []) {
-            return array_values(array_unique(array_filter(array_map(
-                static fn ($code) => is_string($code) ? strtolower(trim($code)) : '',
-                $map
-            ))));
-        }
+        $request = $request ?? request();
 
-        return ['ar', 'he', 'fa', 'ur'];
+        return SiteLanguage::resolveActiveLocale(
+            auth()->check() ? (auth()->user()->langauge ?? null) : null,
+            $_COOKIE['googtrans'] ?? null,
+            $request->cookie((string) config('supported_locales.locale_cookie', 'khub_locale'))
+        );
     }
 
-    public static function isRtlGoogleCode(?string $googleCode): bool
+    public static function applyAppLocale(?Request $request = null): string
     {
-        $googleCode = strtolower(trim((string) $googleCode));
+        $locale = self::activeLocale($request);
+        App::setLocale($locale);
 
-        return $googleCode !== '' && in_array($googleCode, self::rtlGoogleCodes(), true);
+        return $locale;
     }
 }

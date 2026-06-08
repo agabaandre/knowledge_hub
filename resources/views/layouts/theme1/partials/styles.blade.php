@@ -5,10 +5,12 @@
         $userTheme = in_array($pref, ['light','dark','system']) ? $pref : 'light';
     }
     $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
-    $docDir = ui_document_direction();
+    $uiLocale = active_ui_locale();
+    $uiLang = str_replace('_', '-', $uiLocale);
+    $uiDir = locale_direction($uiLocale);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}{{ $docDir['is_rtl'] ? ' khub-rtl-document' : '' }}">
+<html lang="{{ $uiLang }}" dir="{{ $uiDir }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
@@ -20,10 +22,10 @@
 
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/nifty.min.css') }}">
-    <link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-icons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-settings.min.css') }}">
     @include('layouts.theme1.partials.theme1_colors')
+    @include('layouts.partials.rtl_stylesheet')
     <style>
         .root.front-container { min-height: 100vh; display: flex; flex-direction: column; background-color: #f8f9fa; }
         .root.front-container #content.content { flex: 1; pointer-events: auto; }

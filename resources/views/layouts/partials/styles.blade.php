@@ -5,10 +5,12 @@
         $userTheme = in_array($pref, ['light','dark','system']) ? $pref : 'light';
     }
     $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
-    $docDir = ui_document_direction();
+    $uiLocale = active_ui_locale();
+    $uiLang = str_replace('_', '-', $uiLocale);
+    $uiDir = locale_direction($uiLocale);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" class="{{ $menuIconsClass }}{{ $docDir['is_rtl'] ? ' khub-rtl-document' : '' }}">
+<html lang="{{ $uiLang }}" dir="{{ $uiDir }}" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" class="{{ $menuIconsClass }}">
 <head>
 
 @include('layouts.partials.header_resources')
@@ -19,4 +21,4 @@
 
 <body onload="">
 <div class="preloader"></div>
-<div id="main-wrapper" class="khub-gt-content">
+<div id="main-wrapper">

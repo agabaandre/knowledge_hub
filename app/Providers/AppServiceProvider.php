@@ -97,6 +97,14 @@ class AppServiceProvider extends ServiceProvider
             // Ignore during install / missing DB.
         }
 
+        try {
+            if (! $this->app->runningInConsole()) {
+                \App\Support\LocaleDirection::applyAppLocale();
+            }
+        } catch (\Throwable $e) {
+            // Ignore during install / missing DB.
+        }
+
         View::composer(
             ['admin.adminunits.*', 'adminunits.*'],
             \App\View\Composers\AdminUnitsViewComposer::class

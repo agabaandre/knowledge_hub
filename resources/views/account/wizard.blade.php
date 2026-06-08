@@ -305,23 +305,23 @@
                 <div class="col-md-12 mb-2">
                     <div class="wizard-inline-80-20">
                         <div class="mb-0 url_wrapper">
-                            <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
-                            <input type="text" placeholder="URL Link" class="form-control url" id="publication"
-                                name="link" value="{{ @$row->publication ?? old('publication') }}">
-                            <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
-                        </div>
+                        <label class="form-label" for="publication">Publication URL Link <span class="text-danger link-required-asterisk" style="display: none;">*</span></label>
+                        <input type="text" placeholder="URL Link" class="form-control url" id="publication"
+                            name="link" value="{{ @$row->publication ?? old('publication') }}">
+                        <small class="text-muted link-required-text" style="display: none;">Required when selecting External Link</small>
+                    </div>
                         <div class="mb-0 wizard-field-year">
-                            <label class="form-label" for="year_published">Year of Publication
-                                @if(($requiredFields['year_published'] ?? false) == true)
-                                    <span class="text-danger">*</span>
-                                @endif
-                            </label>
-                            <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
-                                @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
-                                @for($y = $start; $y >= $end; $y--)
-                                    <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
-                                @endfor
-                            </select>
+                    <label class="form-label" for="year_published">Year of Publication
+                        @if(($requiredFields['year_published'] ?? false) == true)
+                            <span class="text-danger">*</span>
+                    @endif
+                    </label>
+                    <select class="form-control select2" name="year_published" id="year_published" {{ ($requiredFields['year_published'] ?? false) ? 'required' : '' }}>
+                        @php $currentYear = intval(date('Y')); $start = $currentYear; $end = $currentYear - 20; @endphp
+                        @for($y = $start; $y >= $end; $y--)
+                            <option value="{{ $y }}" {{ ( (old('year_published') == $y) || (@$row->year_published == $y) || (!@$row->year_published && !old('year_published') && $y == $currentYear) ) ? 'selected' : '' }}>{{ $y }}</option>
+                        @endfor
+                    </select>
                             <small class="text-muted d-block">Year published</small>
                         </div>
                     </div>
@@ -331,27 +331,27 @@
                     <div class="wizard-inline-50-50">
                         <div class="mb-0 wizard-field-wrap" data-wizard-field="data_category_id">
                             <label class="form-label">Category
-                                @if(($requiredFields['data_category_id'] ?? true) == true)
-                                    <span class="text-danger">*</span>
-                                @endif
-                            </label>
-                            @include('partials.datarecords.categories_dropdown', [
-                                'field' => 'data_category_id',
-                                'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
-                                'exclude_special' => true,
+                        @if(($requiredFields['data_category_id'] ?? true) == true)
+                            <span class="text-danger">*</span>
+                        @endif
+                    </label>
+                        @include('partials.datarecords.categories_dropdown', [
+                            'field' => 'data_category_id',
+                        'required' => ($requiredFields['data_category_id'] ?? true) ? 'required' : '',
+                            'exclude_special' => true,
                                 'selected' => old('data_category_id', optional($publication)->publication_catgory_id ?? ''),
-                            ])
-                        </div>
+                        ])
+                    </div>
                         <div class="mb-0 wizard-field-wrap" data-wizard-field="category_id">
                             <label class="form-label" for="category_id">Sub Category <span class="text-danger">*</span></label>
-                            @include('partials.publications.filecategory_dropdown', [
-                                'field' => 'category_id',
+                        @include('partials.publications.filecategory_dropdown', [
+                            'field' => 'category_id',
                                 'required' => 'required',
                                 'selected' => old('category_id', optional($publication)->data_category_id ?? ''),
-                            ])
+                        ])
                         </div>
                     </div>
-                </div>
+            </div>
 
                 <div class="col-md-6 mb-2">
                     <label class="form-label" for="publication">Thematic Area
@@ -450,9 +450,9 @@
                                             <a href="{{ $pub_file->file }}" target="_blank" title="{{ e($pub_file->original_filename ?? $pub_file->description ?? '') }}"><i class="fa fa-paperclip text-muted"></i> {{ Str::limit($pub_file->original_filename ?? $pub_file->description ?? 'Attachment', 90) }}</a>
                                             <label class="mb-0"><input type="checkbox" name="remove_attachments[]" value="{{ $pub_file->id }}"> Remove</label>
                                         </li>
-                                    @endforeach
+                            @endforeach
                                 </ul>
-                            </div>
+                </div>
                         @endif
 
                         <div class="custom-file">
@@ -464,7 +464,7 @@
                             <div id="attachment-security-error" class="alert alert-danger mt-2 py-2 px-3 small" style="display:none;" role="alert"></div>
                         </div>
                         <div class="preview py-2" style="min-height: 24px;"></div>
-                    </div>
+            </div>
 
                     <div class="form-group mt-2 p-2" style="background:#ffffff;">
                         <label class="form-label" for="communities">Target Audience/Communities of Practice</label>
@@ -487,22 +487,22 @@
                             <div onclick="$('#cover').click()" class="cover_preview py-2"
                                 style="width:200px; height:130px; margin-bottom:10px; background-image: url({{ $image_link }}); background-size:cover; background-position:center; background-repeat:no-repeat; display:block; clear:both;">
                             </div>
-                        </div>
-                    </div>
                 </div>
+            </div>
+        </div>
             </div>
 
             <div class="row" style="display: none;">
                 <div class="col-md-6 justify-content-center video">
-                    <label class="form-label" for="publication">Video</label>
-                    <div class="mb-3">
+                <label class="form-label" for="publication">Video</label>
+                <div class="mb-3">
                         <iframe width="450" height="260" class="vid" src=""></iframe>
                     </div>
                 </div>
             </div>
 
             <h3 class="mb-2 mt-3" style="font-weight:600;">Publication Details</h3>
-
+            
             <!-- AI Description Loader -->
             <div id="ai-description-loader" style="display: none; margin-top: 10px; margin-bottom: 15px; padding: 15px; background-color: #f8f9fa; border-left: 4px solid #119A48; border-radius: 4px;">
                 <div class="d-flex align-items-center">
@@ -513,9 +513,9 @@
                     <div>
                         <strong style="color: #119A48;"><i class="fa fa-robot mr-1"></i>AI is extracting data from your document…</strong>
                         <p class="mb-0 text-muted" style="font-size: 0.9rem;">Please wait while we extract the description, authors, and affiliation. This is only a draft to help you publish faster—always review and edit before you submit.</p>
-                    </div>
                 </div>
             </div>
+        </div>
 
             <div class="row">
                 <div class="col-md-12">
@@ -753,16 +753,16 @@
                                placeholder="e.g., 123-145" 
                                value="{{ @$row->journal_pages ?? old('journal_pages') }}">
                         <small class="text-muted" style="font-size: 0.75rem;">Page range</small>
-                    </div>
                 </div>
             </div>
+        </div>
 
-            <div class="row mt-3 mb-3 submit">
+        <div class="row mt-3 mb-3 submit">
                 <div class="col-lg-8 mt-5 float-end"></div>
                 <div class="col-lg-3 mt-5 float-end">
-                    <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
-                        {{ @$row ? 'Save Changes' : 'Submit' }}
-                    </button>
+                <button class="btn btn-dark col-lg-12 savebtn" type="submit" id="submit">
+                    {{ @$row ? 'Save Changes' : 'Submit' }}
+                </button>
                 </div>
             </div>
         </div>
@@ -923,7 +923,7 @@
             if (!countrySelect.length) {
                 return;
             }
-
+            
             wizardEnsureCountriesAllOption(countrySelect);
             
             // Normalize to array
@@ -939,7 +939,7 @@
             function isNumeric(value) {
                 return !isNaN(parseFloat(value)) && isFinite(value);
             }
-
+            
             // Region "All" always rebuilds member states (create + edit) — never skip on edit
             if (hasAll) {
                 userManuallyChangedCountries = false;
@@ -1228,7 +1228,7 @@
                 $fileInput.prop('disabled', false);
             }
         };
-
+        
         if ($input.length) {
             // Clear any existing preview icons from attachment_js.blade.php
             $input.closest('.mb-2').find('.preview').empty();
@@ -1265,7 +1265,7 @@
                     updateFilePreview();
                     return;
                 }
-
+                
                 // Merge new files with existing files (avoid duplicates)
                 var mergedFiles = [...existingFiles];
                 acceptedNew.forEach(function(newFile) {
@@ -1706,7 +1706,7 @@
             var regionVal = wizardGetSelectValue($region);
             var regionValues = Array.isArray(regionVal) ? regionVal : (regionVal ? [regionVal] : []);
             if (wizardSelectionIncludesAll(regionValues)) {
-                return true;
+            return true;
             }
             return window.wizardCountriesHasValue($countries);
         };

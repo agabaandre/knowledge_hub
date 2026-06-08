@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\SiteLanguage;
 use App\Models\StaticLink;
+use App\Support\LocaleDirection;
 use App\Support\UiLocaleLabels;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -56,8 +57,8 @@ class LocaleSwitchController extends Controller
         $response = response()->json([
             'locale' => $locale,
             'google_code' => $googleCode,
-            'dir' => html_dir_for_locale($locale),
-            'is_rtl' => is_rtl_locale($locale),
+            'direction' => LocaleDirection::direction($locale),
+            'is_rtl' => LocaleDirection::isRtl($locale),
             'fragments' => $fragments,
             'labels' => UiLocaleLabels::exportForCurrentLocale(),
         ]);

@@ -66,27 +66,19 @@ window.translateLanguage = function() {
                         date.setTime(date.getTime() - 1);
                         document.cookie = "googtrans=; expires=" + date.toUTCString() + "; path=/";
 
-                        document.body.classList.remove('translated-rtl');
-                        document.documentElement.classList.remove('translated-rtl');
+                        if (typeof window.khubClearGoogleTranslationState === 'function') {
+                            window.khubClearGoogleTranslationState();
+                        } else {
+                            document.body.classList.remove('translated-rtl');
+                            document.documentElement.classList.remove('translated-rtl');
+                        }
 
                         if (typeof window.khubApplyDocumentDirection === 'function') {
-                            window.khubApplyDocumentDirection('en', 'en');
+                            window.khubApplyDocumentDirection('en');
                         } else {
                             document.documentElement.setAttribute('dir', 'ltr');
                             document.documentElement.setAttribute('lang', 'en');
                         }
-
-                        var translateLinks = document.querySelectorAll('head link[href*="translate.googleapis.com"]');
-                        translateLinks.forEach(function(link) {
-                            link.remove();
-                        });
-
-                        var elementsWithDirection = document.querySelectorAll('[style*="direction"]');
-                        elementsWithDirection.forEach(function(el) {
-                            if (el.style.direction) {
-                                el.style.direction = '';
-                            }
-                        });
 
                         var teCombo = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
                         if (teCombo) {
@@ -104,6 +96,9 @@ window.translateLanguage = function() {
                             }
                         }
                     } else {
+                        if (typeof window.khubApplyDocumentDirection === 'function') {
+                            window.khubApplyDocumentDirection(localeCode);
+                        }
                         doGTranslate(googleCode);
                     }
                 }

@@ -22,7 +22,6 @@
 @endif
 
 <link href="{{ asset('frontend/css/styles.css') }}" rel="stylesheet">
-<link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/cookie-alert.css') }}">
@@ -39,6 +38,7 @@
 <link rel="stylesheet" href="{{ asset('assets/webfont-medical-icons/css/wfmi-style.css') }}">
 {{-- Theme (typography + colors) after frontend CSS so body/nav font settings override styles.css --}}
 @include('partials.theming.colors')
+@include('layouts.partials.rtl_stylesheet')
 <script src="{{ asset('frontend/js/jquery.min.js') }}"></script>
 <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit">
 </script>
