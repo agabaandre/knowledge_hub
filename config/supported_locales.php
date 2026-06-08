@@ -23,6 +23,18 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Right-to-left UI locales (html dir="rtl")
+    |--------------------------------------------------------------------------
+    */
+    'rtl_locales' => ['ar'],
+
+    /*
+    | Google Translate codes that use RTL layout when GT drives direction.
+    */
+    'rtl_google_codes' => ['ar', 'he', 'fa', 'ur'],
+
+    /*
+    |--------------------------------------------------------------------------
     | Translation file groups editable under Settings → Language management
     |--------------------------------------------------------------------------
     */

@@ -2206,4 +2206,18 @@ if (! function_exists('hub_storage_path')) {
     }
 }
 
+if (! function_exists('is_rtl_locale')) {
+    function is_rtl_locale(?string $locale = null): bool
+    {
+        return \App\Support\LocaleDirection::isRtl($locale);
+    }
+}
+
+if (! function_exists('html_dir_for_locale')) {
+    function html_dir_for_locale(?string $locale = null): string
+    {
+        return \App\Support\LocaleDirection::htmlDir($locale);
+    }
+}
+
 ?>

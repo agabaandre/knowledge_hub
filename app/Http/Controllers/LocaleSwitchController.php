@@ -56,6 +56,8 @@ class LocaleSwitchController extends Controller
         $response = response()->json([
             'locale' => $locale,
             'google_code' => $googleCode,
+            'dir' => html_dir_for_locale($locale),
+            'is_rtl' => is_rtl_locale($locale),
             'fragments' => $fragments,
             'labels' => UiLocaleLabels::exportForCurrentLocale(),
         ]);

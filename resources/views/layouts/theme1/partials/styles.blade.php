@@ -6,8 +6,9 @@
     }
     $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
 @endphp
+@include('partials.theming.document_direction')
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}">
+<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}{{ $isRtlUi ? ' khub-rtl-document' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">
@@ -19,6 +20,7 @@
 
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/bootstrap.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/nifty.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-icons.min.css') }}">
     <link rel="stylesheet" href="{{ asset('theme1/assets/css/demo-purpose/demo-settings.min.css') }}">
     @include('layouts.theme1.partials.theme1_colors')

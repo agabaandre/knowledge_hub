@@ -6,8 +6,9 @@
     }
     $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
 @endphp
+@include('partials.theming.document_direction')
 <!DOCTYPE html>
-<html lang="en" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" class="{{ $menuIconsClass }}">
+<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" xmlns="https://www.w3.org/1999/xhtml" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" class="{{ $menuIconsClass }}{{ $isRtlUi ? ' khub-rtl-document' : '' }}">
 <head>
 
 @include('layouts.partials.header_resources')

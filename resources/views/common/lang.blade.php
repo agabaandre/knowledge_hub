@@ -69,6 +69,13 @@ window.translateLanguage = function() {
                         document.body.classList.remove('translated-rtl');
                         document.documentElement.classList.remove('translated-rtl');
 
+                        if (typeof window.khubApplyDocumentDirection === 'function') {
+                            window.khubApplyDocumentDirection('en', 'en');
+                        } else {
+                            document.documentElement.setAttribute('dir', 'ltr');
+                            document.documentElement.setAttribute('lang', 'en');
+                        }
+
                         var translateLinks = document.querySelectorAll('head link[href*="translate.googleapis.com"]');
                         translateLinks.forEach(function(link) {
                             link.remove();

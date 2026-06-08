@@ -88,6 +88,13 @@
         $('head').find('link[href*="translate.googleapis.com"]').remove();
         $('[style*="direction"]').css('direction', '');
 
+        if (typeof window.khubApplyDocumentDirection === 'function') {
+            window.khubApplyDocumentDirection('en', 'en');
+        } else {
+            document.documentElement.setAttribute('dir', 'ltr');
+            document.documentElement.setAttribute('lang', 'en');
+        }
+
         var teComboEn = document.querySelector('select.goog-te-combo:not(.menu-language-menu-container select)');
         if (teComboEn) {
           var enIndex = Array.from(teComboEn.options).findIndex(function(option) {
@@ -132,6 +139,21 @@
       var date = new Date();
       date.setTime(date.getTime() + (365 * 24 * 60 * 60 * 1000)); // 1 year
       document.cookie = "googtrans=/auto/" + lang + "; expires=" + date.toUTCString() + "; path={{ $localeCookiePath }}";
+
+      if (typeof window.khubApplyDocumentDirection === 'function') {
+        var localeFromGoogle = null;
+        if (window.khubLangMeta) {
+          for (var loc in window.khubLangMeta) {
+            if (!Object.prototype.hasOwnProperty.call(window.khubLangMeta, loc)) continue;
+            var gc = window.khubLangMeta[loc].google_code || loc;
+            if (gc === lang || loc === lang) {
+              localeFromGoogle = loc;
+              break;
+            }
+          }
+        }
+        window.khubApplyDocumentDirection(localeFromGoogle || lang, lang);
+      }
     }
     $(function () {
       $('.selectpicker').selectpicker();

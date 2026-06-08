@@ -22,6 +22,7 @@
 @endif
 
 <link href="{{ asset('frontend/css/styles.css') }}" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/quiz.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/sharing.css') }}">
 <link rel="stylesheet" href="{{ asset('frontend/css/cookie-alert.css') }}">

@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="en">
+@include('partials.theming.document_direction')
+<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" class="{{ $isRtlUi ? 'khub-rtl-document' : '' }}">
 
 <head>
 	<meta charset="UTF-8">
@@ -27,13 +28,22 @@
 	<link href="{{ asset('assets/plugins/sidebar/sidebar.css') }}" rel="stylesheet">
 
 	<!-- Style css -->
+	@if($isRtlUi)
+	<link rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css-rtl/style.css') }}">
+	@else
 	<link rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css/style.css') }}">
+	@endif
+	<link rel="stylesheet" href="{{ asset('frontend/css/khub-rtl.css') }}">
 
 	<!-- Colors css -->
 	<link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css/colors/color.css') }}">
 
 	<!-- Horizontal css -->
+	@if($isRtlUi)
+	<link href="{{ asset('assets/css-rtl/horizontalmenu/horizontal-menu.css') }}" rel="stylesheet">
+	@else
 	<link href="{{ asset('assets/css/horizontalmenu/horizontal-menu.css') }}" rel="stylesheet">
+	@endif
 
 	<!-- Skinmodes css -->
 	<link href="{{ asset('assets/css/skin-modes.css') }}" rel="stylesheet">

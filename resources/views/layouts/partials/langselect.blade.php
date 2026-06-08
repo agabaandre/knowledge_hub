@@ -15,6 +15,11 @@
         $first = reset($languages);
         $currentLanguage = is_array($first) ? $first : ['name' => 'English', 'flag' => '', 'code' => 'en', 'google_code' => 'en'];
     }
+    $languagesForJs = collect($languages)->map(function ($row, $code) {
+        $row['rtl'] = is_rtl_locale((string) $code);
+
+        return $row;
+    })->all();
 @endphp
 
 <style>
@@ -475,7 +480,8 @@
 (function() {
     'use strict';
 
-    window.khubLangMeta = @json($languages);
+    window.khubLangMeta = @json($languagesForJs);
+    window.khubRtlGoogleCodes = @json(\App\Support\LocaleDirection::rtlGoogleCodes());
     window.khubInitialNativeLabels = @json(\App\Support\UiLocaleLabels::exportForCurrentLocale());
     var khubLocaleCookieName = @json(config('supported_locales.locale_cookie', 'khub_locale'));
     @php
@@ -686,7 +692,36 @@
         }
     }
 
-    function khubAfterLocaleSwap(googleCode, labels) {
+    function khubIsRtlLocale(localeCode) {
+        var meta = window.khubLangMeta && window.khubLangMeta[localeCode];
+        if (meta && typeof meta.rtl === 'boolean') {
+            return meta.rtl;
+        }
+
+        return false;
+    }
+
+    function khubIsRtlGoogleCode(googleCode) {
+        var codes = window.khubRtlGoogleCodes || [];
+        googleCode = (googleCode || '').toString().toLowerCase();
+
+        return googleCode !== '' && codes.indexOf(googleCode) !== -1;
+    }
+
+    function khubApplyDocumentDirection(localeCode, googleCode) {
+        var rtl = khubIsRtlLocale(localeCode) || khubIsRtlGoogleCode(googleCode);
+        var dir = rtl ? 'rtl' : 'ltr';
+        var lang = (localeCode || googleCode || 'en').toString().replace('_', '-');
+
+        document.documentElement.setAttribute('dir', dir);
+        document.documentElement.setAttribute('lang', lang);
+        document.body.classList.toggle('khub-rtl', rtl);
+        document.body.classList.toggle('khub-ltr', !rtl);
+    }
+
+    window.khubApplyDocumentDirection = khubApplyDocumentDirection;
+
+    function khubAfterLocaleSwap(googleCode, labels, localeCode) {
         if (typeof window.khubInitMegaMenus === 'function') {
             window.khubInitMegaMenus();
         }
@@ -703,7 +738,7 @@
             window.jQuery('[data-toggle="tooltip"]').tooltip();
         }
         khubApplyGoogleTranslateWhenReady(googleCode);
-        document.documentElement.setAttribute('lang', googleCode || 'en');
+        khubApplyDocumentDirection(localeCode || getCurrentLang(), googleCode);
     }
 
     function khubFallbackLocaleRedirect(localeCode) {
@@ -751,7 +786,7 @@
         })
         .then(function(data) {
             swapLocaleFragments(data.fragments);
-            khubAfterLocaleSwap(data.google_code || googleCode, data.labels);
+            khubAfterLocaleSwap(data.google_code || googleCode, data.labels, data.locale || localeCode);
         })
         .catch(function() {
             khubFallbackLocaleRedirect(localeCode);
@@ -759,5 +794,7 @@
 
         return false;
     };
+
+    khubApplyDocumentDirection(getCurrentLang());
 })();
 </script>
