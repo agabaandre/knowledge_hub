@@ -109,11 +109,12 @@ final class SpotlightBackground
 
     private static function escapeCssUrl(string $url): string
     {
-        return str_replace(['\\', '"'], ['\\\\', '\\"'], $url);
+        // Single-quoted url() is used because inline styles sit inside HTML style="..." attributes.
+        return str_replace(['\\', "'"], ['\\\\', "\\'"], $url);
     }
 
     private static function cssUrl(string $escapedUrl): string
     {
-        return '"'.$escapedUrl.'"';
+        return "'".$escapedUrl."'";
     }
 }
