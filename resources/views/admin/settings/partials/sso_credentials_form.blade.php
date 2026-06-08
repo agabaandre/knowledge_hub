@@ -7,22 +7,7 @@
     @if(!$compact)
         <hr class="my-3">
         <p class="text-muted small mb-3">
-            Social login credentials are read from <code>.env</code> by default. Enable the switch below only when you want this app to use the database values instead.
-        </p>
-        <div class="form-check mb-3">
-            <input type="hidden" name="sso_use_database_credentials" value="0">
-            <input type="checkbox" class="form-check-input" id="sso_use_database_credentials" name="sso_use_database_credentials" value="1"
-                   @checked(old('sso_use_database_credentials', $ssoFields['sso_use_database_credentials']['form_value'] ?? false))>
-            <label class="form-check-label" for="sso_use_database_credentials">
-                Use database SSO credentials instead of <code>.env</code>
-            </label>
-        </div>
-        <p class="text-muted small mb-3">
-            Active source:
-            <strong>{{ ($ssoFields['sso_use_database_credentials']['form_value'] ?? false) ? 'Database' : '.env' }}</strong>.
-            @unless($ssoFields['sso_use_database_credentials']['form_value'] ?? false)
-                Fields below are stored for later use; live sign-in uses your environment variables.
-            @endunless
+            Social login credentials are managed here (same approach as email settings). Values saved below are stored in the database and take effect immediately; matching keys in <code>.env</code> are cleared on save so the database remains the source of truth.
         </p>
     @endif
 
@@ -37,7 +22,7 @@
                         <label class="form-label" for="microsoft_client_id">Client ID</label>
                         <input type="text" name="microsoft_client_id" id="microsoft_client_id" class="form-control"
                                value="{{ old('microsoft_client_id', $ssoFields['microsoft_client_id']['form_value'] ?? '') }}">
-                        <small class="text-muted">Env: <code>MICROSOFT_CLIENT_ID</code></small>
+                        <small class="text-muted">Env fallback: <code>MICROSOFT_CLIENT_ID</code> or <code>EXCHANGE_CLIENT_ID</code></small>
                     </div>
                     <div class="col-md-6">
                         <label class="form-label" for="microsoft_client_secret">Client secret</label>

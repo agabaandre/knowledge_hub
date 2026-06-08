@@ -477,9 +477,7 @@ class InstallerService
         ];
 
         if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
-            $payload['sso_use_database_credentials'] = ! empty($sso['microsoft_client_secret'])
-                || ! empty($sso['google_client_secret'])
-                || ! empty($sso['linkedin_client_secret']);
+            $payload['sso_use_database_credentials'] = true;
         }
 
         if (! empty($sso['microsoft_client_secret'])) {
@@ -494,10 +492,7 @@ class InstallerService
 
         $setting->forceFill($payload)->save();
 
-        if (Schema::hasColumn('setting', 'sso_use_database_credentials')
-            && ($setting->sso_use_database_credentials ?? false)) {
-            $this->clearSsoEnvOverrides();
-        }
+        $this->clearSsoEnvOverrides();
 
         \App\Support\SsoConfig::clearCache();
         \App\Support\SsoConfig::applyRuntimeConfig();

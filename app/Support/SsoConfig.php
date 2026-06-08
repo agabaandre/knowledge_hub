@@ -29,24 +29,35 @@ class SsoConfig
         return self::$dbSettings;
     }
 
+    /**
+     * Database settings win when present; .env / config is fallback (same as EmailConfig).
+     */
     public static function usesDatabaseCredentials(): bool
     {
-        if (! Schema::hasColumn('setting', 'sso_use_database_credentials')) {
-            return false;
-        }
-
-        $db = self::dbSettings();
-        if ($db && property_exists($db, 'sso_use_database_credentials')
-            && $db->sso_use_database_credentials !== null && $db->sso_use_database_credentials !== '') {
-            return filter_var($db->sso_use_database_credentials, FILTER_VALIDATE_BOOLEAN);
-        }
-
-        return false;
+        return self::credentialSource() === 'database';
     }
 
     public static function credentialSource(): string
     {
-        return self::usesDatabaseCredentials() ? 'database' : 'env';
+        $db = self::dbSettings();
+        if (! $db) {
+            return 'env';
+        }
+
+        foreach ([
+            'microsoft_client_id',
+            'microsoft_client_secret',
+            'google_client_id',
+            'google_client_secret',
+            'linkedin_client_id',
+            'linkedin_client_secret',
+        ] as $column) {
+            if (property_exists($db, $column) && trim((string) $db->{$column}) !== '') {
+                return 'database';
+            }
+        }
+
+        return 'env';
     }
 
     /**
@@ -55,14 +66,12 @@ class SsoConfig
      */
     public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
     {
-        if (self::usesDatabaseCredentials()) {
-            $db = self::dbSettings();
-            $column = $dbColumn ?? strtolower($envKey);
-            if ($db && $column && property_exists($db, $column)) {
-                $dbValue = $db->{$column};
-                if ($dbValue !== null && $dbValue !== '') {
-                    return $dbValue;
-                }
+        $db = self::dbSettings();
+        $column = $dbColumn ?? strtolower($envKey);
+        if ($db && $column && property_exists($db, $column)) {
+            $dbValue = $db->{$column};
+            if ($dbValue !== null && $dbValue !== '') {
+                return $dbValue;
             }
         }
 
@@ -197,10 +206,6 @@ class SsoConfig
 
     public static function providerConfigured(string $provider): bool
     {
-        if (! self::usesDatabaseCredentials()) {
-            return self::providerConfiguredFromConfig($provider);
-        }
-
         return match ($provider) {
             'microsoft' => trim((string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', '')) !== ''
                 && trim((string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', '')) !== '',
@@ -212,49 +217,9 @@ class SsoConfig
         };
     }
 
-    private static function providerConfiguredFromConfig(string $provider): bool
-    {
-        $keys = match ($provider) {
-            'microsoft' => [
-                'id' => ['config' => 'services.microsoft.client_id', 'env' => 'MICROSOFT_CLIENT_ID'],
-                'secret' => ['config' => 'services.microsoft.client_secret', 'env' => 'MICROSOFT_CLIENT_SECRET'],
-            ],
-            'google' => [
-                'id' => ['config' => 'services.google.client_id', 'env' => 'GOOGLE_CLIENT_ID'],
-                'secret' => ['config' => 'services.google.client_secret', 'env' => 'GOOGLE_CLIENT_SECRET'],
-            ],
-            'linkedin' => [
-                'id' => ['config' => 'services.linkedin.client_id', 'env' => 'LINKEDIN_CLIENT_ID'],
-                'secret' => ['config' => 'services.linkedin.client_secret', 'env' => 'LINKEDIN_CLIENT_SECRET'],
-            ],
-            default => null,
-        };
-
-        if ($keys === null) {
-            return false;
-        }
-
-        $id = self::configuredCredentialValue($keys['id']['config'], $keys['id']['env']);
-        $secret = self::configuredCredentialValue($keys['secret']['config'], $keys['secret']['env']);
-
-        return $id !== '' && $secret !== '';
-    }
-
-    private static function configuredCredentialValue(string $configKey, string $envKey): string
-    {
-        $value = trim((string) config($configKey, ''));
-        if ($value !== '') {
-            return $value;
-        }
-
-        return trim((string) self::resolveFromEnv($envKey, ''));
-    }
-
     public static function applyRuntimeConfig(): void
     {
-        if (! self::usesDatabaseCredentials()) {
-            self::applyEnvModeRuntimeConfig();
-
+        if (! Schema::hasTable('setting')) {
             return;
         }
 
@@ -297,45 +262,14 @@ class SsoConfig
         ]);
     }
 
-    private static function applyEnvModeRuntimeConfig(): void
-    {
-        $appUrl = rtrim((string) config('app.url', ''), '/');
-        $patches = [];
-
-        foreach ([
-            'services.microsoft.redirect' => ['env' => 'MICROSOFT_REDIRECT_URI', 'default' => $appUrl.'/auth/microsoft/callback'],
-            'services.google.redirect' => ['env' => 'GOOGLE_REDIRECT_URI', 'default' => $appUrl.'/auth/google/callback'],
-            'services.linkedin.redirect' => ['env' => 'LINKEDIN_REDIRECT_URI', 'default' => $appUrl.'/auth/linkedin/callback'],
-            'services.linkedin-openid.redirect' => ['env' => 'LINKEDIN_REDIRECT_URI', 'default' => $appUrl.'/auth/linkedin/callback'],
-        ] as $configKey => $meta) {
-            if (trim((string) config($configKey, '')) === '') {
-                $patches[$configKey] = (string) self::resolveFromEnv($meta['env'], $meta['default']);
-            }
-        }
-
-        foreach (['client_id', 'client_secret'] as $field) {
-            $linkedInKey = "services.linkedin.{$field}";
-            $openIdKey = "services.linkedin-openid.{$field}";
-            if (trim((string) config($openIdKey, '')) === '' && trim((string) config($linkedInKey, '')) !== '') {
-                $patches[$openIdKey] = config($linkedInKey);
-            }
-        }
-
-        if ($patches !== []) {
-            config($patches);
-        }
-    }
-
     /**
      * @return array<string, array{env_key: string, db_column: string, value: mixed, form_value: mixed, source: string}>
      */
     public static function fieldsForAdmin(): array
     {
         $db = self::dbSettings();
-        $usesDb = self::usesDatabaseCredentials();
         $appUrl = rtrim((string) config('app.url', ''), '/');
         $map = [
-            'sso_use_database_credentials' => ['env_key' => '', 'db_column' => 'sso_use_database_credentials', 'default' => false, 'boolean' => true],
             'microsoft_client_id' => ['env_key' => 'MICROSOFT_CLIENT_ID', 'db_column' => 'microsoft_client_id', 'default' => ''],
             'microsoft_client_secret' => ['env_key' => 'MICROSOFT_CLIENT_SECRET', 'db_column' => 'microsoft_client_secret', 'default' => ''],
             'microsoft_redirect_uri' => ['env_key' => 'MICROSOFT_REDIRECT_URI', 'db_column' => 'microsoft_redirect_uri', 'default' => $appUrl.'/auth/microsoft/callback'],
@@ -354,20 +288,20 @@ class SsoConfig
         $fields = [];
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
+            $effective = ! empty($meta['env_key'])
+                ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
+                : ($dbValue !== null ? (bool) $dbValue : (bool) $meta['default']);
 
             if (! empty($meta['boolean'])) {
                 $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $formValue = $hasDbValue ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN) : (bool) $meta['default'];
-                $value = $formValue;
+                $formValue = $hasDbValue ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN) : filter_var($effective, FILTER_VALIDATE_BOOLEAN);
+                $value = filter_var($effective, FILTER_VALIDATE_BOOLEAN);
                 $source = 'database';
             } else {
-                $envEffective = ! empty($meta['env_key'])
-                    ? self::resolveFromEnv($meta['env_key'], $meta['default'])
-                    : $meta['default'];
                 $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $value = $usesDb && $hasDbValue ? $dbValue : $envEffective;
-                $formValue = $hasDbValue ? $dbValue : $envEffective;
-                $source = ($usesDb && $hasDbValue) ? 'database' : 'env';
+                $formValue = $hasDbValue ? $dbValue : $effective;
+                $value = $effective;
+                $source = $hasDbValue ? 'database' : 'env';
             }
 
             if (str_contains($key, '_secret') && $hasDbValue && $formValue !== '') {
