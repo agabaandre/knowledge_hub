@@ -45,7 +45,7 @@ class AiSearchInsightsService
             return null;
         }
 
-        $cacheKey = 'ai_search_insights:'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheKey = 'ai_search_insights:v3:'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
             $cached = Cache::get($cacheKey);
@@ -136,15 +136,18 @@ class AiSearchInsightsService
 
         $allowedSiteLabels = AiConfig::allowedSearchSiteLabels();
 
-        $system = 'You are Khub AI on the Africa CDC Knowledge Hub search results page. '
-            .'Write a brief, helpful overview (like a search engine AI overview) for the user query. '
-            .'Use ONLY the catalog data provided from this platform. Do not invent hub resources. '
-            .'Health topics, thematic areas, sub-themes, and contributors are provided for context—prefer citing them when relevant. '
-            .'Internet search results are provided separately from '.$allowedSiteLabels.'; you may reference them but do not treat them as on-platform resources. '
-            .'For external_resources, prefer '.$allowedSiteLabels.' links only—do not suggest WHO, Africa CDC, or other general websites. '
+        $system = 'You are Khub AI, the search assistant for the Africa CDC Knowledge Hub—a professional public health knowledge platform for Africa. '
+            .'Produce a concise research brief for the user query. Tone: authoritative, neutral, and precise—suitable for public health professionals and policymakers. '
+            .'Avoid filler, marketing language, hedging, and first-person voice. Use plain text only (no markdown, HTML, or bullet characters in strings). '
+            .'Use ONLY the catalog data provided for on-platform resources. Never invent titles, URLs, counts, or authors. '
+            .'Health topics, thematic areas, sub-themes, and contributors are context—reference them when directly relevant. '
+            .'Internet search results come from '.$allowedSiteLabels.'; cite them only as external scholarly evidence, not as Khub resources. '
+            .'For external_resources, use '.$allowedSiteLabels.' links only—never suggest WHO, Africa CDC, or other general websites. '
             .'Never include private contact details (emails, phone numbers, postal addresses). '
-            .'Keep overview under 80 words and key_points to 3 short bullets. '
-            .'Return strict JSON with keys: overview (string), key_points (array of strings), '
+            .'overview: exactly 2 sentences, max 65 words. Sentence 1 defines the topic in public-health terms (Africa context when appropriate). '
+            .'Sentence 2 states what Khub holds for this query using total_publications_matching when > 0; do not list individual resource titles. '
+            .'key_points: exactly 3 items, each 8–14 words, starting with a strong keyword; factual and scannable. '
+            .'Return strict JSON with keys: overview (string), key_points (array of 3 strings), '
             .'featured_publication_ids (array of int, max 3 from catalog), featured_forum_ids (array of int, max 2), '
             .'featured_community_ids (array of int, max 2), featured_health_topic_ids (array of int, max 3), '
             .'external_resources (array of {title, url, note} max 3).';
@@ -168,7 +171,7 @@ class AiSearchInsightsService
             $result = app(AiCompletionService::class)->completeForFeature('ai_search', [
                 ['role' => 'system', 'content' => $system],
                 ['role' => 'user', 'content' => json_encode($userPayload, JSON_UNESCAPED_UNICODE)],
-            ], 700, null, true);
+            ], 900, null, true);
 
             if ($result['ok'] ?? false) {
                 $decoded = json_decode((string) ($result['content'] ?? ''), true);
@@ -182,7 +185,9 @@ class AiSearchInsightsService
                         $internetResults,
                         $themeCatalog,
                         $subThemeCatalog,
-                        $authorCatalog
+                        $authorCatalog,
+                        $term,
+                        $totalPublications
                     );
 
                     if (self::isDisplayable($normalized)) {
@@ -200,6 +205,8 @@ class AiSearchInsightsService
         }
 
         return $this->fallbackInsights(
+            $term,
+            $totalPublications,
             $internetResults,
             $healthTopicCatalog,
             $publicationCatalog,
@@ -270,6 +277,8 @@ class AiSearchInsightsService
      * @return array<string, mixed>|null
      */
     private function fallbackInsights(
+        string $term,
+        int $totalPublications,
         array $internetResults,
         array $healthTopicCatalog,
         array $publicationCatalog,
@@ -302,7 +311,9 @@ class AiSearchInsightsService
             $internetResults,
             $themeCatalog,
             $subThemeCatalog,
-            $authorCatalog
+            $authorCatalog,
+            $term,
+            $totalPublications
         );
 
         return self::isDisplayable($normalized) ? $normalized : null;
@@ -571,7 +582,9 @@ class AiSearchInsightsService
         array $internetResults,
         array $themeCatalog,
         array $subThemeCatalog,
-        array $authorCatalog
+        array $authorCatalog,
+        string $term = '',
+        int $totalPublications = 0
     ): array {
         $pubById = collect($publicationCatalog)->keyBy('id');
         $forumById = collect($forumCatalog)->keyBy('id');
@@ -640,36 +653,153 @@ class AiSearchInsightsService
 
         $keyPoints = [];
         foreach ((array) ($decoded['key_points'] ?? []) as $point) {
-            $point = trim((string) $point);
+            $point = preg_replace('/^[\-\*\u{2022}\d\.\)]\s*/u', '', trim((string) $point)) ?? trim((string) $point);
+            $point = trim($point);
             if ($point !== '') {
-                $keyPoints[] = Str::limit($point, 200);
+                $keyPoints[] = Str::limit($point, 160);
             }
         }
 
-        $overview = Str::limit(trim((string) ($decoded['overview'] ?? '')), 500);
-        if ($overview === '' && (
-            $pickHealthTopics !== []
+        $overview = Str::limit(trim((string) ($decoded['overview'] ?? '')), 480);
+        $hasContent = $pickHealthTopics !== []
             || $internetResults !== []
             || $pickPublications !== []
             || $pickForums !== []
-            || $pickCommunities !== []
-        )) {
-            $overview = __('publications.search.ai_overview_fallback');
+            || $pickCommunities !== [];
+
+        if ($overview === '' && $hasContent) {
+            $overview = $this->composeFallbackOverview(
+                $term,
+                $totalPublications,
+                $pickHealthTopics,
+                $pickPublications,
+                $pickForums
+            );
         }
 
+        if ($keyPoints === [] && $hasContent) {
+            $keyPoints = $this->composeFallbackKeyPoints(
+                $term,
+                $totalPublications,
+                $pickHealthTopics,
+                $pickPublications,
+                $pickForums,
+                $pickCommunities,
+                $internetResults
+            );
+        }
+
+        $healthTopics = array_map(function (array $topic): array {
+            if (! empty($topic['overview'])) {
+                $topic['overview'] = plain_text_excerpt_from_html((string) $topic['overview'], 200);
+            }
+
+            return $topic;
+        }, array_slice($pickHealthTopics, 0, 3));
+
         return [
+            'query' => $term,
+            'hub_matches' => $totalPublications,
             'overview' => $overview,
-            'key_points' => array_slice($keyPoints, 0, 4),
+            'key_points' => array_slice($keyPoints, 0, 3),
             'publications' => array_slice($pickPublications, 0, 3),
             'forums' => array_slice($pickForums, 0, 2),
             'communities' => array_slice($pickCommunities, 0, 2),
-            'health_topics' => array_slice($pickHealthTopics, 0, 3),
+            'health_topics' => $healthTopics,
             'internet_results' => array_slice($internetResults, 0, 3),
             'thematic_areas' => array_slice($themeCatalog, 0, 6),
             'sub_thematic_areas' => array_slice($subThemeCatalog, 0, 8),
             'contributors' => array_slice($authorCatalog, 0, 6),
             'external_resources' => array_slice($external, 0, 3),
         ];
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $healthTopics
+     * @param  list<array<string, mixed>>  $publications
+     * @param  list<array<string, mixed>>  $forums
+     */
+    private function composeFallbackOverview(
+        string $term,
+        int $totalPublications,
+        array $healthTopics,
+        array $publications,
+        array $forums
+    ): string {
+        $sentences = [];
+
+        $topicNames = collect($healthTopics)->pluck('name')->filter()->take(2)->values();
+        if ($topicNames->isNotEmpty()) {
+            $sentences[] = __('publications.search.ai_fallback_with_topics', [
+                'topics' => $topicNames->implode(__('publications.search.ai_fallback_topic_joiner')),
+            ]);
+        } elseif ($term !== '') {
+            $sentences[] = __('publications.search.ai_fallback_for_term', ['term' => $term]);
+        }
+
+        if ($totalPublications > 0) {
+            $sentences[] = __('publications.search.ai_fallback_publication_count', [
+                'count' => number_format($totalPublications),
+            ]);
+        } elseif ($publications !== [] || $forums !== []) {
+            $sentences[] = __('publications.search.ai_fallback_curated_below');
+        } else {
+            $sentences[] = __('publications.search.ai_fallback_review_sources');
+        }
+
+        return Str::limit(implode(' ', $sentences), 480);
+    }
+
+    /**
+     * @param  list<array<string, mixed>>  $healthTopics
+     * @param  list<array<string, mixed>>  $publications
+     * @param  list<array<string, mixed>>  $forums
+     * @param  list<array<string, mixed>>  $communities
+     * @param  list<array<string, mixed>>  $internetResults
+     * @return list<string>
+     */
+    private function composeFallbackKeyPoints(
+        string $term,
+        int $totalPublications,
+        array $healthTopics,
+        array $publications,
+        array $forums,
+        array $communities,
+        array $internetResults
+    ): array {
+        $points = [];
+
+        foreach (collect($healthTopics)->pluck('name')->filter()->take(2) as $name) {
+            $points[] = __('publications.search.ai_fallback_point_topic', ['topic' => $name]);
+        }
+
+        if ($totalPublications > 0) {
+            $points[] = __('publications.search.ai_fallback_point_publications', [
+                'count' => number_format($totalPublications),
+            ]);
+        }
+
+        if ($forums !== []) {
+            $points[] = __('publications.search.ai_fallback_point_forums', [
+                'count' => count($forums),
+            ]);
+        }
+
+        if ($communities !== [] && count($points) < 3) {
+            $points[] = __('publications.search.ai_fallback_point_communities', [
+                'count' => count($communities),
+            ]);
+        }
+
+        if ($internetResults !== [] && count($points) < 3) {
+            $points[] = __('publications.search.ai_fallback_point_scholarly');
+        }
+
+        if ($points === [] && $term !== '') {
+            $points[] = __('publications.search.ai_fallback_point_explore', ['term' => $term]);
+        }
+
+        return array_slice($points, 0, 3);
     }
 
     private function isAllowedExternalUrl(string $url): bool
