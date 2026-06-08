@@ -97,12 +97,19 @@
                     </div>
                 </div>
             </div>
-            </div>
         </div>
-    @endsection
+    </div>
+
+    @auth
+        @include('common.pdf-chat-modal')
+    @endauth
+@endsection
 
     @section('scripts')
         @include('common.select2')
+        @auth
+            @include('common.pdf-chat-js')
+        @endauth
         <script>
         (function () {
             var FRAGMENT_URL = @json(url('records/search/fragment'));

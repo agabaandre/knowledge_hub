@@ -40,7 +40,7 @@ public function get(Request $request, $return_array = false, $featured = false,$
 {
     $rows_count = $request->rows ?? 20;
 
-    $with = ['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent'];
+    $with = ['file_type', 'author', 'sub_theme', 'category', 'country', 'comments', 'versioning', 'parent', 'attachments'];
     if (!empty($request->approved_only)) {
         $with[] = 'approver';
         $with[] = 'rejector';
