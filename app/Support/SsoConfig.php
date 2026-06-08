@@ -90,7 +90,37 @@ class SsoConfig
             return env('EXCHANGE_TENANT_ID');
         }
 
+        $configKey = self::configKeyForEnv($envKey);
+        if ($configKey !== null) {
+            $configValue = config($configKey);
+            if ($configValue !== null && $configValue !== '') {
+                return $configValue;
+            }
+        }
+
         return $default;
+    }
+
+    private static function configKeyForEnv(string $envKey): ?string
+    {
+        return match ($envKey) {
+            'MICROSOFT_CLIENT_ID' => 'services.microsoft.client_id',
+            'MICROSOFT_CLIENT_SECRET' => 'services.microsoft.client_secret',
+            'MICROSOFT_REDIRECT_URI' => 'services.microsoft.redirect',
+            'MICROSOFT_TENANT_ID' => 'services.microsoft.tenant',
+            'GOOGLE_CLIENT_ID' => 'services.google.client_id',
+            'GOOGLE_CLIENT_SECRET' => 'services.google.client_secret',
+            'GOOGLE_REDIRECT_URI' => 'services.google.redirect',
+            'LINKEDIN_CLIENT_ID' => 'services.linkedin.client_id',
+            'LINKEDIN_CLIENT_SECRET' => 'services.linkedin.client_secret',
+            'LINKEDIN_REDIRECT_URI' => 'services.linkedin.redirect',
+            default => null,
+        };
+    }
+
+    public static function ensureRuntimeConfig(): void
+    {
+        self::applyRuntimeConfig();
     }
 
     public static function microsoftEnabled(): bool
@@ -146,9 +176,9 @@ class SsoConfig
     {
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
-        config([
-            'services.microsoft.client_id' => (string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', env('EXCHANGE_CLIENT_ID', '')),
-            'services.microsoft.client_secret' => (string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', env('EXCHANGE_CLIENT_SECRET', '')),
+        $overrides = [
+            'services.microsoft.client_id' => (string) self::resolve('MICROSOFT_CLIENT_ID', 'microsoft_client_id', ''),
+            'services.microsoft.client_secret' => (string) self::resolve('MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret', ''),
             'services.microsoft.redirect' => (string) self::resolve(
                 'MICROSOFT_REDIRECT_URI',
                 'microsoft_redirect_uri',
@@ -157,7 +187,7 @@ class SsoConfig
             'services.microsoft.tenant' => (string) self::resolve(
                 'MICROSOFT_TENANT_ID',
                 'microsoft_tenant_id',
-                env('EXCHANGE_TENANT_ID', 'common')
+                'common'
             ),
             'services.google.client_id' => (string) self::resolve('GOOGLE_CLIENT_ID', 'google_client_id', ''),
             'services.google.client_secret' => (string) self::resolve('GOOGLE_CLIENT_SECRET', 'google_client_secret', ''),
@@ -180,7 +210,17 @@ class SsoConfig
                 'linkedin_redirect_uri',
                 $appUrl.'/auth/linkedin/callback'
             ),
-        ]);
+        ];
+
+        if (! self::usesDatabaseCredentials()) {
+            foreach (array_keys($overrides) as $key) {
+                if ($overrides[$key] === '' && config($key)) {
+                    $overrides[$key] = config($key);
+                }
+            }
+        }
+
+        config($overrides);
     }
 
     /**

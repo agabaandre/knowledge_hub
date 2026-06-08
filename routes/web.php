@@ -861,14 +861,17 @@ Route::group(["prefix" => "communities"], function () {
 
 Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/microsoft', function () {
+        \App\Support\SsoConfig::ensureRuntimeConfig();
+
         if (! \App\Support\SsoConfig::microsoftEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'Microsoft login is currently disabled.');
         }
-        $clientId = config('services.microsoft.client_id');
-        $clientSecret = config('services.microsoft.client_secret');
-        if (empty($clientId) || empty($clientSecret)) {
-            \Log::warning('Microsoft login: client_id or client_secret missing. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET (or EXCHANGE_CLIENT_ID and EXCHANGE_CLIENT_SECRET) in .env.');
+        if (! \App\Support\SsoConfig::providerConfigured('microsoft')) {
+            \Log::warning('Microsoft login: client_id or client_secret missing.', [
+                'source' => \App\Support\SsoConfig::credentialSource(),
+            ]);
+
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'Microsoft login is not configured. Set MICROSOFT_CLIENT_ID and MICROSOFT_CLIENT_SECRET in .env (or use EXCHANGE_* if using the same Azure app).');
         }
@@ -879,9 +882,15 @@ Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
 
     Route::get('auth/google', function () {
+        \App\Support\SsoConfig::ensureRuntimeConfig();
+
         if (! \App\Support\SsoConfig::googleEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'Google login is currently disabled.');
+        }
+        if (! \App\Support\SsoConfig::providerConfigured('google')) {
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'Google login is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in .env.');
         }
 
         return Socialite::driver('google')->redirect();
@@ -890,9 +899,15 @@ Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/google/callback', [AuthController::class, 'googleLogin']);
 
     Route::get('auth/linkedin', function () {
+        \App\Support\SsoConfig::ensureRuntimeConfig();
+
         if (! \App\Support\SsoConfig::linkedinEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'LinkedIn login is currently disabled.');
+        }
+        if (! \App\Support\SsoConfig::providerConfigured('linkedin')) {
+            return redirect('/login')->with('alert_class', 'danger')
+                ->with('alert', 'LinkedIn login is not configured. Set LINKEDIN_CLIENT_ID and LINKEDIN_CLIENT_SECRET in .env.');
         }
         try {
             return Socialite::driver('linkedin-openid')->redirect();
