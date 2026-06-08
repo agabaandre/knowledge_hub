@@ -301,6 +301,9 @@ class SettingsRepository
         if (Schema::hasColumn('setting', 'microsoft_client_id')) {
             $this->applySsoSettings($settings, $request);
         }
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials') && $request->has('sso_use_database_credentials')) {
+            $settings->sso_use_database_credentials = self::parseSubmittedBoolean($request, 'sso_use_database_credentials');
+        }
         if (Schema::hasColumn('setting', 'allow_email_password_accounts_social_login')) {
             $settings->allow_email_password_accounts_social_login = (bool)$request->boolean('allow_email_password_accounts_social_login', true);
         }
@@ -479,7 +482,7 @@ class SettingsRepository
         EmailConfig::applyRuntimeConfig();
         if (Schema::hasColumn('setting', 'microsoft_client_id')
             || Schema::hasColumn('setting', 'enable_microsoft_login')) {
-            if (Schema::hasColumn('setting', 'microsoft_client_id')) {
+            if ($settings->sso_use_database_credentials ?? false) {
                 app(InstallerService::class)->clearSsoEnvOverrides();
             }
             \App\Support\SsoConfig::clearCache();
@@ -503,10 +506,16 @@ class SettingsRepository
         }
 
         $this->applySsoSettings($settings, $request);
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
+            $settings->sso_use_database_credentials = true;
+        }
         $settings->save();
 
+        if ($settings->sso_use_database_credentials ?? false) {
+            app(InstallerService::class)->clearSsoEnvOverrides();
+        }
+
         \App\Support\SsoConfig::clearCache();
-        app(InstallerService::class)->clearSsoEnvOverrides();
         \App\Support\SsoConfig::applyRuntimeConfig();
         clear_settings_cache();
         clear_cache();

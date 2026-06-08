@@ -29,21 +29,52 @@ class SsoConfig
         return self::$dbSettings;
     }
 
+    public static function usesDatabaseCredentials(): bool
+    {
+        if (! Schema::hasColumn('setting', 'sso_use_database_credentials')) {
+            return false;
+        }
+
+        $db = self::dbSettings();
+        if ($db && property_exists($db, 'sso_use_database_credentials')
+            && $db->sso_use_database_credentials !== null && $db->sso_use_database_credentials !== '') {
+            return filter_var($db->sso_use_database_credentials, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        return false;
+    }
+
+    public static function credentialSource(): string
+    {
+        return self::usesDatabaseCredentials() ? 'database' : 'env';
+    }
+
     /**
      * @param  mixed  $default
      * @return mixed
      */
     public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
     {
-        $db = self::dbSettings();
-        $column = $dbColumn ?? strtolower($envKey);
-        if ($db && $column && property_exists($db, $column)) {
-            $dbValue = $db->{$column};
-            if ($dbValue !== null && $dbValue !== '') {
-                return $dbValue;
+        if (self::usesDatabaseCredentials()) {
+            $db = self::dbSettings();
+            $column = $dbColumn ?? strtolower($envKey);
+            if ($db && $column && property_exists($db, $column)) {
+                $dbValue = $db->{$column};
+                if ($dbValue !== null && $dbValue !== '') {
+                    return $dbValue;
+                }
             }
         }
 
+        return self::resolveFromEnv($envKey, $default);
+    }
+
+    /**
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public static function resolveFromEnv(string $envKey, $default = null)
+    {
         $envValue = env($envKey);
         if ($envValue !== null && $envValue !== '') {
             return $envValue;
@@ -113,10 +144,6 @@ class SsoConfig
 
     public static function applyRuntimeConfig(): void
     {
-        if (! Schema::hasTable('setting')) {
-            return;
-        }
-
         $appUrl = rtrim((string) config('app.url', ''), '/');
 
         config([
@@ -157,13 +184,15 @@ class SsoConfig
     }
 
     /**
-     * @return array<string, array{env_key: string, db_column: string, value: mixed, form_value: mixed}>
+     * @return array<string, array{env_key: string, db_column: string, value: mixed, form_value: mixed, source: string}>
      */
     public static function fieldsForAdmin(): array
     {
         $db = self::dbSettings();
+        $usesDb = self::usesDatabaseCredentials();
         $appUrl = rtrim((string) config('app.url', ''), '/');
         $map = [
+            'sso_use_database_credentials' => ['env_key' => '', 'db_column' => 'sso_use_database_credentials', 'default' => false, 'boolean' => true],
             'microsoft_client_id' => ['env_key' => 'MICROSOFT_CLIENT_ID', 'db_column' => 'microsoft_client_id', 'default' => ''],
             'microsoft_client_secret' => ['env_key' => 'MICROSOFT_CLIENT_SECRET', 'db_column' => 'microsoft_client_secret', 'default' => ''],
             'microsoft_redirect_uri' => ['env_key' => 'MICROSOFT_REDIRECT_URI', 'db_column' => 'microsoft_redirect_uri', 'default' => $appUrl.'/auth/microsoft/callback'],
@@ -182,18 +211,20 @@ class SsoConfig
         $fields = [];
         foreach ($map as $key => $meta) {
             $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $effective = ! empty($meta['env_key'])
-                ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
-                : ($dbValue !== null ? (bool) $dbValue : (bool) $meta['default']);
 
             if (! empty($meta['boolean'])) {
-                $hasDbValue = $dbValue !== null;
-                $formValue = $hasDbValue ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN) : filter_var($effective, FILTER_VALIDATE_BOOLEAN);
-                $value = filter_var($effective, FILTER_VALIDATE_BOOLEAN);
-            } else {
                 $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $formValue = $hasDbValue ? $dbValue : $effective;
-                $value = $effective;
+                $formValue = $hasDbValue ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN) : (bool) $meta['default'];
+                $value = $formValue;
+                $source = 'database';
+            } else {
+                $envEffective = ! empty($meta['env_key'])
+                    ? self::resolveFromEnv($meta['env_key'], $meta['default'])
+                    : $meta['default'];
+                $hasDbValue = $dbValue !== null && $dbValue !== '';
+                $value = $usesDb && $hasDbValue ? $dbValue : $envEffective;
+                $formValue = $hasDbValue ? $dbValue : $envEffective;
+                $source = ($usesDb && $hasDbValue) ? 'database' : 'env';
             }
 
             if (str_contains($key, '_secret') && $hasDbValue && $formValue !== '') {
@@ -206,6 +237,7 @@ class SsoConfig
                 'value' => $value,
                 'form_value' => $formValue,
                 'boolean' => ! empty($meta['boolean']),
+                'source' => $source,
             ];
         }
 

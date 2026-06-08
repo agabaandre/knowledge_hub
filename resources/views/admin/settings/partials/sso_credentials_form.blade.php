@@ -7,7 +7,22 @@
     @if(!$compact)
         <hr class="my-3">
         <p class="text-muted small mb-3">
-            OAuth client credentials for social login. Database values <strong>override</strong> matching <code>.env</code> keys.
+            Social login credentials are read from <code>.env</code> by default. Enable the switch below only when you want this app to use the database values instead.
+        </p>
+        <div class="form-check mb-3">
+            <input type="hidden" name="sso_use_database_credentials" value="0">
+            <input type="checkbox" class="form-check-input" id="sso_use_database_credentials" name="sso_use_database_credentials" value="1"
+                   @checked(old('sso_use_database_credentials', $ssoFields['sso_use_database_credentials']['form_value'] ?? false))>
+            <label class="form-check-label" for="sso_use_database_credentials">
+                Use database SSO credentials instead of <code>.env</code>
+            </label>
+        </div>
+        <p class="text-muted small mb-3">
+            Active source:
+            <strong>{{ ($ssoFields['sso_use_database_credentials']['form_value'] ?? false) ? 'Database' : '.env' }}</strong>.
+            @unless($ssoFields['sso_use_database_credentials']['form_value'] ?? false)
+                Fields below are stored for later use; live sign-in uses your environment variables.
+            @endunless
         </p>
     @endif
 

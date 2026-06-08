@@ -476,6 +476,10 @@ class InstallerService
             'enable_linkedin_login' => (bool) ($sso['enable_linkedin_login'] ?? true),
         ];
 
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
+            $payload['sso_use_database_credentials'] = true;
+        }
+
         if (! empty($sso['microsoft_client_secret'])) {
             $payload['microsoft_client_secret'] = $sso['microsoft_client_secret'];
         }
@@ -488,7 +492,10 @@ class InstallerService
 
         $setting->forceFill($payload)->save();
 
-        $this->clearSsoEnvOverrides();
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials')
+            && ($setting->sso_use_database_credentials ?? false)) {
+            $this->clearSsoEnvOverrides();
+        }
 
         \App\Support\SsoConfig::clearCache();
         \App\Support\SsoConfig::applyRuntimeConfig();
