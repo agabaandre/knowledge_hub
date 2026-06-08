@@ -2220,4 +2220,22 @@ if (! function_exists('html_dir_for_locale')) {
     }
 }
 
+if (! function_exists('ui_document_direction')) {
+    /**
+     * @return array{locale: string, lang: string, dir: string, is_rtl: bool}
+     */
+    function ui_document_direction(?string $locale = null): array
+    {
+        $locale = (string) ($locale ?? app()->getLocale());
+        $dir = html_dir_for_locale($locale);
+
+        return [
+            'locale' => $locale,
+            'lang' => str_replace('_', '-', $locale),
+            'dir' => $dir,
+            'is_rtl' => $dir === 'rtl',
+        ];
+    }
+}
+
 ?>

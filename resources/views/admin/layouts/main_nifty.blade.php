@@ -1,6 +1,6 @@
+@php($docDir = ui_document_direction())
 <!DOCTYPE html>
-@include('partials.theming.document_direction')
-<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" data-bs-theme="light" data-scheme="navy" class="{{ (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled' }}{{ $isRtlUi ? ' khub-rtl-document' : '' }}">
+<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" data-bs-theme="light" data-scheme="navy" class="{{ (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled' }}{{ $docDir['is_rtl'] ? ' khub-rtl-document' : '' }}">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">

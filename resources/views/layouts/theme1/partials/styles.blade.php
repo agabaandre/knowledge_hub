@@ -5,10 +5,10 @@
         $userTheme = in_array($pref, ['light','dark','system']) ? $pref : 'light';
     }
     $menuIconsClass = (settings()->menu_icons_enabled ?? 0) ? 'menu-icons-enabled' : 'menu-icons-disabled';
+    $docDir = ui_document_direction();
 @endphp
-@include('partials.theming.document_direction')
 <!DOCTYPE html>
-<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}{{ $isRtlUi ? ' khub-rtl-document' : '' }}">
+<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" data-bs-theme="{{ $userTheme === 'system' ? 'light' : $userTheme }}" data-theme-preference="{{ $userTheme }}" data-scheme="navy" class="{{ $menuIconsClass }}{{ $docDir['is_rtl'] ? ' khub-rtl-document' : '' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1">

@@ -1,6 +1,6 @@
+@php($docDir = ui_document_direction())
 <!DOCTYPE html>
-@include('partials.theming.document_direction')
-<html lang="{{ $htmlLang }}" dir="{{ $htmlDir }}" class="{{ $isRtlUi ? 'khub-rtl-document' : '' }}">
+<html lang="{{ $docDir['lang'] }}" dir="{{ $docDir['dir'] }}" class="{{ $docDir['is_rtl'] ? 'khub-rtl-document' : '' }}">
 
 <head>
 	<meta charset="UTF-8">
@@ -28,7 +28,7 @@
 	<link href="{{ asset('assets/plugins/sidebar/sidebar.css') }}" rel="stylesheet">
 
 	<!-- Style css -->
-	@if($isRtlUi)
+	@if($docDir['is_rtl'])
 	<link rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css-rtl/style.css') }}">
 	@else
 	<link rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css/style.css') }}">
@@ -39,7 +39,7 @@
 	<link id="theme" rel="stylesheet" type="text/css" media="all" href="{{ asset('assets/css/colors/color.css') }}">
 
 	<!-- Horizontal css -->
-	@if($isRtlUi)
+	@if($docDir['is_rtl'])
 	<link href="{{ asset('assets/css-rtl/horizontalmenu/horizontal-menu.css') }}" rel="stylesheet">
 	@else
 	<link href="{{ asset('assets/css/horizontalmenu/horizontal-menu.css') }}" rel="stylesheet">
