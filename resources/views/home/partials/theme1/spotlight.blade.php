@@ -1,18 +1,5 @@
 @php
-    $bannerUrl = null;
-    if (!empty(settings()->spotlight_banner)) {
-        $b = settings()->spotlight_banner;
-        $bannerUrl = (strpos($b, 'http') === 0 || strpos($b, '//') === 0) ? $b : asset($b);
-    }
     $primary = settings()->primary_color ?? '#119A48';
-    $overlayHex = settings()->spotlight_overlay_color ?? '#000000';
-    $overlayOpacityPercent = (int) (settings()->spotlight_overlay_opacity ?? 35);
-    $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
-    $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
-    if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
-        $overlayRgb = [0, 0, 0];
-    }
-    $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
 @endphp
 <style>
 .theme1-spotlight {
@@ -22,9 +9,7 @@
     scroll-margin-top: 72px;
     margin-top: 1.25rem;
     background-color: #f0f4f8;
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    background-image: none !important;
     /* Break out of padded layout so background fills full viewport width */
     width: 100vw;
     max-width: 100vw;
@@ -36,7 +21,7 @@
     content: '';
     position: absolute;
     inset: 0;
-    background: {{ $bannerUrl ? $overlayRgba : 'linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%)' }};
+    background: linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%);
     pointer-events: none;
 }
 .theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 1; }
@@ -211,7 +196,7 @@
     }
 }
 </style>
-<div class="theme1-spotlight" style="{{ $bannerUrl ? 'background-image: url(' . e($bannerUrl) . ');' : '' }}">
+<div class="theme1-spotlight">
     <h1 class="visually-hidden notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

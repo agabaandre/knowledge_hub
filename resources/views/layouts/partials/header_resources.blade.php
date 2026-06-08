@@ -140,7 +140,7 @@
         border-radius: 4px;
     }
 
-    /* Search/Spotlight area background - image or gradient - only for search areas */
+    /* Search/Spotlight area background — brand gradient only (no banner photo on public pages) */
     .spotlight.custom-bg,
     .custom-bg.spotlight,
     .custom-bg {
@@ -148,32 +148,9 @@
             $settings = settings();
             $gradientStart = $settings->gradient_start_color ?? '#119A48';
             $gradientEnd = $settings->gradient_end_color ?? '#16c653';
-
-            $bgImage = '';
-            if (!empty($settings->spotlight_banner)) {
-                $rawBanner = (string) $settings->spotlight_banner;
-                $bgImage = (strpos($rawBanner, 'http') === 0 || strpos($rawBanner, '//') === 0)
-                    ? $rawBanner
-                    : asset(ltrim($rawBanner, '/'));
-            }
-
-            $overlayHex = $settings->spotlight_overlay_color ?? '#000000';
-            $overlayOpacityPercent = (int) ($settings->spotlight_overlay_opacity ?? 35);
-            $overlayOpacity = max(0, min(100, $overlayOpacityPercent)) / 100;
-            $overlayRgb = sscanf((string) $overlayHex, '#%02x%02x%02x');
-            if (!is_array($overlayRgb) || count($overlayRgb) !== 3) {
-                $overlayRgb = [0, 0, 0];
-            }
-            $overlayRgba = 'rgba(' . (int) $overlayRgb[0] . ', ' . (int) $overlayRgb[1] . ', ' . (int) $overlayRgb[2] . ', ' . $overlayOpacity . ')';
         @endphp
-        @if(!empty($bgImage))
-        background: linear-gradient({{ $overlayRgba }}, {{ $overlayRgba }}), url('{{ $bgImage }}') !important;
-        background-repeat: no-repeat !important;
-        background-size: cover !important;
-        background-position: center !important;
-        @else
         background: linear-gradient(135deg, {{ $gradientStart }} 0%, {{ $gradientEnd }} 100%) !important;
-        @endif
+        background-image: none !important;
     }
     
     /* Ensure other .custom-bg uses (if any) don't conflict */
