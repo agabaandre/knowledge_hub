@@ -380,29 +380,7 @@ class SettingsRepository
         }
 
         if (Schema::hasColumn('setting', 'email_driver')) {
-            $driver = $request->input('email_driver', 'exchange');
-            $settings->email_driver = in_array($driver, ['smtp', 'exchange'], true) ? $driver : 'exchange';
-            $settings->mail_host = $request->input('mail_host');
-            $settings->mail_port = $request->input('mail_port');
-            $settings->mail_username = $request->input('mail_username');
-            if ($request->filled('mail_password')) {
-                $settings->mail_password = $request->input('mail_password');
-            }
-            $encryption = $request->input('mail_encryption', 'tls');
-            $settings->mail_encryption = in_array($encryption, ['tls', 'ssl', 'none', ''], true) ? $encryption : 'tls';
-            $settings->mail_from_address = $request->input('mail_from_address');
-            $settings->mail_from_name = $request->input('mail_from_name');
-            $settings->exchange_tenant_id = $request->input('exchange_tenant_id');
-            $settings->exchange_client_id = $request->input('exchange_client_id');
-            if ($request->filled('exchange_client_secret')) {
-                $settings->exchange_client_secret = $request->input('exchange_client_secret');
-            }
-            $settings->exchange_redirect_uri = $request->input('exchange_redirect_uri');
-            $settings->exchange_scope = $request->input('exchange_scope');
-            $authMethod = $request->input('exchange_auth_method', 'client_credentials');
-            $settings->exchange_auth_method = in_array($authMethod, ['client_credentials', 'authorization_code'], true)
-                ? $authMethod
-                : 'client_credentials';
+            $this->applyEmailSettings($settings, $request);
         }
 
         // Handle status change - if setting a new config as active, deactivate others
@@ -470,18 +448,13 @@ class SettingsRepository
 
         $settings->save();
 
-        if (Schema::hasColumn('setting', 'email_driver')) {
-            app(InstallerService::class)->clearMailEnvOverrides();
-        }
-
         DisposableEmailChecker::forgetCache();
-        EmailConfig::clearCache();
-        EmailConfig::applyRuntimeConfig();
+        if (Schema::hasColumn('setting', 'email_driver')) {
+            EmailConfig::clearCache();
+            EmailConfig::applyRuntimeConfig();
+        }
         if (Schema::hasColumn('setting', 'microsoft_client_id')
             || Schema::hasColumn('setting', 'enable_microsoft_login')) {
-            if ($request->has('microsoft_client_id') || $request->has('enable_microsoft_login')) {
-                app(InstallerService::class)->clearSsoEnvOverrides();
-            }
             \App\Support\SsoConfig::clearCache();
             \App\Support\SsoConfig::applyRuntimeConfig();
         }
@@ -504,8 +477,6 @@ class SettingsRepository
 
         $this->applySsoSettings($settings, $request);
         $settings->save();
-
-        app(InstallerService::class)->clearSsoEnvOverrides();
 
         \App\Support\SsoConfig::clearCache();
         \App\Support\SsoConfig::applyRuntimeConfig();
@@ -542,51 +513,13 @@ class SettingsRepository
         }
 
         if (Schema::hasColumn('setting', 'moodle_api_url')) {
-            if ($request->has('moodle_api_url')) {
-                $settings->moodle_api_url = $request->input('moodle_api_url');
-                $settings->moodle_base_url = $request->input('moodle_base_url');
-                if ($request->filled('moodle_api_token')) {
-                    $settings->moodle_api_token = $request->input('moodle_api_token');
-                }
-            }
-            if ($request->has('moodle_sync_enabled')) {
-                $settings->moodle_sync_enabled = self::parseSubmittedBoolean($request, 'moodle_sync_enabled');
-            }
-        }
-
-        if (Schema::hasColumn('setting', 'frappe_base_url')) {
-            if ($request->has('frappe_base_url')) {
-                $settings->frappe_base_url = $request->input('frappe_base_url');
-                $settings->frappe_api_key = $request->input('frappe_api_key');
-                $settings->frappe_course_doctype = $request->input('frappe_course_doctype', 'LMS Course');
-                if ($request->filled('frappe_api_secret')) {
-                    $settings->frappe_api_secret = $request->input('frappe_api_secret');
-                }
-            }
-            if ($request->has('frappe_sync_enabled')) {
-                $settings->frappe_sync_enabled = self::parseSubmittedBoolean($request, 'frappe_sync_enabled');
-            }
-        }
-
-        if (Schema::hasColumn('setting', 'openedx_lms_url')) {
-            if ($request->has('openedx_lms_url')) {
-                $settings->openedx_lms_url = $request->input('openedx_lms_url');
-                $settings->openedx_client_id = $request->input('openedx_client_id');
-                $settings->openedx_token_url = $request->input('openedx_token_url');
-                if ($request->filled('openedx_client_secret')) {
-                    $settings->openedx_client_secret = $request->input('openedx_client_secret');
-                }
-            }
-            if ($request->has('openedx_sync_enabled')) {
-                $settings->openedx_sync_enabled = self::parseSubmittedBoolean($request, 'openedx_sync_enabled');
-            }
+            $this->applyLearningSettings($settings, $request);
         }
 
         $settings->save();
 
         if (Schema::hasColumn('setting', 'moodle_api_url')) {
             \App\Support\LearningConfig::clearAllCaches();
-            app(InstallerService::class)->clearLearningEnvOverrides();
             \App\Support\LearningConfig::applyRuntimeConfig();
         }
         clear_settings_cache();
@@ -605,29 +538,124 @@ class SettingsRepository
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
+    private function applyEmailSettings(Setting $settings, Request $request): void
+    {
+        $envDriver = \App\Support\EmailConfig::envDriverFromEnv();
+        $submittedDriver = $request->input('email_driver', 'exchange');
+        $submittedDriver = in_array($submittedDriver, ['smtp', 'exchange'], true) ? $submittedDriver : 'exchange';
+        $settings->email_driver = $submittedDriver !== $envDriver ? $submittedDriver : null;
+
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_host', 'MAIL_HOST', 'mail_host');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_port', 'MAIL_PORT', 'mail_port', false, '587');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_username', 'MAIL_USERNAME', 'mail_username');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_password', 'MAIL_PASSWORD', 'mail_password', true);
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_encryption', 'MAIL_ENCRYPTION', 'mail_encryption', false, 'tls');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_from_address', 'MAIL_FROM_ADDRESS', 'mail_from_address');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'mail_from_name', 'MAIL_FROM_NAME', 'mail_from_name');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_tenant_id', 'EXCHANGE_TENANT_ID', 'exchange_tenant_id');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_client_id', 'EXCHANGE_CLIENT_ID', 'exchange_client_id');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_client_secret', 'EXCHANGE_CLIENT_SECRET', 'exchange_client_secret', true);
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_redirect_uri', 'EXCHANGE_REDIRECT_URI', 'exchange_redirect_uri');
+        \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'exchange_scope', 'EXCHANGE_SCOPE', 'exchange_scope', false, 'https://graph.microsoft.com/.default');
+
+        if ($request->has('exchange_auth_method')) {
+            $submittedAuth = $request->input('exchange_auth_method', 'client_credentials');
+            $submittedAuth = in_array($submittedAuth, ['client_credentials', 'authorization_code'], true)
+                ? $submittedAuth
+                : 'client_credentials';
+            $envAuth = (string) \App\Support\EnvFirstConfig::envEffective('EXCHANGE_AUTH_METHOD', 'client_credentials');
+            $settings->exchange_auth_method = $submittedAuth !== $envAuth ? $submittedAuth : null;
+        }
+    }
+
+    private function applyLearningSettings(Setting $settings, Request $request): void
+    {
+        if ($request->has('moodle_api_url')) {
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'moodle_api_url', 'MOODLE_API_URL', 'moodle_api_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'moodle_base_url', 'MOODLE_URL', 'moodle_base_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'moodle_api_token', 'MOODLE_API_TOKEN', 'moodle_api_token', true);
+        }
+
+        if ($request->has('moodle_sync_enabled')) {
+            $envDefault = filter_var(\App\Support\EnvFirstConfig::envEffective('MOODLE_SYNC_ENABLED', true), FILTER_VALIDATE_BOOLEAN);
+            $submitted = self::parseSubmittedBoolean($request, 'moodle_sync_enabled');
+            $settings->moodle_sync_enabled = $submitted !== $envDefault ? ($submitted ? 1 : 0) : null;
+        }
+
+        if ($request->has('frappe_base_url')) {
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'frappe_base_url', 'FRAPPE_BASE_URL', 'frappe_base_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'frappe_api_key', 'FRAPPE_API_KEY', 'frappe_api_key');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'frappe_course_doctype', 'FRAPPE_COURSE_DOCTYPE', 'frappe_course_doctype', false, 'LMS Course');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'frappe_api_secret', 'FRAPPE_API_SECRET', 'frappe_api_secret', true);
+        }
+
+        if ($request->has('frappe_sync_enabled')) {
+            $envDefault = filter_var(\App\Support\EnvFirstConfig::envEffective('FRAPPE_SYNC_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+            $submitted = self::parseSubmittedBoolean($request, 'frappe_sync_enabled');
+            $settings->frappe_sync_enabled = $submitted !== $envDefault ? ($submitted ? 1 : 0) : null;
+        }
+
+        if ($request->has('openedx_lms_url')) {
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'openedx_lms_url', 'OPENEDX_LMS_URL', 'openedx_lms_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'openedx_client_id', 'OPENEDX_CLIENT_ID', 'openedx_client_id');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'openedx_token_url', 'OPENEDX_TOKEN_URL', 'openedx_token_url');
+            \App\Support\EnvFirstConfig::applySubmittedOverride($settings, $request, 'openedx_client_secret', 'OPENEDX_CLIENT_SECRET', 'openedx_client_secret', true);
+        }
+
+        if ($request->has('openedx_sync_enabled')) {
+            $envDefault = filter_var(\App\Support\EnvFirstConfig::envEffective('OPENEDX_SYNC_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+            $submitted = self::parseSubmittedBoolean($request, 'openedx_sync_enabled');
+            $settings->openedx_sync_enabled = $submitted !== $envDefault ? ($submitted ? 1 : 0) : null;
+        }
+    }
+
     private function applySsoSettings(Setting $settings, Request $request): void
     {
         if ($request->has('microsoft_client_id')) {
-            $settings->microsoft_client_id = trim((string) $request->input('microsoft_client_id', ''));
-            $settings->microsoft_redirect_uri = trim((string) $request->input('microsoft_redirect_uri', ''));
-            $settings->microsoft_tenant_id = trim((string) $request->input('microsoft_tenant_id', 'common')) ?: 'common';
-            if ($request->filled('microsoft_client_secret')) {
-                $settings->microsoft_client_secret = $request->input('microsoft_client_secret');
-            }
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'microsoft_client_id', 'microsoft_client_id',
+                \App\Support\SsoConfig::resolveFromEnv('MICROSOFT_CLIENT_ID', '')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'microsoft_redirect_uri', 'microsoft_redirect_uri',
+                \App\Support\SsoConfig::resolveFromEnv('MICROSOFT_REDIRECT_URI', rtrim((string) config('app.url', ''), '/').'/auth/microsoft/callback')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'microsoft_tenant_id', 'microsoft_tenant_id',
+                \App\Support\SsoConfig::resolveFromEnv('MICROSOFT_TENANT_ID', 'common')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'microsoft_client_secret', 'microsoft_client_secret',
+                \App\Support\SsoConfig::resolveFromEnv('MICROSOFT_CLIENT_SECRET', ''), true
+            );
         }
         if ($request->has('google_client_id')) {
-            $settings->google_client_id = trim((string) $request->input('google_client_id', ''));
-            $settings->google_redirect_uri = trim((string) $request->input('google_redirect_uri', ''));
-            if ($request->filled('google_client_secret')) {
-                $settings->google_client_secret = $request->input('google_client_secret');
-            }
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'google_client_id', 'google_client_id',
+                \App\Support\SsoConfig::resolveFromEnv('GOOGLE_CLIENT_ID', '')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'google_redirect_uri', 'google_redirect_uri',
+                \App\Support\SsoConfig::resolveFromEnv('GOOGLE_REDIRECT_URI', rtrim((string) config('app.url', ''), '/').'/auth/google/callback')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'google_client_secret', 'google_client_secret',
+                \App\Support\SsoConfig::resolveFromEnv('GOOGLE_CLIENT_SECRET', ''), true
+            );
         }
         if ($request->has('linkedin_client_id')) {
-            $settings->linkedin_client_id = trim((string) $request->input('linkedin_client_id', ''));
-            $settings->linkedin_redirect_uri = trim((string) $request->input('linkedin_redirect_uri', ''));
-            if ($request->filled('linkedin_client_secret')) {
-                $settings->linkedin_client_secret = $request->input('linkedin_client_secret');
-            }
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'linkedin_client_id', 'linkedin_client_id',
+                \App\Support\SsoConfig::resolveFromEnv('LINKEDIN_CLIENT_ID', '')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'linkedin_redirect_uri', 'linkedin_redirect_uri',
+                \App\Support\SsoConfig::resolveFromEnv('LINKEDIN_REDIRECT_URI', rtrim((string) config('app.url', ''), '/').'/auth/linkedin/callback')
+            );
+            \App\Support\EnvFirstConfig::applySubmittedOverrideWithEnvEffective(
+                $settings, $request, 'linkedin_client_secret', 'linkedin_client_secret',
+                \App\Support\SsoConfig::resolveFromEnv('LINKEDIN_CLIENT_SECRET', ''), true
+            );
         }
         if ($request->has('enable_microsoft_login')) {
             $settings->enable_microsoft_login = self::parseSubmittedBoolean($request, 'enable_microsoft_login');

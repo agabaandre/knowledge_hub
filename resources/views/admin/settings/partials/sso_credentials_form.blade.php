@@ -7,7 +7,7 @@
     @if(!$compact)
         <hr class="my-3">
         <p class="text-muted small mb-3">
-            Social login credentials are managed here (same approach as email settings). Values saved below are stored in the database and take effect immediately; matching keys in <code>.env</code> are cleared on save so the database remains the source of truth.
+            Social login credentials are read from <code>.env</code> by default. Values are saved to the database only when you change a field from what is in <code>.env</code>.
         </p>
     @endif
 

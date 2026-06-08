@@ -9,12 +9,10 @@ class SsoConfig
 {
     private static ?object $dbSettings = null;
 
-    /** @var array<string, string>|null */
-    private static ?array $envFileCache = null;
-
     public static function clearCache(): void
     {
         self::$dbSettings = null;
+        EnvFirstConfig::clearEnvFileCache();
     }
 
     public static function dbSettings(): ?object
@@ -34,7 +32,7 @@ class SsoConfig
     }
 
     /**
-     * Database settings win when present; .env / config is fallback (same as EmailConfig).
+     * .env is default; database stores only values that differ from .env.
      */
     public static function usesDatabaseCredentials(): bool
     {
@@ -49,14 +47,14 @@ class SsoConfig
         }
 
         foreach ([
-            'microsoft_client_id',
-            'microsoft_client_secret',
-            'google_client_id',
-            'google_client_secret',
-            'linkedin_client_id',
-            'linkedin_client_secret',
-        ] as $column) {
-            if (property_exists($db, $column) && trim((string) $db->{$column}) !== '') {
+            ['MICROSOFT_CLIENT_ID', 'microsoft_client_id'],
+            ['MICROSOFT_CLIENT_SECRET', 'microsoft_client_secret'],
+            ['GOOGLE_CLIENT_ID', 'google_client_id'],
+            ['GOOGLE_CLIENT_SECRET', 'google_client_secret'],
+            ['LINKEDIN_CLIENT_ID', 'linkedin_client_id'],
+            ['LINKEDIN_CLIENT_SECRET', 'linkedin_client_secret'],
+        ] as [$envKey, $column]) {
+            if (EnvFirstConfig::hasOverrideForEffective($db, self::resolveFromEnv($envKey, ''), $column)) {
                 return 'database';
             }
         }
@@ -70,16 +68,11 @@ class SsoConfig
      */
     public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
     {
-        $db = self::dbSettings();
-        $column = $dbColumn ?? strtolower($envKey);
-        if ($db && $column && property_exists($db, $column)) {
-            $dbValue = $db->{$column};
-            if ($dbValue !== null && $dbValue !== '') {
-                return $dbValue;
-            }
-        }
-
-        return self::resolveFromEnv($envKey, $default);
+        return EnvFirstConfig::resolveWithEnvEffective(
+            self::dbSettings(),
+            self::resolveFromEnv($envKey, $default),
+            $dbColumn ?? strtolower($envKey)
+        );
     }
 
     /**
@@ -88,20 +81,16 @@ class SsoConfig
      */
     public static function resolveFromEnv(string $envKey, $default = null)
     {
-        $envValue = self::envValue($envKey);
-        if ($envValue !== '') {
+        $envValue = EnvFirstConfig::envEffective($envKey, null, self::configKeyForEnv($envKey));
+        if ($envValue !== null && $envValue !== '') {
             return $envValue;
         }
 
         if ($envKey === 'MICROSOFT_CLIENT_ID') {
             foreach (['EXCHANGE_CLIENT_ID'] as $exchangeKey) {
-                $exchange = self::envValue($exchangeKey);
-                if ($exchange !== '') {
+                $exchange = EnvFirstConfig::envEffective($exchangeKey);
+                if ($exchange !== null && $exchange !== '') {
                     return $exchange;
-                }
-                $fileExchange = self::envFileValue($exchangeKey);
-                if ($fileExchange !== '') {
-                    return $fileExchange;
                 }
             }
             $configExchange = trim((string) config('exchange-email.client_id', ''));
@@ -111,13 +100,9 @@ class SsoConfig
         }
         if ($envKey === 'MICROSOFT_CLIENT_SECRET') {
             foreach (['EXCHANGE_CLIENT_SECRET'] as $exchangeKey) {
-                $exchange = self::envValue($exchangeKey);
-                if ($exchange !== '') {
+                $exchange = EnvFirstConfig::envEffective($exchangeKey);
+                if ($exchange !== null && $exchange !== '') {
                     return $exchange;
-                }
-                $fileExchange = self::envFileValue($exchangeKey);
-                if ($fileExchange !== '') {
-                    return $fileExchange;
                 }
             }
             $configExchange = trim((string) config('exchange-email.client_secret', ''));
@@ -127,13 +112,9 @@ class SsoConfig
         }
         if ($envKey === 'MICROSOFT_TENANT_ID') {
             foreach (['EXCHANGE_TENANT_ID'] as $exchangeKey) {
-                $exchange = self::envValue($exchangeKey);
-                if ($exchange !== '') {
+                $exchange = EnvFirstConfig::envEffective($exchangeKey);
+                if ($exchange !== null && $exchange !== '') {
                     return $exchange;
-                }
-                $fileExchange = self::envFileValue($exchangeKey);
-                if ($fileExchange !== '') {
-                    return $fileExchange;
                 }
             }
             $configExchange = trim((string) config('exchange-email.tenant_id', ''));
@@ -142,24 +123,11 @@ class SsoConfig
             }
         }
 
-        $configKey = self::configKeyForEnv($envKey);
-        if ($configKey !== null) {
-            $configValue = config($configKey);
-            if ($configValue !== null && $configValue !== '') {
-                return $configValue;
-            }
-        }
-
-        $fileValue = self::envFileValue($envKey);
-        if ($fileValue !== '') {
-            return $fileValue;
-        }
-
         return $default;
     }
 
     /**
-     * Copy SSO credentials from .env into the setting table (installer-managed source of truth).
+     * Clear database integration overrides so .env becomes the active source again.
      *
      * @return array{updated: int, providers: array<string, bool>, redirects: array<string, string>}
      */
@@ -169,39 +137,29 @@ class SsoConfig
             return ['updated' => 0, 'providers' => [], 'redirects' => []];
         }
 
-        $env = self::readEnvFile($envPath ?? base_path('.env'));
-        $appUrl = rtrim((string) ($env['APP_URL'] ?? config('app.url', '')), '/');
-
-        $payload = [
-            'microsoft_client_id' => trim((string) ($env['MICROSOFT_CLIENT_ID'] ?? $env['EXCHANGE_CLIENT_ID'] ?? '')),
-            'microsoft_client_secret' => trim((string) ($env['MICROSOFT_CLIENT_SECRET'] ?? $env['EXCHANGE_CLIENT_SECRET'] ?? '')),
-            'microsoft_tenant_id' => trim((string) ($env['MICROSOFT_TENANT_ID'] ?? $env['EXCHANGE_TENANT_ID'] ?? 'common')) ?: 'common',
-            'google_client_id' => trim((string) ($env['GOOGLE_CLIENT_ID'] ?? '')),
-            'google_client_secret' => trim((string) ($env['GOOGLE_CLIENT_SECRET'] ?? '')),
-            'linkedin_client_id' => trim((string) ($env['LINKEDIN_CLIENT_ID'] ?? '')),
-            'linkedin_client_secret' => trim((string) ($env['LINKEDIN_CLIENT_SECRET'] ?? '')),
-            'microsoft_redirect_uri' => self::resolveRedirectUriForSync($env, 'MICROSOFT_REDIRECT_URI', 'microsoft', $appUrl),
-            'google_redirect_uri' => self::resolveRedirectUriForSync($env, 'GOOGLE_REDIRECT_URI', 'google', $appUrl),
-            'linkedin_redirect_uri' => self::resolveRedirectUriForSync($env, 'LINKEDIN_REDIRECT_URI', 'linkedin', $appUrl),
-            'enable_microsoft_login' => true,
-            'enable_google_login' => true,
-            'enable_linkedin_login' => true,
+        $columns = [
+            'microsoft_client_id', 'microsoft_client_secret', 'microsoft_redirect_uri', 'microsoft_tenant_id',
+            'google_client_id', 'google_client_secret', 'google_redirect_uri',
+            'linkedin_client_id', 'linkedin_client_secret', 'linkedin_redirect_uri',
         ];
 
-        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
-            $payload['sso_use_database_credentials'] = true;
-        }
-
-        $filtered = [];
-        foreach ($payload as $column => $value) {
+        $updates = [];
+        foreach ($columns as $column) {
             if (Schema::hasColumn('setting', $column)) {
-                $filtered[$column] = $value;
+                $updates[$column] = null;
             }
         }
 
-        $updated = DB::table('setting')->where('status', 'active')->update($filtered);
-        if ($updated === 0) {
-            $updated = DB::table('setting')->limit(1)->update($filtered);
+        if (Schema::hasColumn('setting', 'sso_use_database_credentials')) {
+            $updates['sso_use_database_credentials'] = false;
+        }
+
+        $updated = 0;
+        if ($updates !== []) {
+            $updated = DB::table('setting')->where('status', 'active')->update($updates);
+            if ($updated === 0) {
+                $updated = DB::table('setting')->limit(1)->update($updates);
+            }
         }
 
         self::clearCache();
@@ -220,98 +178,6 @@ class SsoConfig
                 'linkedin' => (string) config('services.linkedin.redirect', ''),
             ],
         ];
-    }
-
-    /**
-     * @param  array<string, string>  $env
-     */
-    private static function resolveRedirectUriForSync(array $env, string $envKey, string $provider, string $appUrl): string
-    {
-        $default = $appUrl !== '' ? $appUrl.'/auth/'.$provider.'/callback' : '';
-        $fromEnv = trim((string) ($env[$envKey] ?? ''));
-
-        if ($fromEnv === '') {
-            return $default;
-        }
-
-        if ($appUrl !== '' && self::isLocalHostUrl($fromEnv) && ! self::isLocalHostUrl($appUrl)) {
-            return $default;
-        }
-
-        return $fromEnv;
-    }
-
-    private static function isLocalHostUrl(string $url): bool
-    {
-        $host = parse_url($url, PHP_URL_HOST);
-        if (! is_string($host) || $host === '') {
-            return false;
-        }
-
-        $host = strtolower($host);
-
-        return in_array($host, ['localhost', '127.0.0.1', '::1'], true)
-            || str_ends_with($host, '.local')
-            || str_ends_with($host, '.test');
-    }
-
-    private static function envFileValue(string $key): string
-    {
-        return trim((string) (self::readEnvFile(base_path('.env'))[$key] ?? ''));
-    }
-
-    /**
-     * @return array<string, string>
-     */
-    private static function readEnvFile(string $path): array
-    {
-        if (self::$envFileCache !== null && $path === base_path('.env')) {
-            return self::$envFileCache;
-        }
-
-        $values = [];
-        if (! is_readable($path)) {
-            return $values;
-        }
-
-        foreach (file($path, FILE_IGNORE_NEW_LINES) ?: [] as $line) {
-            $line = trim($line);
-            if ($line === '' || str_starts_with($line, '#') || ! str_contains($line, '=')) {
-                continue;
-            }
-
-            [$key, $value] = explode('=', $line, 2);
-            $key = trim($key);
-            $value = trim($value);
-
-            if ($value !== '' && (($value[0] === '"' && str_ends_with($value, '"'))
-                || ($value[0] === "'" && str_ends_with($value, "'")))) {
-                $value = substr($value, 1, -1);
-            }
-
-            $values[$key] = $value;
-        }
-
-        if ($path === base_path('.env')) {
-            self::$envFileCache = $values;
-        }
-
-        return $values;
-    }
-
-    private static function envValue(string $key): string
-    {
-        $value = env($key);
-        if ($value !== null && $value !== '') {
-            return trim((string) $value);
-        }
-
-        $getenv = getenv($key);
-        if ($getenv !== false && $getenv !== '') {
-            return trim((string) $getenv);
-        }
-
-        return '';
     }
 
     private static function configKeyForEnv(string $envKey): ?string
@@ -455,35 +321,16 @@ class SsoConfig
 
         $fields = [];
         foreach ($map as $key => $meta) {
-            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $effective = ! empty($meta['env_key'])
-                ? self::resolve($meta['env_key'], $meta['db_column'], $meta['default'])
-                : ($dbValue !== null ? (bool) $dbValue : (bool) $meta['default']);
-
-            if (! empty($meta['boolean'])) {
-                $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $formValue = $hasDbValue ? filter_var($dbValue, FILTER_VALIDATE_BOOLEAN) : filter_var($effective, FILTER_VALIDATE_BOOLEAN);
-                $value = filter_var($effective, FILTER_VALIDATE_BOOLEAN);
-                $source = 'database';
-            } else {
-                $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $formValue = $hasDbValue ? $dbValue : $effective;
-                $value = $effective;
-                $source = $hasDbValue ? 'database' : 'env';
-            }
-
-            if (str_contains($key, '_secret') && $hasDbValue && $formValue !== '') {
-                $formValue = '';
-            }
-
-            $fields[$key] = [
-                'env_key' => $meta['env_key'],
-                'db_column' => $meta['db_column'],
-                'value' => $value,
-                'form_value' => $formValue,
-                'boolean' => ! empty($meta['boolean']),
-                'source' => $source,
-            ];
+            $envEffective = ! empty($meta['env_key'])
+                ? self::resolveFromEnv($meta['env_key'], $meta['default'])
+                : null;
+            $field = ! empty($meta['boolean'])
+                ? EnvFirstConfig::adminField($db, $meta)
+                : EnvFirstConfig::adminField($db, array_merge($meta, [
+                    'secret' => str_contains($key, '_secret'),
+                ]), $envEffective);
+            $field['boolean'] = ! empty($meta['boolean']);
+            $fields[$key] = $field;
         }
 
         return $fields;

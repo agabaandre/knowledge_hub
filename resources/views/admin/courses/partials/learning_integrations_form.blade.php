@@ -1,8 +1,7 @@
 @if(!empty($moodleFields) || !empty($frappeFields) || !empty($openEdxFields))
     <div class="alert alert-light border mb-4">
         <i class="fa fa-info-circle me-2" style="color: var(--la-primary);"></i>
-        Configure Moodle, Frappe LMS, and/or Open edX. Enable sync for each platform you use.
-        Database values <strong>override</strong> matching <code>.env</code> settings.
+        Configure Moodle, Frappe LMS, and/or Open edX. Values are loaded from <code>.env</code> by default; the database stores only fields you change here.
         Run <code>php artisan learning:fetch-courses</code> after saving.
     </div>
 @else

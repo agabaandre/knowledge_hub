@@ -11,6 +11,7 @@ class FrappeConfig
     public static function clearCache(): void
     {
         self::$dbSettings = null;
+        EnvFirstConfig::clearEnvFileCache();
     }
 
     public static function dbSettings(): ?object
@@ -35,21 +36,7 @@ class FrappeConfig
      */
     public static function resolve(string $envKey, ?string $dbColumn = null, $default = null)
     {
-        $db = self::dbSettings();
-        $column = $dbColumn ?? strtolower($envKey);
-        if ($db && $column && property_exists($db, $column)) {
-            $dbValue = $db->{$column};
-            if ($dbValue !== null && $dbValue !== '') {
-                return $dbValue;
-            }
-        }
-
-        $envValue = env($envKey);
-        if ($envValue !== null && $envValue !== '') {
-            return $envValue;
-        }
-
-        return $default;
+        return EnvFirstConfig::resolve(self::dbSettings(), $envKey, $dbColumn, $default);
     }
 
     public static function baseUrl(): string
@@ -75,16 +62,14 @@ class FrappeConfig
     public static function syncEnabled(): bool
     {
         $db = self::dbSettings();
-        if ($db && property_exists($db, 'frappe_sync_enabled') && $db->frappe_sync_enabled !== null) {
+        $envDefault = filter_var(EnvFirstConfig::envEffective('FRAPPE_SYNC_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+
+        if ($db && property_exists($db, 'frappe_sync_enabled') && $db->frappe_sync_enabled !== null
+            && EnvFirstConfig::hasOverrideForEffective($db, $envDefault, 'frappe_sync_enabled')) {
             return (bool) $db->frappe_sync_enabled;
         }
 
-        $env = env('FRAPPE_SYNC_ENABLED');
-        if ($env !== null && $env !== '') {
-            return filter_var($env, FILTER_VALIDATE_BOOLEAN);
-        }
-
-        return (bool) config('frappe.sync_enabled', false);
+        return (bool) $envDefault;
     }
 
     public static function courseViewUrl(string $courseName): ?string
@@ -139,25 +124,22 @@ class FrappeConfig
 
         $fields = [];
         foreach ($map as $key => $meta) {
-            $dbValue = ($db && property_exists($db, $meta['db_column'])) ? $db->{$meta['db_column']} : null;
-            $effective = self::resolve($meta['env_key'], $meta['db_column'], $meta['default']);
-            $isBoolean = str_ends_with($key, '_sync_enabled');
-            if ($isBoolean) {
-                $hasDbValue = $dbValue !== null;
-                $formValue = filter_var($hasDbValue ? $dbValue : $effective, FILTER_VALIDATE_BOOLEAN);
-                $value = filter_var($effective, FILTER_VALIDATE_BOOLEAN);
-            } else {
-                $hasDbValue = $dbValue !== null && $dbValue !== '';
-                $formValue = $hasDbValue ? $dbValue : $effective;
-                $value = $effective;
+            if ($key === 'frappe_sync_enabled') {
+                $envDefault = filter_var(EnvFirstConfig::envEffective('FRAPPE_SYNC_ENABLED', false), FILTER_VALIDATE_BOOLEAN);
+                $fields[$key] = [
+                    'env_key' => $meta['env_key'],
+                    'db_column' => $meta['db_column'],
+                    'value' => self::syncEnabled(),
+                    'form_value' => self::syncEnabled(),
+                    'source' => EnvFirstConfig::hasOverrideForEffective($db, $envDefault, 'frappe_sync_enabled') ? 'database' : 'env',
+                    'has_db_override' => EnvFirstConfig::hasOverrideForEffective($db, $envDefault, 'frappe_sync_enabled'),
+                ];
+
+                continue;
             }
 
-            $fields[$key] = [
-                'env_key' => $meta['env_key'],
-                'db_column' => $meta['db_column'],
-                'value' => $value,
-                'form_value' => $formValue,
-            ];
+            $meta['secret'] = $key === 'frappe_api_secret';
+            $fields[$key] = EnvFirstConfig::adminField($db, $meta);
         }
 
         return $fields;

@@ -10,7 +10,7 @@ class SyncSsoFromEnvCommand extends Command
     protected $signature = 'sso:sync-from-env
         {--env-file= : Path to .env file (default: project .env)}';
 
-    protected $description = 'Copy SSO credentials from .env into the database and apply runtime config';
+    protected $description = 'Clear database SSO overrides so .env values take effect again';
 
     public function handle(): int
     {
@@ -47,7 +47,7 @@ class SyncSsoFromEnvCommand extends Command
         }
 
         $this->newLine();
-        $this->info('SSO sync complete. Run: php artisan config:cache');
+        $this->info('SSO env-first reset complete. Run: php artisan config:cache');
 
         return self::SUCCESS;
     }
