@@ -949,14 +949,8 @@ class HubStorageService
             }
         }
 
-        $mode = $this->internalUrlMode();
-        if ($mode === 'storage') {
-            return url('/storage/'.$relative);
-        }
-        if ($mode === 'hub-media') {
-            return url('/hub-media/'.$relative);
-        }
-
+        // Pick /storage/ only when the file is actually reachable via public/storage;
+        // otherwise serve through /hub-media/ (same resolver publications use on mixed roots).
         if ($this->canServeViaPublicStorage($relative)) {
             return url('/storage/'.$relative);
         }

@@ -44,7 +44,7 @@
                         <input type="hidden" name="enable_microsoft_login" value="0">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="enable_microsoft_login" name="enable_microsoft_login" value="1"
-                                   @checked(old('enable_microsoft_login', $ssoFields['enable_microsoft_login']['form_value'] ?? false))>
+                                   @checked(old('enable_microsoft_login', $ssoFields['enable_microsoft_login']['form_value'] ?? true))>
                             <label class="form-check-label" for="enable_microsoft_login">Enable Microsoft login</label>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                         <input type="hidden" name="enable_google_login" value="0">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="enable_google_login" name="enable_google_login" value="1"
-                                   @checked(old('enable_google_login', $ssoFields['enable_google_login']['form_value'] ?? false))>
+                                   @checked(old('enable_google_login', $ssoFields['enable_google_login']['form_value'] ?? true))>
                             <label class="form-check-label" for="enable_google_login">Enable Google login</label>
                         </div>
                     </div>
@@ -112,7 +112,7 @@
                         <input type="hidden" name="enable_linkedin_login" value="0">
                         <div class="form-check">
                             <input type="checkbox" class="form-check-input" id="enable_linkedin_login" name="enable_linkedin_login" value="1"
-                                   @checked(old('enable_linkedin_login', $ssoFields['enable_linkedin_login']['form_value'] ?? false))>
+                                   @checked(old('enable_linkedin_login', $ssoFields['enable_linkedin_login']['form_value'] ?? true))>
                             <label class="form-check-label" for="enable_linkedin_login">Enable LinkedIn login</label>
                         </div>
                     </div>

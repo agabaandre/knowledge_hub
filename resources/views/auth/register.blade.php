@@ -22,17 +22,17 @@
                         <h3 class="py-3 text-success">Register for an account</h3>
                         <div class="row justify-content-center mb-3">
                             <div class="btn-group" role="group" aria-label="Login with social media">
-                                @if(settings()->enable_microsoft_login ?? true)
+                                @if(\App\Support\SsoConfig::microsoftEnabled())
                                 <a href="{{ url('auth/microsoft') }}" class="btn btn-outline-primary"><i
                                         class="lni lni-microsoft"></i>
                                     Join with Microsoft</a>
                                 @endif
-                                @if(settings()->enable_google_login ?? true)
+                                @if(\App\Support\SsoConfig::googleEnabled())
                                 <a href="{{ url('auth/google') }}" class="btn btn-outline-danger"><i
                                         class="lni lni-google"></i>
                                     Join with Google</a>
                                 @endif
-                                @if(settings()->enable_linkedin_login ?? true)
+                                @if(\App\Support\SsoConfig::linkedinEnabled())
                                 <a href="{{ url('auth/linkedin') }}" class="btn btn-outline-primary"><i
                                         class="fab fa-linkedin"></i>
                                     Join with LinkedIn</a>

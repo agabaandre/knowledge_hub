@@ -24,12 +24,18 @@ class SettingsController extends Controller
         // Use merged settings (per-theme: Theme1 overlay when active)
         $data['settings'] = settings();
         $data['badgeTypes'] = \App\Models\BadgeType::getAllBadgesInOrder();
-        // Config gallery: list image filenames from storage for "browse existing"
+        // Config gallery: list image filenames from active + legacy config dirs
         $configImages = [];
-        $configPath = storage_path('app/public/uploads/config');
-        if (is_dir($configPath)) {
+        $configPaths = array_unique(array_filter([
+            function_exists('hub_storage_path') ? hub_storage_path('uploads/config') : null,
+            storage_path('app/public/uploads/config'),
+        ]));
+        foreach ($configPaths as $configPath) {
+            if (! is_dir($configPath)) {
+                continue;
+            }
             foreach (['jpg', 'jpeg', 'png', 'gif', 'webp', 'ico', 'svg'] as $ext) {
-                foreach (glob($configPath . '/*.' . $ext) ?: [] as $path) {
+                foreach (glob($configPath.'/*.'.$ext) ?: [] as $path) {
                     $configImages[] = basename($path);
                 }
             }
@@ -47,7 +53,8 @@ class SettingsController extends Controller
         $data['emailFields'] = Schema::hasColumn('setting', 'email_driver')
             ? EmailConfig::fieldsForAdmin()
             : [];
-        $data['ssoFields'] = Schema::hasColumn('setting', 'microsoft_client_id')
+        $data['ssoFields'] = (Schema::hasColumn('setting', 'microsoft_client_id')
+            || Schema::hasColumn('setting', 'enable_microsoft_login'))
             ? SsoConfig::fieldsForAdmin()
             : [];
         $data['hubCountries'] = Schema::hasTable('country')

@@ -91,8 +91,8 @@ class SsoConfig
         }
 
         $db = self::dbSettings();
-        if ($db && property_exists($db, $column) && $db->{$column} !== null) {
-            return (bool) $db->{$column};
+        if ($db && property_exists($db, $column) && $db->{$column} !== null && $db->{$column} !== '') {
+            return filter_var($db->{$column}, FILTER_VALIDATE_BOOLEAN);
         }
 
         return true;

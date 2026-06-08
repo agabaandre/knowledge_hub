@@ -861,7 +861,7 @@ Route::group(["prefix" => "communities"], function () {
 
 Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/microsoft', function () {
-        if (!(settings()->enable_microsoft_login ?? true)) {
+        if (! \App\Support\SsoConfig::microsoftEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'Microsoft login is currently disabled.');
         }
@@ -879,7 +879,7 @@ Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/microsoft/callback', [AuthController::class, 'microsoftLogin']);
 
     Route::get('auth/google', function () {
-        if (!(settings()->enable_google_login ?? true)) {
+        if (! \App\Support\SsoConfig::googleEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'Google login is currently disabled.');
         }
@@ -890,7 +890,7 @@ Route::middleware('throttle:oauth')->group(function () {
     Route::get('auth/google/callback', [AuthController::class, 'googleLogin']);
 
     Route::get('auth/linkedin', function () {
-        if (!(settings()->enable_linkedin_login ?? true)) {
+        if (! \App\Support\SsoConfig::linkedinEnabled()) {
             return redirect('/login')->with('alert_class', 'danger')
                 ->with('alert', 'LinkedIn login is currently disabled.');
         }

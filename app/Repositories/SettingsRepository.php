@@ -289,13 +289,13 @@ class SettingsRepository
 
         // Social login toggles (default false when unchecked)
         // Only set if columns exist to avoid errors on production
-        if (Schema::hasColumn('setting', 'enable_microsoft_login')) {
+        if (Schema::hasColumn('setting', 'enable_microsoft_login') && $request->has('enable_microsoft_login')) {
             $settings->enable_microsoft_login = self::parseSubmittedBoolean($request, 'enable_microsoft_login');
         }
-        if (Schema::hasColumn('setting', 'enable_google_login')) {
+        if (Schema::hasColumn('setting', 'enable_google_login') && $request->has('enable_google_login')) {
             $settings->enable_google_login = self::parseSubmittedBoolean($request, 'enable_google_login');
         }
-        if (Schema::hasColumn('setting', 'enable_linkedin_login')) {
+        if (Schema::hasColumn('setting', 'enable_linkedin_login') && $request->has('enable_linkedin_login')) {
             $settings->enable_linkedin_login = self::parseSubmittedBoolean($request, 'enable_linkedin_login');
         }
         if (Schema::hasColumn('setting', 'microsoft_client_id')) {
@@ -477,8 +477,11 @@ class SettingsRepository
         DisposableEmailChecker::forgetCache();
         EmailConfig::clearCache();
         EmailConfig::applyRuntimeConfig();
-        if (Schema::hasColumn('setting', 'microsoft_client_id')) {
-            app(InstallerService::class)->clearSsoEnvOverrides();
+        if (Schema::hasColumn('setting', 'microsoft_client_id')
+            || Schema::hasColumn('setting', 'enable_microsoft_login')) {
+            if (Schema::hasColumn('setting', 'microsoft_client_id')) {
+                app(InstallerService::class)->clearSsoEnvOverrides();
+            }
             \App\Support\SsoConfig::clearCache();
             \App\Support\SsoConfig::applyRuntimeConfig();
         }
@@ -486,6 +489,7 @@ class SettingsRepository
             \App\Support\AiConfig::clearCache();
             \App\Support\AiConfig::applyRuntimeConfig();
         }
+        clear_settings_cache();
         clear_cache();
 
         return $settings;
@@ -751,11 +755,17 @@ class SettingsRepository
     {
         $upfiles   = (!is_array($files)) ? [$files] : $files;
         $file_path = null;
+        $configDir = function_exists('hub_storage_path')
+            ? hub_storage_path('uploads/config')
+            : storage_path('app/public/uploads/config');
+        if (! is_dir($configDir)) {
+            @mkdir($configDir, 0775, true);
+        }
         foreach ($upfiles as $file) {
             $file_name   = md5_file($file->getRealPath());
             $extension   = $file->guessExtension();
             $file_path   = $file_name . '.' . $extension;
-            $file->move(storage_path() . '/app/public/uploads/config/', $file_path);
+            $file->move($configDir, $file_path);
         }
        return $file_path;
     }

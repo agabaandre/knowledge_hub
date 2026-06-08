@@ -368,9 +368,11 @@
                 </form>
 
                 @php
-                    $hasSocialLogin = (settings()->enable_microsoft_login ?? true) || 
-                                      (settings()->enable_google_login ?? true) || 
-                                      (settings()->enable_linkedin_login ?? true);
+                    use App\Support\SsoConfig;
+
+                    $hasSocialLogin = SsoConfig::microsoftEnabled()
+                        || SsoConfig::googleEnabled()
+                        || SsoConfig::linkedinEnabled();
                 @endphp
 
                 @if($hasSocialLogin)
@@ -378,7 +380,7 @@
                     <span>or continue with</span>
                         </div>
 
-                @if(settings()->enable_microsoft_login ?? true)
+                @if(SsoConfig::microsoftEnabled())
                 <div class="staff-notice" style="background: #e8f5e9; border-left: 4px solid #119A48; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem;">
                     <p style="margin: 0; font-size: 0.875rem; color: #2d3748; line-height: 1.5;">
                         <i class="fa fa-info-circle" style="color: #119A48; margin-right: 0.5rem;"></i>
@@ -388,19 +390,19 @@
                 @endif
 
                 <div class="social-btn-group">
-                    @if(settings()->enable_microsoft_login ?? true)
+                    @if(SsoConfig::microsoftEnabled())
                     <a href="{{ url('auth/microsoft') }}" class="btn-social btn-microsoft">
                         <i class="lni lni-microsoft"></i>
                         <span>Microsoft</span>
                     </a>
                     @endif
-                    @if(settings()->enable_google_login ?? true)
+                    @if(SsoConfig::googleEnabled())
                     <a href="{{ url('auth/google') }}" class="btn-social btn-google">
                         <i class="lni lni-google"></i>
                         <span>Google</span>
                     </a>
                     @endif
-                    @if(settings()->enable_linkedin_login ?? true)
+                    @if(SsoConfig::linkedinEnabled())
                     <a href="{{ url('auth/linkedin') }}" class="btn-social btn-linkedin">
                         <i class="fab fa-linkedin"></i>
                         <span>LinkedIn</span>

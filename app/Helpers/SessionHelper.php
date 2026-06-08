@@ -51,10 +51,20 @@ if (! function_exists('branding_image_url')) {
 		if ($filename === null || $filename === '') {
 			return '';
 		}
+
+		$basename = basename(parse_url($filename, PHP_URL_PATH) ?: $filename);
+		if ($basename !== '' && preg_match('#/(?:storage|hub-media)/uploads/config/#i', $filename)) {
+			return storage_link('uploads/config/'.$basename);
+		}
+
 		if (preg_match('#^https?://#i', $filename) || str_starts_with($filename, '//')) {
 			return $filename;
 		}
-		$basename = basename($filename);
+
+		if ($basename === '') {
+			return '';
+		}
+
 		if (function_exists('storage_link')) {
 			return storage_link('uploads/config/'.$basename);
 		}
@@ -130,6 +140,16 @@ if(!function_exists('settings')){
 				$settings->logo = branding_image_url($settings->logo ?? '');
 				$settings->favicon = branding_image_url($settings->favicon ?? '');
 				$settings->spotlight_banner = branding_image_url($settings->spotlight_banner ?? '');
+				foreach (['enable_microsoft_login', 'enable_google_login', 'enable_linkedin_login'] as $toggle) {
+					if (! property_exists($settings, $toggle)) {
+						continue;
+					}
+					if ($settings->{$toggle} === null || $settings->{$toggle} === '') {
+						$settings->{$toggle} = true;
+						continue;
+					}
+					$settings->{$toggle} = filter_var($settings->{$toggle}, FILTER_VALIDATE_BOOLEAN);
+				}
 			}
 			return $settings;
         });

@@ -471,9 +471,9 @@ class InstallerService
             'google_redirect_uri' => trim((string) ($sso['google_redirect_uri'] ?? '')),
             'linkedin_client_id' => trim((string) ($sso['linkedin_client_id'] ?? '')),
             'linkedin_redirect_uri' => trim((string) ($sso['linkedin_redirect_uri'] ?? '')),
-            'enable_microsoft_login' => (bool) ($sso['enable_microsoft_login'] ?? false),
-            'enable_google_login' => (bool) ($sso['enable_google_login'] ?? false),
-            'enable_linkedin_login' => (bool) ($sso['enable_linkedin_login'] ?? false),
+            'enable_microsoft_login' => (bool) ($sso['enable_microsoft_login'] ?? true),
+            'enable_google_login' => (bool) ($sso['enable_google_login'] ?? true),
+            'enable_linkedin_login' => (bool) ($sso['enable_linkedin_login'] ?? true),
         ];
 
         if (! empty($sso['microsoft_client_secret'])) {
