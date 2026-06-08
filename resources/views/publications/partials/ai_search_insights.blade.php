@@ -19,8 +19,8 @@
         display: flex;
         align-items: flex-start;
         justify-content: space-between;
-        gap: 1rem;
-        padding: 1rem 1.15rem;
+        gap: 0.75rem;
+        padding: 0.75rem 1rem;
         border-bottom: 1px solid #e2e8f0;
         background: linear-gradient(180deg, #f8fafc 0%, #fff 100%);
     }
@@ -79,26 +79,41 @@
         background: color-mix(in srgb, var(--theme-color-primary, #119A48) 6%, #fff);
     }
     .ai-insights-body {
-        padding: 1rem 1.15rem 0.25rem;
+        padding: 0.75rem 1rem 0.35rem;
     }
     .ai-insights-summary {
-        margin: 0 0 1rem;
-        padding: 0.85rem 0.95rem;
+        margin: 0 0 0.65rem;
+        padding: 0.65rem 0.8rem;
         border-left: 3px solid var(--theme-color-primary, #119A48);
         background: #f8fafc;
         color: #334155;
-        font-size: 0.92rem;
-        line-height: 1.65;
+        font-size: 0.9rem;
+        line-height: 1.55;
     }
     .ai-insights-section {
-        margin-bottom: 1rem;
+        margin: 0 0 0.65rem;
+    }
+    .ai-insights-section:last-child {
+        margin-bottom: 0;
+    }
+    .ai-insights-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.65rem;
+        margin: 0 0 0.65rem;
+    }
+    .ai-insights-grid--split {
+        grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    }
+    .ai-insights-grid .ai-insights-section {
+        margin-bottom: 0;
     }
     .ai-insights-section__title {
         display: flex;
         align-items: center;
-        gap: 0.45rem;
-        margin: 0 0 0.65rem;
-        font-size: 0.78rem;
+        gap: 0.4rem;
+        margin: 0 0 0.4rem;
+        font-size: 0.75rem;
         font-weight: 700;
         letter-spacing: 0.04em;
         text-transform: uppercase;
@@ -113,30 +128,35 @@
         margin: 0;
         padding: 0;
         display: grid;
-        gap: 0.45rem;
+        gap: 0.35rem;
     }
     .ai-insights-takeaways li {
         display: flex;
         align-items: flex-start;
-        gap: 0.55rem;
-        padding: 0.55rem 0.7rem;
+        gap: 0.5rem;
+        padding: 0.45rem 0.6rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.25rem;
         background: #fff;
         color: #334155;
-        font-size: 0.84rem;
-        line-height: 1.5;
+        font-size: 0.83rem;
+        line-height: 1.45;
     }
     .ai-insights-takeaways li i {
         color: var(--theme-color-primary, #119A48);
         margin-top: 0.15rem;
         flex-shrink: 0;
     }
+    .ai-insights-card-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+    }
     .ai-insights-card {
         display: flex;
         align-items: flex-start;
-        gap: 0.65rem;
-        padding: 0.7rem 0.75rem;
+        gap: 0.55rem;
+        padding: 0.55rem 0.65rem;
         border: 1px solid #e2e8f0;
         border-radius: 0.25rem;
         background: #fff;
@@ -205,11 +225,16 @@
         text-decoration: underline;
     }
     .ai-insights-footer {
-        padding: 0.65rem 1.15rem 0.85rem;
+        padding: 0.5rem 1rem 0.65rem;
         border-top: 1px solid #e2e8f0;
         font-size: 0.72rem;
         color: #94a3b8;
-        line-height: 1.45;
+        line-height: 1.4;
+    }
+    @media (max-width: 991.98px) {
+        .ai-insights-grid--split {
+            grid-template-columns: 1fr;
+        }
     }
     @media (max-width: 767.98px) {
         .ai-insights-header {
@@ -270,15 +295,14 @@
             </section>
         @endif
 
-        <div class="row g-3">
+        <div class="ai-insights-grid{{ ($hasHubPicks && $hasScholarly) ? ' ai-insights-grid--split' : '' }}">
             @if($hasHubPicks)
-                <div class="{{ $hasScholarly ? 'col-lg-7' : 'col-12' }}">
-                    <section class="ai-insights-section" aria-label="{{ __('publications.search.on_this_hub') }}">
+                <section class="ai-insights-section" aria-label="{{ __('publications.search.on_this_hub') }}">
                         <h3 class="ai-insights-section__title">
                             <i class="fa fa-database" aria-hidden="true"></i>
                             {{ __('publications.search.on_this_hub') }}
                         </h3>
-                        <div class="d-flex flex-column gap-2">
+                        <div class="ai-insights-card-list">
                             @foreach($insights['health_topics'] ?? [] as $topic)
                                 @if(!empty($topic['url']))
                                     <a href="{{ $topic['url'] }}" class="ai-insights-card">
@@ -341,18 +365,16 @@
                                 @endif
                             @endforeach
                         </div>
-                    </section>
-                </div>
+                </section>
             @endif
 
             @if($hasScholarly)
-                <div class="{{ $hasHubPicks ? 'col-lg-5' : 'col-12' }}">
-                    <section class="ai-insights-section" aria-label="{{ __('publications.search.scholarly_sources') }}">
+                <section class="ai-insights-section" aria-label="{{ __('publications.search.scholarly_sources') }}">
                         <h3 class="ai-insights-section__title">
                             <i class="fa fa-graduation-cap" aria-hidden="true"></i>
                             {{ __('publications.search.scholarly_sources') }}
                         </h3>
-                        <div class="d-flex flex-column gap-2">
+                        <div class="ai-insights-card-list">
                             @foreach($insights['internet_results'] ?? [] as $web)
                                 @if(!empty($web['url']))
                                     @php
@@ -387,19 +409,18 @@
                                 @endif
                             @endforeach
                         </div>
-                    </section>
-                </div>
+                </section>
             @endif
         </div>
 
         @if($hasTaxonomy)
-            <section class="ai-insights-section mt-1" aria-label="{{ __('publications.search.thematic_areas') }}">
+            <section class="ai-insights-section" aria-label="{{ __('publications.search.thematic_areas') }}">
                 @if(!empty($insights['thematic_areas']))
                     <h3 class="ai-insights-section__title">
                         <i class="fa fa-layer-group" aria-hidden="true"></i>
                         {{ __('publications.search.thematic_areas') }}
                     </h3>
-                    <div class="ai-insights-pill-row mb-2">
+                    <div class="ai-insights-pill-row mb-1">
                         @foreach($insights['thematic_areas'] as $theme)
                             @if(!empty($theme['name']))
                                 <span class="ai-insights-pill">{{ $theme['name'] }}</span>
@@ -413,7 +434,7 @@
                         <i class="fa fa-sitemap" aria-hidden="true"></i>
                         {{ __('publications.search.sub_thematic_areas') }}
                     </h3>
-                    <div class="ai-insights-pill-row mb-2">
+                    <div class="ai-insights-pill-row mb-1">
                         @foreach(collect($insights['sub_thematic_areas'])->take(6) as $subTheme)
                             @if(!empty($subTheme['name']))
                                 <span class="ai-insights-pill">{{ $subTheme['name'] }}</span>
