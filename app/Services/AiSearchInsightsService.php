@@ -45,7 +45,7 @@ class AiSearchInsightsService
             return null;
         }
 
-        $cacheKey = 'ai_search_insights:v3:'.md5($term.'|'.$this->filterFingerprint($request));
+        $cacheKey = 'ai_search_insights:v4:'.md5($term.'|'.$this->filterFingerprint($request));
 
         try {
             $cached = Cache::get($cacheKey);
@@ -86,7 +86,11 @@ class AiSearchInsightsService
             return false;
         }
 
-        foreach (['overview', 'key_points', 'publications', 'forums', 'communities', 'health_topics', 'internet_results', 'external_resources'] as $key) {
+        foreach ([
+            'overview', 'key_points', 'publications', 'forums', 'communities',
+            'health_topics', 'internet_results', 'external_resources',
+            'thematic_areas', 'sub_thematic_areas', 'contributors',
+        ] as $key) {
             if (! empty($insights[$key])) {
                 return true;
             }
@@ -174,8 +178,8 @@ class AiSearchInsightsService
             ], 900, null, true);
 
             if ($result['ok'] ?? false) {
-                $decoded = json_decode((string) ($result['content'] ?? ''), true);
-                if (is_array($decoded) && trim((string) ($decoded['overview'] ?? '')) !== '') {
+                $decoded = $this->decodeAiInsightsPayload((string) ($result['content'] ?? ''));
+                if (is_array($decoded) && $decoded !== []) {
                     $normalized = $this->normalizeInsights(
                         $decoded,
                         $publicationCatalog,
@@ -653,21 +657,25 @@ class AiSearchInsightsService
 
         $keyPoints = [];
         foreach ((array) ($decoded['key_points'] ?? []) as $point) {
-            $point = preg_replace('/^[\-\*\u{2022}\d\.\)]\s*/u', '', trim((string) $point)) ?? trim((string) $point);
-            $point = trim($point);
+            $point = $this->cleanKeyPointText((string) $point);
             if ($point !== '') {
                 $keyPoints[] = Str::limit($point, 160);
             }
         }
 
         $overview = Str::limit(trim((string) ($decoded['overview'] ?? '')), 480);
-        $hasContent = $pickHealthTopics !== []
-            || $internetResults !== []
+        $hasHubContent = $pickHealthTopics !== []
             || $pickPublications !== []
             || $pickForums !== []
             || $pickCommunities !== [];
+        $hasDisplayableContent = $hasHubContent
+            || $internetResults !== []
+            || $external !== []
+            || $themeCatalog !== []
+            || $subThemeCatalog !== []
+            || $authorCatalog !== [];
 
-        if ($overview === '' && $hasContent) {
+        if (trim($overview) === '' && $hasDisplayableContent) {
             $overview = $this->composeFallbackOverview(
                 $term,
                 $totalPublications,
@@ -677,7 +685,7 @@ class AiSearchInsightsService
             );
         }
 
-        if ($keyPoints === [] && $hasContent) {
+        if ($keyPoints === [] && $hasDisplayableContent) {
             $keyPoints = $this->composeFallbackKeyPoints(
                 $term,
                 $totalPublications,
@@ -712,6 +720,52 @@ class AiSearchInsightsService
             'contributors' => array_slice($authorCatalog, 0, 6),
             'external_resources' => array_slice($external, 0, 3),
         ];
+    }
+
+    /**
+     * @return array<string, mixed>|null
+     */
+    private function decodeAiInsightsPayload(string $content): ?array
+    {
+        $content = trim($content);
+        if ($content === '') {
+            return null;
+        }
+
+        $decoded = json_decode($content, true);
+        if (is_array($decoded)) {
+            return $decoded;
+        }
+
+        if (preg_match('/```(?:json)?\s*(\{.*\})\s*```/is', $content, $matches) === 1) {
+            $decoded = json_decode((string) ($matches[1] ?? ''), true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        $start = strpos($content, '{');
+        $end = strrpos($content, '}');
+        if ($start !== false && $end !== false && $end > $start) {
+            $decoded = json_decode(substr($content, $start, $end - $start + 1), true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+
+        return null;
+    }
+
+    private function cleanKeyPointText(string $point): string
+    {
+        $point = trim($point);
+        if ($point === '') {
+            return '';
+        }
+
+        $cleaned = preg_replace('/^[\-\*\x{2022}\d\.\)]\s*/u', '', $point);
+
+        return trim((string) ($cleaned ?? $point));
     }
 
     /**

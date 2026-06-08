@@ -1,4 +1,4 @@
-@if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null) && !empty($aiSearchInsights['overview']))
+@if(\App\Services\AiSearchInsightsService::isDisplayable($aiSearchInsights ?? null))
 @php
     $insights = $aiSearchInsights;
     $searchTerm = trim((string) ($insights['query'] ?? request('term', '')));
@@ -249,7 +249,9 @@
     </header>
 
     <div class="ai-insights-body">
-        <p class="ai-insights-summary">{{ $insights['overview'] }}</p>
+        @if(!empty($insights['overview']))
+            <p class="ai-insights-summary">{{ $insights['overview'] }}</p>
+        @endif
 
         @if(!empty($insights['key_points']))
             <section class="ai-insights-section" aria-label="{{ __('publications.search.key_takeaways') }}">
