@@ -1,4 +1,7 @@
 @php
+    use App\Support\SpotlightBackground;
+
+    $spotlightBg = SpotlightBackground::resolve();
     $primary = settings()->primary_color ?? '#119A48';
 @endphp
 <style>
@@ -9,7 +12,9 @@
     scroll-margin-top: 72px;
     margin-top: 1.25rem;
     background-color: #f0f4f8;
-    background-image: none !important;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     /* Break out of padded layout so background fills full viewport width */
     width: 100vw;
     max-width: 100vw;
@@ -23,6 +28,10 @@
     inset: 0;
     background: linear-gradient(135deg, rgba(17, 154, 72, 0.12) 0%, rgba(22, 198, 83, 0.08) 100%);
     pointer-events: none;
+    z-index: 0;
+}
+.theme1-spotlight.theme1-spotlight--has-banner::before {
+    display: none;
 }
 .theme1-spotlight .theme1-spotlight-inner { position: relative; z-index: 1; }
 .theme1-spotlight .banner-headline { color: #1e293b !important; font-size: 1.05rem; line-height: 1.5; }
@@ -196,7 +205,7 @@
     }
 }
 </style>
-<div class="theme1-spotlight">
+<div class="theme1-spotlight{{ $spotlightBg['has_banner'] ? ' theme1-spotlight--has-banner' : '' }}" style="{{ $spotlightBg['inline_style'] }}">
     <h1 class="visually-hidden notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

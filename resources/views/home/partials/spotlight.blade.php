@@ -1,13 +1,14 @@
 @php
-    $settings = settings();
-    $gradientStart = $settings->gradient_start_color ?? '#119A48';
-    $gradientEnd = $settings->gradient_end_color ?? '#16c653';
-    $bgStyle = "background: linear-gradient(135deg, {$gradientStart} 0%, {$gradientEnd} 100%) !important;";
-    $primaryColor = $settings->primary_color ?? '#119A48';
+    use App\Support\SpotlightBackground;
+
+    $spotlightBg = SpotlightBackground::resolve();
+    $primaryColor = settings()->primary_color ?? '#119A48';
 @endphp
 <style>
     .home-spotlight {
         position: relative;
+        background-size: cover !important;
+        background-position: center !important;
         background-repeat: no-repeat !important;
     }
     .home-spotlight > * {
@@ -19,7 +20,7 @@
         filter: brightness(0.96);
     }
 </style>
-<div class="spotlight home-spotlight px-3 py-3" style="{{ $bgStyle }}">
+<div class="spotlight home-spotlight px-3 py-3" style="{{ $spotlightBg['inline_style'] }}">
     <h1 class="sr-only notranslate">
         <span data-khub-i18n="ui_body.site_title">{{ \App\Support\UiLocaleLabels::siteTitle() }}</span>@if(\App\Support\UiLocaleLabels::siteTagline() !== '') — <span data-khub-i18n="ui_body.site_tagline">{{ \App\Support\UiLocaleLabels::siteTagline() }}</span>@endif
     </h1>

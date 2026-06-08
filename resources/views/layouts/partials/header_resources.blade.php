@@ -140,17 +140,11 @@
         border-radius: 4px;
     }
 
-    /* Search/Spotlight area background — brand gradient only (no banner photo on public pages) */
+    /* Search/Spotlight area — gradient, or banner image blended with gradient overlay */
     .spotlight.custom-bg,
     .custom-bg.spotlight,
     .custom-bg {
-        @php
-            $settings = settings();
-            $gradientStart = $settings->gradient_start_color ?? '#119A48';
-            $gradientEnd = $settings->gradient_end_color ?? '#16c653';
-        @endphp
-        background: linear-gradient(135deg, {{ $gradientStart }} 0%, {{ $gradientEnd }} 100%) !important;
-        background-image: none !important;
+        {!! \App\Support\SpotlightBackground::cssBackgroundRule() !!}
     }
     
     /* Ensure other .custom-bg uses (if any) don't conflict */
