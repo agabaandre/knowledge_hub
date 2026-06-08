@@ -8,6 +8,7 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
+use App\Support\SsoConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -130,6 +131,8 @@ class AuthController extends Controller
 
     public function microsoftLogin(Request $request)
     {
+        SsoConfig::ensureRuntimeConfig();
+
         if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'microsoft')) {
             return $denied;
         }
@@ -267,6 +270,8 @@ class AuthController extends Controller
 
     public function googleLogin(Request $request)
     {
+        SsoConfig::ensureRuntimeConfig();
+
         if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'google')) {
             return $denied;
         }
@@ -367,6 +372,8 @@ class AuthController extends Controller
 
     public function linkedinLogin(Request $request)
     {
+        SsoConfig::ensureRuntimeConfig();
+
         if ($denied = OAuthAccountSecurity::redirectIfOAuthDenied($request, 'linkedin')) {
             return $denied;
         }
