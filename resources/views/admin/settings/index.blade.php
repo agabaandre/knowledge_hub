@@ -1461,9 +1461,9 @@
                     <div class="form-group">
                         <label>Spotlight Banner Image</label>
                         <label class="small text-muted d-block mb-1">Browse from existing gallery</label>
+                        @php $currentBannerFile = settings()->spotlight_banner ? basename(parse_url(settings()->spotlight_banner, PHP_URL_PATH)) : ''; @endphp
                         <select name="spotlight_banner_existing" id="spotlight_banner_existing" class="form-control mb-2">
                             <option value="" @if(!$currentBannerFile) selected @endif>— Keep current / upload new —</option>
-                            @php $currentBannerFile = settings()->spotlight_banner ? basename(parse_url(settings()->spotlight_banner, PHP_URL_PATH)) : ''; @endphp
                             @foreach($configGalleryImages ?? [] as $f)
                                 <option value="{{ $f }}" @if($f === $currentBannerFile) selected @endif>{{ $f }}</option>
                             @endforeach
