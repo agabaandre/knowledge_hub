@@ -180,6 +180,44 @@
 
     .user-avatar-wrapper {
         position: relative;
+        flex-shrink: 0;
+    }
+
+    /* Nav profile: photo must match placeholder size (do not grow the header bar) */
+    .nav-menu.nav-menu-social .kh-nav-profile-link {
+        display: inline-flex !important;
+        align-items: center;
+        gap: 0.4rem;
+        line-height: 1;
+        vertical-align: middle;
+    }
+
+    .nav-menu.nav-menu-social .kh-nav-avatar.user-avatar-wrapper,
+    .nav-menu.nav-menu-social .user-avatar-wrapper.kh-nav-avatar {
+        width: 28px !important;
+        height: 28px !important;
+        min-width: 28px !important;
+        min-height: 28px !important;
+        max-width: 28px !important;
+        max-height: 28px !important;
+        margin: 0;
+        vertical-align: middle;
+    }
+
+    .nav-menu.nav-menu-social .user-avatar-img,
+    .nav-menu.nav-menu-social img.user-avatar-img {
+        width: 28px !important;
+        height: 28px !important;
+        max-width: 28px !important;
+        max-height: 28px !important;
+        object-fit: cover;
+        display: block;
+        border-radius: 50%;
+    }
+
+    .nav-menu.nav-menu-social .kh-nav-label {
+        line-height: 1.2;
+        white-space: nowrap;
     }
 
 

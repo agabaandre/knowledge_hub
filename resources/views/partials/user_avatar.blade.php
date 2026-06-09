@@ -4,7 +4,7 @@
     $class = $class ?? '';
 @endphp
 
-<span class="user-avatar-wrapper {{ $class }}" style="display: inline-flex; align-items: center; justify-content: center; width: {{ $size }}; height: {{ $size }}; border-radius: 50%; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e0;">
+<span class="user-avatar-wrapper {{ $class }}" style="display: inline-flex; align-items: center; justify-content: center; width: {{ $size }}; height: {{ $size }}; min-width: {{ $size }}; min-height: {{ $size }}; max-width: {{ $size }}; max-height: {{ $size }}; border-radius: 50%; overflow: hidden; background-color: #e2e8f0; border: 1px solid #cbd5e0; flex-shrink: 0;">
     @if(!empty($photo) && $photo !== asset('assets/images/user.jpg'))
         <img src="{{ $photo }}" 
              alt="{{ $user->name ?? 'User' }}" 

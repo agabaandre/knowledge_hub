@@ -14,17 +14,13 @@
                 </a>
                </li> -->
                        @else
-                           <li class="{{ $class ?? '' }} notranslate">
-                               <a href="#">
-                                   @if(!empty(current_user()->photo))
-                                       <img class="rounded-circle notranslate user-avatar-img"
-                                           src="{{ current_user()->photo }}"
-                                           alt=""
-                                           onerror="this.style.display='none'; this.nextElementSibling.style.display='inline-flex';">
-                                       <span class="user-avatar-fallback" style="display:none; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 14px;"><i class="fas fa-user"></i></span>
-                                   @else
-                                       <span class="user-avatar-fallback" style="display:inline-flex; width: 28px; height: 28px; border-radius: 50%; border: 1px solid #cbd5e1; background-color: #e2e8f0; align-items: center; justify-content: center; color: #718096; font-size: 14px;"><i class="fas fa-user"></i></span>
-                                   @endif
+                           <li class="{{ $class ?? '' }} notranslate kh-nav-profile-item">
+                               <a href="#" class="kh-nav-profile-link">
+                                   @include('partials.user_avatar', [
+                                       'user' => current_user(),
+                                       'size' => '28px',
+                                       'class' => 'kh-nav-avatar',
+                                   ])
                                    <span class="kh-nav-label">{{ ucwords(current_user()->name) }}</span>
                                </a>
                                <ul class="nav-dropdown nav-submenu">
