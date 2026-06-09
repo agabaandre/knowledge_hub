@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Providers\RouteServiceProvider;
+use App\Support\PostLoginRedirect;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -46,6 +47,8 @@ class LoginController extends Controller
 
     public function showLoginForm(Request $request)
     {
+        PostLoginRedirect::sanitizeSessionIntended();
+
         $redirect = $this->safeRedirectUrl($request->query('redirect'));
         if ($redirect !== null) {
             session(['url.intended' => $redirect]);
@@ -77,15 +80,35 @@ class LoginController extends Controller
         }
 
         if (str_starts_with($url, '/')) {
-            return $url;
+            return PostLoginRedirect::isSafe($url) ? $url : null;
         }
 
         $appUrl = rtrim((string) config('app.url'), '/');
         if ($appUrl !== '' && str_starts_with($url, $appUrl.'/')) {
-            return $url;
+            return PostLoginRedirect::isSafe($url) ? $url : null;
         }
 
         return null;
+    }
+
+    protected function authenticated(\Illuminate\Http\Request $request, $user)
+    {
+        PostLoginRedirect::sanitizeSessionIntended();
+    }
+
+    protected function sendLoginResponse(\Illuminate\Http\Request $request)
+    {
+        $request->session()->regenerate();
+
+        $this->clearLoginAttempts($request);
+
+        if ($response = $this->authenticated($request, $this->guard()->user())) {
+            return $response;
+        }
+
+        return $request->wantsJson()
+            ? new \Illuminate\Http\JsonResponse([], 204)
+            : PostLoginRedirect::intended($this->redirectPath());
     }
 
     protected function validateLogin(Request $request)

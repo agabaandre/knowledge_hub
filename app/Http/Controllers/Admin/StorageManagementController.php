@@ -444,8 +444,14 @@ class StorageManagementController extends Controller
             ->with('alert-danger', $result['message'] ?? 'Legacy purge did not complete.');
     }
 
-    public function migrationStatus()
+    public function migrationStatus(Request $request)
     {
+        if (! $request->expectsJson() && ! $request->ajax()) {
+            return redirect()
+                ->route('admin.storage.index', [], 303)
+                ->withFragment('storage-migration');
+        }
+
         $settings = HubStorageSetting::current();
 
         return response()->json([
@@ -456,9 +462,15 @@ class StorageManagementController extends Controller
         ]);
     }
 
-    public function systemMetrics(HubStorageService $storage, HubStorageMetricsService $metrics)
+    public function systemMetrics(Request $request, HubStorageService $storage, HubStorageMetricsService $metrics)
     {
-        return response()->json($metrics->snapshot($storage, request()->boolean('fresh')));
+        if (! $request->expectsJson() && ! $request->ajax()) {
+            return redirect()
+                ->route('admin.storage.index', [], 303)
+                ->withFragment('storage-overview');
+        }
+
+        return response()->json($metrics->snapshot($storage, $request->boolean('fresh')));
     }
 
     public function retryFailedJobs(HubStorageService $storage)

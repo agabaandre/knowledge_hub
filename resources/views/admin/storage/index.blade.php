@@ -1961,10 +1961,20 @@
 
     function fetchLiveMetrics(fresh, onDone) {
         fetch('{{ route('admin.storage.system-metrics') }}' + (fresh ? '?fresh=1' : ''), {
-            headers: { 'Accept': 'application/json', 'X-Requested-With': 'XMLHttpRequest' }
+            headers: khubAdminJsonFetchHeaders,
+            credentials: 'same-origin'
         })
-            .then(function (r) { return r.json(); })
+            .then(function (r) {
+                if (r.status === 401 || r.status === 403) {
+                    return null;
+                }
+                return r.json();
+            })
             .then(function (data) {
+                if (!data) {
+                    if (onDone) onDone();
+                    return;
+                }
                 applyLiveMetrics(data);
                 if (onDone) onDone();
             })
@@ -1974,11 +1984,26 @@
     }
 
     var migrationWasRunning = {{ $migrationRunning ? 'true' : 'false' }};
+    var khubAdminJsonFetchHeaders = {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest'
+    };
 
     function pollMigrationLive() {
-        fetch('{{ route('admin.storage.migration-status') }}')
-            .then(function (r) { return r.json(); })
+        fetch('{{ route('admin.storage.migration-status') }}', {
+            headers: khubAdminJsonFetchHeaders,
+            credentials: 'same-origin'
+        })
+            .then(function (r) {
+                if (r.status === 401 || r.status === 403) {
+                    return null;
+                }
+                return r.json();
+            })
             .then(function (data) {
+                if (!data) {
+                    return;
+                }
                 setMigrationKpi(data.status, data.message);
                 var total = parseInt(data.total || 0, 10);
                 var done = parseInt(data.done || 0, 10);

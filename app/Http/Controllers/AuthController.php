@@ -8,6 +8,7 @@ use App\Repositories\AuthorsRepository;
 use App\Repositories\UsersRepository;
 use App\Services\SocialLoginService;
 use App\Support\OAuthAccountSecurity;
+use App\Support\PostLoginRedirect;
 use App\Support\SsoConfig;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -253,7 +254,7 @@ class AuthController extends Controller
 
             return $redirect_to === '/account'
                 ? redirect($redirect_to)->with($data)
-                : redirect()->intended($redirect_to)->with($data);
+                : PostLoginRedirect::intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('Microsoft Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -356,7 +357,7 @@ class AuthController extends Controller
 
             return $redirect_to === '/account'
                 ? redirect($redirect_to)->with($data)
-                : redirect()->intended($redirect_to)->with($data);
+                : PostLoginRedirect::intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('Google Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -503,7 +504,7 @@ class AuthController extends Controller
 
             return $redirect_to === '/account'
                 ? redirect($redirect_to)->with($data)
-                : redirect()->intended($redirect_to)->with($data);
+                : PostLoginRedirect::intended($redirect_to)->with($data);
         } catch (\Exception $e) {
             \Log::error('LinkedIn Login Exception: '.$e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
