@@ -201,8 +201,6 @@
      </p>
  @endif
 
- @endif
-
  <div id="records-search-publications"
       @if($searchInfiniteScroll)
       data-infinite-scroll="1"
